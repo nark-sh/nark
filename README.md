@@ -16,9 +16,16 @@ cd nark
 npm install
 npm run build
 
-# Scan a project
+# Verify it works by scanning nark itself
+node bin/nark.js --tsconfig ./tsconfig.json --corpus ../nark-corpus
+
+# Then scan your own project
 node bin/nark.js --tsconfig /path/to/your/project/tsconfig.json --corpus ../nark-corpus
 ```
+
+Scanning nark's own repo is a good smoke test — you should see a clean report with 0 violations and a handful of contracted packages detected.
+
+If your project doesn't have a `tsconfig.json`, nark will generate a minimal one automatically.
 
 If `nark-corpus` is installed as an npm package, nark finds it automatically — no `--corpus` flag needed.
 
