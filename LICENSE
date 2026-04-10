@@ -1,0 +1,124 @@
+GNU AFFERO GENERAL PUBLIC LICENSE
+Version 3, 19 November 2007
+
+Copyright (C) 2026 Nark Contributors
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with this program. If not, see <https://www.gnu.org/licenses/>.
+
+Full license text: https://www.gnu.org/licenses/agpl-3.0.txt
+
+---
+
+ADDITIONAL PERMISSIONS (AGPL Section 7):
+
+None currently granted. If you need different licensing terms, contact us.
+
+---
+
+WHY AGPL-3.0?
+
+This license keeps the scanner open while protecting against proprietary SaaS competitors:
+
+✅ Anyone can use locally (free forever)
+✅ Anyone can self-host (free forever)
+✅ Anyone can modify and redistribute (open source)
+✅ Companies can integrate into CI/CD (free forever)
+❌ If you offer this as a SaaS, you MUST open source your modifications
+
+KEY POINT: The AGPL "network use" clause means if you run this as a web service (SaaS),
+you must provide the source code to your users.
+
+This prevents vendors from taking our work, adding proprietary features, and offering
+closed SaaS — which is exactly what happened to Redis (they used BSD license and lost
+to AWS ElastiCache).
+
+---
+
+DUAL LICENSING NOTE:
+
+As the copyright holders, Nark can offer this software under alternative
+commercial licenses for organizations that cannot comply with AGPL-3.0.
+
+For commercial licensing inquiries, visit: https://github.com/nark-sh/nark
+
+---
+
+WHAT THIS MEANS FOR YOU:
+
+Individual Developers:
+✅ Use freely in your projects
+✅ No restrictions for local use
+✅ Contribute improvements back (open source)
+
+Companies (Internal Use):
+✅ Run in your CI/CD pipelines
+✅ Self-host for your organization
+✅ Modify for internal use
+✅ No cost, no restrictions
+
+Companies (SaaS Providers):
+✅ You can build SaaS using this tool
+❌ But you must open source your SaaS code (AGPL requirement)
+⚠️ Or contact us for commercial licensing
+
+Examples:
+- Running in GitHub Actions: ✅ Fine (not SaaS)
+- Self-hosting for your team: ✅ Fine (internal use)
+- Building public SaaS like "ContractCheckr.com": ❌ Must open source OR get commercial license
+- Integrating into closed-source IDE: ❌ Must open source IDE OR get commercial license
+
+---
+
+WHY NOT MIT OR APACHE?
+
+MIT/Apache would allow competitors to:
+1. Fork our code
+2. Add proprietary features
+3. Offer closed SaaS
+4. Never contribute back
+
+AGPL prevents this while keeping the tool free for everyone except those building
+competing SaaS products.
+
+We chose AGPL because:
+- Proven by GitLab ($15B valuation, AGPL)
+- Proven by Grafana (similar model)
+- Protects open source from cloud providers
+- Encourages community contributions
+- Ensures improvements flow back
+
+---
+
+COMPARISON TO OTHER LICENSES:
+
+MIT (too permissive):
+❌ Allows proprietary SaaS
+❌ No obligation to contribute back
+Result: AWS takes your work, makes money, contributes nothing
+
+GPL v3 (better, but not enough):
+✅ Requires source sharing
+❌ Doesn't cover network use (SaaS loophole)
+Result: SaaS providers can still close it off
+
+LGPL v2.1 (what Semgrep uses):
+✅ Requires source sharing for modifications
+❌ Allows proprietary use without modification
+Result: Competitors can wrap it in closed SaaS
+
+AGPL v3 (what we chose):
+✅ Requires source sharing
+✅ Covers network use (closes SaaS loophole)
+✅ Forces SaaS providers to open source
+Result: Everyone benefits from improvements
