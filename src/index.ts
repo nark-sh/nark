@@ -606,8 +606,11 @@ function findDefaultCorpusPath(): string {
 
   // Try 2: Look for local corpus repo (development use)
   const possiblePaths = [
+    path.join(process.cwd(), '../nark-corpus'),
     path.join(process.cwd(), '../corpus'),
+    path.join(process.cwd(), '../../nark-corpus'),
     path.join(process.cwd(), '../../corpus'),
+    path.join(__dirname, '../../nark-corpus'),
     path.join(__dirname, '../../corpus'),
   ];
 
@@ -617,9 +620,8 @@ function findDefaultCorpusPath(): string {
     }
   }
 
-  // Fallback: assume npm package will be installed
-  // (This path will error if neither npm package nor local corpus exists)
-  return path.join(process.cwd(), '../corpus');
+  // Fallback: assume sibling nark-corpus repo
+  return path.join(process.cwd(), '../nark-corpus');
 }
 
 /**
