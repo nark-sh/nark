@@ -46,7 +46,7 @@ export async function generateAIPrompt(
   }
   const projectName = path.basename(path.resolve(projectDir));
 
-  const prompt = `# AI Agent Instructions: Behavioral Contract Violation Review
+  const prompt = `# AI Agent Instructions: Nark Violation Review
 
 **Project:** ${projectName}
 **Scan Date:** ${new Date(auditRecord.timestamp).toLocaleString()}
@@ -56,14 +56,14 @@ export async function generateAIPrompt(
 
 ## Important: Working Directory
 
-All analysis files and reports are stored in the \`.behavioral-contracts/\` directory at the project root.
+All analysis files and reports are stored in the \`.nark/\` directory at the project root.
 
 **This directory is automatically:**
 - Created for you
 - Added to \`.gitignore\` (won't be committed by default)
 - Safe for storing analysis results, fix proposals, and documentation
 
-**Recommendation:** Save any analysis files (reports, fix proposals, notes) to \`.behavioral-contracts/analysis/\` so they're organized and won't clutter the codebase.
+**Recommendation:** Save any analysis files (reports, fix proposals, notes) to \`.nark/analysis/\` so they're organized and won't clutter the codebase.
 
 ---
 
@@ -139,7 +139,7 @@ await axios.post('/api/users', userData);
 
 ### Method B: Config File (Recommended for Global Rules)
 
-Create \`.behavioralcontractsrc.json\` in project root:
+Create \`.narkrc.json\` in project root:
 
 \`\`\`json
 {
@@ -312,7 +312,7 @@ Then suppress with config file:
 ### Example Report Format
 
 \`\`\`markdown
-# Behavioral Contract Violations - Fix Report
+# Nark Violations - Fix Report
 
 ## Summary
 - Total Violations: ${violationCount}
@@ -323,7 +323,7 @@ Then suppress with config file:
 
 ### 1. Test Files (8 violations)
 **Reason:** Test files intentionally trigger errors to validate error handling
-**Action:** Created \`.behavioralcontractsrc.json\` with test file pattern
+**Action:** Created \`.narkrc.json\` with test file pattern
 **Files:** src/test/**, **/*.test.ts, **/*.spec.ts
 
 ### 2. Global Error Handler (3 violations)
@@ -457,8 +457,8 @@ npx nark suppressions clean --auto
 ## Resources
 
 📚 **Documentation:**
-- Suppression System Guide: [docs/cli-reference/suppressions.md](https://github.com/behavioral-contracts/verify-cli/blob/main/docs/cli-reference/suppressions.md)
-- Fixing Violations: [docs/getting-started/fixing-violations.md](https://github.com/behavioral-contracts/verify-cli/blob/main/docs/getting-started/fixing-violations.md)
+- Suppression System Guide: [docs/cli-reference/suppressions.md](https://github.com/nark-sh/nark/blob/main/docs/cli-reference/suppressions.md)
+- Fixing Violations: [docs/getting-started/fixing-violations.md](https://github.com/nark-sh/nark/blob/main/docs/getting-started/fixing-violations.md)
 
 🔧 **Tools:**
 - Interactive Visualization: file://${indexHtmlPath}

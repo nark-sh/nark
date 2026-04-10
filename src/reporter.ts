@@ -180,7 +180,7 @@ export function writeAuditRecord(
  * Prints violations to terminal in human-readable format
  */
 export function printTerminalReport(record: AuditRecord): void {
-  console.log("\n" + chalk.bold("Behavioral Contract Verification Report"));
+  console.log("\n" + chalk.bold("Nark Verification Report"));
   console.log(chalk.gray("─".repeat(80)));
 
   // Summary
@@ -449,7 +449,7 @@ export function printPackageDiscoveryReport(
  * Prints enhanced terminal report with violations grouped by package
  */
 export function printEnhancedTerminalReport(record: EnhancedAuditRecord): void {
-  console.log("\n" + chalk.bold("Behavioral Contract Verification Report"));
+  console.log("\n" + chalk.bold("Nark Verification Report"));
   console.log(chalk.gray("─".repeat(80)));
 
   // Summary

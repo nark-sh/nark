@@ -8,6 +8,7 @@ import { Command } from 'commander';
 import * as path from 'path';
 import * as fs from 'fs';
 import { fileURLToPath } from 'url';
+import { createRequire } from 'module';
 import chalk from 'chalk';
 import { loadCorpus } from './corpus-loader.js';
 import { Analyzer } from './analyzer.js';
@@ -34,8 +35,11 @@ import { ensureTsconfig } from './tsconfig-generator.js';
 import type { AnalyzerConfig, Violation } from './types.js';
 import { createSuppressionsCommand } from './cli/suppressions.js';
 import { createInitCommand } from './cli/init.js';
+import { createTriageCommand } from './cli/triage.js';
+import { createCompactCommand } from './cli/compact.js';
 import { generateAIPrompt } from './ai-prompt-generator.js';
 import { loadStore, removeStaleSuppressions, saveStore } from './suppressions/bc-scan-store.js';
+import { writeScanResults } from './output/index.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -50,6 +54,8 @@ program
 // Add suppressions subcommand
 program.addCommand(createSuppressionsCommand());
 program.addCommand(createInitCommand());
+program.addCommand(createTriageCommand());
+program.addCommand(createCompactCommand());
 
 program
   .option('--tsconfig <path>', 'Path to tsconfig.json or project directory (default: ./tsconfig.json)', './tsconfig.json')
@@ -70,6 +76,7 @@ program
   .option('--use-v1-analyzer', 'Use legacy v1 analyzer instead of the default v2', false)
   .option('--use-v2-analyzer', 'Deprecated no-op: v2 is now the default', false)
   .option('--compare-analyzers', 'Run both v1 and v2 analyzers and show diff (for validation)', false)
+  .option('--instructions-path', 'Print the path to FORAIAGENTS.md and exit', false)
   .action(async (options) => {
     // This action handler is called when the main command is invoked
     // (i.e., not a subcommand like 'suppressions')
@@ -101,7 +108,8 @@ function findGitRepoRoot(startPath: string): string | null {
  */
 function getGitHashFromRepo(tsconfigPath: string): string {
   try {
-    const { execSync } = require('child_process');
+    const _require = createRequire(import.meta.url);
+    const { execSync } = _require('child_process');
 
     // Get the directory containing the tsconfig (the repo root)
     const repoDir = path.dirname(path.resolve(tsconfigPath));
@@ -120,11 +128,11 @@ function getGitHashFromRepo(tsconfigPath: string): string {
 }
 
 /**
- * Ensure .behavioral-contracts is in .gitignore
+ * Ensure .nark is in .gitignore
  */
 function ensureGitignore(projectRoot: string): void {
   const gitignorePath = path.join(projectRoot, '.gitignore');
-  const entry = '.behavioral-contracts';
+  const entry = '.nark';
 
   try {
     let gitignoreContent = '';
@@ -150,7 +158,7 @@ function ensureGitignore(projectRoot: string): void {
 }
 
 /**
- * Generate organized output path in the analyzed project's .behavioral-contracts directory
+ * Generate organized output path in the analyzed project's .nark directory
  */
 function generateOutputPath(tsconfigPath: string): string {
   const timestamp = new Date().toISOString().replace(/[:.]/g, '-').substring(0, 19);
@@ -164,13 +172,13 @@ function generateOutputPath(tsconfigPath: string): string {
   // Create run directory name
   const runDir = `${timestamp.replace(/T/, '-').replace(/-/g, '').substring(0, 13)}-${gitHash}`;
 
-  // Output goes to .behavioral-contracts/runs/{runDir}/ in the analyzed project
-  const outputDir = path.join(projectRoot, '.behavioral-contracts', 'runs', runDir);
+  // Output goes to .nark/runs/{runDir}/ in the analyzed project
+  const outputDir = path.join(projectRoot, '.nark', 'runs', runDir);
 
   // Create directory if it doesn't exist
   fs.mkdirSync(outputDir, { recursive: true });
 
-  // Ensure .behavioral-contracts is in .gitignore
+  // Ensure .nark is in .gitignore
   ensureGitignore(projectRoot);
 
   return path.join(outputDir, 'audit.json');
@@ -232,7 +240,16 @@ function normalizeTsconfigPath(tsconfigPath: string): string {
  * Main execution
  */
 async function main(options: any) {
-  console.log(chalk.bold('\nBehavioral Contract Verification\n'));
+  // Handle --instructions-path: print FORAIAGENTS.md path and exit
+  if (options.instructionsPath) {
+    const forAiAgentsPath = path.join(__dirname, '../FORAIAGENTS.md');
+    console.log(forAiAgentsPath);
+    process.exit(0);
+  }
+
+  const scanStartTime = Date.now();
+
+  console.log(chalk.bold('\nNark Contract Verification\n'));
 
   // Normalize tsconfig path (allow directory or file)
   const tsconfigPath = normalizeTsconfigPath(options.tsconfig);
@@ -260,7 +277,8 @@ async function main(options: any) {
   // Show corpus source (npm package vs local)
   if (options.corpus === findDefaultCorpusPath()) {
     try {
-      require.resolve('nark-corpus');
+      const _require = createRequire(import.meta.url);
+      _require.resolve('nark-corpus');
       console.log(chalk.dim(`  (using npm package nark-corpus)`));
     } catch {
       console.log(chalk.dim(`  (using local corpus for development)`));
@@ -272,7 +290,7 @@ async function main(options: any) {
   console.log(chalk.gray(`  output: ${outputPath}\n`));
 
   // Load corpus
-  console.log(chalk.dim('Loading behavioral contracts...'));
+  console.log(chalk.dim('Loading contracts...'));
   const corpusResult = await loadCorpus(options.corpus, {
     includeDrafts: options.includeDrafts,
     includeDeprecated: options.includeDeprecated,
@@ -517,6 +535,23 @@ async function main(options: any) {
     console.log('');
   }
 
+  // Write .nark/ output directory
+  const projectRoot = findGitRepoRoot(tsconfigPath) || path.dirname(path.resolve(tsconfigPath));
+  const narkResult = await writeScanResults({
+    projectRoot,
+    auditRecord: finalRecord,
+    violations,
+    tsconfigPath: path.resolve(tsconfigPath),
+    startTime: scanStartTime,
+    narkVersion: '0.1.0',
+  });
+
+  if (narkResult) {
+    console.log(chalk.gray(`\nScan results saved to ${narkResult.scanPath}`));
+    console.log(chalk.gray(`Violation details: ${path.join(narkResult.narkDir, 'violations')}/`));
+    console.log(chalk.gray(`For AI agent instructions: nark --instructions-path`));
+  }
+
   // Final summary at the very end (easy to spot after all output)
   const totalViolations = auditRecord.summary.error_count + auditRecord.summary.warning_count;
   if (totalViolations > 0) {
@@ -555,12 +590,15 @@ async function main(options: any) {
 function findDefaultCorpusPath(): string {
   // Try 1: Use published npm package (production use)
   try {
-    // Dynamic import to avoid issues if package not installed
-    const corpusModule = require('nark-corpus');
-    const corpusPath = corpusModule.getCorpusPath();
+    // Use createRequire for ESM compatibility
+    const _require = createRequire(import.meta.url);
+    const corpusModule = _require('nark-corpus');
+    // getCorpusPath() returns the packages/ subdirectory
+    // corpus-loader expects the parent (the corpus root containing packages/ and schema/)
+    const corpusRoot = path.dirname(corpusModule.getCorpusPath());
 
-    if (fs.existsSync(corpusPath)) {
-      return corpusPath;
+    if (fs.existsSync(path.join(corpusRoot, 'packages'))) {
+      return corpusRoot;
     }
   } catch (err) {
     // Package not installed - fall through to local paths

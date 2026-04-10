@@ -47,7 +47,7 @@ export function generateD3Dashboard(data: D3VisualizationData): string {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Behavioral Contracts Analysis - ${repoName}</title>
+  <title>Nark Analysis - ${repoName}</title>
   <script src="https://d3js.org/d3.v7.min.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -384,7 +384,7 @@ export function generateD3Dashboard(data: D3VisualizationData): string {
   <div class="container">
     <!-- Header -->
     <div class="header">
-      <h1>Behavioral Contracts Analysis</h1>
+      <h1>Nark Analysis</h1>
       <div class="meta">
         <span><strong>${repoName}</strong></span>
         <span class="separator">•</span>
