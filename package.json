@@ -1,0 +1,43 @@
+{
+  "name": "nark",
+  "version": "0.1.0",
+  "description": "Contract coverage scanner for npm packages — find missing error handling before production",
+  "type": "module",
+  "bin": {
+    "nark": "./bin/nark.js"
+  },
+  "exports": {
+    ".": "./dist/index.js",
+    "./api": "./dist/api.js",
+    "./api-v2": "./dist/api-v2.js"
+  },
+  "files": [
+    "bin/",
+    "dist/",
+    "FORAIAGENTS.md"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "dev": "tsc --watch -p tsconfig.build.json",
+    "clean": "rm -rf dist",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "nark-corpus": "workspace:*",
+    "ajv": "^8.12.0",
+    "chalk": "^5.3.0",
+    "commander": "^12.0.0",
+    "glob": "^13.0.6",
+    "typescript": "^5.3.3",
+    "yaml": "^2.3.4"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "vitest": "^3.0.0"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "license": "MIT",
+  "keywords": ["nark", "error-handling", "static-analysis", "behavioral-contracts", "typescript"]
+}

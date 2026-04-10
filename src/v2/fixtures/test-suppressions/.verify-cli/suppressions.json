@@ -1,0 +1,21 @@
+{
+  "version": "1.0.0",
+  "projectRoot": "/Users/calebgates/WebstormProjects/behavioral-contracts/corpus/packages/test-suppressions/fixtures",
+  "lastUpdated": "2026-03-11T18:39:43.431Z",
+  "suppressions": [
+    {
+      "id": "suppress-with-inline-suppression-ts-12-c4a53914",
+      "file": "with-inline-suppression.ts",
+      "line": 12,
+      "column": 26,
+      "package": "axios",
+      "postconditionId": "network-failure",
+      "reason": "Testing suppression system",
+      "suppressedAt": "2026-03-11T18:39:43.431Z",
+      "suppressedBy": "inline-comment",
+      "lastChecked": "2026-03-11T18:39:43.431Z",
+      "stillViolates": true,
+      "analyzerVersion": "1.1.0"
+    }
+  ]
+}

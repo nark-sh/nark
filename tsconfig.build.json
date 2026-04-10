@@ -1,0 +1,14 @@
+{
+  "extends": "./tsconfig.json",
+  "exclude": [
+    "node_modules",
+    "dist",
+    "tests",
+    "src/fixture-tester.ts",
+    "src/**/*.test.ts",
+    "src/v2/fixtures/**",
+    "src/v2/test-analyzer.ts",
+    "src/v2/test-multi-package.ts",
+    "src/v2/integration-test.ts"
+  ]
+}
