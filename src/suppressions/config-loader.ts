@@ -1,24 +1,24 @@
 /**
  * Configuration File Loader
  *
- * Loads and validates .behavioralcontractsrc.json config file
+ * Loads and validates .narkrc.json config file
  */
 
 import * as fs from 'fs';
 import * as path from 'path';
-import { BehavioralContractsConfig, IgnoreRule } from './types.js';
+import { NarkConfig, IgnoreRule } from './types.js';
 
-const CONFIG_FILENAME = '.behavioralcontractsrc.json';
+const CONFIG_FILENAME = '.narkrc.json';
 
 /**
- * Load behavioral contracts configuration from project root
+ * Load nark configuration from project root (.narkrc.json)
  *
  * @param projectRoot - Absolute path to project root
  * @returns Configuration object, or empty config if file doesn't exist
  */
 export async function loadConfig(
   projectRoot: string
-): Promise<BehavioralContractsConfig> {
+): Promise<NarkConfig> {
   const configPath = path.join(projectRoot, CONFIG_FILENAME);
 
   if (!fs.existsSync(configPath)) {
@@ -27,7 +27,7 @@ export async function loadConfig(
 
   try {
     const content = await fs.promises.readFile(configPath, 'utf-8');
-    const config: BehavioralContractsConfig = JSON.parse(content);
+    const config: NarkConfig = JSON.parse(content);
 
     // Validate config structure
     validateConfig(config);
@@ -48,7 +48,7 @@ export async function loadConfig(
  */
 export function loadConfigSync(
   projectRoot: string
-): BehavioralContractsConfig {
+): NarkConfig {
   const configPath = path.join(projectRoot, CONFIG_FILENAME);
 
   if (!fs.existsSync(configPath)) {
@@ -57,7 +57,7 @@ export function loadConfigSync(
 
   try {
     const content = fs.readFileSync(configPath, 'utf-8');
-    const config: BehavioralContractsConfig = JSON.parse(content);
+    const config: NarkConfig = JSON.parse(content);
 
     // Validate config structure
     validateConfig(config);
@@ -76,7 +76,7 @@ export function loadConfigSync(
  * @param config - Configuration to validate
  * @throws Error if configuration is invalid
  */
-function validateConfig(config: BehavioralContractsConfig): void {
+function validateConfig(config: NarkConfig): void {
   if (typeof config !== 'object' || config === null) {
     throw new Error('Configuration must be an object');
   }
@@ -225,7 +225,7 @@ function matchGlob(pattern: string, text: string): boolean {
  * @returns Array of matching rules
  */
 export function findMatchingRules(
-  config: BehavioralContractsConfig,
+  config: NarkConfig,
   file: string,
   packageName: string,
   postconditionId: string
@@ -251,7 +251,7 @@ export async function createDefaultConfig(projectRoot: string): Promise<void> {
     throw new Error(`${CONFIG_FILENAME} already exists`);
   }
 
-  const defaultConfig: BehavioralContractsConfig = {
+  const defaultConfig: NarkConfig = {
     ignore: [
       {
         file: 'src/test/**',

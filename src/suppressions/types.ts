@@ -64,9 +64,9 @@ export interface SuppressionManifest {
 }
 
 /**
- * Configuration file structure (.behavioralcontractsrc.json)
+ * Configuration file structure (.narkrc.json)
  */
-export interface BehavioralContractsConfig {
+export interface NarkConfig {
   /** Suppression rules */
   ignore?: IgnoreRule[];
 

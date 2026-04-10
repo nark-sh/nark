@@ -126,7 +126,7 @@ export function checkSuppression(options: CheckSuppressionOptions): SuppressionC
     };
   }
 
-  // 3. Check config file suppression (.behavioralcontractsrc.json)
+  // 3. Check config file suppression (.narkrc.json)
   const config = loadConfigSync(projectRoot);
   const matchingRules = findMatchingRules(
     config,
