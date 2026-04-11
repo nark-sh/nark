@@ -14179,7 +14179,7 @@
     "source": "deepen",
     "package": "@neondatabase/serverless",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for @neondatabase/serverless sql.transaction() -- postconditions added in depth pass but no scanner rule exists for await patterns on the transaction method of the NeonQueryFunction",
     "evidence": {
       "repos": [],
@@ -14187,7 +14187,7 @@
       "violation_count": 0,
       "note": "Proactive -- contract added via API surface analysis, detection rule needed"
     },
-    "resolution": null
+    "resolution": "Verified: sql.transaction() detection already works via instance tracker. neon() is listed as factory_method in @neondatabase/serverless detection config, so const sqlFn = neon(url) is tracked. sqlFn.transaction() is then detected as functionName:\"transaction\" on package:\"@neondatabase/serverless\". Added ground-truth fixture tests (lines 249/263) that confirm detection fires correctly. No code changes needed."
   },
   {
     "id": "concern-20260411-sequelize-deepen-1",
@@ -14846,6 +14846,246 @@
       "fp_reason": "No note provided by reviewer",
       "fix_target": "contract",
       "postcondition_id": "weak-password"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260411-tanstack-react-query-deepen-5",
+    "created_at": "2026-04-11",
+    "source": "deepen",
+    "package": "@tanstack/react-query",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for QueryClient.ensureInfiniteQueryData() — postcondition ensureinfinitequerydata-throws-when-fetch-needed added in depth pass 2 but no scanner rule exists. Must detect await queryClient.ensureInfiniteQueryData(...) calls without enclosing try-catch, same pattern as ensureQueryData detection.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis (pass 2). ensureInfiniteQueryData delegates to ensureQueryData internally, so scanner can reuse the same detection pattern adapted to the ensureInfiniteQueryData method name."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260411-tanstack-react-query-deepen-6",
+    "created_at": "2026-04-11",
+    "source": "deepen",
+    "package": "@tanstack/react-query",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for QueryClient.ensureInfiniteQueryData() with revalidateIfStale: true — postcondition ensureinfinitequerydata-revalidate-if-stale-silent-background-error added in depth pass 2. Must detect when revalidateIfStale: true is set without background error monitoring (no global QueryCache.onError handler configured). This is a configuration-analysis concern — scanner needs to inspect the options argument for the revalidateIfStale property.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — revalidateIfStale: true causes background refetch whose errors are silently discarded. Developers commonly set this assuming they will see errors but they only appear in per-query error state, not thrown to the caller. Requires option-argument inspection (similar to retry option analysis already implemented for useQuery)."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260411-moment-deepen-1",
+    "created_at": "2026-04-11",
+    "source": "deepen",
+    "package": "moment",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for moment.parseZone() — postcondition parsezone-invalid-date added in depth pass but scanner needs to recognize parseZone as a contracted function requiring isValid() guard",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis. moment.parseZone() is the timezone-preserving variant of moment() with same invalid-date behavior. Detection requires treating parseZone as an alias of moment() in the ThrowingFunctionDetector."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260411-moment-deepen-2",
+    "created_at": "2026-04-11",
+    "source": "deepen",
+    "package": "moment",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for moment.unix() — postcondition unix-nan-timestamp added in depth pass. Scanner needs to flag moment.unix() calls without isFinite() or typeof number validation on the argument.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis. moment.unix(NaN) silently creates invalid moment (confirmed from source: createUnix multiplies input by 1000 and passes to createLocal). Detection requires argument-type-validation pattern (isFinite/typeof check before call)."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260411-moment-deepen-3",
+    "created_at": "2026-04-11",
+    "source": "deepen",
+    "package": "moment",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for moment.defineLocale() and moment.updateLocale() — postconditions definelocale-path-traversal and updatelocale-path-traversal added. Both share CVE-2022-24785 vector as moment.locale().",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis. defineLocale/updateLocale have the same path traversal risk as locale() which is already detected. Scanner should treat defineLocale/updateLocale as aliases of locale() for the locale-path-traversal detection rule."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260411-moment-deepen-4",
+    "created_at": "2026-04-11",
+    "source": "deepen",
+    "package": "moment",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for Moment.format() — postcondition format-invalid-date-string: format() returns \"Invalid date\" string for invalid moments (not an exception). Detection pattern: moment(x).format() without preceding isValid() check.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added. format() is the #1 moment footgun: it returns a plain string \"Invalid date\" instead of throwing, so it silently gets stored in DB. Detection requires instance-method chain analysis: track moment()/utc()/parseZone() results → detect .format() call without .isValid() guard in scope."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260411-moment-deepen-5",
+    "created_at": "2026-04-11",
+    "source": "deepen",
+    "package": "moment",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for Moment.toISOString() — postcondition toisostring-null-for-invalid: toISOString() returns null for invalid moments (source confirmed: line 3994). Chained .split() or .substring() after toISOString() crashes at runtime.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Source confirmed from moment.js line 3994: if (\\!this.isValid()) { return null; }. toJSON() also calls toISOString() and returns null. Detection requires instance-method chain analysis similar to format() concern above. Particularly dangerous in JSON.stringify() contexts."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260411-got-deepen-1",
+    "created_at": "2026-04-11",
+    "source": "deepen",
+    "package": "got",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for got() with responseType json — postcondition parse-error: ParseError (ERR_BODY_PARSE_FAILURE) thrown when 2xx response body is not valid JSON. Not currently detected by scanner.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via depth pass. ParseError occurs when a server returns 2xx with malformed JSON (e.g. HTML error page from a proxy). Very common footgun: developer only catches HTTPError but not ParseError. Source confirmed in dist/source/as-promise/index.js and dist/source/core/response.d.ts."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260411-got-deepen-2",
+    "created_at": "2026-04-11",
+    "source": "deepen",
+    "package": "got",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for got(url).json() shortcut — postconditions: json-parse-error, json-http-error. The .json() shortcut on CancelableRequest is a new function entry added in this depth pass.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — RequestPromise.json() is a method chained on the got() result. Scanner needs to detect: const x = await got(url).json() without try-catch. Detection requires tracking that got() returns a CancelableRequest with .json()/.buffer()/.text() methods."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260411-got-deepen-3",
+    "created_at": "2026-04-11",
+    "source": "deepen",
+    "package": "got",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for got(url).buffer() and got(url).text() shortcuts — postconditions: buffer-http-error, buffer-network-error, text-http-error, text-network-error.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — buffer() and text() are shortcut methods on CancelableRequest alongside json(). All three have the same detection challenge: chained method call on got() result. Source: dist/source/as-promise/types.d.ts."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260411-got-deepen-4",
+    "created_at": "2026-04-11",
+    "source": "deepen",
+    "package": "got",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for got() AbortError — postcondition abort-error: when options.signal from AbortController fires, request throws AbortError (ERR_ABORTED). Scanner currently does not detect abort-pattern violations.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — AbortController pattern is increasingly common in server-side code for request cancellation and timeouts. AbortError is a distinct error type from TimeoutError. Source confirmed in dist/source/core/index.js. Detection: got() call with signal option that lacks try-catch catching AbortError specifically."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260411-archiver-deepen-1",
+    "created_at": "2026-04-11",
+    "source": "deepen",
+    "package": "archiver",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for archiver.finalize() — postconditions added (finalize-after-abort, finalize-double-call, finalize-incomplete-output) but no scanner rules exist for post-call race condition or incomplete-output pattern",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis. Key pattern: await archive.finalize() without awaiting output stream close event produces corrupt archives at scale."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260411-archiver-deepen-2",
+    "created_at": "2026-04-11",
+    "source": "deepen",
+    "package": "archiver",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for archiver.append() called with stream source missing error handler — postcondition append-stream-error-not-propagated added but no scanner rule exists to detect missing stream.on(error) before archive.append(stream, ...)",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — pattern: fs.createReadStream piped to archive.append() without stream error handler. Read stream error events crash the process as unhandled."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260411-archiver-deepen-3",
+    "created_at": "2026-04-11",
+    "source": "deepen",
+    "package": "archiver",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for archiver.symlink() called on zip-format archive — postcondition symlink-zip-format-unsupported added but no scanner rule to detect zip+symlink combination",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — zip format silently emits SYMLINKNOTSUPPORTED error when symlink() is called. TAR format is required for symlinks."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260411-archiver-deepen-4",
+    "created_at": "2026-04-11",
+    "source": "deepen",
+    "package": "archiver",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for archiver methods (append/directory/file/glob/symlink) called after finalize() — QUEUECLOSED error pattern. No scanner rule exists for post-finalize method calls.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — calling append/directory/file after finalize() silently drops entries. Common in request handlers with async file processing."
     },
     "resolution": null
   }
