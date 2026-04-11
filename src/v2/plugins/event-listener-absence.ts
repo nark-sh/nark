@@ -56,10 +56,20 @@ export class EventListenerAbsencePlugin implements DetectorPlugin {
   private buildLookupMaps(): void {
     for (const [packageName, contract] of this.contracts.entries()) {
       if (!contract.detection?.required_event_listeners?.length) continue;
+      const classNames = contract.detection.class_names ?? [];
       for (const factory of contract.detection.factory_methods ?? []) {
+        // When a contract uses class_names for event-listener tracking (e.g. undici's WebSocket),
+        // its factory_methods are typically stateless request functions (fetch, request, stream)
+        // that DON'T return persistent connection objects needing error listeners.
+        // Only add factory_methods to event-listener tracking when the contract has NO class_names
+        // (e.g. redis: createClient() → connection object) or when the factory name itself
+        // is connection-factory-like (starts with 'create', 'make', 'build', 'init', 'getInstance').
+        if (classNames.length > 0 && !/^(create|make|build|init|getInstance)/i.test(factory)) {
+          continue; // Skip non-constructor factory methods when class_names are present
+        }
         this.factoryToPackage.set(factory, packageName);
       }
-      for (const cls of contract.detection.class_names ?? []) {
+      for (const cls of classNames) {
         this.classToPackage.set(cls, packageName);
       }
     }
@@ -97,12 +107,45 @@ export class EventListenerAbsencePlugin implements DetectorPlugin {
    * Handle assignments that create instances requiring event listeners:
    *   this.field = createClient()    (PropertyAccessExpression on left)
    *   moduleVar = createClient()     (bare Identifier on left — module-level reassignment)
+   *
+   * Also handles DOM-style event listener property assignments:
+   *   ws.onerror = handler           (varName.onEventName = ...)
+   *   These complement the .on()/.addEventListener() tracking in onCallExpression.
    */
   public onBinaryExpression(node: ts.BinaryExpression, context: NodeContext): Detection[] {
     // Only handle assignments
     if (node.operatorToken.kind !== ts.SyntaxKind.EqualsToken) return [];
 
     const left = node.left;
+
+    // Handle DOM-style event listener property assignments: ws.onerror = handler
+    // Pattern: <identifier>.<onEventName> = <value>
+    if (
+      ts.isPropertyAccessExpression(left) &&
+      ts.isIdentifier(left.expression)
+    ) {
+      const objName = left.expression.text;
+      const propName = left.name.text;
+      // Check if this is an event handler property (onerror, onclose, onmessage, onopen, etc.)
+      if (propName.startsWith('on') && propName.length > 2) {
+        const eventName = propName.slice(2); // 'onerror' → 'error'
+        const assignPos = node.getStart();
+        let bestMatch: TrackedCreation | null = null;
+        for (const creation of this.trackedCreations) {
+          if (creation.varName !== objName) continue;
+          if (creation.factoryCallPos > assignPos) continue;
+          if (!bestMatch || creation.factoryCallPos > bestMatch.factoryCallPos) {
+            bestMatch = creation;
+          }
+        }
+        if (bestMatch) {
+          bestMatch.attachedEvents.add(eventName);
+        }
+        // Return early — ws.onerror = handler is not a factory creation, skip trackCreation
+        return [];
+      }
+    }
+
     let varName: string;
 
     if (ts.isPropertyAccessExpression(left)) {
@@ -259,24 +302,25 @@ export class EventListenerAbsencePlugin implements DetectorPlugin {
       const className = init.expression.text;
       const pkg = this.classToPackage.get(className);
       if (pkg) {
-        // If contract specifies import_source, only track when that exact specifier is imported.
+        // Always check the importMap first — if the class is explicitly imported from a
+        // different package, that import is authoritative and overrides classToPackage.
         // This prevents false positives when multiple packages export the same class name
-        // (e.g., ioredis and @upstash/redis both export `Redis`).
-        const contract = this.contracts.get(pkg);
-        const importSource = contract?.detection?.import_source;
-        if (importSource) {
-          const importInfo = importMap.get(className);
-          if (importInfo && importInfo.packageName !== importSource) {
-            // Class is imported from a different package — skip
+        // (e.g., ws and undici both export `WebSocket`; ioredis and @upstash/redis both export `Redis`).
+        const importInfo = importMap.get(className);
+        if (importInfo && importInfo.packageName !== pkg) {
+          // Class is explicitly imported from a different package — skip
+        } else {
+          // Either not imported explicitly (global), or imported from the expected package.
+          // Also respect import_source if the contract specifies one.
+          const contract = this.contracts.get(pkg);
+          const importSource = contract?.detection?.import_source;
+          if (importSource && importInfo && importInfo.packageName !== importSource) {
+            // import_source mismatch — skip
           } else {
             packageName = pkg;
             factoryMethodName = className;
             factoryCallNode = init;
           }
-        } else {
-          packageName = pkg;
-          factoryMethodName = className;
-          factoryCallNode = init;
         }
       }
     }
@@ -368,9 +412,11 @@ export class EventListenerAbsencePlugin implements DetectorPlugin {
           const funcContract = contract?.functions.find(
             (f) => f.name === creation.factoryMethodName
           );
-          const postcondition = funcContract?.postconditions?.find(
-            (p) => p.severity === 'error' || p.severity === 'warning'
-          );
+          // Prefer error-severity postconditions (missing error listener is more severe
+          // than syntax errors). Fall back to warning if no error-severity postcondition.
+          const postcondition =
+            funcContract?.postconditions?.find((p) => p.severity === 'error') ??
+            funcContract?.postconditions?.find((p) => p.severity === 'warning');
 
           detections.push({
             pluginName: this.name,

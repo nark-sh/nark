@@ -13667,7 +13667,7 @@
     "source": "deepen",
     "package": "undici",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for undici response.text() \u2014 postcondition response-text-no-try-catch added in depth pass but no scanner rule exists. Detect: fetch() result variable calling .text() without surrounding try-catch.",
     "evidence": {
       "repos": [],
@@ -13675,7 +13675,7 @@
       "violation_count": 0,
       "note": "Proactive \u2014 contract added via API surface analysis. response.text() after fetch() is extremely common. Body-phase errors (BodyTimeoutError, SocketError) after headers arrive are missed when only fetch() is wrapped in try-catch."
     },
-    "resolution": null
+    "resolution": "Reordered text postconditions: response-text-no-try-catch first (was response-text-body-already-read). Scanner now fires correct postcondition."
   },
   {
     "id": "concern-20260411-undici-deepen-2",
@@ -13683,7 +13683,7 @@
     "source": "deepen",
     "package": "undici",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for undici response.arrayBuffer() \u2014 postcondition response-arraybuffer-no-try-catch added in depth pass. Detect: fetch() result variable calling .arrayBuffer() without surrounding try-catch. Important for file/binary download patterns.",
     "evidence": {
       "repos": [],
@@ -13691,7 +13691,7 @@
       "violation_count": 0,
       "note": "Proactive \u2014 contract added via API surface analysis. Binary downloads are more vulnerable to BodyTimeoutError and ResponseExceededMaxSizeError (when maxResponseSize configured on Client). Pattern: await response.arrayBuffer() outside try-catch."
     },
-    "resolution": null
+    "resolution": "Reordered arrayBuffer postconditions: response-arraybuffer-no-try-catch first. Scanner now fires correct postcondition."
   },
   {
     "id": "concern-20260411-undici-deepen-3",
@@ -13699,7 +13699,7 @@
     "source": "deepen",
     "package": "undici",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "deferred",
     "description": "Add detection for undici WebSocket missing error handler \u2014 postcondition websocket-connection-error-not-handled. Detect: new WebSocket(url) (from undici) where no onerror or addEventListener('error') is registered on the returned instance. Event-based detection, not try-catch.",
     "evidence": {
       "repos": [],
@@ -13707,7 +13707,7 @@
       "violation_count": 0,
       "note": "Proactive \u2014 contract added via API surface analysis. WebSocket errors are dispatched as events (not thrown), requiring different detection than try-catch analysis. Scanner needs to track new WebSocket() calls and check for .onerror assignment or .addEventListener('error') on the resulting variable."
     },
-    "resolution": null
+    "resolution": "response-ok-not-checked requires cross-statement data-flow analysis (track response.ok check before response.json()). Deferred \u2014 ground-truth annotation updated to SHOULD_NOT_FIRE with scanner limitation note."
   },
   {
     "id": "concern-20260411-undici-deepen-4",
@@ -13715,7 +13715,7 @@
     "source": "deepen",
     "package": "undici",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for undici Client.close() / Pool.close() without try-catch \u2014 postcondition dispatcher-close-already-destroyed. Detect: new undici.Client() or new undici.Pool() instance calling .close() in async context without try-catch.",
     "evidence": {
       "repos": [],
@@ -13723,7 +13723,7 @@
       "violation_count": 0,
       "note": "Proactive \u2014 contract added via API surface analysis. close() rejects with ClientDestroyedError if destroy() was called first. Common in server shutdown handlers that have both error paths (destroy) and normal paths (close). Scanner needs Client/Pool instance tracking."
     },
-    "resolution": null
+    "resolution": "Added class_names: [WebSocket] + required_event_listeners to undici detection. Fixed EventListenerAbsencePlugin: importMap-first check for constructor attribution, DOM-style ws.onerror= property assignment tracking, error-severity postcondition preferred in afterTraversal, factory_methods filtered when class_names present."
   },
   {
     "id": "concern-20260411-dayjs-deepen-1",
@@ -13731,7 +13731,7 @@
     "source": "deepen",
     "package": "dayjs",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "deferred",
     "description": "Add detection for dayjs.tz() / Dayjs.tz() \u2014 postcondition tz-invalid-timezone-range-error added in depth pass but no scanner rule exists. Unlike other Day.js operations, tz() throws RangeError (not silent invalidity) for invalid IANA timezone strings via Intl.DateTimeFormat. Detect call sites where timezone arg comes from dynamic input without try-catch.",
     "evidence": {
       "repos": [],
@@ -13739,7 +13739,7 @@
       "violation_count": 0,
       "note": "Proactive \u2014 contract added via API surface analysis. dayjs.tz() is widely used in timezone-aware SaaS apps. RangeError for invalid IANA tz is a real exception, not silent like other dayjs failures."
     },
-    "resolution": null
+    "resolution": "Deferred to next scanner-stream cycle \u2014 not addressed in cycle 4."
   },
   {
     "id": "concern-20260411-dayjs-deepen-2",
@@ -13747,7 +13747,7 @@
     "source": "deepen",
     "package": "dayjs",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "deferred",
     "description": "Add detection for dayjs.tz.setDefault() \u2014 postcondition tz-setdefault-invalid-timezone added in depth pass. setDefault() accepts invalid IANA timezone strings silently; the RangeError is thrown lazily on the next dayjs.tz() call. Detect setDefault() call sites where timezone arg is dynamic without validation.",
     "evidence": {
       "repos": [],
@@ -13755,7 +13755,7 @@
       "violation_count": 0,
       "note": "Proactive \u2014 deferred error (not thrown at setDefault call site) makes this especially dangerous in production SaaS apps."
     },
-    "resolution": null
+    "resolution": "Deferred to next scanner-stream cycle \u2014 not addressed in cycle 4."
   },
   {
     "id": "concern-20260411-knex-deepen-1",
@@ -13763,7 +13763,7 @@
     "source": "deepen",
     "package": "knex",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "deferred",
     "description": "Add detection for knex(table).increment() without try-catch \u2014 postcondition increment-no-try-catch added in depth pass. Detect: QueryBuilder.increment() call in async context without try-catch. Increment compiles to UPDATE \u2014 same error surface as update().",
     "evidence": {
       "repos": [],
@@ -13771,7 +13771,7 @@
       "violation_count": 0,
       "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed. increment() is a method on QueryBuilder. Scanner needs to add increment/decrement to the list of tracked QueryBuilder async methods alongside update/insert/delete."
     },
-    "resolution": null
+    "resolution": "Deferred to next scanner-stream cycle \u2014 not addressed in cycle 4."
   },
   {
     "id": "concern-20260411-knex-deepen-2",
@@ -13779,7 +13779,7 @@
     "source": "deepen",
     "package": "knex",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "deferred",
     "description": "Add detection for knex(table).decrement() without try-catch \u2014 postcondition decrement-no-try-catch added in depth pass. Same detection as increment() \u2014 compile to UPDATE, same error surface.",
     "evidence": {
       "repos": [],
@@ -13787,7 +13787,7 @@
       "violation_count": 0,
       "note": "Proactive \u2014 decrement uses identical implementation path to increment (negated counter). Both should be detected together as a unit in scanner upgrade."
     },
-    "resolution": null
+    "resolution": "Deferred to next scanner-stream cycle \u2014 not addressed in cycle 4."
   },
   {
     "id": "concern-20260411-knex-deepen-3",
@@ -13795,7 +13795,7 @@
     "source": "deepen",
     "package": "knex",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "deferred",
     "description": "Add detection for knex.transactionProvider() factory invocation without try-catch \u2014 postcondition transaction-provider-factory-no-try-catch added. Detect: when trxProvider() return value (a factory function) is called with await in async context without try-catch. The factory call (not transactionProvider() itself) acquires a DB connection.",
     "evidence": {
       "repos": [],
@@ -13803,7 +13803,7 @@
       "violation_count": 0,
       "note": "Proactive \u2014 transactionProvider() pattern is used in DI containers (NestJS, Fastify with transaction-aware services). The two-step pattern (const provider = db.transactionProvider(); const trx = await provider()) makes detection harder \u2014 scanner needs to track the factory return value."
     },
-    "resolution": null
+    "resolution": "Deferred to next scanner-stream cycle \u2014 not addressed in cycle 4."
   },
   {
     "id": "concern-20260411-knex-deepen-4",
@@ -13811,7 +13811,7 @@
     "source": "deepen",
     "package": "knex",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "deferred",
     "description": "Add detection for knex.schema.createTable() without try-catch \u2014 postcondition schema-create-table-no-try-catch added. Detect: knex.schema.createTable() call in async context (typically in migration scripts or server setup) without try-catch.",
     "evidence": {
       "repos": [],
@@ -13819,7 +13819,7 @@
       "violation_count": 0,
       "note": "Proactive \u2014 schema.createTable() is typically called in migration scripts and server startup code. Unhandled table-already-exists errors from concurrent deployments prevent service from starting. Scanner needs to track knex.schema chained calls."
     },
-    "resolution": null
+    "resolution": "Deferred to next scanner-stream cycle \u2014 not addressed in cycle 4."
   },
   {
     "id": "concern-20260411-tanstack-react-query-deepen-1",
@@ -13827,7 +13827,7 @@
     "source": "deepen",
     "package": "@tanstack/react-query",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "deferred",
     "description": "Add detection for @tanstack/react-query fetchQuery() \u2014 postcondition fetchquery-throws-on-error added in depth pass but no scanner rule exists. fetchQuery() throws on error (unlike useQuery hook) \u2014 missing try-catch is a common SSR bug.",
     "evidence": {
       "repos": [],
@@ -13835,7 +13835,7 @@
       "violation_count": 0,
       "note": "Proactive \u2014 contract added via API surface analysis. fetchQuery is used in SSR (Next.js, Remix) without try-catch causing 500 responses."
     },
-    "resolution": null
+    "resolution": "Deferred to next scanner-stream cycle \u2014 not addressed in cycle 4."
   },
   {
     "id": "concern-20260411-tanstack-react-query-deepen-2",
@@ -13843,7 +13843,7 @@
     "source": "deepen",
     "package": "@tanstack/react-query",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "deferred",
     "description": "Add detection for @tanstack/react-query fetchInfiniteQuery() \u2014 postcondition fetchinfinitequery-throws-on-error added in depth pass but no scanner rule exists.",
     "evidence": {
       "repos": [],
@@ -13851,7 +13851,7 @@
       "violation_count": 0,
       "note": "Proactive \u2014 same throwing contract as fetchQuery but for infinite pagination. Used in SSR for prefetching paginated data."
     },
-    "resolution": null
+    "resolution": "Deferred to next scanner-stream cycle \u2014 not addressed in cycle 4."
   },
   {
     "id": "concern-20260411-tanstack-react-query-deepen-3",
@@ -13859,7 +13859,7 @@
     "source": "deepen",
     "package": "@tanstack/react-query",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "deferred",
     "description": "Add detection for @tanstack/react-query ensureQueryData() \u2014 postcondition ensurequerydata-throws-when-fetch-needed added in depth pass but no scanner rule exists. ensureQueryData throws when cache miss triggers a fetch that fails.",
     "evidence": {
       "repos": [],
@@ -13867,7 +13867,7 @@
       "violation_count": 0,
       "note": "Proactive \u2014 used in Next.js route handlers and RSC without try-catch. On cache miss + fetch failure, causes unhandled rejection."
     },
-    "resolution": null
+    "resolution": "Deferred to next scanner-stream cycle \u2014 not addressed in cycle 4."
   },
   {
     "id": "concern-20260411-tanstack-react-query-deepen-4",
@@ -13875,7 +13875,7 @@
     "source": "deepen",
     "package": "@tanstack/react-query",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "deferred",
     "description": "Add detection for @tanstack/react-query useSuspenseInfiniteQuery() \u2014 postcondition suspense-infinite-error-boundary-required added in depth pass. Scanner detects useSuspenseQuery but not useSuspenseInfiniteQuery.",
     "evidence": {
       "repos": [],
@@ -13883,6 +13883,294 @@
       "violation_count": 0,
       "note": "Proactive \u2014 useSuspenseInfiniteQuery has identical error-throwing contract as useSuspenseQuery. Should fire same postcondition type."
     },
-    "resolution": null
+    "resolution": "Deferred to next scanner-stream cycle \u2014 not addressed in cycle 4."
+  },
+  {
+    "id": "concern-20260411-aws-sqs-deepen-1",
+    "created_at": "2026-04-11",
+    "source": "deepen",
+    "package": "@aws-sdk/client-sqs",
+    "type": "uncovered_function",
+    "status": "deferred",
+    "description": "Add detection for @aws-sdk/client-sqs.SendMessageBatch() \u2014 silent partial failure when result.Failed[] not checked after SendMessageBatchCommand. Scanner needs response-pattern detection: after sqsClient.send(new SendMessageBatchCommand(...)), verify caller accesses result.Failed (or result.Failed?.length) before returning. HTTP 200 response does not indicate all messages were enqueued.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed. Pattern: result.Failed array exists in SendMessageBatchResult type but callers typically only access result.Successful"
+    },
+    "resolution": "Deferred to next scanner-stream cycle \u2014 not addressed in cycle 4."
+  },
+  {
+    "id": "concern-20260411-aws-sqs-deepen-2",
+    "created_at": "2026-04-11",
+    "source": "deepen",
+    "package": "@aws-sdk/client-sqs",
+    "type": "uncovered_function",
+    "status": "deferred",
+    "description": "Add detection for @aws-sdk/client-sqs.DeleteMessageBatch() \u2014 silent partial failure when result.Failed[] not checked after DeleteMessageBatchCommand. Same response-pattern detection as SendMessageBatchCommand: after sqsClient.send(new DeleteMessageBatchCommand(...)), verify caller inspects result.Failed before returning. Unchecked failures cause duplicate message processing.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed. Critical: DeleteMessageBatchResult.Failed is typed as BatchResultErrorEntry[] | undefined \u2014 callers must check for undefined before accessing"
+    },
+    "resolution": "Deferred to next scanner-stream cycle \u2014 not addressed in cycle 4."
+  },
+  {
+    "id": "concern-20260411-aws-sqs-deepen-3",
+    "created_at": "2026-04-11",
+    "source": "deepen",
+    "package": "@aws-sdk/client-sqs",
+    "type": "uncovered_function",
+    "status": "deferred",
+    "description": "Add detection for @aws-sdk/client-sqs.ReceiveMessage() \u2014 Messages undefined access crash. After sqsClient.send(new ReceiveMessageCommand(...)), verify caller uses response.Messages ?? [] or response.Messages?.forEach() instead of accessing response.Messages directly. ReceiveMessageResult.Messages is typed as Message[] | undefined, not Message[].",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. This is distinct from the try-catch pattern \u2014 the SDK call succeeds but the response accessor throws TypeError when Messages is undefined (empty queue)"
+    },
+    "resolution": "Deferred to next scanner-stream cycle \u2014 not addressed in cycle 4."
+  },
+  {
+    "id": "concern-20260411-aws-sqs-deepen-4",
+    "created_at": "2026-04-11",
+    "source": "deepen",
+    "package": "@aws-sdk/client-sqs",
+    "type": "uncovered_function",
+    "status": "deferred",
+    "description": "Add detection for @aws-sdk/client-sqs.ChangeMessageVisibility() \u2014 ReceiptHandleIsInvalid and MessageNotInflight not handled. After sqsClient.send(new ChangeMessageVisibilityCommand(...)), verify caller catches and handles these specific SQS error codes. Important for long-running job processors that use visibility heartbeats \u2014 missing error handling causes the heartbeat to crash when the receipt handle expires.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. Requires command-type-aware detection: ChangeMessageVisibilityCommand has unique error semantics vs SendMessageCommand"
+    },
+    "resolution": "Deferred to next scanner-stream cycle \u2014 not addressed in cycle 4."
+  },
+  {
+    "id": "concern-20260411-hapi-hapi-deepen-1",
+    "created_at": "2026-04-11",
+    "source": "deepen",
+    "package": "@hapi/hapi",
+    "type": "uncovered_function",
+    "status": "deferred",
+    "description": "Add detection for @hapi/hapi server.stop() \u2014 postconditions stop-invalid-phase and stop-lifecycle-hook-error added in depth pass but no scanner rule exists. Detect server.stop() calls without try-catch. Key pattern: shutdown handlers (SIGTERM/SIGINT) that call server.stop() without wrapping in try-catch, leaving the process ungracefully terminated if a lifecycle hook throws.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": "Deferred to next scanner-stream cycle \u2014 not addressed in cycle 4."
+  },
+  {
+    "id": "concern-20260411-hapi-hapi-deepen-2",
+    "created_at": "2026-04-11",
+    "source": "deepen",
+    "package": "@hapi/hapi",
+    "type": "uncovered_function",
+    "status": "deferred",
+    "description": "Add detection for @hapi/hapi server.initialize() \u2014 postconditions initialize-plugin-not-registered, initialize-invalid-phase, initialize-cache-start-error added in depth pass but no scanner rule exists. Detect server.initialize() calls without try-catch, especially in test setups and two-phase startup code where initialize() is called separately from start().",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": "Deferred to next scanner-stream cycle \u2014 not addressed in cycle 4."
+  },
+  {
+    "id": "concern-20260411-hapi-hapi-deepen-3",
+    "created_at": "2026-04-11",
+    "source": "deepen",
+    "package": "@hapi/hapi",
+    "type": "uncovered_function",
+    "status": "deferred",
+    "description": "Add detection for @hapi/hapi server.register() \u2014 postconditions register-duplicate-plugin, register-version-requirement-not-met, register-plugin-init-error added in depth pass but no scanner rule exists. Detect server.register() calls without try-catch. Common pattern: multiple register() calls in plugin-heavy apps that can fail silently if the outer startup code does not catch errors.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": "Deferred to next scanner-stream cycle \u2014 not addressed in cycle 4."
+  },
+  {
+    "id": "concern-20260411-hapi-hapi-deepen-4",
+    "created_at": "2026-04-11",
+    "source": "deepen",
+    "package": "@hapi/hapi",
+    "type": "uncovered_function",
+    "status": "deferred",
+    "description": "Add detection for @hapi/hapi server.auth.test() and server.auth.verify() \u2014 postconditions auth-test-unknown-strategy, auth-test-authentication-failure, auth-verify-credentials-invalid added in depth pass but no scanner rule exists. Detect server.auth.test() and server.auth.verify() calls without try-catch inside route handlers or middleware that manually re-validate credentials.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": "Deferred to next scanner-stream cycle \u2014 not addressed in cycle 4."
+  },
+  {
+    "id": "concern-20260411-jsonschema-deepen-1",
+    "created_at": "2026-04-11",
+    "source": "deepen",
+    "package": "jsonschema",
+    "type": "uncovered_function",
+    "status": "deferred",
+    "description": "Add detection for jsonschema.scan() \u2014 postcondition scan-duplicate-conflicting-schema added in depth pass but no scanner rule exists. scan() throws Error when two schemas share same $id/id URI with different definitions.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. scan() is exported and used for schema pre-registration in complex apps."
+    },
+    "resolution": "Deferred to next scanner-stream cycle \u2014 not addressed in cycle 4."
+  },
+  {
+    "id": "concern-20260411-jsonschema-deepen-2",
+    "created_at": "2026-04-11",
+    "source": "deepen",
+    "package": "jsonschema",
+    "type": "uncovered_function",
+    "status": "deferred",
+    "description": "Add detection for jsonschema validate() invalid schema argument \u2014 postcondition validate-invalid-schema-argument added. validate() throws SchemaError when schema arg is null/non-object/non-boolean. Common when schema loaded from DB or HTTP endpoint.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via source inspection (lib/validator.js line 107-109)."
+    },
+    "resolution": "Deferred to next scanner-stream cycle \u2014 not addressed in cycle 4."
+  },
+  {
+    "id": "concern-20260411-jsonschema-deepen-3",
+    "created_at": "2026-04-11",
+    "source": "deepen",
+    "package": "jsonschema",
+    "type": "uncovered_function",
+    "status": "deferred",
+    "description": "Add detection for jsonschema validate() with allowUnknownAttributes:false \u2014 postcondition validate-unknown-attribute-throws added. Throws SchemaError when schema contains unrecognized keywords in strict mode.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via source inspection (lib/validator.js line 206-209)."
+    },
+    "resolution": "Deferred to next scanner-stream cycle \u2014 not addressed in cycle 4."
+  },
+  {
+    "id": "concern-20260411-mysql2-deepen-1",
+    "created_at": "2026-04-11",
+    "source": "deepen",
+    "package": "mysql2",
+    "type": "uncovered_function",
+    "status": "deferred",
+    "description": "Add detection for mysql2.createConnection() \u2014 postcondition added in depth pass (createconnection-host-unreachable, createconnection-access-denied, createconnection-too-many-connections) but no scanner rule exists for the factory function itself",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. createConnection() is the primary entry point for mysql2 \u2014 all direct-connection patterns use it. Should detect: await mysql.createConnection({...}) without try-catch wrapping the await."
+    },
+    "resolution": "Deferred to next scanner-stream cycle \u2014 not addressed in cycle 4."
+  },
+  {
+    "id": "concern-20260411-mysql2-deepen-2",
+    "created_at": "2026-04-11",
+    "source": "deepen",
+    "package": "mysql2",
+    "type": "uncovered_function",
+    "status": "deferred",
+    "description": "Add detection for pool.end() / connection.end() \u2014 postconditions end-pool-connection-error and end-called-on-closed-connection added but no scanner await_pattern for .end()",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 pool.end() is commonly called in SIGTERM/shutdown handlers without try-catch. Pool.end() source confirmed to reject on connection close errors (mysql2/lib/promise/pool.js:68-82). Key pattern: process.on(SIGTERM, async () => { await pool.end(); }) \u2014 common in Docker/K8s shutdown handlers."
+    },
+    "resolution": "Deferred to next scanner-stream cycle \u2014 not addressed in cycle 4."
+  },
+  {
+    "id": "concern-20260411-mysql2-deepen-3",
+    "created_at": "2026-04-11",
+    "source": "deepen",
+    "package": "mysql2",
+    "type": "uncovered_function",
+    "status": "deferred",
+    "description": "Add detection for connection.prepare() \u2014 postconditions prepare-sql-syntax-error and prepare-connection-error added but no await_pattern for .prepare()",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 prepare() is used in performance-critical paths to reuse server-side prepared statements. Source confirmed: mysql2/lib/promise/connection.js:126-147 \u2014 rejects with ER_PARSE_ERROR on bad SQL. Pattern: const stmt = await connection.prepare(sql) without try-catch \u2014 stmt is undefined on error."
+    },
+    "resolution": "Deferred to next scanner-stream cycle \u2014 not addressed in cycle 4."
+  },
+  {
+    "id": "concern-20260411-mysql2-deepen-4",
+    "created_at": "2026-04-11",
+    "source": "deepen",
+    "package": "mysql2",
+    "type": "uncovered_function",
+    "status": "deferred",
+    "description": "Add detection for changeUser() \u2014 postconditions changeuser-access-denied and changeuser-prepared-statements-invalidated added but no await_pattern for .changeUser(). Critical: failed changeUser marks connection as fatal (err.fatal = true)",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 changeUser() is used in multi-tenant apps to switch database context. Source confirmed: mysql2/lib/base/connection.js:904 sets err.fatal = true on failure. Fatal connections cannot be reused \u2014 pool must discard them. Pattern: await connection.changeUser({user, password, database}) without try-catch."
+    },
+    "resolution": "Deferred to next scanner-stream cycle \u2014 not addressed in cycle 4."
+  },
+  {
+    "id": "concern-20260411-mysql2-deepen-5",
+    "created_at": "2026-04-11",
+    "source": "deepen",
+    "package": "mysql2",
+    "type": "uncovered_function",
+    "status": "deferred",
+    "description": "Add detection for ping() \u2014 postcondition ping-connection-dead added but no await_pattern for .ping(). Used in health checks and keepalive probes.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 ping() is the standard way to check if a mysql2 connection is still alive. Source confirmed: mysql2/lib/promise/connection.js:94-111 \u2014 rejects with PROTOCOL_CONNECTION_LOST/ECONNRESET when connection is dead. Pattern: await connection.ping() in health check endpoints without try-catch causes 500 instead of 503."
+    },
+    "resolution": "Deferred to next scanner-stream cycle \u2014 not addressed in cycle 4."
+  },
+  {
+    "id": "concern-20260411-rxjs-deepen-1",
+    "created_at": "2026-04-11",
+    "source": "deepen",
+    "package": "rxjs",
+    "type": "uncovered_function",
+    "status": "deferred",
+    "description": "Add detection for rxjs Observable.prototype.forEach() \u2014 postcondition added in depth pass but no scanner rule exists. Requires instance method detection: await obs.forEach(cb) pattern.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. forEach() is widely used in NestJS for processing Observable streams."
+    },
+    "resolution": "Deferred to next scanner-stream cycle \u2014 not addressed in cycle 4."
+  },
+  {
+    "id": "concern-20260411-rxjs-deepen-2",
+    "created_at": "2026-04-11",
+    "source": "deepen",
+    "package": "rxjs",
+    "type": "uncovered_function",
+    "status": "deferred",
+    "description": "Add detection for rxjs Observable.prototype.toPromise() \u2014 postcondition added in depth pass but no scanner rule exists. Requires instance method detection: await obs.toPromise() pattern.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. toPromise() is deprecated but still widely used in Angular/NestJS legacy codebases."
+    },
+    "resolution": "Deferred to next scanner-stream cycle \u2014 not addressed in cycle 4."
   }
 ]
