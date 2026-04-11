@@ -39,7 +39,7 @@ const __dirname = path.dirname(__filename);
 
 const GROUND_TRUTH_PATH = path.resolve(
   __dirname,
-  '../../../../corpus/packages/body-parser/fixtures/ground-truth.ts'
+  '../../../../nark-corpus/packages/body-parser/fixtures/ground-truth.ts'
 );
 
 describe('body-parser: ground-truth fixture', () => {

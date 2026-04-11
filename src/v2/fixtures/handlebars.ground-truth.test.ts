@@ -29,7 +29,7 @@ const __dirname = path.dirname(__filename);
 
 const GROUND_TRUTH_PATH = path.resolve(
   __dirname,
-  '../../../../corpus/packages/handlebars/fixtures/ground-truth.ts'
+  '../../../../nark-corpus/packages/handlebars/fixtures/ground-truth.ts'
 );
 
 const ANNOTATIONS: Annotation[] = parseAnnotations(GROUND_TRUTH_PATH);

@@ -27,9 +27,9 @@ import type { Violation } from '../types/index.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// __dirname resolves to dist/v2/fixtures at runtime; corpus is at ../../../../../../corpus
-// relative to dist/v2/fixtures: ../../../ = verify-cli root, then ../corpus
-export const CORPUS_PATH = path.resolve(__dirname, '../../../../corpus');
+// __dirname resolves to dist/v2/fixtures at runtime; corpus is at ../../../../nark-corpus
+// relative to dist/v2/fixtures: ../../../ = verify-cli root, then ../nark-corpus
+export const CORPUS_PATH = path.resolve(__dirname, '../../../../nark-corpus');
 
 // ──────────────────────────────────────────────────────────────────────────────
 // Annotation parsing

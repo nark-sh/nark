@@ -16,7 +16,7 @@ import type { PackageContract } from '../../types.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const CORPUS_PATH = path.join(__dirname, '../../../../corpus');
+const CORPUS_PATH = path.join(__dirname, '../../../../nark-corpus');
 const PROJECT_ROOT = path.join(__dirname, '../../../..');
 
 // ────────────────────────────────────────────────────────

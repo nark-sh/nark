@@ -39,7 +39,7 @@ const __dirname = path.dirname(__filename);
 
 const GROUND_TRUTH_PATH = path.resolve(
   __dirname,
-  '../../../../corpus/packages/@vercel/blob/fixtures/ground-truth.ts'
+  '../../../../nark-corpus/packages/@vercel/blob/fixtures/ground-truth.ts'
 );
 
 // Parse annotations synchronously at module load (before beforeAll runs)

@@ -36,7 +36,7 @@ const __dirname = path.dirname(__filename);
 
 const GROUND_TRUTH_PATH = path.resolve(
   __dirname,
-  '../../../../corpus/packages/@aws-sdk/client-sesv2/fixtures/ground-truth.ts'
+  '../../../../nark-corpus/packages/@aws-sdk/client-sesv2/fixtures/ground-truth.ts'
 );
 
 const ANNOTATIONS: Annotation[] = parseAnnotations(GROUND_TRUTH_PATH);

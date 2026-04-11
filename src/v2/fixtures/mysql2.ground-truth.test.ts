@@ -32,7 +32,7 @@ const __dirname = path.dirname(__filename);
 
 const GROUND_TRUTH_PATH = path.resolve(
   __dirname,
-  '../../../../corpus/packages/mysql2/fixtures/ground-truth.ts'
+  '../../../../nark-corpus/packages/mysql2/fixtures/ground-truth.ts'
 );
 
 const ANNOTATIONS: Annotation[] = parseAnnotations(GROUND_TRUTH_PATH);

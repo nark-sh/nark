@@ -35,7 +35,7 @@ const __dirname = path.dirname(__filename);
 
 const GROUND_TRUTH_PATH = path.resolve(
   __dirname,
-  "../../../../corpus/packages/@tanstack/react-query/fixtures/ground-truth.ts",
+  "../../../../nark-corpus/packages/@tanstack/react-query/fixtures/ground-truth.ts",
 );
 
 const ANNOTATIONS: Annotation[] = parseAnnotations(GROUND_TRUTH_PATH);
