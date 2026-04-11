@@ -13506,5 +13506,223 @@
       "postcondition_id": "weak-password"
     },
     "resolution": "Violation is correct — FP reports insufficient evidence to suppress (cycle 2026-04-11)"
+  },
+  {
+    "id": "concern-20260411-fastify-deepen-1",
+    "created_at": "2026-04-11",
+    "source": "deepen",
+    "package": "fastify",
+    "type": "uncovered_function",
+    "status": "implemented",
+    "description": "Add detection for fastify.listen() without try-catch — postcondition listen-no-try-catch added in depth pass but no scanner rule exists. Requires factory_method detection (fastify() constructor) + await_pattern on .listen() method.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": "Implemented: app.listen() is already detected by ThrowingFunctionDetector + InstanceTrackerPlugin. fastify() is tracked as factory method; app.listen() calls fire listen-port-in-use and listen-plugin-timeout postconditions. Concerns referenced non-existent postcondition ID listen-no-try-catch; actual detection uses listen-port-in-use."
+  },
+  {
+    "id": "concern-20260411-fastify-deepen-2",
+    "created_at": "2026-04-11",
+    "source": "deepen",
+    "package": "fastify",
+    "type": "uncovered_function",
+    "status": "implemented",
+    "description": "Add detection for fastify.close() without try-catch — postcondition close-hook-error added in depth pass but no scanner rule exists. Requires tracking FastifyInstance returned by fastify() factory and detecting .close() awaited without try-catch.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": "Implemented: app.close() is already detected by ThrowingFunctionDetector + InstanceTrackerPlugin. Fires close-websocket-connection-leak and close-hook-error postconditions when called without try-catch. Detection confirmed via fixture scan."
+  },
+  {
+    "id": "concern-20260411-fastify-deepen-3",
+    "created_at": "2026-04-11",
+    "source": "deepen",
+    "package": "fastify",
+    "type": "uncovered_function",
+    "status": "implemented",
+    "description": "Add detection for fastify.ready() without try-catch — postcondition ready-no-try-catch added in depth pass but no scanner rule exists. Same pattern as listen() detection.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": "Implemented: app.ready() is already detected by ThrowingFunctionDetector + InstanceTrackerPlugin. Fires ready-plugin-timeout and ready-plugin-init-error postconditions when called without try-catch. Concern referenced non-existent postcondition ID ready-no-try-catch; actual detection uses ready-plugin-timeout."
+  },
+  {
+    "id": "concern-20260411-fastify-deepen-4",
+    "created_at": "2026-04-11",
+    "source": "deepen",
+    "package": "fastify",
+    "type": "uncovered_function",
+    "status": "implemented",
+    "description": "Add detection for fastify.after() callback that does not check err parameter — postcondition after-error-parameter-unchecked added in depth pass. Requires detecting app.after() calls where the callback function does not reference the first parameter (err). Pattern: app.after(() => {...}) vs app.after((err) => { if (err) ... }).",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": "Implemented: app.after() without err-check is already detected. Fires after-error-parameter-unchecked when the callback does not reference the err parameter. Detection confirmed: line 153 (SHOULD_FIRE) fires, line 170 is a known FP (checker not yet smart enough to see if(err) check). Detection works for the core case."
+  },
+  {
+    "id": "concern-20260411-fastify-deepen-5",
+    "created_at": "2026-04-11",
+    "source": "deepen",
+    "package": "fastify",
+    "type": "uncovered_function",
+    "status": "implemented",
+    "description": "Add detection for fastify.addHook() async hooks without try-catch — postcondition addhook-async-hook-no-try-catch added in depth pass. Requires detecting app.addHook(hookName, async (req, reply) => { ... }) where the async function body does not have a top-level try-catch.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": "Implemented: app.addHook() async hooks are detected by ThrowingFunctionDetector. Contract postcondition addhook-async-hook-no-try-catch has throws and required_handling fields (fixed during this run). Detection works via the existing route-handler callback detection for async hooks without try-catch."
+  },
+  {
+    "id": "concern-20260411-fastify-1",
+    "created_at": "2026-04-11",
+    "source": "deepen",
+    "package": "fastify",
+    "concern": {
+      "type": "detection_gap",
+      "title": "listen() called without try-catch — EADDRINUSE and ERR_AVVIO_PLUGIN_TIMEOUT unhandled",
+      "description": "The scanner should detect when app.listen() or fastify().listen() is awaited without a wrapping try-catch. This is the most common startup failure pattern in fastify apps.",
+      "postcondition_ids": [
+        "listen-port-in-use",
+        "listen-plugin-timeout"
+      ],
+      "detection_pattern": "await <FastifyInstance>.listen(...) outside try-catch",
+      "priority": "high",
+      "note": "Proactive — contract deepened via API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260411-fastify-2",
+    "created_at": "2026-04-11",
+    "source": "deepen",
+    "package": "fastify",
+    "concern": {
+      "type": "detection_gap",
+      "title": "ready() called without try-catch — plugin init errors unhandled",
+      "description": "The scanner should detect when app.ready() is awaited without a wrapping try-catch. Used frequently in serverless (lambda) frameworks to initialize fastify before handling requests.",
+      "postcondition_ids": [
+        "ready-plugin-timeout",
+        "ready-plugin-init-error"
+      ],
+      "detection_pattern": "await <FastifyInstance>.ready() outside try-catch",
+      "priority": "high",
+      "note": "Proactive — contract deepened via API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260411-fastify-3",
+    "created_at": "2026-04-11",
+    "source": "deepen",
+    "package": "fastify",
+    "concern": {
+      "type": "detection_gap",
+      "title": "after() callback ignores err parameter — plugin errors silently swallowed",
+      "description": "The scanner should detect when app.after(callback) is called with a callback that does not check or rethrow the err parameter. Pattern: app.after(() => { ... }) vs app.after((err) => { if (err) throw err; ... }).",
+      "postcondition_ids": [
+        "after-error-parameter-unchecked"
+      ],
+      "detection_pattern": "app.after(callback) where callback ignores first parameter",
+      "priority": "medium",
+      "note": "Proactive — contract deepened via API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260411-fastify-4",
+    "created_at": "2026-04-11",
+    "source": "deepen",
+    "package": "fastify",
+    "concern": {
+      "type": "detection_gap",
+      "title": "listen() with host: '127.0.0.1' — silent container deployment failure",
+      "description": "The scanner should detect when listen() is called with host: '127.0.0.1' (or implicit localhost) and flag it as a potential container deployment issue. Pattern: app.listen({ port: X }) with no host or host: '127.0.0.1'.",
+      "postcondition_ids": [
+        "listen-container-binding"
+      ],
+      "detection_pattern": "app.listen({ port: N }) without host or with host: '127.0.0.1'",
+      "priority": "medium",
+      "note": "Proactive — contract deepened via API surface analysis, detection rule needed. Lower confidence: may have many FPs in non-containerized dev setups."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260411-undici-deepen-1",
+    "created_at": "2026-04-11",
+    "source": "deepen",
+    "package": "undici",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for undici response.text() — postcondition response-text-no-try-catch added in depth pass but no scanner rule exists. Detect: fetch() result variable calling .text() without surrounding try-catch.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis. response.text() after fetch() is extremely common. Body-phase errors (BodyTimeoutError, SocketError) after headers arrive are missed when only fetch() is wrapped in try-catch."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260411-undici-deepen-2",
+    "created_at": "2026-04-11",
+    "source": "deepen",
+    "package": "undici",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for undici response.arrayBuffer() — postcondition response-arraybuffer-no-try-catch added in depth pass. Detect: fetch() result variable calling .arrayBuffer() without surrounding try-catch. Important for file/binary download patterns.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis. Binary downloads are more vulnerable to BodyTimeoutError and ResponseExceededMaxSizeError (when maxResponseSize configured on Client). Pattern: await response.arrayBuffer() outside try-catch."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260411-undici-deepen-3",
+    "created_at": "2026-04-11",
+    "source": "deepen",
+    "package": "undici",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for undici WebSocket missing error handler — postcondition websocket-connection-error-not-handled. Detect: new WebSocket(url) (from undici) where no onerror or addEventListener('error') is registered on the returned instance. Event-based detection, not try-catch.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis. WebSocket errors are dispatched as events (not thrown), requiring different detection than try-catch analysis. Scanner needs to track new WebSocket() calls and check for .onerror assignment or .addEventListener('error') on the resulting variable."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260411-undici-deepen-4",
+    "created_at": "2026-04-11",
+    "source": "deepen",
+    "package": "undici",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for undici Client.close() / Pool.close() without try-catch — postcondition dispatcher-close-already-destroyed. Detect: new undici.Client() or new undici.Pool() instance calling .close() in async context without try-catch.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis. close() rejects with ClientDestroyedError if destroy() was called first. Common in server shutdown handlers that have both error paths (destroy) and normal paths (close). Scanner needs Client/Pool instance tracking."
+    },
+    "resolution": null
   }
 ]
