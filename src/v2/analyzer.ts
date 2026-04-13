@@ -103,6 +103,15 @@ export class UniversalAnalyzer {
   }
 
   /**
+   * Returns the total number of source files in the TypeScript program,
+   * including those filtered out during analysis (for skipped file count diagnostics).
+   */
+  public getTotalSourceFileCount(): number {
+    if (!this.program) return 0;
+    return this.program.getSourceFiles().length;
+  }
+
+  /**
    * Analyze all source files in the project
    */
   public analyze(): ProjectAnalysisResult {

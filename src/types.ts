@@ -278,6 +278,7 @@ export interface CorpusLoadResult {
   contracts: Map<string, PackageContract>;
   errors: string[];
   skipped?: Array<{ package: string; status: string; reason: string }>;
+  contractFiles?: Map<string, string[]>; // packageName -> absolute file paths loaded
 }
 
 /**

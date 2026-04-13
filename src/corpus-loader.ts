@@ -28,6 +28,7 @@ export async function loadCorpus(
   const contracts = new Map<string, PackageContract>();
   const errors: string[] = [];
   const skipped: { package: string; status: string; reason: string }[] = [];
+  const contractFileMap = new Map<string, string[]>();
 
   // Find all contract.yaml files
   const contractFiles = await glob('**/contract.yaml', {
@@ -134,12 +135,14 @@ export async function loadCorpus(
       }
 
       contracts.set(contract.package, contract);
+      if (!contractFileMap.has(contract.package)) contractFileMap.set(contract.package, []);
+      contractFileMap.get(contract.package)!.push(filePath);
     } catch (err) {
       errors.push(`Failed to load contract ${filePath}: ${err}`);
     }
   }
 
-  return { contracts, errors, skipped };
+  return { contracts, errors, skipped, contractFiles: contractFileMap };
 }
 
 /**

@@ -24,6 +24,8 @@ export interface V2AdapterResult {
   suppressedViolations: V1Violation[];
   filesAnalyzed: number;
   detectionCount: number;
+  fileDurations: { file: string; durationMs: number }[];   // all analyzed files with timing
+  skippedFiles: { reason: string; count: number }[];        // skip reasons with counts
 }
 
 /**
@@ -89,8 +91,12 @@ export async function runV2Analyzer(
   const suppressedViolations: V1Violation[] = [];
   let totalDetections = 0;
 
+  // Collect per-file timing diagnostics
+  const fileDurations: { file: string; durationMs: number }[] = [];
+
   for (const fileResult of result.files) {
     totalDetections += fileResult.detections.length;
+    fileDurations.push({ file: fileResult.file, durationMs: fileResult.duration });
 
     for (const v2Viol of fileResult.violations) {
       const v1Viol = convertViolation(v2Viol, contracts);
@@ -103,11 +109,21 @@ export async function runV2Analyzer(
     }
   }
 
+  // Approximate skipped file count: total program source files minus files analyzed
+  // (declaration files, node_modules, test files filtered by UniversalAnalyzer.analyze())
+  const skippedFiles: { reason: string; count: number }[] = [];
+  const skippedCount = analyzer.getTotalSourceFileCount() - result.filesAnalyzed;
+  if (skippedCount > 0) {
+    skippedFiles.push({ reason: 'declaration/test/node_modules files', count: skippedCount });
+  }
+
   return {
     violations: activeViolations,
     suppressedViolations,
     filesAnalyzed: result.filesAnalyzed,
     detectionCount: totalDetections,
+    fileDurations,
+    skippedFiles,
   };
 }
 
