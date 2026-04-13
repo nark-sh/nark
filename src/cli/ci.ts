@@ -30,6 +30,8 @@ import {
   findLatestScan,
 } from '../output/scan-writer.js';
 import { computeViolationFingerprint } from '../suppressions/fingerprint.js';
+import { readTelemetryConfig } from './telemetry.js';
+import { getToken } from '../lib/auth.js';
 import type { AnalyzerConfig, Violation } from '../types.js';
 
 // ---------------------------------------------------------------------------
@@ -158,6 +160,44 @@ function printViolation(v: Violation): void {
 }
 
 // ---------------------------------------------------------------------------
+// Lifecycle event telemetry
+// ---------------------------------------------------------------------------
+
+interface LifecycleEvent {
+  type: 'introduced' | 'resolved';
+  fingerprint: string;
+  contractId: string;
+  packageName: string;
+  commitHash: string;
+}
+
+/**
+ * Fire lifecycle events (introduced / resolved) to the nark.sh analytics endpoint.
+ * Fire-and-forget — never throws, never blocks the caller.
+ * Requires telemetry enabled AND user logged in (events must be attributed to an org).
+ */
+function fireLifecycleEvents(events: LifecycleEvent[]): void {
+  if (events.length === 0) return;
+  const config = readTelemetryConfig();
+  if (!config.enabled) return;
+  const token = getToken();
+  if (!token) return; // lifecycle events require auth for org attribution
+  try {
+    fetch('https://nark.sh/api/telemetry/lifecycle', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + token,
+      },
+      body: JSON.stringify({ events }),
+      signal: AbortSignal.timeout(2000),
+    }).catch(() => {});
+  } catch {
+    // fire-and-forget — never affect the scan
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Command factory
 // ---------------------------------------------------------------------------
 
@@ -280,6 +320,39 @@ async function runCi(options: {
 
   const newViolations = violations.filter((v: any) => !baselineFingerprints.has(v.fingerprint));
   const preExistingCount = violations.length - newViolations.length;
+
+  // 12b. Compute resolved violations and fire lifecycle events
+  const currentFingerprints = new Set<string>(
+    violations
+      .map((v: any) => v.fingerprint as string | undefined)
+      .filter((fp): fp is string => !!fp)
+  );
+
+  const resolvedViolations = (baselineRecord?.violations ?? []).filter(
+    (v: any) => {
+      const fp = v.fingerprint as string | undefined;
+      return fp && !currentFingerprints.has(fp);
+    }
+  );
+
+  const lifecycleEvents: LifecycleEvent[] = [
+    ...newViolations.map((v: any): LifecycleEvent => ({
+      type: 'introduced',
+      fingerprint: v.fingerprint as string,
+      contractId: (v.contract_clause || v.id) as string,
+      packageName: v.package as string,
+      commitHash: currentCommit,
+    })),
+    ...resolvedViolations.map((v: any): LifecycleEvent => ({
+      type: 'resolved',
+      fingerprint: v.fingerprint as string,
+      contractId: (v.contract_clause || v.id) as string,
+      packageName: v.package as string,
+      commitHash: currentCommit,
+    })),
+  ];
+
+  fireLifecycleEvents(lifecycleEvents);
 
   // 13. Print header
   console.log(chalk.bold('\nnark ci — diff-aware scan\n'));
