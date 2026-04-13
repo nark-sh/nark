@@ -160,6 +160,137 @@ async function writeViolationFiles(
 }
 
 /**
+ * A scan record keyed by git commit hash, used by `nark ci` to persist and
+ * compare scans across commits.
+ */
+export interface CommitScanRecord {
+  gitCommit: string;           // full 40-char commit hash (or '' if unknown)
+  timestamp: string;
+  nark_version: string;
+  tsconfig: string;
+  violations: Violation[];     // violations with fingerprint already set
+}
+
+/**
+ * Write a commit-keyed scan JSON to `.nark/scans/<gitCommit>.json`.
+ * Used by `nark ci` to persist the current scan for future baseline reuse.
+ *
+ * Returns the written file path, or null on error.
+ */
+export function writeCommitScan(
+  narkDir: string,
+  gitCommit: string,
+  violations: Violation[],
+  tsconfigPath: string,
+  narkVersion: string = '0.1.0'
+): string | null {
+  try {
+    const scansDir = path.join(narkDir, 'scans');
+    fs.mkdirSync(scansDir, { recursive: true });
+
+    const record: CommitScanRecord = {
+      gitCommit,
+      timestamp: new Date().toISOString(),
+      nark_version: narkVersion,
+      tsconfig: tsconfigPath,
+      violations,
+    };
+
+    const filePath = path.join(scansDir, `${gitCommit}.json`);
+    fs.writeFileSync(filePath, JSON.stringify(record, null, 2), 'utf-8');
+    return filePath;
+  } catch (err) {
+    console.warn(`Warning: Could not write commit scan to .nark/scans/: ${err}`);
+    return null;
+  }
+}
+
+/**
+ * Load a commit-keyed scan from `.nark/scans/<gitCommit>.json`.
+ * Returns null if not found or on parse error.
+ */
+export function loadCommitScan(narkDir: string, gitCommit: string): CommitScanRecord | null {
+  try {
+    const filePath = path.join(narkDir, 'scans', `${gitCommit}.json`);
+    if (!fs.existsSync(filePath)) return null;
+    const raw = fs.readFileSync(filePath, 'utf-8');
+    return JSON.parse(raw) as CommitScanRecord;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Find the latest available scan from .nark/scans/.
+ *
+ * Preference order:
+ *   1. Follow the 'latest' symlink if it exists and is a CommitScanRecord
+ *   2. Walk numeric scan files (001.json, 002.json…) descending and wrap as CommitScanRecord
+ *
+ * Returns null if no scans exist.
+ */
+export function findLatestScan(narkDir: string): CommitScanRecord | null {
+  const scansDir = path.join(narkDir, 'scans');
+  if (!fs.existsSync(scansDir)) return null;
+
+  // Try the 'latest' symlink first
+  const latestLink = path.join(scansDir, 'latest');
+  if (fs.existsSync(latestLink)) {
+    try {
+      const raw = fs.readFileSync(latestLink, 'utf-8');
+      const parsed = JSON.parse(raw);
+      // Could be a CommitScanRecord or a ScanRecord
+      if (parsed.violations) {
+        if (parsed.gitCommit !== undefined) {
+          return parsed as CommitScanRecord;
+        }
+        // It's a ScanRecord — wrap it
+        return {
+          gitCommit: '',
+          timestamp: parsed.timestamp ?? '',
+          nark_version: parsed.nark_version ?? '0.1.0',
+          tsconfig: parsed.tsconfig ?? '',
+          violations: parsed.violations ?? [],
+        };
+      }
+    } catch {
+      // Fall through to numeric scan files
+    }
+  }
+
+  // Walk numeric scan files descending
+  try {
+    const entries = fs.readdirSync(scansDir);
+    const numericFiles = entries
+      .filter(f => /^\d{3}\.json$/.test(f))
+      .sort()
+      .reverse(); // descending — highest number first
+
+    for (const filename of numericFiles) {
+      try {
+        const raw = fs.readFileSync(path.join(scansDir, filename), 'utf-8');
+        const parsed = JSON.parse(raw) as ScanRecord;
+        if (parsed.violations) {
+          return {
+            gitCommit: '',
+            timestamp: parsed.timestamp ?? '',
+            nark_version: parsed.nark_version ?? '0.1.0',
+            tsconfig: parsed.tsconfig ?? '',
+            violations: parsed.violations ?? [],
+          };
+        }
+      } catch {
+        continue;
+      }
+    }
+  } catch {
+    // readdirSync failed
+  }
+
+  return null;
+}
+
+/**
  * Write scan results to .nark/ directory.
  * Returns paths so the CLI can print them to the user.
  * Never throws — wraps all I/O in try/catch and warns on failure.
