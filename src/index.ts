@@ -39,6 +39,7 @@ import { createTriageCommand } from './cli/triage.js';
 import { createCompactCommand } from './cli/compact.js';
 import { createShowCommand } from './cli/show.js';
 import { createTelemetryCommand, handleFirstRunNotice, fireTelemetryEvent } from './cli/telemetry.js';
+import { createAuthCommand } from './cli/auth.js';
 import { generateAIPrompt } from './ai-prompt-generator.js';
 import { loadStore, removeStaleSuppressions, saveStore } from './suppressions/bc-scan-store.js';
 import { writeScanResults } from './output/index.js';
@@ -80,6 +81,7 @@ program.addCommand(createTriageCommand());
 program.addCommand(createCompactCommand());
 program.addCommand(createShowCommand());
 program.addCommand(createTelemetryCommand());
+program.addCommand(createAuthCommand());
 
 program
   .option('--tsconfig <path>', 'Path to tsconfig.json or project directory', _narkRc?.tsconfig ?? './tsconfig.json')
