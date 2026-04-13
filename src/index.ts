@@ -40,6 +40,7 @@ import { createCompactCommand } from './cli/compact.js';
 import { generateAIPrompt } from './ai-prompt-generator.js';
 import { loadStore, removeStaleSuppressions, saveStore } from './suppressions/bc-scan-store.js';
 import { writeScanResults } from './output/index.js';
+import { writeSarifOutput } from './output/sarif-writer.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -79,6 +80,8 @@ program
   .option('--use-v2-analyzer', 'Deprecated no-op: v2 is now the default', false)
   .option('--compare-analyzers', 'Run both v1 and v2 analyzers and show diff (for validation)', false)
   .option('--instructions-path', 'Print the path to FORAIAGENTS.md and exit', false)
+  .option('--sarif', 'Output results in SARIF 2.1.0 format (stdout)')
+  .option('--sarif-output <path>', 'Write SARIF 2.1.0 output to file')
   .action(async (options) => {
     // This action handler is called when the main command is invoked
     // (i.e., not a subcommand like 'suppressions')
@@ -552,6 +555,11 @@ async function main(options: any) {
     console.log(chalk.gray(`\nScan results saved to ${narkResult.scanPath}`));
     console.log(chalk.gray(`Violation details: ${path.join(narkResult.narkDir, 'violations')}/`));
     console.log(chalk.gray(`For AI agent instructions: nark --instructions-path`));
+  }
+
+  // SARIF output (--sarif or --sarif-output)
+  if (options.sarif || options.sarifOutput) {
+    writeSarifOutput(violations, options.sarifOutput);
   }
 
   // Final summary at the very end (easy to spot after all output)
