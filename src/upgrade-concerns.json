@@ -16210,5 +16210,825 @@
       "note": "Proactive — contract added via API surface analysis. Key error: storage/no-download-token — files uploaded via @google-cloud/storage SDK have no tokens by default. Confirmed from lib/storage/index.js lines 64-76."
     },
     "resolution": null
+  },
+  {
+    "id": "concern-20260413-socket.io-deepen-1",
+    "created_at": "2026-04-13",
+    "source": "deepen",
+    "package": "socket.io",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for socket.emitWithAck() — postcondition added: no timeout() chained causes permanent Promise hang (memory leak). Detect await socket.emitWithAck() without preceding .timeout() call.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis (deepen-stream-1 pass 13). Source-confirmed error: socket.js registerAckCallback creates uncleared timer when no timeout set."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260413-socket.io-deepen-2",
+    "created_at": "2026-04-13",
+    "source": "deepen",
+    "package": "socket.io",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for socket.timeout(ms).emitWithAck() — postcondition added: emitWithAck with timeout set but no try-catch; throws Error(\"operation has timed out\") on timeout.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — deepen-stream-1 pass 13. Error confirmed in socket.js: new Error(\"operation has timed out\")."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260413-socket.io-deepen-3",
+    "created_at": "2026-04-13",
+    "source": "deepen",
+    "package": "socket.io",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for await socket.join() — postcondition added: with distributed adapters (Redis/Mongo) join() is async and can reject. Detect await socket.join() without try-catch.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — deepen-stream-1 pass 13. Source-confirmed: socket.js join() delegates to this.adapter.addAll() which returns Promise with distributed adapters."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260413-socket.io-deepen-4",
+    "created_at": "2026-04-13",
+    "source": "deepen",
+    "package": "socket.io",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for await io.fetchSockets() — postcondition added: adapter failures in clustered deployments reject the Promise. Detect fetchSockets() without try-catch.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — deepen-stream-1 pass 13. Source-confirmed: broadcast-operator.js fetchSockets() calls this.adapter.fetchSockets() which can reject with adapter errors."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260413-socket.io-deepen-5",
+    "created_at": "2026-04-13",
+    "source": "deepen",
+    "package": "socket.io",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for io.use() async middleware without try-catch — postcondition added: async middleware that throws causes unhandled rejection and connection hang. Detect async io.use() handler without try-catch.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — deepen-stream-1 pass 13. Docs confirmed: https://socket.io/docs/v4/middlewares/ — async middleware MUST catch and call next(err)."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260413-socket.io-deepen-6",
+    "created_at": "2026-04-13",
+    "source": "deepen",
+    "package": "socket.io",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for io.use() middleware missing next() call — postcondition added: middleware that returns without calling next() leaves connection hanging until timeout. Detect return paths in io.use() that do not call next().",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — deepen-stream-1 pass 13. Docs confirmed: https://socket.io/docs/v4/middlewares/ — must call next() in all code paths."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260413-socket.io-deepen-7",
+    "created_at": "2026-04-13",
+    "source": "deepen",
+    "package": "socket.io",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for await io.serverSideEmitWithAck() — postcondition added: Promise rejects with error containing .responses on timeout. Detect serverSideEmitWithAck() without try-catch.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — deepen-stream-1 pass 13. Source-confirmed: namespace.js serverSideEmitWithAck() wraps in Promise that rejects via callback(err)."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260413-tanstack-react-router-deepen-1",
+    "created_at": "2026-04-13",
+    "source": "deepen",
+    "package": "@tanstack/react-router",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @tanstack/react-router useBlocker() — postcondition blocker-shouldblock-fn-uncaught-rejection added in depth pass. shouldBlockFn async rejections propagate uncaught. Scanner needs to detect async shouldBlockFn without try-catch.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260413-tanstack-react-router-deepen-2",
+    "created_at": "2026-04-13",
+    "source": "deepen",
+    "package": "@tanstack/react-router",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @tanstack/react-router useAwaited() / Await — postconditions awaited-deferred-rejection-no-error-boundary and awaited-missing-suspense-boundary added. Scanner needs to detect useAwaited calls not wrapped in error boundary or Suspense.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260413-tanstack-react-router-deepen-3",
+    "created_at": "2026-04-13",
+    "source": "deepen",
+    "package": "@tanstack/react-router",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @tanstack/react-router lazyRouteComponent() — postconditions lazy-route-component-import-failure and lazy-route-component-chunk-hash-mismatch-loop added. Scanner needs to detect lazyRouteComponent() usage on routes missing errorComponent.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260413-tanstack-react-router-deepen-4",
+    "created_at": "2026-04-13",
+    "source": "deepen",
+    "package": "@tanstack/react-router",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @tanstack/react-router useLoaderDeps() — postcondition loader-deps-route-mismatch-strict added. Scanner needs to detect useLoaderDeps without strict: false in shared/cross-route components.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260413-tanstack-react-router-deepen-5",
+    "created_at": "2026-04-13",
+    "source": "deepen",
+    "package": "@tanstack/react-router",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @tanstack/react-router RouterProvider — postconditions router-provider-loader-initialization-error and router-provider-missing-context added. Scanner needs to detect RouterProvider usage without root errorComponent or top-level ErrorBoundary.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260413-dashboard-fp-1",
+    "created_at": "2026-04-13",
+    "source": "dashboard-feedback",
+    "package": "@tanstack/react-router",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "invalid-route-path postcondition fires on valid dynamic route usages — 94 FP instances across multiple repos using parametric route paths like $invoiceId, $workflowId",
+    "evidence": {
+      "repos": [
+        "src/routes/_authenticated/invoice/$invoiceId.tsx",
+        "src/routes/_authenticated/workflow-builder/$workflowId.tsx",
+        "src/features/browser-agents/browser-agent-detail.tsx",
+        "src/components/command-menu.tsx",
+        "src/features/auth/sign-in/components/user-auth-form.tsx"
+      ],
+      "scan_file": null,
+      "violation_count": 94,
+      "fp_reason": "",
+      "fix_target": "contract",
+      "postcondition_id": "invalid-route-path"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260413-dashboard-fp-2",
+    "created_at": "2026-04-13",
+    "source": "dashboard-feedback",
+    "package": "undici",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "response-json-parse-error postcondition fires on Next.js fetch calls — undici is the underlying engine for native fetch in Next.js, not a direct import; scanner does not distinguish direct undici usage from native fetch",
+    "evidence": {
+      "repos": [
+        "apps/web/app/api/github/debug/route.ts",
+        "apps/web/app/api/oss-scan/route.ts",
+        "apps/web/components/violations/queue-fix-button.tsx",
+        "apps/web/components/repositories/scan-button.tsx",
+        "apps/web/hooks/use-scan-poller.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 64,
+      "fp_reason": "",
+      "fix_target": "scanner",
+      "postcondition_id": "response-json-parse-error"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260413-dashboard-fp-3",
+    "created_at": "2026-04-13",
+    "source": "dashboard-feedback",
+    "package": "react-hook-form",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "async-submit-unhandled-error postcondition fires on handleSubmit() calls — react-hook-form handleSubmit() internally catches all errors from the submit function; the calling pattern is always safe",
+    "evidence": {
+      "repos": [
+        "src/features/auth/sign-in/components/user-auth-form.tsx",
+        "src/features/auth/sign-up/components/sign-up-form.tsx",
+        "src/features/auth/reset-password/components/reset-password-form.tsx",
+        "src/components/create-organization-modal.tsx",
+        "src/features/settings/profile/profile-form.tsx"
+      ],
+      "scan_file": null,
+      "violation_count": 60,
+      "fp_reason": "",
+      "fix_target": "contract",
+      "postcondition_id": "async-submit-unhandled-error"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260413-dashboard-fp-4",
+    "created_at": "2026-04-13",
+    "source": "dashboard-feedback",
+    "package": "ai",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "tool-execution-error postcondition fires on tool definition objects that have their own error handling or are execute callbacks — scanner does not recognize that these are tool definitions, not direct AI SDK calls",
+    "evidence": {
+      "repos": [
+        "lib/tools/browser/browserAct.ts",
+        "lib/tools/files/readFile.ts",
+        "lib/tools/files/writeFile.ts",
+        "lib/tools/searchTwitter.ts",
+        "lib/tools/searchWeb/getWebDeepResearchTool.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 25,
+      "fp_reason": "",
+      "fix_target": "scanner",
+      "postcondition_id": "tool-execution-error"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260413-dashboard-fp-5",
+    "created_at": "2026-04-13",
+    "source": "dashboard-feedback",
+    "package": "@tanstack/react-query",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "query-error-unhandled postcondition fires even when error is handled via onError callback, error boundary, or isError check — scanner does not trace error handling to React Query error patterns",
+    "evidence": {
+      "repos": [
+        "hooks/useAccountOrganizations.ts",
+        "hooks/useArtistSegments.ts",
+        "hooks/useCatalogs.ts",
+        "components/Agents/AgentCreator.tsx",
+        "app/access/page.tsx"
+      ],
+      "scan_file": null,
+      "violation_count": 25,
+      "fp_reason": "",
+      "fix_target": "scanner",
+      "postcondition_id": "query-error-unhandled"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260413-dashboard-fp-6",
+    "created_at": "2026-04-13",
+    "source": "dashboard-feedback",
+    "package": "@tanstack/react-router",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "param-type-mismatch postcondition fires on valid route parameter usages with dynamic IDs — postcondition condition too broad for string-typed dynamic parameters",
+    "evidence": {
+      "repos": [
+        "src/routes/_authenticated/workflow-builder/$workflowId.tsx",
+        "src/features/browser-agents/browser-agent-detail.tsx",
+        "src/features/customers/customer-detail.tsx",
+        "src/routes/unsubscribe/$token.tsx",
+        "src/features/invoices/invoice-detail.tsx"
+      ],
+      "scan_file": null,
+      "violation_count": 18,
+      "fp_reason": "",
+      "fix_target": "contract",
+      "postcondition_id": "param-type-mismatch"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260413-dashboard-fp-7",
+    "created_at": "2026-04-13",
+    "source": "dashboard-feedback",
+    "package": "@tanstack/react-router",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "search-schema-validation-error postcondition fires on routes that use zod for search param validation — the validation schema is present and correct, postcondition too broad",
+    "evidence": {
+      "repos": [
+        "src/features/auth/sign-in/index.tsx",
+        "src/features/auth/sign-up/index.tsx",
+        "src/routes/(auth)/accept-invite.tsx",
+        "src/features/chats/index.tsx",
+        "src/features/apps/index.tsx"
+      ],
+      "scan_file": null,
+      "violation_count": 14,
+      "fp_reason": "",
+      "fix_target": "contract",
+      "postcondition_id": "search-schema-validation-error"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260413-dashboard-fp-8",
+    "created_at": "2026-04-13",
+    "source": "dashboard-feedback",
+    "package": "zod",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "parse-validation-error postcondition fires in Next.js API route handlers where ZodError is caught at the framework/middleware level — scanner does not recognize that framework-level error handling satisfies postcondition",
+    "evidence": {
+      "repos": [
+        "apps/web/app/api/ai/analyze-sender-pattern/route.ts",
+        "apps/web/app/api/clean/route.ts",
+        "apps/web/app/api/google/contacts/route.ts",
+        "apps/web/app/api/threads/[id]/route.ts",
+        "apps/web/app/api/sso/signin/route.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 14,
+      "fp_reason": "",
+      "fix_target": "scanner",
+      "postcondition_id": "parse-validation-error"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260413-dashboard-fp-9",
+    "created_at": "2026-04-13",
+    "source": "dashboard-feedback",
+    "package": "react-hook-form",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "missing-form-provider postcondition fires on components always used inside a Form wrapper — scanner does not trace component render context to verify FormProvider is an ancestor",
+    "evidence": {
+      "repos": [
+        "components/Account/ArtistInstructionTextArea.tsx",
+        "components/Input.tsx",
+        "src/components/ui/form.tsx"
+      ],
+      "scan_file": null,
+      "violation_count": 9,
+      "fp_reason": "",
+      "fix_target": "scanner",
+      "postcondition_id": "missing-form-provider"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260413-dashboard-fp-10",
+    "created_at": "2026-04-13",
+    "source": "dashboard-feedback",
+    "package": "redis",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "missing-error-listener postcondition fires even when .on(\"error\") listener is registered — scanner may not detect .on(\"error\") registration on redis client instance",
+    "evidence": {
+      "repos": [
+        "packages/api/src/main.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 7,
+      "fp_reason": "",
+      "fix_target": "scanner",
+      "postcondition_id": "missing-error-listener"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260413-dashboard-fp-11",
+    "created_at": "2026-04-13",
+    "source": "dashboard-feedback",
+    "package": "@clerk/nextjs",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "use-user-no-loaded-check postcondition fires in server components where isLoaded check is not applicable — contract should not apply to server-side component contexts",
+    "evidence": {
+      "repos": [
+        "apps/web/app/(auth)/invite/[token]/page.tsx",
+        "apps/web/app/(dashboard)/onboarding/onboarding-form.tsx",
+        "apps/web/components/layout/header.tsx",
+        "apps/web/components/layout/sidebar.tsx",
+        "apps/web/components/providers/analytics-provider.tsx"
+      ],
+      "scan_file": null,
+      "violation_count": 7,
+      "fp_reason": "",
+      "fix_target": "contract",
+      "postcondition_id": "use-user-no-loaded-check"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260413-dashboard-fp-12",
+    "created_at": "2026-04-13",
+    "source": "dashboard-feedback",
+    "package": "ai",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "api-error-rate-limit postcondition fires inside try-catch blocks — scanner does not detect try-catch wrapping for rate limit error pattern",
+    "evidence": {
+      "repos": [
+        "apps/web/utils/llms/index.ts",
+        "lib/ai/generateArray.ts",
+        "lib/catalog/analyzeCatalogBatch.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 7,
+      "fp_reason": "",
+      "fix_target": "scanner",
+      "postcondition_id": "api-error-rate-limit"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260413-dashboard-fp-13",
+    "created_at": "2026-04-13",
+    "source": "dashboard-feedback",
+    "package": "express",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "async-middleware-unhandled-rejection postcondition fires on dev/browser-agent servers where express error handler may not be the right pattern — contract should not apply to non-production server scripts",
+    "evidence": {
+      "repos": [
+        "api/browser-agent-server.ts",
+        "api/dev-server.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 5,
+      "fp_reason": "",
+      "fix_target": "contract",
+      "postcondition_id": "async-middleware-unhandled-rejection"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260413-dashboard-fp-14",
+    "created_at": "2026-04-13",
+    "source": "dashboard-feedback",
+    "package": "@tanstack/react-query",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "infinite-query-error-unhandled postcondition fires when error is handled in component render — scanner does not recognize component-level error handling for infinite queries",
+    "evidence": {
+      "repos": [
+        "hooks/useArtistFans.ts",
+        "hooks/useArtistPosts.ts",
+        "hooks/useCatalogSongs.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 3,
+      "fp_reason": "",
+      "fix_target": "scanner",
+      "postcondition_id": "infinite-query-error-unhandled"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260413-dashboard-fp-15",
+    "created_at": "2026-04-13",
+    "source": "dashboard-feedback",
+    "package": "@clerk/nextjs",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "use-clerk-outside-provider postcondition fires on layout components that are always inside ClerkProvider in the component tree — scanner does not trace provider ancestor context",
+    "evidence": {
+      "repos": [
+        "apps/web/components/layout/header.tsx",
+        "apps/web/components/layout/sidebar.tsx",
+        "apps/web/components/layout/top-nav.tsx"
+      ],
+      "scan_file": null,
+      "violation_count": 3,
+      "fp_reason": "",
+      "fix_target": "scanner",
+      "postcondition_id": "use-clerk-outside-provider"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260413-dashboard-fp-16",
+    "created_at": "2026-04-13",
+    "source": "dashboard-feedback",
+    "package": "stripe",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "rate-limit-error postcondition fires inside try-catch block in lib/stripe.ts — scanner does not detect try-catch wrapping for this stripe error pattern",
+    "evidence": {
+      "repos": [
+        "apps/web/lib/stripe.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 3,
+      "fp_reason": "",
+      "fix_target": "scanner",
+      "postcondition_id": "rate-limit-error"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260413-dashboard-fp-17",
+    "created_at": "2026-04-13",
+    "source": "dashboard-feedback",
+    "package": "dotenv",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "missing-env-file postcondition fires in migration scripts where missing .env file is an acceptable/expected condition — contract should not apply to migration or dev tooling scripts",
+    "evidence": {
+      "repos": [
+        "src/lib/migrations/supabase.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 3,
+      "fp_reason": "",
+      "fix_target": "contract",
+      "postcondition_id": "missing-env-file"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260413-dashboard-fp-18",
+    "created_at": "2026-04-13",
+    "source": "dashboard-feedback",
+    "package": "node-fetch",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "fetch-rejects-on-network-error postcondition fires on fetch calls wrapped in error-handling utilities — scanner does not detect error handling in wrapper functions",
+    "evidence": {
+      "repos": [
+        "api/analysis/post-game-analysis.ts",
+        "api/utils/ai-client.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 2,
+      "fp_reason": "",
+      "fix_target": "scanner",
+      "postcondition_id": "fetch-rejects-on-network-error"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260413-dashboard-fp-19",
+    "created_at": "2026-04-13",
+    "source": "dashboard-feedback",
+    "package": "react-hook-form",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "unhandled-field-array-operations postcondition fires on field array usage within Form context — scanner does not recognize that field array operations within handleSubmit are error-handled",
+    "evidence": {
+      "repos": [
+        "src/features/settings/profile/profile-form.tsx"
+      ],
+      "scan_file": null,
+      "violation_count": 2,
+      "fp_reason": "",
+      "fix_target": "scanner",
+      "postcondition_id": "unhandled-field-array-operations"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260413-dashboard-fp-20",
+    "created_at": "2026-04-13",
+    "source": "dashboard-feedback",
+    "package": "@tanstack/react-query",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "mutation-error-unhandled postcondition fires when onError handler is provided in useMutation options — scanner does not detect onError option as error handling",
+    "evidence": {
+      "repos": [
+        "hooks/useCatalogSongsFileSelect.ts",
+        "hooks/useSandboxFileContent.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 2,
+      "fp_reason": "",
+      "fix_target": "scanner",
+      "postcondition_id": "mutation-error-unhandled"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260413-dashboard-fp-21",
+    "created_at": "2026-04-13",
+    "source": "dashboard-feedback",
+    "package": "ioredis",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "missing-error-listener postcondition fires even when error handler is registered on ioredis client — scanner does not detect .on(\"error\") registration for ioredis instances",
+    "evidence": {
+      "repos": [
+        "apps/web/lib/auth-cache.ts",
+        "apps/web/lib/rate-limit.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 2,
+      "fp_reason": "",
+      "fix_target": "scanner",
+      "postcondition_id": "missing-error-listener"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260413-dashboard-fp-22",
+    "created_at": "2026-04-13",
+    "source": "dashboard-feedback",
+    "package": "@vercel/blob",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "blob-del-no-try-catch postcondition fires on del() calls wrapped in async handlers with error catching — scanner does not detect error handling in surrounding async context",
+    "evidence": {
+      "repos": [
+        "lib/sandbox/postSandboxesFilesHandler.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 2,
+      "fp_reason": "",
+      "fix_target": "scanner",
+      "postcondition_id": "blob-del-no-try-catch"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260413-dashboard-fp-23",
+    "created_at": "2026-04-13",
+    "source": "dashboard-feedback",
+    "package": "@supabase/supabase-js",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "rls-policy-violation postcondition fires in server-side context where RLS is intentionally bypassed using service role key — contract should not apply when service role is used",
+    "evidence": {
+      "repos": [
+        "packages/api/src/main.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 1,
+      "fp_reason": "",
+      "fix_target": "contract",
+      "postcondition_id": "rls-policy-violation"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260413-dashboard-fp-24",
+    "created_at": "2026-04-13",
+    "source": "dashboard-feedback",
+    "package": "ai",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "schema-validation-error postcondition fires inside try-catch block — scanner does not detect try-catch wrapping for AI SDK schema validation errors",
+    "evidence": {
+      "repos": [
+        "apps/web/utils/llms/index.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 1,
+      "fp_reason": "",
+      "fix_target": "scanner",
+      "postcondition_id": "schema-validation-error"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260413-dashboard-fp-25",
+    "created_at": "2026-04-13",
+    "source": "dashboard-feedback",
+    "package": "axios",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "error-4xx-5xx postcondition fires on a fixture file containing an inline suppression comment — scanner does not honor inline suppression directives",
+    "evidence": {
+      "repos": [
+        "packages/scanner/src/v2/fixtures/test-suppressions/with-inline-suppression.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 1,
+      "fp_reason": "",
+      "fix_target": "scanner",
+      "postcondition_id": "error-4xx-5xx"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260413-dashboard-fp-26",
+    "created_at": "2026-04-13",
+    "source": "dashboard-feedback",
+    "package": "@upstash/redis",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "network-or-api-error postcondition fires on Redis call wrapped in error-handled utility — scanner does not detect error handling in wrapper function around upstash redis client",
+    "evidence": {
+      "repos": [
+        "apps/web/utils/redis/index.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 1,
+      "fp_reason": "",
+      "fix_target": "scanner",
+      "postcondition_id": "network-or-api-error"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260413-dashboard-fp-27",
+    "created_at": "2026-04-13",
+    "source": "dashboard-feedback",
+    "package": "puppeteer",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "browser-close-must-run postcondition fires on browser usage inside try/finally — scanner may not recognize finally block as satisfying must-run postcondition",
+    "evidence": {
+      "repos": [
+        "api/browser-agent-executor.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 1,
+      "fp_reason": "",
+      "fix_target": "scanner",
+      "postcondition_id": "browser-close-must-run"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260413-dashboard-fp-28",
+    "created_at": "2026-04-13",
+    "source": "dashboard-feedback",
+    "package": "winston",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "missing-error-listener postcondition fires on winston transport even when error event is handled — scanner does not detect error listener registration on winston transport streams",
+    "evidence": {
+      "repos": [
+        "apps/web/scripts/setup-telegram-bot.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 1,
+      "fp_reason": "",
+      "fix_target": "scanner",
+      "postcondition_id": "missing-error-listener"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260413-dashboard-fp-29",
+    "created_at": "2026-04-13",
+    "source": "dashboard-feedback",
+    "package": "@supabase/supabase-js",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "weak-password postcondition fires in an auth context where password strength is validated before calling supabase — scanner does not trace pre-call validation as satisfying postcondition",
+    "evidence": {
+      "repos": [
+        "src/contexts/auth-context.tsx"
+      ],
+      "scan_file": null,
+      "violation_count": 1,
+      "fp_reason": "",
+      "fix_target": "contract",
+      "postcondition_id": "weak-password"
+    },
+    "resolution": null
   }
 ]
