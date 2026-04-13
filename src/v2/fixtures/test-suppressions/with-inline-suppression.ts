@@ -9,6 +9,7 @@ import axios from 'axios';
 
 async function fetchData() {
   // @behavioral-contract-ignore axios/network-failure: Testing suppression system
+  // @behavioral-contract-ignore axios/error-4xx-5xx: Testing suppression system
   const response = await axios.get('https://api.example.com/data');
   return response.data;
 }

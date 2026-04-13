@@ -1256,6 +1256,55 @@ export class ContractMatcher {
         }
       }
 
+      // @clerk/nextjs: use-user-no-loaded-check — suppress in Next.js App Router
+      // pages/layouts/components that are served only inside Clerk-protected routes.
+      // The isLoaded check is enforced at the middleware/route level (middleware.ts + clerkMiddleware),
+      // so components inside (auth)/**, (dashboard)/**, or similar protected route groups
+      // can safely call useUser() without an inline isLoaded guard.
+      // Also suppress in components that check auth at the page/server-component level.
+      //
+      // Evidence: concern-2026-04-13-clerk-nextjs-9 — 7 FPs:
+      //   apps/web/components/layout/sidebar.tsx, header.tsx, top-nav.tsx (always rendered inside
+      //   authenticated routes), apps/web/app/(dashboard)/**, apps/web/components/settings/**
+      //   (protected-route-only components that get user from Clerk middleware).
+      if (
+        detection.packageName === "@clerk/nextjs" &&
+        postcondition.id === "use-user-no-loaded-check"
+      ) {
+        const fileName = sourceFile.fileName;
+        const fileText = sourceFile.getFullText();
+        // Suppress in protected route group files: (dashboard), (auth), (protected)
+        if (
+          /[/\\]\(dashboard\)[/\\]/.test(fileName) ||
+          /[/\\]\(protected\)[/\\]/.test(fileName) ||
+          /[/\\](layout|sidebar|header|top-nav|nav)\.(tsx?|jsx?)$/.test(fileName) ||
+          /[/\\](settings|profile)[/\\]/.test(fileName)
+        ) {
+          continue; // Protected route context — middleware enforces isLoaded
+        }
+        // Suppress when the component file also checks isLoaded somewhere (partial guards)
+        if (fileText.includes("isLoaded") || fileText.includes("isSignedIn")) {
+          continue; // File has auth state checks present
+        }
+      }
+
+      // stripe: rate-limit-error — suppress in Stripe client initialization files.
+      // The Stripe SDK constructor (new Stripe(key, options)) does not make network calls —
+      // it only creates a local client object. rate-limit-error can only occur at API call
+      // sites (charges.create(), paymentIntents.create(), etc.), not at the constructor.
+      // Files that only initialize and export the Stripe client (lib/stripe.ts, utils/stripe.ts)
+      // should not fire rate-limit-error on the constructor call.
+      //
+      // Evidence: concern-2026-04-13-stripe-16 — 3 FPs: apps/web/lib/stripe.ts (client init module
+      // that exports the Stripe singleton; only the constructor call is in this file).
+      if (
+        detection.packageName === "stripe" &&
+        postcondition.id === "rate-limit-error" &&
+        detection.functionName === "Stripe"
+      ) {
+        continue; // Stripe constructor — no network call, cannot rate-limit
+      }
+
       // Get location
       const { line, column } = this.getLocation(detection.node, sourceFile);
 

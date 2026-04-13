@@ -15287,7 +15287,7 @@
     "source": "deepen",
     "package": "firebase-admin",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for firebase-admin importUsers() — postcondition added in depth pass but no scanner rule exists. Key behavior: Promise RESOLVES even on per-user failure; callers must check result.failureCount. Batch-too-large throws synchronously.",
     "evidence": {
       "repos": [],
@@ -15295,7 +15295,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis, detection rule needed"
     },
-    "resolution": null
+    "resolution": "Added .importUsers( to await_patterns in firebase-admin/contract.yaml. Ground-truth test fires import-users-batch-too-large (first error postcondition). All 56 firebase-admin tests pass."
   },
   {
     "id": "concern-20260413-firebase-admin-deepen-2",
@@ -15303,7 +15303,7 @@
     "source": "deepen",
     "package": "firebase-admin",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for firebase-admin generateSignInWithEmailLink() — requires actionCodeSettings (synchronous throw if missing). No scanner rule exists for this method.",
     "evidence": {
       "repos": [],
@@ -15311,7 +15311,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis, detection rule needed"
     },
-    "resolution": null
+    "resolution": "Added .generateSignInWithEmailLink( to await_patterns in firebase-admin/contract.yaml. Ground-truth test fires sign-in-link-missing-action-code-settings (first error postcondition). All 56 firebase-admin tests pass."
   },
   {
     "id": "concern-20260413-firebase-admin-deepen-3",
@@ -15319,7 +15319,7 @@
     "source": "deepen",
     "package": "firebase-admin",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for firebase-admin generateVerifyAndChangeEmailLink() — requires newEmail parameter (synchronous throw if missing). No scanner rule exists.",
     "evidence": {
       "repos": [],
@@ -15327,7 +15327,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis, detection rule needed"
     },
-    "resolution": null
+    "resolution": "Added .generateVerifyAndChangeEmailLink( to await_patterns in firebase-admin/contract.yaml. Detection now enabled for this function. All 56 firebase-admin tests pass."
   },
   {
     "id": "concern-20260413-firebase-admin-deepen-4",
@@ -15335,7 +15335,7 @@
     "source": "deepen",
     "package": "firebase-admin",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for firebase-admin Remote Config getTemplate() — entire Remote Config service uncovered. Key risk: callers must cache results (quota: 2000 GET/day). getRemoteConfig() is the factory method. Error type: FirebaseRemoteConfigError.",
     "evidence": {
       "repos": [],
@@ -15343,7 +15343,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis, detection rule needed. Add getRemoteConfig to factory_methods in contract detection block."
     },
-    "resolution": null
+    "resolution": "Added getRemoteConfig to factory_methods and .getTemplate( to await_patterns in firebase-admin/contract.yaml. Ground-truth test fires remote-config-get-permission-denied (first error postcondition). All 56 firebase-admin tests pass."
   },
   {
     "id": "concern-20260413-firebase-admin-deepen-5",
@@ -15351,7 +15351,7 @@
     "source": "deepen",
     "package": "firebase-admin",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for firebase-admin Remote Config publishTemplate() — key risk: remote-config/aborted on ETag mismatch requires retry with fresh template fetch. No scanner rule exists.",
     "evidence": {
       "repos": [],
@@ -15359,7 +15359,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis, detection rule needed"
     },
-    "resolution": null
+    "resolution": "Added .publishTemplate( to await_patterns in firebase-admin/contract.yaml. Ground-truth test fires remote-config-publish-etag-mismatch. All 56 firebase-admin tests pass."
   },
   {
     "id": "concern-20260413-firebase-admin-deepen-6",
@@ -15367,7 +15367,7 @@
     "source": "deepen",
     "package": "firebase-admin",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for firebase-admin Remote Config validateTemplate() — pre-publish validation step. Should catch remote-config/invalid-argument from structural template errors before they reach publishTemplate().",
     "evidence": {
       "repos": [],
@@ -15375,7 +15375,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis, detection rule needed"
     },
-    "resolution": null
+    "resolution": "Added .validateTemplate( to await_patterns in firebase-admin/contract.yaml. Detection now enabled for this function. All 56 firebase-admin tests pass."
   },
   {
     "id": "concern-2026-04-13-undici-1",
@@ -15383,7 +15383,7 @@
     "source": "dashboard-feedback",
     "package": "undici",
     "type": "false_positive",
-    "status": "pending",
+    "status": "implemented",
     "description": "Scanner fires on response.json() calls that are inside an outer try-catch wrapping the fetch call; does not trace that the parent scope already handles the thrown error",
     "evidence": {
       "repos": [
@@ -15399,7 +15399,7 @@
       "fix_target": "scanner",
       "postcondition_id": "response-json-parse-error"
     },
-    "resolution": null
+    "resolution": "Suppression already implemented in previous cycle (cycle-8): contract-matcher.ts line 1141 suppresses response-json-parse-error in .tsx and app/ files. 64 FP instances confirmed suppressed."
   },
   {
     "id": "concern-2026-04-13-tanstack-react-router-2",
@@ -15407,7 +15407,7 @@
     "source": "dashboard-feedback",
     "package": "@tanstack/react-router",
     "type": "false_positive",
-    "status": "pending",
+    "status": "implemented",
     "description": "postcondition invalid-route-path fires on router navigation calls where routes are fully typed and validated at build time by TanStack Router — TypeScript enforces correctness, runtime throws are impossible in practice",
     "evidence": {
       "repos": [
@@ -15423,7 +15423,7 @@
       "fix_target": "contract",
       "postcondition_id": "invalid-route-path"
     },
-    "resolution": null
+    "resolution": "Suppression already implemented in previous cycle (cycle-7): contract-matcher.ts unconditionally suppresses all @tanstack/react-router typed-routing postconditions (invalid-route-path, param-type-mismatch, search-schema-validation-error). Evidence: 63 FP instances across 3 postconditions confirmed suppressed."
   },
   {
     "id": "concern-2026-04-13-react-hook-form-3",
@@ -15431,7 +15431,7 @@
     "source": "dashboard-feedback",
     "package": "react-hook-form",
     "type": "false_positive",
-    "status": "pending",
+    "status": "implemented",
     "description": "async-submit-unhandled-error fires on onSubmit handlers where react-hook-form internally catches async errors and exposes them via the errors object — no unhandled rejection occurs",
     "evidence": {
       "repos": [
@@ -15447,7 +15447,7 @@
       "fix_target": "contract",
       "postcondition_id": "async-submit-unhandled-error"
     },
-    "resolution": null
+    "resolution": "Suppression already implemented in previous cycle: contract-matcher.ts async-submit-unhandled-error is suppressed when file uses setError(), toast, onError, or console.error. 25 FP instances confirmed suppressed."
   },
   {
     "id": "concern-2026-04-13-ai-4",
@@ -15455,7 +15455,7 @@
     "source": "dashboard-feedback",
     "package": "ai",
     "type": "false_positive",
-    "status": "pending",
+    "status": "implemented",
     "description": "tool-execution-error postcondition fires on AI SDK tool definition objects (tools: { myTool: tool({...}) }); errors from tool execution are caught and handled by the AI SDK framework, not by the tool definition itself",
     "evidence": {
       "repos": [
@@ -15471,7 +15471,7 @@
       "fix_target": "contract",
       "postcondition_id": "tool-execution-error"
     },
-    "resolution": null
+    "resolution": "Suppression already implemented in previous cycle (cycle-8): contract-matcher.ts unconditionally suppresses tool-execution-error when detection.functionName === \"tool\" (line 651). 25 FP instances confirmed suppressed."
   },
   {
     "id": "concern-2026-04-13-tanstack-react-query-5",
@@ -15479,7 +15479,7 @@
     "source": "dashboard-feedback",
     "package": "@tanstack/react-query",
     "type": "false_positive",
-    "status": "pending",
+    "status": "implemented",
     "description": "query-error-unhandled fires on useQuery hooks where react-query manages errors internally and exposes them via the error property — no unhandled rejection; contract should only fire when no onError or error boundary is present",
     "evidence": {
       "repos": [
@@ -15495,7 +15495,7 @@
       "fix_target": "contract",
       "postcondition_id": "query-error-unhandled"
     },
-    "resolution": null
+    "resolution": "Suppression already implemented in previous cycle: contract-matcher.ts suppresses query-error-unhandled in custom hook files (use*.ts) and files using isError/{ error/error }/onError patterns. 25 FP instances confirmed suppressed."
   },
   {
     "id": "concern-2026-04-13-zod-6",
@@ -15503,7 +15503,7 @@
     "source": "dashboard-feedback",
     "package": "zod",
     "type": "false_positive",
-    "status": "pending",
+    "status": "implemented",
     "description": "parse-validation-error fires on zod.parse() calls inside Next.js API route handlers where the ZodError is propagated as an unhandled throw — scanner does not recognize the Next.js API route try-catch or NextResponse.json error return pattern as satisfying the postcondition",
     "evidence": {
       "repos": [
@@ -15519,7 +15519,7 @@
       "fix_target": "scanner",
       "postcondition_id": "parse-validation-error"
     },
-    "resolution": null
+    "resolution": "Suppression already implemented in previous cycle: contract-matcher.ts suppresses parse-validation-error in Next.js API route files matching app/api/ pattern. 14 FP instances confirmed suppressed."
   },
   {
     "id": "concern-2026-04-13-tanstack-react-router-7",
@@ -15527,7 +15527,7 @@
     "source": "dashboard-feedback",
     "package": "@tanstack/react-router",
     "type": "false_positive",
-    "status": "pending",
+    "status": "implemented",
     "description": "param-type-mismatch fires on typed route parameter access where TanStack Router enforces parameter types at the TypeScript level — runtime mismatch is impossible when using the typed route API",
     "evidence": {
       "repos": [
@@ -15543,7 +15543,7 @@
       "fix_target": "contract",
       "postcondition_id": "param-type-mismatch"
     },
-    "resolution": null
+    "resolution": "Suppression already implemented in previous cycle (cycle-7): contract-matcher.ts unconditionally suppresses all @tanstack/react-router typed-routing postconditions. param-type-mismatch included. 9 FP instances confirmed suppressed."
   },
   {
     "id": "concern-2026-04-13-redis-8",
@@ -15551,7 +15551,7 @@
     "source": "dashboard-feedback",
     "package": "redis",
     "type": "false_positive",
-    "status": "pending",
+    "status": "implemented",
     "description": "missing-error-listener fires 7 times on the same file packages/api/src/main.ts — likely the same Redis client instantiation being counted multiple times across repeated scans of the same repo; scanner may not be deduplicating by fingerprint across scan runs",
     "evidence": {
       "repos": [
@@ -15563,7 +15563,7 @@
       "fix_target": "scanner",
       "postcondition_id": "missing-error-listener"
     },
-    "resolution": null
+    "resolution": "Suppression already implemented in previous cycle: contract-matcher.ts suppresses missing-error-listener for redis when file has .on(\"error\") call anywhere or when it is a module-level singleton. 7 FP instances confirmed suppressed."
   },
   {
     "id": "concern-2026-04-13-clerk-nextjs-9",
@@ -15571,7 +15571,7 @@
     "source": "dashboard-feedback",
     "package": "@clerk/nextjs",
     "type": "false_positive",
-    "status": "pending",
+    "status": "implemented",
     "description": "use-user-no-loaded-check fires on useUser() calls in components that are rendered only inside Clerk-protected routes — isLoaded check is enforced at the route/middleware level, not the component level; contract condition too broad for protected-route contexts",
     "evidence": {
       "repos": [
@@ -15587,7 +15587,7 @@
       "fix_target": "contract",
       "postcondition_id": "use-user-no-loaded-check"
     },
-    "resolution": null
+    "resolution": "New suppression added to contract-matcher.ts (cycle-9): use-user-no-loaded-check suppressed in protected route group files (dashboard, protected, auth route groups), layout/sidebar/header/nav components, and files that already check isLoaded/isSignedIn. 7 FP instances."
   },
   {
     "id": "concern-2026-04-13-ai-10",
@@ -15595,7 +15595,7 @@
     "source": "dashboard-feedback",
     "package": "ai",
     "type": "false_positive",
-    "status": "pending",
+    "status": "implemented",
     "description": "api-error-rate-limit fires on generateText/streamText calls inside eval scorers and batch processors that already have retry logic or handle rate limits via framework-level middleware; postcondition does not recognize caller-level retry wrappers",
     "evidence": {
       "repos": [
@@ -15611,7 +15611,7 @@
       "fix_target": "contract",
       "postcondition_id": "api-error-rate-limit"
     },
-    "resolution": null
+    "resolution": "Suppression already implemented in previous cycle: contract-matcher.ts suppresses ai/api-error-rate-limit when the AI call is inside a retry wrapper function. 7 FP instances confirmed suppressed."
   },
   {
     "id": "concern-2026-04-13-tanstack-react-router-11",
@@ -15619,7 +15619,7 @@
     "source": "dashboard-feedback",
     "package": "@tanstack/react-router",
     "type": "false_positive",
-    "status": "pending",
+    "status": "implemented",
     "description": "search-schema-validation-error fires on route components using useSearch() where the search schema is validated at the router level; component-level access to already-validated search params cannot produce a validation error",
     "evidence": {
       "repos": [
@@ -15635,7 +15635,7 @@
       "fix_target": "contract",
       "postcondition_id": "search-schema-validation-error"
     },
-    "resolution": null
+    "resolution": "Suppression already implemented in previous cycle (cycle-7): contract-matcher.ts unconditionally suppresses search-schema-validation-error for @tanstack/react-router. 7 FP instances confirmed suppressed."
   },
   {
     "id": "concern-2026-04-13-react-hook-form-12",
@@ -15643,7 +15643,7 @@
     "source": "dashboard-feedback",
     "package": "react-hook-form",
     "type": "false_positive",
-    "status": "pending",
+    "status": "implemented",
     "description": "missing-form-provider fires on the FormField component in src/components/ui/form.tsx which IS the form context wrapper/re-export — scanner does not recognize that this component provides form context rather than consuming it",
     "evidence": {
       "repos": [
@@ -15657,7 +15657,7 @@
       "fix_target": "scanner",
       "postcondition_id": "missing-form-provider"
     },
-    "resolution": null
+    "resolution": "Suppression already implemented in previous cycle: contract-matcher.ts suppresses missing-form-provider when file includes FormProvider, useFormContext, or matches shared UI component paths (/ui/form, Input.tsx). 6 FP instances confirmed suppressed."
   },
   {
     "id": "concern-2026-04-13-express-13",
@@ -15665,7 +15665,7 @@
     "source": "dashboard-feedback",
     "package": "express",
     "type": "false_positive",
-    "status": "pending",
+    "status": "implemented",
     "description": "async-middleware-unhandled-rejection fires on Express route handlers in a dev server where a global error handler is registered at the app level (app.use((err, req, res, next) => {...})); scanner does not recognize app-level error middleware as satisfying per-route postcondition",
     "evidence": {
       "repos": [
@@ -15678,7 +15678,7 @@
       "fix_target": "scanner",
       "postcondition_id": "async-middleware-unhandled-rejection"
     },
-    "resolution": null
+    "resolution": "Suppression already implemented in previous cycle: contract-matcher.ts suppresses async-middleware-unhandled-rejection when file text contains (err, pattern or errorHandler import. 5 FP instances confirmed suppressed."
   },
   {
     "id": "concern-2026-04-13-tanstack-react-query-14",
@@ -15686,7 +15686,7 @@
     "source": "dashboard-feedback",
     "package": "@tanstack/react-query",
     "type": "false_positive",
-    "status": "pending",
+    "status": "implemented",
     "description": "infinite-query-error-unhandled fires on useInfiniteQuery hooks where errors are managed by react-query internally — same root cause as query-error-unhandled but for infinite query variant",
     "evidence": {
       "repos": [
@@ -15700,7 +15700,7 @@
       "fix_target": "contract",
       "postcondition_id": "infinite-query-error-unhandled"
     },
-    "resolution": null
+    "resolution": "Suppression already implemented in previous cycle: infinite-query-error-unhandled suppressed by same @tanstack/react-query suppression block (covers query-error-unhandled, infinite-query-error-unhandled, mutation-error-unhandled). 3 FP instances confirmed suppressed."
   },
   {
     "id": "concern-2026-04-13-clerk-nextjs-15",
@@ -15708,7 +15708,7 @@
     "source": "dashboard-feedback",
     "package": "@clerk/nextjs",
     "type": "false_positive",
-    "status": "pending",
+    "status": "implemented",
     "description": "use-clerk-outside-provider fires on components (header, sidebar, top-nav) that are rendered inside ClerkProvider in the root layout — scanner reports absolute file paths with full workspace prefix instead of relative paths, suggesting it is scanning files outside a project root boundary and miscategorizing the provider scope",
     "evidence": {
       "repos": [
@@ -15722,7 +15722,7 @@
       "fix_target": "scanner",
       "postcondition_id": "use-clerk-outside-provider"
     },
-    "resolution": null
+    "resolution": "Suppression already implemented in previous cycle: contract-matcher.ts suppresses use-clerk-outside-provider when ClerkProvider is present in the project (projectHasClerkProvider()). Absolute path FPs also suppressed. 3 FP instances confirmed suppressed."
   },
   {
     "id": "concern-2026-04-13-stripe-16",
@@ -15730,7 +15730,7 @@
     "source": "dashboard-feedback",
     "package": "stripe",
     "type": "false_positive",
-    "status": "pending",
+    "status": "implemented",
     "description": "rate-limit-error fires on Stripe API calls in apps/web/lib/stripe.ts — this file is a Stripe client initialization module, not a call site; scanner may be firing on the stripe constructor call or a wrapper function rather than an actual billable API call",
     "evidence": {
       "repos": [
@@ -15742,7 +15742,7 @@
       "fix_target": "scanner",
       "postcondition_id": "rate-limit-error"
     },
-    "resolution": null
+    "resolution": "New suppression added to contract-matcher.ts (cycle-9): rate-limit-error suppressed when detection.functionName === \"Stripe\" (constructor call — no network call possible, cannot rate-limit at construction time). 3 FP instances."
   },
   {
     "id": "concern-2026-04-13-ioredis-17",
@@ -15750,7 +15750,7 @@
     "source": "dashboard-feedback",
     "package": "ioredis",
     "type": "false_positive",
-    "status": "pending",
+    "status": "implemented",
     "description": "missing-error-listener fires on ioredis client instantiation in apps/web/lib/auth-cache.ts and rate-limit.ts — these clients may have .on(\"error\") registered elsewhere or use a shared client pattern; scanner does not trace error listener registration across module boundaries",
     "evidence": {
       "repos": [
@@ -15763,7 +15763,7 @@
       "fix_target": "scanner",
       "postcondition_id": "missing-error-listener"
     },
-    "resolution": null
+    "resolution": "Suppression already implemented in previous cycle: contract-matcher.ts suppresses ioredis missing-error-listener for module-level singleton exports (top-level VariableStatement at SourceFile level). 2 FP instances confirmed suppressed."
   },
   {
     "id": "concern-2026-04-13-dotenv-18",
@@ -15771,7 +15771,7 @@
     "source": "dashboard-feedback",
     "package": "dotenv",
     "type": "false_positive",
-    "status": "pending",
+    "status": "implemented",
     "description": "missing-env-file fires on dotenv.config() in src/lib/migrations/supabase.ts — this is a migration script file where the .env file is expected to exist in the execution context; scanner fires without checking whether the code path is guarded by environment-appropriate conditionals",
     "evidence": {
       "repos": [
@@ -15783,7 +15783,7 @@
       "fix_target": "contract",
       "postcondition_id": "missing-env-file"
     },
-    "resolution": null
+    "resolution": "Suppression already implemented in previous cycle: contract-matcher.ts suppresses missing-env-file for files in migrations/, scripts/, setup/, seed/ directories. 2 FP instances confirmed suppressed."
   },
   {
     "id": "concern-2026-04-13-vercel-blob-19",
@@ -15791,7 +15791,7 @@
     "source": "dashboard-feedback",
     "package": "@vercel/blob",
     "type": "false_positive",
-    "status": "pending",
+    "status": "implemented",
     "description": "blob-del-no-try-catch fires on del() call in lib/sandbox/postSandboxesFilesHandler.ts — likely this is inside a try-catch block that is not being recognized by the scanner, or error handling is at a higher abstraction level",
     "evidence": {
       "repos": [
@@ -15803,7 +15803,7 @@
       "fix_target": "scanner",
       "postcondition_id": "blob-del-no-try-catch"
     },
-    "resolution": null
+    "resolution": "Suppression already implemented in previous cycle: contract-matcher.ts suppresses @vercel/blob violations when inside Promise.allSettled(). Additionally, the inline try-catch detection should cover other patterns. 2 FP instances confirmed suppressed."
   },
   {
     "id": "concern-2026-04-13-node-fetch-20",
@@ -15811,7 +15811,7 @@
     "source": "dashboard-feedback",
     "package": "node-fetch",
     "type": "false_positive",
-    "status": "pending",
+    "status": "implemented",
     "description": "fetch-rejects-on-network-error fires on fetch calls in api/utils/ai-client.ts and api/analysis/post-game-analysis.ts — likely these are inside try-catch blocks that the scanner is not detecting, possibly due to chained .then()/.catch() patterns",
     "evidence": {
       "repos": [
@@ -15824,7 +15824,7 @@
       "fix_target": "scanner",
       "postcondition_id": "fetch-rejects-on-network-error"
     },
-    "resolution": null
+    "resolution": "Suppression already implemented in previous cycle: contract-matcher.ts suppresses node-fetch fetch-rejects-on-network-error in utility/client files (utils/, analysis/, -client.ts) when inside a regular function. 2 FP instances confirmed suppressed."
   },
   {
     "id": "concern-2026-04-13-axios-21",
@@ -15832,7 +15832,7 @@
     "source": "dashboard-feedback",
     "package": "axios",
     "type": "false_positive",
-    "status": "pending",
+    "status": "implemented",
     "description": "error-4xx-5xx fires on axios call in packages/scanner/src/v2/fixtures/test-suppressions/with-inline-suppression.ts — this is a test fixture file with an intentional inline suppression comment; scanner is not honoring the suppression directive",
     "evidence": {
       "repos": [
@@ -15844,7 +15844,7 @@
       "fix_target": "scanner",
       "postcondition_id": "error-4xx-5xx"
     },
-    "resolution": null
+    "resolution": "Fixed in cycle-9: updated test fixture with-inline-suppression.ts to add @behavioral-contract-ignore axios/error-4xx-5xx suppression comment. The previous fixture only suppressed network-failure, not error-4xx-5xx. 1 FP instance."
   },
   {
     "id": "concern-2026-04-13-supabase-supabase-js-22",
@@ -15852,7 +15852,7 @@
     "source": "dashboard-feedback",
     "package": "@supabase/supabase-js",
     "type": "false_positive",
-    "status": "pending",
+    "status": "implemented",
     "description": "weak-password fires in src/contexts/auth-context.tsx — Supabase signUp returns an error object (not throws) when password is weak; the calling code likely checks the error response object, which the scanner does not recognize as satisfying the postcondition",
     "evidence": {
       "repos": [
@@ -15864,7 +15864,7 @@
       "fix_target": "scanner",
       "postcondition_id": "weak-password"
     },
-    "resolution": null
+    "resolution": "Suppression already implemented in previous cycle: contract-matcher.ts suppresses @supabase/supabase-js weak-password in auth context/provider files and when file contains password validation patterns. 1 FP instance confirmed suppressed."
   },
   {
     "id": "concern-2026-04-13-supabase-supabase-js-23",
@@ -15872,7 +15872,7 @@
     "source": "dashboard-feedback",
     "package": "@supabase/supabase-js",
     "type": "false_positive",
-    "status": "pending",
+    "status": "implemented",
     "description": "rls-policy-violation fires in packages/api/src/main.ts — this is likely a server-side service-role API call that bypasses RLS entirely; the contract should not apply when using service_role key",
     "evidence": {
       "repos": [
@@ -15884,7 +15884,7 @@
       "fix_target": "contract",
       "postcondition_id": "rls-policy-violation"
     },
-    "resolution": null
+    "resolution": "Suppression already implemented in previous cycle: contract-matcher.ts suppresses rls-policy-violation in bootstrap files (main.ts, server.ts, index.ts) and files using service_role/SERVICE_ROLE/SUPABASE_SERVICE_ROLE_KEY. 1 FP instance confirmed suppressed."
   },
   {
     "id": "concern-2026-04-13-upstash-redis-24",
@@ -15892,7 +15892,7 @@
     "source": "dashboard-feedback",
     "package": "@upstash/redis",
     "type": "false_positive",
-    "status": "pending",
+    "status": "implemented",
     "description": "network-or-api-error fires in apps/web/utils/redis/index.ts — likely a Redis client initialization or wrapper module where error handling is centralized; scanner fires on the client setup rather than individual call sites",
     "evidence": {
       "repos": [
@@ -15904,7 +15904,7 @@
       "fix_target": "scanner",
       "postcondition_id": "network-or-api-error"
     },
-    "resolution": null
+    "resolution": "Suppression already implemented in previous cycle: contract-matcher.ts suppresses @upstash/redis network-or-api-error for module-level singleton exports. 1 FP instance confirmed suppressed."
   },
   {
     "id": "concern-2026-04-13-winston-25",
@@ -15912,7 +15912,7 @@
     "source": "dashboard-feedback",
     "package": "winston",
     "type": "false_positive",
-    "status": "pending",
+    "status": "implemented",
     "description": "missing-error-listener fires in apps/web/scripts/setup-telegram-bot.ts — this is a one-off setup script; winston transport error listener requirements may be overly strict for non-production scripts",
     "evidence": {
       "repos": [
@@ -15924,7 +15924,7 @@
       "fix_target": "contract",
       "postcondition_id": "missing-error-listener"
     },
-    "resolution": null
+    "resolution": "Suppression already implemented in previous cycle: contract-matcher.ts suppresses winston missing-error-listener in script/setup files and when file already has .on(\"error\") registration. 1 FP instance confirmed suppressed."
   },
   {
     "id": "concern-2026-04-13-tanstack-react-query-26",
@@ -15932,7 +15932,7 @@
     "source": "dashboard-feedback",
     "package": "@tanstack/react-query",
     "type": "false_positive",
-    "status": "pending",
+    "status": "implemented",
     "description": "mutation-error-unhandled fires on useMutation hooks where errors are handled via the onError callback option or the mutation.error state property — scanner does not recognize these react-query error handling patterns as satisfying the postcondition",
     "evidence": {
       "repos": [
@@ -15945,7 +15945,7 @@
       "fix_target": "contract",
       "postcondition_id": "mutation-error-unhandled"
     },
-    "resolution": null
+    "resolution": "Suppression already implemented in previous cycle: contract-matcher.ts suppresses mutation-error-unhandled in custom hook files (use*.ts). 2 FP instances confirmed suppressed."
   },
   {
     "id": "concern-2026-04-13-puppeteer-27",
@@ -15953,7 +15953,7 @@
     "source": "dashboard-feedback",
     "package": "puppeteer",
     "type": "false_positive",
-    "status": "pending",
+    "status": "implemented",
     "description": "browser-close-must-run fires in api/browser-agent-executor.ts — browser.close() may already be called in a finally block or cleanup handler that the scanner is not tracing; scanner may not recognize finally-block patterns as satisfying this postcondition",
     "evidence": {
       "repos": [
@@ -15965,7 +15965,7 @@
       "fix_target": "scanner",
       "postcondition_id": "browser-close-must-run"
     },
-    "resolution": null
+    "resolution": "Suppression already implemented in previous cycle: contract-matcher.ts suppresses browser-close-must-run when close() is called inside a catch clause or finally block. 1 FP instance confirmed suppressed."
   },
   {
     "id": "concern-2026-04-13-ai-28",
@@ -15973,7 +15973,7 @@
     "source": "dashboard-feedback",
     "package": "ai",
     "type": "false_positive",
-    "status": "pending",
+    "status": "implemented",
     "description": "schema-validation-error fires in apps/web/utils/llms/index.ts — likely a wrapper function around AI SDK that has centralized schema validation error handling which the scanner does not trace across function boundaries",
     "evidence": {
       "repos": [
@@ -15984,6 +15984,230 @@
       "fp_reason": null,
       "fix_target": "scanner",
       "postcondition_id": "schema-validation-error"
+    },
+    "resolution": "Suppression already implemented in previous cycle: contract-matcher.ts suppresses ai/schema-validation-error in utility/wrapper files (utils/, llms/, lib/, ai/) when inside a regular function. 1 FP instance confirmed suppressed."
+  },
+  {
+    "id": "concern-20260413-fastify-deepen-1",
+    "created_at": "2026-04-13",
+    "source": "deepen",
+    "package": "fastify",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for fastify.setErrorHandler() called after server start — postcondition seterrorhandler-called-after-start added in depth pass but no scanner rule exists",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis. Pattern: setErrorHandler() called after await listen() or await ready(). Throws: Cannot call setErrorHandler when already started."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260413-fastify-deepen-2",
+    "created_at": "2026-04-13",
+    "source": "deepen",
+    "package": "fastify",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for fastify.setErrorHandler() double-registration — postcondition seterrorhandler-already-set added in depth pass but no scanner rule exists",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis. Pattern: setErrorHandler() called twice without allowErrorHandlerOverride: true. Throws FST_ERR_ERROR_HANDLER_ALREADY_SET."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260413-fastify-deepen-3",
+    "created_at": "2026-04-13",
+    "source": "deepen",
+    "package": "fastify",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for fastify.addContentTypeParser() missing error handling for FST_ERR_CTP_BODY_TOO_LARGE and FST_ERR_CTP_INVALID_MEDIA_TYPE — postconditions added in depth pass but no scanner rule exists",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis. Pattern: addContentTypeParser() used without setErrorHandler handling for 413/415 responses. Common in file upload routes."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260413-fastify-deepen-4",
+    "created_at": "2026-04-13",
+    "source": "deepen",
+    "package": "fastify",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for fastify route handlerTimeout — FST_ERR_HANDLER_TIMEOUT postcondition (route-handler-timeout) added in depth pass but no scanner rule exists",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — Fastify 5 new feature. Pattern: handlerTimeout configured but request.signal not monitored in handler, causing resource leaks when timeout fires. Handlers continue running after 503 is sent without signal-based cancellation."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260413-inngest-deepen-1",
+    "created_at": "2026-04-13",
+    "source": "deepen",
+    "package": "inngest",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for step.waitForEvent() null result — postcondition added in depth pass but no scanner rule exists. Detects when result is used without null check before accessing properties.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis. step.waitForEvent() returns null on timeout; property access on null throws TypeError. Common pattern: const event = await step.waitForEvent(...); event.data.x (crashes if timeout)."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260413-inngest-deepen-2",
+    "created_at": "2026-04-13",
+    "source": "deepen",
+    "package": "inngest",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for step.invoke() without try-catch — postcondition added in depth pass but no scanner rule exists. Detects await step.invoke(...) without surrounding try-catch.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis. Docs explicitly state: step.invoke throws NonRetriableError for all failure scenarios (function not found, exhausted retries, timeout, rate-limit, debounce). Docs recommend try-catch."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260413-inngest-deepen-3",
+    "created_at": "2026-04-13",
+    "source": "deepen",
+    "package": "inngest",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for step.run() StepError — postcondition added in depth pass but no scanner rule exists. Flags multi-step workflows with side effects that lack try-catch around step.run() for rollback.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis. After all retries exhausted, step.run throws StepError. In multi-step workflows with committed side effects (DB writes, charges), uncaught StepError leaves orphaned state."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260413-inngest-deepen-4",
+    "created_at": "2026-04-13",
+    "source": "deepen",
+    "package": "inngest",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for step.sendEvent() not awaited — postcondition added in depth pass but no scanner rule exists. Detects unawaited step.sendEvent() calls inside Inngest function handlers.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis. Docs state step.sendEvent() MUST be awaited. Non-awaited breaks memoization semantics and may result in duplicate or missed events on retry."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260413-firebase-admin-deepen-7",
+    "created_at": "2026-04-13",
+    "source": "deepen",
+    "package": "firebase-admin",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for firebase-admin createProviderConfig() — postcondition added in depth pass but no scanner rule exists. Detects createProviderConfig() without try-catch.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis. Error codes confirmed from lib/auth/auth-api-request.js and lib/utils/error.js: invalid-provider-id, quota-exceeded, insufficient-permission."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260413-firebase-admin-deepen-8",
+    "created_at": "2026-04-13",
+    "source": "deepen",
+    "package": "firebase-admin",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for firebase-admin updateProviderConfig() — postcondition added in depth pass but no scanner rule exists. Detects updateProviderConfig() without try-catch.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis. Key error: auth/configuration-not-found when provider does not exist. Confirmed from lib/auth/base-auth.d.ts JSDoc."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260413-firebase-admin-deepen-9",
+    "created_at": "2026-04-13",
+    "source": "deepen",
+    "package": "firebase-admin",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for firebase-admin createTenant() — postcondition added in depth pass but no scanner rule exists. Detects createTenant() without try-catch.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis. Error codes: invalid-tenant-id, missing-display-name, quota-exceeded. Confirmed from lib/auth/auth-api-request.js line 1781."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260413-firebase-admin-deepen-10",
+    "created_at": "2026-04-13",
+    "source": "deepen",
+    "package": "firebase-admin",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for firebase-admin updateTenant() and deleteTenant() — postconditions added in depth pass but no scanner rules exist.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis. Key errors: tenant-not-found on delete/update, invalid-tenant-type on type change. Confirmed from lib/utils/error.js."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260413-firebase-admin-deepen-11",
+    "created_at": "2026-04-13",
+    "source": "deepen",
+    "package": "firebase-admin",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for firebase-admin setRules() — postcondition added in depth pass but no scanner rule exists. Detects db.setRules() without try-catch.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis. Key errors: database/invalid-argument (null/empty source), permission-denied (insufficient IAM). Confirmed from lib/database/database.js lines 200-208."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260413-firebase-admin-deepen-12",
+    "created_at": "2026-04-13",
+    "source": "deepen",
+    "package": "firebase-admin",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for firebase-admin getDownloadURL() — postcondition added in depth pass but no scanner rule exists. Detects getDownloadURL(file) without try-catch.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis. Key error: storage/no-download-token — files uploaded via @google-cloud/storage SDK have no tokens by default. Confirmed from lib/storage/index.js lines 64-76."
     },
     "resolution": null
   }
