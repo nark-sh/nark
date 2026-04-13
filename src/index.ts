@@ -84,6 +84,7 @@ program
   .option('--instructions-path', 'Print the path to FORAIAGENTS.md and exit', false)
   .option('--sarif', 'Output results in SARIF 2.1.0 format (stdout)')
   .option('--sarif-output <path>', 'Write SARIF 2.1.0 output to file')
+  .option('--verbose', 'Print diagnostic information to stderr during scan', false)
   .action(async (options) => {
     // This action handler is called when the main command is invoked
     // (i.e., not a subcommand like 'suppressions')
@@ -244,6 +245,15 @@ function normalizeTsconfigPath(tsconfigPath: string): string {
 }
 
 /**
+ * Write a verbose diagnostic line to stderr.
+ * Uses process.stderr.write directly to bypass the console.error override
+ * in setupOutputLogging — verbose output must not appear in output.txt.
+ */
+function verboseLog(message: string): void {
+  process.stderr.write(message + '\n');
+}
+
+/**
  * Main execution
  */
 async function main(options: any) {
@@ -298,11 +308,13 @@ async function main(options: any) {
 
   // Load corpus
   console.log(chalk.dim('Loading contracts...'));
+  const corpusStartTime = Date.now();
   const corpusResult = await loadCorpus(options.corpus, {
     includeDrafts: options.includeDrafts,
     includeDeprecated: options.includeDeprecated,
     includeInDevelopment: options.includeDrafts, // in-development included with drafts
   });
+  const corpusEndTime = Date.now();
 
   if (corpusResult.errors.length > 0) {
     printCorpusErrors(corpusResult.errors);
@@ -331,8 +343,25 @@ async function main(options: any) {
   }
   console.log();
 
+  // Checkpoint 1: verbose corpus output
+  if (options.verbose && corpusResult.contractFiles) {
+    const totalFiles = Array.from(corpusResult.contractFiles.values())
+      .reduce((sum, files) => sum + files.length, 0);
+    verboseLog(`\n[verbose] Contracts loaded: ${totalFiles} files across ${corpusResult.contracts.size} packages`);
+    if (totalFiles <= 20) {
+      for (const [pkg, files] of corpusResult.contractFiles) {
+        for (const f of files) verboseLog(`  ${pkg}: ${f}`);
+      }
+    } else {
+      for (const [pkg, files] of corpusResult.contractFiles) {
+        verboseLog(`  ${pkg}: ${files.length} file(s)`);
+      }
+    }
+  }
+
   // Discover packages (if enabled)
   let packageDiscovery;
+  const discoveryStartTime = Date.now();
   if (options.discoverPackages !== false) {
     console.log(chalk.dim('Discovering packages...'));
     const discoveryTool = new PackageDiscovery(corpusResult.contracts);
@@ -341,6 +370,18 @@ async function main(options: any) {
       path.resolve(tsconfigPath)
     );
     console.log(chalk.green(`✓ Discovered ${packageDiscovery.total} packages\n`));
+  }
+  const discoveryEndTime = Date.now();
+
+  // Checkpoint 2: verbose package discovery output
+  if (options.verbose && packageDiscovery) {
+    verboseLog(`\n[verbose] Package discovery:`);
+    for (const pkg of packageDiscovery.packages) {
+      if (pkg.usedIn.length > 0) {
+        verboseLog(`  ${pkg.name}: imported in ${pkg.usedIn.length} file(s)`);
+        for (const f of pkg.usedIn) verboseLog(`    ${f}`);
+      }
+    }
   }
 
   // Create analyzer
@@ -357,7 +398,9 @@ async function main(options: any) {
 
   let violations: Violation[];
   let stats: { filesAnalyzed: number; contractsApplied: number; [key: string]: any };
+  let v2Result: import('./v2/adapter.js').V2AdapterResult | undefined;
 
+  const analysisStartTime = Date.now();
   if (options.useV1Analyzer && !options.compareAnalyzers) {
     // Legacy v1 mode (--use-v1-analyzer flag)
     violations = analyzer.analyze();
@@ -365,7 +408,7 @@ async function main(options: any) {
   } else if (options.compareAnalyzers) {
     // Compare mode: run both and show diff
     const { runV2Analyzer } = await import('./v2/adapter.js');
-    const v2Result = await runV2Analyzer(config, corpusResult.contracts);
+    v2Result = await runV2Analyzer(config, corpusResult.contracts);
     const v1Violations = analyzer.analyze();
     const v1Stats = analyzer.getStats();
 
@@ -381,15 +424,33 @@ async function main(options: any) {
   } else {
     // Default: v2 plugin-based analyzer
     const { runV2Analyzer } = await import('./v2/adapter.js');
-    const v2Result = await runV2Analyzer(config, corpusResult.contracts);
+    v2Result = await runV2Analyzer(config, corpusResult.contracts);
     violations = v2Result.violations;
     stats = {
       filesAnalyzed: v2Result.filesAnalyzed,
       contractsApplied: corpusResult.contracts.size,
     };
   }
+  const analysisEndTime = Date.now();
 
   console.log(chalk.green(`✓ Analyzed ${stats.filesAnalyzed} files\n`));
+
+  // Checkpoint 3: verbose analysis timing output
+  if (options.verbose && v2Result) {
+    const slowFiles = v2Result.fileDurations
+      .filter(f => f.durationMs > 500)
+      .sort((a, b) => b.durationMs - a.durationMs);
+    verboseLog(`\n[verbose] Analysis timing:`);
+    if (slowFiles.length > 0) {
+      verboseLog(`  Files taking >500ms:`);
+      for (const f of slowFiles) verboseLog(`    ${f.durationMs}ms  ${f.file}`);
+    } else {
+      verboseLog(`  No files took >500ms`);
+    }
+    for (const s of v2Result.skippedFiles) {
+      verboseLog(`  Skipped: ${s.count} ${s.reason}`);
+    }
+  }
 
   // Report suppressions if requested
   if (options.showSuppressions) {
@@ -416,6 +477,8 @@ async function main(options: any) {
       console.log(chalk.green('✨ No dead suppressions found!\n'));
     }
   }
+
+  const outputStartTime = Date.now();
 
   // Generate audit record
   const packagesAnalyzed = Array.from(corpusResult.contracts.keys());
@@ -574,6 +637,19 @@ async function main(options: any) {
     console.log(chalk.green('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'));
     console.log(chalk.green.bold('  ✓ No violations found - great work!'));
     console.log(chalk.green('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n'));
+  }
+
+  const outputEndTime = Date.now();
+
+  // Checkpoint 4: verbose time breakdown
+  if (options.verbose) {
+    const totalTime = Date.now() - scanStartTime;
+    verboseLog(`\n[verbose] Time breakdown:`);
+    verboseLog(`  Contract loading:     ${corpusEndTime - corpusStartTime}ms`);
+    verboseLog(`  Package discovery:    ${discoveryEndTime - discoveryStartTime}ms`);
+    verboseLog(`  TypeScript analysis:  ${analysisEndTime - analysisStartTime}ms`);
+    verboseLog(`  Output generation:    ${outputEndTime - outputStartTime}ms`);
+    verboseLog(`  Total:                ${totalTime}ms`);
   }
 
   // Cleanup logging
