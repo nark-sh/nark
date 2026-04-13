@@ -64,6 +64,8 @@ program
   .option('--project <path>', 'Path to project root (for package.json discovery)', process.cwd())
   .option('--no-terminal', 'Disable terminal output (JSON only)')
   .option('--fail-on-warnings', 'Exit with error code if warnings are found')
+  .option('--report-only', 'Always exit 0 regardless of violations (report-only mode)', false)
+  .option('--fail-threshold <level>', 'Exit 1 if violations at or above this severity are found (error|warning|info)', 'error')
   .option('--discover-packages', 'Enable package discovery and coverage reporting', true)
   .option('--include-tests', 'Include test files in analysis (default: excludes test files)', false)
   .option('--include-drafts', 'Include draft and in-development contracts (default: excludes draft/in-development)', false)
@@ -261,7 +263,7 @@ async function main(options: any) {
   if (!fs.existsSync(options.corpus)) {
     console.error(chalk.red(`Error: Corpus directory not found at ${options.corpus}`));
     console.error(chalk.yellow('Tip: Use --corpus <path> to specify corpus location'));
-    process.exit(1);
+    process.exit(2);
   }
 
   // Generate organized output path if not specified
@@ -299,12 +301,12 @@ async function main(options: any) {
 
   if (corpusResult.errors.length > 0) {
     printCorpusErrors(corpusResult.errors);
-    process.exit(1);
+    process.exit(2);
   }
 
   if (corpusResult.contracts.size === 0) {
     console.error(chalk.red('Error: No contracts loaded from corpus'));
-    process.exit(1);
+    process.exit(2);
   }
 
   console.log(chalk.green(`✓ Loaded ${corpusResult.contracts.size} package contracts`));
@@ -568,18 +570,31 @@ async function main(options: any) {
   cleanupLogging();
 
   // Exit with appropriate code
+  // --report-only: always exit 0, even with violations (report-only mode)
+  if (options.reportOnly) {
+    process.exit(0);
+  }
+
   const hasErrors = auditRecord.summary.error_count > 0;
   const hasWarnings = auditRecord.summary.warning_count > 0;
+  const hasInfo = (auditRecord.summary as any).info_count > 0;
 
-  if (hasErrors) {
-    process.exit(1);
+  // Determine effective threshold
+  // --fail-on-warnings is kept for backward compatibility (equivalent to --fail-threshold warning)
+  // --fail-threshold overrides for explicit control
+  const threshold = options.failOnWarnings ? 'warning' : (options.failThreshold || 'error');
+
+  let shouldFail = false;
+  if (threshold === 'info') {
+    shouldFail = hasErrors || hasWarnings || hasInfo;
+  } else if (threshold === 'warning') {
+    shouldFail = hasErrors || hasWarnings;
+  } else {
+    // 'error' (default)
+    shouldFail = hasErrors;
   }
 
-  if (options.failOnWarnings && hasWarnings) {
-    process.exit(1);
-  }
-
-  process.exit(0);
+  process.exit(shouldFail ? 1 : 0);
 }
 
 /**
@@ -743,5 +758,5 @@ function printAnalyzerDiff(v1Violations: Violation[], v2Violations: Violation[])
 process.on('uncaughtException', (error) => {
   console.error(chalk.red('\nUnexpected error:'));
   console.error(error);
-  process.exit(1);
+  process.exit(2);
 });
