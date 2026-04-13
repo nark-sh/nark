@@ -12,7 +12,10 @@ import { Command } from 'commander';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as os from 'os';
+import { createHash } from 'crypto';
+import { execSync } from 'child_process';
 import chalk from 'chalk';
+import { getToken } from '../lib/auth.js';
 
 export interface TelemetryConfig {
   enabled: boolean;
@@ -29,6 +32,25 @@ export interface TelemetryPayload {
   violationCountsByContract: Record<string, number>;
   scanDurationMs: number;
   isCiMode: boolean;
+  repoFingerprint?: string;
+}
+
+/**
+ * Compute a SHA256 hash of the git remote origin URL for the current working directory.
+ * Returns undefined if git is unavailable, there is no origin remote, or any error occurs.
+ * Never throws.
+ */
+function getRepoFingerprint(): string | undefined {
+  try {
+    const url = execSync('git remote get-url origin', {
+      encoding: 'utf-8',
+      stdio: ['pipe', 'pipe', 'pipe'],
+    }).trim();
+    if (!url) return undefined;
+    return createHash('sha256').update(url).digest('hex');
+  } catch {
+    return undefined;
+  }
 }
 
 const TELEMETRY_ENDPOINT = 'https://nark.sh/api/telemetry/scan';
@@ -89,15 +111,24 @@ export function handleFirstRunNotice(): void {
 /**
  * Fire a telemetry event as fire-and-forget.
  * Never throws, never blocks the caller.
+ * When a user is logged in, includes Authorization: Bearer <token> header.
+ * When a git remote is available, includes repoFingerprint (SHA256 of origin URL).
  */
 export function fireTelemetryEvent(payload: TelemetryPayload): void {
   const config = readTelemetryConfig();
   if (!config.enabled) return;
   try {
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+    const token = getToken();
+    if (token !== null) {
+      headers['Authorization'] = 'Bearer ' + token;
+    }
+    const fp = getRepoFingerprint();
+    const enriched = { ...payload, ...(fp ? { repoFingerprint: fp } : {}) };
     fetch(TELEMETRY_ENDPOINT, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
+      headers,
+      body: JSON.stringify(enriched),
       signal: AbortSignal.timeout(2000),
     }).catch(() => {});
   } catch {
