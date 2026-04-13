@@ -1359,6 +1359,9 @@ export class ContractMatcher {
       //   apps/web/components/layout/sidebar.tsx, header.tsx, top-nav.tsx (always rendered inside
       //   authenticated routes), apps/web/app/(dashboard)/**, apps/web/components/settings/**
       //   (protected-route-only components that get user from Clerk middleware).
+      // Evidence: concern-2026-04-13-clerk-nextjs-1 — additional FPs:
+      //   apps/web/app/(auth)/invite/[token]/page.tsx (auth route group also protected by middleware),
+      //   apps/web/components/providers/analytics-provider.tsx (providers always inside ClerkProvider tree).
       if (
         detection.packageName === "@clerk/nextjs" &&
         postcondition.id === "use-user-no-loaded-check"
@@ -1368,9 +1371,11 @@ export class ContractMatcher {
         // Suppress in protected route group files: (dashboard), (auth), (protected)
         if (
           /[/\\]\(dashboard\)[/\\]/.test(fileName) ||
+          /[/\\]\(auth\)[/\\]/.test(fileName) ||
           /[/\\]\(protected\)[/\\]/.test(fileName) ||
           /[/\\](layout|sidebar|header|top-nav|nav)\.(tsx?|jsx?)$/.test(fileName) ||
-          /[/\\](settings|profile)[/\\]/.test(fileName)
+          /[/\\](settings|profile)[/\\]/.test(fileName) ||
+          /[/\\]providers?[/\\]/i.test(fileName)
         ) {
           continue; // Protected route context — middleware enforces isLoaded
         }
