@@ -38,6 +38,7 @@ import { createInitCommand } from './cli/init.js';
 import { createTriageCommand } from './cli/triage.js';
 import { createCompactCommand } from './cli/compact.js';
 import { createShowCommand } from './cli/show.js';
+import { createTelemetryCommand, handleFirstRunNotice, fireTelemetryEvent } from './cli/telemetry.js';
 import { generateAIPrompt } from './ai-prompt-generator.js';
 import { loadStore, removeStaleSuppressions, saveStore } from './suppressions/bc-scan-store.js';
 import { writeScanResults } from './output/index.js';
@@ -78,6 +79,7 @@ program.addCommand(createInitCommand());
 program.addCommand(createTriageCommand());
 program.addCommand(createCompactCommand());
 program.addCommand(createShowCommand());
+program.addCommand(createTelemetryCommand());
 
 program
   .option('--tsconfig <path>', 'Path to tsconfig.json or project directory', _narkRc?.tsconfig ?? './tsconfig.json')
@@ -282,6 +284,9 @@ async function main(options: any) {
     console.log(forAiAgentsPath);
     process.exit(0);
   }
+
+  // First-run telemetry notice (prints to stderr only, does not pollute JSON output)
+  handleFirstRunNotice();
 
   const scanStartTime = Date.now();
 
@@ -659,6 +664,36 @@ async function main(options: any) {
   }
 
   const outputEndTime = Date.now();
+
+  // Fire telemetry (fire-and-forget, never blocks)
+  {
+    const narkPkg = (() => {
+      try {
+        const _require = createRequire(import.meta.url);
+        return _require('../package.json') as { version: string };
+      } catch { return { version: 'unknown' }; }
+    })();
+    const contractIds = corpusResult.contracts
+      ? Array.from((corpusResult.contracts as Map<string, any>).values()).map((c: any) => c.id ?? c.contractId ?? c.package ?? '').filter(Boolean)
+      : [];
+    const packageNames = packageDiscovery?.packages?.map((p: any) => p.name) ?? [];
+    const violationCountsByContract: Record<string, number> = {};
+    for (const v of violations) {
+      const id: string = (v as any).contractId ?? (v as any).contract ?? 'unknown';
+      violationCountsByContract[id] = (violationCountsByContract[id] ?? 0) + 1;
+    }
+    fireTelemetryEvent({
+      version: narkPkg.version,
+      os: process.platform,
+      arch: process.arch,
+      nodeVersion: process.version,
+      packageNames,
+      contractIds,
+      violationCountsByContract,
+      scanDurationMs: outputEndTime - scanStartTime,
+      isCiMode: !!(process.env.CI || process.env.CONTINUOUS_INTEGRATION),
+    });
+  }
 
   // Checkpoint 4: verbose time breakdown
   if (options.verbose) {
