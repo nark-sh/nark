@@ -92,6 +92,76 @@ nark --include-tests
 
 # Fail CI on warnings
 nark --fail-on-warnings
+
+# Report-only mode (always exit 0 — never block CI)
+nark --report-only
+
+# Exit 1 if any warnings or errors found
+nark --fail-threshold warning
+
+# SARIF output for GitHub Code Scanning
+nark --sarif
+nark --sarif-output results.sarif
+
+# Verbose progress output to stderr
+nark --verbose
+```
+
+### Show
+
+Inspect nark's configuration and supported packages:
+
+```bash
+# Print nark version, Node version, corpus path, contract count
+nark show version
+
+# List all contracted packages (human-readable)
+nark show supported-packages
+
+# List as JSON
+nark show supported-packages --json
+
+# Show current auth/API endpoint config
+nark show deployment
+```
+
+### Telemetry
+
+```bash
+# Check telemetry status
+nark telemetry status
+
+# Opt out
+nark telemetry off
+
+# Opt back in
+nark telemetry on
+```
+
+### Auth
+
+```bash
+# Authenticate with the nark SaaS (stores token in ~/.nark/auth.json)
+nark login
+
+# Remove stored credentials
+nark logout
+```
+
+### CI (diff-aware scanning)
+
+Scans only the files changed in the current PR/branch — ideal for GitHub Actions:
+
+```bash
+# Scan files changed since HEAD~1
+nark ci
+
+# Scan files changed since a specific commit
+nark ci --baseline-commit <hash>
+
+# With SARIF output (for GitHub Check Runs / Code Scanning)
+nark ci --sarif
+nark ci --sarif-output results.sarif
 ```
 
 ### Triage
@@ -139,6 +209,48 @@ nark compact
 nark --instructions-path
 ```
 
+## Configuration File
+
+Place a `.narkrc.yaml` in your project root to persist CLI options. CLI flags always override file values.
+
+```yaml
+# .narkrc.yaml
+
+# Fail threshold: error | warning | info (default: error)
+failThreshold: error
+
+# Always exit 0 (report-only mode)
+# reportOnly: false
+
+# Output paths
+output:
+  json: .nark/latest.json
+  sarif: .nark/results.sarif
+
+# Exclude patterns
+exclude:
+  - '**/*.test.ts'
+  - '**/node_modules/**'
+
+# Include draft/in-development contracts
+# includeDrafts: false
+```
+
+| Field | Description | Default |
+|-------|-------------|---------|
+| `tsconfig` | Path to tsconfig.json | `./tsconfig.json` |
+| `corpus` | Path to corpus directory | auto-detected |
+| `failThreshold` | Severity that triggers exit `1` (`error`\|`warning`\|`info`) | `error` |
+| `reportOnly` | Always exit `0` regardless of violations | `false` |
+| `output.json` | Custom path for JSON audit record | auto |
+| `output.sarif` | Custom path for SARIF output | none |
+| `include` | Glob patterns to restrict analyzed files | all `.ts` |
+| `exclude` | Glob patterns to exclude | none |
+| `includeDrafts` | Include draft contracts | `false` |
+| `includeTests` | Include test files | `false` |
+| `includeDeprecated` | Include deprecated contracts | `false` |
+| `telemetry` | Telemetry enabled | `true` |
+
 ## AI Agent Integration
 
 nark includes `FORAIAGENTS.md` — a machine-readable instruction file that teaches AI agents how to interpret and fix violations. Point your agent at it:
@@ -152,6 +264,16 @@ nark --instructions-path
 # Cursor: add to .cursorrules
 ```
 
+## Exit Codes
+
+| Code | Meaning |
+|------|---------|
+| `0` | Clean scan — no violations at or above the fail threshold |
+| `1` | Violations found at or above `--fail-threshold` (default: `error`) |
+| `2` | Internal error (bad tsconfig, missing corpus, etc.) |
+
+Use `--report-only` to always get `0`, or `--fail-threshold warning` to block on warnings too.
+
 ## CLI Options
 
 | Flag | Description | Default |
@@ -161,7 +283,12 @@ nark --instructions-path
 | `--output <path>` | Output path for audit JSON | auto-generated |
 | `--project <path>` | Project root for package.json discovery | cwd |
 | `--no-terminal` | Disable terminal output (JSON only) | false |
-| `--fail-on-warnings` | Exit non-zero on warnings | false |
+| `--report-only` | Always exit 0 (never block CI) | false |
+| `--fail-threshold <level>` | Exit 1 if violations at/above this severity | `error` |
+| `--fail-on-warnings` | Shorthand for `--fail-threshold warning` | false |
+| `--sarif` | Write SARIF 2.1.0 to `.nark/results.sarif` | false |
+| `--sarif-output <file>` | Write SARIF to a custom path | — |
+| `--verbose` | Emit progress checkpoints to stderr | false |
 | `--include-tests` | Include test files | false |
 | `--include-drafts` | Include draft contracts | false |
 | `--show-suppressions` | Show suppressed violations | false |
