@@ -312,6 +312,98 @@ export class ContractMatcher {
         }
       }
 
+      // fastify route methods (get/post/put/delete/patch/options/head/route): suppress
+      // route-handler-async-error when the async handler callback has its body fully
+      // wrapped in try-catch. The try-catch is inside the callback, not around the
+      // app.get() call itself — but that's the correct pattern for fastify route handlers.
+      // The callback argument is the last argument (after optional options objects).
+      // Evidence: concern-20260413-dashboard-fastify-1 (line 51: SHOULD_NOT_FIRE with try-catch).
+      if (
+        detection.packageName === "fastify" &&
+        primaryPostcondition.id === "route-handler-async-error" &&
+        ts.isCallExpression(detection.node)
+      ) {
+        const routeMethods = new Set(["get","post","put","delete","patch","options","head","route","all"]);
+        if (routeMethods.has(detection.functionName)) {
+          // Find the last function-like argument (handler callback) and check try-catch
+          const args = detection.node.arguments;
+          let handlerFullyWrapped = false;
+          for (let i = args.length - 1; i >= 0; i--) {
+            const arg = args[i];
+            if (ts.isArrowFunction(arg) || ts.isFunctionExpression(arg)) {
+              const isAsync = (arg as ts.ArrowFunction | ts.FunctionExpression)
+                .modifiers?.some(m => m.kind === ts.SyntaxKind.AsyncKeyword) ?? false;
+              if (isAsync && this.controlFlow.isCallbackBodyFullyWrappedInTryCatch(detection.node, i)) {
+                handlerFullyWrapped = true;
+              }
+              break;
+            }
+          }
+          if (handlerFullyWrapped) continue;
+        }
+      }
+
+      // fastify setErrorHandler(): suppress seterrorhandler-called-after-start when
+      // no `listen()` or `ready()` call has been awaited before this setErrorHandler()
+      // call in the same function scope. The postcondition only fires when called after
+      // the server is already started (listen/ready already awaited).
+      // If no listen()/ready() precedes this call in the enclosing function, it's safe.
+      // Evidence: concern-20260413-fastify-deepen-1 ground-truth line 200 (SHOULD_NOT_FIRE).
+      if (
+        detection.packageName === "fastify" &&
+        detection.functionName === "setErrorHandler" &&
+        primaryPostcondition.id === "seterrorhandler-called-after-start" &&
+        ts.isCallExpression(detection.node)
+      ) {
+        // Walk up to find the enclosing function body (or source file)
+        let enclosingBody: ts.Block | ts.SourceFile | undefined;
+        let cur: ts.Node | undefined = detection.node.parent;
+        while (cur) {
+          if (ts.isBlock(cur) && cur.parent && (
+            ts.isFunctionDeclaration(cur.parent) ||
+            ts.isFunctionExpression(cur.parent) ||
+            ts.isArrowFunction(cur.parent) ||
+            ts.isMethodDeclaration(cur.parent)
+          )) {
+            enclosingBody = cur;
+            break;
+          }
+          if (ts.isSourceFile(cur)) {
+            enclosingBody = cur;
+            break;
+          }
+          cur = cur.parent;
+        }
+        if (enclosingBody) {
+          // Check if any await listen/ready call appears before setErrorHandler in the body
+          const stmts = (enclosingBody as ts.Block | ts.SourceFile).statements;
+          // Find index of the statement containing setErrorHandler
+          let setErrorHandlerStmtIdx = -1;
+          for (let si = 0; si < stmts.length; si++) {
+            let found = false;
+            const visit = (n: ts.Node): void => {
+              if (n === detection.node) { found = true; return; }
+              if (!found) ts.forEachChild(n, visit);
+            };
+            visit(stmts[si]);
+            if (found) { setErrorHandlerStmtIdx = si; break; }
+          }
+          // Check if any await+listen/ready appears in earlier statements
+          let hasPrecedingAwaitedListen = false;
+          for (let si = 0; si < setErrorHandlerStmtIdx; si++) {
+            const text = stmts[si].getText(sourceFile);
+            if (/await\s+\w+\.(listen|ready)\s*\(/.test(text)) {
+              hasPrecedingAwaitedListen = true;
+              break;
+            }
+          }
+          // If no preceding listen/ready, this is setErrorHandler before start — suppress
+          if (!hasPrecedingAwaitedListen) {
+            continue;
+          }
+        }
+      }
+
       // puppeteer browser.close() inside a catch or finally clause: calling close in
       // the error-handling branch (catch) or guaranteed-execution branch (finally)
       // satisfies browser-close-must-run.
