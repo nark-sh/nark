@@ -42,11 +42,30 @@ import { generateAIPrompt } from './ai-prompt-generator.js';
 import { loadStore, removeStaleSuppressions, saveStore } from './suppressions/bc-scan-store.js';
 import { writeScanResults } from './output/index.js';
 import { writeSarifOutput } from './output/sarif-writer.js';
+import { loadNarkRc } from './config/narkrc.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const program = new Command();
+
+// Load .narkrc.yaml from the project root (cwd at invocation time).
+// Commander hasn't parsed yet, so extract --project from argv manually.
+const _projectArgIdx = process.argv.indexOf('--project');
+const _projectRootForRc =
+  _projectArgIdx !== -1 && process.argv[_projectArgIdx + 1]
+    ? process.argv[_projectArgIdx + 1]
+    : process.cwd();
+const _narkRc = (() => {
+  try {
+    return loadNarkRc(_projectRootForRc);
+  } catch (err) {
+    console.error(
+      chalk.yellow(`Warning: ${err instanceof Error ? err.message : String(err)}`)
+    );
+    return null;
+  }
+})();
 
 program
   .name('nark')
@@ -61,18 +80,18 @@ program.addCommand(createCompactCommand());
 program.addCommand(createShowCommand());
 
 program
-  .option('--tsconfig <path>', 'Path to tsconfig.json or project directory (default: ./tsconfig.json)', './tsconfig.json')
-  .option('--corpus <path>', 'Path to corpus directory', findDefaultCorpusPath())
-  .option('--output <path>', 'Output path for audit record JSON (default: auto-generated in output/runs/)')
+  .option('--tsconfig <path>', 'Path to tsconfig.json or project directory', _narkRc?.tsconfig ?? './tsconfig.json')
+  .option('--corpus <path>', 'Path to corpus directory', _narkRc?.corpus ?? findDefaultCorpusPath())
+  .option('--output <path>', 'Output path for audit record JSON (default: auto-generated in output/runs/)', _narkRc?.output?.json)
   .option('--project <path>', 'Path to project root (for package.json discovery)', process.cwd())
   .option('--no-terminal', 'Disable terminal output (JSON only)')
   .option('--fail-on-warnings', 'Exit with error code if warnings are found')
   .option('--report-only', 'Always exit 0 regardless of violations (report-only mode)', false)
-  .option('--fail-threshold <level>', 'Exit 1 if violations at or above this severity are found (error|warning|info)', 'error')
+  .option('--fail-threshold <level>', 'Exit 1 if violations at or above this severity are found (error|warning|info)', _narkRc?.failThreshold ?? 'error')
   .option('--discover-packages', 'Enable package discovery and coverage reporting', true)
-  .option('--include-tests', 'Include test files in analysis (default: excludes test files)', false)
-  .option('--include-drafts', 'Include draft and in-development contracts (default: excludes draft/in-development)', false)
-  .option('--include-deprecated', 'Include deprecated contracts (default: excludes deprecated)', false)
+  .option('--include-tests', 'Include test files in analysis (default: excludes test files)', _narkRc?.includeTests ?? false)
+  .option('--include-drafts', 'Include draft and in-development contracts (default: excludes draft/in-development)', _narkRc?.includeDrafts ?? false)
+  .option('--include-deprecated', 'Include deprecated contracts (default: excludes deprecated)', _narkRc?.includeDeprecated ?? false)
   .option('--positive-report', 'Generate positive evidence report (default: true)', true)
   .option('--no-positive-report', 'Disable positive evidence report')
   .option('--show-suppressions', 'Show suppressed violations in output', false)
@@ -83,7 +102,7 @@ program
   .option('--compare-analyzers', 'Run both v1 and v2 analyzers and show diff (for validation)', false)
   .option('--instructions-path', 'Print the path to FORAIAGENTS.md and exit', false)
   .option('--sarif', 'Output results in SARIF 2.1.0 format (stdout)')
-  .option('--sarif-output <path>', 'Write SARIF 2.1.0 output to file')
+  .option('--sarif-output <path>', 'Write SARIF 2.1.0 output to file', _narkRc?.output?.sarif)
   .option('--verbose', 'Print diagnostic information to stderr during scan', false)
   .action(async (options) => {
     // This action handler is called when the main command is invoked

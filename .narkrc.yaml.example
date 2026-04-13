@@ -1,0 +1,44 @@
+# .narkrc.yaml — Nark configuration file
+#
+# Place this file (renamed to .narkrc.yaml) in your project root.
+# Nark will find it automatically when scanning your project.
+# CLI flags always override values set here.
+#
+# All fields are optional.
+
+# Path to tsconfig.json (default: ./tsconfig.json)
+# tsconfig: ./tsconfig.json
+
+# Path to nark-corpus directory (default: auto-detected)
+# corpus: ../nark-corpus
+
+# Fail threshold: exit 1 if violations at or above this severity are found
+# Values: error | warning | info (default: error)
+# failThreshold: error
+
+# Output paths
+# output:
+#   json: .nark/latest.json         # Write JSON audit record to this path
+#   sarif: .nark/results.sarif      # Write SARIF 2.1.0 output to this path
+
+# Include patterns to restrict which files are analyzed (glob patterns)
+# include:
+#   - src/**/*.ts
+
+# Exclude patterns (glob patterns)
+# exclude:
+#   - '**/*.test.ts'
+#   - '**/*.spec.ts'
+#   - '**/node_modules/**'
+
+# Include contracts marked as draft/in-development (default: false)
+# includeDrafts: false
+
+# Include test files in analysis (default: false)
+# includeTests: false
+
+# Include deprecated contracts (default: false)
+# includeDeprecated: false
+
+# Telemetry opt-out (default: true — no data is collected currently)
+# telemetry: true
