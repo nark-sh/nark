@@ -37,6 +37,7 @@ import { createSuppressionsCommand } from './cli/suppressions.js';
 import { createInitCommand } from './cli/init.js';
 import { createTriageCommand } from './cli/triage.js';
 import { createCompactCommand } from './cli/compact.js';
+import { createShowCommand } from './cli/show.js';
 import { generateAIPrompt } from './ai-prompt-generator.js';
 import { loadStore, removeStaleSuppressions, saveStore } from './suppressions/bc-scan-store.js';
 import { writeScanResults } from './output/index.js';
@@ -57,6 +58,7 @@ program.addCommand(createSuppressionsCommand());
 program.addCommand(createInitCommand());
 program.addCommand(createTriageCommand());
 program.addCommand(createCompactCommand());
+program.addCommand(createShowCommand());
 
 program
   .option('--tsconfig <path>', 'Path to tsconfig.json or project directory (default: ./tsconfig.json)', './tsconfig.json')
