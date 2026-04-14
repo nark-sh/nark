@@ -38,6 +38,8 @@ export class ContractMatcher {
   private clerkMiddlewareConfigured: boolean | null = null;
   /** Cached result of ClerkProvider project-wide presence check (null = not yet checked) */
   private clerkProviderPresent: boolean | null = null;
+  /** Tracks real call site evaluations per package (pass + fail) */
+  private _callSitesByPackage: Map<string, number> = new Map();
   constructor(
     contracts: Map<string, PackageContract>,
     options: ContractMatcherOptions,
@@ -45,6 +47,13 @@ export class ContractMatcher {
     this.contracts = contracts;
     this.options = options;
     this.controlFlow = new ControlFlowAnalysis();
+  }
+
+  /**
+   * Get the real call site counts per package (includes both passing and failing evaluations).
+   */
+  public get callSitesByPackage(): Record<string, number> {
+    return Object.fromEntries(this._callSitesByPackage);
   }
 
   /**
@@ -172,6 +181,12 @@ export class ContractMatcher {
       ) {
         continue;
       }
+
+      // Track this as a real evaluated call site (pass or fail)
+      this._callSitesByPackage.set(
+        detection.packageName,
+        (this._callSitesByPackage.get(detection.packageName) ?? 0) + 1,
+      );
 
       // Determine handling type: postconditions with "null" in their ID (e.g.,
       // current-user-null-not-handled, get-token-null-not-handled, auth-null-not-checked)

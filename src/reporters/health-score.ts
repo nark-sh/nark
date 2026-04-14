@@ -36,7 +36,12 @@ export interface HealthMetrics {
 export function calculateHealthScore(
   audit: AuditRecord | EnhancedAuditRecord
 ): HealthMetrics {
-  const totalChecks = audit.contracts_applied;
+  // Use real call site counts from V2 contract-matcher when available,
+  // falling back to contracts_applied (corpus size) for V1 or when no call sites tracked.
+  const realCallSiteTotal = audit.callsites_by_package
+    ? Object.values(audit.callsites_by_package).reduce((sum, n) => sum + n, 0)
+    : 0;
+  const totalChecks = realCallSiteTotal > 0 ? realCallSiteTotal : audit.contracts_applied;
   const violations = audit.violations.length;
   const checksPassed = Math.max(0, totalChecks - violations);
 

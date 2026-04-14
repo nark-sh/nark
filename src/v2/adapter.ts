@@ -26,6 +26,7 @@ export interface V2AdapterResult {
   detectionCount: number;
   fileDurations: { file: string; durationMs: number }[];   // all analyzed files with timing
   skippedFiles: { reason: string; count: number }[];        // skip reasons with counts
+  callSitesByPackage: Record<string, number>;               // real per-package call site counts (pass + fail)
 }
 
 /**
@@ -124,6 +125,7 @@ export async function runV2Analyzer(
     detectionCount: totalDetections,
     fileDurations,
     skippedFiles,
+    callSitesByPackage: analyzer.getCallSitesByPackage(),
   };
 }
 

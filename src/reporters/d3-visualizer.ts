@@ -436,7 +436,7 @@ export function generateD3Dashboard(data: D3VisualizationData): string {
         <div class="stats-grid">
           <div class="stat">
             <div class="stat-value accent">${health.checksPerformed}</div>
-            <div class="stat-label">Checks Performed</div>
+            <div class="stat-label">Call Sites Evaluated</div>
           </div>
           <div class="stat">
             <div class="stat-value success">${health.checksPassed}</div>
@@ -738,7 +738,7 @@ function generateInsightsHTML(
   }
 
   if (health.checksPerformed > 100) {
-    insights.push(`Comprehensive analysis with ${health.checksPerformed} checks performed`);
+    insights.push(`Comprehensive analysis with ${health.checksPerformed} call sites evaluated`);
   }
 
   if (insights.length === 0) return '';

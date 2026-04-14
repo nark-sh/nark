@@ -112,6 +112,15 @@ export class UniversalAnalyzer {
   }
 
   /**
+   * Returns real per-package call site counts from the contract matcher.
+   * Includes both passing and failing evaluations — honest "N call sites evaluated" numbers.
+   */
+  public getCallSitesByPackage(): Record<string, number> {
+    if (!this.contractMatcher) return {};
+    return this.contractMatcher.callSitesByPackage;
+  }
+
+  /**
    * Analyze all source files in the project
    */
   public analyze(): ProjectAnalysisResult {

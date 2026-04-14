@@ -155,7 +155,7 @@ function formatPositiveEvidenceReport(
     lines.push(`${cyan}📊 COVERAGE SUMMARY${reset}`);
     lines.push('─'.repeat(80));
     lines.push(`  • Files Analyzed: ${audit.files_analyzed}`);
-    lines.push(`  • Package Usages Detected: ${health.checksPerformed}`);
+    lines.push(`  • Call Sites Evaluated: ${health.checksPerformed}`);
     lines.push(`  • Contracts Applied: ${audit.contracts_applied}`);
 
     const violationColor = audit.violations.length === 0 ? green : yellow;
@@ -234,12 +234,12 @@ function generateInsights(
 
   // Perfect score insight
   if (health.errorHandlingCompliance === 100) {
-    insights.push(`${green}✓${reset} Perfect score! All ${health.checksPerformed} package usage points follow best practices.`);
+    insights.push(`${green}✓${reset} Perfect score! All ${health.checksPerformed} call sites follow best practices.`);
   }
 
   // High compliance insight
   else if (health.errorHandlingCompliance >= 95) {
-    insights.push(`${green}✓${reset} Excellent compliance (${health.errorHandlingCompliance}%) - only ${audit.violations.length} issues found in ${health.checksPerformed} checks.`);
+    insights.push(`${green}✓${reset} Excellent compliance (${health.errorHandlingCompliance}%) - only ${audit.violations.length} issues found in ${health.checksPerformed} call sites.`);
   }
 
   // Passing packages insight
@@ -270,7 +270,7 @@ function generateInsights(
 
   // Add volume insight (shows we did real work)
   if (health.checksPerformed > 100) {
-    insights.push(`${green}✓${reset} Analyzed ${health.checksPerformed} function calls across ${audit.files_analyzed} files - comprehensive coverage.`);
+    insights.push(`${green}✓${reset} Evaluated ${health.checksPerformed} call sites across ${audit.files_analyzed} files - comprehensive coverage.`);
   }
 
   // Benchmarking insight
@@ -430,7 +430,7 @@ function formatPositiveEvidenceReportMarkdown(
     lines.push('### 📊 Coverage Summary');
     lines.push('');
     lines.push(`- **Files Analyzed:** ${audit.files_analyzed}`);
-    lines.push(`- **Package Usages Detected:** ${health.checksPerformed}`);
+    lines.push(`- **Call Sites Evaluated:** ${health.checksPerformed}`);
     lines.push(`- **Contracts Applied:** ${audit.contracts_applied}`);
     lines.push(`- **Violations Found:** ${audit.violations.length}`);
     lines.push(`- **Checks Passed:** ${health.checksPassed} ✓`);

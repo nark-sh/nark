@@ -454,15 +454,10 @@ async function main(options: any) {
     const { runV2Analyzer } = await import('./v2/adapter.js');
     v2Result = await runV2Analyzer(config, corpusResult.contracts);
     violations = v2Result.violations;
-    // Derive per-package call site counts from V2 violations (known minimum)
-    const v2CallsitesByPackage: Record<string, number> = {};
-    for (const v of v2Result.violations) {
-      v2CallsitesByPackage[v.package] = (v2CallsitesByPackage[v.package] ?? 0) + 1;
-    }
     stats = {
       filesAnalyzed: v2Result.filesAnalyzed,
       contractsApplied: corpusResult.contracts.size,
-      callsitesByPackage: v2CallsitesByPackage,
+      callsitesByPackage: v2Result.callSitesByPackage,
     };
   }
   const analysisEndTime = Date.now();
