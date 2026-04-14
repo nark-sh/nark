@@ -324,4 +324,4 @@ The contract library ([nark-corpus](https://github.com/nark-sh/nark-corpus)) inc
 
 ## License
 
-MIT
+AGPL-3.0 — see [LICENSE](./LICENSE) for details. Free for local use, CI/CD, and self-hosting. SaaS providers must open-source modifications or obtain a commercial license.
