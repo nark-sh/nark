@@ -419,7 +419,14 @@ async function main(options: any) {
     includeTests: options.includeTests,
   };
 
-  console.log(chalk.dim('Analyzing TypeScript code...'));
+  // Progress callback for file analysis
+  const isTerminal = process.stderr.isTTY;
+  const onProgress = isTerminal ? (current: number, total: number) => {
+    process.stderr.write(`\r${chalk.dim(`Analyzing TypeScript code... ${current}/${total} files`)}`);
+  } : undefined;
+  if (!isTerminal) {
+    console.log(chalk.dim('Analyzing TypeScript code...'));
+  }
 
   // Always create a v1 analyzer instance (used for suppression checks and dead suppression detection)
   const analyzer = new Analyzer(config, corpusResult.contracts);
@@ -436,7 +443,7 @@ async function main(options: any) {
   } else if (options.compareAnalyzers) {
     // Compare mode: run both and show diff
     const { runV2Analyzer } = await import('./v2/adapter.js');
-    v2Result = await runV2Analyzer(config, corpusResult.contracts);
+    v2Result = await runV2Analyzer(config, corpusResult.contracts, onProgress);
     const v1Violations = analyzer.analyze();
     const v1Stats = analyzer.getStats();
 
@@ -452,7 +459,7 @@ async function main(options: any) {
   } else {
     // Default: v2 plugin-based analyzer
     const { runV2Analyzer } = await import('./v2/adapter.js');
-    v2Result = await runV2Analyzer(config, corpusResult.contracts);
+    v2Result = await runV2Analyzer(config, corpusResult.contracts, onProgress);
     violations = v2Result.violations;
     stats = {
       filesAnalyzed: v2Result.filesAnalyzed,
@@ -462,6 +469,9 @@ async function main(options: any) {
   }
   const analysisEndTime = Date.now();
 
+  if (isTerminal) {
+    process.stderr.write(`\r${' '.repeat(60)}\r`); // clear progress line
+  }
   console.log(chalk.green(`✓ Analyzed ${stats.filesAnalyzed} files\n`));
 
   // Checkpoint 3: verbose analysis timing output

@@ -25,12 +25,15 @@ import type { PackageContract } from '../types.js';
  *
  * Plugin-based analyzer that can detect any pattern without modification.
  */
+export type ProgressCallback = (current: number, total: number, fileName: string) => void;
+
 export class UniversalAnalyzer {
   private config: AnalyzerConfig;
   private program!: ts.Program;
   private plugins: DetectorPlugin[] = [];
   private contracts: Map<string, PackageContract>;
   private contractMatcher?: ContractMatcher;
+  public onProgress?: ProgressCallback;
 
   constructor(config: AnalyzerConfig, contracts?: Map<string, PackageContract>) {
     this.config = config;
@@ -185,7 +188,11 @@ export class UniversalAnalyzer {
     }
 
     // Analyze each file
-    for (const sourceFile of sourceFiles) {
+    for (let i = 0; i < sourceFiles.length; i++) {
+      const sourceFile = sourceFiles[i];
+      if (this.onProgress) {
+        this.onProgress(i + 1, sourceFiles.length, sourceFile.fileName);
+      }
       const result = this.analyzeFile(sourceFile, engine);
       fileResults.push(result);
       totalDetections += result.detections.length;

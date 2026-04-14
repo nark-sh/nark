@@ -36,9 +36,12 @@ export interface V2AdapterResult {
  * @param contracts - Loaded package contracts
  * @returns Violations in v1 format plus suppressed violations
  */
+import type { ProgressCallback } from './analyzer.js';
+
 export async function runV2Analyzer(
   config: V1Config,
-  contracts: Map<string, PackageContract>
+  contracts: Map<string, PackageContract>,
+  onProgress?: ProgressCallback
 ): Promise<V2AdapterResult> {
   // Build detection maps from contracts (factory methods, class names, type names)
   const factoryToPackage = new Map<string, string>();
@@ -84,6 +87,9 @@ export async function runV2Analyzer(
   analyzer.registerPlugin(new ReturnValueChecker());
 
   // Initialize and run
+  if (onProgress) {
+    analyzer.onProgress = onProgress;
+  }
   analyzer.initialize();
   const result = analyzer.analyze();
 
