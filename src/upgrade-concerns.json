@@ -19244,5 +19244,593 @@
       "note": "Proactive — contract added via API surface analysis, detection rule needed"
     },
     "resolution": "Already implemented: the scanner uses property-chain detection for Twilio nested API calls (twilio.verify.v2.services.create(), twilio.calls(sid).fetch(), etc.). Running the ground-truth test (src/v2/fixtures/twilio.ground-truth.test.ts) confirms all 35 tests pass including the depth-26 postconditions. The concerns were queued with the note \"no scanner rule exists\" but the traversal engine covers these via the twilio contract.yaml postconditions."
+  },
+  {
+    "id": "concern-2026-04-13-tanstack-react-router-1",
+    "created_at": "2026-04-13",
+    "source": "dashboard-feedback",
+    "package": "@tanstack/react-router",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Scanner fires on route path strings that are valid per @tanstack/react-router conventions but do not match the expected pattern",
+    "evidence": {
+      "repos": [
+        "src/components/command-menu.tsx",
+        "src/features/auth/sign-in/components/user-auth-form.tsx",
+        "src/features/browser-agents/browser-agent-detail.tsx",
+        "src/routes/(auth)/accept-invite.tsx",
+        "src/routes/_authenticated/invoice/$invoiceId.tsx"
+      ],
+      "scan_file": null,
+      "violation_count": 94,
+      "fp_reason": null,
+      "fix_target": "scanner",
+      "postcondition_id": "invalid-route-path"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-13-undici-2",
+    "created_at": "2026-04-13",
+    "source": "dashboard-feedback",
+    "package": "undici",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Contract postcondition too broad — many legitimate fetch call sites parse JSON safely via .json() without explicit try-catch because errors propagate naturally",
+    "evidence": {
+      "repos": [
+        "apps/web/app/api/github/debug/route.ts",
+        "apps/web/app/api/oss-scan/route.ts",
+        "apps/web/components/violations/violation-review-panel.tsx",
+        "apps/web/components/billing/change-plan-modal.tsx",
+        "apps/web/hooks/use-scan-poller.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 64,
+      "fp_reason": null,
+      "fix_target": "contract",
+      "postcondition_id": "response-json-parse-error"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-13-react-hook-form-3",
+    "created_at": "2026-04-13",
+    "source": "dashboard-feedback",
+    "package": "react-hook-form",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "React Hook Form internally catches errors thrown in handleSubmit callbacks and exposes them via formState.errors; explicit try-catch is not required",
+    "evidence": {
+      "repos": [
+        "src/features/auth/sign-in/components/user-auth-form.tsx",
+        "src/features/auth/sign-up/components/sign-up-form.tsx",
+        "src/features/settings/profile/profile-form.tsx",
+        "src/features/tasks/components/tasks-mutate-drawer.tsx",
+        "src/components/create-organization-modal.tsx"
+      ],
+      "scan_file": null,
+      "violation_count": 60,
+      "fp_reason": null,
+      "fix_target": "contract",
+      "postcondition_id": "async-submit-unhandled-error"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-13-ai-4",
+    "created_at": "2026-04-13",
+    "source": "dashboard-feedback",
+    "package": "ai",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "AI SDK tool execution errors are handled by the framework internally; user-level try-catch is not required for tool callback functions",
+    "evidence": {
+      "repos": [
+        "lib/tools/browser/browserAct.ts",
+        "lib/tools/browser/browserAgent.ts",
+        "lib/tools/files/readFile.ts",
+        "lib/tools/searchTwitter.ts",
+        "lib/tools/searchWeb/getWebDeepResearchTool.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 25,
+      "fp_reason": null,
+      "fix_target": "contract",
+      "postcondition_id": "tool-execution-error"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-13-tanstack-react-query-5",
+    "created_at": "2026-04-13",
+    "source": "dashboard-feedback",
+    "package": "@tanstack/react-query",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "TanStack Query automatically catches errors from queryFn and surfaces them via isError/error state; no explicit try-catch needed on individual query hooks",
+    "evidence": {
+      "repos": [
+        "hooks/useAccountOrganizations.ts",
+        "hooks/useArtistInstruction.ts",
+        "hooks/useCredits.ts",
+        "hooks/useTaskRunStatus.ts",
+        "components/TasksPage/TasksList.tsx"
+      ],
+      "scan_file": null,
+      "violation_count": 25,
+      "fp_reason": null,
+      "fix_target": "contract",
+      "postcondition_id": "query-error-unhandled"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-13-tanstack-react-router-6",
+    "created_at": "2026-04-13",
+    "source": "dashboard-feedback",
+    "package": "@tanstack/react-router",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Scanner incorrectly flags route param access as type mismatch when params are correctly typed via route definition generics",
+    "evidence": {
+      "repos": [
+        "src/features/browser-agents/browser-agent-detail.tsx",
+        "src/features/customers/customer-detail.tsx",
+        "src/features/invoices/invoice-detail.tsx",
+        "src/features/loans/loan-detail.tsx",
+        "src/routes/_authenticated/workflow-builder/$workflowId.tsx"
+      ],
+      "scan_file": null,
+      "violation_count": 18,
+      "fp_reason": null,
+      "fix_target": "scanner",
+      "postcondition_id": "param-type-mismatch"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-13-zod-7",
+    "created_at": "2026-04-13",
+    "source": "dashboard-feedback",
+    "package": "zod",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Contract too broad — zod.parse() errors naturally propagate as unhandled exceptions in Next.js API routes where the framework catches and returns 500 responses",
+    "evidence": {
+      "repos": [
+        "apps/web/app/api/ai/analyze-sender-pattern/route.ts",
+        "apps/web/app/api/clean/route.ts",
+        "apps/web/app/api/sso/signin/route.ts",
+        "apps/web/app/api/threads/[id]/route.ts",
+        "apps/web/app/api/user/stats/senders/route.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 14,
+      "fp_reason": null,
+      "fix_target": "contract",
+      "postcondition_id": "parse-validation-error"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-13-tanstack-react-router-8",
+    "created_at": "2026-04-13",
+    "source": "dashboard-feedback",
+    "package": "@tanstack/react-router",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Router validates search params internally and redirects/errors gracefully; explicit try-catch on validateSearch is not required",
+    "evidence": {
+      "repos": [
+        "src/features/apps/index.tsx",
+        "src/features/auth/sign-in/index.tsx",
+        "src/features/auth/sign-up/index.tsx",
+        "src/routes/(auth)/accept-invite.tsx",
+        "src/routes/(auth)/invite.tsx"
+      ],
+      "scan_file": null,
+      "violation_count": 14,
+      "fp_reason": null,
+      "fix_target": "contract",
+      "postcondition_id": "search-schema-validation-error"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-13-react-hook-form-9",
+    "created_at": "2026-04-13",
+    "source": "dashboard-feedback",
+    "package": "react-hook-form",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Scanner fires on components that receive form context via props/render props rather than FormProvider, which is also valid per RHF docs",
+    "evidence": {
+      "repos": [
+        "components/Account/ArtistInstructionTextArea.tsx",
+        "components/Input.tsx",
+        "src/components/ui/form.tsx"
+      ],
+      "scan_file": null,
+      "violation_count": 9,
+      "fp_reason": null,
+      "fix_target": "scanner",
+      "postcondition_id": "missing-form-provider"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-13-ai-10",
+    "created_at": "2026-04-13",
+    "source": "dashboard-feedback",
+    "package": "ai",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Scanner does not detect retry-wrapper patterns (withRetry, exponentialBackoff) that satisfy the rate-limit-error postcondition",
+    "evidence": {
+      "repos": [
+        "apps/web/utils/llms/index.ts",
+        "lib/ai/generateArray.ts",
+        "lib/catalog/analyzeCatalogBatch.ts",
+        "lib/evals/scorers/CatalogAvailability.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 7,
+      "fp_reason": null,
+      "fix_target": "scanner",
+      "postcondition_id": "api-error-rate-limit"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-13-clerk-nextjs-11",
+    "created_at": "2026-04-13",
+    "source": "dashboard-feedback",
+    "package": "@clerk/nextjs",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Contract too broad — useUser() in Clerk returns isLoaded flag; many components correctly render null/loading before isLoaded, satisfying the postcondition",
+    "evidence": {
+      "repos": [
+        "apps/web/app/(auth)/invite/[token]/page.tsx",
+        "apps/web/components/layout/header.tsx",
+        "apps/web/components/layout/sidebar.tsx",
+        "apps/web/components/layout/top-nav.tsx"
+      ],
+      "scan_file": null,
+      "violation_count": 7,
+      "fp_reason": null,
+      "fix_target": "contract",
+      "postcondition_id": "use-user-no-loaded-check"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-13-redis-12",
+    "created_at": "2026-04-13",
+    "source": "dashboard-feedback",
+    "package": "redis",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Scanner does not detect try-catch blocks wrapping Redis client instantiation and connection that serve as the error handler",
+    "evidence": {
+      "repos": [
+        "packages/api/src/main.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 7,
+      "fp_reason": null,
+      "fix_target": "scanner",
+      "postcondition_id": "missing-error-listener"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-13-express-13",
+    "created_at": "2026-04-13",
+    "source": "dashboard-feedback",
+    "package": "express",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Scanner does not recognize express-async-errors or asyncHandler wrapper that patches Express to handle async middleware rejections automatically",
+    "evidence": {
+      "repos": [
+        "api/browser-agent-server.ts",
+        "api/dev-server.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 5,
+      "fp_reason": null,
+      "fix_target": "scanner",
+      "postcondition_id": "async-middleware-unhandled-rejection"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-13-tanstack-react-query-14",
+    "created_at": "2026-04-13",
+    "source": "dashboard-feedback",
+    "package": "@tanstack/react-query",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "TanStack Query automatically catches errors from infiniteQueryFn and surfaces them via isError/error state; no explicit try-catch needed",
+    "evidence": {
+      "repos": [
+        "hooks/useArtistFans.ts",
+        "hooks/useArtistPosts.ts",
+        "hooks/useCatalogSongs.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 3,
+      "fp_reason": null,
+      "fix_target": "contract",
+      "postcondition_id": "infinite-query-error-unhandled"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-13-clerk-nextjs-15",
+    "created_at": "2026-04-13",
+    "source": "dashboard-feedback",
+    "package": "@clerk/nextjs",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Scanner fires on components that are correctly wrapped in ClerkProvider via a parent layout, not requiring local provider wrapping",
+    "evidence": {
+      "repos": [
+        "apps/web/components/layout/header.tsx",
+        "apps/web/components/layout/sidebar.tsx",
+        "apps/web/components/layout/top-nav.tsx"
+      ],
+      "scan_file": null,
+      "violation_count": 3,
+      "fp_reason": null,
+      "fix_target": "scanner",
+      "postcondition_id": "use-clerk-outside-provider"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-13-dotenv-16",
+    "created_at": "2026-04-13",
+    "source": "dashboard-feedback",
+    "package": "dotenv",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Contract too broad — dotenv.config() missing .env file is expected and handled by process.env fallbacks; not a runtime error in most patterns",
+    "evidence": {
+      "repos": [
+        "src/lib/migrations/supabase.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 3,
+      "fp_reason": null,
+      "fix_target": "contract",
+      "postcondition_id": "missing-env-file"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-13-stripe-17",
+    "created_at": "2026-04-13",
+    "source": "dashboard-feedback",
+    "package": "stripe",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Scanner does not detect Stripe retry configuration (maxNetworkRetries) that satisfies the rate-limit-error postcondition without explicit try-catch",
+    "evidence": {
+      "repos": [
+        "apps/web/lib/stripe.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 3,
+      "fp_reason": null,
+      "fix_target": "scanner",
+      "postcondition_id": "rate-limit-error"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-13-tanstack-react-query-18",
+    "created_at": "2026-04-13",
+    "source": "dashboard-feedback",
+    "package": "@tanstack/react-query",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "TanStack Query mutation errors are surfaced via onError callback or isError state; explicit try-catch on mutateAsync is not always required",
+    "evidence": {
+      "repos": [
+        "hooks/useCatalogSongsFileSelect.ts",
+        "hooks/useSandboxFileContent.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 2,
+      "fp_reason": null,
+      "fix_target": "contract",
+      "postcondition_id": "mutation-error-unhandled"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-13-ioredis-19",
+    "created_at": "2026-04-13",
+    "source": "dashboard-feedback",
+    "package": "ioredis",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Scanner does not detect try-catch blocks around ioredis operations that serve as equivalent error handling to event listeners",
+    "evidence": {
+      "repos": [
+        "apps/web/lib/auth-cache.ts",
+        "apps/web/lib/rate-limit.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 2,
+      "fp_reason": null,
+      "fix_target": "scanner",
+      "postcondition_id": "missing-error-listener"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-13-node-fetch-20",
+    "created_at": "2026-04-13",
+    "source": "dashboard-feedback",
+    "package": "node-fetch",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Contract too broad — node-fetch network errors propagate naturally to caller try-catch; postcondition should not require try-catch at the call site itself",
+    "evidence": {
+      "repos": [
+        "api/analysis/post-game-analysis.ts",
+        "api/utils/ai-client.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 2,
+      "fp_reason": null,
+      "fix_target": "contract",
+      "postcondition_id": "fetch-rejects-on-network-error"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-13-vercel-blob-21",
+    "created_at": "2026-04-13",
+    "source": "dashboard-feedback",
+    "package": "@vercel/blob",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Contract too broad — blob.del() errors propagate to caller naturally; contract should not require try-catch at every delete call site",
+    "evidence": {
+      "repos": [
+        "lib/sandbox/postSandboxesFilesHandler.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 2,
+      "fp_reason": null,
+      "fix_target": "contract",
+      "postcondition_id": "blob-del-no-try-catch"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-13-upstash-redis-22",
+    "created_at": "2026-04-13",
+    "source": "dashboard-feedback",
+    "package": "@upstash/redis",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Contract too broad — Upstash Redis errors propagate naturally and are handled at higher levels in the call stack",
+    "evidence": {
+      "repos": [
+        "apps/web/utils/redis/index.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 1,
+      "fp_reason": null,
+      "fix_target": "contract",
+      "postcondition_id": "network-or-api-error"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-13-puppeteer-23",
+    "created_at": "2026-04-13",
+    "source": "dashboard-feedback",
+    "package": "puppeteer",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Contract too broad — browser.close() is often called in finally blocks that the scanner does not correctly recognize as satisfying the postcondition",
+    "evidence": {
+      "repos": [
+        "api/browser-agent-executor.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 1,
+      "fp_reason": null,
+      "fix_target": "contract",
+      "postcondition_id": "browser-close-must-run"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-13-winston-24",
+    "created_at": "2026-04-13",
+    "source": "dashboard-feedback",
+    "package": "winston",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Scanner does not detect try-catch around winston transport initialization as equivalent to error event listener",
+    "evidence": {
+      "repos": [
+        "apps/web/scripts/setup-telegram-bot.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 1,
+      "fp_reason": null,
+      "fix_target": "scanner",
+      "postcondition_id": "missing-error-listener"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-13-ai-25",
+    "created_at": "2026-04-13",
+    "source": "dashboard-feedback",
+    "package": "ai",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Contract too broad — AI SDK schema validation errors propagate naturally to API route error handlers",
+    "evidence": {
+      "repos": [
+        "apps/web/utils/llms/index.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 1,
+      "fp_reason": null,
+      "fix_target": "contract",
+      "postcondition_id": "schema-validation-error"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-13-supabase-supabase-js-26",
+    "created_at": "2026-04-13",
+    "source": "dashboard-feedback",
+    "package": "@supabase/supabase-js",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Contract too broad — RLS policy violations are surfaced as error objects in Supabase response, not as thrown exceptions requiring try-catch",
+    "evidence": {
+      "repos": [
+        "packages/api/src/main.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 1,
+      "fp_reason": null,
+      "fix_target": "contract",
+      "postcondition_id": "rls-policy-violation"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-13-supabase-supabase-js-27",
+    "created_at": "2026-04-13",
+    "source": "dashboard-feedback",
+    "package": "@supabase/supabase-js",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Contract too broad — password validation errors are returned in Supabase auth response object, not thrown exceptions",
+    "evidence": {
+      "repos": [
+        "src/contexts/auth-context.tsx"
+      ],
+      "scan_file": null,
+      "violation_count": 1,
+      "fp_reason": null,
+      "fix_target": "contract",
+      "postcondition_id": "weak-password"
+    },
+    "resolution": null
   }
 ]
