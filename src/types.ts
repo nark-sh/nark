@@ -229,6 +229,7 @@ export interface AuditRecord {
   tsconfig: string;
   packages_analyzed: string[];
   contracts_applied: number;
+  callsites_by_package?: Record<string, number>;
   files_analyzed: number;
   violations: Violation[];
   summary: VerificationSummary;

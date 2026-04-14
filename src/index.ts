@@ -516,6 +516,7 @@ async function main(options: any) {
     contractsApplied: stats.contractsApplied,
     filesAnalyzed: stats.filesAnalyzed,
     corpusVersion: '1.0.0', // TODO: Read from corpus metadata
+    callsitesByPackage: stats.callsitesByPackage,
   });
 
   // Generate enhanced audit record if package discovery was run

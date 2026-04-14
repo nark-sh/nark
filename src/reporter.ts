@@ -74,6 +74,7 @@ export async function generateAuditRecord(
     contractsApplied: number;
     filesAnalyzed: number;
     corpusVersion: string;
+    callsitesByPackage?: Record<string, number>;
   },
 ): Promise<AuditRecord> {
   // Enrich violations with code snippets
@@ -93,6 +94,7 @@ export async function generateAuditRecord(
     tsconfig: config.tsconfigPath,
     packages_analyzed: config.packagesAnalyzed,
     contracts_applied: config.contractsApplied,
+    callsites_by_package: config.callsitesByPackage,
     files_analyzed: config.filesAnalyzed,
     violations: enrichedViolations,
     summary,

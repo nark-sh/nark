@@ -51,13 +51,12 @@ export function buildPackageBreakdown(
   const packages: PackageUsageStats[] = allPackages.map(pkgName => {
     const violations = violationsByPackage.get(pkgName) || [];
 
-    // Estimate contracts applied per package
-    // (This is approximate - exact tracking requires analyzer changes)
-    const contractsApplied = estimateContractsForPackage(pkgName, audit, violations);
-
-    // Mark as estimated when falling back to proportional distribution
-    const enhanced = audit as EnhancedAuditRecord;
-    const isEstimated = !(enhanced.violations_by_package && enhanced.violations_by_package[pkgName]);
+    // Use real call site count from analyzer when available
+    const realCount = audit.callsites_by_package?.[pkgName];
+    const isEstimated = realCount === undefined;
+    const contractsApplied = isEstimated
+      ? estimateContractsForPackage(pkgName, audit, violations)
+      : realCount;
 
     const checksPassedCount = contractsApplied - violations.length;
     const compliancePercent = contractsApplied > 0
@@ -196,10 +195,18 @@ export function formatPackageBreakdown(breakdown: PackageBreakdownSummary): stri
       ? pkg.packageName.substring(0, 27) + '...'
       : pkg.packageName.padEnd(30);
 
-    // Format check count — prefix with ~ when it is a proportional estimate
-    const checkDisplay = pkg.isEstimated
-      ? `~${pkg.contractsApplied}`.padStart(5)
-      : pkg.contractsApplied.toString().padStart(5);
+    // Format check count — exact when real data is available, estimated otherwise
+    let checkDisplay: string;
+    if (!pkg.isEstimated) {
+      // Real count from analyzer
+      checkDisplay = pkg.contractsApplied.toString().padStart(5);
+    } else if (pkg.violationsFound > 0) {
+      // Known minimum only
+      checkDisplay = `≥${pkg.violationsFound}`.padStart(5);
+    } else {
+      // No data at all
+      checkDisplay = '    —';
+    }
 
     // Build status line
     const statusLine = [

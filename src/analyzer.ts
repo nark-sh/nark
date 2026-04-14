@@ -46,6 +46,7 @@ export class Analyzer {
   private projectRoot: string;
   private includeTests: boolean;
   private analyzerVersion: string = "1.1.0"; // From package.json
+  private callsitesByPackage: Map<string, number> = new Map();
 
   // Detection maps built dynamically from contract definitions
   private typeToPackage: Map<string, string>;
@@ -137,6 +138,7 @@ export class Analyzer {
   analyze(): Violation[] {
     this.violations = [];
     this.suppressedViolations = [];
+    this.callsitesByPackage = new Map();
 
     // Collect all violations first
     const allViolations: Array<{
@@ -1308,6 +1310,12 @@ export class Analyzer {
     if (!fileImports.has(callSite.packageName)) {
       return;
     }
+
+    // Record call site for per-package stats
+    this.callsitesByPackage.set(
+      callSite.packageName,
+      (this.callsitesByPackage.get(callSite.packageName) ?? 0) + 1,
+    );
 
     // NEW: Handle namespace methods
     // Check if this call has a namespace (e.g., ts.sys.readFile())
@@ -3789,6 +3797,7 @@ export class Analyzer {
         (sum, contract) => sum + (contract.functions?.length || 0),
         0,
       ),
+      callsitesByPackage: Object.fromEntries(this.callsitesByPackage),
     };
   }
   /**
