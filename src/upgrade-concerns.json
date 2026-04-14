@@ -20735,7 +20735,7 @@
     "source": "deepen",
     "package": "passport",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "deferred",
     "description": "Add detection for passport req.logIn() — missing callback and silent session-save-error postconditions added in depth pass but no scanner rule exists",
     "evidence": {
       "repos": [],
@@ -20743,7 +20743,7 @@
       "violation_count": 0,
       "note": "Proactive — logIn postconditions (login-missing-callback, login-session-save-error, login-serialize-error, login-missing-session-middleware) added via API surface analysis"
     },
-    "resolution": null
+    "resolution": "Deferred: req.logIn() is injected by passport onto Express Request. Cannot map to passport package without type-checker integration to resolve req parameter type."
   },
   {
     "id": "concern-2026-04-13-passport-deepen-2",
@@ -20751,7 +20751,7 @@
     "source": "deepen",
     "package": "passport",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "deferred",
     "description": "Add detection for passport req.logout() — missing callback throws synchronously in passport >=0.6 (logout-missing-callback), session-save-error silently leaves session active server-side (security vulnerability)",
     "evidence": {
       "repos": [],
@@ -20759,7 +20759,7 @@
       "violation_count": 0,
       "note": "Proactive — logout postconditions (logout-missing-callback, logout-session-save-error, logout-missing-session-middleware) added via API surface analysis. logout-missing-callback is high priority: breaking change in passport 0.6+"
     },
-    "resolution": null
+    "resolution": "Deferred: req.logout() has the same limitation as req.logIn() — requires type-checker integration to map req-level methods to passport."
   },
   {
     "id": "concern-2026-04-13-passport-deepen-3",
@@ -20767,7 +20767,7 @@
     "source": "deepen",
     "package": "passport",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for passport.session() — deserialize-error and session-failed-deserialize-chain fire on every authenticated request when DB is down",
     "evidence": {
       "repos": [],
@@ -20775,7 +20775,7 @@
       "violation_count": 0,
       "note": "Proactive — session postconditions (session-missing-session-middleware, session-deserialize-error, session-failed-deserialize-chain) added via API surface analysis"
     },
-    "resolution": null
+    "resolution": "Session deserialize errors are detected via passport.deserializeUser() callback detection. Ground-truth scan confirms 3 violations at fixture lines 85, 100, 110."
   },
   {
     "id": "concern-2026-04-13-passport-deepen-4",
@@ -20783,7 +20783,7 @@
     "source": "deepen",
     "package": "passport",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "deferred",
     "description": "Add detection for passport.authorize() — strategy errors propagate to next(err) if no callback; identical error surface to authenticate()",
     "evidence": {
       "repos": [],
@@ -20791,7 +20791,7 @@
       "violation_count": 0,
       "note": "Proactive — authorize postconditions (authorize-strategy-error, authorize-failure-without-redirect) added via API surface analysis"
     },
-    "resolution": null
+    "resolution": "Deferred: passport.authorize() is a middleware factory. Errors propagate via next(err) in the returned middleware, not at the call site. Requires special middleware-factory detection pattern."
   },
   {
     "id": "concern-2026-04-13-passport-deepen-5",
@@ -20799,7 +20799,7 @@
     "source": "deepen",
     "package": "passport",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for passport.serializeUser() chain failure — Error('Failed to serialize user into session') blocks all login attempts when no serializer handles the user type",
     "evidence": {
       "repos": [],
@@ -20807,7 +20807,7 @@
       "violation_count": 0,
       "note": "Proactive — serializeUser postcondition (serialize-chain-failure) added via API surface analysis"
     },
-    "resolution": null
+    "resolution": "passport.serializeUser() is detected via the callback-detector. Ground-truth scan confirms 2 violations for serialize-chain-failure at fixture lines 127 and 138."
   },
   {
     "id": "concern-2026-04-13-passport-deepen-6",
@@ -20815,7 +20815,7 @@
     "source": "deepen",
     "package": "passport",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for passport.deserializeUser() — database errors in deserializer fire on every authenticated request, not just at login; amplified impact vs other DB errors",
     "evidence": {
       "repos": [],
@@ -20823,7 +20823,7 @@
       "violation_count": 0,
       "note": "Proactive — deserializeUser postconditions (deserialize-database-error, deserialize-chain-failure) added via API surface analysis. High priority due to amplified impact pattern"
     },
-    "resolution": null
+    "resolution": "passport.deserializeUser() is detected via the callback-detector. Ground-truth scan confirms 3 violations for deserialize-database-error at fixture lines 85, 100, and 110."
   },
   {
     "id": "concern-2026-04-13-feedback-tanstack-react-router-1",
@@ -21432,5 +21432,197 @@
       "postcondition_id": "weak-password"
     },
     "resolution": "Rejected: Suppression for @supabase/supabase-js weak-password in auth context files already exists (lines 1184+). FP violations in DB pre-date the suppression and are from old scans; new scans are suppressed correctly."
+  },
+  {
+    "id": "concern-20260413-trpc-client-deepen-1",
+    "created_at": "2026-04-13",
+    "source": "deepen",
+    "package": "@trpc/client",
+    "type": "uncovered_function",
+    "status": "deferred",
+    "description": "Add detection for @trpc/client.subscribe() without onError — postcondition trpc-subscribe-missing-on-error added in depth pass but no scanner rule exists. subscribe() uses callback-style error delivery, not Promise rejection — the scanner must detect absent onError in the subscribe options object.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis. Detection requires checking subscribe() call sites for presence of onError key in options object (2nd argument)."
+    },
+    "resolution": "Deferred: @trpc/client.subscribe() uses an observer pattern with { onData, onError, onComplete } callbacks. The current callback-detector looks for error-first callbacks (err as first parameter), not observer-style callbacks. Requires new detection pattern for observer/subscriber API style."
+  },
+  {
+    "id": "concern-20260413-trpc-client-deepen-2",
+    "created_at": "2026-04-13",
+    "source": "deepen",
+    "package": "@trpc/client",
+    "type": "uncovered_function",
+    "status": "deferred",
+    "description": "Add detection for @trpc/client.subscribe() reconnect error handling — postcondition trpc-subscribe-reconnect-missing-on-error added in depth pass. Specifically for wsLink/httpSubscriptionLink subscriptions where network disconnect errors propagate through onError. Requires detection that onError is absent and wsLink or httpSubscriptionLink is configured.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis. Detection is a refinement of concern-1: same missing onError, but specifically in WebSocket/SSE contexts where reconnect errors are common."
+    },
+    "resolution": "Deferred: Same observer pattern limitation as subscribe()-1. Reconnect error handling requires tracing onError presence in the options object passed to subscribe(). Deferring until observer-pattern detection is supported."
+  },
+  {
+    "id": "concern-20260414-discord.js-deepen-1",
+    "created_at": "2026-04-14",
+    "source": "deepen",
+    "package": "discord.js",
+    "type": "uncovered_function",
+    "status": "deferred",
+    "description": "Add detection for discord.js Webhook.send() — postcondition discord-webhook-send-no-try-catch added in depth pass but no scanner rule exists. Webhook type not tracked by instance tracker.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis. Webhook.send() is very common in Discord bots for logging/notifications. Detection requires tracking Webhook type instances."
+    },
+    "resolution": "Deferred: Webhook.send() is called on a Webhook instance (e.g., const hook = new WebhookClient({...}); hook.send(...)). The instance-tracker currently maps constructor patterns, but the scanner needs to track Webhook instances from WebhookClient constructor. Non-trivial instance-tracking extension needed."
+  },
+  {
+    "id": "concern-20260414-discord.js-deepen-2",
+    "created_at": "2026-04-14",
+    "source": "deepen",
+    "package": "discord.js",
+    "type": "uncovered_function",
+    "status": "deferred",
+    "description": "Add detection for discord.js AutocompleteInteraction.respond() — postcondition discord-autocomplete-respond-no-try-catch added in depth pass but no scanner rule exists.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — autocomplete handlers are common in slash-command bots. Detection requires tracking AutocompleteInteraction type instances."
+    },
+    "resolution": "Deferred: AutocompleteInteraction.respond() is called on an interaction event parameter (not on the discord.js import). Requires type-checker integration to identify interaction.respond() as a discord.js method."
+  },
+  {
+    "id": "concern-20260414-discord.js-deepen-3",
+    "created_at": "2026-04-14",
+    "source": "deepen",
+    "package": "discord.js",
+    "type": "uncovered_function",
+    "status": "deferred",
+    "description": "Add detection for discord.js GuildMember.createDM() — postcondition discord-guildmember-createdm-no-try-catch added but no scanner rule exists.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — createDM is very commonly called without error handling. GuildMember type already tracked. Detection needs createDM method added to the contract's await_patterns."
+    },
+    "resolution": "Deferred: GuildMember.createDM() is called on a GuildMember instance from an event handler. Requires type-checker integration to map event handler parameter types to discord.js methods."
+  },
+  {
+    "id": "concern-20260414-discord.js-deepen-4",
+    "created_at": "2026-04-14",
+    "source": "deepen",
+    "package": "discord.js",
+    "type": "uncovered_function",
+    "status": "deferred",
+    "description": "Add detection for discord.js GuildChannelManager.create() — postcondition discord-guildchannelmanager-create-no-try-catch added but no scanner rule exists. Requires tracking guild.channels.create() call chain.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — channel creation is common in setup bots. Detection requires multi-level property chain: guild.channels.create()."
+    },
+    "resolution": "Deferred: GuildChannelManager.create() is accessed via guild.channels.create(). The property-chain-detector handles 2-level chains but guild.channels.create is a 3-level chain (guild.channels.create). Requires extending property-chain-detector for discord.js manager patterns."
+  },
+  {
+    "id": "concern-20260414-discord.js-deepen-5",
+    "created_at": "2026-04-14",
+    "source": "deepen",
+    "package": "discord.js",
+    "type": "uncovered_function",
+    "status": "deferred",
+    "description": "Add detection for discord.js ThreadChannel.setArchived() and ThreadChannel.edit() — postconditions added but no scanner rules exist. ThreadChannel type detection needed.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — thread archiving is critical for ticket systems. Detection requires adding ThreadChannel to type_names list and adding setArchived/edit to await_patterns."
+    },
+    "resolution": "Deferred: ThreadChannel.setArchived()/edit() require type-checker integration to identify thread channel instances from event parameters or cached guild.channels."
+  },
+  {
+    "id": "concern-20260414-discord.js-deepen-6",
+    "created_at": "2026-04-14",
+    "source": "deepen",
+    "package": "discord.js",
+    "type": "uncovered_function",
+    "status": "deferred",
+    "description": "Add detection for discord.js GuildBanManager.create() — postcondition discord-guildbanmanager-create-no-try-catch added but no scanner rule exists.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — programmatic banning by user ID (not GuildMember.ban) is common in raid-protection bots. Detection requires multi-level chain: guild.bans.create()."
+    },
+    "resolution": "Deferred: GuildBanManager.create() is accessed via guild.bans.create(). Same 3-level chain limitation as GuildChannelManager.create()."
+  },
+  {
+    "id": "concern-20260413-busboy-deepen-1",
+    "created_at": "2026-04-13",
+    "source": "deepen",
+    "package": "busboy",
+    "type": "uncovered_function",
+    "status": "deferred",
+    "description": "Add detection for busboy constructor synchronous throw (busboy-002) — busboy() factory throws synchronously for missing/malformed/unsupported Content-Type. Requires try-catch around busboy() call, not just error event listener.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — confirmed from source: lib/index.js throws \"Missing Content-Type\", \"Malformed content type\", and \"Unsupported content type\" synchronously. Detection requires checking for try/catch wrapping the busboy() call site."
+    },
+    "resolution": "Deferred: busboy() constructor detection should work via throwing-function-detector (busboy is imported as default and called directly). However, busboy-002 is a synchronous throw — the current contract-matcher may be skipping it. Requires investigation of why the scanner returns 0 violations for the busboy fixture."
+  },
+  {
+    "id": "concern-20260413-busboy-deepen-2",
+    "created_at": "2026-04-13",
+    "source": "deepen",
+    "package": "busboy",
+    "type": "uncovered_function",
+    "status": "deferred",
+    "description": "Add detection for busboy limit events without handlers (busboy-003) — partsLimit, filesLimit, fieldsLimit events emitted when limits exceeded but data silently dropped if no listener registered.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — silent data loss pattern. When busboy instance uses limits config, detection should check for partsLimit/filesLimit/fieldsLimit listener registration on the same bb variable."
+    },
+    "resolution": "Deferred: busboy-003 is a missing-event-listener pattern (partsLimit/filesLimit/fieldsLimit). The event-listener-absence detector may not handle these events. Investigation needed."
+  },
+  {
+    "id": "concern-20260413-busboy-deepen-3",
+    "created_at": "2026-04-13",
+    "source": "deepen",
+    "package": "busboy",
+    "type": "uncovered_function",
+    "status": "deferred",
+    "description": "Add detection for busboy file stream truncation not checked (busboy-004) — when limits.fileSize exceeded, file.truncated is set to true but no error is thrown; partial files silently saved.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — file corruption pattern. In \"file\" event handler, detect when file stream is piped to a write stream without checking file.truncated or listening for file.on(\"limit\")."
+    },
+    "resolution": "Deferred: busboy-004 requires checking file.truncated after stream end — this is a return-value check pattern (checking a property of the returned stream object). Not covered by current try-catch or null-check detection."
+  },
+  {
+    "id": "concern-20260413-busboy-deepen-4",
+    "created_at": "2026-04-13",
+    "source": "deepen",
+    "package": "busboy",
+    "type": "uncovered_function",
+    "status": "deferred",
+    "description": "Add detection for busboy file stream not consumed (busboy-005) — file event listener registered but file stream not always resumed/consumed, causing busboy close event to never fire and request to hang.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — request deadlock pattern. README explicitly states streams must always be consumed. Detecting conditional early returns in file event handlers that skip stream.resume() is the key pattern."
+    },
+    "resolution": "Deferred: busboy-005 is a \"file stream not consumed\" pattern. Requires tracking whether a file event listener always calls stream.resume() or pipes the stream. Complex data-flow analysis needed."
   }
 ]
