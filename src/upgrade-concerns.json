@@ -18712,5 +18712,313 @@
       "note": "Proactive — contract added via API surface analysis. search.execute() is a builder pattern: cloudinary.search.expression(expr).max_results(N).execute(). Detection needs to walk the full chain to cloudinary import."
     },
     "resolution": "Rejected: zero evidence from real-world repos (violation_count: 0, repos: []). cloudinary.search.execute() is a builder pattern ending in execute(). Detection requires walking the full chain to confirm the cloudinary import origin. No confirmed field violations. Revisit when scan data shows >= 3 repos affected."
+  },
+  {
+    "id": "concern-20260413-tanstack-react-router-1",
+    "created_at": "2026-04-13",
+    "source": "dashboard-feedback",
+    "package": "@tanstack/react-router",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "invalid-route-path postcondition continues to fire as false positive across 94 violations in 30 days despite previous fix. Scanner fires on valid router.navigate() and Link calls where the route path is valid but not statically analyzable. Fix may need to handle dynamic route segments or type-registered route trees.",
+    "evidence": {
+      "repos": [
+        "src/components/command-menu.tsx",
+        "src/features/auth/sign-in/components/user-auth-form.tsx",
+        "src/features/customers/components/users-table.tsx",
+        "src/features/settings/components/sidebar-nav.tsx",
+        "src/features/browser-agents/browser-agent-detail.tsx"
+      ],
+      "scan_file": null,
+      "violation_count": 94,
+      "fp_reason": "Recurring FPs on invalid-route-path postcondition — 94 instances marked FALSE_POSITIVE by users since 2026-03-14. Prior implementation did not fully resolve the detection gap.",
+      "fix_target": "scanner",
+      "postcondition_id": "invalid-route-path"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260413-tanstack-react-router-2",
+    "created_at": "2026-04-13",
+    "source": "dashboard-feedback",
+    "package": "@tanstack/react-router",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "param-type-mismatch postcondition continues to produce false positives (18 instances) across multiple repos. Scanner fires on route params that are correctly typed via the router route tree but not inferred by the static analyzer.",
+    "evidence": {
+      "repos": [
+        "src/features/customers/customer-detail.tsx",
+        "src/features/invoices/invoice-detail.tsx",
+        "src/features/loans/loan-detail.tsx",
+        "src/features/documents/document-builder.tsx"
+      ],
+      "scan_file": null,
+      "violation_count": 18,
+      "fp_reason": "Recurring FPs on param-type-mismatch postcondition — 18 instances marked FALSE_POSITIVE since 2026-03-14.",
+      "fix_target": "scanner",
+      "postcondition_id": "param-type-mismatch"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260413-tanstack-react-router-3",
+    "created_at": "2026-04-13",
+    "source": "dashboard-feedback",
+    "package": "@tanstack/react-router",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "search-schema-validation-error postcondition fires as false positive (14 instances) on search params that are correctly validated via useSearch() or useLoaderData() patterns. Scanner does not recognize the TanStack Router search param validation idiom.",
+    "evidence": {
+      "repos": [
+        "src/features/customers/components/users-table.tsx",
+        "src/features/invoices/components/data-table.tsx",
+        "src/features/loans/components/loans-columns.tsx"
+      ],
+      "scan_file": null,
+      "violation_count": 14,
+      "fp_reason": "Recurring FPs on search-schema-validation-error postcondition — 14 instances marked FALSE_POSITIVE since 2026-03-14.",
+      "fix_target": "scanner",
+      "postcondition_id": "search-schema-validation-error"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260413-undici-1",
+    "created_at": "2026-04-13",
+    "source": "dashboard-feedback",
+    "package": "undici",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "response-json-parse-error postcondition fires as false positive in 64 instances. Scanner flags undici response.json() calls that are already wrapped in try-catch or inside error-handling middleware. Prior fix did not cover all protected call patterns.",
+    "evidence": {
+      "repos": [
+        "hooks/useArtistFans.ts",
+        "hooks/useArtistPosts.ts",
+        "hooks/useCatalogSongs.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 64,
+      "fp_reason": "Recurring FPs on response-json-parse-error postcondition — 64 instances marked FALSE_POSITIVE since 2026-03-14.",
+      "fix_target": "scanner",
+      "postcondition_id": "response-json-parse-error"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260413-react-hook-form-1",
+    "created_at": "2026-04-13",
+    "source": "dashboard-feedback",
+    "package": "react-hook-form",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "async-submit-unhandled-error postcondition continues to fire as false positive (60 instances) across form submit handlers where errors are handled by the surrounding React error boundary or are wrapped by the RHF handleSubmit() function which already catches errors. Scanner does not account for handleSubmit() as an error boundary.",
+    "evidence": {
+      "repos": [
+        "src/features/settings/profile/profile-form.tsx",
+        "src/features/auth/sign-in/components/user-auth-form.tsx",
+        "src/features/customers/components/users-invite-dialog.tsx",
+        "src/features/auth/forgot-password/components/forgot-password-form.tsx",
+        "src/features/tasks/components/tasks-mutate-drawer.tsx"
+      ],
+      "scan_file": null,
+      "violation_count": 60,
+      "fp_reason": "Recurring FPs on async-submit-unhandled-error postcondition — 60 instances marked FALSE_POSITIVE since 2026-03-14. handleSubmit() wraps async handler and may already catch errors.",
+      "fix_target": "contract",
+      "postcondition_id": "async-submit-unhandled-error"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260413-tanstack-react-query-1",
+    "created_at": "2026-04-13",
+    "source": "dashboard-feedback",
+    "package": "@tanstack/react-query",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "query-error-unhandled postcondition fires as false positive (25 instances) on queries where error is handled via the global QueryClient onError callback, ErrorBoundary, or the useQuery error return value is consumed. Scanner does not trace error handling at the component or provider level.",
+    "evidence": {
+      "repos": [
+        "hooks/useArtistInstruction.ts",
+        "hooks/useArtistKnowledge.ts",
+        "hooks/useArtistSegments.ts",
+        "hooks/useCatalogs.ts",
+        "components/Agents/AgentCreator.tsx"
+      ],
+      "scan_file": null,
+      "violation_count": 25,
+      "fp_reason": "Recurring FPs on query-error-unhandled postcondition — 25 instances marked FALSE_POSITIVE since 2026-03-14.",
+      "fix_target": "scanner",
+      "postcondition_id": "query-error-unhandled"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260413-ai-1",
+    "created_at": "2026-04-13",
+    "source": "dashboard-feedback",
+    "package": "ai",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "tool-execution-error postcondition fires as false positive (25 instances) across AI tool definitions that are wrapped in a common error handler or use the Vercel AI SDK tool() wrapper which catches errors internally. Scanner does not recognize tool() wrapper as satisfying the error handling postcondition.",
+    "evidence": {
+      "repos": [
+        "lib/tools/searchTwitter.ts",
+        "lib/tools/getArtistSegments.ts",
+        "lib/tools/getSocialPosts.ts",
+        "lib/tools/files/deleteFile.ts",
+        "lib/tools/browser/browserAct.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 25,
+      "fp_reason": "Recurring FPs on tool-execution-error postcondition — 25 instances marked FALSE_POSITIVE since 2026-03-14.",
+      "fix_target": "contract",
+      "postcondition_id": "tool-execution-error"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260413-zod-1",
+    "created_at": "2026-04-13",
+    "source": "dashboard-feedback",
+    "package": "zod",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "parse-validation-error postcondition fires as false positive (14 instances) on zod.parse() calls inside tRPC procedures or route handlers where the framework catches ZodError at the boundary level. Scanner does not recognize framework-level error handling as satisfying the postcondition.",
+    "evidence": {
+      "repos": [
+        "hooks/useArtistFans.ts",
+        "hooks/useArtistPosts.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 14,
+      "fp_reason": "Recurring FPs on parse-validation-error postcondition — 14 instances marked FALSE_POSITIVE since 2026-03-14.",
+      "fix_target": "contract",
+      "postcondition_id": "parse-validation-error"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260413-ai-2",
+    "created_at": "2026-04-13",
+    "source": "dashboard-feedback",
+    "package": "ai",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "api-error-rate-limit postcondition continues to fire as false positive (7 instances) on Vercel AI SDK calls that use retry-wrapped fetch or are inside structured error handlers. Prior fix did not cover all call patterns.",
+    "evidence": {
+      "repos": [
+        "apps/web/utils/llms/index.ts",
+        "lib/evals/scorers/QuestionAnswered.ts",
+        "lib/evals/scorers/CatalogAvailability.ts",
+        "lib/ai/generateArray.ts",
+        "lib/catalog/analyzeCatalogBatch.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 7,
+      "fp_reason": "Recurring FPs on api-error-rate-limit postcondition — 7 instances marked FALSE_POSITIVE since 2026-03-14.",
+      "fix_target": "scanner",
+      "postcondition_id": "api-error-rate-limit"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260413-clerk-nextjs-1",
+    "created_at": "2026-04-13",
+    "source": "dashboard-feedback",
+    "package": "@clerk/nextjs",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "use-user-no-loaded-check postcondition fires as false positive (7 instances) in components that are rendered inside a ClerkProvider-wrapped layout where isLoaded is guaranteed true, or where the component is protected by a server-side auth() check. Scanner does not trace the auth guard context upstream.",
+    "evidence": {
+      "repos": [
+        "apps/web/app/(auth)/invite/[token]/page.tsx",
+        "apps/web/components/layout/sidebar.tsx",
+        "apps/web/components/settings/profile-settings.tsx",
+        "apps/web/components/layout/header.tsx",
+        "apps/web/components/providers/analytics-provider.tsx"
+      ],
+      "scan_file": null,
+      "violation_count": 7,
+      "fp_reason": "Recurring FPs on use-user-no-loaded-check postcondition — 7 instances marked FALSE_POSITIVE since 2026-03-14.",
+      "fix_target": "contract",
+      "postcondition_id": "use-user-no-loaded-check"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260413-redis-1",
+    "created_at": "2026-04-13",
+    "source": "dashboard-feedback",
+    "package": "redis",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "missing-error-listener postcondition fires as false positive (7 instances) on redis client instances where .on(\"error\") is registered in a shared module imported at startup, not co-located with the client creation. Scanner does not trace error listener registration across module boundaries.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 7,
+      "fp_reason": "Recurring FPs on missing-error-listener postcondition — 7 instances marked FALSE_POSITIVE since 2026-03-14. Error listener may be registered in a different module.",
+      "fix_target": "scanner",
+      "postcondition_id": "missing-error-listener"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260413-express-1",
+    "created_at": "2026-04-13",
+    "source": "dashboard-feedback",
+    "package": "express",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "async-middleware-unhandled-rejection postcondition fires as false positive (5 instances). Scanner flags async middleware that calls next(err) on errors, which is the correct Express error-forwarding pattern. The postcondition should recognize next(err) as satisfying the error handling requirement.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 5,
+      "fp_reason": "Recurring FPs on async-middleware-unhandled-rejection — 5 instances marked FALSE_POSITIVE since 2026-03-14.",
+      "fix_target": "contract",
+      "postcondition_id": "async-middleware-unhandled-rejection"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260413-react-hook-form-2",
+    "created_at": "2026-04-13",
+    "source": "dashboard-feedback",
+    "package": "react-hook-form",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "missing-form-provider postcondition fires as false positive (9 instances) in components where the FormProvider is rendered by a parent component above in the component tree. Scanner only checks for FormProvider in the immediate component scope, not in ancestor components.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 9,
+      "fp_reason": "Recurring FPs on missing-form-provider postcondition — 9 instances marked FALSE_POSITIVE since 2026-03-14.",
+      "fix_target": "scanner",
+      "postcondition_id": "missing-form-provider"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260413-clerk-nextjs-2",
+    "created_at": "2026-04-13",
+    "source": "dashboard-feedback",
+    "package": "@clerk/nextjs",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "use-clerk-outside-provider postcondition fires as false positive (3 instances) in components that are inside ClerkProvider at the root layout level. Scanner does not recognize that all components in Next.js App Router layout tree are inside the root ClerkProvider.",
+    "evidence": {
+      "repos": [
+        "apps/web/components/layout/top-nav.tsx",
+        "apps/web/components/layout/header.tsx",
+        "apps/web/components/layout/sidebar.tsx"
+      ],
+      "scan_file": null,
+      "violation_count": 3,
+      "fp_reason": "Recurring FPs on use-clerk-outside-provider postcondition — 3 instances marked FALSE_POSITIVE since 2026-03-14.",
+      "fix_target": "scanner",
+      "postcondition_id": "use-clerk-outside-provider"
+    },
+    "resolution": null
   }
 ]
