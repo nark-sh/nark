@@ -688,7 +688,7 @@ async function main(options: any) {
       const id: string = (v as any).contractId ?? (v as any).contract ?? 'unknown';
       violationCountsByContract[id] = (violationCountsByContract[id] ?? 0) + 1;
     }
-    fireTelemetryEvent({
+    await fireTelemetryEvent({
       version: narkPkg.version,
       os: process.platform,
       arch: process.arch,

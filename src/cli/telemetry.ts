@@ -130,12 +130,15 @@ export function handleFirstRunNotice(): void {
 }
 
 /**
- * Fire a telemetry event as fire-and-forget.
- * Never throws, never blocks the caller.
+ * Fire a telemetry event. Returns a promise that resolves when the request
+ * completes (or fails). Never rejects — errors are silently swallowed.
+ * The caller should await this before process.exit() to avoid the request
+ * being killed mid-flight.
+ *
  * When a user is logged in, includes Authorization: Bearer <token> header.
  * When a git remote is available, includes repoFingerprint (SHA256 of origin URL).
  */
-export function fireTelemetryEvent(payload: TelemetryPayload): void {
+export async function fireTelemetryEvent(payload: TelemetryPayload): Promise<void> {
   const config = readTelemetryConfig();
   if (!config.enabled) return;
   try {
@@ -146,7 +149,7 @@ export function fireTelemetryEvent(payload: TelemetryPayload): void {
     }
     const fp = getRepoFingerprint();
     const enriched = { ...payload, ...(fp ? { repoFingerprint: fp } : {}) };
-    fetch(TELEMETRY_ENDPOINT, {
+    await fetch(TELEMETRY_ENDPOINT, {
       method: 'POST',
       headers,
       body: JSON.stringify(enriched),
