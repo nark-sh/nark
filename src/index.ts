@@ -685,7 +685,7 @@ async function main(options: any) {
     const packageNames = packageDiscovery?.packages?.map((p: any) => p.name) ?? [];
     const violationCountsByContract: Record<string, number> = {};
     for (const v of violations) {
-      const id: string = (v as any).contractId ?? (v as any).contract ?? 'unknown';
+      const id: string = v.package ?? (v as any).contractId ?? 'unknown';
       violationCountsByContract[id] = (violationCountsByContract[id] ?? 0) + 1;
     }
     await fireTelemetryEvent({
