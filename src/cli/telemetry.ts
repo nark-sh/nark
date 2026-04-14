@@ -53,7 +53,8 @@ function getRepoFingerprint(): string | undefined {
   }
 }
 
-const TELEMETRY_ENDPOINT = 'https://nark.sh/api/telemetry/scan';
+const NARK_API_BASE = process.env['NARK_API_URL'] ?? 'https://nark.sh';
+const TELEMETRY_ENDPOINT = `${NARK_API_BASE}/api/telemetry/scan`;
 
 export function getTelemetryConfigPath(): string {
   return path.join(os.homedir(), '.nark', 'telemetry.json');

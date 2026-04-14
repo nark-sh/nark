@@ -35,8 +35,9 @@ export function createAuthCommand(): Command {
       const code = crypto.randomBytes(3).toString('hex').toUpperCase();
 
       // 2. Build URLs
-      const browserUrl = `https://nark.sh/auth/cli?code=${code}`;
-      const pollUrl = `https://nark.sh/api/auth/cli/exchange?code=${code}`;
+      const NARK_API_BASE = process.env['NARK_API_URL'] ?? 'https://nark.sh';
+      const browserUrl = `${NARK_API_BASE}/auth/cli?code=${code}`;
+      const pollUrl = `${NARK_API_BASE}/api/auth/cli/exchange?code=${code}`;
 
       // 3. Open browser (best-effort)
       try {
