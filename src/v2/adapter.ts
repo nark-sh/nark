@@ -27,6 +27,8 @@ export interface V2AdapterResult {
   fileDurations: { file: string; durationMs: number }[];   // all analyzed files with timing
   skippedFiles: { reason: string; count: number }[];        // skip reasons with counts
   callSitesByPackage: Record<string, number>;               // real per-package call site counts (pass + fail)
+  initDurationMs: number;                                    // time spent creating TS program
+  analyzeDurationMs: number;                                 // time spent analyzing files
 }
 
 /**
@@ -90,8 +92,13 @@ export async function runV2Analyzer(
   if (onProgress) {
     analyzer.onProgress = onProgress;
   }
+  const initStart = Date.now();
   analyzer.initialize();
+  const initDurationMs = Date.now() - initStart;
+
+  const analyzeStart = Date.now();
   const result = analyzer.analyze();
+  const analyzeDurationMs = Date.now() - analyzeStart;
 
   // Convert v2 violations to v1 format, split by suppressed status
   const activeViolations: V1Violation[] = [];
@@ -132,6 +139,8 @@ export async function runV2Analyzer(
     fileDurations,
     skippedFiles,
     callSitesByPackage: analyzer.getCallSitesByPackage(),
+    initDurationMs,
+    analyzeDurationMs,
   };
 }
 

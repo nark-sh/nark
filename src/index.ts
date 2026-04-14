@@ -419,14 +419,7 @@ async function main(options: any) {
     includeTests: options.includeTests,
   };
 
-  // Progress callback for file analysis
-  const isTerminal = process.stderr.isTTY;
-  const onProgress = isTerminal ? (current: number, total: number) => {
-    process.stderr.write(`\r${chalk.dim(`Analyzing TypeScript code... ${current}/${total} files`)}`);
-  } : undefined;
-  if (!isTerminal) {
-    console.log(chalk.dim('Analyzing TypeScript code...'));
-  }
+  console.log(chalk.dim('Analyzing TypeScript code...'));
 
   // Always create a v1 analyzer instance (used for suppression checks and dead suppression detection)
   const analyzer = new Analyzer(config, corpusResult.contracts);
@@ -443,7 +436,7 @@ async function main(options: any) {
   } else if (options.compareAnalyzers) {
     // Compare mode: run both and show diff
     const { runV2Analyzer } = await import('./v2/adapter.js');
-    v2Result = await runV2Analyzer(config, corpusResult.contracts, onProgress);
+    v2Result = await runV2Analyzer(config, corpusResult.contracts);
     const v1Violations = analyzer.analyze();
     const v1Stats = analyzer.getStats();
 
@@ -459,7 +452,7 @@ async function main(options: any) {
   } else {
     // Default: v2 plugin-based analyzer
     const { runV2Analyzer } = await import('./v2/adapter.js');
-    v2Result = await runV2Analyzer(config, corpusResult.contracts, onProgress);
+    v2Result = await runV2Analyzer(config, corpusResult.contracts);
     violations = v2Result.violations;
     stats = {
       filesAnalyzed: v2Result.filesAnalyzed,
@@ -468,11 +461,9 @@ async function main(options: any) {
     };
   }
   const analysisEndTime = Date.now();
+  const analysisDuration = ((analysisEndTime - analysisStartTime) / 1000).toFixed(1);
 
-  if (isTerminal) {
-    process.stderr.write(`\r${' '.repeat(60)}\r`); // clear progress line
-  }
-  console.log(chalk.green(`✓ Analyzed ${stats.filesAnalyzed} files\n`));
+  console.log(chalk.green(`✓ Analyzed ${stats.filesAnalyzed} files in ${analysisDuration}s\n`));
 
   // Checkpoint 3: verbose analysis timing output
   if (options.verbose && v2Result) {
