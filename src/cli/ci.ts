@@ -426,7 +426,7 @@ async function runCi(options: {
       packagesAnalyzed: packageDiscovery.packages.map((p: any) => p.name),
       contractsApplied: corpusResult.contracts.size,
       filesAnalyzed: v2Result.filesAnalyzed,
-      corpusVersion: '0.1.0',
+      corpusVersion: '1.0.0',
     });
     writeAuditRecord(auditRecord, options.output);
   }

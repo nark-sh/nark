@@ -73,7 +73,7 @@ const _narkRc = (() => {
 program
   .name('nark')
   .description('Contract coverage scanner — find missing error handling before production')
-  .version('0.1.0');
+  .version('1.0.0');
 
 // Add suppressions subcommand
 program.addCommand(createSuppressionsCommand());
@@ -643,7 +643,7 @@ async function main(options: any) {
     violations,
     tsconfigPath: path.resolve(tsconfigPath),
     startTime: scanStartTime,
-    narkVersion: '0.1.0',
+    narkVersion: '1.0.0',
   });
 
   if (narkResult) {

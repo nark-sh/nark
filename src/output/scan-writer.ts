@@ -182,7 +182,7 @@ export function writeCommitScan(
   gitCommit: string,
   violations: Violation[],
   tsconfigPath: string,
-  narkVersion: string = '0.1.0'
+  narkVersion: string = '1.0.0'
 ): string | null {
   try {
     const scansDir = path.join(narkDir, 'scans');
@@ -296,7 +296,7 @@ export function findLatestScan(narkDir: string): CommitScanRecord | null {
  * Never throws — wraps all I/O in try/catch and warns on failure.
  */
 export async function writeScanResults(options: WriteScanOptions): Promise<WriteScanResult | null> {
-  const { projectRoot, auditRecord, violations, tsconfigPath, startTime, narkVersion = '0.1.0' } = options;
+  const { projectRoot, auditRecord, violations, tsconfigPath, startTime, narkVersion = '1.0.0' } = options;
 
   const narkDir = findNarkDir(projectRoot);
 

@@ -159,7 +159,7 @@ export function writeSarifOutput(violations: Violation[], outputPath?: string): 
         tool: {
           driver: {
             name: 'nark',
-            version: '0.1.0',
+            version: '1.0.0',
             rules,
           },
         },
