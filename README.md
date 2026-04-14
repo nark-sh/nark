@@ -127,16 +127,32 @@ nark show deployment
 
 ### Telemetry
 
+nark collects anonymous usage data to help prioritize development. Telemetry is **enabled by default** and can be disabled at any time. A notice is shown on first run.
+
+**What is collected:** nark version, OS/arch, Node.js version, npm package names detected (public package names only), contract IDs matched, violation counts per contract, scan duration, CI mode flag, and an optional SHA256 hash of your git remote URL.
+
+**What is never collected:** source code, file paths, variable names, directory names, repository names, git history, user identity, machine hostname, or IP addresses (stripped server-side).
+
 ```bash
 # Check telemetry status
 nark telemetry status
 
-# Opt out
+# Opt out permanently
 nark telemetry off
+
+# Opt out via environment variable (ideal for CI)
+export NARK_TELEMETRY=off
+
+# Respect the standard DO_NOT_TRACK convention
+export DO_NOT_TRACK=1
 
 # Opt back in
 nark telemetry on
 ```
+
+You can also set `telemetry: false` in `.narkrc.yaml` or point telemetry to a different endpoint with `NARK_API_URL`.
+
+Learn more: [https://nark.sh/telemetry](https://nark.sh/telemetry)
 
 ### Auth
 

@@ -60,7 +60,27 @@ export function getTelemetryConfigPath(): string {
   return path.join(os.homedir(), '.nark', 'telemetry.json');
 }
 
+/**
+ * Check if telemetry is disabled via environment variable.
+ * Supports NARK_TELEMETRY=off and the standard DO_NOT_TRACK=1.
+ */
+function isEnvDisabled(): boolean {
+  const narkEnv = process.env['NARK_TELEMETRY'];
+  if (narkEnv !== undefined && ['off', 'false', '0'].includes(narkEnv.toLowerCase())) {
+    return true;
+  }
+  if (process.env['DO_NOT_TRACK'] === '1') {
+    return true;
+  }
+  return false;
+}
+
 export function readTelemetryConfig(): TelemetryConfig {
+  // Environment variable overrides file config
+  if (isEnvDisabled()) {
+    return { enabled: false, notified: true };
+  }
+
   const configPath = getTelemetryConfigPath();
   try {
     if (!fs.existsSync(configPath)) {
@@ -151,6 +171,7 @@ export function createTelemetryCommand(): Command {
 
       switch (action) {
         case 'status': {
+          const envOverride = isEnvDisabled();
           const statusLabel = config.enabled
             ? chalk.green('Enabled')
             : chalk.yellow('Disabled');
@@ -159,9 +180,14 @@ export function createTelemetryCommand(): Command {
           console.log(chalk.bold('Nark Telemetry'));
           console.log('');
           console.log(`Status:   ${statusLabel}`);
+          if (envOverride) {
+            console.log(`          ${chalk.dim('(disabled via environment variable)')}`);
+          }
           console.log(`Config:   ${getTelemetryConfigPath()}`);
+          console.log(`Endpoint: ${TELEMETRY_ENDPOINT}`);
           console.log('');
           console.log(chalk.dim('Run `nark telemetry off` to opt out.'));
+          console.log(chalk.dim('Set NARK_TELEMETRY=off or DO_NOT_TRACK=1 to disable via env.'));
           console.log(chalk.dim('Learn more: https://nark.sh/telemetry'));
           console.log('');
           break;
