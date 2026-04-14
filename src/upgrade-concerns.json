@@ -19944,5 +19944,299 @@
       "note": "Proactive — contract added via API surface analysis. Deeply nested URL-encoded payloads (a[b][c]...[z]) exceed the qs depth limit (default 32)."
     },
     "resolution": "Rejected: same architectural reason as body-parser-deepen-1. querystring.parse.rangeError fires at request parse time (inside the Express middleware), not at the urlencoded() factory call site."
+  },
+  {
+    "id": "concern-20260413-formidable-deepen-1",
+    "created_at": "2026-04-13",
+    "source": "deepen",
+    "package": "formidable",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for formidable parse() — specific error code: biggerThanMaxFileSize (1016) — postcondition formidable-max-file-size-exceeded added in depth pass but no granular scanner rule exists",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract deepened via API surface analysis (deepen-stream-2). Existing generic formidable-parse-error rule covers the catch, but specific error code advice missing."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260413-formidable-deepen-2",
+    "created_at": "2026-04-13",
+    "source": "deepen",
+    "package": "formidable",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for formidable parse() — DoS via maxFieldsExceeded (1007) / maxFieldsSizeExceeded (1006) — scanner should warn when maxFields/maxFieldsSize are not configured and no error handling present",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Security-critical: missing error handling on a formidable form with no field limits + no catch is a hash-collision DoS vector."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260413-formidable-deepen-3",
+    "created_at": "2026-04-13",
+    "source": "deepen",
+    "package": "formidable",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for formidable parse() — request aborted (1002) — scanner should detect patterns where aborted uploads are silently dropped without error handling",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — aborted uploads cause unhandled rejections in high-traffic upload servers. Common production failure mode."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260413-formidable-deepen-4",
+    "created_at": "2026-04-13",
+    "source": "deepen",
+    "package": "formidable",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for formidable parse() — missing content-type (1011) and no-parser (1003) — scanner should flag form.parse() called without content-type validation or error handling when these errors are foreseeable",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — common when API endpoints accept both form-data and JSON but lack content-type guards."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260413-cloudinary-deepen-7",
+    "created_at": "2026-04-13",
+    "source": "deepen",
+    "package": "cloudinary",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for cloudinary.api.delete_resources_by_tag() — postcondition delete-resources-by-tag-missing-error-handling added in depth pass but no scanner rule exists. Bulk destructive Admin API operation; try-catch required.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis. High priority: bulk irreversible deletion."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260413-cloudinary-deepen-8",
+    "created_at": "2026-04-13",
+    "source": "deepen",
+    "package": "cloudinary",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for cloudinary.api.delete_resources_by_prefix() — postcondition delete-resources-by-prefix-missing-error-handling added in depth pass but no scanner rule exists. Prefix-based bulk delete; empty prefix risk.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis. Also needs static analysis for empty/short prefix detection."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260413-cloudinary-deepen-9",
+    "created_at": "2026-04-13",
+    "source": "deepen",
+    "package": "cloudinary",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for cloudinary.api.delete_all_resources() — postcondition delete-all-resources-nuclear-operation added in depth pass. This nuclear operation should ALWAYS fire a warning when detected in any codebase — it should essentially never appear in runtime app code.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — delete_all_resources() is a nuclear operation that wipes the entire media library. Any detection should fire regardless of try-catch."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260413-cloudinary-deepen-10",
+    "created_at": "2026-04-13",
+    "source": "deepen",
+    "package": "cloudinary",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for cloudinary.api.delete_derived_resources() — postcondition delete-derived-resources-missing-error-handling added in depth pass but no scanner rule exists. Requires derived_resource_ids[], not public_ids[].",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis. Also needs argument-type check: flag if public_ids[] are passed instead of derived IDs."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260413-cloudinary-deepen-11",
+    "created_at": "2026-04-13",
+    "source": "deepen",
+    "package": "cloudinary",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for cloudinary.uploader.remove_all_tags() — postcondition remove-all-tags-missing-error-handling added in depth pass but no scanner rule exists. Same silent no-op pattern as add_tag/remove_tag.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260413-tanstack-react-router-fp-1",
+    "created_at": "2026-04-13",
+    "source": "dashboard-feedback",
+    "package": "@tanstack/react-router",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "invalid-route-path postcondition fires on all route definitions regardless of whether error handling is present. React Router route path validation occurs at type-check/compile time and does not throw async errors in user code — the postcondition is too broad for client-side route definitions.",
+    "evidence": {
+      "repos": [
+        "src/routes/_authenticated/workflow-builder/$workflowId.tsx",
+        "src/features/users/customer-detail.tsx",
+        "src/routes/(auth)/accept-invite.tsx"
+      ],
+      "scan_file": null,
+      "violation_count": 126,
+      "fp_reason": "Human-marked false positive: route path validation in @tanstack/react-router is a compile-time concern, not a runtime throw. The invalid-route-path and search-schema-validation-error postconditions fire on client-side route definitions where no async error handling is applicable.",
+      "fix_target": "contract",
+      "postcondition_id": "invalid-route-path"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260413-undici-fp-1",
+    "created_at": "2026-04-13",
+    "source": "dashboard-feedback",
+    "package": "undici",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "response-json-parse-error postcondition fires on .tsx client component files where undici is not actually imported or called. The scanner is pattern-matching on a construct that resembles an undici call pattern but appears in unrelated UI component code.",
+    "evidence": {
+      "repos": [
+        "apps/web/components/billing/change-plan-modal.tsx",
+        "apps/web/components/billing/plan-selector.tsx"
+      ],
+      "scan_file": null,
+      "violation_count": 64,
+      "fp_reason": "Human-marked false positive: undici violations firing in .tsx React component files where undici is not a direct dependency. Scanner is incorrectly matching the response-json-parse-error pattern in client-side code.",
+      "fix_target": "scanner",
+      "postcondition_id": "response-json-parse-error"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260413-react-hook-form-fp-1",
+    "created_at": "2026-04-13",
+    "source": "dashboard-feedback",
+    "package": "react-hook-form",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "async-submit-unhandled-error and missing-form-provider postconditions fire broadly in React form components. React Hook Form provides its own error handling via the errors object returned from useForm() and the onError callback in handleSubmit() — explicit try/catch in submit handlers is often unnecessary and the postcondition is too broad.",
+    "evidence": {
+      "repos": [
+        "src/components/create-organization-modal.tsx",
+        "components/Account/ArtistInstructionTextArea.tsx",
+        "src/features/settings/profile/profile-form.tsx"
+      ],
+      "scan_file": null,
+      "violation_count": 71,
+      "fp_reason": "Human-marked false positive: react-hook-form handleSubmit() provides built-in error handling. The async-submit-unhandled-error postcondition fires even when the form uses the onError callback or the errors object from useForm(), which are the idiomatic error-handling patterns for this library.",
+      "fix_target": "contract",
+      "postcondition_id": "async-submit-unhandled-error"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260413-ai-fp-1",
+    "created_at": "2026-04-13",
+    "source": "dashboard-feedback",
+    "package": "ai",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "tool-execution-error and api-error-rate-limit postconditions fire broadly in Vercel AI SDK usage. The AI SDK StreamingTextResponse and streamText() handle tool execution errors internally via the onError callback and the toolCallStreaming mechanism — the postconditions are too broad for modern AI SDK usage patterns.",
+    "evidence": {
+      "repos": [
+        "lib/tools/getSocialFans.ts",
+        "apps/web/utils/llms/index.ts",
+        "lib/tools/searchTwitter.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 33,
+      "fp_reason": "Human-marked false positive: Vercel AI SDK tool execution errors are handled by the framework via onError callback and internal streaming error handling. The tool-execution-error postcondition fires even when idiomatic AI SDK error handling is present.",
+      "fix_target": "contract",
+      "postcondition_id": "tool-execution-error"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260413-tanstack-react-query-fp-1",
+    "created_at": "2026-04-13",
+    "source": "dashboard-feedback",
+    "package": "@tanstack/react-query",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "query-error-unhandled, infinite-query-error-unhandled, and mutation-error-unhandled postconditions fire broadly. React Query provides error handling via the error property returned from useQuery()/useMutation(), the onError callback, and QueryErrorResetBoundary/ErrorBoundary integration — the postconditions are too broad for the idiomatic usage pattern.",
+    "evidence": {
+      "repos": [
+        "components/Agents/AgentCreator.tsx",
+        "hooks/useCatalogSongs.ts",
+        "hooks/useSandboxFileContent.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 30,
+      "fp_reason": "Human-marked false positive: @tanstack/react-query queries return an error property that satisfies the error-handling contract. The query-error-unhandled postcondition fires even when useQuery() returns { error } which is the idiomatic error-handling pattern.",
+      "fix_target": "contract",
+      "postcondition_id": "query-error-unhandled"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260413-zod-fp-1",
+    "created_at": "2026-04-13",
+    "source": "dashboard-feedback",
+    "package": "zod",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "parse-validation-error postcondition fires in API route handlers where zod.parse() is called intentionally to validate input. In Next.js API routes, zod.parse() throws a ZodError which is caught by the API route error boundary or a surrounding try/catch in the route handler — the scanner does not trace the surrounding route handler context.",
+    "evidence": {
+      "repos": [
+        "apps/web/app/api/user/stats/rule-stats/route.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 14,
+      "fp_reason": "Human-marked false positive: zod.parse() in Next.js API route handlers is typically wrapped in a try/catch at the route handler level. The scanner fires on zod.parse() calls without tracing whether the enclosing function has a try/catch.",
+      "fix_target": "scanner",
+      "postcondition_id": "parse-validation-error"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260413-clerk-nextjs-fp-1",
+    "created_at": "2026-04-13",
+    "source": "dashboard-feedback",
+    "package": "@clerk/nextjs",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "use-user-no-loaded-check postcondition fires on components that use useUser() but do check the isLoaded property via destructuring or conditional rendering. The scanner does not recognize destructuring patterns like const { isLoaded, user } = useUser() followed by if (!isLoaded) return null as satisfying the postcondition.",
+    "evidence": {
+      "repos": [
+        "apps/web/app/(dashboard)/onboarding/onboarding-form.tsx",
+        "/Users/calebgates/WebstormProjects/behavioral-contracts/behavioral-contracts-saas/apps/web/components/layout/header.tsx"
+      ],
+      "scan_file": null,
+      "violation_count": 10,
+      "fp_reason": "Human-marked false positive: @clerk/nextjs useUser() hook with destructured isLoaded check is not recognized as satisfying use-user-no-loaded-check postcondition. Scanner needs to recognize destructuring + guard pattern.",
+      "fix_target": "scanner",
+      "postcondition_id": "use-user-no-loaded-check"
+    },
+    "resolution": null
   }
 ]
