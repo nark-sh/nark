@@ -4,3 +4,4 @@ dist/
 .nark/
 pnpm-lock.yaml
 .nark
+.claude/
