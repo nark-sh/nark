@@ -446,20 +446,30 @@ function formatPositiveEvidenceReportMarkdown(
     lines.push('');
   }
 
-  // Package Breakdown Section
+  // Violations by Package Section
   if (options.showPackageBreakdown) {
-    lines.push('## 📦 Package Breakdown');
+    lines.push('## 📦 Violations by Package');
     lines.push('');
-    lines.push('| Package | Checks | Passed | Failed | Status | Compliance |');
-    lines.push('|---------|--------|--------|--------|--------|------------|');
 
-    breakdown.packages.forEach(pkg => {
-      const status = pkg.status === 'PASS' ? '✓ PASS' : '✗ FAIL';
-      lines.push(`| ${pkg.packageName} | ${pkg.contractsApplied} | ${pkg.checksPassedCount} | ${pkg.violationsFound} | ${status} | ${pkg.compliancePercent}% |`);
-    });
+    const failingPkgs = breakdown.packages.filter(p => p.violationsFound > 0);
+
+    if (failingPkgs.length === 0) {
+      lines.push('All packages compliant — no violations found.');
+    } else {
+      lines.push('| Package | Violations | Breakdown |');
+      lines.push('|---------|------------|-----------|');
+
+      failingPkgs.forEach(pkg => {
+        const parts = [];
+        if (pkg.violationBreakdown.errors > 0) parts.push(`${pkg.violationBreakdown.errors} errors`);
+        if (pkg.violationBreakdown.warnings > 0) parts.push(`${pkg.violationBreakdown.warnings} warnings`);
+        if (pkg.violationBreakdown.info > 0) parts.push(`${pkg.violationBreakdown.info} info`);
+        lines.push(`| ${pkg.packageName} | ${pkg.violationsFound} | ${parts.join(', ')} |`);
+      });
+    }
 
     lines.push('');
-    lines.push(`**Summary:** ${breakdown.packagesFullyCompliant} passing, ${breakdown.packagesWithViolations} failing (${breakdown.totalPackagesAnalyzed} total)`);
+    lines.push(`**Summary:** ${breakdown.packagesWithContracts} packages checked, ${breakdown.packagesFullyCompliant} compliant, ${breakdown.packagesWithViolations} with violations`);
     lines.push('');
   }
 

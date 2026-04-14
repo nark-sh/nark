@@ -1,8 +1,9 @@
 /**
  * Package Breakdown Analyzer
  *
- * Shows per-package usage statistics - what was checked and what passed.
- * The goal is to prove value by showing all the work that was done, not just errors found.
+ * Shows per-package violation breakdown. Only displays packages with violations
+ * to avoid misleading pass-rate numbers when real call site counts aren't tracked.
+ * Clean packages are reported as a summary count.
  */
 
 import type { AuditRecord, EnhancedAuditRecord, Violation } from '../types.js';
@@ -175,76 +176,57 @@ function estimateContractsForPackage(
  */
 export function formatPackageBreakdown(breakdown: PackageBreakdownSummary): string {
   const lines: string[] = [];
+  const red = '\x1b[31m';
+  const reset = '\x1b[0m';
 
-  lines.push('\n🔍 PACKAGE USAGE BREAKDOWN');
-  lines.push('─'.repeat(80));
+  const failingPackages = breakdown.packages.filter(p => p.violationsFound > 0);
 
-  if (breakdown.packages.length === 0) {
-    lines.push('  No packages with contracts found.');
+  // Only show this section if there are violations
+  if (failingPackages.length === 0) {
+    lines.push('\n✓ VIOLATIONS BY PACKAGE');
+    lines.push('─'.repeat(80));
+    lines.push('  No violations found across any package.');
+    lines.push('');
+    lines.push(`  ${breakdown.packagesWithContracts} packages with contracts checked, all compliant ✓`);
     return lines.join('\n');
   }
 
-  // Show each package
-  for (const pkg of breakdown.packages) {
-    const statusIcon = pkg.status === 'PASS' ? '✓' : '✗';
-    const statusColor = pkg.status === 'PASS' ? '\x1b[32m' : '\x1b[31m';
-    const reset = '\x1b[0m';
+  lines.push(`\n${red}✗${reset} VIOLATIONS BY PACKAGE`);
+  lines.push('─'.repeat(80));
 
+  // Sort by most violations first
+  failingPackages.sort((a, b) => b.violationsFound - a.violationsFound);
+
+  for (const pkg of failingPackages) {
     // Format package name (truncate if too long)
     const pkgDisplay = pkg.packageName.length > 30
       ? pkg.packageName.substring(0, 27) + '...'
       : pkg.packageName.padEnd(30);
 
-    // Format check count — exact when real data is available, estimated otherwise
-    let checkDisplay: string;
-    if (!pkg.isEstimated) {
-      // Real count from analyzer
-      checkDisplay = pkg.contractsApplied.toString().padStart(5);
-    } else if (pkg.violationsFound > 0) {
-      // Known minimum only
-      checkDisplay = `≥${pkg.violationsFound}`.padStart(5);
-    } else {
-      // No data at all
-      checkDisplay = '    —';
+    // Show violation count and severity breakdown inline
+    const severityParts = [];
+    if (pkg.violationBreakdown.errors > 0) {
+      severityParts.push(`${pkg.violationBreakdown.errors} errors`);
+    }
+    if (pkg.violationBreakdown.warnings > 0) {
+      severityParts.push(`${pkg.violationBreakdown.warnings} warnings`);
+    }
+    if (pkg.violationBreakdown.info > 0) {
+      severityParts.push(`${pkg.violationBreakdown.info} info`);
     }
 
-    // Build status line
-    const statusLine = [
-      `  ${pkgDisplay}`,
-      `${statusColor}${statusIcon}${reset}`,
-      `${checkDisplay} checks`,
-      `${pkg.violationsFound.toString().padStart(3)} issues`,
-      `${pkg.compliancePercent}% pass`,
-    ].join('  ');
+    const severityStr = severityParts.length > 0
+      ? `  (${severityParts.join(', ')})`
+      : '';
 
-    lines.push(statusLine);
-
-    // If violations exist, show breakdown
-    if (pkg.violationsFound > 0) {
-      const breakdown = [];
-      if (pkg.violationBreakdown.errors > 0) {
-        breakdown.push(`${pkg.violationBreakdown.errors} errors`);
-      }
-      if (pkg.violationBreakdown.warnings > 0) {
-        breakdown.push(`${pkg.violationBreakdown.warnings} warnings`);
-      }
-      if (pkg.violationBreakdown.info > 0) {
-        breakdown.push(`${pkg.violationBreakdown.info} info`);
-      }
-      if (breakdown.length > 0) {
-        lines.push(`      ↳ ${breakdown.join(', ')}`);
-      }
-    }
+    lines.push(`  ${red}✗${reset} ${pkgDisplay}  ${pkg.violationsFound} violations${severityStr}`);
   }
 
   // Summary stats
   lines.push('');
-  lines.push(`  Total packages analyzed: ${breakdown.totalPackagesAnalyzed}`);
-  lines.push(`  Packages with contracts: ${breakdown.packagesWithContracts}`);
-  lines.push(`  Fully compliant: ${breakdown.packagesFullyCompliant} ✓`);
-  if (breakdown.packagesWithViolations > 0) {
-    lines.push(`  With violations: ${breakdown.packagesWithViolations} ✗`);
-  }
+  lines.push(`  ${breakdown.packagesWithContracts} packages with contracts checked`);
+  lines.push(`  ${breakdown.packagesFullyCompliant} fully compliant ✓`);
+  lines.push(`  ${breakdown.packagesWithViolations} with violations ✗`);
 
   return lines.join('\n');
 }

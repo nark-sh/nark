@@ -457,12 +457,12 @@ export function generateD3Dashboard(data: D3VisualizationData): string {
 
     ${benchmarking && benchmark ? generateBenchmarkingHTML(benchmarking, benchmark) : ''}
 
-    <!-- Package Breakdown -->
+    <!-- Violations by Package -->
     <div class="card grid-full">
       <div class="card-header">
-        <div class="card-title">Package Breakdown</div>
+        <div class="card-title">Violations by Package</div>
         <div style="font-size: 11px; color: var(--text-muted);">
-          ${packageBreakdown.packagesFullyCompliant} passing, ${packageBreakdown.packagesWithViolations} failing
+          ${packageBreakdown.packagesWithContracts} packages checked, ${packageBreakdown.packagesWithViolations} with violations
         </div>
       </div>
       <div class="table-container">
@@ -470,35 +470,24 @@ export function generateD3Dashboard(data: D3VisualizationData): string {
           <thead>
             <tr>
               <th>Package</th>
-              <th style="text-align: center;">Checks</th>
-              <th style="text-align: center;">Passed</th>
-              <th style="text-align: center;">Failed</th>
-              <th>Compliance</th>
-              <th>Status</th>
+              <th style="text-align: center;">Violations</th>
+              <th>Severity Breakdown</th>
             </tr>
           </thead>
           <tbody>
-            ${packageBreakdown.packages.map(pkg => `
-              <tr>
-                <td><strong>${pkg.packageName}</strong></td>
-                <td style="text-align: center;">${pkg.contractsApplied}</td>
-                <td style="text-align: center; color: var(--success-green);">${pkg.checksPassedCount}</td>
-                <td style="text-align: center; color: ${pkg.violationsFound > 0 ? 'var(--error-red)' : 'var(--text-muted)'};">${pkg.violationsFound}</td>
-                <td>
-                  <div style="display: flex; align-items: center; gap: 8px;">
-                    <span style="min-width: 32px;">${pkg.compliancePercent}%</span>
-                    <div class="progress-bar" style="flex: 1;">
-                      <div class="progress-fill" style="width: ${pkg.compliancePercent}%"></div>
-                    </div>
-                  </div>
-                </td>
-                <td>
-                  <span class="badge badge-${pkg.status === 'PASS' ? 'success' : 'error'}">
-                    ${pkg.status === 'PASS' ? '✓ Pass' : '✗ Fail'}
-                  </span>
-                </td>
-              </tr>
-            `).join('')}
+            ${packageBreakdown.packages.filter(p => p.violationsFound > 0).length === 0
+              ? '<tr><td colspan="3" style="text-align: center; color: var(--success-green);">All packages compliant — no violations found</td></tr>'
+              : packageBreakdown.packages.filter(p => p.violationsFound > 0).map(pkg => {
+                const parts: string[] = [];
+                if (pkg.violationBreakdown.errors > 0) parts.push('<span style="color: var(--error-red);">' + pkg.violationBreakdown.errors + ' errors</span>');
+                if (pkg.violationBreakdown.warnings > 0) parts.push('<span style="color: var(--warning-amber);">' + pkg.violationBreakdown.warnings + ' warnings</span>');
+                if (pkg.violationBreakdown.info > 0) parts.push('<span style="color: var(--text-muted);">' + pkg.violationBreakdown.info + ' info</span>');
+                return '<tr>' +
+                  '<td><strong>' + pkg.packageName + '</strong></td>' +
+                  '<td style="text-align: center; color: var(--error-red);">' + pkg.violationsFound + '</td>' +
+                  '<td>' + parts.join(', ') + '</td>' +
+                  '</tr>';
+              }).join('')}
           </tbody>
         </table>
       </div>
