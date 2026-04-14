@@ -21624,5 +21624,591 @@
       "note": "Proactive — request deadlock pattern. README explicitly states streams must always be consumed. Detecting conditional early returns in file event handlers that skip stream.resume() is the key pattern."
     },
     "resolution": "Deferred: busboy-005 is a \"file stream not consumed\" pattern. Requires tracking whether a file event listener always calls stream.resume() or pipes the stream. Complex data-flow analysis needed."
+  },
+  {
+    "id": "concern-20260413-ses-deepen-1",
+    "created_at": "2026-04-13",
+    "source": "deepen",
+    "package": "@aws-sdk/client-ses",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for SendTemplatedEmailCommand postcondition ses-template-rendering-failure-silent: SES accepts request and returns MessageId but email is NOT sent due to template rendering failure. Caller receives 200 OK but recipient never gets email. Requires SNS notification setup for RenderingFailure events.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis. Silent failure: successful API response does not mean successful delivery."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260413-ses-deepen-2",
+    "created_at": "2026-04-13",
+    "source": "deepen",
+    "package": "@aws-sdk/client-ses",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for SendBulkTemplatedEmailCommand postcondition ses-bulk-partial-destination-failure: API succeeds but per-destination Status array must be inspected. Callers that do not check response.Status silently drop failed recipients.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — requires detecting that response.Status is not inspected after SendBulkTemplatedEmailCommand. Pattern: const response = await sesClient.send(new SendBulkTemplatedEmailCommand(...)); response never accessed."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260413-ses-deepen-3",
+    "created_at": "2026-04-13",
+    "source": "deepen",
+    "package": "@aws-sdk/client-ses",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for SendCustomVerificationEmailCommand, CreateTemplateCommand, UpdateTemplateCommand missing try-catch — these command types are not tracked by the existing SESClient.send() detector. Need to add these command class names to the detection pattern.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — existing detection covers core Send* commands. CreateTemplateCommand/UpdateTemplateCommand/SendCustomVerificationEmailCommand need detection rules."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260413-ses-deepen-4",
+    "created_at": "2026-04-13",
+    "source": "deepen",
+    "package": "@aws-sdk/client-ses",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for SendRawEmailCommand postcondition ses-raw-email-size-limit: Raw emails exceeding 10 MB throw MessageRejected. Requires size validation before call. Detection needs to check for missing pre-call size validation on RawMessage.Data.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — 10 MB limit confirmed from API docs. Base64 encoding adds 33% overhead (7.5 MB file becomes 10 MB). Detection needs pre-call size check validation."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-13-tanstack-react-router-1",
+    "created_at": "2026-04-13",
+    "source": "dashboard-feedback",
+    "package": "@tanstack/react-router",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Human-marked FALSE_POSITIVE on invalid-route-path (94 instances, no reason notes provided)",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 94,
+      "fp_reason": null,
+      "fix_target": "contract",
+      "postcondition_id": "invalid-route-path"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-13-undici-2",
+    "created_at": "2026-04-13",
+    "source": "dashboard-feedback",
+    "package": "undici",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Human-marked FALSE_POSITIVE on response-json-parse-error (64 instances, no reason notes provided)",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 64,
+      "fp_reason": null,
+      "fix_target": "scanner",
+      "postcondition_id": "response-json-parse-error"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-13-react-hook-form-3",
+    "created_at": "2026-04-13",
+    "source": "dashboard-feedback",
+    "package": "react-hook-form",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Human-marked FALSE_POSITIVE on async-submit-unhandled-error (60 instances, no reason notes provided)",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 60,
+      "fp_reason": null,
+      "fix_target": "contract",
+      "postcondition_id": "async-submit-unhandled-error"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-13-ai-4",
+    "created_at": "2026-04-13",
+    "source": "dashboard-feedback",
+    "package": "ai",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Human-marked FALSE_POSITIVE on tool-execution-error (25 instances, no reason notes provided)",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 25,
+      "fp_reason": null,
+      "fix_target": "scanner",
+      "postcondition_id": "tool-execution-error"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-13-tanstack-react-query-5",
+    "created_at": "2026-04-13",
+    "source": "dashboard-feedback",
+    "package": "@tanstack/react-query",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Human-marked FALSE_POSITIVE on query-error-unhandled (25 instances, no reason notes provided)",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 25,
+      "fp_reason": null,
+      "fix_target": "contract",
+      "postcondition_id": "query-error-unhandled"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-13-tanstack-react-router-6",
+    "created_at": "2026-04-13",
+    "source": "dashboard-feedback",
+    "package": "@tanstack/react-router",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Human-marked FALSE_POSITIVE on param-type-mismatch (18 instances, no reason notes provided)",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 18,
+      "fp_reason": null,
+      "fix_target": "contract",
+      "postcondition_id": "param-type-mismatch"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-13-tanstack-react-router-7",
+    "created_at": "2026-04-13",
+    "source": "dashboard-feedback",
+    "package": "@tanstack/react-router",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Human-marked FALSE_POSITIVE on search-schema-validation-error (14 instances, no reason notes provided)",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 14,
+      "fp_reason": null,
+      "fix_target": "contract",
+      "postcondition_id": "search-schema-validation-error"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-13-zod-8",
+    "created_at": "2026-04-13",
+    "source": "dashboard-feedback",
+    "package": "zod",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Human-marked FALSE_POSITIVE on parse-validation-error (14 instances, no reason notes provided)",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 14,
+      "fp_reason": null,
+      "fix_target": "scanner",
+      "postcondition_id": "parse-validation-error"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-13-react-hook-form-9",
+    "created_at": "2026-04-13",
+    "source": "dashboard-feedback",
+    "package": "react-hook-form",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Human-marked FALSE_POSITIVE on missing-form-provider (9 instances, no reason notes provided)",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 9,
+      "fp_reason": null,
+      "fix_target": "contract",
+      "postcondition_id": "missing-form-provider"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-13-redis-10",
+    "created_at": "2026-04-13",
+    "source": "dashboard-feedback",
+    "package": "redis",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Human-marked FALSE_POSITIVE on missing-error-listener (7 instances, no reason notes provided)",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 7,
+      "fp_reason": null,
+      "fix_target": "contract",
+      "postcondition_id": "missing-error-listener"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-13-clerk-nextjs-11",
+    "created_at": "2026-04-13",
+    "source": "dashboard-feedback",
+    "package": "@clerk/nextjs",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Human-marked FALSE_POSITIVE on use-user-no-loaded-check (7 instances, no reason notes provided)",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 7,
+      "fp_reason": null,
+      "fix_target": "contract",
+      "postcondition_id": "use-user-no-loaded-check"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-13-ai-12",
+    "created_at": "2026-04-13",
+    "source": "dashboard-feedback",
+    "package": "ai",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Human-marked FALSE_POSITIVE on api-error-rate-limit (7 instances, no reason notes provided)",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 7,
+      "fp_reason": null,
+      "fix_target": "scanner",
+      "postcondition_id": "api-error-rate-limit"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-13-express-13",
+    "created_at": "2026-04-13",
+    "source": "dashboard-feedback",
+    "package": "express",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Human-marked FALSE_POSITIVE on async-middleware-unhandled-rejection (5 instances, no reason notes provided)",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 5,
+      "fp_reason": null,
+      "fix_target": "scanner",
+      "postcondition_id": "async-middleware-unhandled-rejection"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-13-tanstack-react-query-14",
+    "created_at": "2026-04-13",
+    "source": "dashboard-feedback",
+    "package": "@tanstack/react-query",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Human-marked FALSE_POSITIVE on infinite-query-error-unhandled (3 instances, no reason notes provided)",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 3,
+      "fp_reason": null,
+      "fix_target": "contract",
+      "postcondition_id": "infinite-query-error-unhandled"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-13-clerk-nextjs-15",
+    "created_at": "2026-04-13",
+    "source": "dashboard-feedback",
+    "package": "@clerk/nextjs",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Human-marked FALSE_POSITIVE on use-clerk-outside-provider (3 instances, no reason notes provided)",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 3,
+      "fp_reason": null,
+      "fix_target": "contract",
+      "postcondition_id": "use-clerk-outside-provider"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-13-stripe-16",
+    "created_at": "2026-04-13",
+    "source": "dashboard-feedback",
+    "package": "stripe",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Human-marked FALSE_POSITIVE on rate-limit-error (3 instances, no reason notes provided)",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 3,
+      "fp_reason": null,
+      "fix_target": "scanner",
+      "postcondition_id": "rate-limit-error"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-13-dotenv-17",
+    "created_at": "2026-04-13",
+    "source": "dashboard-feedback",
+    "package": "dotenv",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Human-marked FALSE_POSITIVE on missing-env-file (3 instances, no reason notes provided)",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 3,
+      "fp_reason": null,
+      "fix_target": "contract",
+      "postcondition_id": "missing-env-file"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-13-node-fetch-18",
+    "created_at": "2026-04-13",
+    "source": "dashboard-feedback",
+    "package": "node-fetch",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Human-marked FALSE_POSITIVE on fetch-rejects-on-network-error (2 instances, no reason notes provided)",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 2,
+      "fp_reason": null,
+      "fix_target": "scanner",
+      "postcondition_id": "fetch-rejects-on-network-error"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-13-react-hook-form-19",
+    "created_at": "2026-04-13",
+    "source": "dashboard-feedback",
+    "package": "react-hook-form",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Human-marked FALSE_POSITIVE on unhandled-field-array-operations (2 instances, no reason notes provided)",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 2,
+      "fp_reason": null,
+      "fix_target": "scanner",
+      "postcondition_id": "unhandled-field-array-operations"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-13-tanstack-react-query-20",
+    "created_at": "2026-04-13",
+    "source": "dashboard-feedback",
+    "package": "@tanstack/react-query",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Human-marked FALSE_POSITIVE on mutation-error-unhandled (2 instances, no reason notes provided)",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 2,
+      "fp_reason": null,
+      "fix_target": "contract",
+      "postcondition_id": "mutation-error-unhandled"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-13-ioredis-21",
+    "created_at": "2026-04-13",
+    "source": "dashboard-feedback",
+    "package": "ioredis",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Human-marked FALSE_POSITIVE on missing-error-listener (2 instances, no reason notes provided)",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 2,
+      "fp_reason": null,
+      "fix_target": "contract",
+      "postcondition_id": "missing-error-listener"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-13-vercel-blob-22",
+    "created_at": "2026-04-13",
+    "source": "dashboard-feedback",
+    "package": "@vercel/blob",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Human-marked FALSE_POSITIVE on blob-del-no-try-catch (2 instances, no reason notes provided)",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 2,
+      "fp_reason": null,
+      "fix_target": "scanner",
+      "postcondition_id": "blob-del-no-try-catch"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-13-supabase-supabase-js-23",
+    "created_at": "2026-04-13",
+    "source": "dashboard-feedback",
+    "package": "@supabase/supabase-js",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Human-marked FALSE_POSITIVE on rls-policy-violation (1 instances, no reason notes provided)",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 1,
+      "fp_reason": null,
+      "fix_target": "contract",
+      "postcondition_id": "rls-policy-violation"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-13-ai-24",
+    "created_at": "2026-04-13",
+    "source": "dashboard-feedback",
+    "package": "ai",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Human-marked FALSE_POSITIVE on schema-validation-error (1 instances, no reason notes provided)",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 1,
+      "fp_reason": null,
+      "fix_target": "scanner",
+      "postcondition_id": "schema-validation-error"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-13-axios-25",
+    "created_at": "2026-04-13",
+    "source": "dashboard-feedback",
+    "package": "axios",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Human-marked FALSE_POSITIVE on error-4xx-5xx (1 instances, no reason notes provided)",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 1,
+      "fp_reason": null,
+      "fix_target": "scanner",
+      "postcondition_id": "error-4xx-5xx"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-13-upstash-redis-26",
+    "created_at": "2026-04-13",
+    "source": "dashboard-feedback",
+    "package": "@upstash/redis",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Human-marked FALSE_POSITIVE on network-or-api-error (1 instances, no reason notes provided)",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 1,
+      "fp_reason": null,
+      "fix_target": "scanner",
+      "postcondition_id": "network-or-api-error"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-13-puppeteer-27",
+    "created_at": "2026-04-13",
+    "source": "dashboard-feedback",
+    "package": "puppeteer",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Human-marked FALSE_POSITIVE on browser-close-must-run (1 instances, no reason notes provided)",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 1,
+      "fp_reason": null,
+      "fix_target": "contract",
+      "postcondition_id": "browser-close-must-run"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-13-winston-28",
+    "created_at": "2026-04-13",
+    "source": "dashboard-feedback",
+    "package": "winston",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Human-marked FALSE_POSITIVE on missing-error-listener (1 instances, no reason notes provided)",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 1,
+      "fp_reason": null,
+      "fix_target": "contract",
+      "postcondition_id": "missing-error-listener"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-13-supabase-supabase-js-29",
+    "created_at": "2026-04-13",
+    "source": "dashboard-feedback",
+    "package": "@supabase/supabase-js",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Human-marked FALSE_POSITIVE on weak-password (1 instances, no reason notes provided)",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 1,
+      "fp_reason": null,
+      "fix_target": "contract",
+      "postcondition_id": "weak-password"
+    },
+    "resolution": null
   }
 ]
