@@ -46,7 +46,7 @@
     "nark",
     "error-handling",
     "static-analysis",
-    "behavioral-contracts",
+    "contracts",
     "typescript"
   ]
 }

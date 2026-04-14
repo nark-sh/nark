@@ -87,7 +87,7 @@ program.addCommand(createCiCommand());
 
 program
   .option('--tsconfig <path>', 'Path to tsconfig.json or project directory', _narkRc?.tsconfig ?? './tsconfig.json')
-  .option('--corpus <path>', 'Path to corpus directory', _narkRc?.corpus ?? findDefaultCorpusPath())
+  .option('--corpus <path>', 'Path to corpus directory (default: auto-resolves from nark-corpus package)', _narkRc?.corpus ?? findDefaultCorpusPath())
   .option('--output <path>', 'Output path for audit record JSON (default: auto-generated in output/runs/)', _narkRc?.output?.json)
   .option('--project <path>', 'Path to project root (for package.json discovery)', process.cwd())
   .option('--no-terminal', 'Disable terminal output (JSON only)')
@@ -305,7 +305,7 @@ async function main(options: any) {
   // Validate corpus exists
   if (!fs.existsSync(options.corpus)) {
     console.error(chalk.red(`Error: Corpus directory not found at ${options.corpus}`));
-    console.error(chalk.yellow('Tip: Use --corpus <path> to specify corpus location'));
+    console.error(chalk.yellow('Tip: npm install nark-corpus, or use --corpus <path>, or set NARK_CORPUS_PATH'));
     process.exit(2);
   }
 
@@ -749,9 +749,14 @@ async function main(options: any) {
  * 2. Local development paths (for contributors)
  */
 function findDefaultCorpusPath(): string {
-  // Try 1: Use published npm package (production use)
+  // Try 1: NARK_CORPUS_PATH env var (highest priority override, for development)
+  const envPath = process.env.NARK_CORPUS_PATH;
+  if (envPath && fs.existsSync(path.join(envPath, 'packages'))) {
+    return envPath;
+  }
+
+  // Try 2: Published npm package (production use)
   try {
-    // Use createRequire for ESM compatibility
     const _require = createRequire(import.meta.url);
     const corpusModule = _require('nark-corpus');
     // getCorpusPath() returns the packages/ subdirectory
@@ -765,7 +770,7 @@ function findDefaultCorpusPath(): string {
     // Package not installed - fall through to local paths
   }
 
-  // Try 2: Look for local corpus repo (development use)
+  // Try 3: Local corpus repo (development fallback)
   const possiblePaths = [
     path.join(process.cwd(), '../nark-corpus'),
     path.join(process.cwd(), '../corpus'),

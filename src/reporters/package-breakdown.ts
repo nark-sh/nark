@@ -219,7 +219,10 @@ export function formatPackageBreakdown(breakdown: PackageBreakdownSummary): stri
       ? `  (${severityParts.join(', ')})`
       : '';
 
-    lines.push(`  ${red}✗${reset} ${pkgDisplay}  ${pkg.violationsFound} violations${severityStr}`);
+    const callSiteStr = !pkg.isEstimated && pkg.contractsApplied > 0
+      ? ` in ${pkg.contractsApplied} call sites`
+      : '';
+    lines.push(`  ${red}✗${reset} ${pkgDisplay}  ${pkg.violationsFound} violations${callSiteStr}${severityStr}`);
   }
 
   // Summary stats

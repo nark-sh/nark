@@ -16,7 +16,7 @@ export function createInitCommand(): Command {
   const init = new Command('init');
 
   init
-    .description('Initialize behavioral contract scanning for this project')
+    .description('Initialize nark scanning for this project')
     .action(async () => {
       const cwd = process.cwd();
 

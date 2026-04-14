@@ -2,7 +2,7 @@
 
 **Contract coverage scanner for npm packages — find missing error handling before production.**
 
-nark scans your TypeScript codebase against a curated library of 169+ behavioral contracts to find places where error handling is missing. Think of it as a linter, but for runtime failure modes — unhandled promise rejections, missing `.on('error')` listeners, uncaught API exceptions.
+nark scans your TypeScript codebase against a curated library of 169+ package contracts to find places where error handling is missing. Think of it as a linter, but for runtime failure modes — unhandled promise rejections, missing `.on('error')` listeners, uncaught API exceptions.
 
 ## Quick Start
 

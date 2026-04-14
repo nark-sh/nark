@@ -456,15 +456,18 @@ function formatPositiveEvidenceReportMarkdown(
     if (failingPkgs.length === 0) {
       lines.push('All packages compliant — no violations found.');
     } else {
-      lines.push('| Package | Violations | Breakdown |');
-      lines.push('|---------|------------|-----------|');
+      lines.push('| Package | Call Sites | Violations | Breakdown |');
+      lines.push('|---------|------------|------------|-----------|');
 
       failingPkgs.forEach(pkg => {
         const parts = [];
         if (pkg.violationBreakdown.errors > 0) parts.push(`${pkg.violationBreakdown.errors} errors`);
         if (pkg.violationBreakdown.warnings > 0) parts.push(`${pkg.violationBreakdown.warnings} warnings`);
         if (pkg.violationBreakdown.info > 0) parts.push(`${pkg.violationBreakdown.info} info`);
-        lines.push(`| ${pkg.packageName} | ${pkg.violationsFound} | ${parts.join(', ')} |`);
+        const callSiteDisplay = !pkg.isEstimated && pkg.contractsApplied > 0
+          ? String(pkg.contractsApplied)
+          : '—';
+        lines.push(`| ${pkg.packageName} | ${callSiteDisplay} | ${pkg.violationsFound} | ${parts.join(', ')} |`);
       });
     }
 

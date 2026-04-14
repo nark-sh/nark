@@ -29,7 +29,7 @@ export function createSuppressionsCommand(): Command {
   const suppressions = new Command('suppressions');
 
   suppressions
-    .description('Manage behavioral contract suppressions')
+    .description('Manage nark suppressions')
     .addCommand(createListCommand())
     .addCommand(createShowCommand())
     .addCommand(createCleanCommand())

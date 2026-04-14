@@ -470,20 +470,25 @@ export function generateD3Dashboard(data: D3VisualizationData): string {
           <thead>
             <tr>
               <th>Package</th>
+              <th style="text-align: center;">Call Sites</th>
               <th style="text-align: center;">Violations</th>
               <th>Severity Breakdown</th>
             </tr>
           </thead>
           <tbody>
             ${packageBreakdown.packages.filter(p => p.violationsFound > 0).length === 0
-              ? '<tr><td colspan="3" style="text-align: center; color: var(--success-green);">All packages compliant — no violations found</td></tr>'
+              ? '<tr><td colspan="4" style="text-align: center; color: var(--success-green);">All packages compliant — no violations found</td></tr>'
               : packageBreakdown.packages.filter(p => p.violationsFound > 0).map(pkg => {
                 const parts: string[] = [];
                 if (pkg.violationBreakdown.errors > 0) parts.push('<span style="color: var(--error-red);">' + pkg.violationBreakdown.errors + ' errors</span>');
                 if (pkg.violationBreakdown.warnings > 0) parts.push('<span style="color: var(--warning-amber);">' + pkg.violationBreakdown.warnings + ' warnings</span>');
                 if (pkg.violationBreakdown.info > 0) parts.push('<span style="color: var(--text-muted);">' + pkg.violationBreakdown.info + ' info</span>');
+                const callSiteDisplay = !pkg.isEstimated && pkg.contractsApplied > 0
+                  ? String(pkg.contractsApplied)
+                  : '—';
                 return '<tr>' +
                   '<td><strong>' + pkg.packageName + '</strong></td>' +
+                  '<td style="text-align: center; color: var(--text-secondary);">' + callSiteDisplay + '</td>' +
                   '<td style="text-align: center; color: var(--error-red);">' + pkg.violationsFound + '</td>' +
                   '<td>' + parts.join(', ') + '</td>' +
                   '</tr>';

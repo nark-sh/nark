@@ -2,9 +2,9 @@
 
 ## What is nark?
 
-nark is a behavioral contract scanner for npm packages. It analyzes TypeScript code
+nark is a contract coverage scanner for npm packages. It analyzes TypeScript code
 to find missing error handling patterns (try/catch, .on('error'), etc.) based on
-a curated library of behavioral contracts.
+a curated library of contracts that describe how packages fail at runtime.
 
 ## After a scan
 
