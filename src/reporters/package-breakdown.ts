@@ -10,6 +10,7 @@ import type { AuditRecord, EnhancedAuditRecord, Violation } from '../types.js';
 export interface PackageUsageStats {
   packageName: string;
   contractsApplied: number;     // Estimated checks for this package
+  isEstimated: boolean;         // true when contractsApplied is a proportional estimate
   violationsFound: number;      // Issues discovered
   checksPassedCount: number;    // Calculated: applied - violations
   status: 'PASS' | 'FAIL';      // PASS = zero violations
@@ -41,13 +42,22 @@ export function buildPackageBreakdown(
   // Get list of all packages analyzed (with contracts)
   const packagesWithContracts = getPackagesWithContracts(audit);
 
+  // Also include packages that appear only in violations (e.g. undici mapped from fetch())
+  const missingViolationPkgs = Array.from(violationsByPackage.keys())
+    .filter(p => !packagesWithContracts.includes(p));
+  const allPackages = [...packagesWithContracts, ...missingViolationPkgs];
+
   // Build stats for each package
-  const packages: PackageUsageStats[] = packagesWithContracts.map(pkgName => {
+  const packages: PackageUsageStats[] = allPackages.map(pkgName => {
     const violations = violationsByPackage.get(pkgName) || [];
 
     // Estimate contracts applied per package
     // (This is approximate - exact tracking requires analyzer changes)
     const contractsApplied = estimateContractsForPackage(pkgName, audit, violations);
+
+    // Mark as estimated when falling back to proportional distribution
+    const enhanced = audit as EnhancedAuditRecord;
+    const isEstimated = !(enhanced.violations_by_package && enhanced.violations_by_package[pkgName]);
 
     const checksPassedCount = contractsApplied - violations.length;
     const compliancePercent = contractsApplied > 0
@@ -63,6 +73,7 @@ export function buildPackageBreakdown(
     return {
       packageName: pkgName,
       contractsApplied,
+      isEstimated,
       violationsFound: violations.length,
       checksPassedCount,
       status: violations.length === 0 ? 'PASS' : 'FAIL',
@@ -80,7 +91,7 @@ export function buildPackageBreakdown(
   return {
     packages,
     totalPackagesAnalyzed: audit.packages_analyzed.length,
-    packagesWithContracts: packagesWithContracts.length,
+    packagesWithContracts: allPackages.length,
     packagesWithViolations,
     packagesFullyCompliant,
   };
@@ -185,11 +196,16 @@ export function formatPackageBreakdown(breakdown: PackageBreakdownSummary): stri
       ? pkg.packageName.substring(0, 27) + '...'
       : pkg.packageName.padEnd(30);
 
+    // Format check count — prefix with ~ when it is a proportional estimate
+    const checkDisplay = pkg.isEstimated
+      ? `~${pkg.contractsApplied}`.padStart(5)
+      : pkg.contractsApplied.toString().padStart(5);
+
     // Build status line
     const statusLine = [
       `  ${pkgDisplay}`,
       `${statusColor}${statusIcon}${reset}`,
-      `${pkg.contractsApplied.toString().padStart(4)} checks`,
+      `${checkDisplay} checks`,
       `${pkg.violationsFound.toString().padStart(3)} issues`,
       `${pkg.compliancePercent}% pass`,
     ].join('  ');
