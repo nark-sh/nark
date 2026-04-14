@@ -17956,5 +17956,393 @@
       "note": "Proactive — Lookups API returns HTTP 200 with valid: false for invalid numbers. This is a silent failure pattern where subsequent messages.create() will fail with error 21211/21421."
     },
     "resolution": null
+  },
+  {
+    "id": "concern-2026-04-13-tanstack-react-router-1",
+    "created_at": "2026-04-13",
+    "source": "dashboard-feedback",
+    "package": "@tanstack/react-router",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "invalid-route-path postcondition fires on valid route usage patterns that do not represent actual routing errors — 94 instances marked FP across numerous files. Contract postcondition is too broad.",
+    "evidence": {
+      "repos": [
+        "src/components/command-menu.tsx",
+        "src/components/create-organization-modal.tsx",
+        "src/features/auth/sign-in/components/user-auth-form.tsx",
+        "src/features/auth/sign-up/components/sign-up-form.tsx",
+        "src/routes/(auth)/accept-invite.tsx"
+      ],
+      "scan_file": null,
+      "violation_count": 94,
+      "fp_reason": "HUMAN-marked FP — no notes provided but 94 instances across 46 files all marked false positive, indicating postcondition is too broad",
+      "fix_target": "contract",
+      "postcondition_id": "invalid-route-path"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-13-tanstack-react-router-2",
+    "created_at": "2026-04-13",
+    "source": "dashboard-feedback",
+    "package": "@tanstack/react-router",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "param-type-mismatch postcondition fires on valid parameter usage in route components — 18 instances marked FP across detail/builder pages.",
+    "evidence": {
+      "repos": [
+        "src/features/browser-agents/browser-agent-detail.tsx",
+        "src/features/customers/customer-detail.tsx",
+        "src/features/documents/document-builder.tsx",
+        "src/features/invoices/invoice-detail.tsx",
+        "src/routes/_authenticated/workflow-builder/$workflowId.tsx"
+      ],
+      "scan_file": null,
+      "violation_count": 18,
+      "fp_reason": "HUMAN-marked FP — 18 instances across 9 files all marked false positive on detail/builder route parameter usage",
+      "fix_target": "contract",
+      "postcondition_id": "param-type-mismatch"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-13-tanstack-react-router-3",
+    "created_at": "2026-04-13",
+    "source": "dashboard-feedback",
+    "package": "@tanstack/react-router",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "search-schema-validation-error postcondition fires on valid search param usage — 14 instances marked FP across auth and app route pages.",
+    "evidence": {
+      "repos": [
+        "src/features/apps/index.tsx",
+        "src/features/auth/email-confirm/index.tsx",
+        "src/features/auth/sign-in/index.tsx",
+        "src/routes/(auth)/accept-invite.tsx",
+        "src/routes/(auth)/invite.tsx"
+      ],
+      "scan_file": null,
+      "violation_count": 14,
+      "fp_reason": "HUMAN-marked FP — 14 instances across 7 files all marked false positive for search-schema-validation-error postcondition",
+      "fix_target": "contract",
+      "postcondition_id": "search-schema-validation-error"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-13-react-hook-form-1",
+    "created_at": "2026-04-13",
+    "source": "dashboard-feedback",
+    "package": "react-hook-form",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "async-submit-unhandled-error postcondition fires on async form submit handlers that are handled at a higher level or via react-hook-form error boundary — 71 instances marked FP across form components.",
+    "evidence": {
+      "repos": [
+        "src/features/auth/sign-in/components/user-auth-form.tsx",
+        "src/features/auth/sign-up/components/sign-up-form.tsx",
+        "src/features/auth/reset-password/components/reset-password-form.tsx",
+        "src/features/settings/account/account-form.tsx",
+        "src/components/create-organization-modal.tsx"
+      ],
+      "scan_file": null,
+      "violation_count": 71,
+      "fp_reason": "HUMAN-marked FP — 71 instances across 16+ form components all marked false positive, indicating react-hook-form error handling is being detected incorrectly or form-level error handling is sufficient",
+      "fix_target": "contract",
+      "postcondition_id": "async-submit-unhandled-error"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-13-undici-1",
+    "created_at": "2026-04-13",
+    "source": "dashboard-feedback",
+    "package": "undici",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "response-json-parse-error postcondition fires on fetch().json() calls that are wrapped in try-catch at a higher level or using framework error handling — 64 instances marked FP across the saas app.",
+    "evidence": {
+      "repos": [
+        "apps/web/app/admin/(protected)/lab/oss-scan/page.tsx",
+        "apps/web/app/api/github/debug/route.ts",
+        "apps/web/app/api/oss-scan/route.ts",
+        "apps/web/components/repositories/scan-button.tsx",
+        "apps/web/components/violations/violation-review-panel.tsx"
+      ],
+      "scan_file": null,
+      "violation_count": 64,
+      "fp_reason": "HUMAN-marked FP — 64 instances across 36 files all marked false positive, scanner does not detect try-catch wrapping the calling context or Next.js route-level error handling",
+      "fix_target": "scanner",
+      "postcondition_id": "response-json-parse-error"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-13-ai-1",
+    "created_at": "2026-04-13",
+    "source": "dashboard-feedback",
+    "package": "ai",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "tool-execution-error postcondition fires on AI SDK tool implementations that may not need individual try-catch when the tool framework handles errors — 21 instances marked FP across tool definition files.",
+    "evidence": {
+      "repos": [
+        "lib/tools/searchTwitter.ts",
+        "lib/tools/getArtistSegments.ts",
+        "lib/tools/browser/browserObserve.ts",
+        "lib/tools/browser/browserAct.ts",
+        "lib/tools/files/renameFile.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 21,
+      "fp_reason": "HUMAN-marked FP — 21 instances across 21 tool files, AI SDK tool implementations use framework-level error handling that the scanner does not detect",
+      "fix_target": "contract",
+      "postcondition_id": "tool-execution-error"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-13-ai-2",
+    "created_at": "2026-04-13",
+    "source": "dashboard-feedback",
+    "package": "ai",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "api-error-rate-limit postcondition fires on AI SDK calls that may be wrapped or handled by higher-level retry mechanisms — 7 instances marked FP.",
+    "evidence": {
+      "repos": [
+        "apps/web/utils/llms/index.ts",
+        "lib/evals/scorers/QuestionAnswered.ts",
+        "lib/evals/scorers/CatalogAvailability.ts",
+        "lib/catalog/analyzeCatalogBatch.ts",
+        "lib/ai/generateArray.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 7,
+      "fp_reason": "HUMAN-marked FP — 7 instances, api-error-rate-limit postcondition does not account for retry wrapper functions or higher-level error handling patterns",
+      "fix_target": "scanner",
+      "postcondition_id": "api-error-rate-limit"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-13-tanstack-react-query-1",
+    "created_at": "2026-04-13",
+    "source": "dashboard-feedback",
+    "package": "@tanstack/react-query",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "query-error-unhandled postcondition fires on useQuery/useInfiniteQuery hooks that rely on React Query error boundaries or global error handlers — 25 instances marked FP.",
+    "evidence": {
+      "repos": [
+        "hooks/useAccountOrganizations.ts",
+        "hooks/useArtistInstruction.ts",
+        "components/Agents/AgentCreator.tsx",
+        "components/Files/FileInfoDialog.tsx",
+        "app/access/page.tsx"
+      ],
+      "scan_file": null,
+      "violation_count": 25,
+      "fp_reason": "HUMAN-marked FP — 25 instances, scanner does not detect React Query ErrorBoundary or global queryClient error handling patterns",
+      "fix_target": "scanner",
+      "postcondition_id": "query-error-unhandled"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-13-tanstack-react-query-2",
+    "created_at": "2026-04-13",
+    "source": "dashboard-feedback",
+    "package": "@tanstack/react-query",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "infinite-query-error-unhandled and mutation-error-unhandled postconditions fire on hooks relying on global error handling — 5 combined instances marked FP.",
+    "evidence": {
+      "repos": [
+        "hooks/useArtistFans.ts",
+        "hooks/useArtistPosts.ts",
+        "hooks/useCatalogSongs.ts",
+        "hooks/useCatalogSongsFileSelect.ts",
+        "hooks/useSandboxFileContent.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 5,
+      "fp_reason": "HUMAN-marked FP — infinite-query and mutation hooks use global query client error handling not detected by scanner",
+      "fix_target": "scanner",
+      "postcondition_id": "infinite-query-error-unhandled"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-13-zod-1",
+    "created_at": "2026-04-13",
+    "source": "dashboard-feedback",
+    "package": "zod",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "parse-validation-error postcondition fires on zod.parse() calls in Next.js API routes that rely on framework-level error handling — 14 instances marked FP.",
+    "evidence": {
+      "repos": [
+        "apps/web/app/api/ai/analyze-sender-pattern/route.ts",
+        "apps/web/app/api/clean/route.ts",
+        "apps/web/app/api/google/contacts/route.ts",
+        "apps/web/app/api/labels/create/route.ts",
+        "apps/web/app/api/sso/signin/route.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 14,
+      "fp_reason": "HUMAN-marked FP — zod.parse() calls in Next.js route handlers where ZodError is handled by the route framework",
+      "fix_target": "scanner",
+      "postcondition_id": "parse-validation-error"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-13-clerk-nextjs-1",
+    "created_at": "2026-04-13",
+    "source": "dashboard-feedback",
+    "package": "@clerk/nextjs",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "use-user-no-loaded-check postcondition fires on valid useUser() usage in components where the loaded state is checked at a higher component level — 7 instances marked FP.",
+    "evidence": {
+      "repos": [
+        "apps/web/app/(auth)/invite/[token]/page.tsx",
+        "apps/web/app/(dashboard)/onboarding/onboarding-form.tsx",
+        "apps/web/components/layout/header.tsx",
+        "apps/web/components/layout/sidebar.tsx",
+        "apps/web/components/providers/analytics-provider.tsx"
+      ],
+      "scan_file": null,
+      "violation_count": 7,
+      "fp_reason": "HUMAN-marked FP — useUser() used in components within ClerkProvider context where loaded check is handled by parent routes or middleware",
+      "fix_target": "contract",
+      "postcondition_id": "use-user-no-loaded-check"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-13-clerk-nextjs-2",
+    "created_at": "2026-04-13",
+    "source": "dashboard-feedback",
+    "package": "@clerk/nextjs",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "use-clerk-outside-provider postcondition fires on components that are always rendered inside ClerkProvider — 3 instances marked FP.",
+    "evidence": {
+      "repos": [
+        "apps/web/components/layout/header.tsx",
+        "apps/web/components/layout/sidebar.tsx",
+        "apps/web/components/layout/top-nav.tsx"
+      ],
+      "scan_file": null,
+      "violation_count": 3,
+      "fp_reason": "HUMAN-marked FP — layout components always rendered within ClerkProvider in app/layout.tsx, scanner does not trace component tree to verify provider presence",
+      "fix_target": "scanner",
+      "postcondition_id": "use-clerk-outside-provider"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-13-redis-1",
+    "created_at": "2026-04-13",
+    "source": "dashboard-feedback",
+    "package": "redis",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "missing-error-listener postcondition fires when Redis error listener is registered but scanner does not detect it — 7 instances from one file.",
+    "evidence": {
+      "repos": [
+        "packages/api/src/main.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 7,
+      "fp_reason": "HUMAN-marked FP — 7 violations all from main.ts, scanner does not detect .on(\"error\") registration at module initialization level",
+      "fix_target": "scanner",
+      "postcondition_id": "missing-error-listener"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-13-express-1",
+    "created_at": "2026-04-13",
+    "source": "dashboard-feedback",
+    "package": "express",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "async-middleware-unhandled-rejection fires on async Express middleware in dev/browser server where Express error middleware is registered — 5 instances from 2 files.",
+    "evidence": {
+      "repos": [
+        "api/browser-agent-server.ts",
+        "api/dev-server.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 5,
+      "fp_reason": "HUMAN-marked FP — async middleware in server files with Express error handler registered elsewhere, scanner does not detect global Express error handler",
+      "fix_target": "scanner",
+      "postcondition_id": "async-middleware-unhandled-rejection"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-13-dotenv-1",
+    "created_at": "2026-04-13",
+    "source": "dashboard-feedback",
+    "package": "dotenv",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "missing-env-file postcondition fires in migration script where missing .env file is expected and handled — 3 instances from one file.",
+    "evidence": {
+      "repos": [
+        "src/lib/migrations/supabase.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 3,
+      "fp_reason": "HUMAN-marked FP — migration script context where env file is optional or absence is handled by the migration flow",
+      "fix_target": "contract",
+      "postcondition_id": "missing-env-file"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-13-stripe-1",
+    "created_at": "2026-04-13",
+    "source": "dashboard-feedback",
+    "package": "stripe",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "rate-limit-error postcondition fires on Stripe API calls that are wrapped at a higher level — 3 instances from the stripe utility file.",
+    "evidence": {
+      "repos": [
+        "apps/web/lib/stripe.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 3,
+      "fp_reason": "HUMAN-marked FP — Stripe calls in lib/stripe.ts utility wrapper where rate limit handling is expected to be done by callers",
+      "fix_target": "contract",
+      "postcondition_id": "rate-limit-error"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-13-node-fetch-1",
+    "created_at": "2026-04-13",
+    "source": "dashboard-feedback",
+    "package": "node-fetch",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "fetch-rejects-on-network-error postcondition fires on node-fetch calls where network error is handled by the AI client retry logic — 2 instances.",
+    "evidence": {
+      "repos": [
+        "api/analysis/post-game-analysis.ts",
+        "api/utils/ai-client.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 2,
+      "fp_reason": "HUMAN-marked FP — node-fetch calls in AI client utility wrapped by retry/error handling logic that scanner does not trace",
+      "fix_target": "scanner",
+      "postcondition_id": "fetch-rejects-on-network-error"
+    },
+    "resolution": null
   }
 ]
