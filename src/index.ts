@@ -689,6 +689,13 @@ async function main(options: any) {
         return _require('../package.json') as { version: string };
       } catch { return { version: 'unknown' }; }
     })();
+    const corpusPkgVersion = (() => {
+      try {
+        const pkgPath = path.join(options.corpus, 'package.json');
+        const raw = fs.readFileSync(pkgPath, 'utf-8');
+        return (JSON.parse(raw) as { version?: string }).version;
+      } catch { return undefined; }
+    })();
     const contractIds = corpusResult.contracts
       ? Array.from((corpusResult.contracts as Map<string, any>).values()).map((c: any) => c.id ?? c.contractId ?? c.package ?? '').filter(Boolean)
       : [];
@@ -698,6 +705,23 @@ async function main(options: any) {
       const id: string = v.package ?? (v as any).contractId ?? 'unknown';
       violationCountsByContract[id] = (violationCountsByContract[id] ?? 0) + 1;
     }
+    const totalCallSites = stats.callsitesByPackage
+      ? Object.values(stats.callsitesByPackage as Record<string, number>).reduce((sum: number, n: number) => sum + n, 0)
+      : 0;
+    const suppressionCount = v2Result?.suppressedViolations?.length ?? 0;
+
+    // Compute exit code (mirrors logic below)
+    const telemetryExitCode = (() => {
+      if (options.reportOnly) return 0;
+      const _hasErrors = auditRecord.summary.error_count > 0;
+      const _hasWarnings = auditRecord.summary.warning_count > 0;
+      const _hasInfo = (auditRecord.summary as any).info_count > 0;
+      const t = options.failOnWarnings ? 'warning' : (options.failThreshold || 'error');
+      if (t === 'info') return (_hasErrors || _hasWarnings || _hasInfo) ? 1 : 0;
+      if (t === 'warning') return (_hasErrors || _hasWarnings) ? 1 : 0;
+      return _hasErrors ? 1 : 0;
+    })();
+
     await fireTelemetryEvent({
       version: narkPkg.version,
       os: process.platform,
@@ -708,6 +732,12 @@ async function main(options: any) {
       violationCountsByContract,
       scanDurationMs: outputEndTime - scanStartTime,
       isCiMode: !!(process.env.CI || process.env.CONTINUOUS_INTEGRATION),
+      fileCount: stats.filesAnalyzed,
+      totalCallSites,
+      corpusVersion: corpusPkgVersion,
+      suppressionCount,
+      scanMode: 'full',
+      exitCode: telemetryExitCode,
     });
   }
 

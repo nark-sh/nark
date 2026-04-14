@@ -33,6 +33,12 @@ export interface TelemetryPayload {
   scanDurationMs: number;
   isCiMode: boolean;
   repoFingerprint?: string;
+  fileCount?: number;
+  totalCallSites?: number;
+  corpusVersion?: string;
+  suppressionCount?: number;
+  scanMode?: string;
+  exitCode?: number;
 }
 
 /**
