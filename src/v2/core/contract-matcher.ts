@@ -106,9 +106,31 @@ export class ContractMatcher {
         detection.pattern === "property-chain"
           ? (detection.metadata?.chainStr as string | undefined)
           : undefined;
+      // superagent: agent instance rerouting.
+      // When superagent.agent() is called and the result is stored (e.g., `const agent = superagent.agent()`),
+      // the instance-tracker resolves `agent.get()` as packageName='superagent', functionName='get'.
+      // However, calls on a superagent Agent instance should match the `agent` function contract
+      // (postconditions: agent-request-network-error, agent-session-auth-failure) rather than
+      // the raw `get` function contract — because agent instances carry session state and the
+      // error profile is subtly different (auth expiry, cookie persistence).
+      //
+      // Detection: the metadata.chain is ['agent', 'get'] for agent.get() but ['superagent', 'get']
+      // for superagent.get(). When chain[0] !== 'superagent' (i.e., it's a variable, not the import),
+      // we're on an agent instance.
+      let effectiveFunctionName = detection.functionName;
+      if (
+        detection.packageName === "superagent" &&
+        ["get", "post", "put", "patch", "delete", "del", "head"].includes(detection.functionName) &&
+        Array.isArray(detection.metadata?.chain) &&
+        (detection.metadata.chain as string[])[0] !== "superagent"
+      ) {
+        // This is a call on a superagent agent instance — use the `agent` function's postconditions
+        effectiveFunctionName = "agent";
+      }
+
       const funcContract = this.findFunctionContract(
         contract,
-        detection.functionName,
+        effectiveFunctionName,
         chainStr,
       );
       if (!funcContract) {
@@ -973,6 +995,28 @@ export class ContractMatcher {
         }
       }
 
+      // superagent chained-method postcondition selector.
+      // superagent.get(url).timeout({...}) and superagent.get(url).maxResponseSize(n)
+      // are method-chained calls. The entire expression `superagent.get(url).timeout({...})`
+      // is an await target, but the detection fires on the `.get()` call node.
+      // The parent of the `.get()` CallExpression is a PropertyAccessExpression (`.timeout`
+      // or `.maxResponseSize`), then another CallExpression — this is how chaining works.
+      //
+      // We walk up the AST from the detection node to find any method names in the chain
+      // that indicate a specific postcondition should be selected over the default.
+      //
+      // Evidence: superagent deepen concerns 1 (timeout-error-identifiable) and 2 (max-response-size-exceeded)
+      if (!postconditionResolved && detection.packageName === "superagent") {
+        const chainedSpecific = this.pickSuperagentChainedPostcondition(
+          detection,
+          postconditions,
+        );
+        if (chainedSpecific) {
+          postcondition = chainedSpecific;
+          postconditionResolved = true;
+        }
+      }
+
       // Skip warning-only postconditions that have no `throws` — these are informational
       // return-value risks (e.g., dayjs.format ReDoS) that don't require try-catch handling.
       // Warning postconditions WITH `throws` (e.g., clerk setActive) should still fire.
@@ -1805,6 +1849,67 @@ export class ContractMatcher {
     if (!postconditionId) return null;
 
     return postconditions.find((p) => p.id === postconditionId) ?? null;
+  }
+
+  /**
+   * For superagent calls, inspect the parent call chain for chained methods that indicate
+   * a specific postcondition should override the default (network-error-handling).
+   *
+   * Pattern: await superagent.get(url).timeout({deadline: 5000})
+   *   → detection fires on superagent.get(url) CallExpression
+   *   → parent is PropertyAccessExpression with name 'timeout'
+   *   → parent.parent is CallExpression (the .timeout({...}) call)
+   *   → select 'timeout-error-identifiable'
+   *
+   * Pattern: await superagent.get(url).maxResponseSize(1024*1024)
+   *   → parent PropertyAccessExpression has name 'maxResponseSize'
+   *   → select 'max-response-size-exceeded'
+   *
+   * Also handles chains like: superagent.get(url).set('Auth', token).timeout({...})
+   *   → walk up through multiple chained calls looking for timeout/maxResponseSize
+   *
+   * Returns null if no chained-method-specific postcondition found (caller uses pickMostSevere).
+   */
+  private pickSuperagentChainedPostcondition(
+    detection: Detection,
+    postconditions: Postcondition[],
+  ): Postcondition | null {
+    if (!ts.isCallExpression(detection.node)) return null;
+
+    // Walk up the AST from the get()/post()/etc. call to find chained method names.
+    // Each chained call looks like: CallExpr → PropAccessExpr(.timeout) → CallExpr → ...
+    // We collect all chained method names above the detection node.
+    const chainedMethods: string[] = [];
+    let current: ts.Node = detection.node;
+    while (current.parent) {
+      const parent = current.parent;
+      // If parent is a PropertyAccess and grandparent is a CallExpr, we're inside a chain
+      if (
+        ts.isPropertyAccessExpression(parent) &&
+        parent.parent &&
+        ts.isCallExpression(parent.parent) &&
+        parent.parent.expression === parent
+      ) {
+        chainedMethods.push(parent.name.text);
+        current = parent.parent; // move up to the outer CallExpression
+      } else if (ts.isAwaitExpression(parent)) {
+        break; // reached the await — stop
+      } else {
+        break;
+      }
+    }
+
+    // .timeout() in chain → timeout-error-identifiable
+    if (chainedMethods.includes("timeout")) {
+      return postconditions.find((p) => p.id === "timeout-error-identifiable") ?? null;
+    }
+
+    // .maxResponseSize() in chain → max-response-size-exceeded
+    if (chainedMethods.includes("maxResponseSize")) {
+      return postconditions.find((p) => p.id === "max-response-size-exceeded") ?? null;
+    }
+
+    return null;
   }
 
   /**
