@@ -5,14 +5,14 @@
  * nark telemetry [on|off|status]
  *
  * State stored at ~/.nark/telemetry.json
- * Shape: { enabled: boolean, notified: boolean }
+ * Shape: { enabled: boolean, notified: boolean, deviceId?: string }
  */
 
 import { Command } from 'commander';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as os from 'os';
-import { createHash } from 'crypto';
+import { createHash, randomUUID } from 'crypto';
 import { execSync } from 'child_process';
 import chalk from 'chalk';
 import { getToken } from '../lib/auth.js';
@@ -20,6 +20,7 @@ import { getToken } from '../lib/auth.js';
 export interface TelemetryConfig {
   enabled: boolean;
   notified: boolean;
+  deviceId?: string;
 }
 
 export interface TelemetryPayload {
@@ -33,6 +34,7 @@ export interface TelemetryPayload {
   scanDurationMs: number;
   isCiMode: boolean;
   repoFingerprint?: string;
+  deviceId?: string;
   fileCount?: number;
   totalCallSites?: number;
   corpusVersion?: string;
@@ -54,6 +56,40 @@ function getRepoFingerprint(): string | undefined {
     }).trim();
     if (!url) return undefined;
     return createHash('sha256').update(url).digest('hex');
+  } catch {
+    return undefined;
+  }
+}
+
+/**
+ * Get or create a stable device ID (UUID v4) stored in ~/.nark/telemetry.json.
+ * Used to count unique installations without any connection to user identity.
+ * Never throws.
+ */
+function getOrCreateDeviceId(): string | undefined {
+  try {
+    const configPath = getTelemetryConfigPath();
+    const dir = path.dirname(configPath);
+
+    // Read existing config
+    let config: Record<string, unknown> = {};
+    try {
+      if (fs.existsSync(configPath)) {
+        config = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
+      }
+    } catch { /* ignore parse errors */ }
+
+    // Return existing deviceId if present
+    if (typeof config.deviceId === 'string' && config.deviceId.length > 0) {
+      return config.deviceId;
+    }
+
+    // Generate and persist a new one
+    const deviceId = randomUUID();
+    config.deviceId = deviceId;
+    fs.mkdirSync(dir, { recursive: true });
+    fs.writeFileSync(configPath, JSON.stringify(config, null, 2), 'utf-8');
+    return deviceId;
   } catch {
     return undefined;
   }
@@ -154,7 +190,12 @@ export async function fireTelemetryEvent(payload: TelemetryPayload): Promise<voi
       headers['Authorization'] = 'Bearer ' + token;
     }
     const fp = getRepoFingerprint();
-    const enriched = { ...payload, ...(fp ? { repoFingerprint: fp } : {}) };
+    const did = getOrCreateDeviceId();
+    const enriched = {
+      ...payload,
+      ...(fp ? { repoFingerprint: fp } : {}),
+      ...(did ? { deviceId: did } : {}),
+    };
     await fetch(TELEMETRY_ENDPOINT, {
       method: 'POST',
       headers,
