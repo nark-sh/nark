@@ -29669,5 +29669,69 @@
       "note": "Proactive \u2014 downloadToFile() leaves partial files on disk on error. Detection rule should verify try-catch with fs.unlink cleanup pattern in catch block."
     },
     "resolution": null
+  },
+  {
+    "id": "concern-20260416-aws-sdk-client-lambda-deepen-5",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@aws-sdk/client-lambda",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @aws-sdk/client-lambda UpdateFunctionCodeCommand without try-catch \u2014 postcondition aws-lambda-update-code-no-error-handling added. The generic aws-lambda-service-error rule fires but a command-specific rule could also detect PreconditionFailedException (RevisionId mismatch) pattern: UpdateFunctionCodeCommand called with RevisionId param but no PreconditionFailedException handling in catch block.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. PreconditionFailedException (412) on RevisionId mismatch is unique to Update operations and requires specific handling. Generic rule fires for missing try-catch; specific rule needed for RevisionId race pattern."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-aws-sdk-client-lambda-deepen-6",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@aws-sdk/client-lambda",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @aws-sdk/client-lambda UpdateFunctionConfigurationCommand without try-catch \u2014 postcondition aws-lambda-update-config-no-error-handling added. ResourceConflictException (409) is common when VPC update provisioning is in progress (takes 60+ seconds). Detection should also check for missing waitUntilFunctionUpdated call after configuration update.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. VPC provisioning delay pattern is a common production issue: code tries to chain UpdateFunctionCode immediately after UpdateFunctionConfiguration, causing ResourceConflictException."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-aws-sdk-client-lambda-deepen-7",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@aws-sdk/client-lambda",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @aws-sdk/client-lambda waitUntilPublishedVersionActive without try-catch \u2014 postcondition aws-lambda-published-version-waiter-no-error-handling added. Same waiter pattern as waitUntilFunctionActive/waitUntilFunctionUpdated but for published versions. Used in blue/green deployment workflows after PublishVersionCommand.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 waiter function detection is a known scanner gap. All Lambda waiter functions (waitUntilFunctionActive, waitUntilFunctionUpdated, waitUntilPublishedVersionActive) need detection for missing try-catch. TimeoutError is thrown by @smithy/util-waiter checkExceptions."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-aws-sdk-client-lambda-deepen-8",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@aws-sdk/client-lambda",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @aws-sdk/client-lambda CreateEventSourceMappingCommand without idempotency handling \u2014 postcondition aws-lambda-event-source-mapping-no-error-handling added. ResourceConflictException (409) is thrown when mapping already exists. Detection should check that catch block handles ResourceConflictException as idempotency signal (safe to continue) rather than re-throwing.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 CreateEventSourceMappingCommand is not idempotent. Common SaaS pattern: deploy code that creates SQS trigger on startup, fails on second deploy because mapping already exists. ResourceConflictException should be caught and treated as success (mapping already wired)."
+    },
+    "resolution": null
   }
 ]
