@@ -29797,5 +29797,101 @@
       "note": "Proactive \u2014 session.reload() is used in long-lived connections (WebSockets, SSE) to refresh session state. Session expiry during a long-lived connection produces err=\"failed to load session\" which must redirect to login. Source confirmed: session/session.js line 94 throws new Error(\"failed to load session\") when store.get returns null."
     },
     "resolution": null
+  },
+  {
+    "id": "concern-20260416-openai-deepen-stream1-10-1",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "openai",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for openai.files.content() \u2014 postcondition added in depth pass but no scanner rule exists. Should flag calls without try-catch wrapping the content() call.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed. files.content() returns binary Response requiring try-catch for NotFoundError and BadRequestError."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-openai-deepen-stream1-10-2",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "openai",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for openai.conversations.items.delete() \u2014 postcondition added in depth pass but no scanner rule exists. Should flag calls without try-catch (NotFoundError on expired conversations crashes agent loops).",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed. items.delete() is NOT idempotent; NotFoundError is the most common failure in agent context management flows."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-openai-deepen-stream1-10-3",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "openai",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for openai.beta.chatkit.sessions.cancel() \u2014 postcondition added in depth pass but no scanner rule exists. Should flag calls without try-catch for NotFoundError (session expired TOCTOU race).",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed. sessions.cancel() has a TOCTOU expiry race; cleanup flows must catch NotFoundError."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-aws-sdk-lib-storage-deepen-1",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@aws-sdk/lib-storage",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for Upload.abort() fire-and-forget pattern \u2014 postcondition abort-does-not-clean-up-synchronously added but no scanner rule exists. Detect when abort() is called without done() being awaited in the same control flow.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. abort() without awaiting done() leaves S3 parts uncleaned."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-aws-sdk-lib-storage-deepen-2",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@aws-sdk/lib-storage",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for Upload configured with leavePartsOnError: true without manual AbortMultipartUploadCommand in catch \u2014 postcondition leave-parts-on-error-prevents-cleanup added but no scanner rule exists. Detect new Upload({...leavePartsOnError: true}) without subsequent abort in catch block.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 leavePartsOnError=true is a S3 cost accumulation risk. S3 charges for incomplete multipart uploads at standard storage rates until explicitly aborted."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-aws-sdk-lib-storage-deepen-3",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@aws-sdk/lib-storage",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for Upload.done() called twice on same instance \u2014 postcondition upload-done-already-called added but no scanner rule exists. Detect upload.done() being called more than once on the same Upload instance variable (common in retry loops).",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 retry logic that reuses Upload instances throws 'already executed .done()' on the retry attempt. New Upload instance required for each retry."
+    },
+    "resolution": null
   }
 ]
