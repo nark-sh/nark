@@ -30917,5 +30917,117 @@
       "note": "Proactive \u2014 contract added via API surface analysis. The notification-handler check is particularly tricky: requires tracking setNotificationHandler() calls before subscribeResource()."
     },
     "resolution": null
+  },
+  {
+    "id": "concern-20260416-modelcontextprotocol-sdk-deepen-8",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@modelcontextprotocol/sdk",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for client.experimental.tasks.callToolStream() \u2014 postconditions call-tool-stream-error-message-unhandled and call-tool-stream-missing-try-catch added. This is a for-await pattern over an AsyncGenerator. Detection requires: (1) recognizing the generator comes from experimental.tasks.callToolStream(); (2) checking that the loop body handles message.type === error; (3) checking that the for-await is inside a try-catch. This is a novel pattern not covered by existing ThrowingFunctionDetector (which only detects awaited function calls).",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, deepen-stream-2 pass 9. AsyncGenerator error-message pattern is distinct from thrown exceptions. Requires new detector class for for-await-of patterns."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-modelcontextprotocol-sdk-deepen-9",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@modelcontextprotocol/sdk",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for client.experimental.tasks.cancelTask() \u2014 postcondition cancel-task-missing-try-catch added. cancelTask() is commonly called in cleanup/finally blocks without try-catch, causing the cleanup path itself to throw when a task has already completed. Detection: recognize experimental.tasks.cancelTask() as a throwing async method, check for surrounding try-catch. Access chain: client.experimental.tasks.cancelTask() \u2014 three levels deep.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, deepen-stream-2 pass 9. 3-level property chain (client.experimental.tasks.cancelTask) requires extending the property-chain walker to handle 3+ levels."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-modelcontextprotocol-sdk-deepen-10",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@modelcontextprotocol/sdk",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for client.experimental.tasks.getTask() \u2014 postcondition get-task-missing-try-catch added. getTask() is used in polling loops and commonly lacks try-catch. Tasks are cleaned up from the task store after completion, making McpError(InvalidParams) a normal terminal condition. Detection: 3-level property chain client.experimental.tasks.getTask(), await without try-catch.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, deepen-stream-2 pass 9. Same 3-level chain detection challenge as cancelTask."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-handlebars-deepen-1",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "handlebars",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for handlebars TemplateDelegate execution (templateFn(context)) \u2014 template-execution-partial-not-found postcondition added in depth pass but no scanner rule exists for detecting uncaught template execution call sites",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. Template execution (calling the compiled fn) has distinct error types from compile() itself."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-handlebars-deepen-2",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "handlebars",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for handlebars strict-mode template execution \u2014 template-execution-strict-undefined-variable: when compile() is called with { strict: true }, the resulting template fn throws on undefined vars; scanner should detect compile-with-strict + template-execution without try-catch",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 strict mode is commonly enabled for security but error handling is not added to execution call sites."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-handlebars-deepen-3",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "handlebars",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for Handlebars.precompile() without try-catch \u2014 precompile-invalid-template-syntax postcondition added. precompile() throws same errors as compile() but is commonly used in build scripts without error handling.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 precompile() is used in build pipelines where developers assume build tool catches errors; Handlebars.Exception propagates unless explicitly caught."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-handlebars-deepen-4",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "handlebars",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for Handlebars.template() without try-catch \u2014 template-version-mismatch postcondition added. template() throws on Handlebars runtime version mismatch, common in microservices with divergent build/runtime envs.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 version mismatch is a real operational failure mode when teams upgrade handlebars in build but not runtime, or vice versa."
+    },
+    "resolution": null
   }
 ]
