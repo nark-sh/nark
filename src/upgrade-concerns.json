@@ -27877,5 +27877,133 @@
       "note": "Proactive \u2014 contract added via API surface analysis (ExpressValidator postcondition express-validator-custom-sanitizer-no-return), detection rule needs AST analysis of arrow function / function body for missing return"
     },
     "resolution": null
+  },
+  {
+    "id": "concern-20260416-trpc-client-deepen-1",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@trpc/client",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @trpc/client.subscribe() missing onError callback \u2014 postcondition trpc-subscribe-missing-on-error added in depth pass but no scanner rule exists. Unlike query()/mutate() which throw, subscription errors are dispatched via optional onError callback. Missing callback = silent error drop (opts.onError?.(err) in TRPCUntypedClient.ts). Detection requires recognizing .subscribe() calls on tRPC client instances and checking whether onError is present in the options object.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. Detection approach: track createTRPCClient/createTRPCProxyClient factory instances, detect .subscribe() calls, check options object for missing onError property."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-trpc-client-deepen-2",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@trpc/client",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @trpc/client.subscribe() missing onError when UNAUTHORIZED/FORBIDDEN errors can occur \u2014 postcondition trpc-subscribe-auth-error-silent added in depth pass. The auth-specific contract is a refinement of the missing-on-error contract: when tRPC server returns 401/403, the subscription is cancelled silently if no onError handler catches the TRPCClientError. Most real-time features (dashboards, live feeds) require detecting expired sessions during active subscriptions.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 can be implemented as a severity upgrade on trpc-subscribe-missing-on-error (same detection, different message emphasizing auth context)"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-pinecone-deepen-1",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@pinecone-database/pinecone",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @pinecone-database/pinecone index.update() \u2014 postcondition added (update-no-error-handling) but no scanner rule exists",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. update() is commonly used in metadata update pipelines."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-pinecone-deepen-2",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@pinecone-database/pinecone",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @pinecone-database/pinecone pinecone.createIndex() \u2014 postcondition added (createindex-no-error-handling) but no scanner rule exists",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. createIndex used in provisioning and startup flows."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-pinecone-deepen-3",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@pinecone-database/pinecone",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @pinecone-database/pinecone pinecone.deleteIndex() \u2014 postcondition added (deleteindex-no-error-handling) but no scanner rule exists",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. deleteIndex has deletion-protection error that requires special handling."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-pinecone-deepen-4",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@pinecone-database/pinecone",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @pinecone-database/pinecone pc.inference.embed() \u2014 postcondition added (inference-embed-no-error-handling) but no scanner rule exists",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. inference.embed() is critical in RAG ingestion pipelines; uncaught errors silently break the entire pipeline."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-pinecone-deepen-5",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@pinecone-database/pinecone",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @pinecone-database/pinecone index.upsertRecords() and index.searchRecords() \u2014 postconditions added but no scanner rules exist",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 new integrated inference API methods. Growing adoption in AI-native apps using Pinecone serverless."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-pinecone-deepen-6",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@pinecone-database/pinecone",
+    "type": "silent_failure_pattern",
+    "status": "pending",
+    "description": "Add detection for update-silent-missing-id: index.update() with non-existent ID returns HTTP 200 silently \u2014 callers cannot detect failed updates without explicit fetch verification",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Confirmed from Pinecone docs: https://docs.pinecone.io/guides/manage-data/update-data \u2014 a non-existent record ID specified causes 200 OK with no records affected. Requires static analysis or runtime verification pattern detection."
+    },
+    "resolution": null
   }
 ]
