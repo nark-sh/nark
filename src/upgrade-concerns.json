@@ -28405,5 +28405,53 @@
       "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
     },
     "resolution": null
+  },
+  {
+    "id": "concern-20260416-morgan-deepen-1",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "morgan",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for morgan.compile() \u2014 postcondition compile-non-string-throws added in depth pass but no scanner rule exists. Detect calls to morgan.compile() where the format argument is not a string literal.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed. Source: morgan/index.js line 395: if (typeof format \\!== \"string\") { throw new TypeError(\"argument format must be a string\") }"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-morgan-deepen-2",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "morgan",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for morgan.compile() \u2014 postcondition compile-invalid-token-syntax-silent. Detect format strings with :token-name references that are not registered via morgan.token(). Silent output corruption: unregistered tokens silently resolve to \"-\".",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. Static analysis can check that all :token-name references in format strings have corresponding morgan.token() registrations in the same file/module."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-morgan-deepen-3",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "morgan",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for morgan.token() \u2014 postcondition token-name-overwrite-silent. Detect calls where the token name matches a built-in morgan token (date, http-version, method, referrer, remote-addr, remote-user, req, res, response-time, status, total-time, url, user-agent). Silent overwrite changes global log output behavior.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. Detection: maintain a static list of built-in morgan token names; flag morgan.token(name, ...) where name is in that list."
+    },
+    "resolution": null
   }
 ]
