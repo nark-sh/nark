@@ -28197,5 +28197,117 @@
       "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
     },
     "resolution": null
+  },
+  {
+    "id": "concern-20260416-pinecone-deepen-7",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@pinecone-database/pinecone",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @pinecone-database/pinecone index.deleteAll() \u2014 postcondition added in depth pass but no scanner rule exists",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-pinecone-deepen-8",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@pinecone-database/pinecone",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @pinecone-database/pinecone pinecone.createIndexForModel() \u2014 postcondition added in depth pass but no scanner rule exists",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-pinecone-deepen-9",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@pinecone-database/pinecone",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @pinecone-database/pinecone index.deleteNamespace() \u2014 postcondition added in depth pass but no scanner rule exists",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-pinecone-deepen-10",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@pinecone-database/pinecone",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @pinecone-database/pinecone index.fetchByMetadata() \u2014 postcondition added in depth pass but no scanner rule exists",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-pinecone-deepen-11",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@pinecone-database/pinecone",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @pinecone-database/pinecone index.cancelImport() \u2014 postcondition added in depth pass but no scanner rule exists",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-pinecone-deepen-12",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@pinecone-database/pinecone",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @pinecone-database/pinecone index.createNamespace() \u2014 postcondition added in depth pass but no scanner rule exists",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-pinecone-deepen-13",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@pinecone-database/pinecone",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @pinecone-database/pinecone index.listImports() \u2014 postcondition added in depth pass but no scanner rule exists",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
   }
 ]
