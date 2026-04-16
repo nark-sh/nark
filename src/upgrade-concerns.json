@@ -29525,5 +29525,69 @@
       "note": "Proactive \u2014 CIBA flows require explicit try-catch for both CIBA-not-enabled and user-denial cases. Scanner needs to detect getTokenByBackchannelAuth calls without try-catch."
     },
     "resolution": null
+  },
+  {
+    "id": "concern-20260416-aws-sdk-client-lambda-deepen-1",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@aws-sdk/client-lambda",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for InvokeWithResponseStreamCommand \u2014 stream-specific postcondition aws-lambda-stream-no-error-handling added but no scanner rule exists (currently covered by generic aws-lambda-service-error rule)",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. InvokeWithResponseStreamCommand needs stream-aware detection rule that fires aws-lambda-stream-no-error-handling postcondition ID"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-aws-sdk-client-lambda-deepen-2",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@aws-sdk/client-lambda",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for InvokeCommand FunctionError field not checked \u2014 postcondition aws-lambda-invoke-function-error-unchecked added. Pattern: after client.send(InvokeCommand), response.FunctionError is not checked before using response.Payload. Requires AST analysis of the response object usage after send.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 critical silent failure. Lambda HTTP 200 does not indicate function success. response.FunctionError must be checked. New postcondition aws-lambda-invoke-function-error-unchecked added in deepen pass."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-aws-sdk-client-lambda-deepen-3",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@aws-sdk/client-lambda",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for InvokeWithResponseStreamCommand EventStream InvokeComplete.ErrorCode not checked \u2014 postcondition aws-lambda-stream-invokecomplete-errorcode-unchecked added. Pattern: iterating EventStream without checking InvokeComplete.ErrorCode.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 streaming Lambda functions can fail mid-stream. InvokeComplete.ErrorCode delivers the error in the EventStream, not via thrown exception. Callers that iterate EventStream without checking InvokeComplete.ErrorCode silently serve partial data."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-aws-sdk-client-lambda-deepen-4",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@aws-sdk/client-lambda",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for waitUntilFunctionActive / waitUntilFunctionActiveV2 / waitUntilFunctionUpdated / waitUntilFunctionUpdatedV2 without try-catch \u2014 postconditions aws-lambda-waiter-no-error-handling and aws-lambda-update-waiter-no-error-handling added. Waiter calls are not client.send() so generic rule does not apply.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 waitUntilFunctionActive*() and waitUntilFunctionUpdated*() call checkExceptions() from @smithy/util-waiter which throws Error with name TimeoutError. Deployment code that calls these without try-catch will crash on function creation timeout or failed state. Confirmed from waiter source code."
+    },
+    "resolution": null
   }
 ]
