@@ -29349,5 +29349,85 @@
       "note": "Proactive \u2014 new ChatKit beta API. openai.beta.chatkit.sessions.create() is a 5-level property chain that scanner may not detect. client_secret caching pattern is a silent auth failure vector. Scanner needs to handle deep method chains for beta APIs."
     },
     "resolution": null
+  },
+  {
+    "id": "concern-20260416-google-genai-deepen-1",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@google/genai",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for chat.sendMessage() \u2014 postcondition genai-send-message-no-error-handling added in depth pass 9 but no scanner rule exists. Scanner needs to detect Chat class instance methods (sendMessage, sendMessageStream) accessed via ai.chats.create() result.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 chat.sendMessage() is a common multi-turn pattern. Scanner currently detects ai.models.* methods but not Chat class instance methods. Detection requires tracking ai.chats.create() return type and flagging .sendMessage() calls without try-catch."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-google-genai-deepen-2",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@google/genai",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for chat.sendMessageStream() \u2014 postcondition genai-send-message-stream-no-error-handling added in depth pass 9 but no scanner rule exists. Same Chat class instance method pattern as sendMessage.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 chat.sendMessageStream() is the streaming variant of sendMessage. Both require try-catch. Scanner needs to detect Chat instance method calls without try-catch."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-google-genai-deepen-3",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@google/genai",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for ai.files.upload() \u2014 postcondition genai-files-upload-no-error-handling added in depth pass 9 but no scanner rule exists. Accessed via 2-level property chain ai.files.upload().",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 files.upload() has distinct error surface including non-ApiError throws for mimeType inference failure and Vertex AI not-supported. Scanner needs to detect ai.files.upload() calls without try-catch via 2-level property chain detection."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-google-genai-deepen-4",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@google/genai",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for ai.models.countTokens() \u2014 postcondition genai-count-tokens-no-error-handling added in depth pass 9 but no scanner rule exists. Accessed via 2-level property chain ai.models.countTokens().",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 countTokens() is commonly used as a pre-flight check without error handling. If it throws and the error is swallowed, the downstream generateContent call proceeds without pre-flight validation."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-google-genai-deepen-5",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@google/genai",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for ai.caches.create() \u2014 postcondition genai-caches-create-no-error-handling added in depth pass 9 but no scanner rule exists. Accessed via 2-level property chain ai.caches.create().",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 caches.create() fails silently when the model does not support context caching or content is below minimum token threshold. Scanner needs to detect ai.caches.create() calls without try-catch."
+    },
+    "resolution": null
   }
 ]
