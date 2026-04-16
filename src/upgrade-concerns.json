@@ -27813,5 +27813,69 @@
       "note": "Proactive \u2014 MultiPartUploadError is unique error class confirmed from source code lines 675-679"
     },
     "resolution": null
+  },
+  {
+    "id": "concern-20260416-dayjs-deepen-1",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "dayjs",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for dayjs Dayjs.toISOString() \u2014 postcondition added in depth pass: throws RangeError when called on invalid Day.js object (no isValid() guard in source). Unlike format() and toJSON(), toISOString() has no safety guard.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via source inspection. Detection pattern: find toISOString() calls on dayjs objects where isValid() is not checked first. Key asymmetry: format() returns \"Invalid Date\" string (safe), toJSON() returns null (safe), but toISOString() throws RangeError (unsafe). Source: m.toISOString=function(){return this.$d.toISOString()} \u2014 no isValid() guard."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-dayjs-deepen-2",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "dayjs",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for dayjs.duration() with invalid ISO 8601 strings \u2014 postcondition added in depth pass: non-matching strings silently produce zero-duration object ($ms=0). Confirmed from duration plugin source: unmatched regex falls through to return this with empty $d, $ms=0.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via source inspection. Detection pattern: dayjs.duration() called with string argument that is not a literal ISO 8601 string (P prefix). Particularly dangerous when duration strings come from config, DB, or API. Silent zero-duration indistinguishable from dayjs.duration(0). Impact: subscriptions expire immediately, trial periods zero out, rate limits fire continuously."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-express-validator-deepen-1",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "express-validator",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for matchedData() called without prior validationResult().isEmpty() check \u2014 invalid fields silently absent from result, DB writes may use partial/undefined data",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis (matchedData postcondition matcheddata-used-without-validationresult-check), detection rule needed for matchedData-without-check pattern"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-express-validator-deepen-2",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "express-validator",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for customSanitizer() callback without a return statement \u2014 field is silently set to undefined, validation passes but data is corrupted",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis (ExpressValidator postcondition express-validator-custom-sanitizer-no-return), detection rule needs AST analysis of arrow function / function body for missing return"
+    },
+    "resolution": null
   }
 ]
