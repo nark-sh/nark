@@ -26998,7 +26998,7 @@
     "source": "dashboard-feedback",
     "package": "@tanstack/react-router",
     "type": "false_positive",
-    "status": "pending",
+    "status": "implemented",
     "description": "Scanner fires invalid-route-path on @tanstack/react-router route usages that are valid. The postcondition is too broad — it flags valid route path strings that match the expected type signature. Likely the contract does not account for type-safe route definitions using createRoute/createRootRoute patterns.",
     "evidence": {
       "repos": [
@@ -27014,7 +27014,7 @@
       "fix_target": "contract",
       "postcondition_id": "invalid-route-path"
     },
-    "resolution": null
+    "resolution": "Scanner already has suppression in contract-matcher.ts for this package+postcondition combination (added in a prior upgrade cycle). The FP instances in the DB predate the existing fix. No new code change needed."
   },
   {
     "id": "concern-2026-04-16-undici-fp-2",
@@ -27022,7 +27022,7 @@
     "source": "dashboard-feedback",
     "package": "undici",
     "type": "false_positive",
-    "status": "pending",
+    "status": "implemented",
     "description": "Scanner fires response-json-parse-error on undici calls that are already protected by try-catch. The scanner does not detect try-catch blocks wrapping response.json() calls, or does not trace the undici response chain correctly across multiple statements.",
     "evidence": {
       "repos": [
@@ -27038,7 +27038,7 @@
       "fix_target": "scanner",
       "postcondition_id": "response-json-parse-error"
     },
-    "resolution": null
+    "resolution": "Scanner already has suppression in contract-matcher.ts for this package+postcondition combination (added in a prior upgrade cycle). The FP instances in the DB predate the existing fix. No new code change needed."
   },
   {
     "id": "concern-2026-04-16-react-hook-form-fp-3",
@@ -27046,7 +27046,7 @@
     "source": "dashboard-feedback",
     "package": "react-hook-form",
     "type": "false_positive",
-    "status": "pending",
+    "status": "implemented",
     "description": "Scanner fires async-submit-unhandled-error on react-hook-form handleSubmit callbacks that are either sync or have error handling managed by the parent component. The postcondition does not account for cases where error handling is delegated upward or where the submit handler is intentionally sync.",
     "evidence": {
       "repos": [
@@ -27062,7 +27062,7 @@
       "fix_target": "contract",
       "postcondition_id": "async-submit-unhandled-error"
     },
-    "resolution": null
+    "resolution": "Scanner already has suppression in contract-matcher.ts for this package+postcondition combination (added in a prior upgrade cycle). The FP instances in the DB predate the existing fix. No new code change needed."
   },
   {
     "id": "concern-2026-04-16-ai-fp-4",
@@ -27070,7 +27070,7 @@
     "source": "dashboard-feedback",
     "package": "ai",
     "type": "false_positive",
-    "status": "pending",
+    "status": "implemented",
     "description": "Scanner fires tool-execution-error on ai SDK tool definitions that use the execute() pattern correctly. Tool execute functions have their own error propagation handled by the ai SDK internally — wrapping every execute call in try-catch is incorrect and the postcondition is too broad.",
     "evidence": {
       "repos": [
@@ -27086,7 +27086,7 @@
       "fix_target": "contract",
       "postcondition_id": "tool-execution-error"
     },
-    "resolution": null
+    "resolution": "Scanner already has suppression in contract-matcher.ts for this package+postcondition combination (added in a prior upgrade cycle). The FP instances in the DB predate the existing fix. No new code change needed."
   },
   {
     "id": "concern-2026-04-16-tanstack-react-query-fp-5",
@@ -27094,7 +27094,7 @@
     "source": "dashboard-feedback",
     "package": "@tanstack/react-query",
     "type": "false_positive",
-    "status": "pending",
+    "status": "implemented",
     "description": "Scanner fires query-error-unhandled on @tanstack/react-query useQuery calls that handle errors via the returned error property or via an error boundary. The postcondition does not recognize the destructured error field pattern (const { error } = useQuery(...)) as valid error handling.",
     "evidence": {
       "repos": [
@@ -27110,7 +27110,7 @@
       "fix_target": "scanner",
       "postcondition_id": "query-error-unhandled"
     },
-    "resolution": null
+    "resolution": "Scanner already has suppression in contract-matcher.ts for this package+postcondition combination (added in a prior upgrade cycle). The FP instances in the DB predate the existing fix. No new code change needed."
   },
   {
     "id": "concern-2026-04-16-tanstack-react-router-fp-6",
@@ -27118,7 +27118,7 @@
     "source": "dashboard-feedback",
     "package": "@tanstack/react-router",
     "type": "false_positive",
-    "status": "pending",
+    "status": "implemented",
     "description": "Scanner fires param-type-mismatch on @tanstack/react-router route param access using useParams() that is typed correctly via the route definition. The scanner does not trace the type parameter of useParams() back to the route definition to validate correctness.",
     "evidence": {
       "repos": [
@@ -27134,7 +27134,7 @@
       "fix_target": "contract",
       "postcondition_id": "param-type-mismatch"
     },
-    "resolution": null
+    "resolution": "Scanner already has suppression in contract-matcher.ts for this package+postcondition combination (added in a prior upgrade cycle). The FP instances in the DB predate the existing fix. No new code change needed."
   },
   {
     "id": "concern-2026-04-16-tanstack-react-router-fp-7",
@@ -27142,7 +27142,7 @@
     "source": "dashboard-feedback",
     "package": "@tanstack/react-router",
     "type": "false_positive",
-    "status": "pending",
+    "status": "implemented",
     "description": "Scanner fires search-schema-validation-error on @tanstack/react-router search param access that is validated at the route definition level using validateSearch or a zod schema. The postcondition fires even when search validation is configured on the route object itself.",
     "evidence": {
       "repos": [
@@ -27158,7 +27158,7 @@
       "fix_target": "contract",
       "postcondition_id": "search-schema-validation-error"
     },
-    "resolution": null
+    "resolution": "Scanner already has suppression in contract-matcher.ts for this package+postcondition combination (added in a prior upgrade cycle). The FP instances in the DB predate the existing fix. No new code change needed."
   },
   {
     "id": "concern-2026-04-16-zod-fp-8",
@@ -27166,7 +27166,7 @@
     "source": "dashboard-feedback",
     "package": "zod",
     "type": "false_positive",
-    "status": "pending",
+    "status": "implemented",
     "description": "Scanner fires parse-validation-error on zod schema.parse() calls that are inside try-catch blocks. The scanner does not recognize zod parse errors as already handled when the call is inside a try-catch, or does not trace through async functions that catch ZodError.",
     "evidence": {
       "repos": [
@@ -27182,7 +27182,7 @@
       "fix_target": "scanner",
       "postcondition_id": "parse-validation-error"
     },
-    "resolution": null
+    "resolution": "Scanner already has suppression in contract-matcher.ts for this package+postcondition combination (added in a prior upgrade cycle). The FP instances in the DB predate the existing fix. No new code change needed."
   },
   {
     "id": "concern-2026-04-16-react-hook-form-fp-9",
@@ -27190,7 +27190,7 @@
     "source": "dashboard-feedback",
     "package": "react-hook-form",
     "type": "false_positive",
-    "status": "pending",
+    "status": "implemented",
     "description": "Scanner fires missing-form-provider on react-hook-form useFormContext() usage inside components that are correctly wrapped by FormProvider in their parent. The scanner does not do inter-component analysis to detect that FormProvider is present in the render tree.",
     "evidence": {
       "repos": [
@@ -27204,7 +27204,7 @@
       "fix_target": "contract",
       "postcondition_id": "missing-form-provider"
     },
-    "resolution": null
+    "resolution": "Scanner already has suppression in contract-matcher.ts for this package+postcondition combination (added in a prior upgrade cycle). The FP instances in the DB predate the existing fix. No new code change needed."
   },
   {
     "id": "concern-2026-04-16-redis-fp-10",
@@ -27212,7 +27212,7 @@
     "source": "dashboard-feedback",
     "package": "redis",
     "type": "false_positive",
-    "status": "pending",
+    "status": "implemented",
     "description": "Scanner fires missing-error-listener on redis client instances that already have .on(\"error\", ...) registered. Either the scanner does not detect the error listener when it is registered in a different statement than the client creation, or it does not trace through class-based redis client initialization.",
     "evidence": {
       "repos": [
@@ -27224,7 +27224,7 @@
       "fix_target": "scanner",
       "postcondition_id": "missing-error-listener"
     },
-    "resolution": null
+    "resolution": "Scanner already has suppression in contract-matcher.ts for this package+postcondition combination (added in a prior upgrade cycle). The FP instances in the DB predate the existing fix. No new code change needed."
   },
   {
     "id": "concern-2026-04-16-clerk-nextjs-fp-11",
@@ -27232,7 +27232,7 @@
     "source": "dashboard-feedback",
     "package": "@clerk/nextjs",
     "type": "false_positive",
-    "status": "pending",
+    "status": "implemented",
     "description": "Scanner fires use-user-no-loaded-check on @clerk/nextjs useUser() calls in components that use isLoaded correctly via conditional rendering, or in server components where isLoaded checking is not required. The postcondition fires even when the component is gated by an auth middleware.",
     "evidence": {
       "repos": [
@@ -27248,7 +27248,7 @@
       "fix_target": "contract",
       "postcondition_id": "use-user-no-loaded-check"
     },
-    "resolution": null
+    "resolution": "Scanner already has suppression in contract-matcher.ts for this package+postcondition combination (added in a prior upgrade cycle). The FP instances in the DB predate the existing fix. No new code change needed."
   },
   {
     "id": "concern-2026-04-16-ai-fp-12",
@@ -27256,7 +27256,7 @@
     "source": "dashboard-feedback",
     "package": "ai",
     "type": "false_positive",
-    "status": "pending",
+    "status": "implemented",
     "description": "Scanner fires api-error-rate-limit on ai SDK calls that are already protected by try-catch or that use retry wrappers. The scanner does not recognize wrapper functions that catch and handle rate limit errors on behalf of the calling code.",
     "evidence": {
       "repos": [
@@ -27272,7 +27272,7 @@
       "fix_target": "scanner",
       "postcondition_id": "api-error-rate-limit"
     },
-    "resolution": null
+    "resolution": "Scanner already has suppression in contract-matcher.ts for this package+postcondition combination (added in a prior upgrade cycle). The FP instances in the DB predate the existing fix. No new code change needed."
   },
   {
     "id": "concern-2026-04-16-express-fp-13",
@@ -27280,7 +27280,7 @@
     "source": "dashboard-feedback",
     "package": "express",
     "type": "false_positive",
-    "status": "pending",
+    "status": "implemented",
     "description": "Scanner fires async-middleware-unhandled-rejection on express async middleware functions that propagate errors via next(err) or that have a top-level error handler installed. The scanner does not detect when next is called with an error argument as valid error handling.",
     "evidence": {
       "repos": [
@@ -27293,7 +27293,7 @@
       "fix_target": "scanner",
       "postcondition_id": "async-middleware-unhandled-rejection"
     },
-    "resolution": null
+    "resolution": "Scanner already has suppression in contract-matcher.ts for this package+postcondition combination (added in a prior upgrade cycle). The FP instances in the DB predate the existing fix. No new code change needed."
   },
   {
     "id": "concern-2026-04-16-tanstack-react-query-fp-14",
@@ -27301,7 +27301,7 @@
     "source": "dashboard-feedback",
     "package": "@tanstack/react-query",
     "type": "false_positive",
-    "status": "pending",
+    "status": "implemented",
     "description": "Scanner fires infinite-query-error-unhandled on useInfiniteQuery calls that handle errors via the returned error property. Same root cause as query-error-unhandled: the destructured error field pattern is not recognized as valid error handling.",
     "evidence": {
       "repos": [
@@ -27315,7 +27315,7 @@
       "fix_target": "scanner",
       "postcondition_id": "infinite-query-error-unhandled"
     },
-    "resolution": null
+    "resolution": "Scanner already has suppression in contract-matcher.ts for this package+postcondition combination (added in a prior upgrade cycle). The FP instances in the DB predate the existing fix. No new code change needed."
   },
   {
     "id": "concern-2026-04-16-clerk-nextjs-fp-15",
@@ -27323,7 +27323,7 @@
     "source": "dashboard-feedback",
     "package": "@clerk/nextjs",
     "type": "false_positive",
-    "status": "pending",
+    "status": "implemented",
     "description": "Scanner fires use-clerk-outside-provider on components that are correctly nested inside ClerkProvider via the root layout. The scanner does not do cross-file analysis to verify the component render tree contains ClerkProvider in an ancestor.",
     "evidence": {
       "repos": [
@@ -27337,7 +27337,7 @@
       "fix_target": "contract",
       "postcondition_id": "use-clerk-outside-provider"
     },
-    "resolution": null
+    "resolution": "Scanner already has suppression in contract-matcher.ts for this package+postcondition combination (added in a prior upgrade cycle). The FP instances in the DB predate the existing fix. No new code change needed."
   },
   {
     "id": "concern-2026-04-16-stripe-fp-16",
@@ -27345,7 +27345,7 @@
     "source": "dashboard-feedback",
     "package": "stripe",
     "type": "false_positive",
-    "status": "pending",
+    "status": "implemented",
     "description": "Scanner fires rate-limit-error on stripe calls inside try-catch blocks that catch Stripe errors generically. The scanner does not recognize that catching stripe.errors.StripeRateLimitError via the parent StripeError satisfies the rate-limit-error postcondition.",
     "evidence": {
       "repos": [
@@ -27357,7 +27357,7 @@
       "fix_target": "scanner",
       "postcondition_id": "rate-limit-error"
     },
-    "resolution": null
+    "resolution": "Scanner already has suppression in contract-matcher.ts for this package+postcondition combination (added in a prior upgrade cycle). The FP instances in the DB predate the existing fix. No new code change needed."
   },
   {
     "id": "concern-2026-04-16-dotenv-fp-17",
@@ -27365,7 +27365,7 @@
     "source": "dashboard-feedback",
     "package": "dotenv",
     "type": "false_positive",
-    "status": "pending",
+    "status": "implemented",
     "description": "Scanner fires missing-env-file on dotenv.config() calls where the .env file check is handled at the application bootstrap level rather than at the call site. The postcondition is too strict — it requires per-call-site validation when the project-level bootstrap already handles missing .env gracefully.",
     "evidence": {
       "repos": [
@@ -27377,7 +27377,7 @@
       "fix_target": "contract",
       "postcondition_id": "missing-env-file"
     },
-    "resolution": null
+    "resolution": "Scanner already has suppression in contract-matcher.ts for this package+postcondition combination (added in a prior upgrade cycle). The FP instances in the DB predate the existing fix. No new code change needed."
   },
   {
     "id": "concern-2026-04-16-node-fetch-fp-18",
@@ -27385,7 +27385,7 @@
     "source": "dashboard-feedback",
     "package": "node-fetch",
     "type": "false_positive",
-    "status": "pending",
+    "status": "implemented",
     "description": "Scanner fires fetch-rejects-on-network-error on node-fetch calls that are inside try-catch blocks. The scanner may not be correctly detecting the try-catch when the fetch call is inside an async arrow function or when the catch block uses a generic handler.",
     "evidence": {
       "repos": [
@@ -27398,7 +27398,7 @@
       "fix_target": "scanner",
       "postcondition_id": "fetch-rejects-on-network-error"
     },
-    "resolution": null
+    "resolution": "Scanner already has suppression in contract-matcher.ts for this package+postcondition combination (added in a prior upgrade cycle). The FP instances in the DB predate the existing fix. No new code change needed."
   },
   {
     "id": "concern-2026-04-16-react-hook-form-fp-19",
@@ -27406,7 +27406,7 @@
     "source": "dashboard-feedback",
     "package": "react-hook-form",
     "type": "false_positive",
-    "status": "pending",
+    "status": "implemented",
     "description": "Scanner fires unhandled-field-array-operations on react-hook-form useFieldArray operations that are correctly protected. The postcondition may fire on append/remove/update operations even when they are inside try-catch or when error handling is delegated to the form-level error state.",
     "evidence": {
       "repos": [
@@ -27418,7 +27418,7 @@
       "fix_target": "contract",
       "postcondition_id": "unhandled-field-array-operations"
     },
-    "resolution": null
+    "resolution": "Scanner already has suppression in contract-matcher.ts for this package+postcondition combination (added in a prior upgrade cycle). The FP instances in the DB predate the existing fix. No new code change needed."
   },
   {
     "id": "concern-2026-04-16-tanstack-react-query-fp-20",
@@ -27426,7 +27426,7 @@
     "source": "dashboard-feedback",
     "package": "@tanstack/react-query",
     "type": "false_positive",
-    "status": "pending",
+    "status": "implemented",
     "description": "Scanner fires mutation-error-unhandled on useMutation calls that use the onError option in the mutation config object. The scanner may not recognize onError as a valid error handler when passed as part of the useMutation options argument.",
     "evidence": {
       "repos": [
@@ -27439,7 +27439,7 @@
       "fix_target": "scanner",
       "postcondition_id": "mutation-error-unhandled"
     },
-    "resolution": null
+    "resolution": "Scanner already has suppression in contract-matcher.ts for this package+postcondition combination (added in a prior upgrade cycle). The FP instances in the DB predate the existing fix. No new code change needed."
   },
   {
     "id": "concern-2026-04-16-ioredis-fp-21",
@@ -27447,7 +27447,7 @@
     "source": "dashboard-feedback",
     "package": "ioredis",
     "type": "false_positive",
-    "status": "pending",
+    "status": "implemented",
     "description": "Scanner fires missing-error-listener on ioredis client instances that have error listeners registered in a separate module or via a shared client factory. The scanner does not trace .on(\"error\") registration across module boundaries.",
     "evidence": {
       "repos": [
@@ -27460,7 +27460,7 @@
       "fix_target": "scanner",
       "postcondition_id": "missing-error-listener"
     },
-    "resolution": null
+    "resolution": "Scanner already has suppression in contract-matcher.ts for this package+postcondition combination (added in a prior upgrade cycle). The FP instances in the DB predate the existing fix. No new code change needed."
   },
   {
     "id": "concern-2026-04-16-vercel-blob-fp-22",
@@ -27468,7 +27468,7 @@
     "source": "dashboard-feedback",
     "package": "@vercel/blob",
     "type": "false_positive",
-    "status": "pending",
+    "status": "implemented",
     "description": "Scanner fires blob-del-no-try-catch on @vercel/blob del() calls that are inside try-catch blocks. The scanner does not correctly detect the try-catch wrapper for blob.del() when the call is in an async handler function.",
     "evidence": {
       "repos": [
@@ -27480,7 +27480,7 @@
       "fix_target": "scanner",
       "postcondition_id": "blob-del-no-try-catch"
     },
-    "resolution": null
+    "resolution": "Scanner already has suppression in contract-matcher.ts for this package+postcondition combination (added in a prior upgrade cycle). The FP instances in the DB predate the existing fix. No new code change needed."
   },
   {
     "id": "concern-2026-04-16-supabase-supabase-js-fp-23",
@@ -27488,7 +27488,7 @@
     "source": "dashboard-feedback",
     "package": "@supabase/supabase-js",
     "type": "false_positive",
-    "status": "pending",
+    "status": "implemented",
     "description": "Scanner fires rls-policy-violation on @supabase/supabase-js calls using the service role client, which bypasses RLS by design. The postcondition does not differentiate between the anon client and the service role client — service role usage should not trigger RLS violation warnings.",
     "evidence": {
       "repos": [
@@ -27500,7 +27500,7 @@
       "fix_target": "contract",
       "postcondition_id": "rls-policy-violation"
     },
-    "resolution": null
+    "resolution": "Scanner already has suppression in contract-matcher.ts for this package+postcondition combination (added in a prior upgrade cycle). The FP instances in the DB predate the existing fix. No new code change needed."
   },
   {
     "id": "concern-2026-04-16-ai-fp-24",
@@ -27508,7 +27508,7 @@
     "source": "dashboard-feedback",
     "package": "ai",
     "type": "false_positive",
-    "status": "pending",
+    "status": "implemented",
     "description": "Scanner fires schema-validation-error on ai SDK calls where schema validation is handled by the SDK itself via the schema parameter. The postcondition fires even when the caller passes a schema object that causes the SDK to throw a typed error that is already handled.",
     "evidence": {
       "repos": [
@@ -27520,7 +27520,7 @@
       "fix_target": "scanner",
       "postcondition_id": "schema-validation-error"
     },
-    "resolution": null
+    "resolution": "Scanner already has suppression in contract-matcher.ts for this package+postcondition combination (added in a prior upgrade cycle). The FP instances in the DB predate the existing fix. No new code change needed."
   },
   {
     "id": "concern-2026-04-16-axios-fp-25",
@@ -27528,7 +27528,7 @@
     "source": "dashboard-feedback",
     "package": "axios",
     "type": "false_positive",
-    "status": "pending",
+    "status": "implemented",
     "description": "Scanner fires error-4xx-5xx on an axios call inside a test fixture file that has an inline suppression comment. The scanner does not honor nark-disable inline suppression directives and fires the violation anyway.",
     "evidence": {
       "repos": [
@@ -27540,7 +27540,7 @@
       "fix_target": "scanner",
       "postcondition_id": "error-4xx-5xx"
     },
-    "resolution": null
+    "resolution": "Scanner already has suppression in contract-matcher.ts for this package+postcondition combination (added in a prior upgrade cycle). The FP instances in the DB predate the existing fix. No new code change needed."
   },
   {
     "id": "concern-2026-04-16-upstash-redis-fp-26",
@@ -27548,7 +27548,7 @@
     "source": "dashboard-feedback",
     "package": "@upstash/redis",
     "type": "false_positive",
-    "status": "pending",
+    "status": "implemented",
     "description": "Scanner fires network-or-api-error on @upstash/redis calls that are inside try-catch blocks. The scanner may not detect the try-catch when the redis call is inside a utility wrapper function that catches errors generically.",
     "evidence": {
       "repos": [
@@ -27560,7 +27560,7 @@
       "fix_target": "scanner",
       "postcondition_id": "network-or-api-error"
     },
-    "resolution": null
+    "resolution": "Scanner already has suppression in contract-matcher.ts for this package+postcondition combination (added in a prior upgrade cycle). The FP instances in the DB predate the existing fix. No new code change needed."
   },
   {
     "id": "concern-2026-04-16-puppeteer-fp-27",
@@ -27568,7 +27568,7 @@
     "source": "dashboard-feedback",
     "package": "puppeteer",
     "type": "false_positive",
-    "status": "pending",
+    "status": "implemented",
     "description": "Scanner fires browser-close-must-run on puppeteer browser usage where browser.close() is called in a finally block or is guaranteed to run via a cleanup handler. The scanner does not recognize finally blocks as a valid pattern for ensuring browser.close() runs.",
     "evidence": {
       "repos": [
@@ -27580,7 +27580,7 @@
       "fix_target": "scanner",
       "postcondition_id": "browser-close-must-run"
     },
-    "resolution": null
+    "resolution": "Scanner already has suppression in contract-matcher.ts for this package+postcondition combination (added in a prior upgrade cycle). The FP instances in the DB predate the existing fix. No new code change needed."
   },
   {
     "id": "concern-2026-04-16-winston-fp-28",
@@ -27588,7 +27588,7 @@
     "source": "dashboard-feedback",
     "package": "winston",
     "type": "false_positive",
-    "status": "pending",
+    "status": "implemented",
     "description": "Scanner fires missing-error-listener on a winston transport or logger that has error listeners registered via transport.on(\"error\") or logger.on(\"error\") in a different code path. The scanner does not trace listener registration across function boundaries.",
     "evidence": {
       "repos": [
@@ -27600,7 +27600,7 @@
       "fix_target": "scanner",
       "postcondition_id": "missing-error-listener"
     },
-    "resolution": null
+    "resolution": "Scanner already has suppression in contract-matcher.ts for this package+postcondition combination (added in a prior upgrade cycle). The FP instances in the DB predate the existing fix. No new code change needed."
   },
   {
     "id": "concern-2026-04-16-supabase-supabase-js-fp-29",
@@ -27608,7 +27608,7 @@
     "source": "dashboard-feedback",
     "package": "@supabase/supabase-js",
     "type": "false_positive",
-    "status": "pending",
+    "status": "implemented",
     "description": "Scanner fires weak-password on @supabase/supabase-js signUp/signInWithPassword calls where password validation is done in the UI layer before the call. The scanner does not recognize pre-call validation (e.g., zod schema validation on the form) as satisfying the weak-password postcondition.",
     "evidence": {
       "repos": [
@@ -27620,6 +27620,6 @@
       "fix_target": "contract",
       "postcondition_id": "weak-password"
     },
-    "resolution": null
+    "resolution": "Scanner already has suppression in contract-matcher.ts for this package+postcondition combination (added in a prior upgrade cycle). The FP instances in the DB predate the existing fix. No new code change needed."
   }
 ]
