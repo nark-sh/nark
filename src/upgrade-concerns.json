@@ -30117,5 +30117,53 @@
       "note": "Proactive \u2014 contract added via API surface analysis. Queue pause/resume operations are often called in emergency response procedures where error handling is neglected."
     },
     "resolution": null
+  },
+  {
+    "id": "concern-20260416-square-deepen-1",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "square",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for SquareClient-based API (v40+): client.payments.create(), client.refunds.refundPayment(), client.subscriptions.create/cancel(), client.orders.create(), client.customers.create/delete(), client.checkout.paymentLinks.create(). Old contract used v8 API names (Client, paymentsApi.createPayment). Scanner must detect SquareClient class name and namespaced method calls.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract rewritten from stub (v8 API) to confirmed (v44 API). Detection rules needed for new SquareClient class and namespaced method pattern."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-square-deepen-2",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "square",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for SquareTimeoutError separately from SquareError: client.payments.create() throws SquareTimeoutError on network timeout \u2014 a distinct class. Callers that only catch SquareError miss timeout cases. On timeout, payment status is UNKNOWN \u2014 retrying without idempotency_key check risks double-charge.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 SquareTimeoutError is a separate class from SquareError in square@44.0.1. Must be caught separately in try-catch. Confirmed from TypeScript declarations."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-square-deepen-3",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "square",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for subscriptions.create() PENDING state not checked: when card_id is provided but payment fails at enrollment, subscription may be created in PENDING state. Callers must check response.subscription.status === 'ACTIVE' before granting access. Silent revenue loss if this check is omitted.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 response pattern detection needed for PENDING status check after subscriptions.create(). Confirmed from Square API docs."
+    },
+    "resolution": null
   }
 ]
