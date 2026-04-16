@@ -28613,5 +28613,69 @@
       "note": "Proactive \u2014 contract added via API surface analysis (stream-1 pass 2). Realtime session token generation in server-side handlers requires try-catch; PermissionDeniedError is distinct from AuthenticationError."
     },
     "resolution": null
+  },
+  {
+    "id": "concern-20260416-mistralai-deepen2-1",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@mistralai/mistralai",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @mistralai/mistralai beta.conversations.start() \u2014 postcondition added in depth pass 2 but scanner uses generic \"start\" method name detection which does not exist for this package",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis (SDK v2.2.0 beta conversations API), detection rule needed for client.beta.conversations.start()"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-mistralai-deepen2-2",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@mistralai/mistralai",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @mistralai/mistralai beta.conversations.append() \u2014 postcondition added in depth pass 2 but scanner uses generic \"append\" method name detection which does not exist for this package",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis (SDK v2.2.0 beta conversations API), detection rule needed for client.beta.conversations.append()"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-mistralai-deepen2-3",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@mistralai/mistralai",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @mistralai/mistralai workflows.executeWorkflow() \u2014 postcondition added in depth pass 2 but no scanner rule exists for this method",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis (SDK v2.2.0 workflows API), detection rule needed for client.workflows.executeWorkflow()"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-mistralai-deepen2-4",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@mistralai/mistralai",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Improve detection specificity for @mistralai/mistralai beta.libraries.create() and beta.libraries.documents.upload() \u2014 currently fires embeddings-create-no-error-handling and files-upload-no-error-handling respectively (method name collision). New postconditions libraries-create-no-error-handling and libraries-documents-upload-no-error-handling need context-aware detection.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 context-aware detection needed to distinguish client.beta.libraries.create() from client.embeddings.create() and client.beta.libraries.documents.upload() from client.files.upload()"
+    },
+    "resolution": null
   }
 ]
