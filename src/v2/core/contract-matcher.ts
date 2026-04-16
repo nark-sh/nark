@@ -1037,6 +1037,53 @@ export class ContractMatcher {
         }
       }
 
+      // @aws-sdk/client-sesv2 send(): resolve postcondition based on the command
+      // argument type. Each SESv2 command has distinct error types; command-specific
+      // postconditions provide more actionable guidance than the generic sesv2-send-no-try-catch.
+      //
+      // Evidence: concern-20260416-sesv2-deepen-1 (SendEmailCommand),
+      //           concern-20260416-sesv2-deepen-3 (CreateEmailIdentityCommand),
+      //           concern-20260416-sesv2-deepen-4 (CreateImportJobCommand).
+      if (
+        !postconditionResolved &&
+        detection.packageName === "@aws-sdk/client-sesv2" &&
+        detection.functionName === "send"
+      ) {
+        const commandSpecific = this.pickSesv2SendPostcondition(
+          detection,
+          postconditions,
+          contract,
+        );
+        if (commandSpecific) {
+          postcondition = commandSpecific;
+          postconditionResolved = true;
+        }
+      }
+
+      // @aws-sdk/client-sqs send(): resolve postcondition based on the command
+      // argument type. CreateQueueCommand, PurgeQueueCommand, ChangeMessageVisibilityCommand
+      // each have unique error types; command-specific postconditions are more actionable
+      // than the generic aws-service-error.
+      //
+      // Evidence: concern-20260416-aws-sqs-deepen-4 (ChangeMessageVisibilityCommand —
+      // sqs-change-visibility-not-inflight). Also covers CreateQueueCommand and PurgeQueueCommand
+      // which were in the ground-truth fixture but lacked pending concerns.
+      if (
+        !postconditionResolved &&
+        detection.packageName === "@aws-sdk/client-sqs" &&
+        detection.functionName === "send"
+      ) {
+        const commandSpecific = this.pickSqsSendPostcondition(
+          detection,
+          postconditions,
+          contract,
+        );
+        if (commandSpecific) {
+          postcondition = commandSpecific;
+          postconditionResolved = true;
+        }
+      }
+
       // superagent chained-method postcondition selector.
       // superagent.get(url).timeout({...}) and superagent.get(url).maxResponseSize(n)
       // are method-chained calls. The entire expression `superagent.get(url).timeout({...})`
@@ -1958,6 +2005,22 @@ export class ContractMatcher {
       PutConfigurationSetDeliveryOptionsCommand: "ses-put-delivery-options-config-set-not-found",
       // Evidence: concern-20260415-aws-sdk-client-ses-deepen-4 (DeleteConfigurationSetCommand — NOT idempotent)
       DeleteConfigurationSetCommand: "ses-delete-config-set-not-found",
+      // Evidence: concern-20260416-aws-sdk-client-ses-deepen-1 (CreateReceiptRuleSetCommand)
+      CreateReceiptRuleSetCommand: "ses-create-receipt-rule-set-already-exists",
+      // Evidence: concern-20260416-aws-sdk-client-ses-deepen-2 (CreateReceiptRuleCommand)
+      CreateReceiptRuleCommand: "ses-create-receipt-rule-ruleset-not-found",
+      // Evidence: concern-20260416-aws-sdk-client-ses-deepen-3 (SetActiveReceiptRuleSetCommand)
+      SetActiveReceiptRuleSetCommand: "ses-set-active-receipt-rule-set-not-found",
+      // Evidence: concern-20260416-aws-sdk-client-ses-deepen-4 (CreateConfigurationSetTrackingOptionsCommand)
+      CreateConfigurationSetTrackingOptionsCommand:
+        "ses-create-tracking-options-config-set-not-found",
+      // Evidence: concern-20260416-aws-sdk-client-ses-deepen-5 (UpdateConfigurationSetSendingEnabledCommand)
+      UpdateConfigurationSetSendingEnabledCommand:
+        "ses-update-config-set-sending-enabled-not-found",
+      // Evidence: concern-20260416-aws-sdk-client-ses-deepen-6 (PutIdentityPolicyCommand)
+      PutIdentityPolicyCommand: "ses-put-identity-policy-invalid",
+      // Evidence: concern-20260416-aws-sdk-client-ses-deepen-7 (DeleteConfigurationSetEventDestinationCommand)
+      DeleteConfigurationSetEventDestinationCommand: "ses-delete-event-dest-config-set-not-found",
     };
 
   /**
@@ -2006,6 +2069,121 @@ export class ContractMatcher {
 
     // Fallback: search passed postconditions (handles cases where the postcondition
     // was placed under the `send` function instead of a dedicated command entry).
+    return postconditions.find((p) => p.id === postconditionId) ?? null;
+  }
+
+  /**
+   * @aws-sdk/client-sesv2 command → postcondition map.
+   * Maps SESv2 command constructor names to their primary (most actionable) postcondition ID.
+   *
+   * Evidence: concern-20260416-sesv2-deepen-1 (SendEmailCommand),
+   *           concern-20260416-sesv2-deepen-3 (CreateEmailIdentityCommand),
+   *           concern-20260416-sesv2-deepen-4 (CreateImportJobCommand).
+   */
+  private static readonly SESV2_COMMAND_POSTCONDITION_MAP: Record<string, string> = {
+    SendEmailCommand: "sesv2-send-email-no-try-catch",
+    SendBulkEmailCommand: "sesv2-bulk-email-no-try-catch",
+    CreateEmailIdentityCommand: "sesv2-create-identity-no-try-catch",
+    CreateImportJobCommand: "sesv2-import-job-no-try-catch",
+    CreateEmailTemplate: "sesv2-create-template-no-try-catch",
+  };
+
+  /**
+   * For @aws-sdk/client-sesv2 send() calls, inspect the first argument to determine
+   * which SESv2 command is being executed, then return the matching postcondition.
+   *
+   * Pattern: await sesv2Client.send(new SendEmailCommand({...}))
+   *   → first arg is NewExpression with constructor name "SendEmailCommand"
+   *   → look up in SESV2_COMMAND_POSTCONDITION_MAP
+   */
+  private pickSesv2SendPostcondition(
+    detection: Detection,
+    postconditions: Postcondition[],
+    contract: PackageContract,
+  ): Postcondition | null {
+    if (!ts.isCallExpression(detection.node)) return null;
+    const args = detection.node.arguments;
+    if (args.length === 0) return null;
+
+    const firstArg = args[0];
+    if (!ts.isNewExpression(firstArg)) return null;
+    if (!ts.isIdentifier(firstArg.expression)) return null;
+
+    const commandClassName = firstArg.expression.text;
+    const postconditionId =
+      ContractMatcher.SESV2_COMMAND_POSTCONDITION_MAP[commandClassName];
+    if (!postconditionId) return null;
+
+    const commandFuncContract = this.findFunctionContract(contract, commandClassName);
+    if (commandFuncContract) {
+      const found = (commandFuncContract.postconditions || []).find(
+        (p) => p.id === postconditionId,
+      );
+      if (found) return found;
+    }
+
+    return postconditions.find((p) => p.id === postconditionId) ?? null;
+  }
+
+  /**
+   * @aws-sdk/client-sqs command → postcondition map.
+   * Maps SQS command constructor names to their primary (most actionable) postcondition ID.
+   *
+   * Evidence: concern-20260416-aws-sqs-deepen-4 (ChangeMessageVisibilityCommand),
+   *           ground-truth fixture for CreateQueueCommand and PurgeQueueCommand.
+   */
+  private static readonly SQS_COMMAND_POSTCONDITION_MAP: Record<string, string> = {
+    CreateQueueCommand: "sqs-create-queue-no-try-catch",
+    PurgeQueueCommand: "sqs-purge-in-progress",
+    ChangeMessageVisibilityCommand: "sqs-change-visibility-not-inflight",
+  };
+
+  /**
+   * For @aws-sdk/client-sqs send() calls, inspect the first argument to determine
+   * which SQS command is being executed, then return the matching postcondition.
+   *
+   * Pattern: await sqsClient.send(new CreateQueueCommand({...}))
+   *   → first arg is NewExpression with constructor name "CreateQueueCommand"
+   *   → look up in SQS_COMMAND_POSTCONDITION_MAP
+   */
+  private pickSqsSendPostcondition(
+    detection: Detection,
+    postconditions: Postcondition[],
+    contract: PackageContract,
+  ): Postcondition | null {
+    if (!ts.isCallExpression(detection.node)) return null;
+    const args = detection.node.arguments;
+    if (args.length === 0) return null;
+
+    const firstArg = args[0];
+    if (!ts.isNewExpression(firstArg)) return null;
+    if (!ts.isIdentifier(firstArg.expression)) return null;
+
+    const commandClassName = firstArg.expression.text;
+    const postconditionId =
+      ContractMatcher.SQS_COMMAND_POSTCONDITION_MAP[commandClassName];
+    if (!postconditionId) return null;
+
+    // First: try exact function name match (e.g., if contract has a function named "CreateQueueCommand")
+    const commandFuncContract = this.findFunctionContract(contract, commandClassName);
+    if (commandFuncContract) {
+      const found = (commandFuncContract.postconditions || []).find(
+        (p) => p.id === postconditionId,
+      );
+      if (found) return found;
+    }
+
+    // Second: search all contract functions for "send (CommandName)" naming convention
+    // The SQS contract uses names like "send (CreateQueueCommand)" rather than bare command names.
+    const functions = contract.functions || [];
+    for (const fn of functions) {
+      if (fn.name.includes(commandClassName)) {
+        const found = (fn.postconditions || []).find((p) => p.id === postconditionId);
+        if (found) return found;
+      }
+    }
+
+    // Third: fallback to currently-matched function's postconditions
     return postconditions.find((p) => p.id === postconditionId) ?? null;
   }
 

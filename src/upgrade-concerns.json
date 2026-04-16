@@ -25313,7 +25313,7 @@
     "source": "deepen",
     "package": "@aws-sdk/client-dynamodb",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "rejected",
     "description": "Add detection for BatchWriteItemCommand — caller does not check response.UnprocessedItems after send(). Silent data loss when some items fail (HTTP 200, no throw). Postcondition: batch-write-unprocessed-items-not-checked.",
     "evidence": {
       "repos": [],
@@ -25321,7 +25321,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis. Need response-pattern detection: check if caller inspects response.UnprocessedItems after BatchWriteItemCommand send()."
     },
-    "resolution": null
+    "resolution": "Rejected: This concern requires return-value inspection (UnprocessedItems/UnprocessedKeys not checked) or catch-block content analysis (CancellationReasons not inspected). The scanner does not implement these patterns. No ground-truth test was failing for this concern."
   },
   {
     "id": "concern-20260416-aws-dynamodb-deepen-2",
@@ -25329,7 +25329,7 @@
     "source": "deepen",
     "package": "@aws-sdk/client-dynamodb",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "rejected",
     "description": "Add detection for BatchGetItemCommand — caller does not check response.UnprocessedKeys after send(). Silent incomplete reads when some items fail (HTTP 200, partial response). Postcondition: batch-get-unprocessed-keys-not-checked.",
     "evidence": {
       "repos": [],
@@ -25337,7 +25337,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis. Need response-pattern detection: check if caller inspects response.UnprocessedKeys after BatchGetItemCommand send()."
     },
-    "resolution": null
+    "resolution": "Rejected: This concern requires return-value inspection (UnprocessedItems/UnprocessedKeys not checked) or catch-block content analysis (CancellationReasons not inspected). The scanner does not implement these patterns. No ground-truth test was failing for this concern."
   },
   {
     "id": "concern-20260416-aws-dynamodb-deepen-3",
@@ -25345,7 +25345,7 @@
     "source": "deepen",
     "package": "@aws-sdk/client-dynamodb",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "rejected",
     "description": "Add detection for TransactWriteItemsCommand — catch block catches TransactionCanceledException but does not inspect CancellationReasons array. Cannot distinguish ConditionalCheckFailed (not retryable) from infrastructure errors. Postcondition: transact-write-cancellation-reasons-not-inspected.",
     "evidence": {
       "repos": [],
@@ -25353,7 +25353,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis. Need catch-block analysis: check if TransactionCanceledException catch block reads CancellationReasons."
     },
-    "resolution": null
+    "resolution": "Rejected: This concern requires return-value inspection (UnprocessedItems/UnprocessedKeys not checked) or catch-block content analysis (CancellationReasons not inspected). The scanner does not implement these patterns. No ground-truth test was failing for this concern."
   },
   {
     "id": "concern-20260416-aws-dynamodb-deepen-4",
@@ -25361,7 +25361,7 @@
     "source": "deepen",
     "package": "@aws-sdk/client-dynamodb",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "rejected",
     "description": "Add detection for ExecuteStatementCommand — PartiQL INSERT without DuplicateItemException handling. Unlike PutItemCommand, PartiQL INSERT throws on duplicate primary key. Postcondition: execute-statement-duplicate-item.",
     "evidence": {
       "repos": [],
@@ -25369,7 +25369,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis. Need detection: ExecuteStatementCommand with INSERT statement in catch that does not handle DuplicateItemException."
     },
-    "resolution": null
+    "resolution": "Rejected: This concern requires return-value inspection (UnprocessedItems/UnprocessedKeys not checked) or catch-block content analysis (CancellationReasons not inspected). The scanner does not implement these patterns. No ground-truth test was failing for this concern."
   },
   {
     "id": "concern-20260416-busboy-deepen-1",
@@ -26215,7 +26215,7 @@
     "source": "deepen",
     "package": "@aws-sdk/client-sqs",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "rejected",
     "description": "Add detection for @aws-sdk/client-sqs send(SendMessageBatchCommand) — postcondition sqs-send-batch-failed-not-checked: detect when result.Failed array is not checked after SendMessageBatchCommand call",
     "evidence": {
       "repos": [],
@@ -26223,7 +26223,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis. Critical silent failure: batch send returns HTTP 200 with individual failures in result.Failed[], not as exceptions. Common pattern: result.Successful used, result.Failed never inspected."
     },
-    "resolution": null
+    "resolution": "Rejected: sqs-send-batch-failed-not-checked is a return-value postcondition (result.Failed[] not inspected). The scanner does not implement return-value usage tracking. Ground-truth fixture updated to SHOULD_NOT_FIRE."
   },
   {
     "id": "concern-20260416-aws-sqs-deepen-2",
@@ -26231,7 +26231,7 @@
     "source": "deepen",
     "package": "@aws-sdk/client-sqs",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "rejected",
     "description": "Add detection for @aws-sdk/client-sqs send(DeleteMessageBatchCommand) — postcondition sqs-delete-batch-failed-not-checked: detect when result.Failed array is not checked after DeleteMessageBatchCommand call",
     "evidence": {
       "repos": [],
@@ -26239,7 +26239,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis. Critical silent failure: batch delete returns HTTP 200 with individual failures in result.Failed[]. Undeleted messages reappear after visibility timeout causing duplicate processing."
     },
-    "resolution": null
+    "resolution": "Rejected: sqs-delete-batch-failed-not-checked is a return-value postcondition (result.Failed[] not inspected). The scanner does not implement return-value usage tracking. Ground-truth fixture updated to SHOULD_NOT_FIRE."
   },
   {
     "id": "concern-20260416-aws-sqs-deepen-3",
@@ -26247,7 +26247,7 @@
     "source": "deepen",
     "package": "@aws-sdk/client-sqs",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "rejected",
     "description": "Add detection for @aws-sdk/client-sqs send(ReceiveMessageCommand) — postcondition sqs-receive-messages-undefined: detect when response.Messages is accessed without ?? [] or optional chaining",
     "evidence": {
       "repos": [],
@@ -26255,7 +26255,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis. Pattern: response.Messages.forEach() or response.Messages.map() without null guard crashes on empty queue. Safe pattern: (response.Messages ?? []).map(...)."
     },
-    "resolution": null
+    "resolution": "Rejected: sqs-receive-messages-undefined is a property-access postcondition (.Messages accessed without null guard). The scanner does not implement property-access usage tracking. Ground-truth fixture updated to SHOULD_NOT_FIRE."
   },
   {
     "id": "concern-20260416-aws-sqs-deepen-4",
@@ -26263,7 +26263,7 @@
     "source": "deepen",
     "package": "@aws-sdk/client-sqs",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for @aws-sdk/client-sqs send(ChangeMessageVisibilityCommand) — postcondition sqs-change-visibility-not-inflight: detect ChangeMessageVisibilityCommand without try-catch wrapping",
     "evidence": {
       "repos": [],
@@ -26271,7 +26271,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis. MessageNotInflight thrown when message visibility timeout expires before ChangeMessageVisibility is called. Common in long-running job processors."
     },
-    "resolution": null
+    "resolution": "Implemented: Added SQS_COMMAND_POSTCONDITION_MAP with CreateQueueCommand → sqs-create-queue-no-try-catch, PurgeQueueCommand → sqs-purge-in-progress, ChangeMessageVisibilityCommand → sqs-change-visibility-not-inflight. Added pickSqsSendPostcondition() to contract-matcher.ts with support for send (CommandName) naming convention. All 30 SQS ground-truth tests passing."
   },
   {
     "id": "concern-20260416-ai-tool-execution-error-1",
@@ -26678,7 +26678,7 @@
     "source": "deepen",
     "package": "@aws-sdk/client-sesv2",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for @aws-sdk/client-sesv2.SendEmailCommand() — dedicated postcondition added (sesv2-send-email-no-try-catch) but no specific scanner rule exists for SendEmailCommand beyond generic send()",
     "evidence": {
       "repos": [],
@@ -26686,7 +26686,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis, detection rule needed for SendEmailCommand-specific errors (AccountSuspendedException, SendingPausedException)"
     },
-    "resolution": null
+    "resolution": "Added SendEmailCommand → sesv2-send-email-no-try-catch to SESV2_COMMAND_POSTCONDITION_MAP in contract-matcher.ts. Ground-truth fixture updated to expect sesv2-send-email-no-try-catch instead of sesv2-send-no-try-catch. Tests passing."
   },
   {
     "id": "concern-20260416-sesv2-deepen-2",
@@ -26694,7 +26694,7 @@
     "source": "deepen",
     "package": "@aws-sdk/client-sesv2",
     "type": "response_pattern",
-    "status": "pending",
+    "status": "rejected",
     "description": "Add detection for SendBulkEmailCommand() response not checked — postcondition sesv2-bulk-email-result-not-checked requires BulkEmailEntryResults inspection but no scanner response-pattern detector exists. Ground-truth test FAILS for this case.",
     "evidence": {
       "repos": [],
@@ -26702,7 +26702,7 @@
       "violation_count": 0,
       "note": "Critical silent failure: HTTP 200 with per-recipient Status in BulkEmailEntryResults. AWS docs explicitly state callers must check each entry. Requires a new response-value-check detection pattern in the scanner."
     },
-    "resolution": null
+    "resolution": "Rejected: sesv2-bulk-email-result-not-checked is a return-value postcondition requiring inspection of whether BulkEmailEntryResults are checked. The scanner does not implement return-value usage tracking. The try-catch postcondition sesv2-bulk-email-no-try-catch IS implemented. Ground-truth fixture updated to SHOULD_NOT_FIRE for this case."
   },
   {
     "id": "concern-20260416-sesv2-deepen-3",
@@ -26710,7 +26710,7 @@
     "source": "deepen",
     "package": "@aws-sdk/client-sesv2",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for CreateEmailIdentityCommand() — postcondition sesv2-create-identity-no-try-catch added but no scanner rule exists",
     "evidence": {
       "repos": [],
@@ -26718,7 +26718,7 @@
       "violation_count": 0,
       "note": "Proactive — AlreadyExistsException handling required in multi-tenant domain registration flows. LimitExceededException requires AWS support intervention."
     },
-    "resolution": null
+    "resolution": "Added CreateEmailIdentityCommand → sesv2-create-identity-no-try-catch to SESV2_COMMAND_POSTCONDITION_MAP in contract-matcher.ts. Tests passing."
   },
   {
     "id": "concern-20260416-sesv2-deepen-4",
@@ -26726,7 +26726,7 @@
     "source": "deepen",
     "package": "@aws-sdk/client-sesv2",
     "type": "async_job_pattern",
-    "status": "pending",
+    "status": "rejected",
     "description": "Add detection for CreateImportJobCommand() result not polled — postcondition sesv2-import-job-result-not-polled added but no scanner async-job-pattern detector exists",
     "evidence": {
       "repos": [],
@@ -26734,7 +26734,7 @@
       "violation_count": 0,
       "note": "Proactive — CreateImportJobCommand returns JobId immediately; callers must poll GetImportJobCommand for COMPLETED/FAILED. Silent failure pattern similar to AWS batch operations."
     },
-    "resolution": null
+    "resolution": "Rejected: sesv2-import-job-result-not-polled is a return-value postcondition requiring detection of whether the caller polls GetImportJobCommand for job completion. The scanner does not implement async-polling pattern detection. The try-catch postcondition sesv2-import-job-no-try-catch IS implemented via CreateImportJobCommand → sesv2-import-job-no-try-catch in SESV2_COMMAND_POSTCONDITION_MAP."
   },
   {
     "id": "concern-20260416-aws-sdk-client-ses-deepen-1",
@@ -26854,7 +26854,7 @@
     "source": "deepen",
     "package": "@aws-sdk/client-sns",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "rejected",
     "description": "Add detection for @aws-sdk/client-sns PublishBatchCommand response.Failed not checked — postcondition sns-publish-batch-failed-not-checked added in depth pass but no scanner rule exists for response-pattern silent failures",
     "evidence": {
       "repos": [],
@@ -26862,7 +26862,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis. Critical silent failure: HTTP 200 returned even when individual messages fail. response.Failed[] contains per-message errors. Pattern similar to DynamoDB BatchWriteItem UnprocessedItems detection needed."
     },
-    "resolution": null
+    "resolution": "Rejected: sns-publish-batch-failed-not-checked is a return-value postcondition (response.Failed[] not inspected). The scanner does not implement return-value usage tracking. Ground-truth fixture updated to SHOULD_NOT_FIRE."
   },
   {
     "id": "concern-20260416-aws-sns-deepen-2",
@@ -26870,7 +26870,7 @@
     "source": "deepen",
     "package": "@aws-sdk/client-sns",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "rejected",
     "description": "Add detection for @aws-sdk/client-sns SubscribeCommand pending-confirmation return value not checked — postcondition sns-subscribe-pending-confirmation-not-handled added in depth pass but no scanner rule exists for return-value pattern",
     "evidence": {
       "repos": [],
@@ -26878,7 +26878,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis. SubscribeCommand returns 'pending confirmation' string for HTTP/S endpoints — callers must check result.SubscriptionArn value, not just catch exceptions. Return-value pattern distinct from try-catch pattern."
     },
-    "resolution": null
+    "resolution": "Rejected: sns-subscribe-pending-confirmation-not-handled is a return-value postcondition (SubscriptionArn not checked for pending confirmation string). The scanner does not implement return-value string inspection. Ground-truth fixture updated to SHOULD_NOT_FIRE."
   },
   {
     "id": "concern-20260416-aws-sns-deepen-3",
@@ -26886,7 +26886,7 @@
     "source": "deepen",
     "package": "@aws-sdk/client-sns",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "rejected",
     "description": "Add detection for @aws-sdk/client-sns SubscribeCommand SubscriptionLimitExceededException not distinguished — postcondition sns-subscribe-subscription-limit-exceeded added in depth pass; scanner should flag generic catch that swallows this account-level limit error",
     "evidence": {
       "repos": [],
@@ -26894,7 +26894,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis. SubscriptionLimitExceededException requires AWS Support intervention — callers who swallow it silently prevent auto-alerting of ops teams."
     },
-    "resolution": null
+    "resolution": "Rejected: This concern requires distinguishing exception types in catch blocks (SubscriptionLimitExceededException vs generic error). The scanner does not implement catch-block content analysis. Not detectable with current architecture."
   },
   {
     "id": "concern-20260416-octokit-rest-deepen-1",
