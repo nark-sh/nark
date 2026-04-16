@@ -30597,5 +30597,149 @@
       "note": "Proactive \u2014 contract added via API surface analysis. Pattern: const record = await credential.authenticate(scopes) without try-catch. Less common in server SaaS but relevant for OAuth 2.0 callback flows."
     },
     "resolution": null
+  },
+  {
+    "id": "concern-20260416-cookie-parser-deepen-1",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "cookie-parser",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for cookieParser.signedCookie() \u2014 postcondition signed-cookie-tampered-false added: function returns false for tampered cookies instead of throwing. Callers using truthiness check instead of strict === false comparison miss security violations.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. Pattern: const result = signedCookie(val, secret); if (result) { ... } without checking result === false."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-cookie-parser-deepen-2",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "cookie-parser",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for cookieParser.signedCookie() \u2014 postcondition signed-cookie-non-string-undefined: function returns undefined for non-string input without throwing. Callers passing req.cookies[name] without existence check get undefined propagated silently.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. Pattern: signedCookie(req.cookies[\"session\"], secret) where cookie key may be missing."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-cookie-parser-deepen-3",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "cookie-parser",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for cookieParser.signedCookies() \u2014 postcondition signed-cookies-mutates-input: function deletes signed cookie keys from the input object as a side effect. Callers passing req.cookies directly find those keys missing after the call.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. Pattern: signedCookies(req.cookies, secret) without cloning req.cookies first. req.cookies is mutated in place."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-cookie-parser-deepen-4",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "cookie-parser",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for cookieParser.signedCookies() \u2014 postcondition signed-cookies-false-on-tamper: returned object contains false values for tampered cookies. Callers iterating over the result without checking for false values silently pass tampered data downstream.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. Pattern: for (const [k, v] of Object.entries(signedCookies(cookies, secret))) { use(v); } without checking v === false."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-cookie-parser-deepen-5",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "cookie-parser",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for cookieParser.JSONCookie() \u2014 postcondition json-cookie-undefined-for-non-json: function returns undefined (NOT the original string) for non-JSON cookies. Common bug: developers use it as a parse-or-passthrough but get undefined for regular cookies.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. Pattern: const parsed = JSONCookie(val); use(parsed) without checking for undefined. Return value is undefined for all non-j: prefixed values."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-multer-deepen-1",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "multer",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for multer.fields() \u2014 postcondition added in depth pass but no scanner rule exists for fields() middleware specifically",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed for fields() middleware with LIMIT_UNEXPECTED_FILE and LIMIT_FILE_SIZE/COUNT codes"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-multer-deepen-2",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "multer",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for multer.any() security risk \u2014 no fileFilter configured. any() accepts all files from any field without restriction; missing fileFilter is a critical security gap",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 any-unrestricted-upload-no-filter postcondition requires scanner to detect when any() is used without fileFilter on the multer instance"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-multer-deepen-3",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "multer",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for multer.none() \u2014 postcondition added but no scanner rule for none() middleware without error handling middleware",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 none-throws-multer-error-on-file-upload requires scanner to detect none() usage without subsequent Express error middleware"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-multer-deepen-4",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "multer",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for multer.diskStorage() with string destination \u2014 when destination is a string, fs.mkdirSync is called synchronously at startup without try-catch",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 disk-storage-destination-permission-error and disk-storage-write-error postconditions require scanner to detect diskStorage usage without error middleware"
+    },
+    "resolution": null
   }
 ]
