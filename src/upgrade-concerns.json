@@ -25450,5 +25450,635 @@
       "note": "Proactive — contract added via API surface analysis. Confirmed from source: jwt.service.ts throw new Error(Payload as string is not allowed...)"
     },
     "resolution": null
+  },
+  {
+    "id": "concern-2026-04-16-tanstack-react-router-1",
+    "created_at": "2026-04-16",
+    "source": "dashboard-feedback",
+    "package": "@tanstack/react-router",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "FP: invalid-route-path postcondition fires on valid dynamic route strings and router.navigate() calls that use valid path patterns. Contract condition is too broad — does not distinguish between static invalid paths and dynamic route params.",
+    "evidence": {
+      "repos": [
+        "src/components/command-menu.tsx",
+        "src/components/create-organization-modal.tsx",
+        "src/components/layout/nav-user.tsx",
+        "src/components/profile-dropdown.tsx",
+        "src/features/auth/email-confirm/index.tsx"
+      ],
+      "scan_file": null,
+      "violation_count": 94,
+      "fp_reason": null,
+      "fix_target": "contract",
+      "postcondition_id": "invalid-route-path"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-16-undici-2",
+    "created_at": "2026-04-16",
+    "source": "dashboard-feedback",
+    "package": "undici",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "FP: response-json-parse-error fires on .json() calls inside async functions that are already wrapped by outer try-catch at the call site. Scanner does not trace error handling across async function boundaries.",
+    "evidence": {
+      "repos": [
+        "apps/web/app/admin/(protected)/lab/oss-scan/page.tsx",
+        "apps/web/app/admin/(protected)/lab/oss-scan/[scanId]/page.tsx",
+        "apps/web/app/admin/(protected)/product-feedback/add-feedback-form.tsx",
+        "apps/web/app/api/github/debug/route.ts",
+        "apps/web/app/api/oss-scan/route.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 64,
+      "fp_reason": null,
+      "fix_target": "scanner",
+      "postcondition_id": "response-json-parse-error"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-16-react-hook-form-3",
+    "created_at": "2026-04-16",
+    "source": "dashboard-feedback",
+    "package": "react-hook-form",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "FP: async-submit-unhandled-error fires on onSubmit handlers passed to handleSubmit(). Per react-hook-form docs, handleSubmit() catches errors thrown by the async callback and passes them to onError — wrapping in try-catch inside the handler is redundant. Contract postcondition should not apply when function is passed directly to handleSubmit().",
+    "evidence": {
+      "repos": [
+        "src/components/create-organization-modal.tsx",
+        "src/features/auth/forgot-password/components/forgot-password-form.tsx",
+        "src/features/auth/otp/components/otp-form.tsx",
+        "src/features/auth/reset-password/components/reset-password-form.tsx",
+        "src/features/auth/sign-in/components/user-auth-form.tsx"
+      ],
+      "scan_file": null,
+      "violation_count": 60,
+      "fp_reason": null,
+      "fix_target": "contract",
+      "postcondition_id": "async-submit-unhandled-error"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-16-ai-4",
+    "created_at": "2026-04-16",
+    "source": "dashboard-feedback",
+    "package": "ai",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "FP: tool-execution-error fires on tool handler functions registered with the Vercel AI SDK. The SDK framework catches errors from tool execution and surfaces them as ToolExecutionError — the individual tool functions do not need try-catch if errors are handled by the framework layer.",
+    "evidence": {
+      "repos": [
+        "lib/tools/browser/browserAct.ts",
+        "lib/tools/browser/browserAgent.ts",
+        "lib/tools/browser/browserExtract.ts",
+        "lib/tools/browser/browserObserve.ts",
+        "lib/tools/browser/waitTool.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 25,
+      "fp_reason": null,
+      "fix_target": "contract",
+      "postcondition_id": "tool-execution-error"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-16-tanstack-react-query-5",
+    "created_at": "2026-04-16",
+    "source": "dashboard-feedback",
+    "package": "@tanstack/react-query",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "FP: query-error-unhandled fires on useQuery() calls where error handling is done via the returned { isError, error } state or via the onError option — not via try-catch. TanStack Query manages async errors through its state machine; try-catch inside the queryFn is not the expected error handling pattern for the query result.",
+    "evidence": {
+      "repos": [
+        "app/access/page.tsx",
+        "components/Agents/AgentCreator.tsx",
+        "components/Files/FileInfoDialog.tsx",
+        "components/TasksPage/TasksList.tsx",
+        "hooks/useAccountOrganizations.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 25,
+      "fp_reason": null,
+      "fix_target": "contract",
+      "postcondition_id": "query-error-unhandled"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-16-tanstack-react-router-6",
+    "created_at": "2026-04-16",
+    "source": "dashboard-feedback",
+    "package": "@tanstack/react-router",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "FP: param-type-mismatch fires when route params are used directly as strings (e.g. passed to API calls) without explicit type coercion. Scanner does not recognize that useParams() with a typed route already validates the type at the route definition level via RouteOptions.params.parse.",
+    "evidence": {
+      "repos": [
+        "src/features/browser-agents/browser-agent-detail.tsx",
+        "src/features/customers/customer-detail.tsx",
+        "src/features/documents/document-builder.tsx",
+        "src/features/invoices/invoice-detail.tsx",
+        "src/features/loans/loan-detail.tsx"
+      ],
+      "scan_file": null,
+      "violation_count": 18,
+      "fp_reason": null,
+      "fix_target": "scanner",
+      "postcondition_id": "param-type-mismatch"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-16-tanstack-react-router-7",
+    "created_at": "2026-04-16",
+    "source": "dashboard-feedback",
+    "package": "@tanstack/react-router",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "FP: search-schema-validation-error fires on useSearch() calls even when the route already defines a validateSearch schema. When a route defines validateSearch, TanStack Router already validates and parses search params — a second runtime check in the component is redundant.",
+    "evidence": {
+      "repos": [
+        "src/features/apps/index.tsx",
+        "src/features/auth/email-confirm/index.tsx",
+        "src/features/auth/sign-in/index.tsx",
+        "src/features/auth/sign-up/index.tsx",
+        "src/features/chats/index.tsx"
+      ],
+      "scan_file": null,
+      "violation_count": 14,
+      "fp_reason": null,
+      "fix_target": "contract",
+      "postcondition_id": "search-schema-validation-error"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-16-zod-8",
+    "created_at": "2026-04-16",
+    "source": "dashboard-feedback",
+    "package": "zod",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "FP: parse-validation-error fires on z.parse() in Next.js App Router route handlers that do not wrap in try-catch. Scanner does not recognize the Next.js route handler error boundary — unhandled errors in route handlers are caught by Next.js and returned as 500 responses, which is an acceptable pattern.",
+    "evidence": {
+      "repos": [
+        "apps/web/app/api/ai/analyze-sender-pattern/route.ts",
+        "apps/web/app/api/clean/gmail/route.ts",
+        "apps/web/app/api/clean/route.ts",
+        "apps/web/app/api/google/contacts/route.ts",
+        "apps/web/app/api/labels/create/route.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 14,
+      "fp_reason": null,
+      "fix_target": "scanner",
+      "postcondition_id": "parse-validation-error"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-16-react-hook-form-9",
+    "created_at": "2026-04-16",
+    "source": "dashboard-feedback",
+    "package": "react-hook-form",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "FP: missing-form-provider fires on useFormContext() calls inside components that are always used within a FormProvider ancestor. Scanner does not trace component usage to verify FormProvider is present in the render tree — it flags useFormContext() calls regardless of actual context availability.",
+    "evidence": {
+      "repos": [
+        "components/Account/ArtistInstructionTextArea.tsx",
+        "components/Input.tsx",
+        "src/components/ui/form.tsx"
+      ],
+      "scan_file": null,
+      "violation_count": 9,
+      "fp_reason": null,
+      "fix_target": "scanner",
+      "postcondition_id": "missing-form-provider"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-16-redis-10",
+    "created_at": "2026-04-16",
+    "source": "dashboard-feedback",
+    "package": "redis",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "FP: missing-error-listener fires on Redis client instances where .on('error') is registered in a separate initialization function or module. Scanner does not trace .on('error') registration across module boundaries — only detects it when called on the same variable in the same scope.",
+    "evidence": {
+      "repos": [
+        "packages/api/src/main.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 7,
+      "fp_reason": null,
+      "fix_target": "scanner",
+      "postcondition_id": "missing-error-listener"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-16-clerk-nextjs-11",
+    "created_at": "2026-04-16",
+    "source": "dashboard-feedback",
+    "package": "@clerk/nextjs",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "FP: use-user-no-loaded-check fires on useUser() calls in components that check isLoaded via early return, conditional rendering, or optional chaining. Scanner does not recognize all patterns for guarding on isLoaded — it misses early-return patterns (if (!isLoaded) return null) and optional chaining (user?.id) as valid guards.",
+    "evidence": {
+      "repos": [
+        "apps/web/app/(auth)/invite/[token]/page.tsx",
+        "apps/web/app/(dashboard)/onboarding/onboarding-form.tsx",
+        "apps/web/components/layout/header.tsx",
+        "apps/web/components/layout/sidebar.tsx",
+        "apps/web/components/layout/top-nav.tsx"
+      ],
+      "scan_file": null,
+      "violation_count": 7,
+      "fp_reason": null,
+      "fix_target": "scanner",
+      "postcondition_id": "use-user-no-loaded-check"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-16-ai-12",
+    "created_at": "2026-04-16",
+    "source": "dashboard-feedback",
+    "package": "ai",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "FP: api-error-rate-limit fires on AI SDK calls that are inside retry wrapper functions or exponential backoff helpers. Scanner does not recognize retry utility patterns (e.g. pRetry, custom retry loops) as equivalent to handling rate-limit errors at the call site.",
+    "evidence": {
+      "repos": [
+        "apps/web/utils/llms/index.ts",
+        "lib/ai/generateArray.ts",
+        "lib/catalog/analyzeCatalogBatch.ts",
+        "lib/evals/scorers/CatalogAvailability.ts",
+        "lib/evals/scorers/QuestionAnswered.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 7,
+      "fp_reason": null,
+      "fix_target": "scanner",
+      "postcondition_id": "api-error-rate-limit"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-16-express-13",
+    "created_at": "2026-04-16",
+    "source": "dashboard-feedback",
+    "package": "express",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "FP: async-middleware-unhandled-rejection fires on async Express middleware that calls next(err) in a catch block. Scanner does not recognize next(err) as a valid error propagation mechanism — it only checks for try-catch, not the Express error-forwarding pattern.",
+    "evidence": {
+      "repos": [
+        "api/browser-agent-server.ts",
+        "api/dev-server.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 5,
+      "fp_reason": null,
+      "fix_target": "scanner",
+      "postcondition_id": "async-middleware-unhandled-rejection"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-16-tanstack-react-query-14",
+    "created_at": "2026-04-16",
+    "source": "dashboard-feedback",
+    "package": "@tanstack/react-query",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "FP: infinite-query-error-unhandled fires on useInfiniteQuery() calls where error handling is done via { isError, error } destructuring at the component level — the same valid pattern as useQuery(). Contract should align with query-error-unhandled to accept state-based error handling.",
+    "evidence": {
+      "repos": [
+        "hooks/useArtistFans.ts",
+        "hooks/useArtistPosts.ts",
+        "hooks/useCatalogSongs.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 3,
+      "fp_reason": null,
+      "fix_target": "contract",
+      "postcondition_id": "infinite-query-error-unhandled"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-16-clerk-nextjs-15",
+    "created_at": "2026-04-16",
+    "source": "dashboard-feedback",
+    "package": "@clerk/nextjs",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "FP: use-clerk-outside-provider fires on Clerk hooks used in layout components that are rendered inside ClerkProvider at the app root. Scanner does not trace component tree to verify ClerkProvider is an ancestor — it flags any Clerk hook use outside an explicitly visible ClerkProvider in the same file.",
+    "evidence": {
+      "repos": [
+        "/Users/calebgates/WebstormProjects/behavioral-contracts/behavioral-contracts-saas/apps/web/components/layout/header.tsx",
+        "/Users/calebgates/WebstormProjects/behavioral-contracts/behavioral-contracts-saas/apps/web/components/layout/sidebar.tsx",
+        "/Users/calebgates/WebstormProjects/behavioral-contracts/behavioral-contracts-saas/apps/web/components/layout/top-nav.tsx"
+      ],
+      "scan_file": null,
+      "violation_count": 3,
+      "fp_reason": null,
+      "fix_target": "scanner",
+      "postcondition_id": "use-clerk-outside-provider"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-16-stripe-16",
+    "created_at": "2026-04-16",
+    "source": "dashboard-feedback",
+    "package": "stripe",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "FP: rate-limit-error fires on Stripe API calls in a shared utility module where error handling (including rate-limit) is done at the call site in the consuming functions. Scanner does not trace that callers of the utility function handle Stripe errors.",
+    "evidence": {
+      "repos": [
+        "/Users/calebgates/WebstormProjects/behavioral-contracts/behavioral-contracts-saas/apps/web/lib/stripe.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 3,
+      "fp_reason": null,
+      "fix_target": "scanner",
+      "postcondition_id": "rate-limit-error"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-16-dotenv-17",
+    "created_at": "2026-04-16",
+    "source": "dashboard-feedback",
+    "package": "dotenv",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "FP: missing-env-file fires on dotenv.config() calls in migration scripts that are intentionally run in environments where the .env file may not exist (CI, production). Migration scripts typically load env from process.env directly. The postcondition should not apply to scripts where missing .env is expected behavior.",
+    "evidence": {
+      "repos": [
+        "src/lib/migrations/supabase.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 3,
+      "fp_reason": null,
+      "fix_target": "contract",
+      "postcondition_id": "missing-env-file"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-16-node-fetch-18",
+    "created_at": "2026-04-16",
+    "source": "dashboard-feedback",
+    "package": "node-fetch",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "FP: fetch-rejects-on-network-error fires on fetch() calls inside async utility functions where the caller is expected to handle errors. Scanner does not trace whether the calling context has error handling — it flags unprotected fetch() at the function level even when callers use try-catch.",
+    "evidence": {
+      "repos": [
+        "api/analysis/post-game-analysis.ts",
+        "api/utils/ai-client.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 2,
+      "fp_reason": null,
+      "fix_target": "scanner",
+      "postcondition_id": "fetch-rejects-on-network-error"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-16-react-hook-form-19",
+    "created_at": "2026-04-16",
+    "source": "dashboard-feedback",
+    "package": "react-hook-form",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "FP: unhandled-field-array-operations fires on useFieldArray() append/remove calls that are inside event handlers that are themselves called within a handleSubmit() context. RHF catches errors from field array operations when within the form submit flow.",
+    "evidence": {
+      "repos": [
+        "src/features/settings/profile/profile-form.tsx"
+      ],
+      "scan_file": null,
+      "violation_count": 2,
+      "fp_reason": null,
+      "fix_target": "contract",
+      "postcondition_id": "unhandled-field-array-operations"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-16-tanstack-react-query-20",
+    "created_at": "2026-04-16",
+    "source": "dashboard-feedback",
+    "package": "@tanstack/react-query",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "FP: mutation-error-unhandled fires on useMutation() calls that handle errors via the onError callback option rather than try-catch. The TanStack Query onError option is a fully supported error handling mechanism for mutations.",
+    "evidence": {
+      "repos": [
+        "hooks/useCatalogSongsFileSelect.ts",
+        "hooks/useSandboxFileContent.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 2,
+      "fp_reason": null,
+      "fix_target": "contract",
+      "postcondition_id": "mutation-error-unhandled"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-16-ioredis-21",
+    "created_at": "2026-04-16",
+    "source": "dashboard-feedback",
+    "package": "ioredis",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "FP: missing-error-listener fires on ioredis client instances where .on('error') handler is registered in a separate initialization helper function, not inline with the client creation. Scanner requires .on('error') to be called on the same variable in the same scope.",
+    "evidence": {
+      "repos": [
+        "/Users/calebgates/WebstormProjects/behavioral-contracts/behavioral-contracts-saas/apps/web/lib/auth-cache.ts",
+        "/Users/calebgates/WebstormProjects/behavioral-contracts/behavioral-contracts-saas/apps/web/lib/rate-limit.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 2,
+      "fp_reason": null,
+      "fix_target": "scanner",
+      "postcondition_id": "missing-error-listener"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-16-vercel-blob-22",
+    "created_at": "2026-04-16",
+    "source": "dashboard-feedback",
+    "package": "@vercel/blob",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "FP: blob-del-no-try-catch fires on del() calls inside async functions that propagate errors to an outer error handler. Scanner does not trace error propagation through async function call chains.",
+    "evidence": {
+      "repos": [
+        "lib/sandbox/postSandboxesFilesHandler.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 2,
+      "fp_reason": null,
+      "fix_target": "scanner",
+      "postcondition_id": "blob-del-no-try-catch"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-16-supabase-supabase-js-23",
+    "created_at": "2026-04-16",
+    "source": "dashboard-feedback",
+    "package": "@supabase/supabase-js",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "FP: rls-policy-violation fires on Supabase queries in server-side code that uses the service role key (bypasses RLS intentionally). Scanner does not distinguish between anon key client (subject to RLS) and service role key client (bypasses RLS by design).",
+    "evidence": {
+      "repos": [
+        "packages/api/src/main.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 1,
+      "fp_reason": null,
+      "fix_target": "scanner",
+      "postcondition_id": "rls-policy-violation"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-16-ai-24",
+    "created_at": "2026-04-16",
+    "source": "dashboard-feedback",
+    "package": "ai",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "FP: schema-validation-error fires on streamObject()/generateObject() calls with a schema parameter where the caller already handles validation errors via onError or try-catch at a higher level.",
+    "evidence": {
+      "repos": [
+        "apps/web/utils/llms/index.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 1,
+      "fp_reason": null,
+      "fix_target": "scanner",
+      "postcondition_id": "schema-validation-error"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-16-axios-25",
+    "created_at": "2026-04-16",
+    "source": "dashboard-feedback",
+    "package": "axios",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "FP: error-4xx-5xx fires on test fixture file with inline nark-suppress comment. Scanner is not respecting the inline suppression annotation for this postcondition.",
+    "evidence": {
+      "repos": [
+        "packages/scanner/src/v2/fixtures/test-suppressions/with-inline-suppression.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 1,
+      "fp_reason": null,
+      "fix_target": "scanner",
+      "postcondition_id": "error-4xx-5xx"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-16-upstash-redis-26",
+    "created_at": "2026-04-16",
+    "source": "dashboard-feedback",
+    "package": "@upstash/redis",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "FP: network-or-api-error fires on @upstash/redis commands in a utility wrapper module where errors are handled by callers. Scanner does not trace that the wrapper is always invoked from try-catch contexts.",
+    "evidence": {
+      "repos": [
+        "apps/web/utils/redis/index.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 1,
+      "fp_reason": null,
+      "fix_target": "scanner",
+      "postcondition_id": "network-or-api-error"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-16-puppeteer-27",
+    "created_at": "2026-04-16",
+    "source": "dashboard-feedback",
+    "package": "puppeteer",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "FP: browser-close-must-run fires on browser.close() usage where browser cleanup is handled via a finally block in a surrounding try-catch. Scanner may not correctly identify that the finally block guarantees browser.close() runs.",
+    "evidence": {
+      "repos": [
+        "api/browser-agent-executor.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 1,
+      "fp_reason": null,
+      "fix_target": "scanner",
+      "postcondition_id": "browser-close-must-run"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-16-winston-28",
+    "created_at": "2026-04-16",
+    "source": "dashboard-feedback",
+    "package": "winston",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "FP: missing-error-listener fires on Winston logger instances where the error event handler is registered via logger.on('error') but in a setup script context where uncaught errors are acceptable.",
+    "evidence": {
+      "repos": [
+        "apps/web/scripts/setup-telegram-bot.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 1,
+      "fp_reason": null,
+      "fix_target": "scanner",
+      "postcondition_id": "missing-error-listener"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-16-supabase-supabase-js-29",
+    "created_at": "2026-04-16",
+    "source": "dashboard-feedback",
+    "package": "@supabase/supabase-js",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "FP: weak-password fires on signUp() calls in an auth context that uses Supabase email OTP (magic link) flow — no password is involved. The postcondition should not apply when the auth method is passwordless.",
+    "evidence": {
+      "repos": [
+        "src/contexts/auth-context.tsx"
+      ],
+      "scan_file": null,
+      "violation_count": 1,
+      "fp_reason": null,
+      "fix_target": "contract",
+      "postcondition_id": "weak-password"
+    },
+    "resolution": null
   }
 ]
