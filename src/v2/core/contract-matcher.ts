@@ -1948,6 +1948,14 @@ export class ContractMatcher {
       CreateConfigurationSetEventDestinationCommand: "ses-event-dest-config-set-not-found",
       CreateCustomVerificationEmailTemplateCommand: "ses-create-cve-template-already-exists",
       UpdateCustomVerificationEmailTemplateCommand: "ses-update-cve-template-not-found",
+      // Evidence: concern-20260415-aws-sdk-client-ses-deepen-1 (SendBounceCommand)
+      SendBounceCommand: "ses-send-bounce-no-try-catch",
+      // Evidence: concern-20260415-aws-sdk-client-ses-deepen-2 (UpdateConfigurationSetEventDestinationCommand)
+      UpdateConfigurationSetEventDestinationCommand: "ses-update-event-dest-config-set-not-found",
+      // Evidence: concern-20260415-aws-sdk-client-ses-deepen-3 (PutConfigurationSetDeliveryOptionsCommand)
+      PutConfigurationSetDeliveryOptionsCommand: "ses-put-delivery-options-config-set-not-found",
+      // Evidence: concern-20260415-aws-sdk-client-ses-deepen-4 (DeleteConfigurationSetCommand — NOT idempotent)
+      DeleteConfigurationSetCommand: "ses-delete-config-set-not-found",
     };
 
   /**
