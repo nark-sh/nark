@@ -29189,5 +29189,37 @@
       "note": "Proactive \u2014 contract added via API surface analysis. conversations.items.create() is a 3-level chain (openai.conversations.items.create) used in agent frameworks for persistent conversation state."
     },
     "resolution": null
+  },
+  {
+    "id": "concern-20260416-openai-deepen-stream1-8-1",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "openai",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for openai.chat.completions.stream() \u2014 postconditions added (stream-length-finish-reason-error, stream-content-filter-finish-reason-error, stream-abort-error, stream-premature-termination-error) but no scanner rule exists. The streaming helper converts finish_reason errors into thrown exceptions (LengthFinishReasonError, ContentFilterFinishReasonError) and throws on premature termination via finalChatCompletion(). Pattern: caller uses chat.completions.stream() without awaiting .finalChatCompletion() in a try-catch.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. chat.completions.stream() is a 3-level chain helper. Distinct from create({stream:true}) in that it throws on finish_reason errors rather than silently returning truncated output."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-openai-deepen-stream1-8-2",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "openai",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for openai.chat.completions.runTools() \u2014 postconditions added (run-tools-n-gt-1-error, run-tools-missing-function-error, run-tools-stream-termination-error) but no scanner rule exists. Critical failure mode: OpenAIError('Tool given to .runTools() that does not have an associated function') fires mid-run when the model invokes a tool that has no executor function \u2014 thrown AFTER multiple successful tool calls. Also throws on n>1 params (client-side guard). Caller must await runner.finalChatCompletion() in try-catch.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. chat.completions.runTools() is a 3-level chain agentic tool runner. Tool execution errors (invalid names, parse failures) are returned as tool messages, not thrown \u2014 only missing implementations and n>1 are thrown."
+    },
+    "resolution": null
   }
 ]
