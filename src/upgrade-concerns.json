@@ -30165,5 +30165,149 @@
       "note": "Proactive \u2014 response pattern detection needed for PENDING status check after subscriptions.create(). Confirmed from Square API docs."
     },
     "resolution": null
+  },
+  {
+    "id": "concern-20260416-square-deepen-4",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "square",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for square.orders.update() \u2014 postconditions added (square-orders-update-version-conflict, square-orders-update-closed-order) but no scanner rule exists. Need to detect calls to client.orders.update() without try-catch.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-square-deepen-5",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "square",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for square.orders.pay() \u2014 postconditions added (square-orders-pay-amount-mismatch, square-orders-pay-timeout) but no scanner rule exists. Critical: SquareTimeoutError must be caught separately \u2014 need both SquareError and SquareTimeoutError catch detection. Also detect missing payment_ids sum validation.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed. orders.pay is a final capture step \u2014 missing error handling is high-risk payment flow bug."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-google-auth-library-deepen-1",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "google-auth-library",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for OAuth2Client.verifyIdToken() \u2014 postcondition verify-id-token-unprotected added in depth pass but no scanner rule exists. Detects missing try-catch on verifyIdToken() call with options object.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-google-auth-library-deepen-2",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "google-auth-library",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for OAuth2Client.refreshAccessToken() \u2014 postcondition refresh-access-token-unprotected added in depth pass but no scanner rule exists. Method throws Error(No refresh token is set.) and GaxiosError.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-google-auth-library-deepen-3",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "google-auth-library",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for OAuth2Client.getAccessToken() \u2014 postcondition get-access-token-unprotected added in depth pass. Method throws Error(No refresh token or refresh handler callback is set.) when credentials are incomplete.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-google-auth-library-deepen-4",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "google-auth-library",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for GoogleAuth.getApplicationDefault() \u2014 postcondition get-application-default-unprotected added in depth pass. Throws Error(Could not load the default credentials) when ADC is not configured.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-google-auth-library-deepen-5",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "google-auth-library",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for GoogleAuth.getIdTokenClient() \u2014 postcondition get-id-token-client-unprotected added. Throws Error(Cannot fetch ID token in this environment) when not on GCE or missing service account credentials.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-google-auth-library-deepen-6",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "google-auth-library",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for GoogleAuth.sign() \u2014 postcondition sign-unprotected added. Throws Error(Cannot sign data without client_email) when using user credentials instead of service account. Common in signed URL generation flows.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-google-auth-library-deepen-7",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "google-auth-library",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for JWT.authorize() \u2014 postcondition jwt-authorize-unprotected added. Throws GaxiosError from Google token endpoint (invalid_grant, unauthorized_client, access_denied) when service account cannot authenticate.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
   }
 ]
