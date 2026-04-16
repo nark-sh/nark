@@ -24469,5 +24469,634 @@
       "note": "Proactive \u2014 confirmed from dist/index.cjs line 828-834. handleAsyncErrors wraps all middleware execution."
     },
     "resolution": "express-rate-limit deepen deferred: contract schema validation errors fixed (silent_data_loss, hidden, unaffected, SECURITY, CRASH, rateLimit- camelCase IDs), but detection rules require new ground-truth fixture + middleware-pattern scanner support. Deferred to next cycle (cycle 5, 2026-04-15)."
+  },
+  {
+    "id": "concern-2026-04-15-tanstack-react-router-1",
+    "created_at": "2026-04-15",
+    "source": "dashboard-feedback",
+    "package": "@tanstack/react-router",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Dashboard FP reports: 94 instance(s) of @tanstack/react-router/invalid-route-path marked as false positive by users",
+    "evidence": {
+      "repos": [
+        "src/components/command-menu.tsx",
+        "src/features/auth/sign-in/components/user-auth-form.tsx",
+        "src/features/auth/sign-up/components/sign-up-form.tsx",
+        "src/routes/_authenticated/workflow-builder/$workflowId.tsx",
+        "src/routes/(auth)/invite.tsx"
+      ],
+      "scan_file": null,
+      "violation_count": 94,
+      "fp_reason": "MARK_FP by human reviewer (no note provided)",
+      "fix_target": "contract",
+      "postcondition_id": "invalid-route-path"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-15-undici-2",
+    "created_at": "2026-04-15",
+    "source": "dashboard-feedback",
+    "package": "undici",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Dashboard FP reports: 64 instance(s) of undici/response-json-parse-error marked as false positive by users",
+    "evidence": {
+      "repos": [
+        "apps/web/components/repositories/scan-button.tsx",
+        "apps/web/components/violations/violation-review-panel.tsx",
+        "apps/web/hooks/use-scan-poller.ts",
+        "apps/web/components/settings/team-settings.tsx",
+        "apps/web/components/share/unified-share-dialog.tsx"
+      ],
+      "scan_file": null,
+      "violation_count": 64,
+      "fp_reason": "MARK_FP by human reviewer (no note provided)",
+      "fix_target": "contract",
+      "postcondition_id": "response-json-parse-error"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-15-react-hook-form-3",
+    "created_at": "2026-04-15",
+    "source": "dashboard-feedback",
+    "package": "react-hook-form",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Dashboard FP reports: 60 instance(s) of react-hook-form/async-submit-unhandled-error marked as false positive by users",
+    "evidence": {
+      "repos": [
+        "src/features/auth/sign-in/components/user-auth-form.tsx",
+        "src/features/auth/sign-up/components/sign-up-form.tsx",
+        "src/features/settings/profile/profile-form.tsx",
+        "src/features/customers/components/users-action-dialog.tsx",
+        "src/features/auth/forgot-password/components/forgot-password-form.tsx"
+      ],
+      "scan_file": null,
+      "violation_count": 60,
+      "fp_reason": "MARK_FP by human reviewer (no note provided)",
+      "fix_target": "contract",
+      "postcondition_id": "async-submit-unhandled-error"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-15-ai-4",
+    "created_at": "2026-04-15",
+    "source": "dashboard-feedback",
+    "package": "ai",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Dashboard FP reports: 25 instance(s) of ai/tool-execution-error marked as false positive by users",
+    "evidence": {
+      "repos": [
+        "lib/tools/browser/browserAct.ts",
+        "lib/tools/browser/browserAgent.ts",
+        "lib/tools/files/writeFile.ts",
+        "lib/tools/files/readFile.ts",
+        "lib/tools/searchTwitter.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 25,
+      "fp_reason": "MARK_FP by human reviewer (no note provided)",
+      "fix_target": "contract",
+      "postcondition_id": "tool-execution-error"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-15-tanstack-react-query-5",
+    "created_at": "2026-04-15",
+    "source": "dashboard-feedback",
+    "package": "@tanstack/react-query",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Dashboard FP reports: 25 instance(s) of @tanstack/react-query/query-error-unhandled marked as false positive by users",
+    "evidence": {
+      "repos": [
+        "hooks/useAccountOrganizations.ts",
+        "hooks/useArtistInstruction.ts",
+        "hooks/useCatalogs.ts",
+        "components/Files/FileInfoDialog.tsx",
+        "app/access/page.tsx"
+      ],
+      "scan_file": null,
+      "violation_count": 25,
+      "fp_reason": "MARK_FP by human reviewer (no note provided)",
+      "fix_target": "contract",
+      "postcondition_id": "query-error-unhandled"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-15-tanstack-react-router-6",
+    "created_at": "2026-04-15",
+    "source": "dashboard-feedback",
+    "package": "@tanstack/react-router",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Dashboard FP reports: 18 instance(s) of @tanstack/react-router/param-type-mismatch marked as false positive by users",
+    "evidence": {
+      "repos": [
+        "src/features/browser-agents/browser-agent-detail.tsx",
+        "src/features/customers/customer-detail.tsx",
+        "src/features/loans/loan-detail.tsx",
+        "src/routes/_authenticated/workflow-builder/$workflowId.tsx",
+        "src/routes/unsubscribe/$token.tsx"
+      ],
+      "scan_file": null,
+      "violation_count": 18,
+      "fp_reason": "MARK_FP by human reviewer (no note provided)",
+      "fix_target": "contract",
+      "postcondition_id": "param-type-mismatch"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-15-tanstack-react-router-7",
+    "created_at": "2026-04-15",
+    "source": "dashboard-feedback",
+    "package": "@tanstack/react-router",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Dashboard FP reports: 14 instance(s) of @tanstack/react-router/search-schema-validation-error marked as false positive by users",
+    "evidence": {
+      "repos": [
+        "src/features/auth/sign-in/index.tsx",
+        "src/features/auth/sign-up/index.tsx",
+        "src/features/chats/index.tsx",
+        "src/routes/(auth)/invite.tsx",
+        "src/routes/(auth)/accept-invite.tsx"
+      ],
+      "scan_file": null,
+      "violation_count": 14,
+      "fp_reason": "MARK_FP by human reviewer (no note provided)",
+      "fix_target": "contract",
+      "postcondition_id": "search-schema-validation-error"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-15-zod-8",
+    "created_at": "2026-04-15",
+    "source": "dashboard-feedback",
+    "package": "zod",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Dashboard FP reports: 14 instance(s) of zod/parse-validation-error marked as false positive by users",
+    "evidence": {
+      "repos": [
+        "apps/web/app/api/ai/analyze-sender-pattern/route.ts",
+        "apps/web/app/api/clean/route.ts",
+        "apps/web/app/api/sso/signin/route.ts",
+        "apps/web/app/api/threads/[id]/route.ts",
+        "apps/web/app/api/user/stats/senders/route.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 14,
+      "fp_reason": "MARK_FP by human reviewer (no note provided)",
+      "fix_target": "contract",
+      "postcondition_id": "parse-validation-error"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-15-react-hook-form-9",
+    "created_at": "2026-04-15",
+    "source": "dashboard-feedback",
+    "package": "react-hook-form",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Dashboard FP reports: 9 instance(s) of react-hook-form/missing-form-provider marked as false positive by users",
+    "evidence": {
+      "repos": [
+        "src/components/ui/form.tsx",
+        "components/Input.tsx",
+        "components/Account/ArtistInstructionTextArea.tsx"
+      ],
+      "scan_file": null,
+      "violation_count": 9,
+      "fp_reason": "MARK_FP by human reviewer (no note provided)",
+      "fix_target": "contract",
+      "postcondition_id": "missing-form-provider"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-15-redis-10",
+    "created_at": "2026-04-15",
+    "source": "dashboard-feedback",
+    "package": "redis",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Dashboard FP reports: 7 instance(s) of redis/missing-error-listener marked as false positive by users",
+    "evidence": {
+      "repos": [
+        "packages/api/src/main.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 7,
+      "fp_reason": "MARK_FP by human reviewer (no note provided)",
+      "fix_target": "contract",
+      "postcondition_id": "missing-error-listener"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-15-clerk-nextjs-11",
+    "created_at": "2026-04-15",
+    "source": "dashboard-feedback",
+    "package": "@clerk/nextjs",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Dashboard FP reports: 7 instance(s) of @clerk/nextjs/use-user-no-loaded-check marked as false positive by users",
+    "evidence": {
+      "repos": [
+        "apps/web/components/layout/sidebar.tsx",
+        "apps/web/components/layout/header.tsx",
+        "apps/web/components/layout/top-nav.tsx",
+        "apps/web/app/(auth)/invite/[token]/page.tsx",
+        "apps/web/components/settings/profile-settings.tsx"
+      ],
+      "scan_file": null,
+      "violation_count": 7,
+      "fp_reason": "MARK_FP by human reviewer (no note provided)",
+      "fix_target": "contract",
+      "postcondition_id": "use-user-no-loaded-check"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-15-ai-12",
+    "created_at": "2026-04-15",
+    "source": "dashboard-feedback",
+    "package": "ai",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Dashboard FP reports: 7 instance(s) of ai/api-error-rate-limit marked as false positive by users",
+    "evidence": {
+      "repos": [
+        "apps/web/utils/llms/index.ts",
+        "lib/evals/scorers/CatalogAvailability.ts",
+        "lib/evals/scorers/QuestionAnswered.ts",
+        "lib/catalog/analyzeCatalogBatch.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 7,
+      "fp_reason": "MARK_FP by human reviewer (no note provided)",
+      "fix_target": "contract",
+      "postcondition_id": "api-error-rate-limit"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-15-express-13",
+    "created_at": "2026-04-15",
+    "source": "dashboard-feedback",
+    "package": "express",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Dashboard FP reports: 5 instance(s) of express/async-middleware-unhandled-rejection marked as false positive by users",
+    "evidence": {
+      "repos": [
+        "api/dev-server.ts",
+        "api/browser-agent-server.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 5,
+      "fp_reason": "MARK_FP by human reviewer (no note provided)",
+      "fix_target": "contract",
+      "postcondition_id": "async-middleware-unhandled-rejection"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-15-tanstack-react-query-14",
+    "created_at": "2026-04-15",
+    "source": "dashboard-feedback",
+    "package": "@tanstack/react-query",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Dashboard FP reports: 3 instance(s) of @tanstack/react-query/infinite-query-error-unhandled marked as false positive by users",
+    "evidence": {
+      "repos": [
+        "hooks/useArtistFans.ts",
+        "hooks/useArtistPosts.ts",
+        "hooks/useCatalogSongs.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 3,
+      "fp_reason": "MARK_FP by human reviewer (no note provided)",
+      "fix_target": "contract",
+      "postcondition_id": "infinite-query-error-unhandled"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-15-clerk-nextjs-15",
+    "created_at": "2026-04-15",
+    "source": "dashboard-feedback",
+    "package": "@clerk/nextjs",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Dashboard FP reports: 3 instance(s) of @clerk/nextjs/use-clerk-outside-provider marked as false positive by users",
+    "evidence": {
+      "repos": [
+        "apps/web/components/layout/header.tsx",
+        "apps/web/components/layout/sidebar.tsx",
+        "apps/web/components/layout/top-nav.tsx"
+      ],
+      "scan_file": null,
+      "violation_count": 3,
+      "fp_reason": "MARK_FP by human reviewer (no note provided)",
+      "fix_target": "contract",
+      "postcondition_id": "use-clerk-outside-provider"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-15-stripe-16",
+    "created_at": "2026-04-15",
+    "source": "dashboard-feedback",
+    "package": "stripe",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Dashboard FP reports: 3 instance(s) of stripe/rate-limit-error marked as false positive by users",
+    "evidence": {
+      "repos": [
+        "apps/web/lib/stripe.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 3,
+      "fp_reason": "MARK_FP by human reviewer (no note provided)",
+      "fix_target": "contract",
+      "postcondition_id": "rate-limit-error"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-15-dotenv-17",
+    "created_at": "2026-04-15",
+    "source": "dashboard-feedback",
+    "package": "dotenv",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Dashboard FP reports: 3 instance(s) of dotenv/missing-env-file marked as false positive by users",
+    "evidence": {
+      "repos": [
+        "src/lib/migrations/supabase.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 3,
+      "fp_reason": "MARK_FP by human reviewer (no note provided)",
+      "fix_target": "contract",
+      "postcondition_id": "missing-env-file"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-15-node-fetch-18",
+    "created_at": "2026-04-15",
+    "source": "dashboard-feedback",
+    "package": "node-fetch",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Dashboard FP reports: 2 instance(s) of node-fetch/fetch-rejects-on-network-error marked as false positive by users",
+    "evidence": {
+      "repos": [
+        "api/utils/ai-client.ts",
+        "api/analysis/post-game-analysis.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 2,
+      "fp_reason": "MARK_FP by human reviewer (no note provided)",
+      "fix_target": "contract",
+      "postcondition_id": "fetch-rejects-on-network-error"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-15-react-hook-form-19",
+    "created_at": "2026-04-15",
+    "source": "dashboard-feedback",
+    "package": "react-hook-form",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Dashboard FP reports: 2 instance(s) of react-hook-form/unhandled-field-array-operations marked as false positive by users",
+    "evidence": {
+      "repos": [
+        "src/features/settings/profile/profile-form.tsx"
+      ],
+      "scan_file": null,
+      "violation_count": 2,
+      "fp_reason": "MARK_FP by human reviewer (no note provided)",
+      "fix_target": "contract",
+      "postcondition_id": "unhandled-field-array-operations"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-15-tanstack-react-query-20",
+    "created_at": "2026-04-15",
+    "source": "dashboard-feedback",
+    "package": "@tanstack/react-query",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Dashboard FP reports: 2 instance(s) of @tanstack/react-query/mutation-error-unhandled marked as false positive by users",
+    "evidence": {
+      "repos": [
+        "hooks/useCatalogSongsFileSelect.ts",
+        "hooks/useSandboxFileContent.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 2,
+      "fp_reason": "MARK_FP by human reviewer (no note provided)",
+      "fix_target": "contract",
+      "postcondition_id": "mutation-error-unhandled"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-15-ioredis-21",
+    "created_at": "2026-04-15",
+    "source": "dashboard-feedback",
+    "package": "ioredis",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Dashboard FP reports: 2 instance(s) of ioredis/missing-error-listener marked as false positive by users",
+    "evidence": {
+      "repos": [
+        "apps/web/lib/auth-cache.ts",
+        "apps/web/lib/rate-limit.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 2,
+      "fp_reason": "MARK_FP by human reviewer (no note provided)",
+      "fix_target": "contract",
+      "postcondition_id": "missing-error-listener"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-15-vercel-blob-22",
+    "created_at": "2026-04-15",
+    "source": "dashboard-feedback",
+    "package": "@vercel/blob",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Dashboard FP reports: 2 instance(s) of @vercel/blob/blob-del-no-try-catch marked as false positive by users",
+    "evidence": {
+      "repos": [
+        "lib/sandbox/postSandboxesFilesHandler.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 2,
+      "fp_reason": "MARK_FP by human reviewer (no note provided)",
+      "fix_target": "contract",
+      "postcondition_id": "blob-del-no-try-catch"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-15-supabase-supabase-js-23",
+    "created_at": "2026-04-15",
+    "source": "dashboard-feedback",
+    "package": "@supabase/supabase-js",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Dashboard FP reports: 1 instance(s) of @supabase/supabase-js/rls-policy-violation marked as false positive by users",
+    "evidence": {
+      "repos": [
+        "packages/api/src/main.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 1,
+      "fp_reason": "MARK_FP by human reviewer (no note provided)",
+      "fix_target": "contract",
+      "postcondition_id": "rls-policy-violation"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-15-ai-24",
+    "created_at": "2026-04-15",
+    "source": "dashboard-feedback",
+    "package": "ai",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Dashboard FP reports: 1 instance(s) of ai/schema-validation-error marked as false positive by users",
+    "evidence": {
+      "repos": [
+        "apps/web/utils/llms/index.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 1,
+      "fp_reason": "MARK_FP by human reviewer (no note provided)",
+      "fix_target": "contract",
+      "postcondition_id": "schema-validation-error"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-15-axios-25",
+    "created_at": "2026-04-15",
+    "source": "dashboard-feedback",
+    "package": "axios",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Dashboard FP reports: 1 instance(s) of axios/error-4xx-5xx marked as false positive by users",
+    "evidence": {
+      "repos": [
+        "packages/scanner/src/v2/fixtures/test-suppressions/with-inline-suppression.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 1,
+      "fp_reason": "MARK_FP by human reviewer (no note provided)",
+      "fix_target": "contract",
+      "postcondition_id": "error-4xx-5xx"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-15-upstash-redis-26",
+    "created_at": "2026-04-15",
+    "source": "dashboard-feedback",
+    "package": "@upstash/redis",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Dashboard FP reports: 1 instance(s) of @upstash/redis/network-or-api-error marked as false positive by users",
+    "evidence": {
+      "repos": [
+        "apps/web/utils/redis/index.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 1,
+      "fp_reason": "MARK_FP by human reviewer (no note provided)",
+      "fix_target": "contract",
+      "postcondition_id": "network-or-api-error"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-15-puppeteer-27",
+    "created_at": "2026-04-15",
+    "source": "dashboard-feedback",
+    "package": "puppeteer",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Dashboard FP reports: 1 instance(s) of puppeteer/browser-close-must-run marked as false positive by users",
+    "evidence": {
+      "repos": [
+        "api/browser-agent-executor.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 1,
+      "fp_reason": "MARK_FP by human reviewer (no note provided)",
+      "fix_target": "contract",
+      "postcondition_id": "browser-close-must-run"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-15-winston-28",
+    "created_at": "2026-04-15",
+    "source": "dashboard-feedback",
+    "package": "winston",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Dashboard FP reports: 1 instance(s) of winston/missing-error-listener marked as false positive by users",
+    "evidence": {
+      "repos": [
+        "apps/web/scripts/setup-telegram-bot.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 1,
+      "fp_reason": "MARK_FP by human reviewer (no note provided)",
+      "fix_target": "contract",
+      "postcondition_id": "missing-error-listener"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-15-supabase-supabase-js-29",
+    "created_at": "2026-04-15",
+    "source": "dashboard-feedback",
+    "package": "@supabase/supabase-js",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Dashboard FP reports: 1 instance(s) of @supabase/supabase-js/weak-password marked as false positive by users",
+    "evidence": {
+      "repos": [
+        "src/contexts/auth-context.tsx"
+      ],
+      "scan_file": null,
+      "violation_count": 1,
+      "fp_reason": "MARK_FP by human reviewer (no note provided)",
+      "fix_target": "contract",
+      "postcondition_id": "weak-password"
+    },
+    "resolution": null
   }
 ]
