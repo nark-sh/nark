@@ -28309,5 +28309,101 @@
       "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
     },
     "resolution": null
+  },
+  {
+    "id": "concern-20260416-openai-deepen-1",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "openai",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for openai.files.create() \u2014 postcondition files-invalid-format-or-size-error and files-processing-timeout-error added in depth pass but no scanner rule exists",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-openai-deepen-2",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "openai",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for openai.chat.completions.parse() \u2014 postconditions parse-length-finish-reason-error and parse-content-filter-finish-reason-error added in depth pass. These are unique errors (LengthFinishReasonError, ContentFilterFinishReasonError) only thrown by parse(), not create()",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-openai-deepen-3",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "openai",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for openai.audio.translations.create() \u2014 postconditions translation-invalid-file-error and translation-rate-limit-error added in depth pass but no scanner rule exists",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-openai-deepen-4",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "openai",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for openai.vectorStores.create() and openai.vectorStores.files.create() \u2014 postconditions vector-stores-authentication-error, vector-stores-rate-limit-error, vector-store-file-processing-failure, vector-store-file-authentication-error added. Critical: vector-store-file-processing-failure is a silent failure pattern (no throw \u2014 must check file.status)",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-openai-deepen-5",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "openai",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for openai.vectorStores.fileBatches.create() \u2014 postcondition vector-store-file-batch-partial-failure added. Critical: batch returns even if some files failed \u2014 must check batch.file_counts.failed > 0. Same silent partial-failure pattern as @aws-sdk DeleteObjectsCommand",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-openai-deepen-6",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "openai",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for openai.uploads.create() \u2014 postconditions uploads-expired-or-size-exceeded and uploads-authentication-error added in depth pass but no scanner rule exists",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
   }
 ]
