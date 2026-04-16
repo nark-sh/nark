@@ -26847,5 +26847,53 @@
       "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
     },
     "resolution": null
+  },
+  {
+    "id": "concern-20260416-aws-sns-deepen-1",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@aws-sdk/client-sns",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @aws-sdk/client-sns PublishBatchCommand response.Failed not checked \u2014 postcondition sns-publish-batch-failed-not-checked added in depth pass but no scanner rule exists for response-pattern silent failures",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. Critical silent failure: HTTP 200 returned even when individual messages fail. response.Failed[] contains per-message errors. Pattern similar to DynamoDB BatchWriteItem UnprocessedItems detection needed."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-aws-sns-deepen-2",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@aws-sdk/client-sns",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @aws-sdk/client-sns SubscribeCommand pending-confirmation return value not checked \u2014 postcondition sns-subscribe-pending-confirmation-not-handled added in depth pass but no scanner rule exists for return-value pattern",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. SubscribeCommand returns 'pending confirmation' string for HTTP/S endpoints \u2014 callers must check result.SubscriptionArn value, not just catch exceptions. Return-value pattern distinct from try-catch pattern."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-aws-sns-deepen-3",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@aws-sdk/client-sns",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @aws-sdk/client-sns SubscribeCommand SubscriptionLimitExceededException not distinguished \u2014 postcondition sns-subscribe-subscription-limit-exceeded added in depth pass; scanner should flag generic catch that swallows this account-level limit error",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. SubscriptionLimitExceededException requires AWS Support intervention \u2014 callers who swallow it silently prevent auto-alerting of ops teams."
+    },
+    "resolution": null
   }
 ]
