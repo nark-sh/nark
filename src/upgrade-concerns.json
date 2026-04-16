@@ -28165,5 +28165,37 @@
       "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
     },
     "resolution": null
+  },
+  {
+    "id": "concern-20260416-aws-dynamodb-deepen-5",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@aws-sdk/client-dynamodb",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for ExecuteTransactionCommand \u2014 postcondition added in depth pass but no scanner rule exists. Needs to detect: (1) no try-catch on send(ExecuteTransactionCommand), (2) TransactionCanceledException caught without CancellationReasons inspection, (3) ClientRequestToken reuse pattern.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-aws-dynamodb-deepen-6",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@aws-sdk/client-dynamodb",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for BatchExecuteStatementCommand \u2014 postcondition batch-execute-statement-response-errors-not-checked added in depth pass but no scanner rule exists. Critical pattern: HTTP 200 partial failure via Responses[].Error (different from BatchWriteItemCommand UnprocessedItems). Scanner must detect when result.Responses is not iterated for per-item Error checks.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
   }
 ]
