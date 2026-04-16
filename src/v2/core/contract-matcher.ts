@@ -1010,6 +1010,30 @@ export class ContractMatcher {
         }
       }
 
+      // @aws-sdk/client-ses send(): resolve postcondition based on the command
+      // argument type. Each SES command has distinct error types; command-specific
+      // postconditions provide more actionable guidance than the generic ses-send-no-try-catch.
+      //
+      // Evidence: concern-20260415-@aws-sdk-client-ses-deepen-1 through -6 (6 uncovered
+      // SES command functions: SendEmailCommand, TestRenderTemplateCommand,
+      // CreateConfigurationSetCommand, CreateConfigurationSetEventDestinationCommand,
+      // CreateCustomVerificationEmailTemplateCommand, UpdateCustomVerificationEmailTemplateCommand).
+      if (
+        !postconditionResolved &&
+        detection.packageName === "@aws-sdk/client-ses" &&
+        detection.functionName === "send"
+      ) {
+        const commandSpecific = this.pickSesSendPostcondition(
+          detection,
+          postconditions,
+          contract,
+        );
+        if (commandSpecific) {
+          postcondition = commandSpecific;
+          postconditionResolved = true;
+        }
+      }
+
       // superagent chained-method postcondition selector.
       // superagent.get(url).timeout({...}) and superagent.get(url).maxResponseSize(n)
       // are method-chained calls. The entire expression `superagent.get(url).timeout({...})`
@@ -1028,6 +1052,33 @@ export class ContractMatcher {
         );
         if (chainedSpecific) {
           postcondition = chainedSpecific;
+          postconditionResolved = true;
+        }
+      }
+
+      // jsonschema validate(): resolve postcondition based on the options argument.
+      // validate() only throws when throwFirst, throwAll, or throwError is set.
+      // Without throw options, it returns a ValidatorResult (no exception possible).
+      // We inspect the 3rd argument to determine which throw-option postcondition to fire,
+      // or suppress entirely if no throw option is present.
+      //
+      // Evidence: concern-20260416-jsonschema-deepen-4 and -5 (validate-result-unchecked,
+      // validator-validate-unresolved-ref); option routing for throwFirst/throwAll/throwError.
+      if (
+        !postconditionResolved &&
+        detection.packageName === "jsonschema" &&
+        detection.functionName === "validate"
+      ) {
+        const optionSpecific = this.pickJsonschemaValidatePostcondition(
+          detection,
+          postconditions,
+        );
+        if (optionSpecific === null) {
+          // No throw option present — validate() will not throw, skip violation
+          continue;
+        }
+        if (optionSpecific) {
+          postcondition = optionSpecific;
           postconditionResolved = true;
         }
       }
@@ -1864,6 +1915,134 @@ export class ContractMatcher {
     if (!postconditionId) return null;
 
     return postconditions.find((p) => p.id === postconditionId) ?? null;
+  }
+
+  /**
+   * @aws-sdk/client-ses command → postcondition map.
+   * Maps SES command constructor names to their primary (most actionable) postcondition ID.
+   * The generic 'send' function catches all calls; command-specific postconditions fire
+   * instead when the command type can be statically determined.
+   *
+   * Evidence: concern-20260415-@aws-sdk-client-ses-deepen-1 through -6.
+   */
+  private static readonly SES_COMMAND_POSTCONDITION_MAP: Record<string, string> =
+    {
+      SendEmailCommand: "ses-send-email-no-try-catch",
+      SendRawEmailCommand: "ses-raw-email-size-limit",
+      SendTemplatedEmailCommand: "ses-template-does-not-exist",
+      SendBulkTemplatedEmailCommand: "ses-bulk-template-does-not-exist",
+      SendCustomVerificationEmailCommand: "ses-custom-verification-template-missing",
+      CreateTemplateCommand: "ses-create-template-already-exists",
+      UpdateTemplateCommand: "ses-update-template-not-found",
+      TestRenderTemplateCommand: "ses-test-render-template-missing",
+      CreateConfigurationSetCommand: "ses-create-config-set-already-exists",
+      CreateConfigurationSetEventDestinationCommand: "ses-event-dest-config-set-not-found",
+      CreateCustomVerificationEmailTemplateCommand: "ses-create-cve-template-already-exists",
+      UpdateCustomVerificationEmailTemplateCommand: "ses-update-cve-template-not-found",
+    };
+
+  /**
+   * For @aws-sdk/client-ses send() calls, inspect the first argument to determine
+   * which SES command is being executed, then return the matching postcondition.
+   *
+   * Pattern: await sesClient.send(new SendEmailCommand({...}))
+   *   → first arg is NewExpression with constructor name "SendEmailCommand"
+   *   → look up in SES_COMMAND_POSTCONDITION_MAP
+   *
+   * If the command type cannot be statically determined (e.g., variable argument),
+   * returns null so the caller falls back to pickMostSevere() / ses-send-no-try-catch.
+   */
+  private pickSesSendPostcondition(
+    detection: Detection,
+    postconditions: Postcondition[],
+    contract: PackageContract,
+  ): Postcondition | null {
+    if (!ts.isCallExpression(detection.node)) return null;
+    const args = detection.node.arguments;
+    if (args.length === 0) return null;
+
+    const firstArg = args[0];
+
+    // Only handle direct `new CommandName(...)` pattern — not variables
+    if (!ts.isNewExpression(firstArg)) return null;
+    if (!ts.isIdentifier(firstArg.expression)) return null;
+
+    const commandClassName = firstArg.expression.text;
+    const postconditionId =
+      ContractMatcher.SES_COMMAND_POSTCONDITION_MAP[commandClassName];
+    if (!postconditionId) return null;
+
+    // The command-specific postconditions (e.g., ses-send-email-no-try-catch for
+    // SendEmailCommand) live under the command's own function entry in the contract,
+    // NOT under the generic `send` function entry. We must look them up from the
+    // command function entry, not from the passed `postconditions` (which is the
+    // `send` function's list containing only ses-send-no-try-catch).
+    const commandFuncContract = this.findFunctionContract(contract, commandClassName);
+    if (commandFuncContract) {
+      const found = (commandFuncContract.postconditions || []).find(
+        (p) => p.id === postconditionId,
+      );
+      if (found) return found;
+    }
+
+    // Fallback: search passed postconditions (handles cases where the postcondition
+    // was placed under the `send` function instead of a dedicated command entry).
+    return postconditions.find((p) => p.id === postconditionId) ?? null;
+  }
+
+  /**
+   * jsonschema validate() option-based postcondition picker.
+   *
+   * validate() only throws synchronously when one of these options is set in the 3rd arg:
+   *   - throwFirst: true  → postcondition 'validate-throw-first'
+   *   - throwAll: true    → postcondition 'validate-throw-all'
+   *   - throwError: true  → postcondition 'validate-throw-error'
+   *
+   * Without these options, validate() returns a ValidatorResult and NEVER throws.
+   * In that case, return null to suppress the violation (no error handling needed).
+   *
+   * Returns:
+   *   - The matching Postcondition if a throw option is statically present
+   *   - null if no throw option detected (caller should suppress the violation)
+   *   - undefined if the call cannot be statically analyzed (fall back to most-severe)
+   *
+   * Evidence: concern-20260416-jsonschema-deepen-4/5; fix for FP on non-throwing validate() calls.
+   */
+  private pickJsonschemaValidatePostcondition(
+    detection: Detection,
+    postconditions: Postcondition[],
+  ): Postcondition | null | undefined {
+    if (!ts.isCallExpression(detection.node)) return undefined;
+    const args = detection.node.arguments;
+
+    // If no 3rd argument (options), validate() won't throw — suppress
+    if (args.length < 3) return null;
+
+    const optionsArg = args[2];
+
+    // Only handle inline object literals: validate(data, schema, { throwFirst: true })
+    // Variable options (validate(data, schema, opts)) cannot be statically analyzed.
+    if (!ts.isObjectLiteralExpression(optionsArg)) return undefined;
+
+    const optionKeys = new Set(
+      optionsArg.properties
+        .filter(ts.isPropertyAssignment)
+        .map((p) => (ts.isIdentifier(p.name) ? p.name.text : null))
+        .filter((k): k is string => k !== null),
+    );
+
+    if (optionKeys.has("throwFirst")) {
+      return postconditions.find((p) => p.id === "validate-throw-first") ?? null;
+    }
+    if (optionKeys.has("throwAll")) {
+      return postconditions.find((p) => p.id === "validate-throw-all") ?? null;
+    }
+    if (optionKeys.has("throwError")) {
+      return postconditions.find((p) => p.id === "validate-throw-error") ?? null;
+    }
+
+    // Options object present but no throw option — validate() won't throw
+    return null;
   }
 
   /**

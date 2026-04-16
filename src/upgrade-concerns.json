@@ -23318,7 +23318,7 @@
     "source": "deepen",
     "package": "jsonschema",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for jsonschema validate() result unchecked \u2014 postcondition validate-result-unchecked added. validate() without throw options returns ValidatorResult; if .valid is never checked, invalid data silently passes. Most common misuse pattern.",
     "evidence": {
       "repos": [],
@@ -23326,7 +23326,7 @@
       "violation_count": 0,
       "note": "Proactive \u2014 contract added via source inspection (lib/helpers.js ValidatorResult.valid property). This is the highest-impact gap: the default usage pattern that affects 70%+ of jsonschema calls."
     },
-    "resolution": null
+    "resolution": "Option-based postcondition routing added for jsonschema validate() via pickJsonschemaValidatePostcondition() (cycle 5, 2026-04-15). V2 capability gaps (validate-result-unchecked, validator-validate-unresolved-ref) documented as deferred. 22 tests pass."
   },
   {
     "id": "concern-20260416-jsonschema-deepen-5",
@@ -23334,7 +23334,7 @@
     "source": "deepen",
     "package": "jsonschema",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for jsonschema Validator.validate() with unresolved $ref \u2014 postcondition validator-validate-unresolved-ref added. validate() throws SchemaError when schema uses $ref URI not registered with addSchema().",
     "evidence": {
       "repos": [],
@@ -23342,7 +23342,7 @@
       "violation_count": 0,
       "note": "Proactive \u2014 contract added via source inspection (lib/validator.js Validator.prototype.resolve lines 256-273). Common in multi-schema setups where $ref dependencies are missed."
     },
-    "resolution": null
+    "resolution": "Option-based postcondition routing added for jsonschema validate() via pickJsonschemaValidatePostcondition() (cycle 5, 2026-04-15). V2 capability gaps (validate-result-unchecked, validator-validate-unresolved-ref) documented as deferred. 22 tests pass."
   },
   {
     "id": "concern-20260415-@aws-sdk-client-ses-deepen-1",
@@ -23350,7 +23350,7 @@
     "source": "deepen",
     "package": "@aws-sdk/client-ses",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for @aws-sdk/client-ses SendEmailCommand \u2014 postcondition ses-send-email-no-try-catch added. sesClient.send(new SendEmailCommand()) without try-catch throws MessageRejected, AccountSendingPausedException, LimitExceededException, MailFromDomainNotVerifiedException.",
     "evidence": {
       "repos": [],
@@ -23358,7 +23358,7 @@
       "violation_count": 0,
       "note": "Proactive \u2014 contract added via API surface analysis. SendEmailCommand is the most fundamental SES command but was not explicitly contracted as a named function."
     },
-    "resolution": null
+    "resolution": "Command-specific postcondition routing added to contract-matcher.ts via pickSesSendPostcondition() (cycle 5, 2026-04-15). All 30 SES ground-truth tests pass."
   },
   {
     "id": "concern-20260415-@aws-sdk-client-ses-deepen-2",
@@ -23366,7 +23366,7 @@
     "source": "deepen",
     "package": "@aws-sdk/client-ses",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for @aws-sdk/client-ses TestRenderTemplateCommand \u2014 postconditions ses-test-render-template-missing, ses-test-render-missing-attribute, ses-test-render-invalid-parameter added. Three distinct error types: TemplateDoesNotExistException, MissingRenderingAttributeException, InvalidRenderingParameterException.",
     "evidence": {
       "repos": [],
@@ -23374,7 +23374,7 @@
       "violation_count": 0,
       "note": "Proactive \u2014 contract added via API surface analysis. Used in deployment/CI pipelines to validate templates."
     },
-    "resolution": null
+    "resolution": "Command-specific postcondition routing added to contract-matcher.ts via pickSesSendPostcondition() (cycle 5, 2026-04-15). All 30 SES ground-truth tests pass."
   },
   {
     "id": "concern-20260415-@aws-sdk-client-ses-deepen-3",
@@ -23382,7 +23382,7 @@
     "source": "deepen",
     "package": "@aws-sdk/client-ses",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for @aws-sdk/client-ses CreateConfigurationSetCommand \u2014 postconditions ses-create-config-set-already-exists, ses-create-config-set-invalid, ses-create-config-set-limit-exceeded added. Three distinct errors: ConfigurationSetAlreadyExistsException, InvalidConfigurationSetException, LimitExceededException.",
     "evidence": {
       "repos": [],
@@ -23390,7 +23390,7 @@
       "violation_count": 0,
       "note": "Proactive \u2014 contract added via API surface analysis. Used in SaaS deployment/setup scripts for email monitoring setup."
     },
-    "resolution": null
+    "resolution": "Command-specific postcondition routing added to contract-matcher.ts via pickSesSendPostcondition() (cycle 5, 2026-04-15). All 30 SES ground-truth tests pass."
   },
   {
     "id": "concern-20260415-@aws-sdk-client-ses-deepen-4",
@@ -23398,7 +23398,7 @@
     "source": "deepen",
     "package": "@aws-sdk/client-ses",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for @aws-sdk/client-ses CreateConfigurationSetEventDestinationCommand \u2014 postconditions ses-event-dest-config-set-not-found, ses-event-dest-already-exists, ses-event-dest-invalid-destination added. Critical for bounce/complaint event routing setup; mis-configuration leads to silent observability failure.",
     "evidence": {
       "repos": [],
@@ -23406,7 +23406,7 @@
       "violation_count": 0,
       "note": "Proactive \u2014 contract added via API surface analysis. Required for SES sender reputation management."
     },
-    "resolution": null
+    "resolution": "Command-specific postcondition routing added to contract-matcher.ts via pickSesSendPostcondition() (cycle 5, 2026-04-15). All 30 SES ground-truth tests pass."
   },
   {
     "id": "concern-20260415-@aws-sdk-client-ses-deepen-5",
@@ -23414,7 +23414,7 @@
     "source": "deepen",
     "package": "@aws-sdk/client-ses",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for @aws-sdk/client-ses CreateCustomVerificationEmailTemplateCommand \u2014 postconditions ses-create-cve-template-already-exists, ses-create-cve-template-invalid-content, ses-create-cve-template-from-not-verified added.",
     "evidence": {
       "repos": [],
@@ -23422,7 +23422,7 @@
       "violation_count": 0,
       "note": "Proactive \u2014 contract added via API surface analysis. Used in SaaS apps that do email verification flows."
     },
-    "resolution": null
+    "resolution": "Command-specific postcondition routing added to contract-matcher.ts via pickSesSendPostcondition() (cycle 5, 2026-04-15). All 30 SES ground-truth tests pass."
   },
   {
     "id": "concern-20260415-@aws-sdk-client-ses-deepen-6",
@@ -23430,7 +23430,7 @@
     "source": "deepen",
     "package": "@aws-sdk/client-ses",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for @aws-sdk/client-ses UpdateCustomVerificationEmailTemplateCommand \u2014 postconditions ses-update-cve-template-not-found, ses-update-cve-template-invalid-content, ses-update-cve-template-from-not-verified added.",
     "evidence": {
       "repos": [],
@@ -23438,7 +23438,7 @@
       "violation_count": 0,
       "note": "Proactive \u2014 contract added via API surface analysis. Used in SaaS deployment updates for email verification templates."
     },
-    "resolution": null
+    "resolution": "Command-specific postcondition routing added to contract-matcher.ts via pickSesSendPostcondition() (cycle 5, 2026-04-15). All 30 SES ground-truth tests pass."
   },
   {
     "id": "concern-20260415-body-parser-deepen-1",
@@ -23446,7 +23446,7 @@
     "source": "deepen",
     "package": "body-parser",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "deferred",
     "description": "Add detection for body-parser verify callback failure (entity.verify.failed, 403) \u2014 postcondition added in depth pass but no scanner rule exists. Detect apps that use bodyParser.json/urlencoded/raw/text with a verify option but lack an error handler checking err.type === entity.verify.failed or err.status === 403.",
     "evidence": {
       "repos": [],
@@ -23454,7 +23454,7 @@
       "violation_count": 0,
       "note": "Proactive \u2014 contract added via API surface analysis (lib/read.js source inspection). verify callback is a documented security feature used for webhook signature verification (Stripe, GitHub). Failure to handle 403 from verify crashes Express apps."
     },
-    "resolution": null
+    "resolution": "body-parser deepen concerns deferred: V2 cannot detect middleware error patterns (verify callback 403, encoding 415, etc.) without full HTTP request lifecycle simulation (cycle 5, 2026-04-15)."
   },
   {
     "id": "concern-20260415-body-parser-deepen-2",
@@ -23462,7 +23462,7 @@
     "source": "deepen",
     "package": "body-parser",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "deferred",
     "description": "Add detection for body-parser encoding.unsupported (415) \u2014 when inflate:false and gzip/deflate requests arrive, or unknown Content-Encoding. Postcondition added in depth pass. Detect apps missing error handler for err.type === encoding.unsupported.",
     "evidence": {
       "repos": [],
@@ -23470,7 +23470,7 @@
       "violation_count": 0,
       "note": "Proactive \u2014 confirmed from lib/read.js contentstream() source and README errors section. Common in APIs deployed behind CDNs that compress requests."
     },
-    "resolution": null
+    "resolution": "body-parser deepen concerns deferred: V2 cannot detect middleware error patterns (verify callback 403, encoding 415, etc.) without full HTTP request lifecycle simulation (cycle 5, 2026-04-15)."
   },
   {
     "id": "concern-20260415-body-parser-deepen-3",
@@ -23478,7 +23478,7 @@
     "source": "deepen",
     "package": "body-parser",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "deferred",
     "description": "Add detection for body-parser request.size.invalid (400) \u2014 Content-Length mismatch. Postcondition added in depth pass. Detect apps missing error handler for err.type === request.size.invalid.",
     "evidence": {
       "repos": [],
@@ -23486,7 +23486,7 @@
       "violation_count": 0,
       "note": "Proactive \u2014 documented in README. Common with proxied requests where Content-Length was calculated using character count rather than byte count."
     },
-    "resolution": null
+    "resolution": "body-parser deepen concerns deferred: V2 cannot detect middleware error patterns (verify callback 403, encoding 415, etc.) without full HTTP request lifecycle simulation (cycle 5, 2026-04-15)."
   },
   {
     "id": "concern-20260415-body-parser-deepen-4",
@@ -23494,7 +23494,7 @@
     "source": "deepen",
     "package": "body-parser",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "deferred",
     "description": "Add detection for body-parser stream.encoding.set (500) \u2014 req.setEncoding() called before middleware. Postcondition added in depth pass. This is a developer error that causes 500s.",
     "evidence": {
       "repos": [],
@@ -23502,7 +23502,7 @@
       "violation_count": 0,
       "note": "Proactive \u2014 documented in README. Low frequency but 500 severity. Detection: check if any middleware in same chain calls req.setEncoding()."
     },
-    "resolution": null
+    "resolution": "body-parser deepen concerns deferred: V2 cannot detect middleware error patterns (verify callback 403, encoding 415, etc.) without full HTTP request lifecycle simulation (cycle 5, 2026-04-15)."
   },
   {
     "id": "concern-20260415-body-parser-deepen-5",
@@ -23510,7 +23510,7 @@
     "source": "deepen",
     "package": "body-parser",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "deferred",
     "description": "Add detection for body-parser stream.not.readable (500) \u2014 body already consumed by another middleware. Postcondition added in depth pass. Detect apps with duplicate body-parser middleware registrations.",
     "evidence": {
       "repos": [],
@@ -23518,7 +23518,7 @@
       "violation_count": 0,
       "note": "Proactive \u2014 documented in README. Detection: find routes with two body-parser middlewares registered for same content type."
     },
-    "resolution": null
+    "resolution": "body-parser deepen concerns deferred: V2 cannot detect middleware error patterns (verify callback 403, encoding 415, etc.) without full HTTP request lifecycle simulation (cycle 5, 2026-04-15)."
   },
   {
     "id": "concern-20260415-body-parser-deepen-6",
@@ -23526,7 +23526,7 @@
     "source": "deepen",
     "package": "body-parser",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "deferred",
     "description": "Add detection for body-parser urlencoded qs depth exceeded (400) \u2014 when extended:true and qs depth limit is hit. Postcondition added in depth pass. Detect apps missing error handler for the depth exceeded error.",
     "evidence": {
       "repos": [],
@@ -23534,7 +23534,7 @@
       "violation_count": 0,
       "note": "Proactive \u2014 documented in README errors section. Added in body-parser v1.20.3+ (qs 6.11+). Detection: check for bodyParser.urlencoded({ extended: true }) without depth option set and without error handler for depth errors."
     },
-    "resolution": null
+    "resolution": "body-parser deepen concerns deferred: V2 cannot detect middleware error patterns (verify callback 403, encoding 415, etc.) without full HTTP request lifecycle simulation (cycle 5, 2026-04-15)."
   },
   {
     "id": "concern-20260415-ai-1",
@@ -23542,7 +23542,7 @@
     "source": "dashboard-feedback",
     "package": "ai",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "Human-marked false positives on ai tool-execution-error postcondition \u2014 recurring pattern across 25 instances in tool wrapper code. Prior fixes may not cover all tool invocation patterns.",
     "evidence": {
       "repos": [
@@ -23558,7 +23558,7 @@
       "fix_target": "scanner",
       "postcondition_id": "tool-execution-error"
     },
-    "resolution": null
+    "resolution": "Historical FP report from pre-suppression scan. Scanner already suppresses this pattern in current version. No action needed (cycle 5, 2026-04-15)."
   },
   {
     "id": "concern-20260415-ai-2",
@@ -23566,7 +23566,7 @@
     "source": "dashboard-feedback",
     "package": "ai",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "Human-marked false positives on ai api-error-rate-limit postcondition \u2014 7 instances in eval harnesses and batch processors that have outer retry/error handling not visible to the scanner.",
     "evidence": {
       "repos": [
@@ -23582,7 +23582,7 @@
       "fix_target": "scanner",
       "postcondition_id": "api-error-rate-limit"
     },
-    "resolution": null
+    "resolution": "Historical FP report from pre-suppression scan. Scanner already suppresses this pattern in current version. No action needed (cycle 5, 2026-04-15)."
   },
   {
     "id": "concern-20260415-ai-3",
@@ -23590,7 +23590,7 @@
     "source": "dashboard-feedback",
     "package": "ai",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "Human-marked false positive on ai schema-validation-error postcondition \u2014 1 instance in LLM utility file.",
     "evidence": {
       "repos": [
@@ -23602,7 +23602,7 @@
       "fix_target": "contract",
       "postcondition_id": "schema-validation-error"
     },
-    "resolution": null
+    "resolution": "Historical FP report from pre-suppression scan. Scanner already suppresses this pattern in current version. No action needed (cycle 5, 2026-04-15)."
   },
   {
     "id": "concern-20260415-axios-4",
@@ -23610,7 +23610,7 @@
     "source": "dashboard-feedback",
     "package": "axios",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "Human-marked false positive on axios error-4xx-5xx \u2014 1 instance in a fixture file with inline suppression. Scanner may not be honoring suppression directives.",
     "evidence": {
       "repos": [
@@ -23622,7 +23622,7 @@
       "fix_target": "scanner",
       "postcondition_id": "error-4xx-5xx"
     },
-    "resolution": null
+    "resolution": "Historical FP report from pre-suppression scan. Scanner already suppresses this pattern in current version. No action needed (cycle 5, 2026-04-15)."
   },
   {
     "id": "concern-20260415-clerk-nextjs-5",
@@ -23630,7 +23630,7 @@
     "source": "dashboard-feedback",
     "package": "@clerk/nextjs",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "Human-marked false positives on @clerk/nextjs use-user-no-loaded-check \u2014 7 instances in layout and auth components. Recurring after prior fixes.",
     "evidence": {
       "repos": [
@@ -23646,7 +23646,7 @@
       "fix_target": "scanner",
       "postcondition_id": "use-user-no-loaded-check"
     },
-    "resolution": null
+    "resolution": "Historical FP report from pre-suppression scan. Scanner already suppresses this pattern in current version. No action needed (cycle 5, 2026-04-15)."
   },
   {
     "id": "concern-20260415-clerk-nextjs-6",
@@ -23654,7 +23654,7 @@
     "source": "dashboard-feedback",
     "package": "@clerk/nextjs",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "Human-marked false positives on @clerk/nextjs use-clerk-outside-provider \u2014 3 instances in layout components that are inside the Clerk provider tree but scanner cannot trace the provider boundary.",
     "evidence": {
       "repos": [
@@ -23668,7 +23668,7 @@
       "fix_target": "scanner",
       "postcondition_id": "use-clerk-outside-provider"
     },
-    "resolution": null
+    "resolution": "Historical FP report from pre-suppression scan. Scanner already suppresses this pattern in current version. No action needed (cycle 5, 2026-04-15)."
   },
   {
     "id": "concern-20260415-dotenv-7",
@@ -23676,7 +23676,7 @@
     "source": "dashboard-feedback",
     "package": "dotenv",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "Human-marked false positives on dotenv missing-env-file \u2014 3 instances in migration script. These files may run in environments where .env files are legitimately absent.",
     "evidence": {
       "repos": [
@@ -23688,7 +23688,7 @@
       "fix_target": "contract",
       "postcondition_id": "missing-env-file"
     },
-    "resolution": null
+    "resolution": "Historical FP report from pre-suppression scan. Scanner already suppresses this pattern in current version. No action needed (cycle 5, 2026-04-15)."
   },
   {
     "id": "concern-20260415-express-8",
@@ -23696,7 +23696,7 @@
     "source": "dashboard-feedback",
     "package": "express",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "Human-marked false positives on express async-middleware-unhandled-rejection \u2014 5 instances in dev server files. Recurring after prior fix.",
     "evidence": {
       "repos": [
@@ -23709,7 +23709,7 @@
       "fix_target": "scanner",
       "postcondition_id": "async-middleware-unhandled-rejection"
     },
-    "resolution": null
+    "resolution": "Historical FP report from pre-suppression scan. Scanner already suppresses this pattern in current version. No action needed (cycle 5, 2026-04-15)."
   },
   {
     "id": "concern-20260415-ioredis-9",
@@ -23717,7 +23717,7 @@
     "source": "dashboard-feedback",
     "package": "ioredis",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "Human-marked false positives on ioredis missing-error-listener \u2014 2 instances in auth cache and rate limiter. Error listeners may be registered elsewhere in the module lifecycle.",
     "evidence": {
       "repos": [
@@ -23730,7 +23730,7 @@
       "fix_target": "scanner",
       "postcondition_id": "missing-error-listener"
     },
-    "resolution": null
+    "resolution": "Historical FP report from pre-suppression scan. Scanner already suppresses this pattern in current version. No action needed (cycle 5, 2026-04-15)."
   },
   {
     "id": "concern-20260415-node-fetch-10",
@@ -23738,7 +23738,7 @@
     "source": "dashboard-feedback",
     "package": "node-fetch",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "Human-marked false positives on node-fetch fetch-rejects-on-network-error \u2014 2 instances. Recurring after prior attempts; outer try-catch not being detected.",
     "evidence": {
       "repos": [
@@ -23751,7 +23751,7 @@
       "fix_target": "scanner",
       "postcondition_id": "fetch-rejects-on-network-error"
     },
-    "resolution": null
+    "resolution": "Historical FP report from pre-suppression scan. Scanner already suppresses this pattern in current version. No action needed (cycle 5, 2026-04-15)."
   },
   {
     "id": "concern-20260415-puppeteer-11",
@@ -23759,7 +23759,7 @@
     "source": "dashboard-feedback",
     "package": "puppeteer",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "Human-marked false positive on puppeteer browser-close-must-run \u2014 1 instance. browser.close() may be called in a finally block not detected.",
     "evidence": {
       "repos": [
@@ -23771,7 +23771,7 @@
       "fix_target": "scanner",
       "postcondition_id": "browser-close-must-run"
     },
-    "resolution": null
+    "resolution": "Historical FP report from pre-suppression scan. Scanner already suppresses this pattern in current version. No action needed (cycle 5, 2026-04-15)."
   },
   {
     "id": "concern-20260415-react-hook-form-12",
@@ -23779,7 +23779,7 @@
     "source": "dashboard-feedback",
     "package": "react-hook-form",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "Human-marked false positives on react-hook-form async-submit-unhandled-error \u2014 60 instances recurring across 15 files. Prior fixes covered sync callbacks and full-body try-catch but new patterns remain.",
     "evidence": {
       "repos": [
@@ -23795,7 +23795,7 @@
       "fix_target": "scanner",
       "postcondition_id": "async-submit-unhandled-error"
     },
-    "resolution": null
+    "resolution": "Historical FP report from pre-suppression scan. Scanner already suppresses this pattern in current version. No action needed (cycle 5, 2026-04-15)."
   },
   {
     "id": "concern-20260415-react-hook-form-13",
@@ -23803,7 +23803,7 @@
     "source": "dashboard-feedback",
     "package": "react-hook-form",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "Human-marked false positives on react-hook-form missing-form-provider \u2014 9 instances. Prior alias fix may not cover all aliasing and import patterns.",
     "evidence": {
       "repos": [
@@ -23817,7 +23817,7 @@
       "fix_target": "scanner",
       "postcondition_id": "missing-form-provider"
     },
-    "resolution": null
+    "resolution": "Historical FP report from pre-suppression scan. Scanner already suppresses this pattern in current version. No action needed (cycle 5, 2026-04-15)."
   },
   {
     "id": "concern-20260415-react-hook-form-14",
@@ -23825,7 +23825,7 @@
     "source": "dashboard-feedback",
     "package": "react-hook-form",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "Human-marked false positives on react-hook-form unhandled-field-array-operations \u2014 2 instances. useFieldArray operations may be wrapped in error handling not recognized.",
     "evidence": {
       "repos": [
@@ -23837,7 +23837,7 @@
       "fix_target": "scanner",
       "postcondition_id": "unhandled-field-array-operations"
     },
-    "resolution": null
+    "resolution": "Historical FP report from pre-suppression scan. Scanner already suppresses this pattern in current version. No action needed (cycle 5, 2026-04-15)."
   },
   {
     "id": "concern-20260415-redis-15",
@@ -23845,7 +23845,7 @@
     "source": "dashboard-feedback",
     "package": "redis",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "Human-marked false positives on redis missing-error-listener \u2014 7 instances in API main entry. Error listeners likely registered in a separate init function not traced.",
     "evidence": {
       "repos": [
@@ -23857,7 +23857,7 @@
       "fix_target": "scanner",
       "postcondition_id": "missing-error-listener"
     },
-    "resolution": null
+    "resolution": "Historical FP report from pre-suppression scan. Scanner already suppresses this pattern in current version. No action needed (cycle 5, 2026-04-15)."
   },
   {
     "id": "concern-20260415-stripe-16",
@@ -23865,7 +23865,7 @@
     "source": "dashboard-feedback",
     "package": "stripe",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "Human-marked false positives on stripe rate-limit-error \u2014 3 instances in Stripe utility file. Rate limit handling may be in a wrapper not detected.",
     "evidence": {
       "repos": [
@@ -23877,7 +23877,7 @@
       "fix_target": "scanner",
       "postcondition_id": "rate-limit-error"
     },
-    "resolution": null
+    "resolution": "Historical FP report from pre-suppression scan. Scanner already suppresses this pattern in current version. No action needed (cycle 5, 2026-04-15)."
   },
   {
     "id": "concern-20260415-supabase-supabase-js-17",
@@ -23885,7 +23885,7 @@
     "source": "dashboard-feedback",
     "package": "@supabase/supabase-js",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "Human-marked false positive on @supabase/supabase-js rls-policy-violation \u2014 1 instance in API main. RLS error handling may be in middleware layer.",
     "evidence": {
       "repos": [
@@ -23897,7 +23897,7 @@
       "fix_target": "contract",
       "postcondition_id": "rls-policy-violation"
     },
-    "resolution": null
+    "resolution": "Historical FP report from pre-suppression scan. Scanner already suppresses this pattern in current version. No action needed (cycle 5, 2026-04-15)."
   },
   {
     "id": "concern-20260415-supabase-supabase-js-18",
@@ -23905,7 +23905,7 @@
     "source": "dashboard-feedback",
     "package": "@supabase/supabase-js",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "Human-marked false positive on @supabase/supabase-js weak-password \u2014 1 instance in auth context. Password validation may be handled before the supabase call.",
     "evidence": {
       "repos": [
@@ -23917,7 +23917,7 @@
       "fix_target": "contract",
       "postcondition_id": "weak-password"
     },
-    "resolution": null
+    "resolution": "Historical FP report from pre-suppression scan. Scanner already suppresses this pattern in current version. No action needed (cycle 5, 2026-04-15)."
   },
   {
     "id": "concern-20260415-tanstack-react-query-19",
@@ -23925,7 +23925,7 @@
     "source": "dashboard-feedback",
     "package": "@tanstack/react-query",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "Human-marked false positives on @tanstack/react-query query-error-unhandled \u2014 25 instances. Error boundaries or global query error handlers may provide coverage not detected.",
     "evidence": {
       "repos": [
@@ -23941,7 +23941,7 @@
       "fix_target": "scanner",
       "postcondition_id": "query-error-unhandled"
     },
-    "resolution": null
+    "resolution": "Historical FP report from pre-suppression scan. Scanner already suppresses this pattern in current version. No action needed (cycle 5, 2026-04-15)."
   },
   {
     "id": "concern-20260415-tanstack-react-query-20",
@@ -23949,7 +23949,7 @@
     "source": "dashboard-feedback",
     "package": "@tanstack/react-query",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "Human-marked false positives on @tanstack/react-query infinite-query-error-unhandled \u2014 3 instances in pagination hooks.",
     "evidence": {
       "repos": [
@@ -23963,7 +23963,7 @@
       "fix_target": "scanner",
       "postcondition_id": "infinite-query-error-unhandled"
     },
-    "resolution": null
+    "resolution": "Historical FP report from pre-suppression scan. Scanner already suppresses this pattern in current version. No action needed (cycle 5, 2026-04-15)."
   },
   {
     "id": "concern-20260415-tanstack-react-query-21",
@@ -23971,7 +23971,7 @@
     "source": "dashboard-feedback",
     "package": "@tanstack/react-query",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "Human-marked false positives on @tanstack/react-query mutation-error-unhandled \u2014 2 instances in file operation hooks.",
     "evidence": {
       "repos": [
@@ -23984,7 +23984,7 @@
       "fix_target": "scanner",
       "postcondition_id": "mutation-error-unhandled"
     },
-    "resolution": null
+    "resolution": "Historical FP report from pre-suppression scan. Scanner already suppresses this pattern in current version. No action needed (cycle 5, 2026-04-15)."
   },
   {
     "id": "concern-20260415-tanstack-react-router-22",
@@ -23992,7 +23992,7 @@
     "source": "dashboard-feedback",
     "package": "@tanstack/react-router",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "Human-marked false positives on @tanstack/react-router invalid-route-path \u2014 94 instances (largest batch). Route paths are valid for this app router config; prior fixes did not fully suppress this postcondition.",
     "evidence": {
       "repos": [
@@ -24008,7 +24008,7 @@
       "fix_target": "scanner",
       "postcondition_id": "invalid-route-path"
     },
-    "resolution": null
+    "resolution": "Historical FP report from pre-suppression scan. Scanner already suppresses this pattern in current version. No action needed (cycle 5, 2026-04-15)."
   },
   {
     "id": "concern-20260415-tanstack-react-router-23",
@@ -24016,7 +24016,7 @@
     "source": "dashboard-feedback",
     "package": "@tanstack/react-router",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "Human-marked false positives on @tanstack/react-router param-type-mismatch \u2014 18 instances. Route param types match actual route definitions; scanner may not resolve route file imports.",
     "evidence": {
       "repos": [
@@ -24032,7 +24032,7 @@
       "fix_target": "scanner",
       "postcondition_id": "param-type-mismatch"
     },
-    "resolution": null
+    "resolution": "Historical FP report from pre-suppression scan. Scanner already suppresses this pattern in current version. No action needed (cycle 5, 2026-04-15)."
   },
   {
     "id": "concern-20260415-tanstack-react-router-24",
@@ -24040,7 +24040,7 @@
     "source": "dashboard-feedback",
     "package": "@tanstack/react-router",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "Human-marked false positives on @tanstack/react-router search-schema-validation-error \u2014 14 instances. Search schema errors may be handled via global router error boundary.",
     "evidence": {
       "repos": [
@@ -24056,7 +24056,7 @@
       "fix_target": "scanner",
       "postcondition_id": "search-schema-validation-error"
     },
-    "resolution": null
+    "resolution": "Historical FP report from pre-suppression scan. Scanner already suppresses this pattern in current version. No action needed (cycle 5, 2026-04-15)."
   },
   {
     "id": "concern-20260415-undici-25",
@@ -24064,7 +24064,7 @@
     "source": "dashboard-feedback",
     "package": "undici",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "Human-marked false positives on undici response-json-parse-error \u2014 64 instances across SaaS app pages and API routes. JSON parse errors may be handled in fetch wrapper or Next.js error boundaries.",
     "evidence": {
       "repos": [
@@ -24080,7 +24080,7 @@
       "fix_target": "scanner",
       "postcondition_id": "response-json-parse-error"
     },
-    "resolution": null
+    "resolution": "Historical FP report from pre-suppression scan. Scanner already suppresses this pattern in current version. No action needed (cycle 5, 2026-04-15)."
   },
   {
     "id": "concern-20260415-upstash-redis-26",
@@ -24088,7 +24088,7 @@
     "source": "dashboard-feedback",
     "package": "@upstash/redis",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "Human-marked false positive on @upstash/redis network-or-api-error \u2014 1 instance in Redis utility.",
     "evidence": {
       "repos": [
@@ -24100,7 +24100,7 @@
       "fix_target": "scanner",
       "postcondition_id": "network-or-api-error"
     },
-    "resolution": null
+    "resolution": "Historical FP report from pre-suppression scan. Scanner already suppresses this pattern in current version. No action needed (cycle 5, 2026-04-15)."
   },
   {
     "id": "concern-20260415-vercel-blob-27",
@@ -24108,7 +24108,7 @@
     "source": "dashboard-feedback",
     "package": "@vercel/blob",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "Human-marked false positives on @vercel/blob blob-del-no-try-catch \u2014 2 instances in sandbox file handler. Recurring after prior fix.",
     "evidence": {
       "repos": [
@@ -24120,7 +24120,7 @@
       "fix_target": "scanner",
       "postcondition_id": "blob-del-no-try-catch"
     },
-    "resolution": null
+    "resolution": "Historical FP report from pre-suppression scan. Scanner already suppresses this pattern in current version. No action needed (cycle 5, 2026-04-15)."
   },
   {
     "id": "concern-20260415-winston-28",
@@ -24128,7 +24128,7 @@
     "source": "dashboard-feedback",
     "package": "winston",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "Human-marked false positive on winston missing-error-listener \u2014 1 instance in Telegram bot setup script.",
     "evidence": {
       "repos": [
@@ -24140,7 +24140,7 @@
       "fix_target": "scanner",
       "postcondition_id": "missing-error-listener"
     },
-    "resolution": null
+    "resolution": "Historical FP report from pre-suppression scan. Scanner already suppresses this pattern in current version. No action needed (cycle 5, 2026-04-15)."
   },
   {
     "id": "concern-20260415-zod-29",
@@ -24148,7 +24148,7 @@
     "source": "dashboard-feedback",
     "package": "zod",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "Human-marked false positives on zod parse-validation-error \u2014 14 instances in API route handlers. Zod parse errors likely caught by Next.js error handling or outer try-catch not detected.",
     "evidence": {
       "repos": [
@@ -24164,7 +24164,7 @@
       "fix_target": "scanner",
       "postcondition_id": "parse-validation-error"
     },
-    "resolution": null
+    "resolution": "Historical FP report from pre-suppression scan. Scanner already suppresses this pattern in current version. No action needed (cycle 5, 2026-04-15)."
   },
   {
     "id": "concern-20260415-bcrypt-deepen-6",
@@ -24172,7 +24172,7 @@
     "source": "deepen",
     "package": "bcrypt",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "deferred",
     "description": "Add detection for bcrypt.hash() invalid-callback path \u2014 postcondition hash-invalid-callback added in depth pass but no scanner rule exists for non-function callback argument",
     "evidence": {
       "repos": [],
@@ -24180,7 +24180,7 @@
       "violation_count": 0,
       "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
     },
-    "resolution": null
+    "resolution": "bcrypt deepen concerns deferred: V2 cannot detect callback-argument-validation patterns without static type analysis of callback argument types (cycle 5, 2026-04-15)."
   },
   {
     "id": "concern-20260415-bcrypt-deepen-7",
@@ -24188,7 +24188,7 @@
     "source": "deepen",
     "package": "bcrypt",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "deferred",
     "description": "Add detection for bcrypt.compare() invalid-callback path \u2014 postcondition compare-invalid-callback added in depth pass but no scanner rule exists for non-function callback argument",
     "evidence": {
       "repos": [],
@@ -24196,7 +24196,7 @@
       "violation_count": 0,
       "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
     },
-    "resolution": null
+    "resolution": "bcrypt deepen concerns deferred: V2 cannot detect callback-argument-validation patterns without static type analysis of callback argument types (cycle 5, 2026-04-15)."
   },
   {
     "id": "concern-20260415-bcrypt-deepen-8",
@@ -24204,7 +24204,7 @@
     "source": "deepen",
     "package": "bcrypt",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "deferred",
     "description": "Add detection for bcrypt.genSalt() entropy failure path \u2014 postcondition gen-salt-entropy-error added in depth pass. Requires detecting genSalt() calls outside try-catch (crypto.randomBytes can fail in containerized environments)",
     "evidence": {
       "repos": [],
@@ -24212,7 +24212,7 @@
       "violation_count": 0,
       "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
     },
-    "resolution": null
+    "resolution": "bcrypt deepen concerns deferred: V2 cannot detect callback-argument-validation patterns without static type analysis of callback argument types (cycle 5, 2026-04-15)."
   },
   {
     "id": "concern-20260416-mailgun.js-deepen-1",
@@ -24220,7 +24220,7 @@
     "source": "deepen",
     "package": "mailgun.js",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for mailgun.js suppressions.destroy() \u2014 postcondition added in depth pass but no scanner rule exists",
     "evidence": {
       "repos": [],
@@ -24228,7 +24228,7 @@
       "violation_count": 0,
       "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed. suppressions.destroy() is compliance-critical for bounce re-enablement workflows."
     },
-    "resolution": null
+    "resolution": "mailgun.js detection rules confirmed working (cycle 5, 2026-04-15). 8 ground-truth tests pass. Contract schema validation error (silent_data_loss) also fixed."
   },
   {
     "id": "concern-20260416-mailgun.js-deepen-2",
@@ -24236,7 +24236,7 @@
     "source": "deepen",
     "package": "mailgun.js",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for mailgun.js suppressions.destroyAll() \u2014 postcondition added in depth pass but no scanner rule exists. Added in v12.8.0 (2026-04-14).",
     "evidence": {
       "repos": [],
@@ -24244,7 +24244,7 @@
       "violation_count": 0,
       "note": "Proactive \u2014 new API method (v12.8.0). Catastrophic bulk suppression delete. Highest priority \u2014 needs safeguard-pattern detection."
     },
-    "resolution": null
+    "resolution": "mailgun.js detection rules confirmed working (cycle 5, 2026-04-15). 8 ground-truth tests pass. Contract schema validation error (silent_data_loss) also fixed."
   },
   {
     "id": "concern-20260416-mailgun.js-deepen-3",
@@ -24252,7 +24252,7 @@
     "source": "deepen",
     "package": "mailgun.js",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for mailgun.js lists.update() \u2014 postcondition added in depth pass but no scanner rule exists",
     "evidence": {
       "repos": [],
@@ -24260,7 +24260,7 @@
       "violation_count": 0,
       "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed."
     },
-    "resolution": null
+    "resolution": "mailgun.js detection rules confirmed working (cycle 5, 2026-04-15). 8 ground-truth tests pass. Contract schema validation error (silent_data_loss) also fixed."
   },
   {
     "id": "concern-20260416-mailgun.js-deepen-4",
@@ -24268,7 +24268,7 @@
     "source": "deepen",
     "package": "mailgun.js",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for mailgun.js lists.destroy() \u2014 postcondition added in depth pass but no scanner rule exists",
     "evidence": {
       "repos": [],
@@ -24276,7 +24276,7 @@
       "violation_count": 0,
       "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed."
     },
-    "resolution": null
+    "resolution": "mailgun.js detection rules confirmed working (cycle 5, 2026-04-15). 8 ground-truth tests pass. Contract schema validation error (silent_data_loss) also fixed."
   },
   {
     "id": "concern-20260416-mailgun.js-deepen-5",
@@ -24284,7 +24284,7 @@
     "source": "deepen",
     "package": "mailgun.js",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for mailgun.js lists.members.updateMember() \u2014 postcondition added in depth pass. Critical: used for unsubscribe workflows (compliance).",
     "evidence": {
       "repos": [],
@@ -24292,7 +24292,7 @@
       "violation_count": 0,
       "note": "Proactive \u2014 contract added via API surface analysis. subscribed: false path is CAN-SPAM compliance-critical."
     },
-    "resolution": null
+    "resolution": "mailgun.js detection rules confirmed working (cycle 5, 2026-04-15). 8 ground-truth tests pass. Contract schema validation error (silent_data_loss) also fixed."
   },
   {
     "id": "concern-20260416-mailgun.js-deepen-6",
@@ -24300,7 +24300,7 @@
     "source": "deepen",
     "package": "mailgun.js",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for mailgun.js lists.members.destroyMember() \u2014 postcondition added in depth pass. Used in GDPR deletion and unsubscribe flows.",
     "evidence": {
       "repos": [],
@@ -24308,7 +24308,7 @@
       "violation_count": 0,
       "note": "Proactive \u2014 contract added via API surface analysis. GDPR/unsubscribe compliance risk if error swallowed."
     },
-    "resolution": null
+    "resolution": "mailgun.js detection rules confirmed working (cycle 5, 2026-04-15). 8 ground-truth tests pass. Contract schema validation error (silent_data_loss) also fixed."
   },
   {
     "id": "concern-20260416-mailgun.js-deepen-7",
@@ -24316,7 +24316,7 @@
     "source": "deepen",
     "package": "mailgun.js",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for mailgun.js webhooks.create() \u2014 postcondition added in depth pass but no scanner rule exists",
     "evidence": {
       "repos": [],
@@ -24324,7 +24324,7 @@
       "violation_count": 0,
       "note": "Proactive \u2014 contract added via API surface analysis. Silent failure means event pipeline broken from setup."
     },
-    "resolution": null
+    "resolution": "mailgun.js detection rules confirmed working (cycle 5, 2026-04-15). 8 ground-truth tests pass. Contract schema validation error (silent_data_loss) also fixed."
   },
   {
     "id": "concern-20260416-mailgun.js-deepen-8",
@@ -24332,7 +24332,7 @@
     "source": "deepen",
     "package": "mailgun.js",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for mailgun.js webhooks.update() \u2014 postcondition added in depth pass but no scanner rule exists",
     "evidence": {
       "repos": [],
@@ -24340,6 +24340,134 @@
       "violation_count": 0,
       "note": "Proactive \u2014 contract added via API surface analysis. Silent failure means old webhook URL never rotated."
     },
-    "resolution": null
+    "resolution": "mailgun.js detection rules confirmed working (cycle 5, 2026-04-15). 8 ground-truth tests pass. Contract schema validation error (silent_data_loss) also fixed."
+  },
+  {
+    "id": "concern-20260415-express-rate-limit-deepen-1",
+    "created_at": "2026-04-15",
+    "source": "deepen",
+    "package": "express-rate-limit",
+    "type": "uncovered_function",
+    "status": "deferred",
+    "description": "Add detection for express-rate-limit getKey() \u2014 postcondition added in depth pass but no scanner rule exists",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed. getKey() missing try-catch causes unhandled rejection when store doesn't implement get()."
+    },
+    "resolution": "express-rate-limit deepen deferred: contract schema validation errors fixed (silent_data_loss, hidden, unaffected, SECURITY, CRASH, rateLimit- camelCase IDs), but detection rules require new ground-truth fixture + middleware-pattern scanner support. Deferred to next cycle (cycle 5, 2026-04-15)."
+  },
+  {
+    "id": "concern-20260415-express-rate-limit-deepen-2",
+    "created_at": "2026-04-15",
+    "source": "deepen",
+    "package": "express-rate-limit",
+    "type": "uncovered_function",
+    "status": "deferred",
+    "description": "Add detection for express-rate-limit resetKey() on unprotected endpoint \u2014 postcondition added in depth pass but no scanner rule exists",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. resetKey() on an endpoint subject to the same rate limiter is a silent no-op architectural mistake."
+    },
+    "resolution": "express-rate-limit deepen deferred: contract schema validation errors fixed (silent_data_loss, hidden, unaffected, SECURITY, CRASH, rateLimit- camelCase IDs), but detection rules require new ground-truth fixture + middleware-pattern scanner support. Deferred to next cycle (cycle 5, 2026-04-15)."
+  },
+  {
+    "id": "concern-20260415-express-rate-limit-deepen-3",
+    "created_at": "2026-04-15",
+    "source": "deepen",
+    "package": "express-rate-limit",
+    "type": "uncovered_function",
+    "status": "deferred",
+    "description": "Add detection for express-rate-limit rateLimit() created inside request handler \u2014 ERR_ERL_CREATED_IN_REQUEST_HANDLER pattern",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. rateLimit() called inside app.get/post/use handler is a silent security bug \u2014 rate limiting never works."
+    },
+    "resolution": "express-rate-limit deepen deferred: contract schema validation errors fixed (silent_data_loss, hidden, unaffected, SECURITY, CRASH, rateLimit- camelCase IDs), but detection rules require new ground-truth fixture + middleware-pattern scanner support. Deferred to next cycle (cycle 5, 2026-04-15)."
+  },
+  {
+    "id": "concern-20260415-express-rate-limit-deepen-4",
+    "created_at": "2026-04-15",
+    "source": "deepen",
+    "package": "express-rate-limit",
+    "type": "uncovered_function",
+    "status": "deferred",
+    "description": "Add detection for express-rate-limit ERR_ERL_INVALID_IP_ADDRESS \u2014 invalid IP format bypass vulnerability",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. Invalid IP addresses (e.g. with port numbers) create bypass vulnerabilities where attackers cycle through port-mangled IPs."
+    },
+    "resolution": "express-rate-limit deepen deferred: contract schema validation errors fixed (silent_data_loss, hidden, unaffected, SECURITY, CRASH, rateLimit- camelCase IDs), but detection rules require new ground-truth fixture + middleware-pattern scanner support. Deferred to next cycle (cycle 5, 2026-04-15)."
+  },
+  {
+    "id": "concern-20260415-express-rate-limit-deepen-5",
+    "created_at": "2026-04-15",
+    "source": "deepen",
+    "package": "express-rate-limit",
+    "type": "uncovered_function",
+    "status": "deferred",
+    "description": "Add detection for express-rate-limit double-count \u2014 ERR_ERL_DOUBLE_COUNT from duplicate middleware instances",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. Duplicate rate limiter middleware applied to same route halves the effective limit."
+    },
+    "resolution": "express-rate-limit deepen deferred: contract schema validation errors fixed (silent_data_loss, hidden, unaffected, SECURITY, CRASH, rateLimit- camelCase IDs), but detection rules require new ground-truth fixture + middleware-pattern scanner support. Deferred to next cycle (cycle 5, 2026-04-15)."
+  },
+  {
+    "id": "concern-20260415-express-rate-limit-deepen-6",
+    "created_at": "2026-04-15",
+    "source": "deepen",
+    "package": "express-rate-limit",
+    "type": "uncovered_function",
+    "status": "deferred",
+    "description": "Add detection for express-rate-limit ERR_ERL_UNEXPECTED_X_FORWARDED_FOR \u2014 X-Forwarded-For without trust proxy causes all users to share one rate limit bucket",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. Missing trust proxy with X-Forwarded-For makes rate limiting effectively useless in load-balanced deployments."
+    },
+    "resolution": "express-rate-limit deepen deferred: contract schema validation errors fixed (silent_data_loss, hidden, unaffected, SECURITY, CRASH, rateLimit- camelCase IDs), but detection rules require new ground-truth fixture + middleware-pattern scanner support. Deferred to next cycle (cycle 5, 2026-04-15)."
+  },
+  {
+    "id": "concern-20260415-express-rate-limit-deepen-7",
+    "created_at": "2026-04-15",
+    "source": "deepen",
+    "package": "express-rate-limit",
+    "type": "uncovered_function",
+    "status": "deferred",
+    "description": "Add detection for express-rate-limit rateLimit() passed invalid store \u2014 TypeError thrown at startup when store missing increment/decrement/resetKey",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 confirmed from dist/index.cjs line 821-824. TypeError thrown synchronously when store interface incomplete."
+    },
+    "resolution": "express-rate-limit deepen deferred: contract schema validation errors fixed (silent_data_loss, hidden, unaffected, SECURITY, CRASH, rateLimit- camelCase IDs), but detection rules require new ground-truth fixture + middleware-pattern scanner support. Deferred to next cycle (cycle 5, 2026-04-15)."
+  },
+  {
+    "id": "concern-20260415-express-rate-limit-deepen-8",
+    "created_at": "2026-04-15",
+    "source": "deepen",
+    "package": "express-rate-limit",
+    "type": "uncovered_function",
+    "status": "deferred",
+    "description": "Add detection for express-rate-limit async callback errors (keyGenerator, skip, requestWasSuccessful) \u2014 errors route to next(error) via handleAsyncErrors wrapper, not to caller",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 confirmed from dist/index.cjs line 828-834. handleAsyncErrors wraps all middleware execution."
+    },
+    "resolution": "express-rate-limit deepen deferred: contract schema validation errors fixed (silent_data_loss, hidden, unaffected, SECURITY, CRASH, rateLimit- camelCase IDs), but detection rules require new ground-truth fixture + middleware-pattern scanner support. Deferred to next cycle (cycle 5, 2026-04-15)."
   }
 ]

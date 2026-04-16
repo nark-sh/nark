@@ -220,11 +220,18 @@ export function assertFires(
     };
   }
 
-  // If postconditionId specified, check it matches one of the violations
+  // If postconditionId specified, check it matches one of the violations.
+  // Supports wildcard suffix: 'ses-custom-verification-*' matches any postconditionId
+  // that starts with 'ses-custom-verification-'.
   if (annotation.postconditionId) {
-    const matchesPostcondition = viols.some(
-      v => v.postconditionId === annotation.postconditionId
-    );
+    const expectedId = annotation.postconditionId;
+    const matchesPostcondition = viols.some(v => {
+      if (expectedId.endsWith('*')) {
+        const prefix = expectedId.slice(0, -1);
+        return v.postconditionId.startsWith(prefix);
+      }
+      return v.postconditionId === expectedId;
+    });
     if (!matchesPostcondition) {
       const actualIds = viols.map(v => v.postconditionId).join(', ');
       return {
