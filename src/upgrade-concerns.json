@@ -24476,7 +24476,7 @@
     "source": "dashboard-feedback",
     "package": "@tanstack/react-router",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "Dashboard FP reports: 94 instance(s) of @tanstack/react-router/invalid-route-path marked as false positive by users",
     "evidence": {
       "repos": [
@@ -24492,7 +24492,7 @@
       "fix_target": "contract",
       "postcondition_id": "invalid-route-path"
     },
-    "resolution": null
+    "resolution": "Rejected: contract already downgraded to warning severity for invalid-route-path in a prior cycle. TypeScript enforces this at compile time. Recurring FPs from repos without strict TS \u2014 no further fix available."
   },
   {
     "id": "concern-2026-04-15-undici-2",
@@ -24500,7 +24500,7 @@
     "source": "dashboard-feedback",
     "package": "undici",
     "type": "false_positive",
-    "status": "pending",
+    "status": "implemented",
     "description": "Dashboard FP reports: 64 instance(s) of undici/response-json-parse-error marked as false positive by users",
     "evidence": {
       "repos": [
@@ -24516,7 +24516,7 @@
       "fix_target": "contract",
       "postcondition_id": "response-json-parse-error"
     },
-    "resolution": null
+    "resolution": "Extended undici response-json-parse-error suppression in contract-matcher.ts to cover hyphenated hook files (e.g., use-scan-poller.ts) in hooks/ directories and .ts files in components/ directories. The previous suppression used ^use[A-Z] regex which missed kebab-case hook names. Evidence: 64 FP instances including apps/web/hooks/use-scan-poller.ts."
   },
   {
     "id": "concern-2026-04-15-react-hook-form-3",
@@ -24524,7 +24524,7 @@
     "source": "dashboard-feedback",
     "package": "react-hook-form",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "Dashboard FP reports: 60 instance(s) of react-hook-form/async-submit-unhandled-error marked as false positive by users",
     "evidence": {
       "repos": [
@@ -24540,7 +24540,7 @@
       "fix_target": "contract",
       "postcondition_id": "async-submit-unhandled-error"
     },
-    "resolution": null
+    "resolution": "Rejected: suppression already implemented for setError(), toast(), onError, console.error patterns. Recurring FPs from repos without these patterns may be true positives."
   },
   {
     "id": "concern-2026-04-15-ai-4",
@@ -24548,7 +24548,7 @@
     "source": "dashboard-feedback",
     "package": "ai",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "Dashboard FP reports: 25 instance(s) of ai/tool-execution-error marked as false positive by users",
     "evidence": {
       "repos": [
@@ -24564,7 +24564,7 @@
       "fix_target": "contract",
       "postcondition_id": "tool-execution-error"
     },
-    "resolution": null
+    "resolution": "Rejected: suppression for ai.tool() factory calls already implemented. Recurring FPs \u2014 no new pattern."
   },
   {
     "id": "concern-2026-04-15-tanstack-react-query-5",
@@ -24572,7 +24572,7 @@
     "source": "dashboard-feedback",
     "package": "@tanstack/react-query",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "Dashboard FP reports: 25 instance(s) of @tanstack/react-query/query-error-unhandled marked as false positive by users",
     "evidence": {
       "repos": [
@@ -24588,7 +24588,7 @@
       "fix_target": "contract",
       "postcondition_id": "query-error-unhandled"
     },
-    "resolution": null
+    "resolution": "Rejected: suppression for query-error-unhandled already implemented (hook files + isError/onError component patterns). Recurring FPs \u2014 no new pattern."
   },
   {
     "id": "concern-2026-04-15-tanstack-react-router-6",
@@ -24596,7 +24596,7 @@
     "source": "dashboard-feedback",
     "package": "@tanstack/react-router",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "Dashboard FP reports: 18 instance(s) of @tanstack/react-router/param-type-mismatch marked as false positive by users",
     "evidence": {
       "repos": [
@@ -24612,7 +24612,7 @@
       "fix_target": "contract",
       "postcondition_id": "param-type-mismatch"
     },
-    "resolution": null
+    "resolution": "Rejected: contract already downgraded to warning severity for param-type-mismatch in a prior cycle. TypeScript enforces this at compile time. Recurring FPs from repos without strict TS \u2014 no further fix available."
   },
   {
     "id": "concern-2026-04-15-tanstack-react-router-7",
@@ -24620,7 +24620,7 @@
     "source": "dashboard-feedback",
     "package": "@tanstack/react-router",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "Dashboard FP reports: 14 instance(s) of @tanstack/react-router/search-schema-validation-error marked as false positive by users",
     "evidence": {
       "repos": [
@@ -24636,7 +24636,7 @@
       "fix_target": "contract",
       "postcondition_id": "search-schema-validation-error"
     },
-    "resolution": null
+    "resolution": "Rejected: contract already downgraded to warning severity for search-schema-validation-error in a prior cycle. TypeScript enforces this at compile time. Recurring FPs from repos without strict TS \u2014 no further fix available."
   },
   {
     "id": "concern-2026-04-15-zod-8",
@@ -24644,7 +24644,7 @@
     "source": "dashboard-feedback",
     "package": "zod",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "Dashboard FP reports: 14 instance(s) of zod/parse-validation-error marked as false positive by users",
     "evidence": {
       "repos": [
@@ -24660,7 +24660,7 @@
       "fix_target": "contract",
       "postcondition_id": "parse-validation-error"
     },
-    "resolution": null
+    "resolution": "Rejected: suppression for Next.js API route handlers already implemented. Recurring FPs \u2014 no new pattern."
   },
   {
     "id": "concern-2026-04-15-react-hook-form-9",
@@ -24668,7 +24668,7 @@
     "source": "dashboard-feedback",
     "package": "react-hook-form",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "Dashboard FP reports: 9 instance(s) of react-hook-form/missing-form-provider marked as false positive by users",
     "evidence": {
       "repos": [
@@ -24682,7 +24682,7 @@
       "fix_target": "contract",
       "postcondition_id": "missing-form-provider"
     },
-    "resolution": null
+    "resolution": "Rejected: suppression for FormProvider and useFormContext patterns already implemented. Recurring FPs \u2014 no new pattern."
   },
   {
     "id": "concern-2026-04-15-redis-10",
@@ -24690,7 +24690,7 @@
     "source": "dashboard-feedback",
     "package": "redis",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "Dashboard FP reports: 7 instance(s) of redis/missing-error-listener marked as false positive by users",
     "evidence": {
       "repos": [
@@ -24702,7 +24702,7 @@
       "fix_target": "contract",
       "postcondition_id": "missing-error-listener"
     },
-    "resolution": null
+    "resolution": "Rejected: suppression for module-level singleton Redis clients already implemented. Recurring FPs \u2014 no new pattern."
   },
   {
     "id": "concern-2026-04-15-clerk-nextjs-11",
@@ -24710,7 +24710,7 @@
     "source": "dashboard-feedback",
     "package": "@clerk/nextjs",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "Dashboard FP reports: 7 instance(s) of @clerk/nextjs/use-user-no-loaded-check marked as false positive by users",
     "evidence": {
       "repos": [
@@ -24726,7 +24726,7 @@
       "fix_target": "contract",
       "postcondition_id": "use-user-no-loaded-check"
     },
-    "resolution": null
+    "resolution": "Rejected: suppression for protected route groups and layout components already implemented. Recurring FPs \u2014 no new pattern."
   },
   {
     "id": "concern-2026-04-15-ai-12",
@@ -24734,7 +24734,7 @@
     "source": "dashboard-feedback",
     "package": "ai",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "Dashboard FP reports: 7 instance(s) of ai/api-error-rate-limit marked as false positive by users",
     "evidence": {
       "repos": [
@@ -24749,7 +24749,7 @@
       "fix_target": "contract",
       "postcondition_id": "api-error-rate-limit"
     },
-    "resolution": null
+    "resolution": "Rejected: suppression for retry wrapper patterns already implemented. Recurring FPs \u2014 no new pattern."
   },
   {
     "id": "concern-2026-04-15-express-13",
@@ -24757,7 +24757,7 @@
     "source": "dashboard-feedback",
     "package": "express",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "Dashboard FP reports: 5 instance(s) of express/async-middleware-unhandled-rejection marked as false positive by users",
     "evidence": {
       "repos": [
@@ -24770,7 +24770,7 @@
       "fix_target": "contract",
       "postcondition_id": "async-middleware-unhandled-rejection"
     },
-    "resolution": null
+    "resolution": "Rejected: suppression for files with global error middleware already implemented. Recurring FPs \u2014 no new pattern."
   },
   {
     "id": "concern-2026-04-15-tanstack-react-query-14",
@@ -24778,7 +24778,7 @@
     "source": "dashboard-feedback",
     "package": "@tanstack/react-query",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "Dashboard FP reports: 3 instance(s) of @tanstack/react-query/infinite-query-error-unhandled marked as false positive by users",
     "evidence": {
       "repos": [
@@ -24792,7 +24792,7 @@
       "fix_target": "contract",
       "postcondition_id": "infinite-query-error-unhandled"
     },
-    "resolution": null
+    "resolution": "Rejected: suppression for infinite-query-error-unhandled already implemented (hook files + isError/onError component patterns). Recurring FPs \u2014 no new pattern."
   },
   {
     "id": "concern-2026-04-15-clerk-nextjs-15",
@@ -24800,7 +24800,7 @@
     "source": "dashboard-feedback",
     "package": "@clerk/nextjs",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "Dashboard FP reports: 3 instance(s) of @clerk/nextjs/use-clerk-outside-provider marked as false positive by users",
     "evidence": {
       "repos": [
@@ -24814,7 +24814,7 @@
       "fix_target": "contract",
       "postcondition_id": "use-clerk-outside-provider"
     },
-    "resolution": null
+    "resolution": "Rejected: suppression when ClerkProvider found in project already implemented. Recurring FPs \u2014 no new pattern."
   },
   {
     "id": "concern-2026-04-15-stripe-16",
@@ -24822,7 +24822,7 @@
     "source": "dashboard-feedback",
     "package": "stripe",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "Dashboard FP reports: 3 instance(s) of stripe/rate-limit-error marked as false positive by users",
     "evidence": {
       "repos": [
@@ -24834,7 +24834,7 @@
       "fix_target": "contract",
       "postcondition_id": "rate-limit-error"
     },
-    "resolution": null
+    "resolution": "Rejected: suppression for Stripe client initialization files already implemented. Recurring FPs \u2014 no new pattern."
   },
   {
     "id": "concern-2026-04-15-dotenv-17",
@@ -24842,7 +24842,7 @@
     "source": "dashboard-feedback",
     "package": "dotenv",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "Dashboard FP reports: 3 instance(s) of dotenv/missing-env-file marked as false positive by users",
     "evidence": {
       "repos": [
@@ -24854,7 +24854,7 @@
       "fix_target": "contract",
       "postcondition_id": "missing-env-file"
     },
-    "resolution": null
+    "resolution": "Rejected: suppression for script and migration files already implemented. Recurring FPs \u2014 no new pattern."
   },
   {
     "id": "concern-2026-04-15-node-fetch-18",
@@ -24862,7 +24862,7 @@
     "source": "dashboard-feedback",
     "package": "node-fetch",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "Dashboard FP reports: 2 instance(s) of node-fetch/fetch-rejects-on-network-error marked as false positive by users",
     "evidence": {
       "repos": [
@@ -24875,7 +24875,7 @@
       "fix_target": "contract",
       "postcondition_id": "fetch-rejects-on-network-error"
     },
-    "resolution": null
+    "resolution": "Rejected: insufficient evidence (2 instance(s)). Threshold: 3+ instances required. May be valid violations the repo needs to fix."
   },
   {
     "id": "concern-2026-04-15-react-hook-form-19",
@@ -24883,7 +24883,7 @@
     "source": "dashboard-feedback",
     "package": "react-hook-form",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "Dashboard FP reports: 2 instance(s) of react-hook-form/unhandled-field-array-operations marked as false positive by users",
     "evidence": {
       "repos": [
@@ -24895,7 +24895,7 @@
       "fix_target": "contract",
       "postcondition_id": "unhandled-field-array-operations"
     },
-    "resolution": null
+    "resolution": "Rejected: insufficient evidence (2 instance(s)). Threshold: 3+ instances required. May be valid violations the repo needs to fix."
   },
   {
     "id": "concern-2026-04-15-tanstack-react-query-20",
@@ -24903,7 +24903,7 @@
     "source": "dashboard-feedback",
     "package": "@tanstack/react-query",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "Dashboard FP reports: 2 instance(s) of @tanstack/react-query/mutation-error-unhandled marked as false positive by users",
     "evidence": {
       "repos": [
@@ -24916,7 +24916,7 @@
       "fix_target": "contract",
       "postcondition_id": "mutation-error-unhandled"
     },
-    "resolution": null
+    "resolution": "Rejected: suppression for mutation-error-unhandled already implemented (hook files + isError/onError component patterns). Recurring FPs \u2014 no new pattern."
   },
   {
     "id": "concern-2026-04-15-ioredis-21",
@@ -24924,7 +24924,7 @@
     "source": "dashboard-feedback",
     "package": "ioredis",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "Dashboard FP reports: 2 instance(s) of ioredis/missing-error-listener marked as false positive by users",
     "evidence": {
       "repos": [
@@ -24937,7 +24937,7 @@
       "fix_target": "contract",
       "postcondition_id": "missing-error-listener"
     },
-    "resolution": null
+    "resolution": "Rejected: insufficient evidence (2 instance(s)). Threshold: 3+ instances required. May be valid violations the repo needs to fix."
   },
   {
     "id": "concern-2026-04-15-vercel-blob-22",
@@ -24945,7 +24945,7 @@
     "source": "dashboard-feedback",
     "package": "@vercel/blob",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "Dashboard FP reports: 2 instance(s) of @vercel/blob/blob-del-no-try-catch marked as false positive by users",
     "evidence": {
       "repos": [
@@ -24957,7 +24957,7 @@
       "fix_target": "contract",
       "postcondition_id": "blob-del-no-try-catch"
     },
-    "resolution": null
+    "resolution": "Rejected: insufficient evidence (2 instance(s)). Threshold: 3+ instances required. May be valid violations the repo needs to fix."
   },
   {
     "id": "concern-2026-04-15-supabase-supabase-js-23",
@@ -24965,7 +24965,7 @@
     "source": "dashboard-feedback",
     "package": "@supabase/supabase-js",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "Dashboard FP reports: 1 instance(s) of @supabase/supabase-js/rls-policy-violation marked as false positive by users",
     "evidence": {
       "repos": [
@@ -24977,7 +24977,7 @@
       "fix_target": "contract",
       "postcondition_id": "rls-policy-violation"
     },
-    "resolution": null
+    "resolution": "Rejected: insufficient evidence (1 instance(s)). Threshold: 3+ instances required. May be valid violations the repo needs to fix."
   },
   {
     "id": "concern-2026-04-15-ai-24",
@@ -24985,7 +24985,7 @@
     "source": "dashboard-feedback",
     "package": "ai",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "Dashboard FP reports: 1 instance(s) of ai/schema-validation-error marked as false positive by users",
     "evidence": {
       "repos": [
@@ -24997,7 +24997,7 @@
       "fix_target": "contract",
       "postcondition_id": "schema-validation-error"
     },
-    "resolution": null
+    "resolution": "Rejected: insufficient evidence (1 instance(s)). Threshold: 3+ instances required. May be valid violations the repo needs to fix."
   },
   {
     "id": "concern-2026-04-15-axios-25",
@@ -25005,7 +25005,7 @@
     "source": "dashboard-feedback",
     "package": "axios",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "Dashboard FP reports: 1 instance(s) of axios/error-4xx-5xx marked as false positive by users",
     "evidence": {
       "repos": [
@@ -25017,7 +25017,7 @@
       "fix_target": "contract",
       "postcondition_id": "error-4xx-5xx"
     },
-    "resolution": null
+    "resolution": "Rejected: insufficient evidence (1 instance(s)). Threshold: 3+ instances required. May be valid violations the repo needs to fix."
   },
   {
     "id": "concern-2026-04-15-upstash-redis-26",
@@ -25025,7 +25025,7 @@
     "source": "dashboard-feedback",
     "package": "@upstash/redis",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "Dashboard FP reports: 1 instance(s) of @upstash/redis/network-or-api-error marked as false positive by users",
     "evidence": {
       "repos": [
@@ -25037,7 +25037,7 @@
       "fix_target": "contract",
       "postcondition_id": "network-or-api-error"
     },
-    "resolution": null
+    "resolution": "Rejected: insufficient evidence (1 instance(s)). Threshold: 3+ instances required. May be valid violations the repo needs to fix."
   },
   {
     "id": "concern-2026-04-15-puppeteer-27",
@@ -25045,7 +25045,7 @@
     "source": "dashboard-feedback",
     "package": "puppeteer",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "Dashboard FP reports: 1 instance(s) of puppeteer/browser-close-must-run marked as false positive by users",
     "evidence": {
       "repos": [
@@ -25057,7 +25057,7 @@
       "fix_target": "contract",
       "postcondition_id": "browser-close-must-run"
     },
-    "resolution": null
+    "resolution": "Rejected: insufficient evidence (1 instance(s)). Threshold: 3+ instances required. May be valid violations the repo needs to fix."
   },
   {
     "id": "concern-2026-04-15-winston-28",
@@ -25065,7 +25065,7 @@
     "source": "dashboard-feedback",
     "package": "winston",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "Dashboard FP reports: 1 instance(s) of winston/missing-error-listener marked as false positive by users",
     "evidence": {
       "repos": [
@@ -25077,7 +25077,7 @@
       "fix_target": "contract",
       "postcondition_id": "missing-error-listener"
     },
-    "resolution": null
+    "resolution": "Rejected: insufficient evidence (1 instance(s)). Threshold: 3+ instances required. May be valid violations the repo needs to fix."
   },
   {
     "id": "concern-2026-04-15-supabase-supabase-js-29",
@@ -25085,7 +25085,7 @@
     "source": "dashboard-feedback",
     "package": "@supabase/supabase-js",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "Dashboard FP reports: 1 instance(s) of @supabase/supabase-js/weak-password marked as false positive by users",
     "evidence": {
       "repos": [
@@ -25097,6 +25097,6 @@
       "fix_target": "contract",
       "postcondition_id": "weak-password"
     },
-    "resolution": null
+    "resolution": "Rejected: insufficient evidence (1 instance(s)). Threshold: 3+ instances required. May be valid violations the repo needs to fix."
   }
 ]

@@ -1356,10 +1356,16 @@ export class ContractMatcher {
       ) {
         const fileName = sourceFile.fileName;
         // React component files (.tsx) and Next.js app router pages
+        const baseName = path.basename(fileName.replace(/\.tsx?$/, ""));
         if (
           /\.tsx$/.test(fileName) ||
           /[/\\]app[/\\]/.test(fileName) ||
-          /^use[A-Z]/.test(path.basename(fileName.replace(/\.tsx?$/, "")))
+          /^use[A-Z]/.test(baseName) ||
+          // Hyphenated hook files (e.g., use-scan-poller.ts) in hooks/ directories
+          // Evidence: concern-2026-04-15-undici-2 — use-scan-poller.ts not covered by camelCase check
+          (/^use-/.test(baseName) && /[/\\]hooks?[/\\]/.test(fileName)) ||
+          // components/ directory .ts files (client-side utility components)
+          /[/\\]components?[/\\]/.test(fileName)
         ) {
           continue; // Framework/component context — error boundary handles uncaught exceptions
         }
