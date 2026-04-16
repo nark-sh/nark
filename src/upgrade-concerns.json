@@ -25105,7 +25105,7 @@
     "source": "deepen",
     "package": "jszip",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "in-progress",
     "description": "Add detection for jszip JSZipObject.async() method calls \u2014 postcondition file-async-no-try-catch added in depth pass but no scanner rule exists for .async() method call pattern on JSZipObject instances",
     "evidence": {
       "repos": [],
@@ -25121,13 +25121,45 @@
     "source": "deepen",
     "package": "jszip",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "in-progress",
     "description": "Add detection for jszip JSZipObject.async() unsupported type pattern \u2014 postcondition file-async-unsupported-type added in depth pass: callers using blob/uint8array type in Node.js environments throw unsupported platform error",
     "evidence": {
       "repos": [],
       "scan_file": null,
       "violation_count": 0,
       "note": "Proactive \u2014 contract added via API surface analysis. Pattern: zip.files[\"name\"].async(\"blob\") in Node.js code throws Error: blob is not supported by this platform. Needs a separate detector from file-async-no-try-catch since the type-checking issue exists even WITH try-catch present."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260415-discord.js-deepen-1",
+    "created_at": "2026-04-15",
+    "source": "deepen",
+    "package": "discord.js",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for discord.js Webhook.send() \u2014 postcondition discord-webhook-send-no-try-catch added in depth pass but no scanner rule exists. The Webhook class is not in the current class_names detection list.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. Need to add Webhook to class_names or factory_methods in discord.js contract detection, and add send() to await_patterns. Webhook instances are constructed as: new WebhookClient(data) or obtained via client.fetchWebhook()."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260415-discord.js-deepen-2",
+    "created_at": "2026-04-15",
+    "source": "deepen",
+    "package": "discord.js",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for discord.js GuildChannel.delete() \u2014 postcondition discord-guildchannel-delete-no-try-catch added in depth pass but no scanner rule exists. GuildChannel is in type_names but .delete() is not in await_patterns.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. GuildChannel is already in type_names detection. Need to add .delete( to await_patterns in the discord.js contract detection block. Also applies to TextChannel.delete(), NewsChannel.delete(), VoiceChannel.delete() which all inherit from GuildChannel."
     },
     "resolution": null
   }
