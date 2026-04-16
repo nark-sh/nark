@@ -131,7 +131,7 @@ function generateSummary(
  */
 function getGitCommit(): string | undefined {
   try {
-    return execSync("git rev-parse HEAD", { encoding: "utf-8" }).trim();
+    return execSync("git rev-parse HEAD", { encoding: "utf-8", stdio: ["pipe", "pipe", "pipe"] }).trim();
   } catch {
     return undefined;
   }
@@ -161,6 +161,7 @@ function getGitBranch(): string | undefined {
   try {
     return execSync("git rev-parse --abbrev-ref HEAD", {
       encoding: "utf-8",
+      stdio: ["pipe", "pipe", "pipe"],
     }).trim();
   } catch {
     return undefined;

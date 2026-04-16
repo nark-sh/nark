@@ -151,6 +151,7 @@ function getGitHashFromRepo(tsconfigPath: string): string {
     const gitHash = execSync('git rev-parse --short HEAD', {
       cwd: repoDir,
       encoding: 'utf-8',
+      stdio: ['pipe', 'pipe', 'pipe'],
     }).trim();
 
     return gitHash;
@@ -1171,7 +1172,50 @@ function printAnalyzerDiff(v1Violations: Violation[], v2Violations: Violation[])
  * Handle errors
  */
 process.on('uncaughtException', (error) => {
+  const message = error instanceof Error ? error.message : String(error);
+
+  // Friendly message for "no TypeScript files" errors
+  if (message.startsWith('NO_TS_FILES:')) {
+    console.error('');
+    console.error(chalk.red('  Error: Not a TypeScript project'));
+    console.error('');
+    // Print the detailed message (skip the NO_TS_FILES: prefix)
+    console.error(message.slice('NO_TS_FILES: '.length));
+    process.exit(1);
+  }
+
+  // Friendly message for "No inputs were found" (fallback if not caught above)
+  if (message.includes('No inputs were found')) {
+    console.error('');
+    console.error(chalk.red('  Error: No TypeScript files found to analyze'));
+    console.error('');
+    console.error('  nark scans TypeScript projects for missing error handling.');
+    console.error('  Run it from your project directory, or point it at your tsconfig:');
+    console.error('');
+    console.error(chalk.dim('    cd my-project && npx nark'));
+    console.error(chalk.dim('    npx nark --tsconfig path/to/tsconfig.json'));
+    console.error('');
+    process.exit(1);
+  }
+
+  // Permission errors when writing to the filesystem
+  if (message.includes('EPERM') || message.includes('EACCES')) {
+    console.error('');
+    console.error(chalk.red('  Error: Permission denied'));
+    console.error('');
+    console.error('  nark could not write to this directory. Make sure you have');
+    console.error('  write permissions, or run nark from your project directory:');
+    console.error('');
+    console.error(chalk.dim('    cd my-project && npx nark'));
+    console.error(chalk.dim('    npx nark --tsconfig path/to/tsconfig.json'));
+    console.error('');
+    process.exit(1);
+  }
+
   console.error(chalk.red('\nUnexpected error:'));
-  console.error(error);
+  console.error(error instanceof Error ? error.message : error);
+  if (error instanceof Error && error.stack) {
+    console.error(chalk.dim(error.stack.split('\n').slice(1).join('\n')));
+  }
   process.exit(2);
 });

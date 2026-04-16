@@ -113,8 +113,9 @@ export class PackageDiscovery {
           }
         }
       }
-    } catch (error) {
-      console.warn("Could not read package.json:", error);
+    } catch {
+      // No package.json found — this is expected when scanning a non-project directory.
+      // Silently continue; we'll still discover packages from import statements.
     }
 
     return packages;
@@ -156,11 +157,7 @@ export class PackageDiscovery {
           undefined,
         );
         compilerOptions = { skipLibCheck: true, allowJs: false };
-        console.warn(
-          "[PackageDiscovery] tsconfig yielded 0 files; falling back to directory scan, found",
-          fileNames.length,
-          "files",
-        );
+        // Silent fallback — the verbose log in the CLI will show this if needed
       }
 
       // Create program (shared with countCallSites)
@@ -173,8 +170,8 @@ export class PackageDiscovery {
 
         this.extractImportsFromFile(sourceFile, imports);
       }
-    } catch (error) {
-      console.warn("Could not scan imports:", error);
+    } catch {
+      // Failed to scan imports — continue without import-based discovery
     }
 
     return { imports, program };

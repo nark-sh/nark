@@ -72,7 +72,26 @@ export class UniversalAnalyzer {
     );
 
     if (parsedConfig.errors.length > 0) {
-      const errors = parsedConfig.errors.map((e) => e.messageText).join('\n');
+      const errors = parsedConfig.errors.map((e) => typeof e.messageText === 'string' ? e.messageText : String(e.messageText)).join('\n');
+
+      // Detect "no inputs found" — means no TypeScript files matched the include patterns
+      if (errors.includes('No inputs were found')) {
+        throw new Error(
+          'NO_TS_FILES: No TypeScript files found to analyze.\n' +
+          '\n' +
+          '  This usually means you ran `npx nark` in a directory that isn\'t a\n' +
+          '  TypeScript project, or the project\'s TypeScript files are in a\n' +
+          '  subdirectory that wasn\'t included.\n' +
+          '\n' +
+          '  To fix this:\n' +
+          '    1. cd into your TypeScript project first:\n' +
+          '       cd my-project && npx nark\n' +
+          '\n' +
+          '    2. Or point nark at your tsconfig directly:\n' +
+          '       npx nark --tsconfig path/to/my-project/tsconfig.json\n'
+        );
+      }
+
       throw new Error(`Error parsing tsconfig.json: ${errors}`);
     }
 
