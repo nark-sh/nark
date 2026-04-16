@@ -29733,5 +29733,69 @@
       "note": "Proactive \u2014 CreateEventSourceMappingCommand is not idempotent. Common SaaS pattern: deploy code that creates SQS trigger on startup, fails on second deploy because mapping already exists. ResourceConflictException should be caught and treated as success (mapping already wired)."
     },
     "resolution": null
+  },
+  {
+    "id": "concern-20260416-express-session-deepen-1",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "express-session",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for req.session.destroy(callback) where callback does not check err argument. Store errors (Redis disconnect, DB failure) are silently swallowed, leaving the session in the store while the client believes they are logged out (split-brain). Also detect destroy() called without any callback (fire-and-forget).",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 session.destroy() is the standard logout mechanism. Failing to check err in callback is a common pattern that creates silent security issues (server-side session persists despite client-side logout). Detection: look for req.session.destroy() calls in express route handlers where callback body does not reference the err parameter."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-express-session-deepen-2",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "express-session",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for req.session.regenerate(callback) where callback does not check err. Session fixation defense is incomplete when regenerate fails silently \u2014 user is authenticated on old session ID. Detection: look for req.session.regenerate() calls in login/auth handlers where callback does not check err before proceeding.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 session.regenerate() is required after successful login (OWASP session fixation prevention). Store errors during regenerate cause old session ID to persist while user appears authenticated. This is both a reliability and security issue. High severity because it affects authentication flows."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-express-session-deepen-3",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "express-session",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for req.session.save(callback) where callback does not check err before calling res.redirect() or res.send(). Session data (userId, role, cart) may not be persisted if save fails, causing data loss on the next request. Detection: look for session.save() calls where callback proceeds to redirect/respond without error check.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 session.save() must be called explicitly before redirects and in WebSocket handlers. The common pattern of modifying session data then redirecting without explicit save is a documented anti-pattern in express-session README. Detection should flag: (1) save() with callback that ignores err, (2) res.redirect() called after session modification without save() in callback."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-express-session-deepen-4",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "express-session",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for req.session.reload(callback) where callback does not check err. When session expires or is destroyed in another process, reload() produces err with message \"failed to load session\". Unchecked err causes route handler to proceed with stale session data. Detection: look for session.reload() calls where callback body does not reference err.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 session.reload() is used in long-lived connections (WebSockets, SSE) to refresh session state. Session expiry during a long-lived connection produces err=\"failed to load session\" which must redirect to login. Source confirmed: session/session.js line 94 throws new Error(\"failed to load session\") when store.get returns null."
+    },
+    "resolution": null
   }
 ]
