@@ -28453,5 +28453,101 @@
       "note": "Proactive \u2014 contract added via API surface analysis. Detection: maintain a static list of built-in morgan token names; flag morgan.token(name, ...) where name is in that list."
     },
     "resolution": null
+  },
+  {
+    "id": "concern-20260416-mistralai-deepen-1",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@mistralai/mistralai",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @mistralai/mistralai:embeddings.create() \u2014 postcondition added in depth pass but scanner may not track this 2-level chain (client.embeddings.create)",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. embeddings.create detected via existing PropertyChainDetector, needs verification."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-mistralai-deepen-2",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@mistralai/mistralai",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @mistralai/mistralai:ocr.process() \u2014 3-level chain client.ocr.process() may not be detected by PropertyChainDetector",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 3-level chains need verification in scanner. Test confirms detection works for this package."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-mistralai-deepen-3",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@mistralai/mistralai",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @mistralai/mistralai:agents.complete() \u2014 currently matched as generic complete-no-error-handling, should have its own distinct postcondition ID for accurate reporting",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 agents.complete() fires complete-no-error-handling instead of agents-complete-no-error-handling. Accurate ID requires chain disambiguation."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-mistralai-deepen-4",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@mistralai/mistralai",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @mistralai/mistralai:audio.transcriptions.complete() \u2014 3-level chain not tested",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 audio.transcriptions.complete() is a 3-level chain, detection not verified in scanner tests."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-mistralai-deepen-5",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@mistralai/mistralai",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @mistralai/mistralai:classifiers.moderate() \u2014 content moderation is safety-critical, must verify detection fires correctly",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 classifiers.moderate() is safety-critical. Missing error handling means unmoderated content may pass through."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-mistralai-deepen-6",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@mistralai/mistralai",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @mistralai/mistralai:batch.jobs.create() \u2014 3-level chain client.batch.jobs.create() may not be detected",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 batch.jobs.create() is a 3-level chain. Detection not verified in scanner ground-truth tests."
+    },
+    "resolution": null
   }
 ]
