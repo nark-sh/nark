@@ -60,9 +60,13 @@ export function getCredentials(): NarkCredentials | null {
 }
 
 /**
- * Returns the stored token, or null if not logged in.
+ * Returns a token for API authentication.
+ * Checks NARK_TOKEN environment variable first (for CI/CD),
+ * then falls back to ~/.nark/credentials file.
  */
 export function getToken(): string | null {
+  const envToken = process.env.NARK_TOKEN;
+  if (envToken) return envToken;  // env var takes priority
   return getCredentials()?.token ?? null;
 }
 
