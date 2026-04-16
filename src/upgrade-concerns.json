@@ -28005,5 +28005,165 @@
       "note": "Confirmed from Pinecone docs: https://docs.pinecone.io/guides/manage-data/update-data \u2014 a non-existent record ID specified causes 200 OK with no records affected. Requires static analysis or runtime verification pattern detection."
     },
     "resolution": null
+  },
+  {
+    "id": "concern-20260416-octokit-rest-deepen-7",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@octokit/rest",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for octokit.pulls.createReview() \u2014 postcondition added in depth pass but no scanner rule exists",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-octokit-rest-deepen-8",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@octokit/rest",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for octokit.pulls.submitReview() \u2014 postcondition added in depth pass but no scanner rule exists",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-octokit-rest-deepen-9",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@octokit/rest",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for octokit.repos.uploadReleaseAsset() \u2014 silent 422 on duplicate filename; postcondition added but no scanner rule exists",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-octokit-rest-deepen-10",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@octokit/rest",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for octokit.repos.addCollaborator() \u2014 postcondition added in depth pass but no scanner rule exists",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-octokit-rest-deepen-11",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@octokit/rest",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for octokit.repos.createWebhook() \u2014 postcondition added in depth pass but no scanner rule exists",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-octokit-rest-deepen-12",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@octokit/rest",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for octokit.repos.createFork() async pattern \u2014 202 returned before fork git objects available; silent failure when callers immediately use the fork",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-octokit-rest-deepen-13",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@octokit/rest",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for octokit.git.createTag() two-step pattern \u2014 createTag without createRef leaves orphaned tag object invisible to users",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-octokit-rest-deepen-14",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@octokit/rest",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for octokit.git.deleteRef() \u2014 422 when deleting default branch; postcondition added but no scanner rule exists",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-octokit-rest-deepen-15",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@octokit/rest",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for octokit.actions.cancelWorkflowRun() \u2014 409 on terminal state; postcondition added but no scanner rule exists",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-octokit-rest-deepen-16",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@octokit/rest",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for octokit.pulls.update() \u2014 postcondition added in depth pass but no scanner rule exists",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
   }
 ]
