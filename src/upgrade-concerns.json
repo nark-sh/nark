@@ -28933,5 +28933,69 @@
       "note": "Proactive \u2014 contract added via API surface analysis (deepen pass 2026-04-16). update.js is a thin wrapper over replace.js. Same errors: TypeError for compressed archives, async rejection on EACCES/ENOENT. Detection rule should cover both tar.update/tar.u and tar.replace/tar.r in one rule."
     },
     "resolution": null
+  },
+  {
+    "id": "concern-20260416-pdf-parse-deepen-1",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "pdf-parse",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for PDFParse.getImage() \u2014 postcondition added (get-image-no-try-catch) but no scanner rule exists. Same pattern as getText/getInfo but on getImage method name.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-pdf-parse-deepen-2",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "pdf-parse",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for PDFParse.getScreenshot() \u2014 postcondition added (get-screenshot-no-try-catch) but no scanner rule exists.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-pdf-parse-deepen-3",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "pdf-parse",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for PDFParse.getTable() \u2014 postcondition added (get-table-no-try-catch) but no scanner rule exists.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-pdf-parse-deepen-4",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "pdf-parse",
+    "type": "result_unchecked",
+    "status": "pending",
+    "description": "Add detection for getHeader() return value .ok not checked \u2014 postcondition added (get-header-ok-not-checked). Unique pattern: function never throws, but callers must check result.ok. Requires result-property-check detection logic.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. getHeader() catches all errors internally; callers silently ignore failures if they skip .ok check."
+    },
+    "resolution": null
   }
 ]
