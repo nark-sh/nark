@@ -28549,5 +28549,69 @@
       "note": "Proactive \u2014 batch.jobs.create() is a 3-level chain. Detection not verified in scanner ground-truth tests."
     },
     "resolution": null
+  },
+  {
+    "id": "concern-20260416-openai-deepen-stream1-1",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "openai",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for openai.uploads.complete() \u2014 postconditions added in depth pass but no scanner rule exists for byte-count-mismatch and expired-upload errors",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis (stream-1 pass 2). uploads.complete() finalizes multipart uploads; ByteCount mismatch and expiry errors require try-catch."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-openai-deepen-stream1-2",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "openai",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for openai.uploads.parts.create() \u2014 postconditions added in depth pass but no scanner rule exists for size-exceeded and invalid-upload-state errors",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis (stream-1 pass 2). uploads.parts.create() is required for multipart uploads; size and state errors require try-catch."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-openai-deepen-stream1-3",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "openai",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for openai.responses.parse() \u2014 postconditions added in depth pass but no scanner rule exists for OpenAIError (non-strict tools) and SyntaxError (malformed JSON)",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis (stream-1 pass 2). responses.parse() requires try-catch for both APIError subclasses AND SyntaxError \u2014 different from chat.completions.parse()."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-openai-deepen-stream1-4",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "openai",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for openai.realtime.sessions.create() / openai.beta.realtime.sessions.create() \u2014 postconditions added in depth pass but no scanner rule exists for authentication and permission errors",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis (stream-1 pass 2). Realtime session token generation in server-side handlers requires try-catch; PermissionDeniedError is distinct from AuthenticationError."
+    },
+    "resolution": null
   }
 ]
