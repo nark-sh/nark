@@ -28821,5 +28821,117 @@
       "note": "Proactive \u2014 inputTokens.count() used as pre-flight check before expensive responses.create(). BadRequestError when truncation=disabled and input exceeds context window is the key failure mode."
     },
     "resolution": null
+  },
+  {
+    "id": "concern-20260416-ollama-deepen4-1",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "ollama",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for ollama.pull() \u2014 postcondition added (pull-no-try-catch, pull-model-not-found) but no scanner rule exists for .pull() method",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 pull() is used in agent setups to ensure models exist. ResponseError(404) for unknown model names is the key failure mode. Distinct from ECONNREFUSED which has no status_code."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-ollama-deepen4-2",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "ollama",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for ollama.create() \u2014 postcondition added (create-no-try-catch, create-local-path-unsupported) but no scanner rule exists for .create() method. Local path validation error is SDK-unique.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 create() used in custom model workflows. The local-path error is synchronous and thrown before any HTTP call \u2014 different error surface from typical network errors."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-ollama-deepen4-3",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "ollama",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for ollama.show() \u2014 postcondition added (show-no-try-catch) but no scanner rule exists. 404 silent failure in capability-check flows.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 show() is used to check model capabilities before calling chat/generate. If show() throws 404 and the error is caught generically, the caller may proceed to use a model that does not exist."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-ollama-deepen4-4",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "ollama",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for ollama.webSearch() and ollama.webFetch() \u2014 postconditions added but no scanner rules exist. These call external ollama.com API requiring OLLAMA_API_KEY; 401 auth failures are silent.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 webSearch/webFetch are new in ollama-js 0.5+. They call https://ollama.com/api/web_search and web_fetch (not the local server). OLLAMA_API_KEY must be set or 401 is thrown. Missing auth key is a silent startup configuration error in agentic tool systems."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-tar-deepen-1",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "tar",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for tar.list() / tar.t() \u2014 postcondition added (list-error-handling) but no scanner rule exists. Awaited tar.list({file:...}) without try-catch rejects on ENOENT, EACCES, TAR_BAD_ARCHIVE, TAR_ABORT.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis (deepen pass 2026-04-16). list.js source confirmed: Promise rejects via parse.on(\"error\", reject) and stream.on(\"error\", reject). Detection rule needed for tar.list/tar.t async pattern."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-tar-deepen-2",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "tar",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for tar.replace() / tar.r() \u2014 postconditions added (replace-error-handling, replace-compressed-archive-error) but no scanner rules exist. Awaited tar.replace({file:...}) without try-catch rejects on EACCES/ENOENT. Also throws TypeError synchronously for compressed archives.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis (deepen pass 2026-04-16). replace.js source confirmed: sync TypeError for gzip/brotli/zstd options or .gz/.br/.zst file extensions. Async path rejects via Promise reject() on fs.open failure. The synchronous TypeError is a distinct detection pattern from the async await pattern."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-tar-deepen-3",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "tar",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for tar.update() / tar.u() \u2014 postconditions added (update-error-handling, update-compressed-archive-error) but no scanner rules exist. Delegates to replace.js with mtime filter \u2014 same error contracts as replace.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis (deepen pass 2026-04-16). update.js is a thin wrapper over replace.js. Same errors: TypeError for compressed archives, async rejection on EACCES/ENOENT. Detection rule should cover both tar.update/tar.u and tar.replace/tar.r in one rule."
+    },
+    "resolution": null
   }
 ]
