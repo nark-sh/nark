@@ -25306,5 +25306,69 @@
       "note": "Proactive \u2014 stats() requires full pixel decoding; corrupt images crash analysis pipelines. Also documents stats() correctness bug: stats on transformed images requires intermediate toBuffer() call."
     },
     "resolution": null
+  },
+  {
+    "id": "concern-20260416-aws-dynamodb-deepen-1",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@aws-sdk/client-dynamodb",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for BatchWriteItemCommand \u2014 caller does not check response.UnprocessedItems after send(). Silent data loss when some items fail (HTTP 200, no throw). Postcondition: batch-write-unprocessed-items-not-checked.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. Need response-pattern detection: check if caller inspects response.UnprocessedItems after BatchWriteItemCommand send()."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-aws-dynamodb-deepen-2",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@aws-sdk/client-dynamodb",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for BatchGetItemCommand \u2014 caller does not check response.UnprocessedKeys after send(). Silent incomplete reads when some items fail (HTTP 200, partial response). Postcondition: batch-get-unprocessed-keys-not-checked.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. Need response-pattern detection: check if caller inspects response.UnprocessedKeys after BatchGetItemCommand send()."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-aws-dynamodb-deepen-3",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@aws-sdk/client-dynamodb",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for TransactWriteItemsCommand \u2014 catch block catches TransactionCanceledException but does not inspect CancellationReasons array. Cannot distinguish ConditionalCheckFailed (not retryable) from infrastructure errors. Postcondition: transact-write-cancellation-reasons-not-inspected.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. Need catch-block analysis: check if TransactionCanceledException catch block reads CancellationReasons."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-aws-dynamodb-deepen-4",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@aws-sdk/client-dynamodb",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for ExecuteStatementCommand \u2014 PartiQL INSERT without DuplicateItemException handling. Unlike PutItemCommand, PartiQL INSERT throws on duplicate primary key. Postcondition: execute-statement-duplicate-item.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. Need detection: ExecuteStatementCommand with INSERT statement in catch that does not handle DuplicateItemException."
+    },
+    "resolution": null
   }
 ]
