@@ -26671,5 +26671,69 @@
       "note": "Proactive \u2014 documented explicitly in expressjs/compression README Server-Sent Events section. res.flush() is required after each res.write() when using SSE with compression."
     },
     "resolution": null
+  },
+  {
+    "id": "concern-20260416-sesv2-deepen-1",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@aws-sdk/client-sesv2",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @aws-sdk/client-sesv2.SendEmailCommand() \u2014 dedicated postcondition added (sesv2-send-email-no-try-catch) but no specific scanner rule exists for SendEmailCommand beyond generic send()",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed for SendEmailCommand-specific errors (AccountSuspendedException, SendingPausedException)"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-sesv2-deepen-2",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@aws-sdk/client-sesv2",
+    "type": "response_pattern",
+    "status": "pending",
+    "description": "Add detection for SendBulkEmailCommand() response not checked \u2014 postcondition sesv2-bulk-email-result-not-checked requires BulkEmailEntryResults inspection but no scanner response-pattern detector exists. Ground-truth test FAILS for this case.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Critical silent failure: HTTP 200 with per-recipient Status in BulkEmailEntryResults. AWS docs explicitly state callers must check each entry. Requires a new response-value-check detection pattern in the scanner."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-sesv2-deepen-3",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@aws-sdk/client-sesv2",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for CreateEmailIdentityCommand() \u2014 postcondition sesv2-create-identity-no-try-catch added but no scanner rule exists",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 AlreadyExistsException handling required in multi-tenant domain registration flows. LimitExceededException requires AWS support intervention."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-sesv2-deepen-4",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@aws-sdk/client-sesv2",
+    "type": "async_job_pattern",
+    "status": "pending",
+    "description": "Add detection for CreateImportJobCommand() result not polled \u2014 postcondition sesv2-import-job-result-not-polled added but no scanner async-job-pattern detector exists",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 CreateImportJobCommand returns JobId immediately; callers must poll GetImportJobCommand for COMPLETED/FAILED. Silent failure pattern similar to AWS batch operations."
+    },
+    "resolution": null
   }
 ]
