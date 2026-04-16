@@ -29301,5 +29301,53 @@
       "note": "Proactive \u2014 security-critical pattern. validateWebhook is a named export (not method on Replicate class). Scanner needs to detect: (1) result not assigned, (2) result assigned but not checked in conditional, (3) result only used in truthy check after awaiting."
     },
     "resolution": null
+  },
+  {
+    "id": "concern-20260416-openai-deepen-stream1-9-1",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "openai",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for files.waitForProcessing() \u2014 (1) call without try-catch (APIConnectionTimeoutError), (2) return value status field not checked (silent error-state file). Both postconditions added in depth pass 9 but no scanner rule exists.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 RAG pipeline critical. files.waitForProcessing() can timeout after 30min (APIConnectionTimeoutError) and can silently return a file in error state (status==\"error\") without throwing. Both patterns are high-severity silent failures. Scanner needs: (1) detect await without try-catch; (2) detect FileObject.status field not checked after await."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-openai-deepen-stream1-9-2",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "openai",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for files.delete() \u2014 NotFoundError (404) not handled. Unlike S3 DeleteObject, files.delete() is NOT idempotent. Cleanup flows that call delete() without catching NotFoundError crash on re-deletion. Postcondition files-delete-not-found added in depth pass 9 but no scanner rule exists.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 cleanup flow safety. files.delete() throws NotFoundError when file is already deleted or belongs to another project. Scanner needs to detect await openai.files.delete() without try-catch. The idempotent-safe pattern is: catch NotFoundError separately and treat as success."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-openai-deepen-stream1-9-3",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "openai",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for beta.chatkit.sessions.create() \u2014 5-level property chain call without try-catch. AuthenticationError, PermissionDeniedError, NotFoundError not handled. Postconditions chatkit-sessions-create-no-error-handling and chatkit-sessions-create-secret-expired added in depth pass 9 but no scanner rule exists.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 new ChatKit beta API. openai.beta.chatkit.sessions.create() is a 5-level property chain that scanner may not detect. client_secret caching pattern is a silent auth failure vector. Scanner needs to handle deep method chains for beta APIs."
+    },
+    "resolution": null
   }
 ]
