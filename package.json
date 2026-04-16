@@ -1,6 +1,6 @@
 {
   "name": "nark",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Contract coverage scanner for npm packages — find missing error handling before production",
   "type": "module",
   "bin": {
