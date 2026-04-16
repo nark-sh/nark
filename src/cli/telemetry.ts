@@ -16,6 +16,7 @@ import { createHash, randomUUID } from 'crypto';
 import { execSync } from 'child_process';
 import chalk from 'chalk';
 import { getToken } from '../lib/auth.js';
+import type { Violation } from '../types.js';
 
 export interface TelemetryConfig {
   enabled: boolean;
@@ -41,6 +42,16 @@ export interface TelemetryPayload {
   suppressionCount?: number;
   scanMode?: string;
   exitCode?: number;
+}
+
+export interface EnrichedTelemetryPayload extends TelemetryPayload {
+  repoName?: string;
+  repoUrl?: string;
+  gitAuthor?: string;
+  branch?: string;
+  commitSha?: string;
+  ciProvider?: string;
+  codeSnippets?: Array<{ file: string; line: number; code: string; contractId: string }>;
 }
 
 /**
@@ -197,6 +208,181 @@ export async function fireTelemetryEvent(payload: TelemetryPayload): Promise<voi
       ...(did ? { deviceId: did } : {}),
     };
     await fetch(TELEMETRY_ENDPOINT, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(enriched),
+      signal: AbortSignal.timeout(2000),
+    }).catch(() => {});
+  } catch {
+    // ignore — telemetry must never affect the scanner
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Enriched telemetry helpers (all never-throw)
+// ---------------------------------------------------------------------------
+
+/**
+ * Parse an owner/repo string from a git remote URL.
+ * Handles both HTTPS (github.com/owner/repo.git) and SSH (git@github.com:owner/repo.git).
+ * Returns undefined on any failure.
+ */
+function getRepoName(): string | undefined {
+  try {
+    const url = execSync('git remote get-url origin', {
+      encoding: 'utf-8',
+      stdio: ['pipe', 'pipe', 'pipe'],
+    }).trim();
+    if (!url) return undefined;
+    // SSH: git@github.com:owner/repo.git
+    const sshMatch = url.match(/[:/]([^/]+\/[^/]+?)(?:\.git)?$/);
+    if (sshMatch) return sshMatch[1];
+    return undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+function getRepoUrl(): string | undefined {
+  try {
+    return execSync('git remote get-url origin', {
+      encoding: 'utf-8',
+      stdio: ['pipe', 'pipe', 'pipe'],
+    }).trim() || undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+function getGitAuthor(): string | undefined {
+  try {
+    return execSync('git config user.name', {
+      encoding: 'utf-8',
+      stdio: ['pipe', 'pipe', 'pipe'],
+    }).trim() || undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+function getBranch(): string | undefined {
+  try {
+    return execSync('git branch --show-current', {
+      encoding: 'utf-8',
+      stdio: ['pipe', 'pipe', 'pipe'],
+    }).trim() || undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+function getCommitSha(): string | undefined {
+  try {
+    return execSync('git rev-parse HEAD', {
+      encoding: 'utf-8',
+      stdio: ['pipe', 'pipe', 'pipe'],
+    }).trim() || undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+function detectCiProvider(): string | undefined {
+  if (process.env['GITHUB_ACTIONS']) return 'github-actions';
+  if (process.env['GITLAB_CI']) return 'gitlab-ci';
+  if (process.env['CIRCLECI']) return 'circleci';
+  if (process.env['JENKINS_URL']) return 'jenkins';
+  if (process.env['TRAVIS']) return 'travis';
+  if (process.env['BITBUCKET_PIPELINE_UUID']) return 'bitbucket-pipelines';
+  if (process.env['CODEBUILD_BUILD_ID']) return 'aws-codebuild';
+  if (process.env['BUILDKITE']) return 'buildkite';
+  if (process.env['TF_BUILD']) return 'azure-pipelines';
+  return undefined;
+}
+
+const MAX_SNIPPETS = 50;
+const MAX_CODE_LENGTH = 2000;
+
+/**
+ * Extract code snippets from violations for enriched telemetry.
+ * If a violation has a code_snippet, use it; otherwise read ~5 lines from the file.
+ * Caps at 50 snippets total, 2000 chars each.
+ */
+function extractCodeSnippets(violations: Violation[]): Array<{ file: string; line: number; code: string; contractId: string }> {
+  try {
+    const snippets: Array<{ file: string; line: number; code: string; contractId: string }> = [];
+    for (const v of violations) {
+      if (snippets.length >= MAX_SNIPPETS) break;
+      let code: string;
+      if (v.code_snippet) {
+        code = v.code_snippet.lines.map(l => l.content).join('\n');
+      } else {
+        try {
+          const lines = fs.readFileSync(v.file, 'utf-8').split('\n');
+          const start = Math.max(0, v.line - 3);
+          const end = Math.min(lines.length, v.line + 2);
+          code = lines.slice(start, end).join('\n');
+        } catch {
+          code = '';
+        }
+      }
+      if (code.length > MAX_CODE_LENGTH) {
+        code = code.slice(0, MAX_CODE_LENGTH) + '...';
+      }
+      if (code) {
+        snippets.push({ file: v.file, line: v.line, code, contractId: v.package });
+      }
+    }
+    return snippets;
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Fire an enriched telemetry event for authenticated users.
+ * Sends to /api/telemetry/scan-enriched with Bearer auth, git metadata, and code snippets.
+ * Same fire-and-forget pattern — never throws, 2-second timeout.
+ */
+export async function fireEnrichedTelemetryEvent(
+  payload: TelemetryPayload,
+  violations: Violation[],
+): Promise<void> {
+  const config = readTelemetryConfig();
+  if (!config.enabled) return;
+  try {
+    const token = getToken();
+    if (!token) return;
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    };
+
+    const fp = getRepoFingerprint();
+    const did = getOrCreateDeviceId();
+    const repoName = getRepoName();
+    const repoUrl = getRepoUrl();
+    const gitAuthor = getGitAuthor();
+    const branch = getBranch();
+    const commitSha = getCommitSha();
+    const ciProvider = detectCiProvider();
+    const codeSnippets = extractCodeSnippets(violations);
+
+    const enriched: Record<string, unknown> = {
+      ...payload,
+      ...(fp ? { repoFingerprint: fp } : {}),
+      ...(did ? { deviceId: did } : {}),
+      ...(repoName ? { repoName } : {}),
+      ...(repoUrl ? { repoUrl } : {}),
+      ...(gitAuthor ? { gitAuthor } : {}),
+      ...(branch ? { branch } : {}),
+      ...(commitSha ? { commitSha } : {}),
+      ...(ciProvider ? { ciProvider } : {}),
+      ...(codeSnippets.length > 0 ? { codeSnippets } : {}),
+    };
+
+    const endpoint = `${NARK_API_BASE}/api/telemetry/scan-enriched`;
+    await fetch(endpoint, {
       method: 'POST',
       headers,
       body: JSON.stringify(enriched),
