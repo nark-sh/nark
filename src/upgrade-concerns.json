@@ -25274,5 +25274,37 @@
       "note": "Proactive \u2014 contract added via API surface analysis. cloudinary.api.delete_resources_by_tag() is a 3-level chain call. Catastrophic risk: silently deletes ALL matching assets. Rate limited by Admin API."
     },
     "resolution": null
+  },
+  {
+    "id": "concern-20260415-sharp-deepen-1",
+    "created_at": "2026-04-15",
+    "source": "deepen",
+    "package": "sharp",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for sharp().metadata() \u2014 postcondition added in depth pass but no scanner rule exists for metadata() calls without try-catch",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 metadata() is widely used before resize/convert pipelines to validate image dimensions. Corrupt or missing input rejects without error handling crashes upload handlers."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260415-sharp-deepen-2",
+    "created_at": "2026-04-15",
+    "source": "deepen",
+    "package": "sharp",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for sharp().stats() \u2014 postcondition added in depth pass but no scanner rule exists for stats() calls without try-catch",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 stats() requires full pixel decoding; corrupt images crash analysis pipelines. Also documents stats() correctness bug: stats on transformed images requires intermediate toBuffer() call."
+    },
+    "resolution": null
   }
 ]
