@@ -30021,5 +30021,101 @@
       "note": "Proactive \u2014 contract added via API surface analysis. dispute.finalize() not called after adding evidence is a silent failure \u2014 evidence uploaded but never submitted to card network."
     },
     "resolution": null
+  },
+  {
+    "id": "concern-20260416-trigger-dev-sdk-deepen-1",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@trigger.dev/sdk",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for tasks.triggerAndWait() \u2014 postcondition triggerandwait-unwrap-error added but no scanner rule. Scanner should detect .unwrap() calls without surrounding try-catch.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. Scanner also cannot distinguish result.ok pattern (safe) from .unwrap() pattern (needs try-catch)."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-trigger-dev-sdk-deepen-2",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@trigger.dev/sdk",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for tasks.batchTriggerAndWait() \u2014 postconditions batchtriggerandwait-creation-error and batchtriggerandwait-individual-failures-unchecked added. Scanner should detect (1) batchTriggerAndWait() without try-catch and (2) results.runs[] iteration without .ok checks.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. The individual-failures-unchecked pattern (not checking result.ok per item) is a silent failure pattern requiring response-object analysis."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-trigger-dev-sdk-deepen-3",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@trigger.dev/sdk",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for runs.cancel(), runs.replay(), runs.reschedule() \u2014 postconditions added for management API methods. Scanner should detect calls to the runs namespace without surrounding try-catch.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. These are management-plane API calls that throw NotFoundError on missing runs."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-trigger-dev-sdk-deepen-4",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@trigger.dev/sdk",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for runs.poll() \u2014 postcondition poll-no-try-catch added. Scanner should detect poll() calls without try-catch AND warn about missing timeout/AbortController to prevent infinite polling.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. The no-built-in-timeout behavior is a critical pattern: runs.poll() without AbortController can poll indefinitely for stuck runs."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-trigger-dev-sdk-deepen-5",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@trigger.dev/sdk",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for wait.createToken() and wait.completeToken() \u2014 postconditions added. Scanner should detect createToken() without try-catch (blocking token creation failure) and completeToken() without try-catch in webhook handlers.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. completeToken() in webhook handlers is a common pattern where 404 should be swallowed but network errors should trigger retry."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-trigger-dev-sdk-deepen-6",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@trigger.dev/sdk",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for queues.pause() and queues.resume() \u2014 postconditions added. Scanner should detect queue management calls without try-catch.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. Queue pause/resume operations are often called in emergency response procedures where error handling is neglected."
+    },
+    "resolution": null
   }
 ]
