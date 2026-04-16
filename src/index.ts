@@ -73,7 +73,7 @@ const _narkRc = (() => {
 program
   .name('nark')
   .description('Contract coverage scanner — find missing error handling before production')
-  .version('1.0.0');
+  .version('1.1.0');
 
 // Add suppressions subcommand
 program.addCommand(createSuppressionsCommand());
@@ -109,7 +109,7 @@ program
   .option('--instructions-path', 'Print the path to FORAIAGENTS.md and exit', false)
   .option('--sarif', 'Output results in SARIF 2.1.0 format (stdout)')
   .option('--sarif-output <path>', 'Write SARIF 2.1.0 output to file', _narkRc?.output?.sarif)
-  .option('--verbose', 'Print diagnostic information to stderr during scan', false)
+  .option('--verbose', 'Show full detailed output (default: compact summary)', false)
   .action(async (options) => {
     // This action handler is called when the main command is invoked
     // (i.e., not a subcommand like 'suppressions')
@@ -293,14 +293,34 @@ async function main(options: any) {
   handleFirstRunNotice();
 
   const scanStartTime = Date.now();
+  const verbose = options.verbose;
 
-  console.log(chalk.bold('\nNark Contract Verification\n'));
+  // Read nark version from package.json
+  const narkVersion = (() => {
+    try {
+      const _require = createRequire(import.meta.url);
+      return (_require('../package.json') as { version: string }).version;
+    } catch { return 'unknown'; }
+  })();
 
-  // Normalize tsconfig path (allow directory or file)
-  const tsconfigPath = normalizeTsconfigPath(options.tsconfig);
+  if (verbose) {
+    console.log(chalk.bold('\nNark Contract Verification\n'));
+  }
 
-  // Ensure tsconfig exists (generate if missing)
-  ensureTsconfig(tsconfigPath);
+  // Normalize and auto-discover tsconfig path
+  let tsconfigPath = normalizeTsconfigPath(options.tsconfig);
+
+  // If the default tsconfig doesn't exist, try auto-discovery
+  if (!fs.existsSync(tsconfigPath)) {
+    const discovered = discoverTsconfig(path.dirname(tsconfigPath));
+    if (discovered) {
+      tsconfigPath = discovered;
+      if (verbose) console.log(chalk.dim(`  Auto-discovered: ${tsconfigPath}`));
+    }
+  }
+
+  // Ensure tsconfig exists (generate if missing, may redirect to .nark/tsconfig.json)
+  tsconfigPath = ensureTsconfig(tsconfigPath);
 
   // Validate corpus exists
   if (!fs.existsSync(options.corpus)) {
@@ -316,26 +336,28 @@ async function main(options: any) {
   // Setup output logging (capture all terminal output to output.txt)
   const cleanupLogging = setupOutputLogging(outputDir);
 
-  console.log(chalk.gray(`  tsconfig: ${tsconfigPath}`));
-  console.log(chalk.gray(`  corpus: ${options.corpus}`));
+  if (verbose) {
+    console.log(chalk.gray(`  tsconfig: ${tsconfigPath}`));
+    console.log(chalk.gray(`  corpus: ${options.corpus}`));
 
-  // Show corpus source (npm package vs local)
-  if (options.corpus === findDefaultCorpusPath()) {
-    try {
-      const _require = createRequire(import.meta.url);
-      _require.resolve('nark-corpus');
-      console.log(chalk.dim(`  (using npm package nark-corpus)`));
-    } catch {
-      console.log(chalk.dim(`  (using local corpus for development)`));
+    // Show corpus source (npm package vs local)
+    if (options.corpus === findDefaultCorpusPath()) {
+      try {
+        const _require = createRequire(import.meta.url);
+        _require.resolve('nark-corpus');
+        console.log(chalk.dim(`  (using npm package nark-corpus)`));
+      } catch {
+        console.log(chalk.dim(`  (using local corpus for development)`));
+      }
+    } else {
+      console.log(chalk.dim(`  (using custom corpus path)`));
     }
-  } else {
-    console.log(chalk.dim(`  (using custom corpus path)`));
+
+    console.log(chalk.gray(`  output: ${outputPath}\n`));
   }
 
-  console.log(chalk.gray(`  output: ${outputPath}\n`));
-
   // Load corpus
-  console.log(chalk.dim('Loading contracts...'));
+  if (verbose) console.log(chalk.dim('Loading contracts...'));
   const corpusStartTime = Date.now();
   const corpusResult = await loadCorpus(options.corpus, {
     includeDrafts: options.includeDrafts,
@@ -354,22 +376,24 @@ async function main(options: any) {
     process.exit(2);
   }
 
-  console.log(chalk.green(`✓ Loaded ${corpusResult.contracts.size} package contracts`));
+  if (verbose) {
+    console.log(chalk.green(`✓ Loaded ${corpusResult.contracts.size} package contracts`));
 
-  // Show skipped contracts (if any)
-  if (corpusResult.skipped && corpusResult.skipped.length > 0) {
-    const draftCount = corpusResult.skipped.filter(s => s.status === 'draft').length;
-    const inDevCount = corpusResult.skipped.filter(s => s.status === 'in-development').length;
-    const deprecatedCount = corpusResult.skipped.filter(s => s.status === 'deprecated').length;
+    // Show skipped contracts (if any)
+    if (corpusResult.skipped && corpusResult.skipped.length > 0) {
+      const draftCount = corpusResult.skipped.filter(s => s.status === 'draft').length;
+      const inDevCount = corpusResult.skipped.filter(s => s.status === 'in-development').length;
+      const deprecatedCount = corpusResult.skipped.filter(s => s.status === 'deprecated').length;
 
-    const skippedParts: string[] = [];
-    if (draftCount > 0) skippedParts.push(`${draftCount} draft`);
-    if (inDevCount > 0) skippedParts.push(`${inDevCount} in-development`);
-    if (deprecatedCount > 0) skippedParts.push(`${deprecatedCount} deprecated`);
+      const skippedParts: string[] = [];
+      if (draftCount > 0) skippedParts.push(`${draftCount} draft`);
+      if (inDevCount > 0) skippedParts.push(`${inDevCount} in-development`);
+      if (deprecatedCount > 0) skippedParts.push(`${deprecatedCount} deprecated`);
 
-    console.log(chalk.dim(`  (Skipped ${skippedParts.join(', ')} - use --include-drafts to include)`));
+      console.log(chalk.dim(`  (Skipped ${skippedParts.join(', ')} - use --include-drafts to include)`));
+    }
+    console.log();
   }
-  console.log();
 
   // Checkpoint 1: verbose corpus output
   if (options.verbose && corpusResult.contractFiles) {
@@ -391,18 +415,18 @@ async function main(options: any) {
   let packageDiscovery;
   const discoveryStartTime = Date.now();
   if (options.discoverPackages !== false) {
-    console.log(chalk.dim('Discovering packages...'));
+    if (verbose) console.log(chalk.dim('Discovering packages...'));
     const discoveryTool = new PackageDiscovery(corpusResult.contracts);
     packageDiscovery = await discoveryTool.discoverPackages(
       options.project,
       path.resolve(tsconfigPath)
     );
-    console.log(chalk.green(`✓ Discovered ${packageDiscovery.total} packages\n`));
+    if (verbose) console.log(chalk.green(`✓ Discovered ${packageDiscovery.total} packages\n`));
   }
   const discoveryEndTime = Date.now();
 
   // Checkpoint 2: verbose package discovery output
-  if (options.verbose && packageDiscovery) {
+  if (verbose && packageDiscovery) {
     verboseLog(`\n[verbose] Package discovery:`);
     for (const pkg of packageDiscovery.packages) {
       if (pkg.usedIn.length > 0) {
@@ -419,7 +443,7 @@ async function main(options: any) {
     includeTests: options.includeTests,
   };
 
-  console.log(chalk.dim('Analyzing TypeScript code...'));
+  if (verbose) console.log(chalk.dim('Analyzing TypeScript code...'));
 
   // Always create a v1 analyzer instance (used for suppression checks and dead suppression detection)
   const analyzer = new Analyzer(config, corpusResult.contracts);
@@ -463,10 +487,10 @@ async function main(options: any) {
   const analysisEndTime = Date.now();
   const analysisDuration = ((analysisEndTime - analysisStartTime) / 1000).toFixed(1);
 
-  console.log(chalk.green(`✓ Analyzed ${stats.filesAnalyzed} files in ${analysisDuration}s\n`));
+  if (verbose) console.log(chalk.green(`✓ Analyzed ${stats.filesAnalyzed} files in ${analysisDuration}s\n`));
 
   // Checkpoint 3: verbose analysis timing output
-  if (options.verbose && v2Result) {
+  if (verbose && v2Result) {
     const slowFiles = v2Result.fileDurations
       .filter(f => f.durationMs > 500)
       .sort((a, b) => b.durationMs - a.durationMs);
@@ -528,7 +552,7 @@ async function main(options: any) {
 
   // Write JSON output
   writeAuditRecord(finalRecord, outputPath);
-  console.log(chalk.gray(`Audit record written to ${outputPath}`));
+  if (verbose) console.log(chalk.gray(`Audit record written to ${outputPath}`));
 
   // Automatically clean stale suppressions from .bc-suppressions.json
   const suppressionsStorePath = path.join(options.project, '.bc-suppressions.json');
@@ -560,81 +584,53 @@ async function main(options: any) {
   // Generate AI agent prompt file
   const aiPromptPath = await generateAIPrompt(finalRecord, outputPath);
 
-  // Print terminal report
-  if (options.terminal !== false) {
-    if (packageDiscovery) {
-      printEnhancedTerminalReport(finalRecord as any);
-    } else {
-      printTerminalReport(auditRecord);
+  // --- Generate report files (always, regardless of verbose/compact) ---
+
+  const reportOptions = {
+    showHealthScore: true,
+    showPackageBreakdown: true,
+    showInsights: true,
+    showRecommendations: true,
+    showBenchmarking: true,
+  };
+
+  const positiveReportTxtPath = path.join(outputDir, 'positive-report.txt');
+  const positiveReportMdPath = path.join(outputDir, 'positive-report.md');
+  const d3HtmlPath = path.join(outputDir, 'index.html');
+
+  // Calculate metrics
+  const healthMetrics = calculateHealthScore(finalRecord);
+  const packageBreakdown = buildPackageBreakdown(finalRecord);
+
+  // Load benchmark if available
+  let benchmarkComparison;
+  let benchmarkData;
+  try {
+    const benchmarkPath = path.join(__dirname, '../data/benchmarks.json');
+    benchmarkData = await loadBenchmark(benchmarkPath);
+    if (benchmarkData) {
+      benchmarkComparison = compareAgainstBenchmark(finalRecord, benchmarkData);
     }
+  } catch {
+    // Benchmark not available
   }
 
-  // Generate and print positive evidence report (default: on)
-  if (options.positiveReport !== false && options.terminal !== false) {
-    console.log(''); // Add spacing
-
-    const reportOptions = {
-      showHealthScore: true,
-      showPackageBreakdown: true,
-      showInsights: true,
-      showRecommendations: true,
-      showBenchmarking: true, // Phase 2 - now enabled!
-    };
-
-    await printPositiveEvidenceReport(finalRecord as any, reportOptions);
-
-    // Write positive evidence report to file (both .txt and .md)
-    const positiveReportTxtPath = path.join(outputDir, 'positive-report.txt');
-    const positiveReportMdPath = path.join(outputDir, 'positive-report.md');
-
+  // Write report files
+  if (options.positiveReport !== false) {
     await writePositiveEvidenceReport(finalRecord as any, positiveReportTxtPath, reportOptions);
     await writePositiveEvidenceReportMarkdown(finalRecord as any, positiveReportMdPath, reportOptions);
-
-    // Generate D3.js interactive visualization
-    const d3HtmlPath = path.join(outputDir, 'index.html');
-
-    // Calculate metrics for D3 visualization
-    const healthMetrics = calculateHealthScore(finalRecord);
-    const packageBreakdown = buildPackageBreakdown(finalRecord);
-
-    // Load benchmark if available
-    let benchmarkComparison;
-    let benchmarkData;
-    try {
-      const benchmarkPath = path.join(__dirname, '../data/benchmarks.json');
-      benchmarkData = await loadBenchmark(benchmarkPath);
-      if (benchmarkData) {
-        benchmarkComparison = compareAgainstBenchmark(finalRecord, benchmarkData);
-      }
-    } catch {
-      // Benchmark not available
-    }
-
-    await writeD3Visualization(
-      {
-        audit: finalRecord,
-        health: healthMetrics,
-        packageBreakdown,
-        benchmarking: benchmarkComparison,
-        benchmark: benchmarkData || undefined,
-      },
-      d3HtmlPath
-    );
-
-    const outputTxtPath = path.join(outputDir, 'output.txt');
-
-    console.log(chalk.gray(`Reports written to:`));
-    console.log(chalk.gray(`  - ${outputTxtPath} (full terminal output)`));
-    console.log(chalk.gray(`  - ${positiveReportTxtPath}`));
-    console.log(chalk.gray(`  - ${positiveReportMdPath}`));
-    console.log(chalk.green(`  - file://${d3HtmlPath} (interactive visualization)`));
-
-    // Only show AI prompt if it was generated (i.e., if there are violations)
-    if (aiPromptPath) {
-      console.log(chalk.hex('#FFA500')(`  - ${aiPromptPath} (AI agent instructions)`));
-    }
-    console.log('');
   }
+
+  await writeD3Visualization(
+    {
+      audit: finalRecord,
+      health: healthMetrics,
+      packageBreakdown,
+      benchmarking: benchmarkComparison,
+      benchmark: benchmarkData || undefined,
+    },
+    d3HtmlPath
+  );
 
   // Write .nark/ output directory
   const projectRoot = findGitRepoRoot(tsconfigPath) || path.dirname(path.resolve(tsconfigPath));
@@ -644,42 +640,76 @@ async function main(options: any) {
     violations,
     tsconfigPath: path.resolve(tsconfigPath),
     startTime: scanStartTime,
-    narkVersion: '1.0.0',
+    narkVersion,
   });
-
-  if (narkResult) {
-    console.log(chalk.gray(`\nScan results saved to ${narkResult.scanPath}`));
-    console.log(chalk.gray(`Violation details: ${path.join(narkResult.narkDir, 'violations')}/`));
-    console.log(chalk.gray(`For AI agent instructions: nark --instructions-path`));
-  }
 
   // SARIF output (--sarif or --sarif-output)
   if (options.sarif || options.sarifOutput) {
     writeSarifOutput(violations, options.sarifOutput);
   }
 
-  // Final summary at the very end (easy to spot after all output)
-  const totalViolations = auditRecord.summary.error_count + auditRecord.summary.warning_count;
-  if (totalViolations > 0) {
-    console.log(chalk.yellow('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'));
-    console.log(chalk.yellow.bold(`  ⚠️  ${totalViolations} violation${totalViolations === 1 ? '' : 's'} found - scroll up for full report`));
-    console.log(chalk.yellow('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n'));
-  } else {
-    console.log(chalk.green('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'));
-    console.log(chalk.green.bold('  ✓ No violations found - great work!'));
-    console.log(chalk.green('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n'));
+  // --- Terminal output: verbose vs compact ---
+  if (verbose && options.terminal !== false) {
+    // Full detailed output (previous default behavior)
+    if (packageDiscovery) {
+      printEnhancedTerminalReport(finalRecord as any);
+    } else {
+      printTerminalReport(auditRecord);
+    }
+
+    if (options.positiveReport !== false) {
+      console.log('');
+      await printPositiveEvidenceReport(finalRecord as any, reportOptions);
+    }
+
+    const outputTxtPath = path.join(outputDir, 'output.txt');
+    console.log(chalk.gray(`Reports written to:`));
+    console.log(chalk.gray(`  - ${outputTxtPath} (full terminal output)`));
+    console.log(chalk.gray(`  - ${positiveReportTxtPath}`));
+    console.log(chalk.gray(`  - ${positiveReportMdPath}`));
+    console.log(chalk.green(`  - file://${d3HtmlPath} (interactive visualization)`));
+    if (aiPromptPath) {
+      console.log(chalk.hex('#FFA500')(`  - ${aiPromptPath} (AI agent instructions)`));
+    }
+    console.log('');
+
+    if (narkResult) {
+      console.log(chalk.gray(`\nScan results saved to ${narkResult.scanPath}`));
+      console.log(chalk.gray(`Violation details: ${path.join(narkResult.narkDir, 'violations')}/`));
+      console.log(chalk.gray(`For AI agent instructions: nark --instructions-path`));
+    }
+
+    // Final verbose summary box
+    const totalViolations = auditRecord.summary.error_count + auditRecord.summary.warning_count;
+    if (totalViolations > 0) {
+      console.log(chalk.yellow('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'));
+      console.log(chalk.yellow.bold(`  ⚠️  ${totalViolations} violation${totalViolations === 1 ? '' : 's'} found - scroll up for full report`));
+      console.log(chalk.yellow('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n'));
+    } else {
+      console.log(chalk.green('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'));
+      console.log(chalk.green.bold('  ✓ No violations found - great work!'));
+      console.log(chalk.green('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n'));
+    }
+  } else if (options.terminal !== false) {
+    // Compact output (new default)
+    printCompactReport({
+      narkVersion,
+      filesAnalyzed: stats.filesAnalyzed,
+      packagesMatched: packageDiscovery?.withContracts ?? 0,
+      scanDuration: ((Date.now() - scanStartTime) / 1000).toFixed(1),
+      score: healthMetrics.overallScore,
+      violations,
+      packageDiscovery,
+      d3HtmlPath,
+      aiPromptPath,
+      finalRecord,
+    });
   }
 
   const outputEndTime = Date.now();
 
   // Fire telemetry (fire-and-forget, never blocks)
   {
-    const narkPkg = (() => {
-      try {
-        const _require = createRequire(import.meta.url);
-        return _require('../package.json') as { version: string };
-      } catch { return { version: 'unknown' }; }
-    })();
     const corpusPkgVersion = (() => {
       try {
         const pkgPath = path.join(options.corpus, 'package.json');
@@ -714,7 +744,7 @@ async function main(options: any) {
     })();
 
     await fireTelemetryEvent({
-      version: narkPkg.version,
+      version: narkVersion,
       os: process.platform,
       arch: process.arch,
       nodeVersion: process.version,
@@ -733,7 +763,7 @@ async function main(options: any) {
   }
 
   // Checkpoint 4: verbose time breakdown
-  if (options.verbose) {
+  if (verbose) {
     const totalTime = Date.now() - scanStartTime;
     verboseLog(`\n[verbose] Time breakdown:`);
     verboseLog(`  Contract loading:     ${corpusEndTime - corpusStartTime}ms`);
@@ -772,6 +802,204 @@ async function main(options: any) {
   }
 
   process.exit(shouldFail ? 1 : 0);
+}
+
+/**
+ * Auto-discover tsconfig.json in a project directory.
+ * Searches common locations when the default path doesn't exist.
+ */
+function discoverTsconfig(projectDir: string): string | null {
+  const candidates = [
+    path.join(projectDir, 'tsconfig.json'),
+    path.join(projectDir, 'tsconfig.build.json'),
+  ];
+
+  // Check monorepo patterns
+  for (const subdir of ['apps', 'packages', 'src']) {
+    const dir = path.join(projectDir, subdir);
+    if (fs.existsSync(dir) && fs.statSync(dir).isDirectory()) {
+      try {
+        const entries = fs.readdirSync(dir, { withFileTypes: true });
+        for (const entry of entries) {
+          if (entry.isDirectory()) {
+            candidates.push(path.join(dir, entry.name, 'tsconfig.json'));
+          }
+        }
+      } catch {
+        // Permission errors — skip
+      }
+    }
+  }
+
+  for (const candidate of candidates) {
+    if (fs.existsSync(candidate)) {
+      return candidate;
+    }
+  }
+
+  return null;
+}
+
+/**
+ * Print compact CLI output (~15-25 lines).
+ * Default mode — shows score, violation summary by package, and report link.
+ */
+function printCompactReport(opts: {
+  narkVersion: string;
+  filesAnalyzed: number;
+  packagesMatched: number;
+  scanDuration: string;
+  score: number;
+  violations: Violation[];
+  packageDiscovery: import('./types.js').PackageDiscoveryResult | undefined;
+  d3HtmlPath: string;
+  aiPromptPath: string | null;
+  finalRecord: any;
+}): void {
+  const {
+    narkVersion, filesAnalyzed, packagesMatched, scanDuration,
+    score, violations, packageDiscovery, d3HtmlPath, aiPromptPath,
+  } = opts;
+
+  const errorCount = violations.filter(v => v.severity === 'error').length;
+  const warningCount = violations.filter(v => v.severity === 'warning').length;
+  const totalViolations = errorCount + warningCount;
+
+  // Header line
+  console.log('');
+  console.log(chalk.bold(`nark`) + chalk.dim(` v${narkVersion}`) +
+    chalk.dim(` · ${filesAnalyzed} files · ${packagesMatched} packages matched · ${scanDuration}s`));
+  console.log('');
+
+  // Score line
+  const scoreColor = score >= 90 ? chalk.green : score >= 70 ? chalk.yellow : chalk.red;
+  if (totalViolations > 0) {
+    const parts = [];
+    if (errorCount > 0) parts.push(`${errorCount} error${errorCount === 1 ? '' : 's'}`);
+    if (warningCount > 0) parts.push(`${warningCount} warning${warningCount === 1 ? '' : 's'}`);
+    console.log(`  ${scoreColor.bold(`Score: ${score}/100`)}  ·  ${chalk.red(`${totalViolations} violation${totalViolations === 1 ? '' : 's'}`)} ${chalk.dim(`(${parts.join(', ')})`)}`)
+  } else {
+    console.log(`  ${scoreColor.bold(`Score: ${score}/100`)}  ·  ${chalk.green('0 violations')}`);
+  }
+  console.log('');
+
+  if (totalViolations === 0) {
+    // Clean scan — show passing packages
+    const passingPkgs = packageDiscovery?.packages
+      .filter(p => p.hasContract)
+      .map(p => p.name) ?? [];
+    if (passingPkgs.length > 0) {
+      console.log(`  ${chalk.green('✓')} ${passingPkgs.join(', ')} — all compliant`);
+      console.log('');
+    }
+  } else {
+    // Group violations by package
+    const byPackage = new Map<string, Violation[]>();
+    for (const v of violations) {
+      if (v.severity === 'error' || v.severity === 'warning') {
+        if (!byPackage.has(v.package)) byPackage.set(v.package, []);
+        byPackage.get(v.package)!.push(v);
+      }
+    }
+
+    // Sort packages by violation count descending
+    const sortedPackages = [...byPackage.entries()].sort((a, b) => b[1].length - a[1].length);
+
+    // Show top packages with inline violations (top 3 get detail, rest just count)
+    const MAX_DETAIL_PACKAGES = 3;
+    const MAX_INLINE_VIOLATIONS = 2;
+
+    for (let i = 0; i < sortedPackages.length; i++) {
+      const [pkg, pkgViolations] = sortedPackages[i];
+
+      if (i < MAX_DETAIL_PACKAGES) {
+        // Show detail for top packages
+        console.log(`  ${chalk.red('✗')} ${chalk.bold(pkg)}     ${chalk.dim(`${pkgViolations.length} violation${pkgViolations.length === 1 ? '' : 's'}`)}`);
+
+        // Show first N violations inline
+        const projectRoot = findGitRepoRoot(opts.finalRecord.tsconfig_path || '') || process.cwd();
+        for (let j = 0; j < Math.min(MAX_INLINE_VIOLATIONS, pkgViolations.length); j++) {
+          const v = pkgViolations[j];
+          const relFile = path.relative(projectRoot, v.file);
+          const shortDesc = getCompactDescription(v);
+          console.log(chalk.dim(`    ${relFile}:${v.line}`) + `    ${v.function}() — ${shortDesc}`);
+        }
+
+        if (pkgViolations.length > MAX_INLINE_VIOLATIONS) {
+          console.log(chalk.dim(`    ... +${pkgViolations.length - MAX_INLINE_VIOLATIONS} more`));
+        }
+      } else {
+        // Just show count for remaining packages
+        console.log(`  ${chalk.red('✗')} ${chalk.bold(pkg)}     ${chalk.dim(`${pkgViolations.length} violation${pkgViolations.length === 1 ? '' : 's'}`)}`);
+      }
+    }
+    console.log('');
+  }
+
+  // Report link
+  console.log(chalk.dim(`  Full report: `) + chalk.underline(`file://${d3HtmlPath}`));
+  if (aiPromptPath && totalViolations > 0) {
+    console.log(chalk.dim(`  AI fix:      `) + `nark --instructions-path`);
+  }
+  console.log('');
+}
+
+/**
+ * Generate a compact, scary description for a violation.
+ * Focuses on the production consequence, not the rule name.
+ */
+function getCompactDescription(v: Violation): string {
+  // Use business impact if available
+  if (v.business_impact?.incident_label) {
+    const labels: Record<string, string> = {
+      'PAYMENT_RISK': 'payment will fail silently',
+      'DATA_LOSS': 'data loss risk',
+      'SILENT_FAILURE': 'will fail silently',
+      'DOWNTIME': 'will crash in production',
+      'SECURITY_RISK': 'security vulnerability',
+      'COMPLIANCE_VIOLATION': 'compliance risk',
+    };
+    return labels[v.business_impact.incident_label] || 'missing error handling';
+  }
+
+  // Extract the key info from the description
+  // Common pattern: "No try-catch block found around axios.get() call"
+  // We want: "missing try-catch, network errors will crash"
+  const desc = v.description.toLowerCase();
+
+  if (desc.includes('no try-catch') || desc.includes('missing try-catch') || desc.includes('not wrapped')) {
+    // Try to extract what will happen
+    if (v.contract_clause.toLowerCase().includes('p2002') || v.contract_clause.toLowerCase().includes('unique')) {
+      return 'missing try-catch, duplicate key will crash';
+    }
+    if (v.contract_clause.toLowerCase().includes('p2003') || v.contract_clause.toLowerCase().includes('foreign')) {
+      return 'missing try-catch, FK constraint will crash';
+    }
+    if (v.contract_clause.toLowerCase().includes('p2025') || v.contract_clause.toLowerCase().includes('not found')) {
+      return 'missing try-catch, record-not-found will crash';
+    }
+    if (v.contract_clause.toLowerCase().includes('404') || v.contract_clause.toLowerCase().includes('not found')) {
+      return 'missing try-catch, 404 will crash';
+    }
+    if (v.contract_clause.toLowerCase().includes('network') || v.contract_clause.toLowerCase().includes('timeout')) {
+      return 'missing try-catch, network errors will crash';
+    }
+    if (v.contract_clause.toLowerCase().includes('rate') || v.contract_clause.toLowerCase().includes('429')) {
+      return 'missing try-catch, rate limit will crash';
+    }
+    if (v.contract_clause.toLowerCase().includes('auth') || v.contract_clause.toLowerCase().includes('401')) {
+      return 'missing try-catch, auth errors will crash';
+    }
+    return 'missing try-catch, errors will crash';
+  }
+
+  if (desc.includes('error handler') || desc.includes('.on(')) {
+    return 'missing error event handler';
+  }
+
+  // Fallback: truncate the original description
+  const shortDesc = v.description.replace(/\.$/, '');
+  return shortDesc.length > 50 ? shortDesc.substring(0, 47) + '...' : shortDesc;
 }
 
 /**

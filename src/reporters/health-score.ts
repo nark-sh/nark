@@ -62,10 +62,10 @@ export function calculateHealthScore(
   // Risk level (based on violation count and severity)
   const riskLevel = getRiskLevel(audit);
 
-  // Overall composite score
-  // Weighted: Error handling (70%), Package coverage (30%)
-  // Clamp to 0 minimum in case violations > contracts (V2 counts contracts differently than V1)
-  const overallScore = Math.max(0, (errorHandlingCompliance * 0.7) + (packageCoverage * 0.3));
+  // Overall score = pure compliance (how well the user handles errors)
+  // Package coverage is informational only — we don't penalize users for
+  // contracts WE haven't written yet.
+  const overallScore = Math.max(0, errorHandlingCompliance);
 
   // Pattern detection (simplified for now)
   const hasGlobalErrorHandlers = detectGlobalErrorHandlers(audit);

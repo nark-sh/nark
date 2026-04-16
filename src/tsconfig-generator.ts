@@ -124,12 +124,58 @@ export function generateMinimalTsconfig(tsconfigPath: string, options?: TsConfig
 }
 
 /**
- * Ensures tsconfig.json exists, generating if necessary
+ * Check if a directory contains any TypeScript files (recursive, fast bail-out)
  */
-export function ensureTsconfig(tsconfigPath: string): void {
-  if (!fs.existsSync(tsconfigPath)) {
-    const projectDir = path.dirname(tsconfigPath);
-    console.log(chalk.yellow(`  tsconfig.json not found, generating minimal config...`));
-    generateMinimalTsconfig(tsconfigPath, { projectDir });
+function hasTypeScriptFiles(dir: string): boolean {
+  try {
+    const entries = fs.readdirSync(dir, { withFileTypes: true });
+    for (const entry of entries) {
+      if (entry.name === 'node_modules' || entry.name === '.git' || entry.name === 'dist' || entry.name === 'build') continue;
+      const fullPath = path.join(dir, entry.name);
+      if (entry.isFile() && (entry.name.endsWith('.ts') || entry.name.endsWith('.tsx')) && !entry.name.endsWith('.d.ts')) {
+        return true;
+      }
+      if (entry.isDirectory()) {
+        if (hasTypeScriptFiles(fullPath)) return true;
+      }
+    }
+  } catch {
+    // Permission errors etc — skip
   }
+  return false;
+}
+
+/**
+ * Ensures tsconfig.json exists, generating if necessary.
+ * If no TypeScript files are found, prints a friendly message and exits.
+ * Generated tsconfig goes to .nark/tsconfig.json to avoid polluting the project.
+ */
+export function ensureTsconfig(tsconfigPath: string): string {
+  if (fs.existsSync(tsconfigPath)) {
+    return tsconfigPath;
+  }
+
+  const projectDir = path.dirname(tsconfigPath);
+
+  // Check for TS files before generating anything
+  if (!hasTypeScriptFiles(projectDir)) {
+    console.log('');
+    console.log(chalk.yellow('  No TypeScript files found in this directory.'));
+    console.log(chalk.dim('  Nark scans TypeScript and TSX projects.'));
+    console.log('');
+    console.log(chalk.dim('  If this is a TypeScript project, pass your tsconfig:'));
+    console.log(chalk.dim('    npx nark --tsconfig path/to/tsconfig.json'));
+    console.log('');
+    process.exit(0);
+  }
+
+  // Generate tsconfig in .nark/ to avoid polluting the user's project
+  const narkDir = path.join(projectDir, '.nark');
+  fs.mkdirSync(narkDir, { recursive: true });
+  const generatedPath = path.join(narkDir, 'tsconfig.json');
+
+  console.log(chalk.dim(`  tsconfig.json not found, generating temporary config...`));
+  generateMinimalTsconfig(generatedPath, { projectDir });
+
+  return generatedPath;
 }
