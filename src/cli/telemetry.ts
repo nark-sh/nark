@@ -95,7 +95,7 @@ function getOrCreateDeviceId(): string | undefined {
   }
 }
 
-const NARK_API_BASE = process.env['NARK_API_URL'] ?? 'https://nark.sh';
+const NARK_API_BASE = process.env['NARK_API_URL'] ?? 'https://app.nark.sh';
 const TELEMETRY_ENDPOINT = `${NARK_API_BASE}/api/telemetry/scan`;
 
 export function getTelemetryConfigPath(): string {

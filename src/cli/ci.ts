@@ -183,7 +183,7 @@ function fireLifecycleEvents(events: LifecycleEvent[]): void {
   const token = getToken();
   if (!token) return; // lifecycle events require auth for org attribution
   try {
-    fetch('https://nark.sh/api/telemetry/lifecycle', {
+    fetch(`${process.env['NARK_API_URL'] ?? 'https://app.nark.sh'}/api/telemetry/lifecycle`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
