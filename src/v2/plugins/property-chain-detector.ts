@@ -199,9 +199,30 @@ export class PropertyChainDetector implements DetectorPlugin {
 
     // Walk up the chain, collecting property names.
     // When we encounter a CallExpression in the chain (builder pattern), walk through it.
+    // When we encounter an ElementAccessExpression (bracket notation, e.g. zip.files['name']),
+    // walk through it transparently — the bracket index is not part of the function chain.
+    // This supports patterns like: zip.files['name'].async('string')
     while (ts.isPropertyAccessExpression(current)) {
       properties.unshift(current.name.text);
       current = current.expression;
+
+      // Element access pattern: current may be an ElementAccessExpression (bracket notation),
+      // e.g. zip.files['name'] in: zip.files['name'].async('string')
+      // We unwrap it ONLY when the element access object is itself a PropertyAccessExpression
+      // whose root will eventually resolve to an identifier (classic obj.prop['key'].method()
+      // chain). We do NOT unwrap bare arr['key'].method() patterns (whose inner expression
+      // is a plain Identifier) since those would introduce false positives for any array/map
+      // access on a tracked-package variable.
+      //
+      // Implementation: use a while loop to handle nested element accesses like
+      // zip.files['a']['b'].async(), unwrapping each level only when its inner expression
+      // is still a PropertyAccessExpression (ensuring we stop before a bare Identifier root).
+      while (
+        ts.isElementAccessExpression(current) &&
+        ts.isPropertyAccessExpression(current.expression)
+      ) {
+        current = current.expression;
+      }
 
       // Builder pattern: current is now a CallExpression (e.g., supabase.from('users'))
       // Unwrap: collect the method name from the call's PropertyAccess, then continue walking
