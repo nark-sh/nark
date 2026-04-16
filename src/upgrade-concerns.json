@@ -30741,5 +30741,181 @@
       "note": "Proactive \u2014 disk-storage-destination-permission-error and disk-storage-write-error postconditions require scanner to detect diskStorage usage without error middleware"
     },
     "resolution": null
+  },
+  {
+    "id": "concern-20260416-jose-deepen-1",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "jose",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for jose.jwtDecrypt() without try-catch \u2014 postcondition jwt-decrypt-no-try-catch added in depth pass but no scanner rule exists for jwtDecrypt (only jwtVerify is detected)",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. jwtDecrypt() throws JWEDecryptionFailed + JWTExpired same as jwtVerify but for encrypted JWTs"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-jose-deepen-2",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "jose",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for jose.compactDecrypt() without try-catch \u2014 postcondition compact-decrypt-no-try-catch added in depth pass but no scanner rule exists",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 compactDecrypt() throws JWEDecryptionFailed on tampered ciphertext, JWEInvalid on malformed compact serialization"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-jose-deepen-3",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "jose",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for jose.importSPKI() and jose.importPKCS8() without try-catch \u2014 postconditions import-spki-no-try-catch and import-pkcs8-no-try-catch added in depth pass. High impact: PEM key loading from env vars is a common crash point at server startup",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 importSPKI/importPKCS8 throw TypeError on malformed PEM strings (common with env var issues: missing newlines, truncation, Windows line endings)"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-jose-deepen-4",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "jose",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for jose.compactVerify() without try-catch \u2014 postcondition compact-verify-no-try-catch added in depth pass. Similar to jwtVerify but lower-level JWS verification without claims validation",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 compactVerify() throws JWSSignatureVerificationFailed on tampered tokens, JWSInvalid on format errors, JOSEAlgNotAllowed on algorithm mismatches"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-modelcontextprotocol-sdk-deepen-1",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@modelcontextprotocol/sdk",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for Client.close() and McpServer.close() \u2014 postcondition close-missing-on-server-shutdown added but no scanner rule exists. Detect when close() is never called on Client/McpServer instances in HTTP request handlers or process shutdown paths.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. Pattern: McpServer created, connect() called, close() missing in cleanup paths."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-modelcontextprotocol-sdk-deepen-2",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@modelcontextprotocol/sdk",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for Client.readResource() \u2014 postcondition read-resource-missing-try-catch added but no scanner rule exists. Detect when readResource() is awaited without try-catch.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-modelcontextprotocol-sdk-deepen-3",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@modelcontextprotocol/sdk",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for Client.getPrompt() \u2014 postcondition get-prompt-missing-try-catch added but no scanner rule exists. Detect when getPrompt() is awaited without try-catch.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-modelcontextprotocol-sdk-deepen-4",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@modelcontextprotocol/sdk",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for Server.createMessage() \u2014 postcondition create-message-missing-try-catch added. Server-to-client sampling request that wraps LLM API calls. Detect when createMessage() is awaited without try-catch. High impact: LLM calls are slow and commonly fail.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. createMessage() is unique: it crosses client-server boundary in reverse. Detection needs Server class instance tracking."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-modelcontextprotocol-sdk-deepen-5",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@modelcontextprotocol/sdk",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for Server.elicitInput() \u2014 postcondition elicit-input-missing-try-catch added. User interaction request that can time out if user never responds. Detect when elicitInput() is awaited without try-catch.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. elicitInput() is a new capability (MCP 2025-06-18) and commonly used without error handling in early implementations."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-modelcontextprotocol-sdk-deepen-6",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@modelcontextprotocol/sdk",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for Client.listResources() and Client.listPrompts() \u2014 postconditions list-resources-missing-try-catch and list-prompts-missing-try-catch added. Pattern mirrors listTools() detection. Detect when these listing methods are awaited without try-catch.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed. Same detection pattern as listTools()."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-modelcontextprotocol-sdk-deepen-7",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@modelcontextprotocol/sdk",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for Client.subscribeResource() \u2014 postcondition subscribe-resource-missing-try-catch and subscribe-resource-no-notification-handler added. The no-notification-handler case requires checking whether setNotificationHandler() has been called before subscribeResource(). This is a complex flow-sensitive detection.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. The notification-handler check is particularly tricky: requires tracking setNotificationHandler() calls before subscribeResource()."
+    },
+    "resolution": null
   }
 ]
