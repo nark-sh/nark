@@ -29893,5 +29893,133 @@
       "note": "Proactive \u2014 retry logic that reuses Upload instances throws 'already executed .done()' on the retry attempt. New Upload instance required for each retry."
     },
     "resolution": null
+  },
+  {
+    "id": "concern-20260416-sesv2-deepen2-1",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@aws-sdk/client-sesv2",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for UpdateEmailTemplateCommand without try-catch \u2014 postcondition sesv2-update-template-no-try-catch added in depth pass 2 but no scanner rule exists. Detect sesv2Client.send(new UpdateEmailTemplateCommand(...)) calls not wrapped in try-catch.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 template sync scripts commonly call UpdateEmailTemplateCommand in loops without error handling. NotFoundException when template was externally deleted causes silent deployment failure."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-sesv2-deepen2-2",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@aws-sdk/client-sesv2",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for PutSuppressedDestinationCommand without try-catch \u2014 postcondition sesv2-suppressed-destination-no-try-catch added in depth pass 2. Detect sesv2Client.send(new PutSuppressedDestinationCommand(...)) calls not wrapped in try-catch. Critical: in bounce webhook handlers, unhandled exceptions return 5xx causing SES retry storms.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 bounce/complaint webhook handlers that add to suppression list without try-catch will cause HTTP 5xx responses, triggering SNS/SES retry storms and duplicate suppression attempts."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-sesv2-deepen2-3",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@aws-sdk/client-sesv2",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for CreateContactCommand without try-catch \u2014 postcondition sesv2-create-contact-no-try-catch added in depth pass 2. Detect sesv2Client.send(new CreateContactCommand(...)) calls not wrapped in try-catch. AlreadyExistsException is expected for resubscription flows; NotFoundException means the contact list is missing.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 newsletter subscription flows frequently call CreateContactCommand without handling AlreadyExistsException, causing subscription form failures for returning users."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-braintree-deepen-1",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "braintree",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for gateway.transaction.void() \u2014 postcondition void-no-try-catch added in depth pass but no scanner rule exists",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis (deepen pass 2026-04-16). void() is commonly used in payment authorization flows."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-braintree-deepen-2",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "braintree",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for gateway.transaction.submitForSettlement() \u2014 postcondition submit-settlement-no-try-catch added in depth pass but no scanner rule exists",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. submitForSettlement() is the capture step in authorize-then-capture flows. Silent failure means funds never collected."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-braintree-deepen-3",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "braintree",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for gateway.subscription.cancel/retryCharge/update() \u2014 postconditions added in depth pass but no scanner rule exists",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. subscription.cancel() without try-catch in account deletion flows leaves subscriptions active and billing users."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-braintree-deepen-4",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "braintree",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for gateway.webhookNotification.parse() \u2014 postcondition webhook-parse-no-try-catch added in depth pass but no scanner rule exists",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. InvalidSignatureError on parse() is security-critical: tampered webhooks should not be processed."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-braintree-deepen-5",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "braintree",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for gateway.dispute.accept/finalize() \u2014 postconditions added in depth pass but no scanner rule exists",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. dispute.finalize() not called after adding evidence is a silent failure \u2014 evidence uploaded but never submitted to card network."
+    },
+    "resolution": null
   }
 ]
