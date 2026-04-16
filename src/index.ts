@@ -38,8 +38,9 @@ import { createInitCommand } from './cli/init.js';
 import { createTriageCommand } from './cli/triage.js';
 import { createCompactCommand } from './cli/compact.js';
 import { createShowCommand } from './cli/show.js';
-import { createTelemetryCommand, handleFirstRunNotice, fireTelemetryEvent } from './cli/telemetry.js';
+import { createTelemetryCommand, handleFirstRunNotice, fireTelemetryEvent, fireEnrichedTelemetryEvent } from './cli/telemetry.js';
 import { createAuthCommand } from './cli/auth.js';
+import { getToken } from './lib/auth.js';
 import { createCiCommand } from './cli/ci.js';
 import { generateAIPrompt } from './ai-prompt-generator.js';
 import { loadStore, removeStaleSuppressions, saveStore } from './suppressions/bc-scan-store.js';
@@ -755,7 +756,7 @@ async function main(options: any) {
       return _hasErrors ? 1 : 0;
     })();
 
-    await fireTelemetryEvent({
+    const telemetryPayload = {
       version: narkVersion,
       os: process.platform,
       arch: process.arch,
@@ -771,7 +772,14 @@ async function main(options: any) {
       suppressionCount,
       scanMode: 'full',
       exitCode: telemetryExitCode,
-    });
+    };
+
+    const token = getToken();
+    if (token !== null) {
+      await fireEnrichedTelemetryEvent(telemetryPayload, violations);
+    } else {
+      await fireTelemetryEvent(telemetryPayload);
+    }
   }
 
   // Checkpoint 4: verbose time breakdown
