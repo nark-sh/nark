@@ -25098,5 +25098,37 @@
       "postcondition_id": "weak-password"
     },
     "resolution": "Rejected: insufficient evidence (1 instance(s)). Threshold: 3+ instances required. May be valid violations the repo needs to fix."
+  },
+  {
+    "id": "concern-20260415-jszip-deepen-1",
+    "created_at": "2026-04-15",
+    "source": "deepen",
+    "package": "jszip",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for jszip JSZipObject.async() method calls \u2014 postcondition file-async-no-try-catch added in depth pass but no scanner rule exists for .async() method call pattern on JSZipObject instances",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. JSZipObject.async() is called in every zip file reading workflow after loadAsync(). Common pattern: zip.files[\"name\"].async(\"string\") without try-catch. Decompression via pako can throw on corrupted DEFLATE data even when the zip container passes loadAsync()."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260415-jszip-deepen-2",
+    "created_at": "2026-04-15",
+    "source": "deepen",
+    "package": "jszip",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for jszip JSZipObject.async() unsupported type pattern \u2014 postcondition file-async-unsupported-type added in depth pass: callers using blob/uint8array type in Node.js environments throw unsupported platform error",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. Pattern: zip.files[\"name\"].async(\"blob\") in Node.js code throws Error: blob is not supported by this platform. Needs a separate detector from file-async-no-try-catch since the type-checking issue exists even WITH try-catch present."
+    },
+    "resolution": null
   }
 ]
