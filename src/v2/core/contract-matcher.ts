@@ -111,10 +111,13 @@ export class ContractMatcher {
       // functionName match (e.g., prefer "embeddings.create" over "create" for
       // openai.embeddings.create() calls). This ensures package-namespaced functions
       // like openai.embeddings.create() use the correct postconditions.
+      // For throwing-function detections that carry instanceTypeName (e.g., channel: GuildChannel),
+      // use the type name as a class-prefix hint to disambiguate dotted-name contracts
+      // (e.g., GuildChannel.delete vs Message.delete when functionName='delete').
       const chainStr =
         detection.pattern === "property-chain"
           ? (detection.metadata?.chainStr as string | undefined)
-          : undefined;
+          : (detection.metadata?.instanceTypeName as string | undefined);
       // superagent: agent instance rerouting.
       // When superagent.agent() is called and the result is stored (e.g., `const agent = superagent.agent()`),
       // the instance-tracker resolves `agent.get()` as packageName='superagent', functionName='get'.
@@ -2190,12 +2193,29 @@ export class ContractMatcher {
 
     // Fallback: match the last segment of a dotted function name in the contract.
     // Example: functionName='login', contract has name='Client.login' → match!
-    const dotted = functions.find((f) => {
+    // When chainStr is provided as instanceTypeName context, prefer the contract function
+    // whose class prefix matches (e.g., 'GuildChannel' in 'GuildChannel.delete').
+    const dottedMatches = functions.filter((f) => {
       const parts = f.name.split(".");
       return parts.length > 1 && parts[parts.length - 1] === functionName;
     });
-    if (dotted) {
-      return dotted;
+    if (dottedMatches.length === 1) {
+      return dottedMatches[0];
+    }
+    if (dottedMatches.length > 1) {
+      // Multiple dotted functions share the same method name (e.g., Message.delete + GuildChannel.delete).
+      // Use chainStr as a hint for the class prefix if available (instanceTypeName from detection metadata).
+      if (chainStr) {
+        const typeMatch = dottedMatches.find((f) => {
+          const parts = f.name.split(".");
+          // Class prefix is everything except the last segment
+          const classPrefix = parts.slice(0, -1).join(".");
+          return classPrefix === chainStr;
+        });
+        if (typeMatch) return typeMatch;
+      }
+      // No disambiguation available — return the first match (maintains backwards compatibility)
+      return dottedMatches[0];
     }
 
     return null;

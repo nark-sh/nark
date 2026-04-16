@@ -118,6 +118,11 @@ export class ThrowingFunctionDetector implements DetectorPlugin {
     }
     const functionName = chain.properties[0]; // e.g., 'get' in axios.get()
 
+    // Include type name when available for class-level disambiguation.
+    // e.g., channel: GuildChannel → instanceTypeName='GuildChannel'
+    // Used by ContractMatcher to resolve dotted-name ambiguity (Message.delete vs GuildChannel.delete).
+    const instanceTypeName = this.instanceTracker?.resolveIdentifierTypeName(rootName) ?? undefined;
+
     return [
       {
         pluginName: this.name,
@@ -129,6 +134,7 @@ export class ThrowingFunctionDetector implements DetectorPlugin {
         metadata: {
           depth: 1,
           chain: [rootName, ...chain.properties],
+          ...(instanceTypeName ? { instanceTypeName } : {}),
         },
       },
     ];

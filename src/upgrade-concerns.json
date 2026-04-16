@@ -25370,5 +25370,53 @@
       "note": "Proactive \u2014 contract added via API surface analysis. Need detection: ExecuteStatementCommand with INSERT statement in catch that does not handle DuplicateItemException."
     },
     "resolution": null
+  },
+  {
+    "id": "concern-20260416-busboy-deepen-1",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "busboy",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for busboy field event without info.valueTruncated check \u2014 postcondition busboy-006. Field values truncated at 1MB default without detection.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. Need detection: field event callback that does not check info.valueTruncated before storing the value."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-busboy-deepen-2",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "busboy",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for busboy without error event listener covering Unexpected end of form \u2014 postcondition busboy-007. Client disconnects mid-upload crash server if no error handler.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. busboy-001 already covers the base case; busboy-007 adds specific documentation of the Unexpected end of form error message and cleanup requirement."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-busboy-deepen-3",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "busboy",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for busboy() call with multipart/form-data Content-Type missing boundary \u2014 postcondition busboy-008. Distinct synchronous throw from busboy-002.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. The existing busboy-002 try/catch detector already covers this, but busboy-008 documents the specific error message for better violation reporting."
+    },
+    "resolution": null
   }
 ]

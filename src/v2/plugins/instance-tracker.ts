@@ -29,6 +29,7 @@ export class InstanceTrackerPlugin implements DetectorPlugin {
   description = 'Tracks factory method calls and class instances to resolve variable → package';
 
   private instanceMap = new Map<string, string>(); // variable name → package name
+  private instanceTypeMap = new Map<string, string>(); // variable name → type/class name
   private factoryToPackage: Map<string, string>; // factory method name → package name
   private classToPackage: Map<string, string>; // class name → package name
   private typeToPackage: Map<string, string>; // type name → package name
@@ -52,6 +53,7 @@ export class InstanceTrackerPlugin implements DetectorPlugin {
    */
   public beforeTraversal(sf: ts.SourceFile, ctx: PluginContext): void {
     this.instanceMap.clear();
+    this.instanceTypeMap.clear();
     if (this.typeToPackage.size > 0) {
       // Only register type names whose package is confirmed by the file's import map.
       // This prevents mapping `Socket` → socket.io when the file imports it from socket.io-client.
@@ -125,27 +127,30 @@ export class InstanceTrackerPlugin implements DetectorPlugin {
     // Function/method/arrow parameters
     if (ts.isParameter(node) && node.name && node.type && ts.isIdentifier(node.name)) {
       const varName = node.name.text;
-      const pkg = this.resolveTypeAnnotation(node.type, importedTypes);
-      if (pkg) {
-        this.instanceMap.set(varName, pkg);
+      const result = this.resolveTypeAnnotationWithName(node.type, importedTypes);
+      if (result) {
+        this.instanceMap.set(varName, result.pkg);
+        this.instanceTypeMap.set(varName, result.typeName);
       }
     }
 
     // Variable declarations with explicit type: const x: SomeType = ...
     if (ts.isVariableDeclaration(node) && node.type && ts.isIdentifier(node.name)) {
       const varName = node.name.text;
-      const pkg = this.resolveTypeAnnotation(node.type, importedTypes);
-      if (pkg) {
-        this.instanceMap.set(varName, pkg);
+      const result = this.resolveTypeAnnotationWithName(node.type, importedTypes);
+      if (result) {
+        this.instanceMap.set(varName, result.pkg);
+        this.instanceTypeMap.set(varName, result.typeName);
       }
     }
 
     // Class property declarations: private channel: TextChannel;
     if (ts.isPropertyDeclaration(node) && node.type && ts.isIdentifier(node.name)) {
       const varName = node.name.text;
-      const pkg = this.resolveTypeAnnotation(node.type, importedTypes);
-      if (pkg) {
-        this.instanceMap.set(varName, pkg);
+      const result = this.resolveTypeAnnotationWithName(node.type, importedTypes);
+      if (result) {
+        this.instanceMap.set(varName, result.pkg);
+        this.instanceTypeMap.set(varName, result.typeName);
       }
     }
 
@@ -153,27 +158,44 @@ export class InstanceTrackerPlugin implements DetectorPlugin {
   }
 
   /**
-   * Resolve a TypeScript type node to a package name.
-   * Only resolves types that are actually imported from the matching package in this file
-   * (prevents mapping Socket→socket.io when file imports Socket from socket.io-client).
+   * Resolve a TypeScript type node to both a package name and the type name.
+   * Used to populate instanceTypeMap for class-level disambiguation (e.g.,
+   * channel: GuildChannel → pkg='discord.js', typeName='GuildChannel').
    */
-  private resolveTypeAnnotation(typeNode: ts.TypeNode, importedTypes: Map<string, string>): string | null {
+  private resolveTypeAnnotationWithName(
+    typeNode: ts.TypeNode,
+    importedTypes: Map<string, string>
+  ): { pkg: string; typeName: string } | null {
     if (ts.isTypeReferenceNode(typeNode)) {
       const name = typeNode.typeName;
       if (ts.isIdentifier(name)) {
-        return importedTypes.get(name.text) ?? null;
+        const pkg = importedTypes.get(name.text);
+        if (pkg) return { pkg, typeName: name.text };
       }
       if (ts.isQualifiedName(name) && ts.isIdentifier(name.right)) {
-        return importedTypes.get(name.right.text) ?? null;
+        const pkg = importedTypes.get(name.right.text);
+        if (pkg) return { pkg, typeName: name.right.text };
       }
     }
     if (ts.isUnionTypeNode(typeNode)) {
       for (const t of typeNode.types) {
-        const pkg = this.resolveTypeAnnotation(t, importedTypes);
-        if (pkg) return pkg;
+        const result = this.resolveTypeAnnotationWithName(t, importedTypes);
+        if (result) return result;
       }
     }
     return null;
+  }
+
+  /**
+   * Look up the type/class name for a tracked identifier.
+   * Returns the class name (e.g., 'GuildChannel', 'Message') if the variable was
+   * tracked from a typed declaration. Returns null if type info isn't available.
+   *
+   * Used by the ContractMatcher to disambiguate contracts with the same function name
+   * on different classes (e.g., discord.js Message.delete vs GuildChannel.delete).
+   */
+  public resolveIdentifierTypeName(varName: string): string | null {
+    return this.instanceTypeMap.get(varName) ?? null;
   }
 
   /**
