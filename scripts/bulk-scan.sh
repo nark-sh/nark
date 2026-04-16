@@ -4,12 +4,36 @@
 
 set -euo pipefail
 
+# macOS doesn't have GNU timeout — use perl fallback
+if command -v timeout &>/dev/null; then
+  TIMEOUT_CMD="timeout"
+elif command -v gtimeout &>/dev/null; then
+  TIMEOUT_CMD="gtimeout"
+else
+  # Perl-based timeout fallback for macOS
+  run_with_timeout() {
+    local secs="$1"; shift
+    perl -e '
+      alarm shift @ARGV;
+      $SIG{ALRM} = sub { kill 9, $pid; exit 124 };
+      $pid = fork // die;
+      unless ($pid) { exec @ARGV; die "exec: $!" }
+      waitpid $pid, 0;
+      exit ($? >> 8);
+    ' "$secs" "$@"
+  }
+  TIMEOUT_CMD="run_with_timeout"
+fi
+
 WORKSPACE_ROOT="$(cd ../.. && pwd)"
 RESULTS_DIR="output/$(date +%Y%m%d)-bulk"
 CORPUS_PATH="../nark-corpus"
 SUMMARY_FILE="$RESULTS_DIR/SUMMARY.txt"
 
 mkdir -p "$RESULTS_DIR"
+
+# Clear previous run artifacts
+rm -f "$RESULTS_DIR/crashes.txt" "$RESULTS_DIR/ranked.txt"
 
 echo "Bulk scan started: $(date)" | tee "$SUMMARY_FILE"
 echo "Results: $RESULTS_DIR" | tee -a "$SUMMARY_FILE"
@@ -44,13 +68,23 @@ for repo in "$WORKSPACE_ROOT"/test-repos/*/; do
 
   # Run with 90s timeout, capture output
   set +e
-  timeout 90 node dist/index.js \
-    --tsconfig "$tsconfig" \
-    --corpus "$CORPUS_PATH" \
-    --report-only \
-    --no-terminal \
-    --output "$RESULTS_DIR/$name-audit.json" \
-    > "$RESULTS_DIR/$name-output.txt" 2>&1
+  if [ "$TIMEOUT_CMD" = "run_with_timeout" ]; then
+    run_with_timeout 90 node dist/index.js \
+      --tsconfig "$tsconfig" \
+      --corpus "$CORPUS_PATH" \
+      --report-only \
+      --no-terminal \
+      --output "$RESULTS_DIR/$name-audit.json" \
+      > "$RESULTS_DIR/$name-output.txt" 2>&1
+  else
+    $TIMEOUT_CMD 90 node dist/index.js \
+      --tsconfig "$tsconfig" \
+      --corpus "$CORPUS_PATH" \
+      --report-only \
+      --no-terminal \
+      --output "$RESULTS_DIR/$name-audit.json" \
+      > "$RESULTS_DIR/$name-output.txt" 2>&1
+  fi
   EXIT_CODE=$?
   set -e
 
