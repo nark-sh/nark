@@ -26279,7 +26279,7 @@
     "source": "dashboard-feedback",
     "package": "ai",
     "type": "false_positive",
-    "status": "pending",
+    "status": "implemented",
     "description": "ai postcondition tool-execution-error fires on 25 tool-wrapper functions (file I/O, browser, social API calls) marked FALSE_POSITIVE by operator. These functions are tool implementations passed to the AI SDK \u2014 they have a different error contract than direct generateText/streamText calls. Contract scope may be too broad.",
     "evidence": {
       "repos": [
@@ -26295,7 +26295,7 @@
       "fix_target": "contract",
       "postcondition_id": "tool-execution-error"
     },
-    "resolution": null
+    "resolution": "Already suppressed in contract-matcher: tool-execution-error suppressed for all ai.tool() calls unconditionally (line ~790)."
   },
   {
     "id": "concern-20260416-ai-api-error-rate-limit-2",
@@ -26303,7 +26303,7 @@
     "source": "dashboard-feedback",
     "package": "ai",
     "type": "false_positive",
-    "status": "pending",
+    "status": "implemented",
     "description": "ai postcondition api-error-rate-limit fires on 5+ files (eval scorers, catalog analysis, generateArray) marked FALSE_POSITIVE. These callers use higher-level wrappers that handle rate limit retries internally, so the postcondition doesn't apply at call sites.",
     "evidence": {
       "repos": [
@@ -26319,7 +26319,7 @@
       "fix_target": "contract",
       "postcondition_id": "api-error-rate-limit"
     },
-    "resolution": null
+    "resolution": "Already suppressed in contract-matcher: api-error-rate-limit suppressed when call is inside a retry wrapper function (line ~751)."
   },
   {
     "id": "concern-20260416-ai-schema-validation-error-3",
@@ -26327,7 +26327,7 @@
     "source": "dashboard-feedback",
     "package": "ai",
     "type": "false_positive",
-    "status": "pending",
+    "status": "implemented",
     "description": "ai postcondition schema-validation-error fires on apps/web/utils/llms/index.ts:350 marked FALSE_POSITIVE. Likely fires on an abstraction layer that validates inline.",
     "evidence": {
       "repos": [
@@ -26339,7 +26339,7 @@
       "fix_target": "contract",
       "postcondition_id": "schema-validation-error"
     },
-    "resolution": null
+    "resolution": "Fixed in contract-matcher: schema-validation-error now suppressed in utility/wrapper files (utils/, llms/, lib/, ai/) that delegate errors to callers. Ground-truth fixture excluded from suppression."
   },
   {
     "id": "concern-20260416-axios-error-4xx-5xx-4",
@@ -26347,7 +26347,7 @@
     "source": "dashboard-feedback",
     "package": "axios",
     "type": "false_positive",
-    "status": "pending",
+    "status": "deferred",
     "description": "axios postcondition error-4xx-5xx fires on packages/scanner/src/v2/fixtures/test-suppressions/with-inline-suppression.ts \u2014 this is a suppression test fixture that uses inline nark-ignore comments. Scanner fired despite inline suppression present.",
     "evidence": {
       "repos": [
@@ -26359,7 +26359,7 @@
       "fix_target": "scanner",
       "postcondition_id": "error-4xx-5xx"
     },
-    "resolution": null
+    "resolution": "Needs nark-ignore inline suppression support. Deferred."
   },
   {
     "id": "concern-20260416-clerk-nextjs-use-user-no-loaded-check-5",
@@ -26367,7 +26367,7 @@
     "source": "dashboard-feedback",
     "package": "@clerk/nextjs",
     "type": "false_positive",
-    "status": "pending",
+    "status": "implemented",
     "description": "@clerk/nextjs postcondition use-user-no-loaded-check fires on 7 common Next.js component files (sidebar, header, top-nav, onboarding-form, profile-settings, analytics-provider, invite page) marked FALSE_POSITIVE. These components use useUser() in ways that are safe under Clerk's ClerkProvider wrapper \u2014 the isLoaded check may be handled at a parent layout level.",
     "evidence": {
       "repos": [
@@ -26383,7 +26383,7 @@
       "fix_target": "contract",
       "postcondition_id": "use-user-no-loaded-check"
     },
-    "resolution": null
+    "resolution": "Already suppressed in contract-matcher: use-user-no-loaded-check suppressed in Clerk-protected route components and authenticated route groups."
   },
   {
     "id": "concern-20260416-clerk-nextjs-use-clerk-outside-provider-6",
@@ -26391,7 +26391,7 @@
     "source": "dashboard-feedback",
     "package": "@clerk/nextjs",
     "type": "false_positive",
-    "status": "pending",
+    "status": "implemented",
     "description": "@clerk/nextjs postcondition use-clerk-outside-provider fires on top-nav.tsx, sidebar.tsx, header.tsx \u2014 components that are always rendered inside ClerkProvider. Scanner does not trace the component tree to verify provider presence.",
     "evidence": {
       "repos": [
@@ -26405,7 +26405,7 @@
       "fix_target": "scanner",
       "postcondition_id": "use-clerk-outside-provider"
     },
-    "resolution": null
+    "resolution": "Already suppressed in contract-matcher: use-clerk-outside-provider suppressed when projectHasClerkProvider() returns true."
   },
   {
     "id": "concern-20260416-dotenv-missing-env-file-7",
@@ -26413,7 +26413,7 @@
     "source": "dashboard-feedback",
     "package": "dotenv",
     "type": "false_positive",
-    "status": "pending",
+    "status": "deferred",
     "description": "dotenv postcondition missing-env-file fires on src/lib/migrations/supabase.ts:5 marked FALSE_POSITIVE (appeared in multiple scans). Migration scripts intentionally load env variables at import time without a path argument \u2014 this is expected behavior.",
     "evidence": {
       "repos": [
@@ -26425,7 +26425,7 @@
       "fix_target": "contract",
       "postcondition_id": "missing-env-file"
     },
-    "resolution": null
+    "resolution": "Migration script pattern \u2014 intentional no-path config(). Needs investigation."
   },
   {
     "id": "concern-20260416-express-async-middleware-unhandled-rejection-8",
@@ -26433,7 +26433,7 @@
     "source": "dashboard-feedback",
     "package": "express",
     "type": "false_positive",
-    "status": "pending",
+    "status": "deferred",
     "description": "express postcondition async-middleware-unhandled-rejection fires on 5 middleware functions across api/dev-server.ts and api/browser-agent-server.ts marked FALSE_POSITIVE. These middleware use next(error) pattern or a global Express error handler, satisfying the postcondition without per-function try-catch.",
     "evidence": {
       "repos": [
@@ -26446,7 +26446,7 @@
       "fix_target": "contract",
       "postcondition_id": "async-middleware-unhandled-rejection"
     },
-    "resolution": null
+    "resolution": "next(error) pattern as alternative to try-catch. Needs investigation."
   },
   {
     "id": "concern-20260416-ioredis-missing-error-listener-9",
@@ -26454,7 +26454,7 @@
     "source": "dashboard-feedback",
     "package": "ioredis",
     "type": "false_positive",
-    "status": "pending",
+    "status": "deferred",
     "description": "ioredis postcondition missing-error-listener fires on apps/web/lib/auth-cache.ts and apps/web/lib/rate-limit.ts marked FALSE_POSITIVE. The error listener may be registered in a shared Redis client factory or wrapper, not at each usage site.",
     "evidence": {
       "repos": [
@@ -26467,7 +26467,7 @@
       "fix_target": "scanner",
       "postcondition_id": "missing-error-listener"
     },
-    "resolution": null
+    "resolution": "Shared Redis client pattern \u2014 listener registered in initialization. Needs investigation."
   },
   {
     "id": "concern-20260416-node-fetch-fetch-rejects-on-network-error-10",
@@ -26475,7 +26475,7 @@
     "source": "dashboard-feedback",
     "package": "node-fetch",
     "type": "false_positive",
-    "status": "pending",
+    "status": "deferred",
     "description": "node-fetch postcondition fetch-rejects-on-network-error fires on api/utils/ai-client.ts and api/analysis/post-game-analysis.ts marked FALSE_POSITIVE. These callers use wrapper functions that handle fetch errors at a higher abstraction level.",
     "evidence": {
       "repos": [
@@ -26488,7 +26488,7 @@
       "fix_target": "contract",
       "postcondition_id": "fetch-rejects-on-network-error"
     },
-    "resolution": null
+    "resolution": "Wrapper utility pattern. Needs investigation."
   },
   {
     "id": "concern-20260416-puppeteer-browser-close-must-run-11",
@@ -26496,7 +26496,7 @@
     "source": "dashboard-feedback",
     "package": "puppeteer",
     "type": "false_positive",
-    "status": "pending",
+    "status": "deferred",
     "description": "puppeteer postcondition browser-close-must-run fires on api/browser-agent-executor.ts:921 marked FALSE_POSITIVE. browser.close() may be called via a process.on('exit') handler or cleanup routine registered at module level, not directly in the same function.",
     "evidence": {
       "repos": [
@@ -26508,7 +26508,7 @@
       "fix_target": "scanner",
       "postcondition_id": "browser-close-must-run"
     },
-    "resolution": null
+    "resolution": "Exit handler pattern. Needs investigation."
   },
   {
     "id": "concern-20260416-react-hook-form-async-submit-unhandled-error-12",
@@ -26516,7 +26516,7 @@
     "source": "dashboard-feedback",
     "package": "react-hook-form",
     "type": "false_positive",
-    "status": "pending",
+    "status": "implemented",
     "description": "react-hook-form postcondition async-submit-unhandled-error fires on 15 form submit handlers across a shadcn-admin project marked FALSE_POSITIVE. These handlers use a toast/error UI pattern that satisfies the postcondition without explicit try-catch \u2014 errors are handled via RHF's setError() or displayed via toast notifications in the catch path.",
     "evidence": {
       "repos": [
@@ -26532,7 +26532,7 @@
       "fix_target": "contract",
       "postcondition_id": "async-submit-unhandled-error"
     },
-    "resolution": null
+    "resolution": "Already suppressed in contract-matcher: async-submit-unhandled-error suppressed when file contains setError(), toast.error, useToast, onError, or console.error patterns."
   },
   {
     "id": "concern-20260416-react-hook-form-missing-form-provider-13",
@@ -26540,7 +26540,7 @@
     "source": "dashboard-feedback",
     "package": "react-hook-form",
     "type": "false_positive",
-    "status": "pending",
+    "status": "implemented",
     "description": "react-hook-form postcondition missing-form-provider fires on components/Input.tsx, components/Account/ArtistInstructionTextArea.tsx, and src/components/ui/form.tsx marked FALSE_POSITIVE. These are reusable input components designed to be used both inside and outside FormProvider \u2014 scanner cannot detect that FormProvider wraps them at the call site.",
     "evidence": {
       "repos": [
@@ -26554,7 +26554,7 @@
       "fix_target": "scanner",
       "postcondition_id": "missing-form-provider"
     },
-    "resolution": null
+    "resolution": "Already suppressed in contract-matcher: missing-form-provider suppressed for useFormContext hooks, shared UI components (components/ui/, components/form), and files containing FormProvider."
   },
   {
     "id": "concern-20260416-react-hook-form-unhandled-field-array-operations-14",
@@ -26562,7 +26562,7 @@
     "source": "dashboard-feedback",
     "package": "react-hook-form",
     "type": "false_positive",
-    "status": "pending",
+    "status": "deferred",
     "description": "react-hook-form postcondition unhandled-field-array-operations fires on src/features/settings/profile/profile-form.tsx:64 marked FALSE_POSITIVE. Field array operations (append, remove, etc.) in this form are synchronous and errors are surfaced via RHF's built-in validation, not async rejection.",
     "evidence": {
       "repos": [
@@ -26574,7 +26574,7 @@
       "fix_target": "contract",
       "postcondition_id": "unhandled-field-array-operations"
     },
-    "resolution": null
+    "resolution": "Sync field array operations \u2014 RHF handles validation. Needs investigation."
   },
   {
     "id": "concern-20260416-passport-deepen-1",
