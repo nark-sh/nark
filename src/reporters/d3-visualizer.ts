@@ -1,25 +1,14 @@
 /**
- * D3.js Visualization Generator - Professional Sentry-Inspired Design
+ * Nark HTML Report Generator — Light mode, SaaS share-page inspired
  *
- * Design principles (following .claude/rules/design-system.md):
- * - Clean, minimal, professional aesthetic
- * - Subtle color palette (dark grays, muted accents)
- * - Small fonts (12-14px), generous whitespace
- * - Sentry-like professionalism
- *
- * Color palette:
- * - Background: #0E1116 (dark)
- * - Cards: #1C1F26 (slightly lighter)
- * - Borders: #2D3139 (subtle)
- * - Text: #E6EDF3 (light gray)
- * - Muted: #7D8590 (gray)
- * - Accent: #8B5CF6 (purple)
- * - Success: #3FB950 (green)
- * - Warning: #D29922 (amber)
- * - Error: #F85149 (red)
+ * Matches the behavioral-contracts-saas light theme:
+ * - bg: #FAFAF9, card: #FFFFFF, border: #DFE1E6, text: #172B4D
+ * - Code snippets with amber left-border, expand/collapse per violation
+ * - No external JS dependencies
  */
 
-import type { AuditRecord, EnhancedAuditRecord } from '../types.js';
+import * as fs from 'fs';
+import type { AuditRecord, EnhancedAuditRecord, Violation } from '../types.js';
 import type { HealthMetrics } from './health-score.js';
 import type { PackageBreakdownSummary } from './package-breakdown.js';
 import type { ComparisonMetrics, BenchmarkData } from './benchmarking.js';
@@ -32,795 +21,599 @@ export interface D3VisualizationData {
   benchmark?: BenchmarkData;
 }
 
-/**
- * Generate interactive D3.js HTML dashboard
- */
-export function generateD3Dashboard(data: D3VisualizationData): string {
-  const { audit, health, packageBreakdown, benchmarking, benchmark } = data;
+/** Read source lines around a violation for the code snippet */
+function readCodeSnippet(filePath: string, line: number, context: number = 3): Array<{ line: number; content: string; highlighted: boolean }> | null {
+  try {
+    const src = fs.readFileSync(filePath, 'utf-8');
+    const lines = src.split('\n');
+    const start = Math.max(0, line - 1 - context);
+    const end = Math.min(lines.length, line + context);
+    const result: Array<{ line: number; content: string; highlighted: boolean }> = [];
+    for (let i = start; i < end; i++) {
+      result.push({ line: i + 1, content: lines[i], highlighted: i + 1 === line });
+    }
+    return result;
+  } catch {
+    return null;
+  }
+}
 
-  // Extract repo name
+export function generateD3Dashboard(data: D3VisualizationData): string {
+  const { audit, packageBreakdown } = data;
+
   const repoName = extractRepoName(audit.tsconfig);
   const timestamp = new Date(audit.timestamp).toLocaleString();
+  const commitSha = audit.git_commit ? audit.git_commit.slice(0, 7) : null;
+  const branch = audit.git_branch || null;
+
+  const errors = audit.violations.filter(v => v.severity === 'error');
+  const warnings = audit.violations.filter(v => v.severity === 'warning');
+  const totalViolations = errors.length + warnings.length;
+
+  const tsconfigDir = audit.tsconfig.replace(/[/\\][^/\\]+$/, '');
 
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Nark Analysis - ${repoName}</title>
-  <script src="https://d3js.org/d3.v7.min.js" integrity="sha384-CjloA8y00+1SDAUkjs099PVfnY2KmDC2BZnws9kh8D/lX1s46w6EPhpXdqMfjK6iD" crossorigin="anonymous"></script>
+  <title>Nark Report — ${esc(repoName)}</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
     :root {
-      /* Sentry-inspired color palette */
-      --bg-primary: #0E1116;
-      --bg-secondary: #1C1F26;
-      --bg-tertiary: #22252D;
-      --border-primary: #2D3139;
-      --border-secondary: #3D4149;
-      --text-primary: #E6EDF3;
-      --text-secondary: #B1BAC4;
-      --text-muted: #7D8590;
-      --accent-purple: #8B5CF6;
-      --success-green: #3FB950;
-      --warning-amber: #D29922;
-      --error-red: #F85149;
+      --bg: #FAFAF9;
+      --bg-card: #FFFFFF;
+      --bg-hover: #F4F5F7;
+      --bg-muted: #F4F5F7;
+      --border: #DFE1E6;
+      --border-active: #C1C7D0;
+      --text: #172B4D;
+      --text-secondary: #44546F;
+      --text-muted: #6B778C;
+      --brand: #8B5CF6;
+      --brand-light: rgba(139, 92, 246, 0.08);
+      --error: #FF5630;
+      --error-light: rgba(255, 86, 48, 0.1);
+      --warning: #FFAB00;
+      --warning-light: rgba(255, 171, 0, 0.12);
+      --success: #36B37E;
+      --success-light: rgba(54, 179, 126, 0.1);
+      --amber-border: rgba(245, 158, 11, 0.4);
+      --amber-bg: rgba(245, 158, 11, 0.06);
+      --amber-highlight: rgba(245, 158, 11, 0.1);
     }
 
     body {
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background: var(--bg-primary);
-      color: var(--text-primary);
+      background: var(--bg);
+      color: var(--text);
       font-size: 13px;
       line-height: 1.5;
-      padding: 0;
-      min-height: 100vh;
     }
 
-    .container {
-      max-width: 1400px;
-      margin: 0 auto;
-      padding: 24px;
-    }
-
-    /* Header */
-    .header {
-      background: var(--bg-secondary);
-      border: 1px solid var(--border-primary);
-      border-radius: 6px;
-      padding: 20px 24px;
-      margin-bottom: 24px;
-    }
-
-    .header h1 {
-      color: var(--text-primary);
-      font-size: 18px;
-      font-weight: 600;
-      margin-bottom: 8px;
-      letter-spacing: -0.01em;
-    }
-
-    .header .meta {
-      color: var(--text-muted);
-      font-size: 12px;
-      display: flex;
-      gap: 16px;
-      flex-wrap: wrap;
-    }
-
-    .header .meta span {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .header .meta .separator {
-      color: var(--border-secondary);
-    }
-
-    /* Grid Layout */
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-      gap: 16px;
-      margin-bottom: 16px;
-    }
-
-    .grid-full {
-      grid-column: 1 / -1;
-    }
-
-    /* Card */
-    .card {
-      background: var(--bg-secondary);
-      border: 1px solid var(--border-primary);
-      border-radius: 6px;
-      padding: 20px;
-    }
-
-    .card-header {
+    /* Sticky Header */
+    .top-bar {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      height: 48px;
+      background: var(--bg-card);
+      border-bottom: 1px solid var(--border);
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-bottom: 16px;
-      padding-bottom: 12px;
-      border-bottom: 1px solid var(--border-primary);
+      padding: 0 24px;
     }
 
-    .card-title {
-      font-size: 14px;
-      font-weight: 600;
-      color: var(--text-primary);
-      letter-spacing: -0.01em;
-    }
-
-    /* Stats Grid */
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 12px;
-    }
-
-    .stat {
-      background: var(--bg-tertiary);
-      border: 1px solid var(--border-primary);
-      border-radius: 4px;
-      padding: 12px;
-    }
-
-    .stat-value {
-      font-size: 24px;
-      font-weight: 700;
-      color: var(--text-primary);
-      line-height: 1;
-      margin-bottom: 4px;
-    }
-
-    .stat-label {
-      font-size: 11px;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      font-weight: 500;
-    }
-
-    .stat-value.success { color: var(--success-green); }
-    .stat-value.error { color: var(--error-red); }
-    .stat-value.warning { color: var(--warning-amber); }
-    .stat-value.accent { color: var(--accent-purple); }
-
-    /* Gauge */
-    .gauge-container {
+    .top-bar-left {
       display: flex;
-      flex-direction: column;
       align-items: center;
-      padding: 12px 0;
+      gap: 12px;
+      min-width: 0;
     }
 
-    .gauge-score {
-      font-size: 48px;
-      font-weight: 700;
-      margin-top: 8px;
-      line-height: 1;
-    }
+    .top-bar-left .repo-name { font-size: 13px; font-weight: 600; white-space: nowrap; }
 
-    .gauge-label {
+    .top-bar-left .meta-item {
       font-size: 11px;
       color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      margin-top: 8px;
-      font-weight: 500;
+      font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+      white-space: nowrap;
     }
 
-    /* Table */
-    .table-container {
-      overflow-x: auto;
-      margin-top: 12px;
-    }
+    .top-bar-left .separator { color: var(--border); font-size: 11px; }
 
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 12px;
-    }
-
-    thead {
-      border-bottom: 1px solid var(--border-primary);
-    }
-
-    th {
-      text-align: left;
-      padding: 8px 12px;
-      font-size: 11px;
-      font-weight: 600;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-
-    td {
-      padding: 10px 12px;
-      border-bottom: 1px solid var(--border-primary);
-      color: var(--text-secondary);
-    }
-
-    tbody tr:last-child td {
-      border-bottom: none;
-    }
-
-    tbody tr:hover {
-      background: var(--bg-tertiary);
-    }
-
-    /* Badge */
-    .badge {
+    .cta-btn {
       display: inline-flex;
       align-items: center;
-      padding: 2px 8px;
-      border-radius: 12px;
-      font-size: 10px;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-
-    .badge-success {
-      background: rgba(63, 185, 80, 0.15);
-      color: var(--success-green);
-    }
-
-    .badge-error {
-      background: rgba(248, 81, 73, 0.15);
-      color: var(--error-red);
-    }
-
-    /* Progress Bar */
-    .progress-bar {
-      height: 4px;
-      background: var(--bg-tertiary);
-      border-radius: 2px;
-      overflow: hidden;
-      margin-top: 6px;
-    }
-
-    .progress-fill {
-      height: 100%;
-      background: linear-gradient(90deg, var(--accent-purple), var(--success-green));
-      transition: width 0.3s ease;
-      border-radius: 2px;
-    }
-
-    /* Insights */
-    .insights {
-      background: rgba(139, 92, 246, 0.08);
-      border: 1px solid rgba(139, 92, 246, 0.2);
-      border-radius: 4px;
-      padding: 12px 16px;
-      margin-top: 16px;
-    }
-
-    .insights-title {
+      gap: 4px;
+      background: var(--brand);
+      color: #fff;
       font-size: 11px;
       font-weight: 600;
-      color: var(--accent-purple);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
+      padding: 6px 12px;
+      border-radius: 4px;
+      border: none;
+      cursor: pointer;
+      text-decoration: none;
+      transition: opacity 0.15s;
+    }
+    .cta-btn:hover { opacity: 0.9; }
+
+    .content { max-width: 960px; margin: 0 auto; padding: 24px; }
+
+    /* Stat Strip */
+    .stat-strip {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 20px 0;
       margin-bottom: 8px;
     }
 
-    .insights ul {
-      list-style: none;
-      margin: 0;
-      padding: 0;
+    .stat-strip .big-num { font-size: 28px; font-weight: 700; line-height: 1; }
+    .stat-strip .big-num.error { color: var(--error); }
+    .stat-strip .big-num.warning { color: #B47500; }
+    .stat-strip .big-num.success { color: var(--success); }
+
+    .stat-strip .big-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-weight: 500;
     }
 
-    .insights li {
-      padding: 4px 0;
+    .stat-strip .divider { width: 1px; height: 32px; background: var(--border); }
+    .stat-strip .stat-group { display: flex; flex-direction: column; align-items: center; }
+
+    .stat-strip .meta-stats {
+      display: flex;
+      gap: 16px;
+      margin-left: auto;
       font-size: 12px;
-      color: var(--text-secondary);
+      color: var(--text-muted);
+    }
+
+    /* Section Headers */
+    .section-header {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      padding: 12px 0 8px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    /* Filter Bar */
+    .filter-bar { display: flex; gap: 6px; padding: 10px 0; }
+
+    .filter-btn {
+      padding: 4px 10px;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 11px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s;
+      font-family: inherit;
+    }
+    .filter-btn:hover { border-color: var(--border-active); color: var(--text-secondary); }
+    .filter-btn.active { border-color: var(--brand); color: var(--brand); background: var(--brand-light); }
+
+    /* Violation Rows */
+    .violation-list { list-style: none; }
+
+    .v-row {
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      margin-bottom: 6px;
+      background: var(--bg-card);
+      transition: border-color 0.15s;
+      overflow: hidden;
+    }
+    .v-row:hover { border-color: var(--border-active); }
+
+    .v-row-main {
       display: flex;
       align-items: flex-start;
-      gap: 8px;
+      gap: 10px;
+      padding: 10px 12px;
     }
 
-    .insights li::before {
-      content: "→";
-      color: var(--accent-purple);
+    .severity-badge {
+      display: inline-block;
+      padding: 1px 6px;
+      border-radius: 10px;
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
       flex-shrink: 0;
       margin-top: 2px;
     }
+    .severity-badge.error { background: var(--error-light); color: var(--error); }
+    .severity-badge.warning { background: var(--warning-light); color: #B47500; }
 
-    /* Benchmark Card */
-    .benchmark-layout {
-      display: grid;
-      grid-template-columns: 320px 1fr;
-      gap: 24px;
+    .v-pkg {
+      font-size: 11px;
+      font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+      color: var(--brand);
+      flex-shrink: 0;
+    }
+
+    .v-body { flex: 1; min-width: 0; }
+
+    .v-msg { font-size: 12px; color: var(--text); line-height: 1.4; }
+
+    .v-meta {
+      display: flex;
       align-items: center;
+      gap: 8px;
+      margin-top: 3px;
     }
 
-    .benchmark-stats {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 12px;
+    .v-file {
+      font-size: 11px;
+      font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+      color: var(--text-muted);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .v-file a { color: var(--text-muted); text-decoration: none; }
+    .v-file a:hover { text-decoration: underline; color: var(--brand); }
+
+    .v-fn { font-size: 11px; color: var(--text-muted); opacity: 0.7; }
+
+    /* Code expand toggle */
+    .v-expand-btn {
+      font-size: 10px;
+      color: var(--brand);
+      cursor: pointer;
+      background: none;
+      border: none;
+      font-family: inherit;
+      font-weight: 500;
+      padding: 0;
+      margin-left: auto;
+      flex-shrink: 0;
+    }
+    .v-expand-btn:hover { text-decoration: underline; }
+
+    /* Code Snippet */
+    .v-code {
+      display: none;
+      border-top: 1px solid var(--border);
+      border-left: 4px solid var(--amber-border);
+      background: var(--bg-muted);
+      overflow-x: auto;
+    }
+    .v-code.open { display: block; }
+
+    .code-line {
+      display: flex;
+      font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+      font-size: 11px;
+      line-height: 1.6;
+    }
+    .code-line.highlighted { background: var(--amber-highlight); }
+    .code-line:hover { background: var(--amber-bg); }
+
+    .line-num {
+      min-width: 44px;
+      padding: 0 8px;
+      text-align: right;
+      color: var(--text-muted);
+      user-select: none;
+      flex-shrink: 0;
+      opacity: 0.6;
+    }
+    .code-line.highlighted .line-num {
+      background: rgba(245, 158, 11, 0.15);
+      opacity: 1;
     }
 
-    .benchmark-highlight {
-      margin-top: 12px;
-      padding: 12px;
-      background: rgba(63, 185, 80, 0.08);
-      border: 1px solid rgba(63, 185, 80, 0.2);
+    .line-content {
+      padding: 0 12px 0 8px;
+      white-space: pre;
+      color: var(--text);
+    }
+
+    /* Packages */
+    .pkg-section { margin-top: 32px; }
+
+    .pkg-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    .pkg-table th {
+      text-align: left;
+      padding: 8px 12px;
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      border-bottom: 1px solid var(--border);
+    }
+    .pkg-table td { padding: 8px 12px; border-bottom: 1px solid var(--border); color: var(--text-secondary); }
+    .pkg-table tbody tr:hover { background: var(--bg-hover); }
+    .pkg-table .pkg-name { font-weight: 600; color: var(--text); }
+    .pkg-table .num-cell { text-align: center; }
+    .pkg-table .error-cell { color: var(--error); font-weight: 600; }
+
+    .clean-section {
+      margin-top: 8px;
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--success);
       border-radius: 4px;
+      overflow: hidden;
     }
+    .clean-header {
+      padding: 10px 12px;
+      font-size: 12px;
+      color: var(--text-secondary);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--bg-card);
+    }
+    .clean-header:hover { background: var(--bg-hover); }
+    .clean-toggle { font-size: 10px; color: var(--text-muted); transition: transform 0.15s; }
+    .clean-toggle.open { transform: rotate(90deg); }
+    .clean-body { display: none; padding: 0 12px 8px; background: var(--bg-card); }
+    .clean-body.open { display: block; }
+    .clean-pkg { padding: 4px 0; font-size: 12px; color: var(--text-muted); display: flex; align-items: center; gap: 6px; }
+    .clean-pkg .check { color: var(--success); font-size: 11px; }
 
-    .benchmark-highlight strong {
-      color: var(--success-green);
+    /* Upsell */
+    .upsell {
+      margin-top: 32px;
+      padding: 16px 20px;
+      border: 1px solid rgba(139, 92, 246, 0.2);
+      border-radius: 6px;
+      background: var(--brand-light);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
     }
+    .upsell-text { font-size: 12px; color: var(--text-secondary); }
+    .upsell-text strong { color: var(--text); }
+    .upsell .cta-btn { flex-shrink: 0; }
+
+    .clean-banner {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--success);
+      font-size: 14px;
+      font-weight: 500;
+    }
+    .clean-banner .big-check { font-size: 32px; margin-bottom: 8px; }
+
+    .footer {
+      text-align: center;
+      padding: 32px 0 24px;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+    .footer a { color: var(--text-muted); text-decoration: none; }
+    .footer a:hover { color: var(--brand); }
 
     @media (max-width: 768px) {
-      .grid {
-        grid-template-columns: 1fr;
-      }
-
-      .benchmark-layout {
-        grid-template-columns: 1fr;
-      }
-
-      .stats-grid {
-        grid-template-columns: 1fr;
-      }
+      .top-bar { padding: 0 12px; }
+      .content { padding: 16px; }
+      .stat-strip { flex-wrap: wrap; }
+      .stat-strip .meta-stats { margin-left: 0; width: 100%; }
+      .v-row-main { flex-wrap: wrap; }
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <!-- Header -->
-    <div class="header">
-      <h1>Nark Analysis</h1>
-      <div class="meta">
-        <span><strong>${repoName}</strong></span>
-        <span class="separator">•</span>
-        <span>${timestamp}</span>
-        <span class="separator">•</span>
-        <span>${audit.files_analyzed} files</span>
-        <span class="separator">•</span>
-        <span>${audit.contracts_applied} checks</span>
+  <div class="top-bar">
+    <div class="top-bar-left">
+      <span class="repo-name">${esc(repoName)}</span>
+      ${commitSha ? `<span class="separator">&middot;</span><span class="meta-item">${commitSha}</span>` : ''}
+      ${branch ? `<span class="separator">&middot;</span><span class="meta-item">${esc(branch)}</span>` : ''}
+      <span class="separator">&middot;</span>
+      <span class="meta-item" style="font-family: inherit;">${timestamp}</span>
+    </div>
+    <div class="top-bar-right">
+      <a class="cta-btn" href="https://app.nark.sh" target="_blank">Get hosted reports &rarr;</a>
+    </div>
+  </div>
+
+  <div class="content">
+    <div class="stat-strip">
+      ${totalViolations === 0 ? `
+        <div class="stat-group">
+          <div class="big-num success">0</div>
+          <div class="big-label">Violations</div>
+        </div>
+      ` : `
+        <div class="stat-group">
+          <div class="big-num error">${errors.length}</div>
+          <div class="big-label">Error${errors.length === 1 ? '' : 's'}</div>
+        </div>
+        <div class="divider"></div>
+        <div class="stat-group">
+          <div class="big-num warning">${warnings.length}</div>
+          <div class="big-label">Warning${warnings.length === 1 ? '' : 's'}</div>
+        </div>
+      `}
+      <div class="meta-stats">
+        <span>${audit.files_analyzed} files scanned</span>
+        <span>&middot;</span>
+        <span>${packageBreakdown.packagesWithContracts} packages matched</span>
       </div>
     </div>
 
-    <!-- Main Grid -->
-    <div class="grid">
-      <!-- Health Score -->
-      <div class="card">
-        <div class="card-header">
-          <div class="card-title">Health Score</div>
-        </div>
-        <div class="gauge-container">
-          <svg id="health-gauge" width="280" height="160"></svg>
-          <div class="gauge-score" id="gauge-score">--</div>
-          <div class="gauge-label">Overall Code Health</div>
-        </div>
-        <div class="stats-grid" style="margin-top: 16px;">
-          <div class="stat">
-            <div class="stat-value">${health.errorHandlingCompliance}%</div>
-            <div class="stat-label">Error Handling</div>
-          </div>
-          <div class="stat">
-            <div class="stat-value">${health.packageCoverage}%</div>
-            <div class="stat-label">Coverage</div>
-          </div>
-          <div class="stat">
-            <div class="stat-value">${health.codeMaturity}</div>
-            <div class="stat-label">Maturity</div>
-          </div>
-          <div class="stat">
-            <div class="stat-value">${health.riskLevel}</div>
-            <div class="stat-label">Risk Level</div>
-          </div>
-        </div>
+    ${totalViolations === 0 ? `
+      <div class="clean-banner">
+        <div class="big-check">&#10003;</div>
+        All ${packageBreakdown.packagesWithContracts} matched packages are compliant — no violations found.
       </div>
+    ` : `
+      <div class="section-header">Violations (${totalViolations})</div>
+      <div class="filter-bar">
+        <button class="filter-btn active" onclick="filterViolations('all')">All (${totalViolations})</button>
+        ${errors.length > 0 ? `<button class="filter-btn" onclick="filterViolations('error')">Errors (${errors.length})</button>` : ''}
+        ${warnings.length > 0 ? `<button class="filter-btn" onclick="filterViolations('warning')">Warnings (${warnings.length})</button>` : ''}
+      </div>
+      <ul class="violation-list">
+        ${generateViolationRows(audit.violations, tsconfigDir)}
+      </ul>
+    `}
 
-      <!-- Summary Stats -->
-      <div class="card">
-        <div class="card-header">
-          <div class="card-title">Summary</div>
-        </div>
-        <div class="stats-grid">
-          <div class="stat">
-            <div class="stat-value accent">${health.checksPerformed}</div>
-            <div class="stat-label">Call Sites Evaluated</div>
-          </div>
-          <div class="stat">
-            <div class="stat-value success">${health.checksPassed}</div>
-            <div class="stat-label">Checks Passed</div>
-          </div>
-          <div class="stat">
-            <div class="stat-value ${audit.violations.length === 0 ? 'success' : 'error'}">${audit.violations.length}</div>
-            <div class="stat-label">Violations Found</div>
-          </div>
-          <div class="stat">
-            <div class="stat-value">${packageBreakdown.packagesWithContracts}</div>
-            <div class="stat-label">Packages</div>
-          </div>
-        </div>
-        ${generateInsightsHTML(health, audit, benchmarking)}
-      </div>
+    <div class="pkg-section">
+      <div class="section-header">Packages</div>
+      ${generatePackagesHTML(packageBreakdown)}
     </div>
 
-    ${benchmarking && benchmark ? generateBenchmarkingHTML(benchmarking, benchmark) : ''}
+    <div class="upsell">
+      <div class="upsell-text">
+        <strong>Want shareable links, scan history, and team dashboards?</strong><br>
+        Add your API key to get hosted reports on app.nark.sh.
+      </div>
+      <a class="cta-btn" href="https://app.nark.sh" target="_blank">Sign up free &rarr;</a>
+    </div>
 
-    <!-- Violations by Package -->
-    <div class="card grid-full">
-      <div class="card-header">
-        <div class="card-title">Violations by Package</div>
-        <div style="font-size: 11px; color: var(--text-muted);">
-          ${packageBreakdown.packagesWithContracts} packages checked, ${packageBreakdown.packagesWithViolations} with violations
-        </div>
-      </div>
-      <div class="table-container">
-        <table>
-          <thead>
-            <tr>
-              <th>Package</th>
-              <th style="text-align: center;">Call Sites</th>
-              <th style="text-align: center;">Violations</th>
-              <th>Severity Breakdown</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${packageBreakdown.packages.filter(p => p.violationsFound > 0).length === 0
-              ? '<tr><td colspan="4" style="text-align: center; color: var(--success-green);">All packages compliant — no violations found</td></tr>'
-              : packageBreakdown.packages.filter(p => p.violationsFound > 0).map(pkg => {
-                const parts: string[] = [];
-                if (pkg.violationBreakdown.errors > 0) parts.push('<span style="color: var(--error-red);">' + pkg.violationBreakdown.errors + ' errors</span>');
-                if (pkg.violationBreakdown.warnings > 0) parts.push('<span style="color: var(--warning-amber);">' + pkg.violationBreakdown.warnings + ' warnings</span>');
-                if (pkg.violationBreakdown.info > 0) parts.push('<span style="color: var(--text-muted);">' + pkg.violationBreakdown.info + ' info</span>');
-                const callSiteDisplay = !pkg.isEstimated && pkg.contractsApplied > 0
-                  ? String(pkg.contractsApplied)
-                  : '—';
-                return '<tr>' +
-                  '<td><strong>' + pkg.packageName + '</strong></td>' +
-                  '<td style="text-align: center; color: var(--text-secondary);">' + callSiteDisplay + '</td>' +
-                  '<td style="text-align: center; color: var(--error-red);">' + pkg.violationsFound + '</td>' +
-                  '<td>' + parts.join(', ') + '</td>' +
-                  '</tr>';
-              }).join('')}
-          </tbody>
-        </table>
-      </div>
+    <div class="footer">
+      Generated by <a href="https://nark.sh">Nark</a> &middot; ${timestamp}
     </div>
   </div>
 
   <script>
-    // Data
-    const healthScore = ${health.overallScore};
-    ${benchmarking && benchmark ? `
-    const benchmarkData = ${JSON.stringify(benchmark)};
-    const comparisonData = ${JSON.stringify(benchmarking)};
-    ` : ''}
-
-    // Health Score Gauge
-    function drawHealthGauge() {
-      const width = 280;
-      const height = 160;
-      const radius = 70;
-
-      const svg = d3.select('#health-gauge');
-
-      // Color scale - subtle gradient
-      const colorScale = d3.scaleLinear()
-        .domain([0, 50, 70, 90, 100])
-        .range(['#F85149', '#D29922', '#8B5CF6', '#3FB950', '#3FB950']);
-
-      // Background arc
-      const bgArc = d3.arc()
-        .innerRadius(radius - 12)
-        .outerRadius(radius)
-        .startAngle(-Math.PI / 2)
-        .endAngle(Math.PI / 2);
-
-      svg.append('path')
-        .attr('d', bgArc)
-        .attr('transform', \`translate(\${width/2}, \${height-20})\`)
-        .attr('fill', '#22252D')
-        .attr('opacity', 0.5);
-
-      // Score arc (animated)
-      const scoreAngle = -Math.PI / 2 + (healthScore / 100) * Math.PI;
-
-      const scoreArc = d3.arc()
-        .innerRadius(radius - 12)
-        .outerRadius(radius)
-        .startAngle(-Math.PI / 2)
-        .endAngle(scoreAngle);
-
-      const path = svg.append('path')
-        .attr('transform', \`translate(\${width/2}, \${height-20})\`)
-        .attr('fill', colorScale(healthScore));
-
-      // Animate the arc
-      path.transition()
-        .duration(1200)
-        .ease(d3.easeCubicOut)
-        .attrTween('d', function() {
-          const interpolate = d3.interpolate(-Math.PI / 2, scoreAngle);
-          return function(t) {
-            const currentArc = d3.arc()
-              .innerRadius(radius - 12)
-              .outerRadius(radius)
-              .startAngle(-Math.PI / 2)
-              .endAngle(interpolate(t));
-            return currentArc();
-          };
-        });
-
-      // Animate the score number
-      d3.select('#gauge-score')
-        .transition()
-        .duration(1200)
-        .tween('text', function() {
-          const interpolate = d3.interpolate(0, healthScore);
-          return function(t) {
-            this.textContent = Math.round(interpolate(t));
-          };
-        })
-        .style('color', colorScale(healthScore));
-
-      // Add subtle tick marks
-      const ticks = [0, 25, 50, 75, 100];
-      ticks.forEach(tick => {
-        const angle = -Math.PI / 2 + (tick / 100) * Math.PI;
-        const x1 = Math.cos(angle) * (radius - 15);
-        const y1 = Math.sin(angle) * (radius - 15);
-        const x2 = Math.cos(angle) * (radius + 2);
-        const y2 = Math.sin(angle) * (radius + 2);
-
-        svg.append('line')
-          .attr('transform', \`translate(\${width/2}, \${height-20})\`)
-          .attr('x1', x1)
-          .attr('y1', y1)
-          .attr('x2', x2)
-          .attr('y2', y2)
-          .attr('stroke', '#3D4149')
-          .attr('stroke-width', 1.5);
-
-        svg.append('text')
-          .attr('transform', \`translate(\${width/2}, \${height-20})\`)
-          .attr('x', Math.cos(angle) * (radius + 15))
-          .attr('y', Math.sin(angle) * (radius + 15))
-          .attr('text-anchor', 'middle')
-          .attr('dominant-baseline', 'middle')
-          .attr('fill', '#7D8590')
-          .attr('font-size', '10px')
-          .text(tick);
+    function filterViolations(severity) {
+      document.querySelectorAll('.v-row').forEach(function(row) {
+        if (severity === 'all') { row.style.display = ''; }
+        else { row.style.display = row.dataset.severity === severity ? '' : 'none'; }
+      });
+      document.querySelectorAll('.filter-btn').forEach(function(btn) {
+        var t = btn.textContent.toLowerCase();
+        btn.classList.toggle('active', severity === 'all' ? t.startsWith('all') : t.startsWith(severity));
       });
     }
 
-    ${benchmarking && benchmark ? `
-    // Benchmarking Distribution Chart
-    function drawBenchmarkChart() {
-      const margin = {top: 10, right: 20, bottom: 30, left: 50};
-      const width = 450 - margin.left - margin.right;
-      const height = 200 - margin.top - margin.bottom;
-
-      const svg = d3.select('#benchmark-chart')
-        .append('svg')
-        .attr('width', width + margin.left + margin.right)
-        .attr('height', height + margin.top + margin.bottom)
-        .append('g')
-        .attr('transform', \`translate(\${margin.left},\${margin.top})\`);
-
-      const percentiles = [
-        { label: '25th', value: benchmarkData.percentiles.p25, y: 0.75 },
-        { label: 'Median', value: benchmarkData.percentiles.p50, y: 0.5 },
-        { label: '75th', value: benchmarkData.percentiles.p75, y: 0.25 },
-        { label: '90th', value: benchmarkData.percentiles.p90, y: 0.1 }
-      ];
-
-      const maxViolations = Math.max(benchmarkData.percentiles.p90, comparisonData.your_violations) + 10;
-
-      const x = d3.scaleLinear()
-        .domain([0, maxViolations])
-        .range([0, width]);
-
-      const y = d3.scaleLinear()
-        .domain([0, 1])
-        .range([height, 0]);
-
-      // Draw distribution area
-      const area = d3.area()
-        .x(d => x(d.value))
-        .y0(d => y(d.y - 0.12))
-        .y1(d => y(d.y + 0.12))
-        .curve(d3.curveBasis);
-
-      svg.append('path')
-        .datum(percentiles)
-        .attr('fill', '#8B5CF6')
-        .attr('opacity', 0.2)
-        .attr('d', area);
-
-      // Draw percentile markers
-      percentiles.forEach(p => {
-        svg.append('line')
-          .attr('x1', x(p.value))
-          .attr('x2', x(p.value))
-          .attr('y1', y(p.y - 0.1))
-          .attr('y2', y(p.y + 0.1))
-          .attr('stroke', '#8B5CF6')
-          .attr('stroke-width', 1.5);
-
-        svg.append('text')
-          .attr('x', x(p.value))
-          .attr('y', y(p.y - 0.18))
-          .attr('text-anchor', 'middle')
-          .attr('font-size', '10px')
-          .attr('fill', '#7D8590')
-          .text(p.label);
-      });
-
-      // Draw your position
-      const yourX = x(comparisonData.your_violations);
-      svg.append('line')
-        .attr('x1', yourX)
-        .attr('x2', yourX)
-        .attr('y1', 0)
-        .attr('y2', height)
-        .attr('stroke', '#3FB950')
-        .attr('stroke-width', 2)
-        .attr('stroke-dasharray', '3,3');
-
-      svg.append('circle')
-        .attr('cx', yourX)
-        .attr('cy', height / 2)
-        .attr('r', 5)
-        .attr('fill', '#3FB950')
-        .attr('stroke', '#1C1F26')
-        .attr('stroke-width', 2);
-
-      svg.append('text')
-        .attr('x', yourX)
-        .attr('y', height / 2 - 15)
-        .attr('text-anchor', 'middle')
-        .attr('font-weight', '600')
-        .attr('font-size', '10px')
-        .attr('fill', '#3FB950')
-        .text('YOU');
-
-      // X-axis
-      svg.append('g')
-        .attr('transform', \`translate(0,\${height})\`)
-        .call(d3.axisBottom(x).ticks(5))
-        .attr('color', '#3D4149')
-        .selectAll('text')
-        .attr('font-size', '10px')
-        .attr('fill', '#7D8590');
-
-      svg.append('text')
-        .attr('x', width / 2)
-        .attr('y', height + 28)
-        .attr('text-anchor', 'middle')
-        .attr('font-size', '10px')
-        .attr('fill', '#7D8590')
-        .text('Violations');
+    function toggleCode(id) {
+      var el = document.getElementById(id);
+      if (el) el.classList.toggle('open');
     }
-    ` : ''}
 
-    // Initialize
-    drawHealthGauge();
-    ${benchmarking && benchmark ? 'drawBenchmarkChart();' : ''}
+    function toggleClean(id) {
+      var body = document.getElementById(id);
+      var toggle = document.getElementById(id + '-toggle');
+      if (body) { body.classList.toggle('open'); if (toggle) toggle.classList.toggle('open'); }
+    }
   </script>
 </body>
 </html>`;
 }
 
-/**
- * Generate insights HTML
- */
-function generateInsightsHTML(
-  health: HealthMetrics,
-  audit: AuditRecord | EnhancedAuditRecord,
-  benchmarking?: ComparisonMetrics
-): string {
-  const insights: string[] = [];
+function generateViolationRows(violations: Violation[], tsconfigDir: string): string {
+  const filtered = violations.filter(v => v.severity === 'error' || v.severity === 'warning');
 
-  if (health.errorHandlingCompliance === 100) {
-    insights.push('Perfect compliance across all package usage points');
-  } else if (health.errorHandlingCompliance >= 95) {
-    insights.push(`High compliance rate with only ${audit.violations.length} issues`);
-  }
+  const sorted = [...filtered].sort((a, b) => {
+    if (a.severity !== b.severity) return a.severity === 'error' ? -1 : 1;
+    if (a.package !== b.package) return a.package.localeCompare(b.package);
+    return a.file.localeCompare(b.file) || a.line - b.line;
+  });
 
-  if (benchmarking && benchmarking.violations_avoided > 0) {
-    insights.push(`Avoided ${benchmarking.violations_avoided} violations vs average repo`);
-  }
+  return sorted.map((v, idx) => {
+    let relFile = v.file;
+    if (v.file.startsWith(tsconfigDir)) {
+      relFile = v.file.slice(tsconfigDir.length + 1);
+    }
+    const vscodeLink = `vscode://file${v.file}:${v.line}:${v.column}`;
+    const desc = v.description.length > 150 ? v.description.slice(0, 147) + '...' : v.description;
+    const codeId = `code-${idx}`;
 
-  if (health.checksPerformed > 100) {
-    insights.push(`Comprehensive analysis with ${health.checksPerformed} call sites evaluated`);
-  }
+    // Read source code snippet
+    const snippet = readCodeSnippet(v.file, v.line, 3);
+    const codeHtml = snippet ? snippet.map(l =>
+      `<div class="code-line${l.highlighted ? ' highlighted' : ''}"><span class="line-num">${l.line}</span><span class="line-content">${esc(l.content)}</span></div>`
+    ).join('') : '';
 
-  if (insights.length === 0) return '';
-
-  return `
-    <div class="insights">
-      <div class="insights-title">Key Insights</div>
-      <ul>
-        ${insights.map(insight => `<li>${insight}</li>`).join('')}
-      </ul>
-    </div>
-  `;
+    return `<li class="v-row" data-severity="${v.severity}" data-package="${esc(v.package)}">
+          <div class="v-row-main">
+            <span class="severity-badge ${v.severity}">${v.severity}</span>
+            <span class="v-pkg">${esc(v.package)}</span>
+            <div class="v-body">
+              <div class="v-msg">${esc(desc)}</div>
+              <div class="v-meta">
+                <span class="v-file"><a href="${vscodeLink}" title="Open in VS Code">${esc(relFile)}:${v.line}</a></span>
+                <span class="v-fn">${esc(v.function)}()</span>
+              </div>
+            </div>
+            ${codeHtml ? `<button class="v-expand-btn" onclick="toggleCode('${codeId}')">code &darr;</button>` : ''}
+          </div>
+          ${codeHtml ? `<div class="v-code" id="${codeId}">${codeHtml}</div>` : ''}
+        </li>`;
+  }).join('\n');
 }
 
-/**
- * Generate benchmarking section HTML
- */
-function generateBenchmarkingHTML(
-  benchmarking: ComparisonMetrics,
-  benchmark: BenchmarkData
-): string {
-  return `
-    <div class="card grid-full">
-      <div class="card-header">
-        <div class="card-title">Benchmarking</div>
-        <div style="font-size: 11px; color: var(--text-muted);">
-          Compared against ${benchmark.sample_size} repositories
+function generatePackagesHTML(breakdown: PackageBreakdownSummary): string {
+  const withViolations = breakdown.packages.filter(p => p.violationsFound > 0);
+  const clean = breakdown.packages.filter(p => p.violationsFound === 0);
+
+  let html = '';
+
+  if (withViolations.length > 0) {
+    const rows = withViolations
+      .sort((a, b) => b.violationsFound - a.violationsFound)
+      .map(pkg => {
+        const parts: string[] = [];
+        if (pkg.violationBreakdown.errors > 0) parts.push(`<span style="color:var(--error)">${pkg.violationBreakdown.errors} errors</span>`);
+        if (pkg.violationBreakdown.warnings > 0) parts.push(`<span style="color:#B47500">${pkg.violationBreakdown.warnings} warnings</span>`);
+        return `<tr>
+          <td class="pkg-name">${esc(pkg.packageName)}</td>
+          <td class="num-cell">${!pkg.isEstimated && pkg.contractsApplied > 0 ? pkg.contractsApplied : '\u2014'}</td>
+          <td class="num-cell error-cell">${pkg.violationsFound}</td>
+          <td>${parts.join(', ')}</td>
+        </tr>`;
+      }).join('');
+
+    html += `<table class="pkg-table" style="margin-top: 12px;">
+        <thead><tr><th>Package</th><th class="num-cell">Call Sites</th><th class="num-cell">Violations</th><th>Breakdown</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>`;
+  }
+
+  if (clean.length > 0) {
+    const cleanItems = clean
+      .sort((a, b) => a.packageName.localeCompare(b.packageName))
+      .map(p => `<div class="clean-pkg"><span class="check">&#10003;</span> ${esc(p.packageName)}</div>`)
+      .join('');
+
+    html += `<div class="clean-section">
+        <div class="clean-header" onclick="toggleClean('clean-pkgs')">
+          <span class="clean-toggle" id="clean-pkgs-toggle">&#9654;</span>
+          ${clean.length} package${clean.length === 1 ? '' : 's'} with contracts — 0 violations
         </div>
-      </div>
-      <div class="benchmark-layout">
-        <div>
-          <div class="benchmark-stats">
-            <div class="stat">
-              <div class="stat-value">${benchmarking.your_violations}</div>
-              <div class="stat-label">Your Violations</div>
-            </div>
-            <div class="stat">
-              <div class="stat-value">${benchmarking.avg_violations}</div>
-              <div class="stat-label">Average</div>
-            </div>
-            <div class="stat">
-              <div class="stat-value success">Top ${100 - benchmarking.percentile_rank}%</div>
-              <div class="stat-label">Ranking</div>
-            </div>
-            <div class="stat">
-              <div class="stat-value">${benchmark.sample_size}</div>
-              <div class="stat-label">Repos Analyzed</div>
-            </div>
-          </div>
-          <div class="benchmark-highlight" style="font-size: 12px;">
-            Your repo is <strong>${benchmarking.comparison.toLowerCase()}</strong> than ${benchmarking.percentile_rank}% of repos scanned.
-            ${benchmarking.violations_avoided > 0 ? `<br>You avoided <strong>${benchmarking.violations_avoided} violations</strong> compared to average.` : ''}
-          </div>
-        </div>
-        <div id="benchmark-chart"></div>
-      </div>
-    </div>
-  `;
+        <div class="clean-body" id="clean-pkgs">${cleanItems}</div>
+      </div>`;
+  }
+
+  return html;
 }
 
-/**
- * Extract repository name from tsconfig path
- */
+function esc(str: string): string {
+  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
 function extractRepoName(tsconfigPath: string): string {
   const parts = tsconfigPath.split('/');
   const repoIndex = parts.findIndex(p => p === 'test-repos') + 1;
-
-  if (repoIndex > 0 && repoIndex < parts.length) {
-    return parts[repoIndex];
-  }
-
+  if (repoIndex > 0 && repoIndex < parts.length) return parts[repoIndex];
   return parts[parts.length - 2] || 'Unknown Repository';
 }
 
-/**
- * Write D3 visualization to file
- */
 export async function writeD3Visualization(
   data: D3VisualizationData,
   outputPath: string

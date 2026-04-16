@@ -476,7 +476,18 @@ async function main(options: any) {
   } else {
     // Default: v2 plugin-based analyzer
     const { runV2Analyzer } = await import('./v2/adapter.js');
-    v2Result = await runV2Analyzer(config, corpusResult.contracts);
+
+    // Progress feedback in compact mode (overwritten in-place)
+    const progressCallback = !verbose ? (current: number, total: number, fileName: string) => {
+      const shortName = path.basename(fileName);
+      process.stdout.write(`\r${chalk.dim(`  Scanning... ${current}/${total} files (${shortName})`)}\x1b[K`);
+    } : undefined;
+
+    v2Result = await runV2Analyzer(config, corpusResult.contracts, progressCallback);
+
+    // Clear the progress line
+    if (!verbose) process.stdout.write('\r\x1b[K');
+
     violations = v2Result.violations;
     stats = {
       filesAnalyzed: v2Result.filesAnalyzed,
@@ -905,41 +916,35 @@ function printCompactReport(opts: {
     // Sort packages by violation count descending
     const sortedPackages = [...byPackage.entries()].sort((a, b) => b[1].length - a[1].length);
 
-    // Show top packages with inline violations (top 3 get detail, rest just count)
-    const MAX_DETAIL_PACKAGES = 3;
-    const MAX_INLINE_VIOLATIONS = 2;
+    // Show all packages with inline violations
+    const MAX_INLINE_VIOLATIONS = 5;
+    const projectRoot = findGitRepoRoot(opts.finalRecord.tsconfig_path || '') || process.cwd();
 
-    for (let i = 0; i < sortedPackages.length; i++) {
-      const [pkg, pkgViolations] = sortedPackages[i];
+    for (const [pkg, pkgViolations] of sortedPackages) {
+      console.log(`  ${chalk.red('✗')} ${chalk.bold(pkg)}     ${chalk.dim(`${pkgViolations.length} violation${pkgViolations.length === 1 ? '' : 's'}`)}`);
 
-      if (i < MAX_DETAIL_PACKAGES) {
-        // Show detail for top packages
-        console.log(`  ${chalk.red('✗')} ${chalk.bold(pkg)}     ${chalk.dim(`${pkgViolations.length} violation${pkgViolations.length === 1 ? '' : 's'}`)}`);
+      // Show first N violations inline
+      for (let j = 0; j < Math.min(MAX_INLINE_VIOLATIONS, pkgViolations.length); j++) {
+        const v = pkgViolations[j];
+        const relFile = path.relative(projectRoot, v.file);
+        const shortDesc = getCompactDescription(v);
+        console.log(chalk.dim(`    ${relFile}:${v.line}`) + `    ${v.function}() — ${shortDesc}`);
+      }
 
-        // Show first N violations inline
-        const projectRoot = findGitRepoRoot(opts.finalRecord.tsconfig_path || '') || process.cwd();
-        for (let j = 0; j < Math.min(MAX_INLINE_VIOLATIONS, pkgViolations.length); j++) {
-          const v = pkgViolations[j];
-          const relFile = path.relative(projectRoot, v.file);
-          const shortDesc = getCompactDescription(v);
-          console.log(chalk.dim(`    ${relFile}:${v.line}`) + `    ${v.function}() — ${shortDesc}`);
-        }
-
-        if (pkgViolations.length > MAX_INLINE_VIOLATIONS) {
-          console.log(chalk.dim(`    ... +${pkgViolations.length - MAX_INLINE_VIOLATIONS} more`));
-        }
-      } else {
-        // Just show count for remaining packages
-        console.log(`  ${chalk.red('✗')} ${chalk.bold(pkg)}     ${chalk.dim(`${pkgViolations.length} violation${pkgViolations.length === 1 ? '' : 's'}`)}`);
+      if (pkgViolations.length > MAX_INLINE_VIOLATIONS) {
+        console.log(chalk.dim(`    ... +${pkgViolations.length - MAX_INLINE_VIOLATIONS} more`));
       }
     }
     console.log('');
   }
 
   // Report link
-  console.log(chalk.dim(`  Full report: `) + chalk.underline(`file://${d3HtmlPath}`));
+  console.log(chalk.dim(`  Full report: `) + chalk.underline(`file://${d3HtmlPath}`) + chalk.dim(`  (Cmd+click to open)`));
   if (aiPromptPath && totalViolations > 0) {
     console.log(chalk.dim(`  AI fix:      `) + `nark --instructions-path`);
+  }
+  if (totalViolations > 0) {
+    console.log(chalk.dim(`  Verbose:     `) + `npx nark --verbose`);
   }
   console.log('');
 }
