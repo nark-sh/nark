@@ -30549,5 +30549,21 @@
       "note": "CRITICAL INSIGHT: metadata.flush() NEVER throws \u2014 confirmed in @trigger.dev/core/dist/commonjs/v3/runMetadata/manager.js. The try/catch approach used for all other @trigger.dev/sdk functions is inapplicable here. Need a new postcondition detection pattern: detect metadata.set/append/increment followed by metadata.flush() followed by tasks.trigger() in the same function body \u2014 this sequence assumes durable metadata but the flush may have silently failed."
     },
     "resolution": null
+  },
+  {
+    "id": "concern-20260416-google-auth-library-deepen-8",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "google-auth-library",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for google-auth-library JWT.fetchIdToken() \u2014 postcondition added in depth pass but no scanner rule exists. JWT.fetchIdToken(targetAudience) throws GaxiosError when Google token endpoint rejects the JWT assertion, and Error(\"Unknown error: Failed to fetch ID token\") if idToken missing. Used for service-to-service auth targeting Cloud Run/Functions.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis (deepen-stream-2 pass 6), detection rule needed. JWT class is exported from google-auth-library. Method signature: fetchIdToken(targetAudience: string): Promise<string>"
+    },
+    "resolution": null
   }
 ]
