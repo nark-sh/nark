@@ -24165,5 +24165,181 @@
       "postcondition_id": "parse-validation-error"
     },
     "resolution": null
+  },
+  {
+    "id": "concern-20260415-bcrypt-deepen-6",
+    "created_at": "2026-04-15",
+    "source": "deepen",
+    "package": "bcrypt",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for bcrypt.hash() invalid-callback path \u2014 postcondition hash-invalid-callback added in depth pass but no scanner rule exists for non-function callback argument",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260415-bcrypt-deepen-7",
+    "created_at": "2026-04-15",
+    "source": "deepen",
+    "package": "bcrypt",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for bcrypt.compare() invalid-callback path \u2014 postcondition compare-invalid-callback added in depth pass but no scanner rule exists for non-function callback argument",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260415-bcrypt-deepen-8",
+    "created_at": "2026-04-15",
+    "source": "deepen",
+    "package": "bcrypt",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for bcrypt.genSalt() entropy failure path \u2014 postcondition gen-salt-entropy-error added in depth pass. Requires detecting genSalt() calls outside try-catch (crypto.randomBytes can fail in containerized environments)",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-mailgun.js-deepen-1",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "mailgun.js",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for mailgun.js suppressions.destroy() \u2014 postcondition added in depth pass but no scanner rule exists",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed. suppressions.destroy() is compliance-critical for bounce re-enablement workflows."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-mailgun.js-deepen-2",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "mailgun.js",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for mailgun.js suppressions.destroyAll() \u2014 postcondition added in depth pass but no scanner rule exists. Added in v12.8.0 (2026-04-14).",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 new API method (v12.8.0). Catastrophic bulk suppression delete. Highest priority \u2014 needs safeguard-pattern detection."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-mailgun.js-deepen-3",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "mailgun.js",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for mailgun.js lists.update() \u2014 postcondition added in depth pass but no scanner rule exists",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-mailgun.js-deepen-4",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "mailgun.js",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for mailgun.js lists.destroy() \u2014 postcondition added in depth pass but no scanner rule exists",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-mailgun.js-deepen-5",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "mailgun.js",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for mailgun.js lists.members.updateMember() \u2014 postcondition added in depth pass. Critical: used for unsubscribe workflows (compliance).",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. subscribed: false path is CAN-SPAM compliance-critical."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-mailgun.js-deepen-6",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "mailgun.js",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for mailgun.js lists.members.destroyMember() \u2014 postcondition added in depth pass. Used in GDPR deletion and unsubscribe flows.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. GDPR/unsubscribe compliance risk if error swallowed."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-mailgun.js-deepen-7",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "mailgun.js",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for mailgun.js webhooks.create() \u2014 postcondition added in depth pass but no scanner rule exists",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. Silent failure means event pipeline broken from setup."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-mailgun.js-deepen-8",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "mailgun.js",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for mailgun.js webhooks.update() \u2014 postcondition added in depth pass but no scanner rule exists",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. Silent failure means old webhook URL never rotated."
+    },
+    "resolution": null
   }
 ]
