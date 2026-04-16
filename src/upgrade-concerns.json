@@ -28997,5 +28997,53 @@
       "note": "Proactive \u2014 contract added via API surface analysis. getHeader() catches all errors internally; callers silently ignore failures if they skip .ok check."
     },
     "resolution": null
+  },
+  {
+    "id": "concern-20260416-mistralai-deepen2-5-1",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@mistralai/mistralai",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for client.fineTuning.jobs.create() \u2014 postcondition added in depth pass (fine-tuning-jobs-create-no-error-handling) but no scanner rule exists. 3-level property chain: fineTuning.jobs.create",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed. SDK property is client.fineTuning (camelCase), not client.fine_tuning."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-mistralai-deepen2-5-2",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@mistralai/mistralai",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for client.fineTuning.jobs.start() \u2014 postcondition added in depth pass (fine-tuning-jobs-start-no-error-handling) but no scanner rule exists. 3-level property chain: fineTuning.jobs.start",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. Key behavioral insight: job must be in VALIDATED state before start() can be called; 422 thrown otherwise."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-mistralai-deepen2-5-3",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@mistralai/mistralai",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for client.beta.connectors.callTool() \u2014 postcondition added in depth pass (connectors-call-tool-no-error-handling) but no scanner rule exists. 4-level property chain: beta.connectors.callTool",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 MCP connector tool execution. Note: successful responses can still contain tool errors via response.metadata.isError \u2014 both throw-based and result-based errors must be handled."
+    },
+    "resolution": null
   }
 ]
