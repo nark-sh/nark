@@ -28677,5 +28677,149 @@
       "note": "Proactive \u2014 context-aware detection needed to distinguish client.beta.libraries.create() from client.embeddings.create() and client.beta.libraries.documents.upload() from client.files.upload()"
     },
     "resolution": null
+  },
+  {
+    "id": "concern-20260416-notionhq-client-deepen-1",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@notionhq/client",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @notionhq/client.fileUploads.create() response-value check \u2014 postcondition file-uploads-create-id-not-used added (returned id must be used in send()+complete()) but no scanner rule exists for response-value tracking",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed for response-value pattern"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-notionhq-client-deepen-2",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@notionhq/client",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @notionhq/client.fileUploads.send() \u2014 postcondition file-uploads-send-no-try-catch added but no scanner rule exists for fileUploads.send() await patterns",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 fileUploads.send() uses multipart/form-data, detection requires await_pattern .fileUploads.send("
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-notionhq-client-deepen-3",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@notionhq/client",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @notionhq/client.fileUploads.complete() \u2014 postcondition file-uploads-complete-no-try-catch added but no scanner rule exists for fileUploads.complete() await patterns",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-notionhq-client-deepen-4",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@notionhq/client",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @notionhq/client.oauth.token() \u2014 postcondition oauth-token-invalid-grant/oauth-token-invalid-client added but no scanner rule exists for oauth.token() await patterns",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 oauth.token() is a critical production path (OAuth onboarding) with high impact if unhandled"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-notionhq-client-deepen-5",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@notionhq/client",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @notionhq/client.comments.create() \u2014 postconditions added for missing capabilities (403) and parent not found (404), but scanner rules need to cover comments.create() call patterns",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 detection pattern .comments.create( added to contract detection section"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-notionhq-client-deepen-6",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@notionhq/client",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @notionhq/client.databases.update() server-error non-retry pattern \u2014 postcondition databases-update-not-retried-on-server-error added; scanner should warn on PATCH operations lacking try-catch for 500/503 handling",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 PATCH non-retry behavior is distinct from GET auto-retry and requires documentation in scanner output"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-openai-deepen-stream2-3-1",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "openai",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for openai.responses.compact() \u2014 postcondition added (responses-compact-not-found-error, rate-limit, bad-request) but no scanner rule exists for 3-level chain responses.compact()",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. responses.compact() used in long-running agent flows to manage context window. NotFoundError on stale previous_response_id is a common production bug."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-openai-deepen-stream2-3-2",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "openai",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for openai.vectorStores.search() \u2014 postcondition added (vector-stores-search-not-found-error, rate-limit) but no scanner rule exists. 3-level chain: vectorStores.search()",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 vector_stores.search() is a production RAG operation. NotFoundError when store ID is wrong (common env config bug). Previously under-omitted: was grouped with admin retrieve/list/delete ops but search is a core runtime operation."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-openai-deepen-stream2-3-3",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "openai",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for openai.responses.inputTokens.count() \u2014 postcondition added (context-overflow BadRequestError, auth-error) but no scanner rule exists for 4-level chain responses.inputTokens.count()",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 inputTokens.count() used as pre-flight check before expensive responses.create(). BadRequestError when truncation=disabled and input exceeds context window is the key failure mode."
+    },
+    "resolution": null
   }
 ]
