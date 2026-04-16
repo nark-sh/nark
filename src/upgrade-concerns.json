@@ -25233,7 +25233,7 @@
     "source": "deepen",
     "package": "cloudinary",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for cloudinary.uploader.update_metadata() \u2014 postconditions update-metadata-missing-error-handling and update-metadata-silent-partial-failure added in depth pass but no scanner rule exists",
     "evidence": {
       "repos": [],
@@ -25241,7 +25241,7 @@
       "violation_count": 0,
       "note": "Proactive \u2014 contract added via API surface analysis. update_metadata() is a 3-level chain call cloudinary.uploader.update_metadata(). Rejects with plain object {message, http_code} on invalid field IDs (HTTP 400) or auth failure (HTTP 401). Also has silent partial failure when public_ids do not exist."
     },
-    "resolution": null
+    "resolution": "Fixture ground-truth annotation alignment fixed + 3-level chain detection verified via PropertyChainDetector. All cloudinary ground-truth tests pass."
   },
   {
     "id": "concern-20260415-cloudinary-deepen-2",
@@ -25249,7 +25249,7 @@
     "source": "deepen",
     "package": "cloudinary",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for cloudinary.api.update() \u2014 postcondition api-update-missing-error-handling added in depth pass. Admin API update method requires try-catch.",
     "evidence": {
       "repos": [],
@@ -25257,7 +25257,7 @@
       "violation_count": 0,
       "note": "Proactive \u2014 contract added via API surface analysis. cloudinary.api.update() is a 3-level chain call. Rejects on 404 (missing asset), 401 (auth), 403 (permission), 420 (rate limit)."
     },
-    "resolution": null
+    "resolution": "Fixture ground-truth annotation alignment fixed + 3-level chain detection verified via PropertyChainDetector. All cloudinary ground-truth tests pass."
   },
   {
     "id": "concern-20260415-cloudinary-deepen-3",
@@ -25265,7 +25265,7 @@
     "source": "deepen",
     "package": "cloudinary",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for cloudinary.api.delete_resources_by_tag() \u2014 postconditions delete-resources-by-tag-missing-error-handling and delete-resources-by-tag-catastrophic-misuse added in depth pass. Irreversible bulk delete.",
     "evidence": {
       "repos": [],
@@ -25273,7 +25273,7 @@
       "violation_count": 0,
       "note": "Proactive \u2014 contract added via API surface analysis. cloudinary.api.delete_resources_by_tag() is a 3-level chain call. Catastrophic risk: silently deletes ALL matching assets. Rate limited by Admin API."
     },
-    "resolution": null
+    "resolution": "Fixture ground-truth annotation alignment fixed + 3-level chain detection verified via PropertyChainDetector. All cloudinary ground-truth tests pass."
   },
   {
     "id": "concern-20260415-sharp-deepen-1",
@@ -25281,7 +25281,7 @@
     "source": "deepen",
     "package": "sharp",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for sharp().metadata() \u2014 postcondition added in depth pass but no scanner rule exists for metadata() calls without try-catch",
     "evidence": {
       "repos": [],
@@ -25289,7 +25289,7 @@
       "violation_count": 0,
       "note": "Proactive \u2014 metadata() is widely used before resize/convert pipelines to validate image dimensions. Corrupt or missing input rejects without error handling crashes upload handlers."
     },
-    "resolution": null
+    "resolution": "Fixed scanner ThrowingFunctionDetector to handle factory-method root patterns (sharp(input).metadata()). Now detects depth-1 chains from factory calls. All 18 sharp ground-truth tests pass."
   },
   {
     "id": "concern-20260415-sharp-deepen-2",
@@ -25297,7 +25297,7 @@
     "source": "deepen",
     "package": "sharp",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for sharp().stats() \u2014 postcondition added in depth pass but no scanner rule exists for stats() calls without try-catch",
     "evidence": {
       "repos": [],
@@ -25305,7 +25305,7 @@
       "violation_count": 0,
       "note": "Proactive \u2014 stats() requires full pixel decoding; corrupt images crash analysis pipelines. Also documents stats() correctness bug: stats on transformed images requires intermediate toBuffer() call."
     },
-    "resolution": null
+    "resolution": "Fixed scanner ThrowingFunctionDetector to handle factory-method root patterns (sharp(input).stats()). Now detects depth-1 chains from factory calls. All 18 sharp ground-truth tests pass."
   },
   {
     "id": "concern-20260416-aws-dynamodb-deepen-1",
@@ -25425,7 +25425,7 @@
     "source": "deepen",
     "package": "@nestjs/jwt",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for @nestjs/jwt JwtService.sign() sync \u2014 postcondition added in depth pass but no scanner rule exists for sign() (only signAsync/verify/verifyAsync are detected)",
     "evidence": {
       "repos": [],
@@ -25433,7 +25433,7 @@
       "violation_count": 0,
       "note": "Proactive \u2014 contract added via API surface analysis. sign() throws WrongSecretProviderError when async secretOrKeyProvider used with sync method."
     },
-    "resolution": null
+    "resolution": "Fixture ground-truth annotation alignment fixed. Scanner detects sign() correctly. All 8 @nestjs/jwt ground-truth tests pass."
   },
   {
     "id": "concern-20260415-nestjs-jwt-deepen-2",
@@ -25441,7 +25441,7 @@
     "source": "deepen",
     "package": "@nestjs/jwt",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for @nestjs/jwt JwtService.sign() string-payload-with-options \u2014 throws Error when string payload used with non-secret/privateKey sign options",
     "evidence": {
       "repos": [],
@@ -25449,7 +25449,7 @@
       "violation_count": 0,
       "note": "Proactive \u2014 contract added via API surface analysis. Confirmed from source: jwt.service.ts throw new Error(Payload as string is not allowed...)"
     },
-    "resolution": null
+    "resolution": "Fixture ground-truth annotation alignment fixed. Scanner detects sign() correctly. All 8 @nestjs/jwt ground-truth tests pass."
   },
   {
     "id": "concern-2026-04-16-tanstack-react-router-1",
@@ -26733,6 +26733,118 @@
       "scan_file": null,
       "violation_count": 0,
       "note": "Proactive \u2014 CreateImportJobCommand returns JobId immediately; callers must poll GetImportJobCommand for COMPLETED/FAILED. Silent failure pattern similar to AWS batch operations."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-aws-sdk-client-ses-deepen-1",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@aws-sdk/client-ses",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @aws-sdk/client-ses CreateReceiptRuleSetCommand \u2014 postcondition added in depth pass but no scanner rule exists for AlreadyExistsException and LimitExceededException",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-aws-sdk-client-ses-deepen-2",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@aws-sdk/client-ses",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @aws-sdk/client-ses CreateReceiptRuleCommand \u2014 postcondition added in depth pass but no scanner rule exists for InvalidLambdaFunctionException, InvalidS3ConfigurationException, InvalidSnsTopicException, RuleSetDoesNotExistException",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-aws-sdk-client-ses-deepen-3",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@aws-sdk/client-ses",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @aws-sdk/client-ses SetActiveReceiptRuleSetCommand \u2014 postcondition added in depth pass but no scanner rule exists for RuleSetDoesNotExistException",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-aws-sdk-client-ses-deepen-4",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@aws-sdk/client-ses",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @aws-sdk/client-ses CreateConfigurationSetTrackingOptionsCommand \u2014 postcondition added in depth pass but no scanner rule exists for InvalidTrackingOptionsException, TrackingOptionsAlreadyExistsException",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-aws-sdk-client-ses-deepen-5",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@aws-sdk/client-ses",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @aws-sdk/client-ses UpdateConfigurationSetSendingEnabledCommand \u2014 postcondition added in depth pass but no scanner rule exists. Critical for automated reputation management pipelines.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-aws-sdk-client-ses-deepen-6",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@aws-sdk/client-ses",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @aws-sdk/client-ses PutIdentityPolicyCommand \u2014 postcondition added in depth pass but no scanner rule exists for InvalidPolicyException",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-aws-sdk-client-ses-deepen-7",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@aws-sdk/client-ses",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @aws-sdk/client-ses DeleteConfigurationSetEventDestinationCommand \u2014 postcondition added in depth pass but no scanner rule exists for EventDestinationDoesNotExistException (not idempotent delete)",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
     },
     "resolution": null
   }

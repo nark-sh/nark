@@ -255,13 +255,21 @@ export class ThrowingFunctionDetector implements DetectorPlugin {
       current = current.expression;
     }
 
-    // Root must be an identifier for us to handle it
+    // Root must be an identifier for us to handle it.
+    // Special case: factory method pattern — sharp(input).metadata()
+    // After the while loop, current = sharp(input) (CallExpression whose expression is an Identifier).
+    // Unwrap one level so that the factory call root (e.g. 'sharp') becomes the root identifier.
     if (!ts.isIdentifier(current)) {
-      return null; // Skip complex expressions
+      if (ts.isCallExpression(current) && ts.isIdentifier(current.expression)) {
+        // Factory call root: treat the factory function identifier as the root
+        current = current.expression;
+      } else {
+        return null; // Skip complex expressions
+      }
     }
 
     return {
-      root: current,
+      root: current as ts.Identifier,
       properties,
     };
   }
