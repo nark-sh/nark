@@ -29597,12 +29597,76 @@
     "package": "@mistralai/mistralai",
     "type": "uncovered_function",
     "status": "pending",
-    "description": "Add detection for client.beta.observability.datasets.records.judge() without try-catch — postcondition judge-dataset-record-no-error-handling added. This is a 5-level property chain (beta → observability → datasets → records → judge) which exceeds current PropertyChainDetector depth.",
+    "description": "Add detection for client.beta.observability.datasets.records.judge() without try-catch \u2014 postcondition judge-dataset-record-no-error-handling added. This is a 5-level property chain (beta \u2192 observability \u2192 datasets \u2192 records \u2192 judge) which exceeds current PropertyChainDetector depth.",
     "evidence": {
       "repos": [],
       "scan_file": null,
       "violation_count": 0,
-      "note": "Proactive — datasets.records.judge() throws ObservabilityError with JUDGE_NOT_FOUND, DATASET_RECORD_NOT_FOUND, DATASET_RECORD_FORMAT_ERROR, JUDGE_MISTRAL_API_ERROR, JUDGE_MISTRAL_API_TIMEOUT error codes (confirmed from betaObservabilityDatasetsRecordsJudge.ts and observabilityerrorcode.ts). Used in automated evaluation pipelines. Contract added via API surface analysis in depth pass 12."
+      "note": "Proactive \u2014 datasets.records.judge() throws ObservabilityError with JUDGE_NOT_FOUND, DATASET_RECORD_NOT_FOUND, DATASET_RECORD_FORMAT_ERROR, JUDGE_MISTRAL_API_ERROR, JUDGE_MISTRAL_API_TIMEOUT error codes (confirmed from betaObservabilityDatasetsRecordsJudge.ts and observabilityerrorcode.ts). Used in automated evaluation pipelines. Contract added via API surface analysis in depth pass 12."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-azure-storage-blob-deepen-1",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@azure/storage-blob",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @azure/storage-blob BlobClient.delete() without deleteSnapshots option \u2014 SnapshotsPresent 409 error not caught when blob has snapshots",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. Pattern: blobClient.delete() without { deleteSnapshots: 'include' } option and no try-catch for 409 RestError."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-azure-storage-blob-deepen-2",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@azure/storage-blob",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @azure/storage-blob BlockBlobClient.uploadStream() without try-catch \u2014 network/auth failures during multi-block upload cause data loss",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 uploadStream() is the recommended method for large file uploads but commonly used without error handling. Detection rule needs to handle stream upload pattern."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-azure-storage-blob-deepen-3",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@azure/storage-blob",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @azure/storage-blob BlobClient.beginCopyFromURL() where pollUntilDone() result is not awaited \u2014 copy completes asynchronously but callers assume immediate completion",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 PollerLike pattern requires explicit polling. Detection rule should check that beginCopyFromURL() result has pollUntilDone() called on it."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-azure-storage-blob-deepen-4",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@azure/storage-blob",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @azure/storage-blob BlobClient.downloadToFile() without cleanup of partial file on error \u2014 disk space leak and corrupt file processing",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 downloadToFile() leaves partial files on disk on error. Detection rule should verify try-catch with fs.unlink cleanup pattern in catch block."
     },
     "resolution": null
   }
