@@ -23135,5 +23135,181 @@
       "postcondition_id": "parse-validation-error"
     },
     "resolution": "Rejected: already suppressed in contract-matcher.ts (lines 1061-1072) \u2014 Next.js App Router API route files suppressed. FP reports are from pre-fix scans."
+  },
+  {
+    "id": "concern-20260415-mailgunjs-deepen-1",
+    "created_at": "2026-04-15",
+    "source": "deepen",
+    "package": "mailgun.js",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for mailgun.js validate.get() \u2014 postcondition added in depth pass but no scanner rule exists",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed for mg.validate.get() calls without try-catch"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260415-mailgunjs-deepen-2",
+    "created_at": "2026-04-15",
+    "source": "deepen",
+    "package": "mailgun.js",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for mailgun.js suppressions.create() \u2014 postcondition added in depth pass but no scanner rule exists",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed for mg.suppressions.create() calls without try-catch"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260415-mailgunjs-deepen-3",
+    "created_at": "2026-04-15",
+    "source": "deepen",
+    "package": "mailgun.js",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for mailgun.js suppressions.upload() \u2014 postcondition added in depth pass but no scanner rule exists",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed for mg.suppressions.upload() calls without try-catch. Added in v12.7.0."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260415-mailgunjs-deepen-4",
+    "created_at": "2026-04-15",
+    "source": "deepen",
+    "package": "mailgun.js",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for mailgun.js validate.multipleValidation.create() \u2014 postcondition added in depth pass but no scanner rule exists",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed for mg.validate.multipleValidation.create() calls without try-catch"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260415-mailgunjs-deepen-5",
+    "created_at": "2026-04-15",
+    "source": "deepen",
+    "package": "mailgun.js",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for mailgun.js lists.create() \u2014 postcondition added in depth pass but no scanner rule exists",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed for mg.lists.create() calls without try-catch"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260415-mailgunjs-deepen-6",
+    "created_at": "2026-04-15",
+    "source": "deepen",
+    "package": "mailgun.js",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for mailgun.js lists.members.createMember() \u2014 postcondition added in depth pass but no scanner rule exists",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed for mg.lists.members.createMember() calls without try-catch"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260415-mailgunjs-deepen-7",
+    "created_at": "2026-04-15",
+    "source": "deepen",
+    "package": "mailgun.js",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for mailgun.js lists.members.createMembers() \u2014 postcondition added in depth pass but no scanner rule exists",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed for mg.lists.members.createMembers() calls without try-catch"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260415-twilio-deepen-1",
+    "created_at": "2026-04-15",
+    "source": "deepen",
+    "package": "twilio",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for twilio calls(sid).update() \u2014 postcondition calls-update-no-try-catch added in depth pass but no scanner rule exists",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. calls(sid).update() uses chained call pattern, requires detecting client.calls(callSid).update() invocation"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260415-twilio-deepen-2",
+    "created_at": "2026-04-15",
+    "source": "deepen",
+    "package": "twilio",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for twilio messages(sid).fetch() \u2014 postcondition messages-fetch-no-try-catch added in depth pass. Currently fires wrong postcondition (lookups-fetch-no-try-catch)",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. messages(sid).fetch() needs to be distinguished from lookups.v2.phoneNumbers().fetch()"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260415-twilio-deepen-3",
+    "created_at": "2026-04-15",
+    "source": "deepen",
+    "package": "twilio",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for twilio calls(sid).recordings.create() \u2014 postcondition recordings-create-no-try-catch added in depth pass but fires messages-create-no-try-catch instead",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. Needs namespace-aware detection for calls.recordings.create() vs messages.create()"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260415-twilio-deepen-4",
+    "created_at": "2026-04-15",
+    "source": "deepen",
+    "package": "twilio",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for twilio verify.v2.services.create() \u2014 postcondition verify-services-create-no-try-catch added in depth pass but fires messages-create-no-try-catch instead",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. Needs verify.services namespace detection"
+    },
+    "resolution": null
   }
 ]
