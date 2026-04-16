@@ -121,7 +121,9 @@ export class ThrowingFunctionDetector implements DetectorPlugin {
     // Include type name when available for class-level disambiguation.
     // e.g., channel: GuildChannel → instanceTypeName='GuildChannel'
     // Used by ContractMatcher to resolve dotted-name ambiguity (Message.delete vs GuildChannel.delete).
-    const instanceTypeName = this.instanceTracker?.resolveIdentifierTypeName(rootName) ?? undefined;
+    const instanceTypeName = typeof this.instanceTracker?.resolveIdentifierTypeName === 'function'
+      ? this.instanceTracker.resolveIdentifierTypeName(rootName) ?? undefined
+      : undefined;
 
     return [
       {
