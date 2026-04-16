@@ -25162,5 +25162,117 @@
       "note": "Proactive \u2014 contract added via API surface analysis. GuildChannel is already in type_names detection. Need to add .delete( to await_patterns in the discord.js contract detection block. Also applies to TextChannel.delete(), NewsChannel.delete(), VoiceChannel.delete() which all inherit from GuildChannel."
     },
     "resolution": null
+  },
+  {
+    "id": "concern-20260415-aws-sdk-client-ses-deepen-1",
+    "created_at": "2026-04-15",
+    "source": "deepen",
+    "package": "@aws-sdk/client-ses",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @aws-sdk/client-ses SendBounceCommand \u2014 postconditions ses-send-bounce-no-try-catch and ses-send-bounce-stale-message-id added in depth pass but no scanner rule exists. SendBounceCommand is not in the current await_patterns for @aws-sdk/client-ses.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. Need to add SendBounceCommand to await_patterns or command_names in the @aws-sdk/client-ses contract detection. The stale-message-id postcondition requires temporal validation (message age > 24h) which may not be detectable statically \u2014 scanner concern is limited to the no-try-catch postcondition."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260415-aws-sdk-client-ses-deepen-2",
+    "created_at": "2026-04-15",
+    "source": "deepen",
+    "package": "@aws-sdk/client-ses",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @aws-sdk/client-ses UpdateConfigurationSetEventDestinationCommand \u2014 postconditions ses-update-event-dest-config-set-not-found, ses-update-event-dest-not-found, ses-update-event-dest-invalid-destination added in depth pass but no scanner rule exists.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. UpdateConfigurationSetEventDestinationCommand has 5 distinct error types (ConfigurationSetDoesNotExist, EventDestinationDoesNotExist, InvalidCloudWatchDestination, InvalidFirehoseDestination, InvalidSNSDestination). Add to await_patterns or command_names detection for @aws-sdk/client-ses."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260415-aws-sdk-client-ses-deepen-3",
+    "created_at": "2026-04-15",
+    "source": "deepen",
+    "package": "@aws-sdk/client-ses",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @aws-sdk/client-ses PutConfigurationSetDeliveryOptionsCommand \u2014 postconditions ses-put-delivery-options-config-set-not-found and ses-put-delivery-options-invalid added in depth pass but no scanner rule exists.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. PutConfigurationSetDeliveryOptionsCommand throws ConfigurationSetDoesNotExistException and InvalidDeliveryOptionsException. Add to command_names detection. Used in security hardening flows that set TLS policy to 'Require'."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260415-aws-sdk-client-ses-deepen-4",
+    "created_at": "2026-04-15",
+    "source": "deepen",
+    "package": "@aws-sdk/client-ses",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @aws-sdk/client-ses DeleteConfigurationSetCommand \u2014 postcondition ses-delete-config-set-not-found added in depth pass but no scanner rule exists. DeleteConfigurationSetCommand is NOT idempotent (throws on double-delete).",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. Key behavioral note: unlike S3 object deletion, SES config set deletion is NOT idempotent \u2014 calling twice throws ConfigurationSetDoesNotExistException. This is a common assumption bug in cleanup scripts. Add to command_names detection for @aws-sdk/client-ses."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260415-cloudinary-deepen-1",
+    "created_at": "2026-04-15",
+    "source": "deepen",
+    "package": "cloudinary",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for cloudinary.uploader.update_metadata() \u2014 postconditions update-metadata-missing-error-handling and update-metadata-silent-partial-failure added in depth pass but no scanner rule exists",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. update_metadata() is a 3-level chain call cloudinary.uploader.update_metadata(). Rejects with plain object {message, http_code} on invalid field IDs (HTTP 400) or auth failure (HTTP 401). Also has silent partial failure when public_ids do not exist."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260415-cloudinary-deepen-2",
+    "created_at": "2026-04-15",
+    "source": "deepen",
+    "package": "cloudinary",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for cloudinary.api.update() \u2014 postcondition api-update-missing-error-handling added in depth pass. Admin API update method requires try-catch.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. cloudinary.api.update() is a 3-level chain call. Rejects on 404 (missing asset), 401 (auth), 403 (permission), 420 (rate limit)."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260415-cloudinary-deepen-3",
+    "created_at": "2026-04-15",
+    "source": "deepen",
+    "package": "cloudinary",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for cloudinary.api.delete_resources_by_tag() \u2014 postconditions delete-resources-by-tag-missing-error-handling and delete-resources-by-tag-catastrophic-misuse added in depth pass. Irreversible bulk delete.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. cloudinary.api.delete_resources_by_tag() is a 3-level chain call. Catastrophic risk: silently deletes ALL matching assets. Rate limited by Admin API."
+    },
+    "resolution": null
   }
 ]
