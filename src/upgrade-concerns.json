@@ -29221,5 +29221,85 @@
       "note": "Proactive \u2014 contract added via API surface analysis. chat.completions.runTools() is a 3-level chain agentic tool runner. Tool execution errors (invalid names, parse failures) are returned as tool messages, not thrown \u2014 only missing implementations and n>1 are thrown."
     },
     "resolution": null
+  },
+  {
+    "id": "concern-20260416-replicate-deepen-stream2-8-1",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "replicate",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for replicate.stream() async generator \u2014 postcondition stream-no-error-handling added but scanner must detect for-await without outer try-catch. Stream method already detected (test passes), but confirm detection covers async generator for-await pattern specifically.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. stream() is async generator returning SSE events. For-await without try-catch is the violation pattern."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-replicate-deepen-stream2-8-2",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "replicate",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for replicate.wait() \u2014 postcondition wait-prediction-failure added. Scanner must detect replicate.wait() calls without try-catch. wait() throws Error (not ApiError) when prediction.status === \"failed\" \u2014 caller cannot rely on only catching ApiError. Detection should flag wait() calls missing error handler.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 wait() already has scanner detection (test passes). This concern is for wait-canceled-prediction-not-thrown pattern: code that calls wait() and accesses .output without checking .status === \"succeeded\" first."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-replicate-deepen-stream2-8-3",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "replicate",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for replicate.trainings.create() 3-level chain \u2014 postconditions trainings-create-no-error-handling and trainings-create-result-not-polled added. Scanner must detect trainings.create() calls without try-catch AND detect training.output accessed immediately without polling (3-level: trainings.create then .output.version without wait()).",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 trainings.create() is a 3-level property chain (replicate.trainings.create). The result-not-polled postcondition requires value-check detection: does caller await replicate.wait(training) before accessing training.output?"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-replicate-deepen-stream2-8-4",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "replicate",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for replicate.files.create() \u2014 postcondition files-create-no-error-handling added. Scanner must detect replicate.files.create() calls without try-catch. files.create() uploads binary data to Replicate (100MiB limit, throws synchronous Error for invalid type, ApiError for quota/auth failures).",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 files.create() is a 2-level chain (replicate.files.create). Test confirms scanner already detects this pattern \u2014 concern is for completeness tracking."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-replicate-deepen-stream2-8-5",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "replicate",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for validateWebhook() return value check \u2014 postcondition validatewebhook-return-value-not-checked added. validateWebhook() returns Promise<boolean>, NOT throws on invalid signature. Code that calls await validateWebhook(...) without checking the return value silently processes forged webhooks. Scanner needs to detect when validateWebhook result is discarded (not assigned or compared).",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 security-critical pattern. validateWebhook is a named export (not method on Replicate class). Scanner needs to detect: (1) result not assigned, (2) result assigned but not checked in conditional, (3) result only used in truthy check after awaiting."
+    },
+    "resolution": null
   }
 ]
