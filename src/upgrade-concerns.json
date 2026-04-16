@@ -29445,5 +29445,85 @@
       "note": "Proactive \u2014 contract added via API surface analysis. jwt-decode README explicitly states 'This library doesn\\'t validate the token'. Security misuse pattern: callers using decoded claims for authorization without server-side verification create privilege escalation vulnerability."
     },
     "resolution": null
+  },
+  {
+    "id": "concern-20260416-auth0-nextjs-auth0-deepen-1",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@auth0/nextjs-auth0",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for Auth0Client.getSession() null-check postcondition \u2014 pattern: destructuring getSession() result without null check",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. Pattern: const { user } = await auth0.getSession() without null guard. Most common v4 auth bug."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-auth0-nextjs-auth0-deepen-2",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@auth0/nextjs-auth0",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for Auth0Client.getAccessToken() v4 instance method \u2014 postcondition: auth0-v4-access-token-missing-session",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 v4 API uses auth0.getAccessToken() instance method (not standalone getAccessToken import). Scanner needs to detect Auth0Client instance usage pattern."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-auth0-nextjs-auth0-deepen-3",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@auth0/nextjs-auth0",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for Auth0Client.updateSession() \u2014 postcondition: auth0-update-session-unauthenticated",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 auth0.updateSession() throws (not returns null). Different behavior from getSession(). Needs explicit scanner rule."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-auth0-nextjs-auth0-deepen-4",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@auth0/nextjs-auth0",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for Auth0Client.mfa.verify() \u2014 postcondition: auth0-mfa-verify-invalid-grant",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 chained method call pattern auth0.mfa.verify() needs multi-level property chain detection. Most common MFA error in SaaS apps."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-auth0-nextjs-auth0-deepen-5",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@auth0/nextjs-auth0",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for Auth0Client.getTokenByBackchannelAuth() \u2014 postconditions: auth0-ciba-not-supported, auth0-ciba-denied-or-expired",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 CIBA flows require explicit try-catch for both CIBA-not-enabled and user-denial cases. Scanner needs to detect getTokenByBackchannelAuth calls without try-catch."
+    },
+    "resolution": null
   }
 ]
