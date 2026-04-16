@@ -29045,5 +29045,69 @@
       "note": "Proactive \u2014 MCP connector tool execution. Note: successful responses can still contain tool errors via response.metadata.isError \u2014 both throw-based and result-based errors must be handled."
     },
     "resolution": null
+  },
+  {
+    "id": "concern-20260416-openai-deepen-stream1-6-1",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "openai",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for openai.webhooks.unwrap() \u2014 postcondition added (webhooks-invalid-signature-error) but no scanner rule exists. Pattern: await openai.webhooks.unwrap(...) without try-catch. The error type is InvalidWebhookSignatureError which extends plain Error (not APIError), making it harder to detect by callers who only catch OpenAI.APIError.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis of openai@6.34.0. webhooks.unwrap() is the recommended way to handle OpenAI webhook events. Missing try-catch is a security issue \u2014 unhandled InvalidWebhookSignatureError crashes the server process."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-openai-deepen-stream1-6-2",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "openai",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for openai.webhooks.verifySignature() \u2014 postcondition added (webhooks-verify-invalid-signature-error) but no scanner rule exists. Pattern: await openai.webhooks.verifySignature(...) without try-catch. Security-critical \u2014 missing error handling means a bad signature will crash the server rather than returning HTTP 400.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis of openai@6.34.0. verifySignature is lower-level than unwrap() but some implementations call it directly before parsing the payload. Both need detection."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-mistralai-deepen-stream2-6-1",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@mistralai/mistralai",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @mistralai/mistralai.beta.observability.judges.judgeConversation() \u2014 postcondition judge-conversation-no-error-handling added in depth pass 6 but no scanner rule exists. ObservabilityError (distinct error class) must be caught separately from MistralError.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis of SDK v2.2.0. New ObservabilityError class hierarchy with ObservabilityErrorCode enum. Detection rule needed for beta.observability.judges.judgeConversation() call pattern."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-mistralai-deepen-stream2-6-2",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@mistralai/mistralai",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @mistralai/mistralai.beta.observability.chatCompletionEvents.judge() \u2014 postcondition judge-event-no-error-handling added in depth pass 6 but no scanner rule exists. Deep 4-level property chain: client.beta.observability.chatCompletionEvents.judge().",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis of SDK v2.2.0. Same ObservabilityError class hierarchy as judgeConversation. Detection rule needed for 4-level property chain: beta.observability.chatCompletionEvents.judge()."
+    },
+    "resolution": null
   }
 ]
