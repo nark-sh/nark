@@ -30309,5 +30309,165 @@
       "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
     },
     "resolution": null
+  },
+  {
+    "id": "concern-20260416-postmark-deepen-1",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "postmark",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for postmark.activateBounce() \u2014 postcondition added in depth pass but no scanner rule exists",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed. activateBounce() makes a live API call that throws PostmarkError subclasses; callers without try-catch crash on invalid bounce ID or auth failure."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-postmark-deepen-2",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "postmark",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for postmark.createSuppressions() \u2014 postcondition added in depth pass but no scanner rule exists. ALSO: Add response-pattern check for Status: \"Failed\" in suppression results (200 OK with partial failure)",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Two failure modes: (1) HTTP errors thrown as PostmarkError \u2014 needs try-catch; (2) 200 OK with per-item Status: Failed \u2014 needs response.Suppressions[].Status check. Second mode is a silent data loss pattern similar to S3 DeleteObjectsCommand."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-postmark-deepen-3",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "postmark",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for postmark.deleteSuppressions() \u2014 postcondition added in depth pass but no scanner rule exists. SpamComplaint suppressions cannot be deleted (Status: Failed) \u2014 silent failure pattern.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "SpamComplaint suppressions return Status: Failed silently on deleteSuppressions() \u2014 this is a known gotcha in the Postmark API that causes re-engagement email flows to silently fail."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-postmark-deepen-4",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "postmark",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for postmark.createTemplate() \u2014 postcondition added in depth pass but no scanner rule exists",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 createTemplate() throws ApiInputError (422) when 100-template server limit is exceeded or alias format is invalid. Called in provisioning scripts that often lack error handling."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-postmark-deepen-5",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "postmark",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for postmark.editTemplate() \u2014 postcondition added in depth pass but no scanner rule exists",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 editTemplate() throws ApiInputError (422) when template not found. Called in migration/deployment scripts. Unhandled errors leave templates in stale state."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-square-deepen-6",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "square",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for square.catalog.batchUpsert() \u2014 postconditions added (concurrent-update 429, IDEMPOTENCY_KEY_REUSED, partial-batch-failure) but no scanner rule exists",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed. Key: concurrent updates return RATE_LIMITED 429, IDEMPOTENCY_KEY_REUSED on same key + different params."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-square-deepen-7",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "square",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for square.disputes.accept() \u2014 postconditions added (financial-debit, deadline-missed) but no scanner rule exists",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 disputes.accept() immediately debits seller account. Missing try-catch is high financial risk. dashboard-exclusion is an operational constraint, not a thrown error."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-square-deepen-8",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "square",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for square.disputes.submitEvidence() \u2014 postconditions added (irrevocable, dashboard-exclusion) but no scanner rule exists",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 evidence submission is irrevocable and locks out Dashboard management. Missing try-catch leaves sellers unable to fall back to Dashboard."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-square-deepen-9",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "square",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for square.giftCards.activities.create() \u2014 postconditions added (insufficient-funds, pending-state, temporary-error) but no scanner rule exists",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 GIFT_CARD_AVAILABLE_AMOUNT and PENDING state errors are specific to gift card activity flows. TEMPORARY_ERROR (503) requires retry logic with same idempotency key."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-square-deepen-10",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "square",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for square.giftCards.create() \u2014 postconditions added (pending-state-trap, invalid-gan) but no scanner rule exists",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 PENDING state trap is a silent success pattern (create() succeeds, customer gets unusable gift card). Scanner needs to detect when giftCards.create() result is used without subsequent activities.create(ACTIVATE) call."
+    },
+    "resolution": null
   }
 ]
