@@ -29109,5 +29109,85 @@
       "note": "Proactive \u2014 contract added via API surface analysis of SDK v2.2.0. Same ObservabilityError class hierarchy as judgeConversation. Detection rule needed for 4-level property chain: beta.observability.chatCompletionEvents.judge()."
     },
     "resolution": null
+  },
+  {
+    "id": "concern-20260416-jszip-deepen-1",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "jszip",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for jszip.generateNodeStream() calls without an 'error' event listener registered on the returned stream before piping. Unhandled stream errors crash the Node.js process. Pattern: .generateNodeStream(...).pipe(...) without a preceding .on('error', ...) call.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 generateNodeStream contract added via API surface analysis in deepen pass 7. Stream 'error' event pattern requires different detection than Promise rejection (try-catch). Scanner needs to check for absence of .on('error') between .generateNodeStream() and .pipe() calls."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-jszip-deepen-2",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "jszip",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for jszip.generateNodeStream() calls in browser environments or with unsupported output types. The method throws synchronously (not via Promise rejection) when nodestream support is unavailable or type \\!= 'nodebuffer'. This synchronous throw pattern is different from the async errors on generateAsync().",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 generateNodeStream contract added via API surface analysis. The synchronous throw from checkSupport('nodestream') and toNodejsStream() type check requires scanner awareness that generateNodeStream() can throw before returning, unlike generateAsync() which always returns a Promise."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-openai-deepen-stream1-7-1",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "openai",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for openai.responses.stream() \u2014 postcondition added (responses-stream-premature-termination-error) but no scanner rule exists. Key pattern: stream used without await stream.finalResponse() in try-catch, or only for-await without finalResponse(). OpenAIError thrown when stream terminates before producing a response.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed. responses.stream() is the streaming helper; error only surfaces via finalResponse() not inline."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-openai-deepen-stream1-7-2",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "openai",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for openai.responses.stream() abort pattern \u2014 postcondition responses-stream-abort-error: APIUserAbortError thrown when stream.abort() called. Callers who do not handle APIUserAbortError distinctly will miss user-cancellation events. APIUserAbortError extends OpenAIError, NOT APIError.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 APIUserAbortError is distinct from APIError. Callers catching only err instanceof OpenAI.APIError will miss this."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-openai-deepen-stream1-7-3",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "openai",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for openai.conversations.items.create() \u2014 postconditions added (conversations-items-not-found-error, conversations-items-rate-limit-error, conversations-items-invalid-request-error) but no scanner rule exists. Critical for agent frameworks: conversation TTL expiry causes NotFoundError 404 on cached conversation IDs.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. conversations.items.create() is a 3-level chain (openai.conversations.items.create) used in agent frameworks for persistent conversation state."
+    },
+    "resolution": null
   }
 ]
