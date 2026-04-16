@@ -1443,8 +1443,10 @@ export class ContractMatcher {
       ) {
         const fileName = sourceFile.fileName;
         // Suppress in utility/wrapper files (utils/, llms/, ai/)
+        // but NOT in corpus fixture files (ground-truth.ts, fixtures/) — those are test files
         if (
-          /[/\\](utils?|llms?|helpers?|lib|ai)[/\\]/i.test(fileName)
+          /[/\\](utils?|llms?|helpers?|lib|ai)[/\\]/i.test(fileName) &&
+          !/[/\\]fixtures?[/\\]|ground-truth/.test(fileName)
         ) {
           // Check if enclosing function returns the result (delegation pattern)
           let cur: ts.Node | undefined = detection.node;
