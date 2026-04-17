@@ -36288,5 +36288,165 @@
       "note": "Proactive \u2014 contract added via API surface analysis. node-fetch/consumeBody() rejects with TypeError \"body used already\" when body is called twice. MDN confirms: TypeError when body is disturbed or locked. Detection requires tracking response object identity and body-read state across calls."
     },
     "resolution": null
+  },
+  {
+    "id": "concern-20260417-next-deepen-1",
+    "created_at": "2026-04-17",
+    "source": "deepen",
+    "package": "next",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for next.redirect() called inside try-catch block \u2014 postcondition redirect-inside-try-catch added in depth pass but no scanner rule exists. redirect() throws NEXT_REDIRECT error which is swallowed by try-catch.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. Common bug: developer wraps fetchUser + redirect in same try-catch. Scanner must detect await inside try-catch with redirect() after it in same try block."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260417-next-deepen-2",
+    "created_at": "2026-04-17",
+    "source": "deepen",
+    "package": "next",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for next.notFound() called inside try-catch block \u2014 postcondition not-found-inside-try-catch added in depth pass. notFound() throws NEXT_HTTP_ERROR_FALLBACK;404 error which is swallowed by try-catch.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 same pattern as redirect-inside-try-catch but for notFound(). Security issue: resource guard that calls notFound() inside try-catch silently serves null data instead of 404."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260417-next-deepen-3",
+    "created_at": "2026-04-17",
+    "source": "deepen",
+    "package": "next",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for Server Actions without authentication check \u2014 postcondition server-action-missing-auth-check added. Functions with \"use server\" directive that call mutation operations (db.*.create/update/delete) without a prior auth check.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 security-critical. Server Actions are reachable via direct POST requests. Scanner needs to detect: async fn with \"use server\" + mutation call + no auth() or getSession() check before mutation."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260417-next-deepen-4",
+    "created_at": "2026-04-17",
+    "source": "deepen",
+    "package": "next",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for revalidatePath()/revalidateTag() called after redirect() \u2014 postconditions revalidate-after-redirect and revalidate-tag-after-redirect added. Code after redirect() is unreachable dead code.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 common mistake in Server Actions. redirect() throws, so any revalidatePath/revalidateTag call that follows it is dead code. Cache not invalidated. Scanner needs control flow analysis to detect calls after redirect()."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260417-next-deepen-5",
+    "created_at": "2026-04-17",
+    "source": "deepen",
+    "package": "next",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for cookies() or headers() called without await in Next.js 15+ \u2014 postconditions cookies-not-awaited and headers-not-awaited added. Forgetting await returns Promise, causing all .get() calls to return undefined.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 extremely common Next.js 14\u219215 upgrade bug. cookies() and headers() became async in Next.js 15. Scanner needs to detect synchronous calls to these functions that are not awaited."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260417-next-deepen-6",
+    "created_at": "2026-04-17",
+    "source": "deepen",
+    "package": "next",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for cookies() or headers() inside unstable_cache() callback \u2014 postcondition unstable-cache-context-api-inside added. Request-scoped APIs cannot be used inside cache scope.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 confirmed from official Next.js docs. Scanner needs to detect calls to cookies() or headers() inside the callback function passed to unstable_cache()."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260417-sqlite3-deepen-1",
+    "created_at": "2026-04-17",
+    "source": "deepen",
+    "package": "sqlite3",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for sqlite3 db.each() without completion callback \u2014 postcondition each-completion-error-ignored added in depth pass but no scanner rule exists. Detect db.each() calls where the number of callback arguments is < 2 (missing completion callback) or completion callback ignores err.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed. each() has dual-callback pattern unique to sqlite3 \u2014 row callback + completion callback."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260417-sqlite3-deepen-2",
+    "created_at": "2026-04-17",
+    "source": "deepen",
+    "package": "sqlite3",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for sqlite3 db.close() without finalizing statements \u2014 postcondition close-unfinalised-statements added in depth pass. Detect db.close() calls where db.prepare() was called in the same scope without stmt.finalize() beforehand.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. Confirmed error: SQLITE_BUSY: unable to close due to unfinalised statements (test/open_close.test.js)."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260417-sqlite3-deepen-3",
+    "created_at": "2026-04-17",
+    "source": "deepen",
+    "package": "sqlite3",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for sqlite3 db.loadExtension() without error check \u2014 postcondition loadextension-file-not-found added in depth pass. Detect db.loadExtension() calls where the callback does not check err.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed. loadExtension() is rarely used but critical when used."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260417-sqlite3-deepen-4",
+    "created_at": "2026-04-17",
+    "source": "deepen",
+    "package": "sqlite3",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for sqlite3 db.backup() without error check \u2014 postcondition backup-cantopen-destination added in depth pass. Detect db.backup() calls where the callback does not check err.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed. Backup API is critical for data safety \u2014 CANTOPEN silently swallowed is dangerous."
+    },
+    "resolution": null
   }
 ]
