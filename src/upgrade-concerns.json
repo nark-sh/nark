@@ -31740,7 +31740,7 @@
     "source": "deepen",
     "package": "@libsql/client",
     "type": "scanner_fp",
-    "status": "pending",
+    "status": "implemented",
     "description": "Fix transaction-not-closed FP: scanner fires on all transaction() calls even when tx.close() is in a finally block. Need to detect finally-block tx.close() pattern to suppress the violation.",
     "evidence": {
       "repos": [],
@@ -31748,7 +31748,7 @@
       "violation_count": 0,
       "note": "Confirmed FP from ground-truth fixture line 142: transferFundsWithFinally() has tx.close() in finally but scanner still fires transaction-not-closed"
     },
-    "resolution": null
+    "resolution": "Implemented: added suppression in contract-matcher.ts for @libsql/client transaction-not-closed when a .close() call is present in a finally block within the enclosing function. The scanner now correctly suppresses the violation for transferFundsWithFinally() pattern (tx.close() in finally) while still firing for transferFundsNoFinally() (no finally). All ground-truth tests pass."
   },
   {
     "id": "concern-20260417-libsql-client-deepen-2",

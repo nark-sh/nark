@@ -1570,6 +1570,70 @@ export class ContractMatcher {
         continue; // Stripe constructor — no network call, cannot rate-limit
       }
 
+      // @libsql/client: transaction-not-closed — suppress when tx.close() (or any
+      // variable.close() call) is present in a finally block within the enclosing function.
+      // The postcondition requires transaction.close() in a finally block; when the finally
+      // block is present, the pattern is correct and no violation should fire.
+      //
+      // Pattern: const tx = await db.transaction("write"); try { ... } finally { tx.close(); }
+      // The scanner's standard try-catch check fires on transaction() because the function is
+      // not wrapped in a single outer try-catch — the finally block is the correct pattern here.
+      //
+      // Evidence: concern-20260417-libsql-client-deepen-1 — ground-truth fixture line 142:
+      // transferFundsWithFinally() has tx.close() in finally but scanner still fires
+      // transaction-not-closed.
+      if (
+        detection.packageName === "@libsql/client" &&
+        primaryPostcondition.id === "transaction-not-closed"
+      ) {
+        // Walk up to find the enclosing function, then check if any finally block
+        // within that function contains a .close() call.
+        let enclosingFunc: ts.Node | undefined;
+        let cur: ts.Node | undefined = detection.node.parent;
+        while (cur) {
+          if (
+            ts.isFunctionDeclaration(cur) ||
+            ts.isFunctionExpression(cur) ||
+            ts.isArrowFunction(cur) ||
+            ts.isMethodDeclaration(cur)
+          ) {
+            enclosingFunc = cur;
+            break;
+          }
+          cur = cur.parent;
+        }
+        const scopeToCheck = enclosingFunc ?? sourceFile;
+        let hasCloseInFinally = false;
+        const checkForCloseInFinally = (node: ts.Node): void => {
+          if (hasCloseInFinally) return;
+          // Is this a Block that is the finallyBlock of a TryStatement?
+          if (
+            ts.isBlock(node) &&
+            node.parent &&
+            ts.isTryStatement(node.parent) &&
+            node.parent.finallyBlock === node
+          ) {
+            // Check if this finally block contains a .close() call
+            const findClose = (n: ts.Node): void => {
+              if (
+                ts.isCallExpression(n) &&
+                ts.isPropertyAccessExpression(n.expression) &&
+                n.expression.name.text === "close"
+              ) {
+                hasCloseInFinally = true;
+                return;
+              }
+              if (!hasCloseInFinally) ts.forEachChild(n, findClose);
+            };
+            findClose(node);
+            return;
+          }
+          ts.forEachChild(node, checkForCloseInFinally);
+        };
+        checkForCloseInFinally(scopeToCheck);
+        if (hasCloseInFinally) continue; // finally { tx.close() } present — postcondition satisfied
+      }
+
       // Get location
       const { line, column } = this.getLocation(detection.node, sourceFile);
 
