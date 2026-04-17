@@ -31189,5 +31189,101 @@
       "note": "Proactive \u2014 common developer mistake: const res = await superagent.get(url); res.pipe(stream) throws synchronously \"end() has already been called\". Scanner needs to detect this anti-pattern: superagent response object being used with .pipe() after an await."
     },
     "resolution": null
+  },
+  {
+    "id": "concern-20260416-modelcontextprotocol-sdk-deepen-11",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@modelcontextprotocol/sdk",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for auth() return value not checked \u2014 postcondition auth-redirect-result-not-checked added in depth pass but no scanner rule exists. auth() returns AUTHORIZED|REDIRECT; callers that ignore the return value and call client.connect() immediately will fail with 401 when result===REDIRECT.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 auth() returns AuthResult (string literal union). Scanner needs to detect: (1) auth() return value stored but not checked for REDIRECT before subsequent connect(), or (2) auth() called without capturing the return value at all (await auth() without checking). This is a return-value-not-checked pattern distinct from try-catch detection."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-modelcontextprotocol-sdk-deepen-12",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@modelcontextprotocol/sdk",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for handle-request-missing-session-routing \u2014 postcondition added in depth pass but no scanner rule exists. StreamableHTTPServerTransport with session IDs used without routing by Mcp-Session-Id header causes all requests to return HTTP 404.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 stateful StreamableHTTPServerTransport (sessionIdGenerator set) instances should be stored in a Map keyed by sessionId, not used as singletons. Scanner could detect: new StreamableHTTPServerTransport({ sessionIdGenerator: ... }) without corresponding Map lookup pattern. Pattern: if transport is stored at module scope (not in request handler scope) and no sessions Map exists, flag the missing routing."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-modelcontextprotocol-sdk-deepen-13",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@modelcontextprotocol/sdk",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for auth() without try-catch \u2014 postcondition auth-throws-oauth-error-on-server-rejection added in depth pass. Scanner currently fires for this (line 435 passes) but using generic try-catch detection. Specialized detection should verify OAuthError types are handled.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "The generic try-catch detector fires correctly for auth() missing try-catch. This concern tracks adding specialized detection that verifies the catch block handles OAuthError specifically \u2014 a generic catch(e){} that rethrows without checking error.constructor is insufficient for auth flows."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-google-auth-library-deepen-9",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "google-auth-library",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for GoogleAuth.fromStream() \u2014 postcondition from-stream-unprotected added in depth pass but no scanner rule exists for stream-based credential loading",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. auth.fromStream() is used in cloud functions to load credentials from Secret Manager responses. throws Error(Must pass in a stream...) on null input; SyntaxError on bad JSON."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-google-auth-library-deepen-10",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "google-auth-library",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for GoogleAuth.getCredentials() \u2014 postcondition get-credentials-unprotected added in depth pass but no scanner rule exists",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. auth.getCredentials() throws Error(Unable to find credentials in current environment) when no credentials are loaded. Propagates GaxiosError from metadata server on GCE."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-google-auth-library-deepen-11",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "google-auth-library",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for Impersonated.fetchIdToken() \u2014 postcondition impersonated-fetch-id-token-unprotected added in depth pass but no scanner rule exists for impersonated client methods",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. Impersonated.fetchIdToken() makes two IAM API calls that can throw GaxiosError with reformatted messages (PERMISSION_DENIED: unable to impersonate, NOT_FOUND: unable to impersonate). Requires scanner support for Impersonated class instance detection."
+    },
+    "resolution": null
   }
 ]
