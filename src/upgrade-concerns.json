@@ -31829,5 +31829,85 @@
       "note": "Proactive \u2014 contract added via API surface analysis. Pattern: rollback() called directly in catch block without its own try-catch."
     },
     "resolution": null
+  },
+  {
+    "id": "concern-20260417-ethers-deepen-1",
+    "created_at": "2026-04-17",
+    "source": "deepen",
+    "package": "ethers",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for ethers ContractFactory.deploy() -- postcondition added in depth pass but no scanner rule exists",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive -- contract added via API surface analysis, detection rule needed for deploy-insufficient-funds, deploy-unsupported-operation"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260417-ethers-deepen-2",
+    "created_at": "2026-04-17",
+    "source": "deepen",
+    "package": "ethers",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for ethers Contract.waitForDeployment() -- postcondition added in depth pass but no scanner rule exists",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive -- contract added via API surface analysis, detection rule needed for waitfordeployment-constructor-reverted, waitfordeployment-transaction-replaced, waitfordeployment-unsupported-operation"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260417-ethers-deepen-3",
+    "created_at": "2026-04-17",
+    "source": "deepen",
+    "package": "ethers",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for ethers Contract.queryFilter() -- postcondition added in depth pass but no scanner rule exists",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive -- contract added via API surface analysis, detection rule needed for queryfilter-range-too-large, queryfilter-no-provider"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260417-ethers-deepen-4",
+    "created_at": "2026-04-17",
+    "source": "deepen",
+    "package": "ethers",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for ethers wallet.signTypedData() -- postcondition added in depth pass but no scanner rule exists",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive -- contract added via API surface analysis, detection rule needed for signtypeddata-no-provider-for-ens, signtypeddata-unconfigured-ens"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260417-libsql-client-deepen-7",
+    "created_at": "2026-04-17",
+    "source": "deepen",
+    "package": "@libsql/client",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @libsql/client execute() RangeError from large integer deserialization \u2014 postcondition execute-integer-range-error added in depth pass 4. When intMode=\"number\" (default) and result contains integers > 2^53-1, a RangeError (not LibsqlError) is thrown during result parsing. Callers who only catch LibsqlError will miss it. Detection pattern: createClient() call without intMode=\"bigint\" or intMode=\"string\", combined with execute() or batch() call on table with INTEGER column.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract postcondition added via API surface analysis. Confirmed from @libsql/hrana-client/lib-esm/value.js: throws RangeError \"Received integer which is too large to be safely represented as a JavaScript number\". This is a plain RangeError, not LibsqlError \u2014 catch(err) { if (err instanceof LibsqlError) } patterns miss it."
+    },
+    "resolution": null
   }
 ]
