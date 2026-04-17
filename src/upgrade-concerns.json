@@ -31573,5 +31573,117 @@
       "note": "Proactive \u2014 confirmed from buildASTSchema.js + validation/validate.js. Notable: semantic validation errors throw plain Error (not GraphQLError), so instanceof checks are unreliable."
     },
     "resolution": null
+  },
+  {
+    "id": "concern-20260416-ethers-deepen-1",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "ethers",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for TransactionResponse.wait() -- postcondition added in depth pass but no scanner rule exists. Three distinct throw conditions: TRANSACTION_REPLACED (speed-up), CALL_EXCEPTION (on-chain revert), TIMEOUT (pending). Critical: wait() must be called after sendTransaction() or the transaction result is never verified.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive -- contract added via API surface analysis. tx.wait() is the most critical ethers error pattern -- financial transactions that dont check wait() result have a silent failure risk."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-ethers-deepen-2",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "ethers",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for provider.estimateGas() -- throws CALL_EXCEPTION (transaction would revert) and INSUFFICIENT_FUNDS. Developers often only wrap sendTransaction() in try-catch but not the estimateGas() call that precedes it.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive -- contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-ethers-deepen-3",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "ethers",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for provider.call() -- throws CALL_EXCEPTION when smart contract read-call reverts. Common with view functions that have require() guards. The revert data is available in error.data for decoding.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive -- contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-ethers-deepen-4",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "ethers",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for provider.broadcastTransaction() -- throws INSUFFICIENT_FUNDS and NONCE_EXPIRED. Used in hardware wallet and batch-signing workflows where the signed TX is broadcast separately from signing.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive -- contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-ethers-deepen-5",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "ethers",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for Wallet.fromEncryptedJson() -- throws on wrong password (MAC mismatch) or corrupt keystore (UNSUPPORTED_OPERATION). Server-side wallet management systems that load wallets from DB need this contract.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive -- contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-ethers-deepen-6",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "ethers",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for provider.getLogs() -- throws SERVER_ERROR when block range exceeds RPC node limit (Infura/Alchemy: 10k results max). Event indexing jobs that query from block 0 to latest will always fail without chunking.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive -- contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-ethers-deepen-7",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "ethers",
+    "type": "pattern",
+    "status": "pending",
+    "description": "Add detection for wait-is-required-after-send pattern -- sendTransaction() returns TransactionResponse but code never calls .wait() before marking operation as complete. Silent failure in financial applications.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive -- high-impact pattern where transaction is broadcast but result never verified"
+    },
+    "resolution": null
   }
 ]
