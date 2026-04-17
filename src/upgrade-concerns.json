@@ -33411,5 +33411,53 @@
       "note": "Proactive \u2014 contract added via API surface analysis. getAll() auto-paginates and loads ALL records into memory \u2014 OOM risk on large portals."
     },
     "resolution": null
+  },
+  {
+    "id": "concern-20260416-ethers-deepen-5",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "ethers",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for BrowserProvider.getSigner() -- ACTION_REJECTED when user denies MetaMask popup (postcondition browserprovider-getsigner-action-rejected added in depth pass)",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive -- contract added via API surface analysis. BrowserProvider.getSigner() is the entry point for all dApp wallet interactions; ACTION_REJECTED is the most common error. Detection rule needed."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-ethers-deepen-6",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "ethers",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for Wallet.encrypt() -- missing try-catch causes unhandled OOM crash in memory-constrained serverless environments (postcondition encrypt-oom-crash added in depth pass)",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive -- contract added via API surface analysis. Wallet.encrypt() with default N=131072 requires ~128MB RAM; Lambda functions at default 128MB will crash. Detection rule needed."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-ethers-deepen-7",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "ethers",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for JsonRpcProvider.getSigner() -- throws plain Error (not EthersError) when account not found; isError() pattern does not apply (postcondition jsonrpc-getsigner-no-such-account added in depth pass)",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive -- contract added via API surface analysis. JsonRpcProvider.getSigner() throws plain Error not EthersError which is a documentation gap. Detection rule needed."
+    },
+    "resolution": null
   }
 ]
