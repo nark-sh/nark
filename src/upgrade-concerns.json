@@ -32126,5 +32126,69 @@
       "note": "Proactive \u2014 used in blue-green migration patterns without error handling. TargetNamespaceExists and NamespaceNotFound (code 26) are common."
     },
     "resolution": "Resolved as part of mongodb-deepen-1 fix. rename-target-exists postcondition fires correctly. Ground-truth test passes."
+  },
+  {
+    "id": "concern-20260417-libsql-client-deepen-8",
+    "created_at": "2026-04-17",
+    "source": "deepen",
+    "package": "@libsql/client",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @libsql/client execute() invalid number arg \u2014 postcondition added in depth pass 5. Detect cases where computed numeric values (result of division, Math operations) are passed as args to execute()/batch() without Number.isFinite() validation. RangeError thrown synchronously (not LibsqlError) when NaN/Infinity passed as arg. Most relevant pattern: args: [someVar / denominator] without guard.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 RangeError from argument serialization in valueToSql()/valueToProto() when arg is NaN or Infinity. Confirmed from @libsql/client v0.17.2 source. Detection: look for execute()/batch() calls where args array elements could be NaN/Infinity (division operations, parseFloat, Math.*) without Number.isFinite() guard."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260417-libsql-client-deepen-9",
+    "created_at": "2026-04-17",
+    "source": "deepen",
+    "package": "@libsql/client",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @libsql/client execute() invalid bigint arg \u2014 postcondition added in depth pass 5. Detect cases where bigint values from external systems are passed as args to execute()/batch() without range validation. RangeError thrown synchronously (not LibsqlError) when bigint > 2^63-1 or < -(2^63) passed as arg. Applies when consuming external IDs or performing bigint arithmetic.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 RangeError from argument serialization in valueToSql()/valueToProto() when bigint arg exceeds SQLite INT64 range (+-9223372036854775807). Confirmed from @libsql/client v0.17.2 source. Detection: look for execute()/batch() calls where args array contains bigint typed variables from external sources without range-check guard."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260417-ethers-deepen-5",
+    "created_at": "2026-04-17",
+    "source": "deepen",
+    "package": "ethers",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for ethers Contract.method() calls (await contract.transfer/mint/etc.) without try-catch -- CALL_EXCEPTION on contract revert and UNSUPPORTED_OPERATION when no signer attached",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive -- Contract.method() is the most common ethers pattern in Web3 SaaS. contract-method-call-exception and contract-method-no-signer postconditions added in deepen pass 8."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260417-ethers-deepen-6",
+    "created_at": "2026-04-17",
+    "source": "deepen",
+    "package": "ethers",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for ethers provider.send(method, params) calls without try-catch -- UNSUPPORTED_OPERATION when RPC method not found and SERVER_ERROR/NETWORK_ERROR on connectivity failure",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive -- provider.send() is used for advanced RPC calls (trace_, debug_, eth_getProof). provider-send-unsupported-method and provider-send-network-error postconditions added in deepen pass 8."
+    },
+    "resolution": null
   }
 ]
