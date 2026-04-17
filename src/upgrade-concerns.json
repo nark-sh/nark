@@ -34532,7 +34532,7 @@
     "source": "deepen",
     "package": "joi",
     "type": "sync_throw_detection",
-    "status": "pending",
+    "status": "deferred",
     "description": "Add detection for Joi.compile() with dynamic schema — throws AssertError on invalid/undefined schema input. This is a sync call so standard async-detection rules do not apply. Requires a new detection pattern for sync calls with dynamic arguments.",
     "evidence": {
       "repos": [],
@@ -34540,7 +34540,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis. compile() throws @hapi/hoek AssertError when schema is undefined, empty array, or non-plain-object. Sync throws are currently out of scanner scope."
     },
-    "resolution": null
+    "resolution": "Sync throw detection is out of scanner scope. compile() fires only on sync execution paths without async boundary — the V2 ThrowingFunctionDetector targets async call sites (await). Tracking sync-throw patterns requires a dedicated sync-call visitor not yet implemented."
   },
   {
     "id": "concern-2026-04-17-tanstack-react-router-fp-1",
