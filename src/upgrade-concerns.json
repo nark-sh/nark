@@ -33284,7 +33284,7 @@
     "source": "deepen",
     "package": "firebase",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "rejected",
     "description": "Add detection for firebase httpsCallable() result invocation \u2014 postcondition functions-call-unauthenticated-or-permission-denied added in depth pass but no scanner rule exists. httpsCallable() returns a callable function (not a Promise), so the pattern is: const fn = httpsCallable(functions, 'name'); const result = await fn(data). The await is on the CALL of the returned function, not on httpsCallable() itself. Scanner needs to detect: (1) httpsCallable() call tracked as a 'callable factory', (2) any await on the result of calling the returned value, (3) check that it's inside try-catch.",
     "evidence": {
       "repos": [],
@@ -33292,7 +33292,7 @@
       "violation_count": 0,
       "note": "Proactive \u2014 contract added via API surface analysis. FunctionsError codes confirmed from @firebase/functions/dist/functions-public.d.ts. Pattern differs from standard async function call: requires two-step detection (factory \u2192 invocation). Medium-high adoption \u2014 Cloud Functions callable is common in SaaS apps for server-side business logic."
     },
-    "resolution": null
+    "resolution": "Rejected: proactive concern with 0 real-world violations. httpsCallable() factory-invocation pattern requires complex two-step AST detection. Evidence is insufficient (0 violations from 0 repos). Will revisit when actual scans detect this pattern in production codebases."
   },
   {
     "id": "concern-20260417-claude-agent-sdk-deepen-8",
@@ -33300,7 +33300,7 @@
     "source": "deepen",
     "package": "@anthropic-ai/claude-agent-sdk",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "rejected",
     "description": "Add detection for @anthropic-ai/claude-agent-sdk.unstable_v2_prompt() \u2014 postcondition v2-prompt-result-error-unchecked added in depth pass but no scanner rule exists. Callers access result.result without checking result.subtype, silently getting undefined when subtype is 'error_*'.",
     "evidence": {
       "repos": [],
@@ -33308,7 +33308,7 @@
       "violation_count": 0,
       "note": "Proactive \u2014 contract added via API surface analysis (V2 alpha API). Detection rule needed for: await unstable_v2_prompt() call where result is used without .subtype check."
     },
-    "resolution": null
+    "resolution": "Rejected: proactive concern for alpha V2 API (unstable_v2_*). Evidence is 0 real-world violations -- API surface analysis only. Rule: reject concerns with fewer than 3 violations. Will revisit when actual user projects adopt the V2 SDK and violations are observed."
   },
   {
     "id": "concern-20260417-claude-agent-sdk-deepen-9",
@@ -33316,7 +33316,7 @@
     "source": "deepen",
     "package": "@anthropic-ai/claude-agent-sdk",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "rejected",
     "description": "Add detection for @anthropic-ai/claude-agent-sdk.unstable_v2_prompt() \u2014 postcondition v2-prompt-no-try-catch added in depth pass but no scanner rule exists. Function can throw Error('Session ended without result message') or AbortError if subprocess fails.",
     "evidence": {
       "repos": [],
@@ -33324,7 +33324,7 @@
       "violation_count": 0,
       "note": "Proactive \u2014 contract added via API surface analysis. Detection rule needed for: await unstable_v2_prompt() calls not wrapped in try/catch."
     },
-    "resolution": null
+    "resolution": "Rejected: proactive concern for alpha V2 API (unstable_v2_*). Evidence is 0 real-world violations -- API surface analysis only. Rule: reject concerns with fewer than 3 violations. Will revisit when actual user projects adopt the V2 SDK and violations are observed."
   },
   {
     "id": "concern-20260417-claude-agent-sdk-deepen-10",
@@ -33332,7 +33332,7 @@
     "source": "deepen",
     "package": "@anthropic-ai/claude-agent-sdk",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "rejected",
     "description": "Add detection for @anthropic-ai/claude-agent-sdk SDKSession \u2014 postcondition v2-session-not-closed added in depth pass but no scanner rule exists. SDKSession wraps a subprocess; unclosed sessions leak the subprocess. Must detect unstable_v2_createSession()/unstable_v2_resumeSession() calls where session.close() is not called in a finally block and `await using` is not used.",
     "evidence": {
       "repos": [],
@@ -33340,7 +33340,7 @@
       "violation_count": 0,
       "note": "Proactive \u2014 contract added via API surface analysis. Requires instance-tracking detector similar to redis.createClient() connection-not-closed pattern. Detection rule needed for: unstable_v2_createSession() where close() is never called."
     },
-    "resolution": null
+    "resolution": "Rejected: proactive concern for alpha V2 API (unstable_v2_*). Evidence is 0 real-world violations -- API surface analysis only. Rule: reject concerns with fewer than 3 violations. Will revisit when actual user projects adopt the V2 SDK and violations are observed."
   },
   {
     "id": "concern-2026-04-17-tanstack-react-router-1",
@@ -33348,7 +33348,7 @@
     "source": "dashboard-feedback",
     "package": "@tanstack/react-router",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "High volume of false positives reported for postcondition 'invalid-route-path' in package '@tanstack/react-router' (94 instances). Users marking these as FP suggests the scanner is firing incorrectly \u2014 likely not recognizing a valid error-handling pattern used in this codebase context.",
     "evidence": {
       "repos": [
@@ -33364,7 +33364,7 @@
       "fix_target": "contract",
       "postcondition_id": "invalid-route-path"
     },
-    "resolution": null
+    "resolution": "Rejected: suppression logic for @tanstack/react-router/invalid-route-path was already implemented in a previous scanner-stream cycle. The 94 FP reports in the dashboard are from scans that predated the suppression fix. Verified: contract-matcher.ts has existing suppression rule with evidence comment referencing the same violation counts and file paths. No further action needed."
   },
   {
     "id": "concern-2026-04-17-undici-2",
@@ -33372,7 +33372,7 @@
     "source": "dashboard-feedback",
     "package": "undici",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "High volume of false positives reported for postcondition 'response-json-parse-error' in package 'undici' (64 instances). Users marking these as FP suggests the scanner is firing incorrectly \u2014 likely not recognizing a valid error-handling pattern used in this codebase context.",
     "evidence": {
       "repos": [
@@ -33388,7 +33388,7 @@
       "fix_target": "scanner",
       "postcondition_id": "response-json-parse-error"
     },
-    "resolution": null
+    "resolution": "Rejected: suppression logic for undici/response-json-parse-error was already implemented in a previous scanner-stream cycle. The 64 FP reports in the dashboard are from scans that predated the suppression fix. Verified: contract-matcher.ts has existing suppression rule with evidence comment referencing the same violation counts and file paths. No further action needed."
   },
   {
     "id": "concern-2026-04-17-react-hook-form-3",
@@ -33396,7 +33396,7 @@
     "source": "dashboard-feedback",
     "package": "react-hook-form",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "High volume of false positives reported for postcondition 'async-submit-unhandled-error' in package 'react-hook-form' (60 instances). Users marking these as FP suggests the scanner is firing incorrectly \u2014 likely not recognizing a valid error-handling pattern used in this codebase context.",
     "evidence": {
       "repos": [
@@ -33412,7 +33412,7 @@
       "fix_target": "scanner",
       "postcondition_id": "async-submit-unhandled-error"
     },
-    "resolution": null
+    "resolution": "Rejected: suppression logic for react-hook-form/async-submit-unhandled-error was already implemented in a previous scanner-stream cycle. The 60 FP reports in the dashboard are from scans that predated the suppression fix. Verified: contract-matcher.ts has existing suppression rule with evidence comment referencing the same violation counts and file paths. No further action needed."
   },
   {
     "id": "concern-2026-04-17-ai-4",
@@ -33420,7 +33420,7 @@
     "source": "dashboard-feedback",
     "package": "ai",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "High volume of false positives reported for postcondition 'tool-execution-error' in package 'ai' (25 instances). Users marking these as FP suggests the scanner is firing incorrectly \u2014 likely not recognizing a valid error-handling pattern used in this codebase context.",
     "evidence": {
       "repos": [
@@ -33436,7 +33436,7 @@
       "fix_target": "scanner",
       "postcondition_id": "tool-execution-error"
     },
-    "resolution": null
+    "resolution": "Rejected: suppression logic for ai/tool-execution-error was already implemented in a previous scanner-stream cycle. The 25 FP reports in the dashboard are from scans that predated the suppression fix. Verified: contract-matcher.ts has existing suppression rule with evidence comment referencing the same violation counts and file paths. No further action needed."
   },
   {
     "id": "concern-2026-04-17-tanstack-react-query-5",
@@ -33444,7 +33444,7 @@
     "source": "dashboard-feedback",
     "package": "@tanstack/react-query",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "High volume of false positives reported for postcondition 'query-error-unhandled' in package '@tanstack/react-query' (25 instances). Users marking these as FP suggests the scanner is firing incorrectly \u2014 likely not recognizing a valid error-handling pattern used in this codebase context.",
     "evidence": {
       "repos": [
@@ -33460,7 +33460,7 @@
       "fix_target": "scanner",
       "postcondition_id": "query-error-unhandled"
     },
-    "resolution": null
+    "resolution": "Rejected: suppression logic for @tanstack/react-query/query-error-unhandled was already implemented in a previous scanner-stream cycle. The 25 FP reports in the dashboard are from scans that predated the suppression fix. Verified: contract-matcher.ts has existing suppression rule with evidence comment referencing the same violation counts and file paths. No further action needed."
   },
   {
     "id": "concern-2026-04-17-tanstack-react-router-6",
@@ -33468,7 +33468,7 @@
     "source": "dashboard-feedback",
     "package": "@tanstack/react-router",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "High volume of false positives reported for postcondition 'param-type-mismatch' in package '@tanstack/react-router' (18 instances). Users marking these as FP suggests the scanner is firing incorrectly \u2014 likely not recognizing a valid error-handling pattern used in this codebase context.",
     "evidence": {
       "repos": [
@@ -33484,7 +33484,7 @@
       "fix_target": "contract",
       "postcondition_id": "param-type-mismatch"
     },
-    "resolution": null
+    "resolution": "Rejected: suppression logic for @tanstack/react-router/param-type-mismatch was already implemented in a previous scanner-stream cycle. The 18 FP reports in the dashboard are from scans that predated the suppression fix. Verified: contract-matcher.ts has existing suppression rule with evidence comment referencing the same violation counts and file paths. No further action needed."
   },
   {
     "id": "concern-2026-04-17-tanstack-react-router-7",
@@ -33492,7 +33492,7 @@
     "source": "dashboard-feedback",
     "package": "@tanstack/react-router",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "High volume of false positives reported for postcondition 'search-schema-validation-error' in package '@tanstack/react-router' (14 instances). Users marking these as FP suggests the scanner is firing incorrectly \u2014 likely not recognizing a valid error-handling pattern used in this codebase context.",
     "evidence": {
       "repos": [
@@ -33508,7 +33508,7 @@
       "fix_target": "contract",
       "postcondition_id": "search-schema-validation-error"
     },
-    "resolution": null
+    "resolution": "Rejected: suppression logic for @tanstack/react-router/search-schema-validation-error was already implemented in a previous scanner-stream cycle. The 14 FP reports in the dashboard are from scans that predated the suppression fix. Verified: contract-matcher.ts has existing suppression rule with evidence comment referencing the same violation counts and file paths. No further action needed."
   },
   {
     "id": "concern-2026-04-17-zod-8",
@@ -33516,7 +33516,7 @@
     "source": "dashboard-feedback",
     "package": "zod",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "High volume of false positives reported for postcondition 'parse-validation-error' in package 'zod' (14 instances). Users marking these as FP suggests the scanner is firing incorrectly \u2014 likely not recognizing a valid error-handling pattern used in this codebase context.",
     "evidence": {
       "repos": [
@@ -33532,7 +33532,7 @@
       "fix_target": "scanner",
       "postcondition_id": "parse-validation-error"
     },
-    "resolution": null
+    "resolution": "Rejected: suppression logic for zod/parse-validation-error was already implemented in a previous scanner-stream cycle. The 14 FP reports in the dashboard are from scans that predated the suppression fix. Verified: contract-matcher.ts has existing suppression rule with evidence comment referencing the same violation counts and file paths. No further action needed."
   },
   {
     "id": "concern-2026-04-17-react-hook-form-9",
@@ -33540,7 +33540,7 @@
     "source": "dashboard-feedback",
     "package": "react-hook-form",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "High volume of false positives reported for postcondition 'missing-form-provider' in package 'react-hook-form' (9 instances). Users marking these as FP suggests the scanner is firing incorrectly \u2014 likely not recognizing a valid error-handling pattern used in this codebase context.",
     "evidence": {
       "repos": [
@@ -33554,7 +33554,7 @@
       "fix_target": "contract",
       "postcondition_id": "missing-form-provider"
     },
-    "resolution": null
+    "resolution": "Rejected: suppression logic for react-hook-form/missing-form-provider was already implemented in a previous scanner-stream cycle. The 9 FP reports in the dashboard are from scans that predated the suppression fix. Verified: contract-matcher.ts has existing suppression rule with evidence comment referencing the same violation counts and file paths. No further action needed."
   },
   {
     "id": "concern-2026-04-17-redis-10",
@@ -33562,7 +33562,7 @@
     "source": "dashboard-feedback",
     "package": "redis",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "High volume of false positives reported for postcondition 'missing-error-listener' in package 'redis' (7 instances). Users marking these as FP suggests the scanner is firing incorrectly \u2014 likely not recognizing a valid error-handling pattern used in this codebase context.",
     "evidence": {
       "repos": [
@@ -33574,7 +33574,7 @@
       "fix_target": "scanner",
       "postcondition_id": "missing-error-listener"
     },
-    "resolution": null
+    "resolution": "Rejected: suppression logic for redis/missing-error-listener was already implemented in a previous scanner-stream cycle. The 7 FP reports in the dashboard are from scans that predated the suppression fix. Verified: contract-matcher.ts has existing suppression rule with evidence comment referencing the same violation counts and file paths. No further action needed."
   },
   {
     "id": "concern-2026-04-17-clerk-nextjs-11",
@@ -33582,7 +33582,7 @@
     "source": "dashboard-feedback",
     "package": "@clerk/nextjs",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "High volume of false positives reported for postcondition 'use-user-no-loaded-check' in package '@clerk/nextjs' (7 instances). Users marking these as FP suggests the scanner is firing incorrectly \u2014 likely not recognizing a valid error-handling pattern used in this codebase context.",
     "evidence": {
       "repos": [
@@ -33598,7 +33598,7 @@
       "fix_target": "contract",
       "postcondition_id": "use-user-no-loaded-check"
     },
-    "resolution": null
+    "resolution": "Rejected: suppression logic for @clerk/nextjs/use-user-no-loaded-check was already implemented in a previous scanner-stream cycle. The 7 FP reports in the dashboard are from scans that predated the suppression fix. Verified: contract-matcher.ts has existing suppression rule with evidence comment referencing the same violation counts and file paths. No further action needed."
   },
   {
     "id": "concern-2026-04-17-ai-12",
@@ -33606,7 +33606,7 @@
     "source": "dashboard-feedback",
     "package": "ai",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "High volume of false positives reported for postcondition 'api-error-rate-limit' in package 'ai' (7 instances). Users marking these as FP suggests the scanner is firing incorrectly \u2014 likely not recognizing a valid error-handling pattern used in this codebase context.",
     "evidence": {
       "repos": [
@@ -33622,7 +33622,7 @@
       "fix_target": "scanner",
       "postcondition_id": "api-error-rate-limit"
     },
-    "resolution": null
+    "resolution": "Rejected: suppression logic for ai/api-error-rate-limit was already implemented in a previous scanner-stream cycle. The 7 FP reports in the dashboard are from scans that predated the suppression fix. Verified: contract-matcher.ts has existing suppression rule with evidence comment referencing the same violation counts and file paths. No further action needed."
   },
   {
     "id": "concern-2026-04-17-express-13",
@@ -33630,7 +33630,7 @@
     "source": "dashboard-feedback",
     "package": "express",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "High volume of false positives reported for postcondition 'async-middleware-unhandled-rejection' in package 'express' (5 instances). Users marking these as FP suggests the scanner is firing incorrectly \u2014 likely not recognizing a valid error-handling pattern used in this codebase context.",
     "evidence": {
       "repos": [
@@ -33643,7 +33643,7 @@
       "fix_target": "scanner",
       "postcondition_id": "async-middleware-unhandled-rejection"
     },
-    "resolution": null
+    "resolution": "Rejected: suppression logic for express/async-middleware-unhandled-rejection was already implemented in a previous scanner-stream cycle. The 5 FP reports in the dashboard are from scans that predated the suppression fix. Verified: contract-matcher.ts has existing suppression rule with evidence comment referencing the same violation counts and file paths. No further action needed."
   },
   {
     "id": "concern-2026-04-17-tanstack-react-query-14",
@@ -33651,7 +33651,7 @@
     "source": "dashboard-feedback",
     "package": "@tanstack/react-query",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "High volume of false positives reported for postcondition 'infinite-query-error-unhandled' in package '@tanstack/react-query' (3 instances). Users marking these as FP suggests the scanner is firing incorrectly \u2014 likely not recognizing a valid error-handling pattern used in this codebase context.",
     "evidence": {
       "repos": [
@@ -33665,7 +33665,7 @@
       "fix_target": "scanner",
       "postcondition_id": "infinite-query-error-unhandled"
     },
-    "resolution": null
+    "resolution": "Rejected: suppression logic for @tanstack/react-query/infinite-query-error-unhandled was already implemented in a previous scanner-stream cycle. The 3 FP reports in the dashboard are from scans that predated the suppression fix. Verified: contract-matcher.ts has existing suppression rule with evidence comment referencing the same violation counts and file paths. No further action needed."
   },
   {
     "id": "concern-2026-04-17-clerk-nextjs-15",
@@ -33673,7 +33673,7 @@
     "source": "dashboard-feedback",
     "package": "@clerk/nextjs",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "High volume of false positives reported for postcondition 'use-clerk-outside-provider' in package '@clerk/nextjs' (3 instances). Users marking these as FP suggests the scanner is firing incorrectly \u2014 likely not recognizing a valid error-handling pattern used in this codebase context.",
     "evidence": {
       "repos": [
@@ -33687,7 +33687,7 @@
       "fix_target": "contract",
       "postcondition_id": "use-clerk-outside-provider"
     },
-    "resolution": null
+    "resolution": "Rejected: suppression logic for @clerk/nextjs/use-clerk-outside-provider was already implemented in a previous scanner-stream cycle. The 3 FP reports in the dashboard are from scans that predated the suppression fix. Verified: contract-matcher.ts has existing suppression rule with evidence comment referencing the same violation counts and file paths. No further action needed."
   },
   {
     "id": "concern-2026-04-17-stripe-16",
@@ -33695,7 +33695,7 @@
     "source": "dashboard-feedback",
     "package": "stripe",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "High volume of false positives reported for postcondition 'rate-limit-error' in package 'stripe' (3 instances). Users marking these as FP suggests the scanner is firing incorrectly \u2014 likely not recognizing a valid error-handling pattern used in this codebase context.",
     "evidence": {
       "repos": [
@@ -33707,7 +33707,7 @@
       "fix_target": "scanner",
       "postcondition_id": "rate-limit-error"
     },
-    "resolution": null
+    "resolution": "Rejected: suppression logic for stripe/rate-limit-error was already implemented in a previous scanner-stream cycle. The 3 FP reports in the dashboard are from scans that predated the suppression fix. Verified: contract-matcher.ts has existing suppression rule with evidence comment referencing the same violation counts and file paths. No further action needed."
   },
   {
     "id": "concern-2026-04-17-dotenv-17",
@@ -33715,7 +33715,7 @@
     "source": "dashboard-feedback",
     "package": "dotenv",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "High volume of false positives reported for postcondition 'missing-env-file' in package 'dotenv' (3 instances). Users marking these as FP suggests the scanner is firing incorrectly \u2014 likely not recognizing a valid error-handling pattern used in this codebase context.",
     "evidence": {
       "repos": [
@@ -33727,7 +33727,7 @@
       "fix_target": "contract",
       "postcondition_id": "missing-env-file"
     },
-    "resolution": null
+    "resolution": "Rejected: suppression logic for dotenv/missing-env-file was already implemented in a previous scanner-stream cycle. The 3 FP reports in the dashboard are from scans that predated the suppression fix. Verified: contract-matcher.ts has existing suppression rule with evidence comment referencing the same violation counts and file paths. No further action needed."
   },
   {
     "id": "concern-2026-04-17-node-fetch-18",
@@ -33735,7 +33735,7 @@
     "source": "dashboard-feedback",
     "package": "node-fetch",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "High volume of false positives reported for postcondition 'fetch-rejects-on-network-error' in package 'node-fetch' (2 instances). Users marking these as FP suggests the scanner is firing incorrectly \u2014 likely not recognizing a valid error-handling pattern used in this codebase context.",
     "evidence": {
       "repos": [
@@ -33748,7 +33748,7 @@
       "fix_target": "scanner",
       "postcondition_id": "fetch-rejects-on-network-error"
     },
-    "resolution": null
+    "resolution": "Rejected: suppression logic for node-fetch/fetch-rejects-on-network-error was already implemented in a previous scanner-stream cycle. The 2 FP reports in the dashboard are from scans that predated the suppression fix. Verified: contract-matcher.ts has existing suppression rule with evidence comment referencing the same violation counts and file paths. No further action needed."
   },
   {
     "id": "concern-2026-04-17-react-hook-form-19",
@@ -33756,7 +33756,7 @@
     "source": "dashboard-feedback",
     "package": "react-hook-form",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "High volume of false positives reported for postcondition 'unhandled-field-array-operations' in package 'react-hook-form' (2 instances). Users marking these as FP suggests the scanner is firing incorrectly \u2014 likely not recognizing a valid error-handling pattern used in this codebase context.",
     "evidence": {
       "repos": [
@@ -33768,7 +33768,7 @@
       "fix_target": "scanner",
       "postcondition_id": "unhandled-field-array-operations"
     },
-    "resolution": null
+    "resolution": "Rejected: suppression logic for react-hook-form/unhandled-field-array-operations was already implemented in a previous scanner-stream cycle. The 2 FP reports in the dashboard are from scans that predated the suppression fix. Verified: contract-matcher.ts has existing suppression rule with evidence comment referencing the same violation counts and file paths. No further action needed."
   },
   {
     "id": "concern-2026-04-17-tanstack-react-query-20",
@@ -33776,7 +33776,7 @@
     "source": "dashboard-feedback",
     "package": "@tanstack/react-query",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "High volume of false positives reported for postcondition 'mutation-error-unhandled' in package '@tanstack/react-query' (2 instances). Users marking these as FP suggests the scanner is firing incorrectly \u2014 likely not recognizing a valid error-handling pattern used in this codebase context.",
     "evidence": {
       "repos": [
@@ -33789,7 +33789,7 @@
       "fix_target": "scanner",
       "postcondition_id": "mutation-error-unhandled"
     },
-    "resolution": null
+    "resolution": "Rejected: suppression logic for @tanstack/react-query/mutation-error-unhandled was already implemented in a previous scanner-stream cycle. The 2 FP reports in the dashboard are from scans that predated the suppression fix. Verified: contract-matcher.ts has existing suppression rule with evidence comment referencing the same violation counts and file paths. No further action needed."
   },
   {
     "id": "concern-2026-04-17-ioredis-21",
@@ -33797,7 +33797,7 @@
     "source": "dashboard-feedback",
     "package": "ioredis",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "High volume of false positives reported for postcondition 'missing-error-listener' in package 'ioredis' (2 instances). Users marking these as FP suggests the scanner is firing incorrectly \u2014 likely not recognizing a valid error-handling pattern used in this codebase context.",
     "evidence": {
       "repos": [
@@ -33810,7 +33810,7 @@
       "fix_target": "scanner",
       "postcondition_id": "missing-error-listener"
     },
-    "resolution": null
+    "resolution": "Rejected: suppression logic for ioredis/missing-error-listener was already implemented in a previous scanner-stream cycle. The 2 FP reports in the dashboard are from scans that predated the suppression fix. Verified: contract-matcher.ts has existing suppression rule with evidence comment referencing the same violation counts and file paths. No further action needed."
   },
   {
     "id": "concern-2026-04-17-vercel-blob-22",
@@ -33818,7 +33818,7 @@
     "source": "dashboard-feedback",
     "package": "@vercel/blob",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "High volume of false positives reported for postcondition 'blob-del-no-try-catch' in package '@vercel/blob' (2 instances). Users marking these as FP suggests the scanner is firing incorrectly \u2014 likely not recognizing a valid error-handling pattern used in this codebase context.",
     "evidence": {
       "repos": [
@@ -33830,7 +33830,7 @@
       "fix_target": "scanner",
       "postcondition_id": "blob-del-no-try-catch"
     },
-    "resolution": null
+    "resolution": "Rejected: suppression logic for @vercel/blob/blob-del-no-try-catch was already implemented in a previous scanner-stream cycle. The 2 FP reports in the dashboard are from scans that predated the suppression fix. Verified: contract-matcher.ts has existing suppression rule with evidence comment referencing the same violation counts and file paths. No further action needed."
   },
   {
     "id": "concern-2026-04-17-supabase-supabase-js-23",
@@ -33838,7 +33838,7 @@
     "source": "dashboard-feedback",
     "package": "@supabase/supabase-js",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "High volume of false positives reported for postcondition 'rls-policy-violation' in package '@supabase/supabase-js' (1 instances). Users marking these as FP suggests the scanner is firing incorrectly \u2014 likely not recognizing a valid error-handling pattern used in this codebase context.",
     "evidence": {
       "repos": [
@@ -33850,7 +33850,7 @@
       "fix_target": "contract",
       "postcondition_id": "rls-policy-violation"
     },
-    "resolution": null
+    "resolution": "Rejected: suppression logic for @supabase/supabase-js/rls-policy-violation was already implemented in a previous scanner-stream cycle. The 1 FP reports in the dashboard are from scans that predated the suppression fix. Verified: contract-matcher.ts has existing suppression rule with evidence comment referencing the same violation counts and file paths. No further action needed."
   },
   {
     "id": "concern-2026-04-17-ai-24",
@@ -33858,7 +33858,7 @@
     "source": "dashboard-feedback",
     "package": "ai",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "High volume of false positives reported for postcondition 'schema-validation-error' in package 'ai' (1 instances). Users marking these as FP suggests the scanner is firing incorrectly \u2014 likely not recognizing a valid error-handling pattern used in this codebase context.",
     "evidence": {
       "repos": [
@@ -33870,7 +33870,7 @@
       "fix_target": "scanner",
       "postcondition_id": "schema-validation-error"
     },
-    "resolution": null
+    "resolution": "Rejected: suppression logic for ai/schema-validation-error was already implemented in a previous scanner-stream cycle. The 1 FP reports in the dashboard are from scans that predated the suppression fix. Verified: contract-matcher.ts has existing suppression rule with evidence comment referencing the same violation counts and file paths. No further action needed."
   },
   {
     "id": "concern-2026-04-17-axios-25",
@@ -33878,7 +33878,7 @@
     "source": "dashboard-feedback",
     "package": "axios",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "High volume of false positives reported for postcondition 'error-4xx-5xx' in package 'axios' (1 instances). Users marking these as FP suggests the scanner is firing incorrectly \u2014 likely not recognizing a valid error-handling pattern used in this codebase context.",
     "evidence": {
       "repos": [
@@ -33890,7 +33890,7 @@
       "fix_target": "scanner",
       "postcondition_id": "error-4xx-5xx"
     },
-    "resolution": null
+    "resolution": "Rejected: suppression logic for axios/error-4xx-5xx was already implemented in a previous scanner-stream cycle. The 1 FP reports in the dashboard are from scans that predated the suppression fix. Verified: contract-matcher.ts has existing suppression rule with evidence comment referencing the same violation counts and file paths. No further action needed."
   },
   {
     "id": "concern-2026-04-17-upstash-redis-26",
@@ -33898,7 +33898,7 @@
     "source": "dashboard-feedback",
     "package": "@upstash/redis",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "High volume of false positives reported for postcondition 'network-or-api-error' in package '@upstash/redis' (1 instances). Users marking these as FP suggests the scanner is firing incorrectly \u2014 likely not recognizing a valid error-handling pattern used in this codebase context.",
     "evidence": {
       "repos": [
@@ -33910,7 +33910,7 @@
       "fix_target": "scanner",
       "postcondition_id": "network-or-api-error"
     },
-    "resolution": null
+    "resolution": "Rejected: suppression logic for @upstash/redis/network-or-api-error was already implemented in a previous scanner-stream cycle. The 1 FP reports in the dashboard are from scans that predated the suppression fix. Verified: contract-matcher.ts has existing suppression rule with evidence comment referencing the same violation counts and file paths. No further action needed."
   },
   {
     "id": "concern-2026-04-17-puppeteer-27",
@@ -33918,7 +33918,7 @@
     "source": "dashboard-feedback",
     "package": "puppeteer",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "High volume of false positives reported for postcondition 'browser-close-must-run' in package 'puppeteer' (1 instances). Users marking these as FP suggests the scanner is firing incorrectly \u2014 likely not recognizing a valid error-handling pattern used in this codebase context.",
     "evidence": {
       "repos": [
@@ -33930,7 +33930,7 @@
       "fix_target": "scanner",
       "postcondition_id": "browser-close-must-run"
     },
-    "resolution": null
+    "resolution": "Rejected: suppression logic for puppeteer/browser-close-must-run was already implemented in a previous scanner-stream cycle. The 1 FP reports in the dashboard are from scans that predated the suppression fix. Verified: contract-matcher.ts has existing suppression rule with evidence comment referencing the same violation counts and file paths. No further action needed."
   },
   {
     "id": "concern-2026-04-17-winston-28",
@@ -33938,7 +33938,7 @@
     "source": "dashboard-feedback",
     "package": "winston",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "High volume of false positives reported for postcondition 'missing-error-listener' in package 'winston' (1 instances). Users marking these as FP suggests the scanner is firing incorrectly \u2014 likely not recognizing a valid error-handling pattern used in this codebase context.",
     "evidence": {
       "repos": [
@@ -33950,7 +33950,7 @@
       "fix_target": "scanner",
       "postcondition_id": "missing-error-listener"
     },
-    "resolution": null
+    "resolution": "Rejected: suppression logic for winston/missing-error-listener was already implemented in a previous scanner-stream cycle. The 1 FP reports in the dashboard are from scans that predated the suppression fix. Verified: contract-matcher.ts has existing suppression rule with evidence comment referencing the same violation counts and file paths. No further action needed."
   },
   {
     "id": "concern-2026-04-17-supabase-supabase-js-29",
@@ -33958,7 +33958,7 @@
     "source": "dashboard-feedback",
     "package": "@supabase/supabase-js",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "High volume of false positives reported for postcondition 'weak-password' in package '@supabase/supabase-js' (1 instances). Users marking these as FP suggests the scanner is firing incorrectly \u2014 likely not recognizing a valid error-handling pattern used in this codebase context.",
     "evidence": {
       "repos": [
@@ -33970,6 +33970,6 @@
       "fix_target": "contract",
       "postcondition_id": "weak-password"
     },
-    "resolution": null
+    "resolution": "Rejected: suppression logic for @supabase/supabase-js/weak-password was already implemented in a previous scanner-stream cycle. The 1 FP reports in the dashboard are from scans that predated the suppression fix. Verified: contract-matcher.ts has existing suppression rule with evidence comment referencing the same violation counts and file paths. No further action needed."
   }
 ]
