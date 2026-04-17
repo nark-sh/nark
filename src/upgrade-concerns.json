@@ -34089,5 +34089,37 @@
       "postcondition_id": "missing-error-listener"
     },
     "resolution": null
+  },
+  {
+    "id": "concern-20260416-better-sqlite3-deepen-1",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "better-sqlite3",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for new Database() constructor with fileMustExist: true \u2014 postcondition database-file-must-exist-error added in depth pass but no scanner rule exists. Pattern: new Database(path, { fileMustExist: true }) outside try/catch.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. fileMustExist: true throws SqliteError if file missing. Needs constructor-call detection with option inspection."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-better-sqlite3-deepen-2",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "better-sqlite3",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for db.transaction() callable invocation \u2014 postcondition transaction-inner-exception-rollback added in depth pass but no scanner rule exists. Pattern: the callable returned by db.transaction() called outside try/catch.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. Transaction callable throws SqliteError on inner exception (auto-rollback occurs but exception still propagates). Requires two-hop detection: track result of db.transaction() then detect when that result is called outside try/catch."
+    },
+    "resolution": null
   }
 ]
