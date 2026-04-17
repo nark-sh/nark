@@ -31285,5 +31285,101 @@
       "note": "Proactive \u2014 contract added via API surface analysis. Impersonated.fetchIdToken() makes two IAM API calls that can throw GaxiosError with reformatted messages (PERMISSION_DENIED: unable to impersonate, NOT_FOUND: unable to impersonate). Requires scanner support for Impersonated class instance detection."
     },
     "resolution": null
+  },
+  {
+    "id": "concern-20260416-aws-sqs-deepen-5",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@aws-sdk/client-sqs",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for SendMessageCommand invalid contents \u2014 postcondition sqs-send-invalid-message-contents added but no scanner rule for character validation",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. SendMessageCommand throws InvalidMessageContents when body contains characters outside allowed Unicode set (#x00-#x08, #x0B-#x0C, #x0E-#x1F are disallowed). Common when serializing arbitrary user input or binary data without sanitization. Requires scanner to detect send(new SendMessageCommand(...)) calls without try-catch where MessageBody may contain arbitrary input."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-aws-sqs-deepen-6",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@aws-sdk/client-sqs",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for SendMessageCommand KMS errors \u2014 postcondition sqs-send-kms-errors added but no scanner rule to distinguish Kms* errors from generic SQS errors",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. SendMessageCommand on KMS-encrypted queues can throw KmsAccessDenied, KmsDisabled, KmsInvalidKeyUsage, KmsInvalidState, KmsNotFound, KmsOptInRequired, KmsThrottled. These require different remediation (IAM/key fixes) vs retry logic. Currently no scanner rule checks for KMS-specific error handling in SQS send() calls. Detection requires identifying whether the target queue URL pattern suggests encryption, or scanning all send() calls for the distinction."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-aws-sqs-deepen-7",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@aws-sdk/client-sqs",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for SendMessageCommand FIFO queue missing MessageGroupId \u2014 postcondition sqs-send-fifo-missing-message-group-id added but no scanner rule exists",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. SendMessageCommand on FIFO queues (.fifo suffix in QueueUrl) requires MessageGroupId \u2014 omitting it causes action failure. Pattern: detect send(new SendMessageCommand({ QueueUrl: FIFO_URL, MessageBody, /* no MessageGroupId */ })). TypeScript SDK does NOT enforce this at compile time. Migration teams that switch from standard to FIFO queues commonly miss this parameter. Requires scanner to either (a) detect when QueueUrl is a .fifo string literal without MessageGroupId, or (b) flag all SendMessageCommand calls without MessageGroupId when the QueueUrl variable ends in .fifo."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-modelcontextprotocol-sdk-deepen-14",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@modelcontextprotocol/sdk",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for StdioClientTransport.start() \u2014 postcondition stdio-start-throws-on-spawn-failure added in depth pass 13 but no scanner rule exists. Detection should track new StdioClientTransport() instances and flag calls to client.connect(transport) or transport.start() outside try-catch.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed. spawn ENOENT/EACCES errors are common when MCP server binaries not installed."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-modelcontextprotocol-sdk-deepen-15",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@modelcontextprotocol/sdk",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for StreamableHTTPClientTransport.finishAuth() \u2014 postcondition finish-auth-throws-no-provider added in depth pass 13. Detection should track new StreamableHTTPClientTransport() instances and flag calls to transport.finishAuth() outside try-catch.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. finishAuth() throws UnauthorizedError if no authProvider configured or if PKCE exchange fails."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-modelcontextprotocol-sdk-deepen-16",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@modelcontextprotocol/sdk",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for WebStandardStreamableHTTPServerTransport.handleRequest() \u2014 postcondition web-transport-stateless-reuse-throws added in depth pass 13. Detection should identify module-scope or singleton transport instances and flag when handleRequest() is called on them in serverless-style handlers (Cloudflare Workers, edge functions) without try-catch or session management.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. Critical for Cloudflare Workers / Deno / Bun deployments where stateless transport must be created per-request."
+    },
+    "resolution": null
   }
 ]
