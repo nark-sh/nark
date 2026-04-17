@@ -6,10 +6,14 @@
  *
  * Postcondition IDs from corpus/packages/winston/contract.yaml:
  *   missing-error-listener
+ *   configure-throws-on-v2-options
+ *   add-throws-on-non-objectmode-transport
  *
  * Key behaviors under test:
  *   - createLogger() without .on('error', handler) → missing-error-listener (EventListenerAbsencePlugin)
  *   - createLogger() with .on('error', handler) → should NOT fire
+ *   - logger.configure() without try-catch → configure-throws-on-v2-options (ThrowingFunctionDetector)
+ *   - logger.add() without try-catch → add-throws-on-non-objectmode-transport (ThrowingFunctionDetector)
  *
  * Design: spec-driven, NOT based on V1 behavior.
  */

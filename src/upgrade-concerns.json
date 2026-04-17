@@ -31402,7 +31402,7 @@
     "source": "deepen",
     "package": "winston",
     "type": "uncovered_function",
-    "status": "in-progress",
+    "status": "rejected",
     "description": "Add detection for winston.query() — callback error not checked (postcondition: query-unhandled-callback-error)",
     "evidence": {
       "repos": [],
@@ -31410,7 +31410,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis, detection rule needed"
     },
-    "resolution": null
+    "resolution": "Rejected: Detection requires new callback-error-check analysis machinery (checking if error-first callback arg is used in if(err) guard). The CallbackDetector already produces error-first-callback detections but the contract-matcher has no handler for this pattern. Additionally the postcondition lacks throws/returns, so it is filtered out by the postcondition selector. Implementing correctly requires significant new code with high FP risk across other callback-using packages. Evidence is insufficient: 0 real-world repos, 0 violations (proactive only). Defer until real-world demand is observed."
   },
   {
     "id": "concern-20260416-winston-deepen-2",
@@ -31418,7 +31418,7 @@
     "source": "deepen",
     "package": "winston",
     "type": "uncovered_function",
-    "status": "in-progress",
+    "status": "rejected",
     "description": "Add detection for transports.File() — per-transport error listener missing (postcondition: file-transport-missing-per-transport-error-listener)",
     "evidence": {
       "repos": [],
@@ -31426,7 +31426,7 @@
       "violation_count": 0,
       "note": "Proactive — transport-level error listeners are separate from logger.on(error). Detection needs to track transport instances."
     },
-    "resolution": null
+    "resolution": "Rejected: Detection requires EventListenerAbsencePlugin to handle sub-namespace constructors (new winston.transports.File()), which are property-chain new expressions not currently supported. Would require new contract field and plugin code changes. Evidence is insufficient: 0 real-world repos, 0 violations (proactive only). Defer until real-world demand is observed."
   },
   {
     "id": "concern-20260416-winston-deepen-3",
@@ -31434,7 +31434,7 @@
     "source": "deepen",
     "package": "winston",
     "type": "uncovered_function",
-    "status": "in-progress",
+    "status": "rejected",
     "description": "Add detection for transports.Http() — warn event not handled (postcondition: http-transport-warn-not-error-on-failure). Http transport emits failures as warn, not error.",
     "evidence": {
       "repos": [],
@@ -31442,7 +31442,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis, detection rule needed. Key: warn vs error event distinction."
     },
-    "resolution": null
+    "resolution": "Rejected: Requires the same sub-namespace constructor tracking as concern-20260416-winston-deepen-2, plus a non-standard event listener requirement (warn instead of error). The EventListenerAbsencePlugin only checks for required_event_listeners from the contract, but transport-level warn-event tracking is not currently modeled. Evidence is insufficient: 0 real-world repos, 0 violations (proactive only). Defer until real-world demand is observed."
   },
   {
     "id": "concern-20260416-winston-deepen-4",
@@ -31450,7 +31450,7 @@
     "source": "deepen",
     "package": "winston",
     "type": "uncovered_function",
-    "status": "in-progress",
+    "status": "implemented",
     "description": "Add detection for configure() and add() — throws on deprecated v2 options and non-objectMode transports (postconditions: configure-throws-on-v2-options, add-throws-on-non-objectmode-transport)",
     "evidence": {
       "repos": [],
@@ -31458,7 +31458,7 @@
       "violation_count": 0,
       "note": "Proactive — synchronous throws at setup time. Relevant for migration from winston@2 and dynamic transport usage."
     },
-    "resolution": null
+    "resolution": "Confirmed: logger.configure() and logger.add() are already detected by the ThrowingFunctionDetector via instance tracking (createLogger → logger instance). Both postconditions (configure-throws-on-v2-options, add-throws-on-non-objectmode-transport) fire correctly when calls lack try-catch. Added SHOULD_FIRE/SHOULD_NOT_FIRE annotations to ground-truth fixture (4 new test cases, all passing). No scanner code changes needed."
   },
   {
     "id": "concern-2026-04-16-undici-1",
