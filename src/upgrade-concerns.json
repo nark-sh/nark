@@ -33459,5 +33459,635 @@
       "note": "Proactive -- contract added via API surface analysis. JsonRpcProvider.getSigner() throws plain Error not EthersError which is a documentation gap. Detection rule needed."
     },
     "resolution": "Rejected: wait-is-required-after-send requires data-flow analysis to track the TransactionResponse object returned by sendTransaction() and verify .wait() is called on it. This is a complex interprocedural analysis problem. The ethers package is already at high implementation coverage. This pattern would require a dedicated data-flow plugin. Deferred pending more pressing concerns."
+  },
+  {
+    "id": "concern-2026-04-16-tanstack-react-router-1",
+    "created_at": "2026-04-16",
+    "source": "dashboard-feedback",
+    "package": "@tanstack/react-router",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "94 FP reports for @tanstack/react-router/invalid-route-path \u2014 postcondition may be too broad or fire on patterns that are inherently safe",
+    "evidence": {
+      "repos": [
+        "src/features/browser-agents/browser-agent-detail.tsx",
+        "src/features/documents/components/columns.tsx",
+        "src/features/invoices/components/data-table.tsx",
+        "src/features/loans/components/data-table.tsx",
+        "src/features/customers/components/customer-subscriptions-tab.tsx"
+      ],
+      "scan_file": null,
+      "violation_count": 94,
+      "fp_reason": null,
+      "fix_target": "contract",
+      "postcondition_id": "invalid-route-path"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-16-undici-2",
+    "created_at": "2026-04-16",
+    "source": "dashboard-feedback",
+    "package": "undici",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "64 FP reports for undici/response-json-parse-error \u2014 scanner may fire on code that is correctly handled (e.g., inside try-catch, using framework error boundaries)",
+    "evidence": {
+      "repos": [
+        "apps/web/components/layout/folder-tree.tsx",
+        "apps/web/app/admin/(protected)/lab/oss-scan/page.tsx",
+        "apps/web/app/(dashboard)/repositories/connect/connect-repository-form.tsx",
+        "apps/web/app/admin/(protected)/lab/oss-scan/[scanId]/page.tsx",
+        "apps/web/components/charts/HistoricalViolationsChart.tsx"
+      ],
+      "scan_file": null,
+      "violation_count": 64,
+      "fp_reason": null,
+      "fix_target": "scanner",
+      "postcondition_id": "response-json-parse-error"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-16-react-hook-form-3",
+    "created_at": "2026-04-16",
+    "source": "dashboard-feedback",
+    "package": "react-hook-form",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "60 FP reports for react-hook-form/async-submit-unhandled-error \u2014 scanner may fire on code that is correctly handled (e.g., inside try-catch, using framework error boundaries)",
+    "evidence": {
+      "repos": [
+        "src/features/auth/forgot-password/components/forgot-password-form.tsx",
+        "src/features/auth/sign-up/components/sign-up-form.tsx",
+        "src/features/clients/invite-client-modal.tsx",
+        "src/features/customers/components/users-action-dialog.tsx",
+        "src/features/settings/display/display-form.tsx"
+      ],
+      "scan_file": null,
+      "violation_count": 60,
+      "fp_reason": null,
+      "fix_target": "scanner",
+      "postcondition_id": "async-submit-unhandled-error"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-16-ai-4",
+    "created_at": "2026-04-16",
+    "source": "dashboard-feedback",
+    "package": "ai",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "25 FP reports for ai/tool-execution-error \u2014 scanner may fire on code that is correctly handled (e.g., inside try-catch, using framework error boundaries)",
+    "evidence": {
+      "repos": [
+        "lib/tools/getSocialFans.ts",
+        "lib/tools/getTwitterTrends.ts",
+        "lib/tools/browser/browserAgent.ts",
+        "lib/tools/browser/waitTool.ts",
+        "lib/tools/browser/browserObserve.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 25,
+      "fp_reason": null,
+      "fix_target": "scanner",
+      "postcondition_id": "tool-execution-error"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-16-tanstack-react-query-5",
+    "created_at": "2026-04-16",
+    "source": "dashboard-feedback",
+    "package": "@tanstack/react-query",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "25 FP reports for @tanstack/react-query/query-error-unhandled \u2014 scanner may fire on code that is correctly handled (e.g., inside try-catch, using framework error boundaries)",
+    "evidence": {
+      "repos": [
+        "hooks/useChatSegment.ts",
+        "hooks/useArtistSegments.ts",
+        "hooks/useCatalogs.ts",
+        "hooks/useAvailableModels.ts",
+        "app/access/page.tsx"
+      ],
+      "scan_file": null,
+      "violation_count": 25,
+      "fp_reason": null,
+      "fix_target": "scanner",
+      "postcondition_id": "query-error-unhandled"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-16-tanstack-react-router-6",
+    "created_at": "2026-04-16",
+    "source": "dashboard-feedback",
+    "package": "@tanstack/react-router",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "18 FP reports for @tanstack/react-router/param-type-mismatch \u2014 postcondition may be too broad or fire on patterns that are inherently safe",
+    "evidence": {
+      "repos": [
+        "src/routes/unsubscribe/$token.tsx",
+        "src/features/invoices/invoice-detail.tsx",
+        "src/routes/_authenticated/executions/$workflowId.tsx",
+        "src/features/customers/customer-detail.tsx",
+        "src/features/loans/loan-detail.tsx"
+      ],
+      "scan_file": null,
+      "violation_count": 18,
+      "fp_reason": null,
+      "fix_target": "contract",
+      "postcondition_id": "param-type-mismatch"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-16-tanstack-react-router-7",
+    "created_at": "2026-04-16",
+    "source": "dashboard-feedback",
+    "package": "@tanstack/react-router",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "14 FP reports for @tanstack/react-router/search-schema-validation-error \u2014 postcondition may be too broad or fire on patterns that are inherently safe",
+    "evidence": {
+      "repos": [
+        "src/features/apps/index.tsx",
+        "src/features/auth/email-confirm/index.tsx",
+        "src/routes/(auth)/invite.tsx",
+        "src/features/chats/index.tsx",
+        "src/features/auth/sign-in/index.tsx"
+      ],
+      "scan_file": null,
+      "violation_count": 14,
+      "fp_reason": null,
+      "fix_target": "contract",
+      "postcondition_id": "search-schema-validation-error"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-16-zod-8",
+    "created_at": "2026-04-16",
+    "source": "dashboard-feedback",
+    "package": "zod",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "14 FP reports for zod/parse-validation-error \u2014 postcondition may be too broad or fire on patterns that are inherently safe",
+    "evidence": {
+      "repos": [
+        "apps/web/app/api/user/stats/newsletters/route.ts",
+        "apps/web/app/api/clean/gmail/route.ts",
+        "apps/web/app/api/user/stats/recipients/route.ts",
+        "apps/web/app/api/ai/analyze-sender-pattern/route.ts",
+        "apps/web/app/api/threads/[id]/route.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 14,
+      "fp_reason": null,
+      "fix_target": "contract",
+      "postcondition_id": "parse-validation-error"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-16-react-hook-form-9",
+    "created_at": "2026-04-16",
+    "source": "dashboard-feedback",
+    "package": "react-hook-form",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "9 FP reports for react-hook-form/missing-form-provider \u2014 postcondition may be too broad or fire on patterns that are inherently safe",
+    "evidence": {
+      "repos": [
+        "src/components/ui/form.tsx",
+        "components/Account/ArtistInstructionTextArea.tsx",
+        "components/Input.tsx"
+      ],
+      "scan_file": null,
+      "violation_count": 9,
+      "fp_reason": null,
+      "fix_target": "contract",
+      "postcondition_id": "missing-form-provider"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-16-ai-10",
+    "created_at": "2026-04-16",
+    "source": "dashboard-feedback",
+    "package": "ai",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "7 FP reports for ai/api-error-rate-limit \u2014 scanner may fire on code that is correctly handled (e.g., inside try-catch, using framework error boundaries)",
+    "evidence": {
+      "repos": [
+        "lib/evals/scorers/QuestionAnswered.ts",
+        "lib/ai/generateArray.ts",
+        "lib/catalog/analyzeCatalogBatch.ts",
+        "lib/evals/scorers/CatalogAvailability.ts",
+        "apps/web/utils/llms/index.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 7,
+      "fp_reason": null,
+      "fix_target": "scanner",
+      "postcondition_id": "api-error-rate-limit"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-16-clerk-nextjs-11",
+    "created_at": "2026-04-16",
+    "source": "dashboard-feedback",
+    "package": "@clerk/nextjs",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "7 FP reports for @clerk/nextjs/use-user-no-loaded-check \u2014 postcondition may be too broad or fire on patterns that are inherently safe",
+    "evidence": {
+      "repos": [
+        "apps/web/components/layout/top-nav.tsx",
+        "apps/web/components/layout/header.tsx",
+        "apps/web/app/(auth)/invite/[token]/page.tsx",
+        "apps/web/app/(dashboard)/onboarding/onboarding-form.tsx",
+        "apps/web/components/providers/analytics-provider.tsx"
+      ],
+      "scan_file": null,
+      "violation_count": 7,
+      "fp_reason": null,
+      "fix_target": "contract",
+      "postcondition_id": "use-user-no-loaded-check"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-16-redis-12",
+    "created_at": "2026-04-16",
+    "source": "dashboard-feedback",
+    "package": "redis",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "7 FP reports for redis/missing-error-listener \u2014 postcondition may be too broad or fire on patterns that are inherently safe",
+    "evidence": {
+      "repos": [
+        "packages/api/src/main.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 7,
+      "fp_reason": null,
+      "fix_target": "contract",
+      "postcondition_id": "missing-error-listener"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-16-express-13",
+    "created_at": "2026-04-16",
+    "source": "dashboard-feedback",
+    "package": "express",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "5 FP reports for express/async-middleware-unhandled-rejection \u2014 scanner may fire on code that is correctly handled (e.g., inside try-catch, using framework error boundaries)",
+    "evidence": {
+      "repos": [
+        "api/browser-agent-server.ts",
+        "api/dev-server.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 5,
+      "fp_reason": null,
+      "fix_target": "scanner",
+      "postcondition_id": "async-middleware-unhandled-rejection"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-16-clerk-nextjs-14",
+    "created_at": "2026-04-16",
+    "source": "dashboard-feedback",
+    "package": "@clerk/nextjs",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "3 FP reports for @clerk/nextjs/use-clerk-outside-provider \u2014 postcondition may be too broad or fire on patterns that are inherently safe",
+    "evidence": {
+      "repos": [
+        "/Users/calebgates/WebstormProjects/behavioral-contracts/behavioral-contracts-saas/apps/web/components/layout/top-nav.tsx",
+        "/Users/calebgates/WebstormProjects/behavioral-contracts/behavioral-contracts-saas/apps/web/components/layout/header.tsx",
+        "/Users/calebgates/WebstormProjects/behavioral-contracts/behavioral-contracts-saas/apps/web/components/layout/sidebar.tsx"
+      ],
+      "scan_file": null,
+      "violation_count": 3,
+      "fp_reason": null,
+      "fix_target": "contract",
+      "postcondition_id": "use-clerk-outside-provider"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-16-dotenv-15",
+    "created_at": "2026-04-16",
+    "source": "dashboard-feedback",
+    "package": "dotenv",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "3 FP reports for dotenv/missing-env-file \u2014 postcondition may be too broad or fire on patterns that are inherently safe",
+    "evidence": {
+      "repos": [
+        "src/lib/migrations/supabase.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 3,
+      "fp_reason": null,
+      "fix_target": "contract",
+      "postcondition_id": "missing-env-file"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-16-stripe-16",
+    "created_at": "2026-04-16",
+    "source": "dashboard-feedback",
+    "package": "stripe",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "3 FP reports for stripe/rate-limit-error \u2014 scanner may fire on code that is correctly handled (e.g., inside try-catch, using framework error boundaries)",
+    "evidence": {
+      "repos": [
+        "/Users/calebgates/WebstormProjects/behavioral-contracts/behavioral-contracts-saas/apps/web/lib/stripe.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 3,
+      "fp_reason": null,
+      "fix_target": "scanner",
+      "postcondition_id": "rate-limit-error"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-16-tanstack-react-query-17",
+    "created_at": "2026-04-16",
+    "source": "dashboard-feedback",
+    "package": "@tanstack/react-query",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "3 FP reports for @tanstack/react-query/infinite-query-error-unhandled \u2014 scanner may fire on code that is correctly handled (e.g., inside try-catch, using framework error boundaries)",
+    "evidence": {
+      "repos": [
+        "hooks/useArtistFans.ts",
+        "hooks/useCatalogSongs.ts",
+        "hooks/useArtistPosts.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 3,
+      "fp_reason": null,
+      "fix_target": "scanner",
+      "postcondition_id": "infinite-query-error-unhandled"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-16-ioredis-18",
+    "created_at": "2026-04-16",
+    "source": "dashboard-feedback",
+    "package": "ioredis",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "2 FP reports for ioredis/missing-error-listener \u2014 postcondition may be too broad or fire on patterns that are inherently safe",
+    "evidence": {
+      "repos": [
+        "/Users/calebgates/WebstormProjects/behavioral-contracts/behavioral-contracts-saas/apps/web/lib/rate-limit.ts",
+        "/Users/calebgates/WebstormProjects/behavioral-contracts/behavioral-contracts-saas/apps/web/lib/auth-cache.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 2,
+      "fp_reason": null,
+      "fix_target": "contract",
+      "postcondition_id": "missing-error-listener"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-16-node-fetch-19",
+    "created_at": "2026-04-16",
+    "source": "dashboard-feedback",
+    "package": "node-fetch",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "2 FP reports for node-fetch/fetch-rejects-on-network-error \u2014 scanner may fire on code that is correctly handled (e.g., inside try-catch, using framework error boundaries)",
+    "evidence": {
+      "repos": [
+        "api/analysis/post-game-analysis.ts",
+        "api/utils/ai-client.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 2,
+      "fp_reason": null,
+      "fix_target": "scanner",
+      "postcondition_id": "fetch-rejects-on-network-error"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-16-react-hook-form-20",
+    "created_at": "2026-04-16",
+    "source": "dashboard-feedback",
+    "package": "react-hook-form",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "2 FP reports for react-hook-form/unhandled-field-array-operations \u2014 scanner may fire on code that is correctly handled (e.g., inside try-catch, using framework error boundaries)",
+    "evidence": {
+      "repos": [
+        "src/features/settings/profile/profile-form.tsx"
+      ],
+      "scan_file": null,
+      "violation_count": 2,
+      "fp_reason": null,
+      "fix_target": "scanner",
+      "postcondition_id": "unhandled-field-array-operations"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-16-tanstack-react-query-21",
+    "created_at": "2026-04-16",
+    "source": "dashboard-feedback",
+    "package": "@tanstack/react-query",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "2 FP reports for @tanstack/react-query/mutation-error-unhandled \u2014 scanner may fire on code that is correctly handled (e.g., inside try-catch, using framework error boundaries)",
+    "evidence": {
+      "repos": [
+        "hooks/useSandboxFileContent.ts",
+        "hooks/useCatalogSongsFileSelect.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 2,
+      "fp_reason": null,
+      "fix_target": "scanner",
+      "postcondition_id": "mutation-error-unhandled"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-16-vercel-blob-22",
+    "created_at": "2026-04-16",
+    "source": "dashboard-feedback",
+    "package": "@vercel/blob",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "2 FP reports for @vercel/blob/blob-del-no-try-catch \u2014 scanner may fire on code that is correctly handled (e.g., inside try-catch, using framework error boundaries)",
+    "evidence": {
+      "repos": [
+        "lib/sandbox/postSandboxesFilesHandler.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 2,
+      "fp_reason": null,
+      "fix_target": "scanner",
+      "postcondition_id": "blob-del-no-try-catch"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-16-ai-23",
+    "created_at": "2026-04-16",
+    "source": "dashboard-feedback",
+    "package": "ai",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "1 FP reports for ai/schema-validation-error \u2014 scanner may fire on code that is correctly handled (e.g., inside try-catch, using framework error boundaries)",
+    "evidence": {
+      "repos": [
+        "apps/web/utils/llms/index.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 1,
+      "fp_reason": null,
+      "fix_target": "scanner",
+      "postcondition_id": "schema-validation-error"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-16-axios-24",
+    "created_at": "2026-04-16",
+    "source": "dashboard-feedback",
+    "package": "axios",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "1 FP reports for axios/error-4xx-5xx \u2014 scanner may fire on code that is correctly handled (e.g., inside try-catch, using framework error boundaries)",
+    "evidence": {
+      "repos": [
+        "packages/scanner/src/v2/fixtures/test-suppressions/with-inline-suppression.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 1,
+      "fp_reason": null,
+      "fix_target": "scanner",
+      "postcondition_id": "error-4xx-5xx"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-16-puppeteer-25",
+    "created_at": "2026-04-16",
+    "source": "dashboard-feedback",
+    "package": "puppeteer",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "1 FP reports for puppeteer/browser-close-must-run \u2014 postcondition may be too broad or fire on patterns that are inherently safe",
+    "evidence": {
+      "repos": [
+        "api/browser-agent-executor.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 1,
+      "fp_reason": null,
+      "fix_target": "contract",
+      "postcondition_id": "browser-close-must-run"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-16-supabase-supabase-js-26",
+    "created_at": "2026-04-16",
+    "source": "dashboard-feedback",
+    "package": "@supabase/supabase-js",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "1 FP reports for @supabase/supabase-js/rls-policy-violation \u2014 postcondition may be too broad or fire on patterns that are inherently safe",
+    "evidence": {
+      "repos": [
+        "packages/api/src/main.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 1,
+      "fp_reason": null,
+      "fix_target": "contract",
+      "postcondition_id": "rls-policy-violation"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-16-supabase-supabase-js-27",
+    "created_at": "2026-04-16",
+    "source": "dashboard-feedback",
+    "package": "@supabase/supabase-js",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "1 FP reports for @supabase/supabase-js/weak-password \u2014 postcondition may be too broad or fire on patterns that are inherently safe",
+    "evidence": {
+      "repos": [
+        "src/contexts/auth-context.tsx"
+      ],
+      "scan_file": null,
+      "violation_count": 1,
+      "fp_reason": null,
+      "fix_target": "contract",
+      "postcondition_id": "weak-password"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-16-upstash-redis-28",
+    "created_at": "2026-04-16",
+    "source": "dashboard-feedback",
+    "package": "@upstash/redis",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "1 FP reports for @upstash/redis/network-or-api-error \u2014 scanner may fire on code that is correctly handled (e.g., inside try-catch, using framework error boundaries)",
+    "evidence": {
+      "repos": [
+        "apps/web/utils/redis/index.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 1,
+      "fp_reason": null,
+      "fix_target": "scanner",
+      "postcondition_id": "network-or-api-error"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-16-winston-29",
+    "created_at": "2026-04-16",
+    "source": "dashboard-feedback",
+    "package": "winston",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "1 FP reports for winston/missing-error-listener \u2014 postcondition may be too broad or fire on patterns that are inherently safe",
+    "evidence": {
+      "repos": [
+        "apps/web/scripts/setup-telegram-bot.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 1,
+      "fp_reason": null,
+      "fix_target": "contract",
+      "postcondition_id": "missing-error-listener"
+    },
+    "resolution": null
   }
 ]
