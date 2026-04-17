@@ -35231,5 +35231,37 @@
       "note": "Proactive \u2014 decode-async-validation-error IS already detected. Async refinement swallowing is a separate and more dangerous pattern. Confirmed from zod@4.3.6 execution."
     },
     "resolution": null
+  },
+  {
+    "id": "concern-20260417-p-queue-deepen-7",
+    "created_at": "2026-04-17",
+    "source": "deepen",
+    "package": "p-queue",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for p-queue.onPendingZero() \u2014 postcondition onpendingzero-ignores-queued-tasks added in depth pass but no scanner rule exists. Detect when await queue.onPendingZero() is used as shutdown/completion signal (similar to onempty-not-all-done pattern). Key behavioral trap: resolves when pending===0 but queue.size may be > 0.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260417-p-queue-deepen-8",
+    "created_at": "2026-04-17",
+    "source": "deepen",
+    "package": "p-queue",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for p-queue.onPendingZero() \u2014 postcondition onpendingzero-resolves-immediately-when-no-running-tasks added in depth pass but no scanner rule exists. Detect when onPendingZero() is called without checking queue.pending first, particularly when queue is created with autoStart:false or after queue.pause().",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
   }
 ]
