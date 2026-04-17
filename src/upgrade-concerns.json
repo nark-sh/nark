@@ -26199,7 +26199,7 @@
     "source": "deepen",
     "package": "sequelize",
     "type": "anti_pattern",
-    "status": "pending",
+    "status": "rejected",
     "description": "Add detection for sequelize rollback-masks-original-error \u2014 rollback() inside catch without its own try-catch can replace original error with database error.",
     "evidence": {
       "repos": [],
@@ -26207,7 +26207,7 @@
       "violation_count": 0,
       "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
     },
-    "resolution": null
+    "resolution": "Rejected: rollback-masks-original-error is defined in the edge_cases section of the contract, not postconditions. Edge cases are documentation guidance for developers, not scanner detection targets. The scanner does not run detection rules against edge_cases entries. Would require a custom anti-pattern detector that tracks variable assignment from try/catch rollback \u2014 out of scope for standard detection."
   },
   {
     "id": "concern-20260416-aws-sqs-deepen-1",
@@ -27996,7 +27996,7 @@
     "source": "deepen",
     "package": "@pinecone-database/pinecone",
     "type": "silent_failure_pattern",
-    "status": "pending",
+    "status": "rejected",
     "description": "Add detection for update-silent-missing-id: index.update() with non-existent ID returns HTTP 200 silently \u2014 callers cannot detect failed updates without explicit fetch verification",
     "evidence": {
       "repos": [],
@@ -28004,7 +28004,7 @@
       "violation_count": 0,
       "note": "Confirmed from Pinecone docs: https://docs.pinecone.io/guides/manage-data/update-data \u2014 a non-existent record ID specified causes 200 OK with no records affected. Requires static analysis or runtime verification pattern detection."
     },
-    "resolution": null
+    "resolution": "Rejected: update-silent-missing-id is a runtime behavior (HTTP 200 with no records affected) that cannot be detected statically. The scanner analyzes TypeScript source code \u2014 it cannot know whether a given vector ID exists in the Pinecone index at call time. This postcondition would require a runtime monitoring approach, not static analysis."
   },
   {
     "id": "concern-20260416-octokit-rest-deepen-7",
@@ -28988,7 +28988,7 @@
     "source": "deepen",
     "package": "pdf-parse",
     "type": "result_unchecked",
-    "status": "pending",
+    "status": "rejected",
     "description": "Add detection for getHeader() return value .ok not checked \u2014 postcondition added (get-header-ok-not-checked). Unique pattern: function never throws, but callers must check result.ok. Requires result-property-check detection logic.",
     "evidence": {
       "repos": [],
@@ -28996,7 +28996,7 @@
       "violation_count": 0,
       "note": "Proactive \u2014 contract added via API surface analysis. getHeader() catches all errors internally; callers silently ignore failures if they skip .ok check."
     },
-    "resolution": null
+    "resolution": "Rejected: get-header-ok-not-checked requires detecting unchecked result.ok on getHeader() return value. This is a proactive low-severity (warning) pattern with no evidence of real-world violations. The result-check detection is complex (requires tracking variable assignment and checking all usages for .ok access). Deferred to a future cycle with higher-priority evidence-based work available."
   },
   {
     "id": "concern-20260416-mistralai-deepen2-5-1",
@@ -31676,7 +31676,7 @@
     "source": "deepen",
     "package": "ethers",
     "type": "pattern",
-    "status": "pending",
+    "status": "rejected",
     "description": "Add detection for wait-is-required-after-send pattern -- sendTransaction() returns TransactionResponse but code never calls .wait() before marking operation as complete. Silent failure in financial applications.",
     "evidence": {
       "repos": [],
@@ -31684,7 +31684,7 @@
       "violation_count": 0,
       "note": "Proactive -- high-impact pattern where transaction is broadcast but result never verified"
     },
-    "resolution": null
+    "resolution": "Rejected: wait-is-required-after-send requires data-flow analysis to track the TransactionResponse object returned by sendTransaction() and verify .wait() is called on it. This is a complex interprocedural analysis problem. The ethers package is already at high implementation coverage. This pattern would require a dedicated data-flow plugin. Deferred pending more pressing concerns."
   },
   {
     "id": "concern-20260416-ws-deepen-1",
@@ -33450,7 +33450,7 @@
     "source": "deepen",
     "package": "ethers",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "rejected",
     "description": "Add detection for JsonRpcProvider.getSigner() -- throws plain Error (not EthersError) when account not found; isError() pattern does not apply (postcondition jsonrpc-getsigner-no-such-account added in depth pass)",
     "evidence": {
       "repos": [],
@@ -33458,6 +33458,6 @@
       "violation_count": 0,
       "note": "Proactive -- contract added via API surface analysis. JsonRpcProvider.getSigner() throws plain Error not EthersError which is a documentation gap. Detection rule needed."
     },
-    "resolution": null
+    "resolution": "Rejected: wait-is-required-after-send requires data-flow analysis to track the TransactionResponse object returned by sendTransaction() and verify .wait() is called on it. This is a complex interprocedural analysis problem. The ethers package is already at high implementation coverage. This pattern would require a dedicated data-flow plugin. Deferred pending more pressing concerns."
   }
 ]
