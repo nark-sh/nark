@@ -32763,5 +32763,53 @@
       "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
     },
     "resolution": null
+  },
+  {
+    "id": "concern-20260417-langchain-openai-deepen-1",
+    "created_at": "2026-04-17",
+    "source": "deepen",
+    "package": "@langchain/openai",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for ChatOpenAI.stream() connection error \u2014 postcondition stream-connection-error added in depth pass but no scanner rule exists. Detect: async functions that call await model.stream() without wrapping in try-catch. Pattern: model.stream() method call on ChatOpenAI/AzureChatOpenAI/BaseChatOpenAI instance without surrounding try-catch.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260417-langchain-openai-deepen-2",
+    "created_at": "2026-04-17",
+    "source": "deepen",
+    "package": "@langchain/openai",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for ChatOpenAI.stream() iteration error \u2014 postcondition stream-iteration-error added in depth pass. Detect: for-await-of loops iterating over a stream returned by model.stream() where the for-await-of loop is NOT inside a try-catch (even if await model.stream() is protected). This is a distinct error point from the stream() connection error.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 distinct from stream-connection-error; for-await-of body needs its own try-catch"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260417-langchain-openai-deepen-3",
+    "created_at": "2026-04-17",
+    "source": "deepen",
+    "package": "@langchain/openai",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for ChatOpenAI.moderateContent() \u2014 postcondition moderation-network-error added in depth pass but no scanner rule exists. Detect: async functions that call await model.moderateContent() without try-catch. Security implication: moderation failure without try-catch allows unsafe content to bypass safety gates. Pattern: .moderateContent() method call on ChatOpenAI/BaseChatOpenAI instance.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 security impact: moderation API failure should fail-safe (block), not fail-open"
+    },
+    "resolution": null
   }
 ]
