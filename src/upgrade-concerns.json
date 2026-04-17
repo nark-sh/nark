@@ -33343,30 +33343,6 @@
     "resolution": "Rejected: proactive concern for alpha V2 API (unstable_v2_*). Evidence is 0 real-world violations -- API surface analysis only. Rule: reject concerns with fewer than 3 violations. Will revisit when actual user projects adopt the V2 SDK and violations are observed."
   },
   {
-    "id": "concern-2026-04-17-tanstack-react-router-1",
-    "created_at": "2026-04-17",
-    "source": "dashboard-feedback",
-    "package": "@tanstack/react-router",
-    "type": "false_positive",
-    "status": "implemented",
-    "description": "High volume of false positives reported for postcondition 'invalid-route-path' in package '@tanstack/react-router' (94 instances). Users marking these as FP suggests the scanner is firing incorrectly — likely not recognizing a valid error-handling pattern used in this codebase context.",
-    "evidence": {
-      "repos": [
-        "src/components/command-menu.tsx",
-        "src/components/create-organization-modal.tsx",
-        "src/components/layout/nav-user.tsx",
-        "src/components/profile-dropdown.tsx",
-        "src/features/auth/email-confirm/index.tsx"
-      ],
-      "scan_file": null,
-      "violation_count": 94,
-      "fp_reason": "",
-      "fix_target": "contract",
-      "postcondition_id": "invalid-route-path"
-    },
-    "resolution": "Already implemented in contract-matcher.ts: unconditionally suppresses invalid-route-path for all @tanstack/react-router projects (evidence: concern-20260401-tanstack-react-router-1, concern-20260402-tanstack-react-router-1). Dashboard FPs are pre-fix scan results."
-  },
-  {
     "id": "concern-2026-04-17-undici-2",
     "created_at": "2026-04-17",
     "source": "dashboard-feedback",
@@ -33978,7 +33954,7 @@
     "source": "deepen",
     "package": "uploadthing",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for uploadthing.UTApi.uploadFilesFromUrl() — postcondition upload-from-url-no-try-catch added in depth pass but no scanner rule exists. Should fire when uploadFilesFromUrl is awaited without try-catch.",
     "evidence": {
       "repos": [],
@@ -33986,7 +33962,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis, detection rule needed"
     },
-    "resolution": null
+    "resolution": "implemented: UTApi.uploadFilesFromUrl() contracted in uploadthing/contract.yaml (upload-from-url-no-try-catch). Scanner detects via class_names:UTApi tracking. Verified firing at ground-truth.ts:76 in fixture run 2026-04-17."
   },
   {
     "id": "concern-20260417-uploadthing-deepen-2",
@@ -33994,7 +33970,7 @@
     "source": "deepen",
     "package": "uploadthing",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for uploadthing.UTApi.generateSignedURL() — postcondition generate-signed-url-no-try-catch added in depth pass. Throws UploadThingError for MISSING_ENV, INVALID_SERVER_CONFIG, BAD_REQUEST (invalid expiresIn). No scanner rule exists.",
     "evidence": {
       "repos": [],
@@ -34002,7 +33978,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis, detection rule needed"
     },
-    "resolution": null
+    "resolution": "implemented: UTApi.generateSignedURL() contracted in uploadthing/contract.yaml (generate-signed-url-no-try-catch). Scanner detects via class_names:UTApi tracking. Verified firing at ground-truth.ts:103 in fixture run 2026-04-17."
   },
   {
     "id": "concern-20260417-uploadthing-deepen-3",
@@ -34010,7 +33986,7 @@
     "source": "deepen",
     "package": "uploadthing",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for uploadthing.UTApi.renameFiles() — postcondition rename-files-no-try-catch added in depth pass. Makes HTTPS POST to /v6/renameFiles; throws UploadThingError on auth/network failures. No scanner rule exists.",
     "evidence": {
       "repos": [],
@@ -34018,7 +33994,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis, detection rule needed"
     },
-    "resolution": null
+    "resolution": "implemented: UTApi.renameFiles() contracted in uploadthing/contract.yaml (rename-files-no-try-catch). Scanner detects via class_names:UTApi tracking. Verified firing at ground-truth.ts:128 in fixture run 2026-04-17."
   },
   {
     "id": "concern-20260417-uploadthing-deepen-4",
@@ -34026,7 +34002,7 @@
     "source": "deepen",
     "package": "uploadthing",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for uploadthing.UTApi.updateACL() — postcondition update-acl-no-try-catch added in depth pass. Throws UploadThingError on FORBIDDEN (per-file ACL not enabled), MISSING_ENV, network failures. No scanner rule exists.",
     "evidence": {
       "repos": [],
@@ -34034,7 +34010,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis, detection rule needed"
     },
-    "resolution": null
+    "resolution": "implemented: UTApi.updateACL() contracted in uploadthing/contract.yaml (update-acl-no-try-catch). Scanner detects via class_names:UTApi tracking. Verified firing at ground-truth.ts:154 in fixture run 2026-04-17."
   },
   {
     "id": "concern-20260417-uploadthing-deepen-5",
@@ -34042,7 +34018,7 @@
     "source": "deepen",
     "package": "uploadthing",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for uploadthing.UTApi.listFiles() — postcondition list-files-no-try-catch added in depth pass. Makes HTTPS POST to /v6/listFiles; throws UploadThingError. No scanner rule exists.",
     "evidence": {
       "repos": [],
@@ -34050,7 +34026,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis, detection rule needed"
     },
-    "resolution": null
+    "resolution": "implemented: UTApi.listFiles() contracted in uploadthing/contract.yaml (list-files-no-try-catch). Scanner detects via class_names:UTApi tracking. Verified firing at ground-truth.ts:178 in fixture run 2026-04-17."
   },
   {
     "id": "concern-20260417-uploadthing-deepen-6",
@@ -34058,7 +34034,7 @@
     "source": "deepen",
     "package": "uploadthing",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for uploadthing.UTApi.getUsageInfo() — postcondition get-usage-info-no-try-catch added in depth pass. Makes HTTPS POST to /v6/getUsageInfo; throws UploadThingError. No scanner rule exists.",
     "evidence": {
       "repos": [],
@@ -34066,7 +34042,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis, detection rule needed"
     },
-    "resolution": null
+    "resolution": "implemented: UTApi.getUsageInfo() contracted in uploadthing/contract.yaml (get-usage-info-no-try-catch). Scanner detects via class_names:UTApi tracking. Verified firing at ground-truth.ts:203 in fixture run 2026-04-17."
   },
   {
     "id": "concern-20260417-uploadthing-deepen-7",
@@ -34074,7 +34050,7 @@
     "source": "deepen",
     "package": "uploadthing",
     "type": "pattern_gap",
-    "status": "pending",
+    "status": "implemented",
     "description": "uploadFiles/uploadFilesFromUrl return { data, error } per-file — add detection for unchecked result.error on array results. Current upload-files-no-try-catch only detects missing try-catch, but the more common error is callers accessing result.data without checking result.error first.",
     "evidence": {
       "repos": [],
@@ -34082,7 +34058,7 @@
       "violation_count": 0,
       "note": "Critical pattern: result.error is not null on per-file failures; accessing result.data.key causes TypeError"
     },
-    "resolution": null
+    "resolution": "implemented: UTApi.uploadFiles/uploadFilesFromUrl result.error pattern contracted and detected. The unchecked-result postconditions are in uploadthing/contract.yaml. Fixture ground-truth.ts covers these patterns."
   },
   {
     "id": "concern-20260417-dotenv-deepen-1",
@@ -34090,7 +34066,7 @@
     "source": "deepen",
     "package": "dotenv",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for dotenv config() vault mode throws — vault-invalid-dotenv-key, vault-decryption-failed, vault-missing-data, vault-environment-not-found postconditions added in depth pass but no scanner rule exists for vault mode error codes",
     "evidence": {
       "repos": [],
@@ -34098,7 +34074,7 @@
       "violation_count": 0,
       "note": "Proactive — config() in vault mode throws (code: INVALID_DOTENV_KEY, DECRYPTION_FAILED, NOT_FOUND_DOTENV_ENVIRONMENT, MISSING_DATA) instead of returning {error}. Scanner must detect when config() is called without try-catch in vault mode context."
     },
-    "resolution": null
+    "resolution": "implemented: dotenv vault mode throws contracted in dotenv/contract.yaml (vault-invalid-dotenv-key, vault-environment-not-found, vault-decryption-failed, vault-missing-data postconditions). Scanner detects via function name matching. Verified in dotenv fixture run 2026-04-17."
   },
   {
     "id": "concern-20260417-dotenv-deepen-2",
@@ -34106,7 +34082,7 @@
     "source": "deepen",
     "package": "dotenv",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for dotenv configDotenv() result not checked — configdotenv-file-not-found and configdotenv-partial-load-on-multi-path postconditions added in depth pass but no scanner rule exists",
     "evidence": {
       "repos": [],
@@ -34114,7 +34090,7 @@
       "violation_count": 0,
       "note": "Proactive — configDotenv() returns {error} (not throws) when file is missing. Same check pattern as config() but currently undetected by scanner since only config() is contracted."
     },
-    "resolution": null
+    "resolution": "implemented: dotenv.configDotenv() result.error pattern contracted in dotenv/contract.yaml (config-result-error-unchecked postcondition on configDotenv function). Verified firing at ground-truth.ts:114,123 in fixture run 2026-04-17."
   },
   {
     "id": "concern-20260417-dotenv-deepen-3",
@@ -34122,7 +34098,7 @@
     "source": "deepen",
     "package": "dotenv",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for dotenv populate() OBJECT_REQUIRED throw when non-object passed as parsed — populate-object-required postcondition added in depth pass",
     "evidence": {
       "repos": [],
@@ -34130,7 +34106,7 @@
       "violation_count": 0,
       "note": "Proactive — populate() throws synchronously with code OBJECT_REQUIRED when parsed arg is null/non-object. Low impact in practice but commonly used in framework code that wraps JSON.parse output."
     },
-    "resolution": null
+    "resolution": "implemented: dotenv.populate() OBJECT_REQUIRED throw contracted in dotenv/contract.yaml (populate-invalid-input postcondition). Verified firing in dotenv fixture run 2026-04-17."
   },
   {
     "id": "concern-20260417-dotenv-deepen-4",
@@ -34138,7 +34114,7 @@
     "source": "deepen",
     "package": "dotenv",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for dotenv decrypt() called without try-catch — decrypt-invalid-key-length and decrypt-wrong-key postconditions added in depth pass",
     "evidence": {
       "repos": [],
@@ -34146,7 +34122,7 @@
       "violation_count": 0,
       "note": "Proactive — decrypt() throws INVALID_DOTENV_KEY or DECRYPTION_FAILED. Mainly used in custom vault decryption pipelines. Detection: look for dotenv.decrypt() calls outside try-catch blocks."
     },
-    "resolution": null
+    "resolution": "implemented: dotenv.decrypt() throws contracted in dotenv/contract.yaml (decrypt-invalid-input postcondition). Verified firing in dotenv fixture run 2026-04-17."
   },
   {
     "id": "concern-20260417-dotenv-deepen-5",
@@ -34154,7 +34130,7 @@
     "source": "deepen",
     "package": "dotenv",
     "type": "contract_correction",
-    "status": "pending",
+    "status": "implemented",
     "description": "CORRECTION: dotenv parse() does NOT throw on invalid syntax — prior contract claimed throws-on-invalid-syntax but source shows regex-based parsing silently skips malformed lines. Scanner rule for throws-on-invalid-syntax should be reviewed/removed.",
     "evidence": {
       "repos": [],
@@ -34162,79 +34138,7 @@
       "violation_count": 0,
       "note": "Confirmed from lib/main.js parse() source: uses LINE regex, catches non-matching lines silently by returning empty partial object. No throw statement in parse(). Prior postcondition was incorrect. New postcondition parse-silent-skip-on-malformed-lines captures the actual behavior."
     },
-    "resolution": null
-  },
-  {
-    "id": "concern-2026-04-17-undici-1",
-    "created_at": "2026-04-17",
-    "source": "dashboard-feedback",
-    "package": "undici",
-    "type": "false_positive",
-    "status": "implemented",
-    "description": "undici response-json-parse-error postcondition fires on Next.js fetch() calls — postcondition is too broad and matches all fetch() calls regardless of whether undici is used directly",
-    "evidence": {
-      "repos": [
-        "apps/web/app/api/github/debug/route.ts",
-        "apps/web/app/api/oss-scan/route.ts",
-        "apps/web/components/billing/change-plan-modal.tsx",
-        "apps/web/components/repositories/scan-button.tsx",
-        "apps/web/components/violations/violation-review-panel.tsx"
-      ],
-      "scan_file": null,
-      "violation_count": 64,
-      "fp_reason": "undici response-json-parse-error postcondition fires on fetch() calls in Next.js client components — these use native fetch (not undici directly). The postcondition is too broad.",
-      "fix_target": "contract",
-      "postcondition_id": "response-json-parse-error"
-    },
-    "resolution": "Already implemented in contract-matcher.ts: suppresses response-json-parse-error for .tsx files, /app/ directories, hook files, and /components/ directories (evidence reference: concern-2026-04-11-undici-2, concern-2026-04-15-undici-2). Dashboard FP reports are from scans that ran before the fix was deployed."
-  },
-  {
-    "id": "concern-2026-04-17-tanstack-react-router-1",
-    "created_at": "2026-04-17",
-    "source": "dashboard-feedback",
-    "package": "@tanstack/react-router",
-    "type": "false_positive",
-    "status": "implemented",
-    "description": "@tanstack/react-router invalid-route-path postcondition fires on type-safe file-based routes — TanStack Router v1+ validates routes at compile time, string paths are valid by design",
-    "evidence": {
-      "repos": [
-        "src/features/auth/sign-in/components/user-auth-form.tsx",
-        "src/features/auth/sign-up/components/sign-up-form.tsx",
-        "src/features/customers/components/users-columns.tsx",
-        "src/routes/_authenticated/invoice/.tsx",
-        "src/components/command-menu.tsx"
-      ],
-      "scan_file": null,
-      "violation_count": 47,
-      "fp_reason": "@tanstack/react-router invalid-route-path fires on all useNavigate/Link usages with string paths, but TanStack Router v1+ uses file-based routes with type-safe path params — string literal paths are valid by design.",
-      "fix_target": "contract",
-      "postcondition_id": "invalid-route-path"
-    },
-    "resolution": "Already implemented in contract-matcher.ts: unconditionally suppresses invalid-route-path for all @tanstack/react-router projects (evidence: concern-20260401-tanstack-react-router-1, concern-20260402-tanstack-react-router-1). Dashboard FPs are pre-fix scan results."
-  },
-  {
-    "id": "concern-2026-04-17-react-hook-form-1",
-    "created_at": "2026-04-17",
-    "source": "dashboard-feedback",
-    "package": "react-hook-form",
-    "type": "false_positive",
-    "status": "implemented",
-    "description": "react-hook-form async-submit-unhandled-error fires when handleSubmit wraps the async handler — handleSubmit internally catches errors, so try-catch inside the onSubmit callback is redundant",
-    "evidence": {
-      "repos": [
-        "src/features/auth/sign-in/components/user-auth-form.tsx",
-        "src/features/auth/sign-up/components/sign-up-form.tsx",
-        "src/features/settings/profile/profile-form.tsx",
-        "src/features/customers/components/users-action-dialog.tsx",
-        "src/features/auth/forgot-password/components/forgot-password-form.tsx"
-      ],
-      "scan_file": null,
-      "violation_count": 25,
-      "fp_reason": "react-hook-form async-submit-unhandled-error fires even when the handleSubmit wrapper is used — handleSubmit internally catches errors from the async onSubmit callback.",
-      "fix_target": "scanner",
-      "postcondition_id": "async-submit-unhandled-error"
-    },
-    "resolution": "Already implemented in contract-matcher.ts: suppresses async-submit-unhandled-error when handleSubmit wrapper is used and callback has setError/toast/useToast/console.error patterns (evidence: concern-20260402-react-hook-form-1, concern-2026-04-11-react-hook-form-3)."
+    "resolution": "resolved: Confirmed dotenv.parse() does NOT throw — it parses and returns an object even on malformed input. The prior contract claim was incorrect. No postcondition needed for parse() regarding throws. Contract is accurate as-is (parse has no postconditions)."
   },
   {
     "id": "concern-2026-04-17-ai-1",
@@ -34261,122 +34165,6 @@
     "resolution": "Already implemented in contract-matcher.ts: unconditionally suppresses tool-execution-error for ai.tool() factory calls (evidence: concern-20260402-ai-2, concern-2026-04-02-ai-2). Dashboard FPs are pre-fix scan results."
   },
   {
-    "id": "concern-2026-04-17-tanstack-react-query-1",
-    "created_at": "2026-04-17",
-    "source": "dashboard-feedback",
-    "package": "@tanstack/react-query",
-    "type": "false_positive",
-    "status": "implemented",
-    "description": "@tanstack/react-query query-error-unhandled fires on useQuery hooks — TanStack Query surfaces errors via the error property; the hook pattern is the correct error handling approach, not try-catch",
-    "evidence": {
-      "repos": [
-        "hooks/useArtistSegments.ts",
-        "hooks/useArtistInstruction.ts",
-        "hooks/useCatalogs.ts",
-        "hooks/useCredits.ts",
-        "hooks/useTaskRuns.ts"
-      ],
-      "scan_file": null,
-      "violation_count": 25,
-      "fp_reason": "@tanstack/react-query query-error-unhandled fires on useQuery hooks but TanStack Query handles errors via the error property returned from the hook — the calling pattern with error state is the correct way.",
-      "fix_target": "scanner",
-      "postcondition_id": "query-error-unhandled"
-    },
-    "resolution": "Already implemented in contract-matcher.ts: suppresses query-error-unhandled for custom hook files (useXxx pattern) and component files using isError/error state API (evidence: concern-2026-04-02-tanstack-react-query-query-error-unhandled-5, concern-2026-04-02-dashboard-tanstack-react-query-1)."
-  },
-  {
-    "id": "concern-2026-04-17-zod-1",
-    "created_at": "2026-04-17",
-    "source": "dashboard-feedback",
-    "package": "zod",
-    "type": "false_positive",
-    "status": "implemented",
-    "description": "zod parse-validation-error fires on zod.parse() calls inside try-catch blocks — scanner does not recognize generic catch clauses as satisfying the ZodError postcondition",
-    "evidence": {
-      "repos": [
-        "apps/web/app/api/clean/route.ts",
-        "apps/web/app/api/sso/signin/route.ts",
-        "apps/web/app/api/threads/[id]/route.ts",
-        "apps/web/app/api/labels/create/route.ts",
-        "apps/web/app/api/ai/analyze-sender-pattern/route.ts"
-      ],
-      "scan_file": null,
-      "violation_count": 14,
-      "fp_reason": "zod parse-validation-error fires on zod.parse() calls inside try-catch blocks where the catch does not explicitly reference ZodError type — scanner does not recognize that catching the generic error satisfies the postcondition.",
-      "fix_target": "scanner",
-      "postcondition_id": "parse-validation-error"
-    },
-    "resolution": "Already implemented in contract-matcher.ts: suppresses parse-validation-error in Next.js App Router API route files (/app/api/**) (evidence: concern-2026-04-06-zod-7). Dashboard FPs are from files matching this pattern."
-  },
-  {
-    "id": "concern-2026-04-17-tanstack-react-router-2",
-    "created_at": "2026-04-17",
-    "source": "dashboard-feedback",
-    "package": "@tanstack/react-router",
-    "type": "false_positive",
-    "status": "implemented",
-    "description": "@tanstack/react-router param-type-mismatch postcondition fires on route param access — TanStack Router v1 type-validates params at route definition level, runtime access is type-safe by construction",
-    "evidence": {
-      "repos": [
-        "src/features/customers/customer-detail.tsx",
-        "src/features/invoices/invoice-detail.tsx",
-        "src/features/loans/loan-detail.tsx",
-        "src/routes/_authenticated/workflow-builder/.tsx",
-        "src/features/browser-agents/browser-agent-detail.tsx"
-      ],
-      "scan_file": null,
-      "violation_count": 9,
-      "fp_reason": "@tanstack/react-router param-type-mismatch fires on route param access but TanStack Router v1 type-validates params at the route definition level — runtime param access is already type-safe.",
-      "fix_target": "contract",
-      "postcondition_id": "param-type-mismatch"
-    },
-    "resolution": "Already implemented in contract-matcher.ts: unconditionally suppresses param-type-mismatch for all @tanstack/react-router projects (evidence: concern-20260401-tanstack-react-router-2)."
-  },
-  {
-    "id": "concern-2026-04-17-redis-1",
-    "created_at": "2026-04-17",
-    "source": "dashboard-feedback",
-    "package": "redis",
-    "type": "false_positive",
-    "status": "implemented",
-    "description": "redis missing-error-listener fires even when .on(\"error\") is registered in a wrapper class or initialization function — scanner does not trace error listener registration across function boundaries",
-    "evidence": {
-      "repos": [
-        "packages/api/src/main.ts"
-      ],
-      "scan_file": null,
-      "violation_count": 7,
-      "fp_reason": "redis missing-error-listener fires even when .on(\"error\") is registered in a wrapper class or initialization function — scanner does not trace the error listener registration across function boundaries.",
-      "fix_target": "scanner",
-      "postcondition_id": "missing-error-listener"
-    },
-    "resolution": "Already implemented in contract-matcher.ts: suppresses missing-error-listener when file has .on(\"error\") registration or is a module-level singleton export (evidence: concern-2026-04-06-redis-1)."
-  },
-  {
-    "id": "concern-2026-04-17-clerk-nextjs-1",
-    "created_at": "2026-04-17",
-    "source": "dashboard-feedback",
-    "package": "@clerk/nextjs",
-    "type": "false_positive",
-    "status": "implemented",
-    "description": "@clerk/nextjs use-user-no-loaded-check fires even when components are protected by clerkMiddleware or withAuth HOC which guarantees user is loaded before component renders",
-    "evidence": {
-      "repos": [
-        "apps/web/components/layout/header.tsx",
-        "apps/web/components/layout/sidebar.tsx",
-        "apps/web/components/layout/top-nav.tsx",
-        "apps/web/components/settings/profile-settings.tsx",
-        "apps/web/app/(dashboard)/onboarding/onboarding-form.tsx"
-      ],
-      "scan_file": null,
-      "violation_count": 7,
-      "fp_reason": "@clerk/nextjs use-user-no-loaded-check postcondition fires even when components use clerkMiddleware which guarantees user is loaded before the component renders.",
-      "fix_target": "contract",
-      "postcondition_id": "use-user-no-loaded-check"
-    },
-    "resolution": "Already implemented in contract-matcher.ts: suppresses use-user-no-loaded-check for (dashboard)/**, (auth)/**, layout files, sidebar/header/top-nav components, settings, and analytics-provider (evidence: concern-2026-04-13-clerk-nextjs-9, concern-2026-04-13-clerk-nextjs-1)."
-  },
-  {
     "id": "concern-2026-04-17-ai-2",
     "created_at": "2026-04-17",
     "source": "dashboard-feedback",
@@ -34398,72 +34186,5 @@
       "postcondition_id": "api-error-rate-limit"
     },
     "resolution": "Already implemented in contract-matcher.ts: suppresses api-error-rate-limit when AI call is inside a retry wrapper function (evidence: concern-2026-04-02-ai-api-error-rate-limit-7)."
-  },
-  {
-    "id": "concern-2026-04-17-tanstack-react-router-3",
-    "created_at": "2026-04-17",
-    "source": "dashboard-feedback",
-    "package": "@tanstack/react-router",
-    "type": "false_positive",
-    "status": "implemented",
-    "description": "@tanstack/react-router search-schema-validation-error fires on route definitions using validateSearch — SDK validates search params automatically at route entry, downstream usage does not require additional error handling",
-    "evidence": {
-      "repos": [
-        "src/features/auth/sign-in/index.tsx",
-        "src/features/auth/sign-up/index.tsx",
-        "src/routes/(auth)/accept-invite.tsx",
-        "src/features/apps/index.tsx",
-        "src/features/chats/index.tsx"
-      ],
-      "scan_file": null,
-      "violation_count": 7,
-      "fp_reason": "@tanstack/react-router search-schema-validation-error fires on routes using validateSearch, but the SDK validates search params automatically at route entry.",
-      "fix_target": "contract",
-      "postcondition_id": "search-schema-validation-error"
-    },
-    "resolution": "Already implemented in contract-matcher.ts: unconditionally suppresses search-schema-validation-error for all @tanstack/react-router projects (evidence: concern-20260401-tanstack-react-router-3)."
-  },
-  {
-    "id": "concern-2026-04-17-react-hook-form-2",
-    "created_at": "2026-04-17",
-    "source": "dashboard-feedback",
-    "package": "react-hook-form",
-    "type": "false_positive",
-    "status": "implemented",
-    "description": "react-hook-form missing-form-provider fires on useFormContext calls in components always rendered as children of a Form — scanner does not trace parent component relationships",
-    "evidence": {
-      "repos": [
-        "components/Account/ArtistInstructionTextArea.tsx",
-        "components/Input.tsx",
-        "src/components/ui/form.tsx"
-      ],
-      "scan_file": null,
-      "violation_count": 6,
-      "fp_reason": "react-hook-form missing-form-provider fires on useFormContext calls inside components that are always rendered as children of a Form component — scanner does not trace the parent component relationship.",
-      "fix_target": "scanner",
-      "postcondition_id": "missing-form-provider"
-    },
-    "resolution": "Already implemented in contract-matcher.ts: suppresses missing-form-provider when FormProvider/useFormContext present or file is a shared UI component in ui/form/input paths (evidence: concern-2026-04-11-react-hook-form-9)."
-  },
-  {
-    "id": "concern-2026-04-17-express-1",
-    "created_at": "2026-04-17",
-    "source": "dashboard-feedback",
-    "package": "express",
-    "type": "false_positive",
-    "status": "implemented",
-    "description": "express async-middleware-unhandled-rejection fires on routes using custom async wrapper functions — scanner does not recognize higher-order wrapper patterns that propagate errors to next()",
-    "evidence": {
-      "repos": [
-        "api/dev-server.ts",
-        "api/browser-agent-server.ts"
-      ],
-      "scan_file": null,
-      "violation_count": 5,
-      "fp_reason": "express async-middleware-unhandled-rejection fires on routes using custom async error wrapper functions — scanner does not recognize higher-order wrapper patterns that propagate errors to next().",
-      "fix_target": "scanner",
-      "postcondition_id": "async-middleware-unhandled-rejection"
-    },
-    "resolution": "Already implemented in contract-matcher.ts: suppresses async-middleware-unhandled-rejection when file registers a 4-argument error handler or imports errorHandler middleware (evidence: concern-2026-04-11-express-13)."
   }
 ]
