@@ -31029,5 +31029,133 @@
       "note": "Proactive \u2014 version mismatch is a real operational failure mode when teams upgrade handlebars in build but not runtime, or vice versa."
     },
     "resolution": null
+  },
+  {
+    "id": "concern-20260416-google-generative-ai-deepen-1",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@google/generative-ai",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @google/generative-ai batchEmbedContents() \u2014 postcondition batch-network-error added in depth pass but no scanner rule exists. batchEmbedContents is called on GenerativeModel instances just like embedContent, but the method name differs. Detection rule should extend the existing @google/generative-ai analyzer to cover batchEmbedContents() calls without try-catch.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed. Ground-truth fixture at packages/@google/generative-ai/fixtures/ground-truth.ts lines 293 and 333 shows the expected SHOULD_FIRE cases."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-google-generative-ai-deepen-2",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@google/generative-ai",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for GoogleAIFileManager.uploadFile() \u2014 postcondition upload-network-error added in depth pass but no scanner rule exists. GoogleAIFileManager is imported from @google/generative-ai/server. Detection needs to track GoogleAIFileManager class instances and flag uploadFile() calls without try-catch.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 GoogleAIFileManager is a server-side only class. Secondary contract upload-file-processing-failed requires polling getFile() for ACTIVE state \u2014 this is a pattern-level check (uploading without subsequent getFile poll)."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-google-generative-ai-deepen-3",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@google/generative-ai",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for GoogleAICacheManager.create() \u2014 postconditions cache-create-validation-error and cache-create-api-error added in depth pass but no scanner rule exists. GoogleAICacheManager imported from @google/generative-ai/server. Detection should track class instances and flag create() calls without try-catch.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 context caching is increasingly used in production apps for cost reduction. Input validation throws synchronously (no model field, conflicting TTL fields) \u2014 these are programmer errors distinct from network errors."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-google-generative-ai-deepen-4",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@google/generative-ai",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for GoogleAICacheManager.update() \u2014 postcondition cache-update-not-found added in depth pass but no scanner rule exists. Cache expiry is a normal lifecycle event \u2014 update() throws 404 when cache has expired between creation and update attempt. Pattern: update() in cache refresh logic without try-catch or without 404 handling.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 update() is commonly used in background jobs that refresh cache TTL. The 404-not-handled pattern is distinct from generic error handling."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-vercel-blob-deepen-1",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@vercel/blob",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @vercel/blob upload() from @vercel/blob/client \u2014 client-side upload function throws BlobError if handleUploadUrl is missing or server route returns non-2xx. Postcondition added in depth pass but no scanner rule exists.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. upload() is the primary browser-side upload API and is commonly called without try-catch in Next.js client components."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-vercel-blob-deepen-2",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@vercel/blob",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @vercel/blob/client generateClientTokenFromReadWriteToken() \u2014 throws BlobError if called in browser (window defined), if token is malformed, or if ifMatch/allowOverwrite: false conflict. Postcondition added in depth pass but no scanner rule exists.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. Security-sensitive: browser-env violation exposes BLOB_READ_WRITE_TOKEN to users. Invalid token variant is common in dev environments without vercel env pull."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-vercel-blob-deepen-3",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@vercel/blob",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @vercel/blob createMultipartUploader() \u2014 convenience wrapper around three-phase multipart upload, same error profile as createMultipartUpload() but manages key+uploadId state internally. Postcondition added in depth pass but no scanner rule exists.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. createMultipartUploader() is the simpler multipart API and may be preferred over the manual three-phase approach in new code."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-vercel-blob-deepen-4",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@vercel/blob",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @vercel/blob createFolder() \u2014 creates virtual folder marker blob, same error profile as put() but with limited options. Postcondition added in depth pass but no scanner rule exists.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. createFolder() is a niche API used in file browser implementations. Low priority."
+    },
+    "resolution": null
   }
 ]
