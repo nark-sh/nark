@@ -36199,7 +36199,7 @@
     "source": "deepen",
     "package": "pdfjs-dist",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for pdfjs-dist.doc.getPage() \u2014 postcondition getpage-invalid-page-number added in depth pass but no scanner rule exists",
     "evidence": {
       "repos": [],
@@ -36207,7 +36207,7 @@
       "violation_count": 0,
       "note": "Proactive \u2014 contract added via API surface analysis. Detect when doc.getPage() is called without try-catch inside an async function."
     },
-    "resolution": null
+    "resolution": "Instance tracking extended with promise_factory_methods, instance_chain_methods, and awaitable_properties. pdfjs-dist contract updated with detection rules. All 4 pdfjs-dist ground-truth tests now pass."
   },
   {
     "id": "concern-20260417-pdfjs-dist-deepen-2",
@@ -36215,7 +36215,7 @@
     "source": "deepen",
     "package": "pdfjs-dist",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for pdfjs-dist.page.getTextContent() \u2014 postconditions gettextcontent-no-try-catch and gettextcontent-partial-extraction added in depth pass but no scanner rule exists",
     "evidence": {
       "repos": [],
@@ -36223,7 +36223,7 @@
       "violation_count": 0,
       "note": "Proactive \u2014 detect when page.getTextContent() is called without try-catch. Also flag when result.items.length is not checked (partial extraction silent failure)."
     },
-    "resolution": null
+    "resolution": "Instance tracking extended with promise_factory_methods, instance_chain_methods, and awaitable_properties. pdfjs-dist contract updated with detection rules. All 4 pdfjs-dist ground-truth tests now pass."
   },
   {
     "id": "concern-20260417-pdfjs-dist-deepen-3",
@@ -36231,7 +36231,7 @@
     "source": "deepen",
     "package": "pdfjs-dist",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for pdfjs-dist.page.render().promise \u2014 postcondition render-no-try-catch added in depth pass but no scanner rule exists",
     "evidence": {
       "repos": [],
@@ -36239,7 +36239,7 @@
       "violation_count": 0,
       "note": "Proactive \u2014 detect when renderTask.promise is awaited without try-catch. Challenge: render() returns RenderTask (not a Promise directly); scanner needs to track .promise property access."
     },
-    "resolution": null
+    "resolution": "Instance tracking extended with promise_factory_methods, instance_chain_methods, and awaitable_properties. pdfjs-dist contract updated with detection rules. All 4 pdfjs-dist ground-truth tests now pass."
   },
   {
     "id": "concern-20260417-pdfjs-dist-deepen-4",
@@ -36247,7 +36247,7 @@
     "source": "deepen",
     "package": "pdfjs-dist",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for pdfjs-dist.doc.saveDocument() \u2014 postcondition savedocument-no-try-catch added in depth pass but no scanner rule exists",
     "evidence": {
       "repos": [],
@@ -36255,7 +36255,7 @@
       "violation_count": 0,
       "note": "Proactive \u2014 detect when doc.saveDocument() is called without try-catch. Instance tracking needed: doc is the resolved value from getDocument().promise."
     },
-    "resolution": null
+    "resolution": "Instance tracking extended with promise_factory_methods, instance_chain_methods, and awaitable_properties. pdfjs-dist contract updated with detection rules. All 4 pdfjs-dist ground-truth tests now pass."
   },
   {
     "id": "concern-20260417-pdfjs-dist-deepen-5",
@@ -36263,7 +36263,7 @@
     "source": "deepen",
     "package": "pdfjs-dist",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "deferred",
     "description": "Add detection for pdfjs-dist.doc.destroy() not in finally block \u2014 postcondition destroy-not-called-finally added in depth pass but no scanner rule exists",
     "evidence": {
       "repos": [],
@@ -36271,7 +36271,7 @@
       "violation_count": 0,
       "note": "Proactive \u2014 detect when getDocument().promise is used but destroy() is not called in a finally block. This requires tracking the document lifecycle across the function body."
     },
-    "resolution": null
+    "resolution": "Deferred: requires cross-statement lifecycle tracking not yet supported by the scanner."
   },
   {
     "id": "concern-20260417-cross-fetch-deepen-1",
@@ -36279,7 +36279,7 @@
     "source": "deepen",
     "package": "cross-fetch",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "deferred",
     "description": "Add detection for cross-fetch response.text() body-consumed-twice \u2014 postcondition text-body-consumed-twice added in depth pass but no scanner rule exists. Detect when response.text() (or any body method) is called on a Response object after its body stream has already been consumed.",
     "evidence": {
       "repos": [],
@@ -36287,7 +36287,7 @@
       "violation_count": 0,
       "note": "Proactive \u2014 contract added via API surface analysis. node-fetch/consumeBody() rejects with TypeError \"body used already\" when body is called twice. MDN confirms: TypeError when body is disturbed or locked. Detection requires tracking response object identity and body-read state across calls."
     },
-    "resolution": null
+    "resolution": "Deferred: requires cross-statement lifecycle tracking not yet supported by the scanner."
   },
   {
     "id": "concern-20260417-next-deepen-1",
@@ -36446,6 +36446,38 @@
       "scan_file": null,
       "violation_count": 0,
       "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed. Backup API is critical for data safety \u2014 CANTOPEN silently swallowed is dangerous."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260417-mammoth-deepen-1",
+    "created_at": "2026-04-17",
+    "source": "deepen",
+    "package": "mammoth",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for mammoth.convertToMarkdown() \u2014 postcondition added in depth pass but no scanner rule exists. convertToMarkdown has same error profile as convertToHtml (delegates to internal convert()), so the same ThrowingFunctionDetector pattern applies. Need to register convertToMarkdown in await_patterns or function name detection.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed. Scanner currently detects convertToHtml and extractRawText but not convertToMarkdown."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260417-mammoth-deepen-2",
+    "created_at": "2026-04-17",
+    "source": "deepen",
+    "package": "mammoth",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for mammoth.embedStyleMap() \u2014 postcondition added in depth pass but no scanner rule exists. embedStyleMap opens a docx via unzip.openZip() and can throw ENOENT/zip errors. Also has a silent-failure postcondition (result-not-saved) where the caller doesn't persist the returned buffer \u2014 this requires response-pattern detection (checking that toBuffer()/toArrayBuffer() is called and result is written).",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. embedStyleMap returns {toBuffer, toArrayBuffer} that must be persisted. This is a DATA_LOSS silent-failure pattern similar to deleteObjects response checking in @aws-sdk/client-s3."
     },
     "resolution": null
   }
