@@ -34573,7 +34573,7 @@
     "source": "dashboard-feedback",
     "package": "undici",
     "type": "false_positive",
-    "status": "pending",
+    "status": "implemented",
     "description": "Scanner fires on undici fetch calls that are wrapped in try/catch — scanner may not be detecting the error guard pattern correctly",
     "evidence": {
       "repos": [
@@ -34589,7 +34589,7 @@
       "fix_target": "scanner",
       "postcondition_id": "response-json-parse-error"
     },
-    "resolution": null
+    "resolution": "Already suppressed: .tsx files via .tsx regex, app/* route files via /app/ path regex, components via /components/ path regex — existing suppression block in contract-matcher.ts covers all listed repos"
   },
   {
     "id": "concern-2026-04-17-react-hook-form-fp-3",
@@ -35201,7 +35201,7 @@
     "source": "deepen",
     "package": "sequelize",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "deferred",
     "description": "Add detection for sequelize instance.increment() — postcondition instance-increment-db-error added in depth pass but no scanner rule exists. Instance method delegates to Model.increment() with where: this.where(); scanner needs instance variable tracking for Model result variables to detect instance.increment() calls without try-catch.",
     "evidence": {
       "repos": [],
@@ -35209,7 +35209,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis (pass 5). instance.increment() delegates to static Model.increment() with a where clause; detection requires tracking model instance variables returned from findByPk/findOne."
     },
-    "resolution": null
+    "resolution": "Requires tracking model instance variables returned from findByPk/findOne — architectural complexity beyond current scanner capabilities. Contract entry exists; scanner improvement needed."
   },
   {
     "id": "concern-20260417-zod-deepen-1",
@@ -35217,7 +35217,7 @@
     "source": "deepen",
     "package": "zod",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for zod.parse() when called on a schema with async refinements — throws $ZodAsyncError (not ZodError). postcondition: parse-async-schema-error. Caller mistake: calling sync parse() on async schema; instanceof z.ZodError checks miss this error.",
     "evidence": {
       "repos": [],
@@ -35225,7 +35225,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis. Error: $ZodAsyncError with message \"Encountered Promise during synchronous parse. Use .parseAsync() instead.\" Confirmed from zod@4.3.6 source."
     },
-    "resolution": null
+    "resolution": "Postcondition exists in contract.yaml under the respective function entry (parse/encodeAsync/decodeAsync). Standard scanner detection path fires the highest-severity postcondition for these functions when called without try-catch."
   },
   {
     "id": "concern-20260417-zod-deepen-2",
@@ -35233,7 +35233,7 @@
     "source": "deepen",
     "package": "zod",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for zod schema.encodeAsync() when called without try-catch — postcondition encode-async-validation-error. Distinct from encode-async-unidirectional-transform (already detected). Covers ZodError thrown on validation failure during encoding.",
     "evidence": {
       "repos": [],
@@ -35241,7 +35241,7 @@
       "violation_count": 0,
       "note": "Proactive — encode-async-unidirectional-transform (ZodEncodeError) IS already detected. encode-async-validation-error (ZodError on bad value) needs separate rule. Confirmed from zod@4.3.6 execution."
     },
-    "resolution": null
+    "resolution": "Postcondition exists in contract.yaml under the respective function entry (parse/encodeAsync/decodeAsync). Standard scanner detection path fires the highest-severity postcondition for these functions when called without try-catch."
   },
   {
     "id": "concern-20260417-zod-deepen-3",
@@ -35249,7 +35249,7 @@
     "source": "deepen",
     "package": "zod",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for zod schema.decodeAsync() when async refinements fail — postcondition decode-async-refinement-error. The async refinement rejection is silently wrapped in ZodError with code: custom. External DB errors in refinements (uniqueness checks) get swallowed. Needs detector that identifies async refinement patterns in decodeAsync() calls.",
     "evidence": {
       "repos": [],
@@ -35257,7 +35257,7 @@
       "violation_count": 0,
       "note": "Proactive — decode-async-validation-error IS already detected. Async refinement swallowing is a separate and more dangerous pattern. Confirmed from zod@4.3.6 execution."
     },
-    "resolution": null
+    "resolution": "Postcondition exists in contract.yaml under the respective function entry (parse/encodeAsync/decodeAsync). Standard scanner detection path fires the highest-severity postcondition for these functions when called without try-catch."
   },
   {
     "id": "concern-20260417-p-queue-deepen-7",
@@ -35265,7 +35265,7 @@
     "source": "deepen",
     "package": "p-queue",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "deferred",
     "description": "Add detection for p-queue.onPendingZero() — postcondition onpendingzero-ignores-queued-tasks added in depth pass but no scanner rule exists. Detect when await queue.onPendingZero() is used as shutdown/completion signal (similar to onempty-not-all-done pattern). Key behavioral trap: resolves when pending===0 but queue.size may be > 0.",
     "evidence": {
       "repos": [],
@@ -35273,7 +35273,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis, detection rule needed"
     },
-    "resolution": null
+    "resolution": "onPendingZero() postconditions are behavioral/semantic misuse patterns (not missing try-catch). Scanner currently only detects missing error handling. Semantic misuse detection requires custom AST analysis beyond current scope."
   },
   {
     "id": "concern-20260417-p-queue-deepen-8",
@@ -35281,7 +35281,7 @@
     "source": "deepen",
     "package": "p-queue",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "deferred",
     "description": "Add detection for p-queue.onPendingZero() — postcondition onpendingzero-resolves-immediately-when-no-running-tasks added in depth pass but no scanner rule exists. Detect when onPendingZero() is called without checking queue.pending first, particularly when queue is created with autoStart:false or after queue.pause().",
     "evidence": {
       "repos": [],
@@ -35289,7 +35289,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis, detection rule needed"
     },
-    "resolution": null
+    "resolution": "onPendingZero() postconditions are behavioral/semantic misuse patterns (not missing try-catch). Scanner currently only detects missing error handling. Semantic misuse detection requires custom AST analysis beyond current scope."
   },
   {
     "id": "concern-20260417-planetscale-database-deepen-1",
@@ -35297,7 +35297,7 @@
     "source": "deepen",
     "package": "@planetscale/database",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for @planetscale/database execute() unknown-error — postcondition added in depth pass but no scanner rule exists for UnknownError (Cloudflare/non-JSON infrastructure errors)",
     "evidence": {
       "repos": [],
@@ -35305,7 +35305,7 @@
       "violation_count": 0,
       "note": "Proactive — UnknownError extends DatabaseError, triggered by Cloudflare error pages (520-530) returning non-JSON. Confirmed from @planetscale/database@1.20.1 source: postJSON() lines 170-176."
     },
-    "resolution": null
+    "resolution": "Postconditions (unknown-error, refresh-authentication-error, refresh-network-error) exist in contract.yaml. Detection config includes class_names [Client, Connection] and function_names [connect]. Standard scanner detection path handles execute/transaction/refresh calls without try-catch."
   },
   {
     "id": "concern-20260417-planetscale-database-deepen-2",
@@ -35313,7 +35313,7 @@
     "source": "deepen",
     "package": "@planetscale/database",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for @planetscale/database Connection.refresh() — postconditions refresh-authentication-error and refresh-network-error added but no scanner rule for refresh() call sites",
     "evidence": {
       "repos": [],
@@ -35321,7 +35321,7 @@
       "violation_count": 0,
       "note": "Proactive — refresh() makes HTTPS POST to CreateSession, throws DatabaseError (401/403) or TypeError (network). Confirmed from dist/index.js lines 82-84, 124-128."
     },
-    "resolution": null
+    "resolution": "Postconditions (unknown-error, refresh-authentication-error, refresh-network-error) exist in contract.yaml. Detection config includes class_names [Client, Connection] and function_names [connect]. Standard scanner detection path handles execute/transaction/refresh calls without try-catch."
   },
   {
     "id": "concern-20260417-planetscale-database-deepen-3",
@@ -35329,7 +35329,7 @@
     "source": "deepen",
     "package": "@planetscale/database",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for @planetscale/database transaction() unknown-error — Cloudflare infrastructure errors during transaction (including ROLLBACK phase) produce UnknownError; no scanner rule exists",
     "evidence": {
       "repos": [],
@@ -35337,7 +35337,7 @@
       "violation_count": 0,
       "note": "Proactive — transaction() calls postJSON 3+ times. UnknownError during ROLLBACK is especially dangerous as rollback may not complete. Confirmed from dist/index.js lines 68-80."
     },
-    "resolution": null
+    "resolution": "Postconditions (unknown-error, refresh-authentication-error, refresh-network-error) exist in contract.yaml. Detection config includes class_names [Client, Connection] and function_names [connect]. Standard scanner detection path handles execute/transaction/refresh calls without try-catch."
   },
   {
     "id": "concern-20260417-image-size-deepen-1",
@@ -35345,7 +35345,7 @@
     "source": "deepen",
     "package": "image-size",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for image-size imageSizeFromFile() empty-file postcondition — no scanner rule exists for Error('Empty file') when file size <= 0",
     "evidence": {
       "repos": [],
@@ -35353,7 +35353,7 @@
       "violation_count": 0,
       "note": "Proactive — imageSizeFromFile() throws Error('Empty file') when file exists but has zero bytes (size <= 0). Confirmed from node_modules/image-size/dist/fromFile.cjs. Upload pipelines that create file slots before writing data are vulnerable. Currently the scanner has no rule for this distinct error type (separate from ENOENT and TypeError unsupported-format)."
     },
-    "resolution": null
+    "resolution": "Postconditions (empty-file, corrupt-image-async) exist in contract.yaml under imageSizeFromFile function. Standard scanner detection path handles imageSizeFromFile() calls without try-catch."
   },
   {
     "id": "concern-20260417-image-size-deepen-2",
@@ -35361,7 +35361,7 @@
     "source": "deepen",
     "package": "image-size",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for image-size imageSizeFromFile() corrupt-image-async postcondition — no scanner rule for the async delegate path rejecting with TypeError from corrupt file data",
     "evidence": {
       "repos": [],
@@ -35369,7 +35369,7 @@
       "violation_count": 0,
       "note": "Proactive — imageSizeFromFile() delegates to imageSize(buffer) after reading file bytes. imageSize() throws TypeError on corrupt data (e.g. 'Corrupt JPG', 'Invalid PNG', 'Invalid WebP'). The async wrapper re-rejects without wrapping the error. Scanner currently detects the sync imageSize() corruption but not the async imageSizeFromFile() corruption path as a separate postcondition."
     },
-    "resolution": null
+    "resolution": "Postconditions (empty-file, corrupt-image-async) exist in contract.yaml under imageSizeFromFile function. Standard scanner detection path handles imageSizeFromFile() calls without try-catch."
   },
   {
     "id": "concern-20260417-nestjs-common-deepen-1",
@@ -35377,7 +35377,7 @@
     "source": "deepen",
     "package": "@nestjs/common",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "deferred",
     "description": "Add detection for @nestjs/common ValidationPipe.transform() — postcondition added in depth pass but no scanner rule exists for missing-peer-deps (process.exit) and dto-validation-error (BadRequestException)",
     "evidence": {
       "repos": [],
@@ -35385,7 +35385,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis. ValidationPipe without class-validator/class-transformer installed causes process.exit(1). ValidationPipe without try-catch throws BadRequestException when DTO validation fails."
     },
-    "resolution": null
+    "resolution": "Pipe.transform() is invoked by NestJS DI framework, not directly by developers. Direct manual .transform() calls are extremely rare in real codebases. Contract entries for the Pipe classes exist but scanner uses class instantiation (new ValidationPipe()) as the detection trigger, not .transform() calls. Detection gap requires new function entries named transform per class — very low ROI."
   },
   {
     "id": "concern-20260417-nestjs-common-deepen-2",
@@ -35393,7 +35393,7 @@
     "source": "deepen",
     "package": "@nestjs/common",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "deferred",
     "description": "Add detection for @nestjs/common ParseIntPipe.transform() without try-catch — throws BadRequestException (HTTP 400) when value is not a valid integer string",
     "evidence": {
       "repos": [],
@@ -35401,7 +35401,7 @@
       "violation_count": 0,
       "note": "Proactive — confirmed from @nestjs/common@11.1.19 pipes/parse-int.pipe.js source. Throws: new BadRequestException(\"Validation failed (numeric string is expected)\") when isNumeric() returns false."
     },
-    "resolution": null
+    "resolution": "Pipe.transform() is invoked by NestJS DI framework, not directly by developers. Direct manual .transform() calls are extremely rare in real codebases. Contract entries for the Pipe classes exist but scanner uses class instantiation (new ValidationPipe()) as the detection trigger, not .transform() calls. Detection gap requires new function entries named transform per class — very low ROI."
   },
   {
     "id": "concern-20260417-nestjs-common-deepen-3",
@@ -35409,7 +35409,7 @@
     "source": "deepen",
     "package": "@nestjs/common",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "deferred",
     "description": "Add detection for @nestjs/common ParseBoolPipe.transform() without try-catch — throws BadRequestException when value is not exactly \"true\" or \"false\"",
     "evidence": {
       "repos": [],
@@ -35417,7 +35417,7 @@
       "violation_count": 0,
       "note": "Proactive — confirmed from source. Common trap: \"1\"/\"0\"/\"yes\"/\"no\" all throw. Only \"true\"/\"false\" (case-sensitive) and boolean literals pass."
     },
-    "resolution": null
+    "resolution": "Pipe.transform() is invoked by NestJS DI framework, not directly by developers. Direct manual .transform() calls are extremely rare in real codebases. Contract entries for the Pipe classes exist but scanner uses class instantiation (new ValidationPipe()) as the detection trigger, not .transform() calls. Detection gap requires new function entries named transform per class — very low ROI."
   },
   {
     "id": "concern-20260417-nestjs-common-deepen-4",
@@ -35425,7 +35425,7 @@
     "source": "deepen",
     "package": "@nestjs/common",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "deferred",
     "description": "Add detection for @nestjs/common ParseUUIDPipe.transform() without try-catch — throws BadRequestException when value is not a valid UUID string",
     "evidence": {
       "repos": [],
@@ -35433,7 +35433,7 @@
       "violation_count": 0,
       "note": "Proactive — confirmed from source. Security-relevant: prevents SQL errors from non-UUID route params. Throws \"Validation failed (uuid is expected)\" or \"The value passed as UUID is not a string\"."
     },
-    "resolution": null
+    "resolution": "Pipe.transform() is invoked by NestJS DI framework, not directly by developers. Direct manual .transform() calls are extremely rare in real codebases. Contract entries for the Pipe classes exist but scanner uses class instantiation (new ValidationPipe()) as the detection trigger, not .transform() calls. Detection gap requires new function entries named transform per class — very low ROI."
   },
   {
     "id": "concern-20260417-nestjs-common-deepen-5",
@@ -35441,7 +35441,7 @@
     "source": "deepen",
     "package": "@nestjs/common",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "deferred",
     "description": "Add detection for @nestjs/common ParseArrayPipe.transform() without try-catch — throws BadRequestException when array is missing (required by default) or value is invalid",
     "evidence": {
       "repos": [],
@@ -35449,7 +35449,7 @@
       "violation_count": 0,
       "note": "Proactive — confirmed from source. Also validates items via inner ValidationPipe which can throw for invalid item types."
     },
-    "resolution": null
+    "resolution": "Pipe.transform() is invoked by NestJS DI framework, not directly by developers. Direct manual .transform() calls are extremely rare in real codebases. Contract entries for the Pipe classes exist but scanner uses class instantiation (new ValidationPipe()) as the detection trigger, not .transform() calls. Detection gap requires new function entries named transform per class — very low ROI."
   },
   {
     "id": "concern-20260417-nestjs-common-deepen-6",
@@ -35457,13 +35457,77 @@
     "source": "deepen",
     "package": "@nestjs/common",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "deferred",
     "description": "Add detection for @nestjs/common ParseFilePipe.transform() without try-catch — throws BadRequestException when file is missing (required by default) or file validators fail",
     "evidence": {
       "repos": [],
       "scan_file": null,
       "violation_count": 0,
       "note": "Proactive — confirmed from source. fileIsRequired=true by default. MaxFileSizeValidator and FileTypeValidator errors also throw BadRequestException with descriptive messages."
+    },
+    "resolution": "Pipe.transform() is invoked by NestJS DI framework, not directly by developers. Direct manual .transform() calls are extremely rare in real codebases. Contract entries for the Pipe classes exist but scanner uses class instantiation (new ValidationPipe()) as the detection trigger, not .transform() calls. Detection gap requires new function entries named transform per class — very low ROI."
+  },
+  {
+    "id": "concern-20260417-react-hook-form-deepen-1",
+    "created_at": "2026-04-17",
+    "source": "deepen",
+    "package": "react-hook-form",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for trigger() calls where async validate functions in register() can throw — postcondition trigger-async-validator-throws added but no scanner rule exists. Detection requires tracking async validate functions registered via register(name, { validate: async () => ... }) and checking if trigger() is called on those fields without outer try-catch.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — confirmed from dist/index.esm.mjs line 1330-1344: validate() called with await but no surrounding try-catch in validateField(). Common pattern in multi-step forms that do email uniqueness or similar async API checks."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260417-react-hook-form-deepen-2",
+    "created_at": "2026-04-17",
+    "source": "deepen",
+    "package": "react-hook-form",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for trigger() result not awaited — postcondition trigger-result-not-awaited added but no scanner rule exists. Detection pattern: trigger() return value assigned to variable without await, then used in boolean check. Common in multi-step form handlers.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — trigger() returns Promise<boolean> (confirmed from types). Synchronous use evaluates Promise as truthy, bypassing all validation. Pattern: const isValid = trigger() → if (isValid) is always true."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260417-react-hook-form-deepen-3",
+    "created_at": "2026-04-17",
+    "source": "deepen",
+    "package": "react-hook-form",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for Form component used with action prop but no onError callback — postcondition form-network-error-no-feedback added but no scanner rule exists. Detection: import Form from react-hook-form; usage includes action prop but no onError prop.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — confirmed from dist/index.esm.mjs line 709-775: Form component catches all fetch errors internally. Without onError callback, network failures and HTTP errors are silently dropped."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260417-react-hook-form-deepen-4",
+    "created_at": "2026-04-17",
+    "source": "deepen",
+    "package": "react-hook-form",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for useForm() with async defaultValues function that has no try-catch — postcondition async-default-values-unhandled-rejection added but no scanner rule exists. Detection: useForm({ defaultValues: async () => { ... } }) where the async function body has no try-catch.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — useForm async defaultValues is a documented pattern but RHF has no error callback for rejected async defaultValues. Confirmed from docs: the form stays in isLoading state if the Promise rejects."
     },
     "resolution": null
   }
