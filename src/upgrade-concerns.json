@@ -33236,7 +33236,7 @@
     "source": "deepen",
     "package": "pusher",
     "type": "uncovered_function",
-    "status": "in-progress",
+    "status": "implemented",
     "description": "Add detection for pusher.terminateUserConnections() — postcondition terminate-api-error added in depth pass but no scanner rule exists. Security-critical: failed termination leaves banned users connected.",
     "evidence": {
       "repos": [],
@@ -33244,7 +33244,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis. terminateUserConnections() calls this.post() internally, which wraps all HTTP failures in Pusher.RequestError. Used in ban/kick flows."
     },
-    "resolution": null
+    "resolution": "Implemented: Scanner already detects terminateUserConnections() via property-chain detection. Fixed ground-truth fixture annotation placement (SHOULD_FIRE comment was 2 lines before await call, not 1). All 3 SHOULD_FIRE/SHOULD_NOT_FIRE tests now pass for terminate-api-error. Also fixed @anthropic-ai/claude-agent-sdk contract schema violations (invalid enum values silent_null_return, hidden, wrong_results, RESOURCE_LEAK, gradual_degradation, service_degraded) that were blocking the corpus from loading during test runs."
   },
   {
     "id": "concern-20260417-pusher-deepen-2",
@@ -33252,7 +33252,7 @@
     "source": "deepen",
     "package": "pusher",
     "type": "uncovered_function",
-    "status": "in-progress",
+    "status": "implemented",
     "description": "Add detection for pusher.get() — postcondition get-api-error added in depth pass but no scanner rule exists. HTTP 400 on invalid attribute (e.g. user_count on non-presence channel).",
     "evidence": {
       "repos": [],
@@ -33260,7 +33260,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis. get() calls requests.send() which throws Pusher.RequestError on status >= 400."
     },
-    "resolution": null
+    "resolution": "Implemented: Scanner already detects pusher.get() via property-chain detection. Fixed ground-truth fixture annotation placement. get-api-error SHOULD_FIRE test now passes."
   },
   {
     "id": "concern-20260417-pusher-deepen-3",
@@ -33268,7 +33268,7 @@
     "source": "deepen",
     "package": "pusher",
     "type": "uncovered_function",
-    "status": "in-progress",
+    "status": "implemented",
     "description": "Add detection for pusher.post() — postcondition post-api-error added in depth pass but no scanner rule exists. HTTP 413 on payloads exceeding 10KB limit.",
     "evidence": {
       "repos": [],
@@ -33276,7 +33276,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis. post() calls requests.send() — same error path as get(). Low-level API rarely used directly; most apps use trigger/sendToUser."
     },
-    "resolution": null
+    "resolution": "Implemented: Scanner already detects pusher.post() via property-chain detection. Fixed ground-truth fixture annotation placement. post-api-error SHOULD_FIRE test now passes."
   },
   {
     "id": "concern-20260417-firebase-deepen-1",
@@ -33291,6 +33291,54 @@
       "scan_file": null,
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis. FunctionsError codes confirmed from @firebase/functions/dist/functions-public.d.ts. Pattern differs from standard async function call: requires two-step detection (factory → invocation). Medium-high adoption — Cloud Functions callable is common in SaaS apps for server-side business logic."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260417-claude-agent-sdk-deepen-8",
+    "created_at": "2026-04-17",
+    "source": "deepen",
+    "package": "@anthropic-ai/claude-agent-sdk",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @anthropic-ai/claude-agent-sdk.unstable_v2_prompt() — postcondition v2-prompt-result-error-unchecked added in depth pass but no scanner rule exists. Callers access result.result without checking result.subtype, silently getting undefined when subtype is 'error_*'.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis (V2 alpha API). Detection rule needed for: await unstable_v2_prompt() call where result is used without .subtype check."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260417-claude-agent-sdk-deepen-9",
+    "created_at": "2026-04-17",
+    "source": "deepen",
+    "package": "@anthropic-ai/claude-agent-sdk",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @anthropic-ai/claude-agent-sdk.unstable_v2_prompt() — postcondition v2-prompt-no-try-catch added in depth pass but no scanner rule exists. Function can throw Error('Session ended without result message') or AbortError if subprocess fails.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis. Detection rule needed for: await unstable_v2_prompt() calls not wrapped in try/catch."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260417-claude-agent-sdk-deepen-10",
+    "created_at": "2026-04-17",
+    "source": "deepen",
+    "package": "@anthropic-ai/claude-agent-sdk",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @anthropic-ai/claude-agent-sdk SDKSession — postcondition v2-session-not-closed added in depth pass but no scanner rule exists. SDKSession wraps a subprocess; unclosed sessions leak the subprocess. Must detect unstable_v2_createSession()/unstable_v2_resumeSession() calls where session.close() is not called in a finally block and `await using` is not used.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis. Requires instance-tracking detector similar to redis.createClient() connection-not-closed pattern. Detection rule needed for: unstable_v2_createSession() where close() is never called."
     },
     "resolution": null
   }

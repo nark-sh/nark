@@ -5,12 +5,18 @@
  * corpus/packages/pusher/fixtures/ground-truth.ts becomes one test case.
  *
  * Postcondition IDs from corpus/packages/pusher/contract.yaml:
- *   api-error (used by all 3 contracted functions: trigger, triggerBatch, sendToUser)
+ *   api-error           (trigger, triggerBatch, sendToUser)
+ *   terminate-api-error (terminateUserConnections)
+ *   get-api-error       (get)
+ *   post-api-error      (post)
  *
  * Key behaviors under test:
- *   - pusher.trigger()       without try-catch → SHOULD_FIRE: api-error
- *   - pusher.triggerBatch()  without try-catch → SHOULD_FIRE: api-error
- *   - pusher.sendToUser()    without try-catch → SHOULD_FIRE: api-error
+ *   - pusher.trigger()                    without try-catch → SHOULD_FIRE: api-error
+ *   - pusher.triggerBatch()               without try-catch → SHOULD_FIRE: api-error
+ *   - pusher.sendToUser()                 without try-catch → SHOULD_FIRE: api-error
+ *   - pusher.terminateUserConnections()   without try-catch → SHOULD_FIRE: terminate-api-error
+ *   - pusher.get()                        without try-catch → SHOULD_FIRE: get-api-error
+ *   - pusher.post()                       without try-catch → SHOULD_FIRE: post-api-error
  *   - Any call inside try-catch → SHOULD_NOT_FIRE
  *
  * pusher uses 2-level property chains (instance.method), detected directly.
