@@ -31685,5 +31685,53 @@
       "note": "Proactive -- high-impact pattern where transaction is broadcast but result never verified"
     },
     "resolution": null
+  },
+  {
+    "id": "concern-20260416-ws-deepen-1",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "ws",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for ws.ping() before connection open \u2014 ping() throws Error when called in CONNECTING state (readyState 0). Scanner should detect ping() calls outside open event handlers without readyState check.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. Source: websocket.js lines 362-363. Common in heartbeat implementations started before open event."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-ws-deepen-2",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "ws",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for WebSocketServer.handleUpgrade() without wsClientError handler in noServer mode. Currently scanner fires handleupgrade-called-in-non-noserver-mode for all handleUpgrade() calls regardless of noServer context. Need to distinguish noServer:true (handleUpgrade is valid) from noServer:false (handleUpgrade is a bug) and also check for wsClientError listener presence.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. Source: websocket-server.js lines 538-553. Common in Next.js API routes using noServer mode."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-ws-deepen-3",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "ws",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for WebSocketServer.close() without callback error handling. Scanner currently matches ws WebSocket.close() contract on WebSocketServer instances. Need type discrimination to distinguish WebSocket.close() (which emits events) from WebSocketServer.close() (where callback receives error when server not running).",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. Source: websocket-server.js lines 163-173. Affects graceful server shutdown code."
+    },
+    "resolution": null
   }
 ]
