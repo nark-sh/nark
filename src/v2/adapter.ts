@@ -49,6 +49,17 @@ export async function runV2Analyzer(
   const factoryToPackage = new Map<string, string>();
   const classToPackage = new Map<string, string>();
   const typeToPackage = new Map<string, string>();
+  // promiseFactoryToPackage: factory functions whose .promise property yields a tracked instance
+  // e.g., pdfjs-dist getDocument().promise → PDFDocumentProxy
+  const promiseFactoryToPackage = new Map<string, string>();
+  // instanceChainMethodToPackage: methods on tracked instances that return another tracked instance
+  // e.g., pdfjs-dist doc.getPage() → page (also pdfjs-dist)
+  const instanceChainMethodToPackage = new Map<string, string>();
+  // awaitablePropertyToFunctionName: property names on tracked instances that, when awaited,
+  // correspond to a named function in the package contract.
+  // Map key: `${packageName}:${propertyName}` → functionName
+  // e.g., pdfjs-dist: 'promise' property on renderTask → 'render' function
+  const awaitablePropertyToFunctionName = new Map<string, string>();
 
   for (const [packageName, contract] of contracts.entries()) {
     const detection = contract.detection;
@@ -63,10 +74,27 @@ export async function runV2Analyzer(
     for (const typeName of detection.type_names || []) {
       typeToPackage.set(typeName, packageName);
     }
+    for (const method of detection.promise_factory_methods || []) {
+      promiseFactoryToPackage.set(method, packageName);
+    }
+    for (const method of detection.instance_chain_methods || []) {
+      instanceChainMethodToPackage.set(method, packageName);
+    }
+    if (detection.awaitable_properties) {
+      for (const [propName, funcName] of Object.entries(detection.awaitable_properties)) {
+        awaitablePropertyToFunctionName.set(`${packageName}:${propName}`, funcName);
+      }
+    }
   }
 
   // Create shared instance tracker (consulted by other plugins)
-  const instanceTracker = new InstanceTrackerPlugin(factoryToPackage, classToPackage, typeToPackage);
+  const instanceTracker = new InstanceTrackerPlugin(
+    factoryToPackage,
+    classToPackage,
+    typeToPackage,
+    promiseFactoryToPackage,
+    instanceChainMethodToPackage,
+  );
 
   // Create v2 analyzer config
   const v2Config = {
@@ -82,7 +110,7 @@ export async function runV2Analyzer(
 
   // Register plugins in order (InstanceTracker must come before plugins that use it)
   analyzer.registerPlugin(instanceTracker);
-  analyzer.registerPlugin(new ThrowingFunctionDetector(instanceTracker));
+  analyzer.registerPlugin(new ThrowingFunctionDetector(instanceTracker, awaitablePropertyToFunctionName));
   analyzer.registerPlugin(new PropertyChainDetector(instanceTracker));
   analyzer.registerPlugin(new EventListenerDetector());
   analyzer.registerPlugin(new EventListenerAbsencePlugin(contracts));

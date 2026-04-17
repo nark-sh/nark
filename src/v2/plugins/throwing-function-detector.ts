@@ -29,9 +29,19 @@ export class ThrowingFunctionDetector implements DetectorPlugin {
   description = 'Detects direct function calls that can throw exceptions';
 
   private instanceTracker?: InstanceTrackerPlugin;
+  /**
+   * Maps `${packageName}:${propertyName}` → functionName for awaitable properties on tracked instances.
+   * Example (pdfjs-dist): 'pdfjs-dist:promise' → 'render'
+   * Used to detect `await renderTask.promise` where renderTask is a tracked pdfjs-dist instance.
+   */
+  private awaitablePropertyToFunctionName: Map<string, string>;
 
-  constructor(instanceTracker?: InstanceTrackerPlugin) {
+  constructor(
+    instanceTracker?: InstanceTrackerPlugin,
+    awaitablePropertyToFunctionName?: Map<string, string>,
+  ) {
     this.instanceTracker = instanceTracker;
+    this.awaitablePropertyToFunctionName = awaitablePropertyToFunctionName ?? new Map();
   }
 
   /**
@@ -39,6 +49,61 @@ export class ThrowingFunctionDetector implements DetectorPlugin {
    */
   public initialize(_context: PluginContext): void {
     // Context not needed for this plugin
+  }
+
+  /**
+   * Handle property access expressions.
+   *
+   * Detects `await trackedInstance.propertyName` patterns where the property corresponds
+   * to a function contract in the package (e.g., `await renderTask.promise` → pdfjs-dist `render`).
+   * This fires when:
+   *   1. The property access is directly inside an AwaitExpression
+   *   2. The object is a tracked instance of a package
+   *   3. The property name is in awaitablePropertyToFunctionName for that package
+   */
+  public onPropertyAccess(node: ts.PropertyAccessExpression, _context: NodeContext): Detection[] {
+    // Only fire when directly awaited: `await trackedInstance.property`
+    if (!node.parent || !ts.isAwaitExpression(node.parent)) {
+      return [];
+    }
+
+    if (!ts.isIdentifier(node.expression)) {
+      return [];
+    }
+
+    const objName = node.expression.text;
+    const propName = node.name.text;
+
+    // Check if the object is a tracked instance
+    if (!this.instanceTracker) {
+      return [];
+    }
+    const packageName = this.instanceTracker.resolveIdentifier(objName);
+    if (!packageName) {
+      return [];
+    }
+
+    // Check if this property name corresponds to a function contract for this package
+    const functionName = this.awaitablePropertyToFunctionName.get(`${packageName}:${propName}`);
+    if (!functionName) {
+      return [];
+    }
+
+    return [
+      {
+        pluginName: this.name,
+        pattern: 'throwing-function',
+        node: node,  // The PropertyAccessExpression — caller checks try-catch around this node
+        packageName,
+        functionName,
+        confidence: 'high',
+        metadata: {
+          depth: 1,
+          awaitableProperty: propName,
+          chain: [objName, propName],
+        },
+      },
+    ];
   }
 
   /**

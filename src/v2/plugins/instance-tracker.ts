@@ -33,15 +33,31 @@ export class InstanceTrackerPlugin implements DetectorPlugin {
   private factoryToPackage: Map<string, string>; // factory method name → package name
   private classToPackage: Map<string, string>; // class name → package name
   private typeToPackage: Map<string, string>; // type name → package name
+  /**
+   * Promise-factory methods: factory functions whose result has a `.promise` property.
+   * Pattern: `const doc = await getDocument(src).promise`
+   * When getDocument is in this map (pdfjs-dist), `doc` is tracked as pdfjs-dist.
+   */
+  private promiseFactoryToPackage: Map<string, string>;
+  /**
+   * Instance chain methods: methods on tracked instances that return another tracked instance.
+   * Pattern: `const page = await doc.getPage(1)` where doc is a tracked pdfjs-dist instance.
+   * When getPage is in this map (pdfjs-dist) AND doc is tracked as pdfjs-dist, `page` is also tracked.
+   */
+  private instanceChainMethodToPackage: Map<string, string>;
 
   constructor(
     factoryToPackage: Map<string, string>,
     classToPackage: Map<string, string>,
-    typeToPackage?: Map<string, string>
+    typeToPackage?: Map<string, string>,
+    promiseFactoryToPackage?: Map<string, string>,
+    instanceChainMethodToPackage?: Map<string, string>,
   ) {
     this.factoryToPackage = factoryToPackage;
     this.classToPackage = classToPackage;
     this.typeToPackage = typeToPackage ?? new Map();
+    this.promiseFactoryToPackage = promiseFactoryToPackage ?? new Map();
+    this.instanceChainMethodToPackage = instanceChainMethodToPackage ?? new Map();
   }
 
   /**
@@ -232,15 +248,16 @@ export class InstanceTrackerPlugin implements DetectorPlugin {
       const packageName = this.resolveFactoryCall(init, context);
       if (packageName) {
         this.instanceMap.set(varName, packageName);
-      } else {
-        // Case 2b: schema factory (z.object(), z.string(), etc.) — chained schema methods
-        // The result is also a schema instance so also track it.
-        const schemaPackage = this.resolveSchemaChainFactory(init, context);
-        if (schemaPackage) {
-          this.instanceMap.set(varName, schemaPackage);
-        }
+        return [];
       }
-      return [];
+      // Case 2b: schema factory (z.object(), z.string(), etc.) — chained schema methods
+      // The result is also a schema instance so also track it.
+      const schemaPackage = this.resolveSchemaChainFactory(init, context);
+      if (schemaPackage) {
+        this.instanceMap.set(varName, schemaPackage);
+        return [];
+      }
+      // Fall through to Case 3d (trackedInstance.chainMethod()) if no factory match
     }
 
     // Case 3: await someImport.factory() - async call
@@ -248,8 +265,70 @@ export class InstanceTrackerPlugin implements DetectorPlugin {
       const packageName = this.resolveFactoryCall(init.expression, context);
       if (packageName) {
         this.instanceMap.set(varName, packageName);
+        return [];
       }
-      return [];
+      // Fall through to Case 3c (await trackedInstance.chainMethod()) if no factory match
+    }
+
+    // Case 3b: await factory().promise — promise-factory pattern (e.g., pdfjs-dist)
+    // Pattern: const doc = await getDocument(src).promise
+    // The factory returns a task object; the .promise property yields the actual instance.
+    if (
+      ts.isAwaitExpression(init) &&
+      ts.isPropertyAccessExpression(init.expression) &&
+      init.expression.name.text === 'promise' &&
+      ts.isCallExpression(init.expression.expression)
+    ) {
+      const call = init.expression.expression;
+      const pkg = this.resolvePromiseFactory(call, context);
+      if (pkg) {
+        this.instanceMap.set(varName, pkg);
+        return [];
+      }
+    }
+
+    // Case 3c: await trackedInstance.chainMethod() — instance chain propagation (e.g., pdfjs-dist)
+    // Pattern: const page = await doc.getPage(1) where doc is tracked and getPage is a chain method
+    if (
+      ts.isAwaitExpression(init) &&
+      ts.isCallExpression(init.expression) &&
+      ts.isPropertyAccessExpression(init.expression.expression)
+    ) {
+      const propAccess = init.expression.expression;
+      const methodName = propAccess.name.text;
+      if (ts.isIdentifier(propAccess.expression)) {
+        const objName = propAccess.expression.text;
+        const trackedPkg = this.instanceMap.get(objName);
+        if (trackedPkg) {
+          // Check if this method is a known chain method for this package
+          const chainPkg = this.instanceChainMethodToPackage.get(methodName);
+          if (chainPkg === trackedPkg) {
+            this.instanceMap.set(varName, trackedPkg);
+            return [];
+          }
+        }
+      }
+    }
+
+    // Case 3d: trackedInstance.chainMethod() (non-awaited) — for RenderTask-like factories
+    // Pattern: const renderTask = page.render(params) where page is tracked and render is a chain method
+    if (
+      ts.isCallExpression(init) &&
+      ts.isPropertyAccessExpression(init.expression)
+    ) {
+      const propAccess = init.expression;
+      const methodName = propAccess.name.text;
+      if (ts.isIdentifier(propAccess.expression)) {
+        const objName = propAccess.expression.text;
+        const trackedPkg = this.instanceMap.get(objName);
+        if (trackedPkg) {
+          const chainPkg = this.instanceChainMethodToPackage.get(methodName);
+          if (chainPkg === trackedPkg) {
+            this.instanceMap.set(varName, trackedPkg);
+            return [];
+          }
+        }
+      }
     }
 
     // Case 4: const x = trackedVar — propagate package from already-tracked identifier
@@ -430,6 +509,54 @@ export class InstanceTrackerPlugin implements DetectorPlugin {
         return instancePackage;
       }
 
+    }
+
+    return null;
+  }
+
+  /**
+   * Resolve a promise-factory call to a package name.
+   *
+   * Handles the pattern: `await factory().promise` where the factory is in promiseFactoryToPackage.
+   * Example (pdfjs-dist): `const doc = await getDocument(src).promise`
+   *   — getDocument is in promiseFactoryToPackage → returns 'pdfjs-dist'
+   *   — caller tracks `doc` as 'pdfjs-dist' instance
+   *
+   * Also handles: `await pdfjs.getDocument(src).promise` (namespace import)
+   */
+  private resolvePromiseFactory(
+    callExpr: ts.CallExpression,
+    context: NodeContext
+  ): string | null {
+    const funcExpr = callExpr.expression;
+
+    // Direct call: getDocument(src)
+    if (ts.isIdentifier(funcExpr)) {
+      const funcName = funcExpr.text;
+      // Check importMap first (authoritative for direct imports)
+      const importInfo = context.importMap.get(funcName);
+      if (importInfo) {
+        const pkg = this.promiseFactoryToPackage.get(funcName);
+        if (pkg && pkg === importInfo.packageName) {
+          return pkg;
+        }
+      }
+      // Fallback: check promiseFactoryToPackage directly
+      const pkg = this.promiseFactoryToPackage.get(funcName);
+      if (pkg) return pkg;
+    }
+
+    // Namespaced call: pdfjs.getDocument(src)
+    if (ts.isPropertyAccessExpression(funcExpr) && ts.isIdentifier(funcExpr.expression)) {
+      const methodName = funcExpr.name.text;
+      const objName = funcExpr.expression.text;
+      const importInfo = context.importMap.get(objName);
+      if (importInfo) {
+        const pkg = this.promiseFactoryToPackage.get(methodName);
+        if (pkg && pkg === importInfo.packageName) {
+          return pkg;
+        }
+      }
     }
 
     return null;

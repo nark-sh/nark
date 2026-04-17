@@ -146,10 +146,13 @@ export async function runGroundTruth(
   fs.writeFileSync(tmpTsconfig, JSON.stringify(tsConfigContent, null, 2));
 
   try {
-    // Build detection maps from contracts
+    // Build detection maps from contracts (mirrors adapter.ts)
     const factoryToPackage = new Map<string, string>();
     const classToPackage = new Map<string, string>();
     const typeToPackage = new Map<string, string>();
+    const promiseFactoryToPackage = new Map<string, string>();
+    const instanceChainMethodToPackage = new Map<string, string>();
+    const awaitablePropertyToFunctionName = new Map<string, string>();
 
     for (const [packageName, contract] of contracts.entries()) {
       const detection = contract.detection;
@@ -157,9 +160,22 @@ export async function runGroundTruth(
       for (const cls of detection.class_names || []) classToPackage.set(cls, packageName);
       for (const factory of detection.factory_methods || []) factoryToPackage.set(factory, packageName);
       for (const typeName of detection.type_names || []) typeToPackage.set(typeName, packageName);
+      for (const method of detection.promise_factory_methods || []) promiseFactoryToPackage.set(method, packageName);
+      for (const method of detection.instance_chain_methods || []) instanceChainMethodToPackage.set(method, packageName);
+      if (detection.awaitable_properties) {
+        for (const [propName, funcName] of Object.entries(detection.awaitable_properties)) {
+          awaitablePropertyToFunctionName.set(`${packageName}:${propName}`, funcName);
+        }
+      }
     }
 
-    const instanceTracker = new InstanceTrackerPlugin(factoryToPackage, classToPackage, typeToPackage);
+    const instanceTracker = new InstanceTrackerPlugin(
+      factoryToPackage,
+      classToPackage,
+      typeToPackage,
+      promiseFactoryToPackage,
+      instanceChainMethodToPackage,
+    );
 
     const analyzer = new UniversalAnalyzer(
       { tsConfigPath: tmpTsconfig, corpusPath },
@@ -167,7 +183,7 @@ export async function runGroundTruth(
     );
 
     analyzer.registerPlugin(instanceTracker);
-    analyzer.registerPlugin(new ThrowingFunctionDetector(instanceTracker));
+    analyzer.registerPlugin(new ThrowingFunctionDetector(instanceTracker, awaitablePropertyToFunctionName));
     analyzer.registerPlugin(new PropertyChainDetector(instanceTracker));
     analyzer.registerPlugin(new EventListenerDetector());
     analyzer.registerPlugin(new EventListenerAbsencePlugin(contracts));

@@ -151,6 +151,29 @@ export interface DetectionRules {
    * export identically-named classes (e.g., ioredis vs @upstash/redis both export Redis).
    */
   import_source?: string;
+  /**
+   * Methods on a tracked instance that return another instance of the same package.
+   * When `result = await trackedVar.method()` or `result = trackedVar.method()`, `result` is also tracked.
+   * Use for package APIs where one instance creates sub-instances (e.g., pdfjs-dist: doc.getPage() → page).
+   * Example: ["getPage", "render"]
+   */
+  instance_chain_methods?: string[];
+  /**
+   * Factory functions whose return value has a `.promise` property to await.
+   * When `result = await factory().promise`, track `result` as the same package.
+   * Use for packages like pdfjs-dist where getDocument() returns a task with a .promise.
+   * Example: ["getDocument"]
+   */
+  promise_factory_methods?: string[];
+  /**
+   * Maps property names on tracked instances to the function contract to use for violation detection.
+   * When `await trackedInstance.propertyName` is used without try-catch, fire a violation attributed
+   * to `functionName` in the package contract.
+   * Use for packages where the async result is accessed as a property, not a method call
+   * (e.g., pdfjs-dist: `await renderTask.promise` → attributed to the `render` function contract).
+   * Example: { "promise": "render" }
+   */
+  awaitable_properties?: Record<string, string>;
 }
 
 /**
