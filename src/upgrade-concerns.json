@@ -31733,5 +31733,101 @@
       "note": "Proactive \u2014 contract added via API surface analysis. Source: websocket-server.js lines 163-173. Affects graceful server shutdown code."
     },
     "resolution": null
+  },
+  {
+    "id": "concern-20260417-libsql-client-deepen-1",
+    "created_at": "2026-04-17",
+    "source": "deepen",
+    "package": "@libsql/client",
+    "type": "scanner_fp",
+    "status": "pending",
+    "description": "Fix transaction-not-closed FP: scanner fires on all transaction() calls even when tx.close() is in a finally block. Need to detect finally-block tx.close() pattern to suppress the violation.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Confirmed FP from ground-truth fixture line 142: transferFundsWithFinally() has tx.close() in finally but scanner still fires transaction-not-closed"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260417-libsql-client-deepen-2",
+    "created_at": "2026-04-17",
+    "source": "deepen",
+    "package": "@libsql/client",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @libsql/client transaction.commit() \u2014 postcondition commit-no-try-catch added in depth pass but no scanner rule exists. Silent data loss when network fails during commit.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. Commit failure = data not persisted even though app logic ran. Critical distinction."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260417-libsql-client-deepen-3",
+    "created_at": "2026-04-17",
+    "source": "deepen",
+    "package": "@libsql/client",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @libsql/client transaction.execute() \u2014 postcondition transaction-execute-no-try-catch added in depth pass. TRANSACTION_CLOSED errors when executing on a closed/timed-out transaction.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. Distinct from client.execute() \u2014 has TRANSACTION_CLOSED error code when tx timed out by server."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260417-libsql-client-deepen-4",
+    "created_at": "2026-04-17",
+    "source": "deepen",
+    "package": "@libsql/client",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @libsql/client migrate() \u2014 postcondition migrate-no-try-catch added in depth pass. Already fires in ground-truth tests (scanner detects bare migrate() calls).",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Ground-truth test PASSES for migrate-no-try-catch \u2014 scanner may already detect this. Verify scanner rule handles both http and ws client implementations."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260417-libsql-client-deepen-5",
+    "created_at": "2026-04-17",
+    "source": "deepen",
+    "package": "@libsql/client",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @libsql/client executeMultiple() \u2014 postcondition execute-multiple-no-try-catch added in depth pass. Already fires in ground-truth tests. Verify complete coverage.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Ground-truth test PASSES for execute-multiple-no-try-catch \u2014 scanner may already detect this. Confirm this covers all transport variants (http, ws, sqlite3)."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260417-libsql-client-deepen-6",
+    "created_at": "2026-04-17",
+    "source": "deepen",
+    "package": "@libsql/client",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @libsql/client transaction.rollback() \u2014 postcondition rollback-already-closed added in depth pass. Rollback can throw HRANA_CLOSED_ERROR if tx timed out, masking original error.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. Pattern: rollback() called directly in catch block without its own try-catch."
+    },
+    "resolution": null
   }
 ]
