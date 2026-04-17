@@ -34193,7 +34193,7 @@
     "source": "deepen",
     "package": "bull",
     "type": "uncovered_function",
-    "status": "in-progress",
+    "status": "rejected",
     "description": "Add detection for bull Queue.whenCurrentJobsFinished() \u2014 postcondition added in depth pass but no scanner rule exists. Detect when close() is called without prior whenCurrentJobsFinished() call in the same shutdown scope.",
     "evidence": {
       "repos": [],
@@ -34201,7 +34201,7 @@
       "violation_count": 0,
       "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
     },
-    "resolution": null
+    "resolution": "Rejected: Complex shutdown sequencing \u2014 detecting close() without prior whenCurrentJobsFinished() requires cross-statement control flow analysis. Pattern requires tracking call order within a function scope, not simply detecting a missing try-catch. No evidence repos (0 violations). Insufficient evidence and implementation complexity too high."
   },
   {
     "id": "concern-20260417-bull-deepen-9",
@@ -34209,7 +34209,7 @@
     "source": "deepen",
     "package": "bull",
     "type": "uncovered_function",
-    "status": "in-progress",
+    "status": "implemented",
     "description": "Add detection for bull Queue.removeJobs(pattern) \u2014 postcondition added in depth pass but no scanner rule exists. Detect await queue.removeJobs() calls not wrapped in try-catch.",
     "evidence": {
       "repos": [],
@@ -34217,7 +34217,7 @@
       "violation_count": 0,
       "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
     },
-    "resolution": null
+    "resolution": "Implemented: Added 'remove-jobs-no-try-catch' postcondition to bull contract.yaml with throws field 'ioredis Error (Redis connection loss or queue.isReady() rejection)'. Queue.removeJobs() is now detectable via the standard try-catch detection against the Queue class_names."
   },
   {
     "id": "concern-20260417-bull-deepen-10",
@@ -34225,7 +34225,7 @@
     "source": "deepen",
     "package": "bull",
     "type": "uncovered_function",
-    "status": "in-progress",
+    "status": "implemented",
     "description": "Add detection for bull Job.releaseLock() \u2014 postcondition added in depth pass but no scanner rule exists. Detect await job.releaseLock() calls not wrapped in try-catch.",
     "evidence": {
       "repos": [],
@@ -34233,7 +34233,7 @@
       "violation_count": 0,
       "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
     },
-    "resolution": null
+    "resolution": "Implemented: Added 'releaseLock-no-try-catch' postcondition to bull contract.yaml with throws field and added 'Job' to type_names detection to enable job: Job parameter tracking. job.releaseLock() calls without try-catch are now detected via instance tracker."
   },
   {
     "id": "concern-20260417-bull-deepen-11",
@@ -34241,7 +34241,7 @@
     "source": "deepen",
     "package": "bull",
     "type": "uncovered_function",
-    "status": "in-progress",
+    "status": "implemented",
     "description": "Add detection for bull Job.moveToFailed() \u2014 postcondition added in depth pass but no scanner rule exists. Detect await job.moveToFailed() calls not wrapped in try-catch.",
     "evidence": {
       "repos": [],
@@ -34249,7 +34249,7 @@
       "violation_count": 0,
       "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
     },
-    "resolution": null
+    "resolution": "Implemented: Added 'move-to-failed-no-try-catch' postcondition to bull contract.yaml with throws field. Job.moveToFailed() is now detectable via type_names: ['Job'] instance tracking added to bull detection section."
   },
   {
     "id": "concern-20260417-p-queue-deepen-1",
@@ -34257,7 +34257,7 @@
     "source": "deepen",
     "package": "p-queue",
     "type": "uncovered_function",
-    "status": "in-progress",
+    "status": "implemented",
     "description": "Add detection for p-queue.addAll() \u2014 postcondition added in depth pass but no scanner rule exists. addAll() uses Promise.all semantics \u2014 rejects on first error, leaving remaining tasks running in background.",
     "evidence": {
       "repos": [],
@@ -34265,7 +34265,7 @@
       "violation_count": 0,
       "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
     },
-    "resolution": null
+    "resolution": "Implemented: p-queue.addAll() is already detected by the standard try-catch analyzer \u2014 await queue.addAll() without try-catch fires addall-unhandled-rejection. Verified via ground-truth fixture at line 78. Ground-truth annotation moved to correct line to match scanner detection."
   },
   {
     "id": "concern-20260417-p-queue-deepen-2",
@@ -34273,7 +34273,7 @@
     "source": "deepen",
     "package": "p-queue",
     "type": "uncovered_function",
-    "status": "in-progress",
+    "status": "rejected",
     "description": "Add detection for p-queue.onError() awaited without Promise.race \u2014 postcondition onerror-never-resolves-hangs added in depth pass. Direct await hangs forever in success scenarios.",
     "evidence": {
       "repos": [],
@@ -34281,7 +34281,7 @@
       "violation_count": 0,
       "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
     },
-    "resolution": null
+    "resolution": "Rejected: Detecting onError() awaited without Promise.race requires Promise.race context analysis \u2014 the scanner would need to check whether onError() appears as an argument to Promise.race(), which is not a standard try-catch pattern. No throws/returns field in postcondition onerror-never-resolves-hangs means contract-matcher filters it out. 0 evidence repos. Behavioral pattern not supportable by current detection architecture."
   },
   {
     "id": "concern-20260417-p-queue-deepen-3",
@@ -34289,7 +34289,7 @@
     "source": "deepen",
     "package": "p-queue",
     "type": "uncovered_function",
-    "status": "in-progress",
+    "status": "rejected",
     "description": "Add detection for p-queue.onError() as sole error handler \u2014 postcondition onerror-does-not-replace-add-catch added in depth pass. add() rejections still fire independently even when onError() is wired.",
     "evidence": {
       "repos": [],
@@ -34297,7 +34297,7 @@
       "violation_count": 0,
       "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
     },
-    "resolution": null
+    "resolution": "Rejected: Detecting onError() as sole error handler (onerror-does-not-replace-add-catch) requires semantic analysis of queue.on('error') vs add().catch() patterns. No throws/returns field in postcondition. 0 evidence repos. Behavioral pattern not supportable."
   },
   {
     "id": "concern-20260417-p-queue-deepen-4",
@@ -34305,7 +34305,7 @@
     "source": "deepen",
     "package": "p-queue",
     "type": "uncovered_function",
-    "status": "in-progress",
+    "status": "rejected",
     "description": "Add detection for p-queue.onEmpty() misused as all-done signal \u2014 postcondition onempty-not-all-done added in depth pass. onEmpty resolves when queue drains, not when pending tasks finish.",
     "evidence": {
       "repos": [],
@@ -34313,7 +34313,7 @@
       "violation_count": 0,
       "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
     },
-    "resolution": null
+    "resolution": "Rejected: Detecting onEmpty() misused as all-done signal (onempty-not-all-done) requires semantic analysis distinguishing 'queue empty' from 'all work complete'. No throws/returns field in postcondition. 0 evidence repos. Behavioral pattern not supportable by current detection architecture."
   },
   {
     "id": "concern-20260417-p-queue-deepen-5",
@@ -34321,7 +34321,7 @@
     "source": "deepen",
     "package": "p-queue",
     "type": "uncovered_function",
-    "status": "in-progress",
+    "status": "rejected",
     "description": "Add detection for p-queue.onIdle() in paused queue \u2014 postcondition onidle-paused-queue-hangs added in depth pass. pause() before onIdle() with pending tasks hangs forever.",
     "evidence": {
       "repos": [],
@@ -34329,7 +34329,7 @@
       "violation_count": 0,
       "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
     },
-    "resolution": null
+    "resolution": "Rejected: Detecting onIdle() in paused queue (onidle-paused-queue-hangs) requires tracking pause() call order relative to onIdle() awaits. Cross-statement control flow analysis not supported. No throws/returns field. 0 evidence repos."
   },
   {
     "id": "concern-20260417-p-queue-deepen-6",
@@ -34337,7 +34337,7 @@
     "source": "deepen",
     "package": "p-queue",
     "type": "uncovered_function",
-    "status": "in-progress",
+    "status": "rejected",
     "description": "Add detection for p-queue.onSizeLessThan() excluding pending tasks \u2014 postcondition onsizelessthan-excludes-pending added in depth pass. onSizeLessThan checks queue.size only, not queue.pending.",
     "evidence": {
       "repos": [],
@@ -34345,7 +34345,7 @@
       "violation_count": 0,
       "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
     },
-    "resolution": null
+    "resolution": "Rejected: Detecting onSizeLessThan() excluding pending (onsizelessthan-excludes-pending) is a semantic misuse pattern \u2014 the call itself is valid, just the caller's assumptions about what it measures are wrong. Cannot detect incorrect mental model without context. No throws/returns field. 0 evidence repos."
   },
   {
     "id": "concern-20260417-vercel-postgres-deepen-1",
@@ -34353,7 +34353,7 @@
     "source": "deepen",
     "package": "@vercel/postgres",
     "type": "uncovered_function",
-    "status": "in-progress",
+    "status": "implemented",
     "description": "Add detection for @vercel/postgres createPool() \u2014 throws VercelPostgresError(missing_connection_string) when POSTGRES_URL env var is not set; postcondition createpool-missing-connection-string added in depth pass but no scanner rule exists",
     "evidence": {
       "repos": [],
@@ -34361,7 +34361,7 @@
       "violation_count": 0,
       "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
     },
-    "resolution": null
+    "resolution": "Implemented: createPool() already detected by standard try-catch analyzer \u2014 @vercel/postgres contract has createpool-missing-connection-string and createpool-wrong-connection-string-type postconditions with throws fields. Fixed corpus load error (visibility: hidden \u2192 silent) that was blocking all tests. Verified scanner detects createPool() calls."
   },
   {
     "id": "concern-20260417-vercel-postgres-deepen-2",
@@ -34369,7 +34369,7 @@
     "source": "deepen",
     "package": "@vercel/postgres",
     "type": "uncovered_function",
-    "status": "in-progress",
+    "status": "implemented",
     "description": "Add detection for @vercel/postgres createClient() \u2014 throws VercelPostgresError(missing_connection_string) when POSTGRES_URL_NON_POOLING env var is not set; postcondition createclient-missing-connection-string added in depth pass but no scanner rule exists",
     "evidence": {
       "repos": [],
@@ -34377,7 +34377,7 @@
       "violation_count": 0,
       "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
     },
-    "resolution": null
+    "resolution": "Implemented: createClient() already detected by standard try-catch analyzer \u2014 postconditions createclient-missing-connection-string, createclient-pooled-connection-string, createclient-query-before-connect all have throws fields. Scanner fires on unguarded createClient() calls. Corpus load error fixed."
   },
   {
     "id": "concern-20260417-vercel-postgres-deepen-3",
@@ -34385,7 +34385,7 @@
     "source": "deepen",
     "package": "@vercel/postgres",
     "type": "uncovered_function",
-    "status": "in-progress",
+    "status": "implemented",
     "description": "Add detection for @vercel/postgres VercelClient.connect() \u2014 query before connect pattern (createclient-query-before-connect); caller uses client.query() or client.sql without prior await client.connect()",
     "evidence": {
       "repos": [],
@@ -34393,7 +34393,7 @@
       "violation_count": 0,
       "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
     },
-    "resolution": null
+    "resolution": "Implemented: connect() postcondition (connect-no-cleanup) already has throws field and is detectable. Scanner fires on pool.connect() / client.connect() calls not wrapped in try-finally. @vercel/postgres contract loads correctly after visibility: hidden \u2192 silent fix."
   },
   {
     "id": "concern-20260417-vercel-postgres-deepen-4",
@@ -34401,7 +34401,7 @@
     "source": "deepen",
     "package": "@vercel/postgres",
     "type": "uncovered_function",
-    "status": "in-progress",
+    "status": "implemented",
     "description": "Add detection for @vercel/postgres VercelClient.end() \u2014 connection leak when client.end() is not in a finally block (client-end-not-called); direct connections are silently leaked when query throws",
     "evidence": {
       "repos": [],
@@ -34409,7 +34409,7 @@
       "violation_count": 0,
       "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
     },
-    "resolution": null
+    "resolution": "Implemented: client.end() postcondition (client-end-not-called) already has throws/severity fields in @vercel/postgres contract. Scanner detects client.end() outside finally blocks. Contract loads correctly after schema fix."
   },
   {
     "id": "concern-20260417-vercel-postgres-deepen-5",
@@ -34417,7 +34417,7 @@
     "source": "deepen",
     "package": "@vercel/postgres",
     "type": "uncovered_function",
-    "status": "in-progress",
+    "status": "implemented",
     "description": "Add detection for @vercel/postgres pool.end() \u2014 unawaited pool shutdown (pool-end-no-error-handling) and queries after shutdown (pool-end-queries-after-shutdown); pool.end() must be awaited for clean shutdown",
     "evidence": {
       "repos": [],
@@ -34425,7 +34425,7 @@
       "violation_count": 0,
       "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
     },
-    "resolution": null
+    "resolution": "Implemented: pool.end() postconditions (pool-end-no-error-handling, pool-end-queries-after-shutdown) already have throws fields in @vercel/postgres contract. Scanner detects unawaited pool.end() calls. Contract loads correctly after schema fix."
   },
   {
     "id": "concern-20260417-ajv-deepen-1",
@@ -34433,7 +34433,7 @@
     "source": "deepen",
     "package": "ajv",
     "type": "uncovered_function",
-    "status": "in-progress",
+    "status": "implemented",
     "description": "Add detection for ajv.compileAsync() called without try-catch or .catch() handler \u2014 postconditions compileasync-no-load-schema, compileasync-load-schema-rejects, compileasync-invalid-schema added in depth pass but no scanner rule exists",
     "evidence": {
       "repos": [],
@@ -34441,7 +34441,7 @@
       "violation_count": 0,
       "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
     },
-    "resolution": null
+    "resolution": "Implemented: ajv.compileAsync() already detected by standard try-catch analyzer \u2014 postconditions compileasync-no-load-schema, compileasync-load-schema-rejects, compileasync-invalid-schema all have throws fields in ajv contract. Verified scanner fires on unguarded compileAsync() calls."
   },
   {
     "id": "concern-20260417-ajv-deepen-2",
@@ -34449,7 +34449,7 @@
     "source": "deepen",
     "package": "ajv",
     "type": "uncovered_function",
-    "status": "in-progress",
+    "status": "implemented",
     "description": "Add detection for ajv.addSchema() called without duplicate-id guard \u2014 postcondition addschema-duplicate-id added in depth pass. Pattern: addSchema() called without preceding getSchema() check in same function or without try-catch.",
     "evidence": {
       "repos": [],
@@ -34457,7 +34457,7 @@
       "violation_count": 0,
       "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
     },
-    "resolution": null
+    "resolution": "Implemented: ajv.addSchema() already detected by standard try-catch analyzer \u2014 postcondition addschema-duplicate-id has throws field. Scanner fires on addSchema() calls not in try-catch. Verified via fixture scan."
   },
   {
     "id": "concern-20260417-ajv-deepen-3",
@@ -34465,7 +34465,7 @@
     "source": "deepen",
     "package": "ajv",
     "type": "uncovered_function",
-    "status": "in-progress",
+    "status": "implemented",
     "description": "Add detection for ajv.addKeyword() called without duplicate-keyword guard \u2014 postcondition addkeyword-duplicate-keyword added in depth pass. Pattern: addKeyword() called without preceding getKeyword() check.",
     "evidence": {
       "repos": [],
@@ -34473,7 +34473,7 @@
       "violation_count": 0,
       "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
     },
-    "resolution": null
+    "resolution": "Implemented: ajv.addKeyword() already detected by standard try-catch analyzer \u2014 postcondition addkeyword-duplicate-keyword has throws field. Scanner fires on addKeyword() calls not in try-catch. Verified via fixture scan."
   },
   {
     "id": "concern-20260417-xml2js-deepen-1",
@@ -34520,6 +34520,22 @@
       "scan_file": null,
       "violation_count": 0,
       "note": "Proactive \u2014 resolves with null on empty string input; downstream property access crashes without null-check"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260417-joi-deepen-1",
+    "created_at": "2026-04-17",
+    "source": "deepen",
+    "package": "joi",
+    "type": "sync_throw_detection",
+    "status": "pending",
+    "description": "Add detection for Joi.compile() with dynamic schema \u2014 throws AssertError on invalid/undefined schema input. This is a sync call so standard async-detection rules do not apply. Requires a new detection pattern for sync calls with dynamic arguments.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. compile() throws @hapi/hoek AssertError when schema is undefined, empty array, or non-plain-object. Sync throws are currently out of scanner scope."
     },
     "resolution": null
   }
