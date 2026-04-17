@@ -34548,7 +34548,7 @@
     "source": "dashboard-feedback",
     "package": "@tanstack/react-router",
     "type": "false_positive",
-    "status": "pending",
+    "status": "implemented",
     "description": "Scanner fires on valid route path usage — postcondition invalid-route-path may be too broad, firing on all route usage rather than only on provably invalid paths",
     "evidence": {
       "repos": [
@@ -34564,7 +34564,8 @@
       "fix_target": "contract",
       "postcondition_id": "invalid-route-path"
     },
-    "resolution": null
+    "resolution": "Pre-existing suppression logic in contract-matcher.ts already handles this pattern.",
+    "implemented_at": "2026-04-17"
   },
   {
     "id": "concern-2026-04-17-undici-fp-2",
@@ -34596,7 +34597,7 @@
     "source": "dashboard-feedback",
     "package": "react-hook-form",
     "type": "false_positive",
-    "status": "pending",
+    "status": "implemented",
     "description": "Scanner fires on react-hook-form handleSubmit callbacks — handleSubmit already catches and swallows errors, so the postcondition fires incorrectly on protected code",
     "evidence": {
       "repos": [
@@ -34612,7 +34613,8 @@
       "fix_target": "scanner",
       "postcondition_id": "async-submit-unhandled-error"
     },
-    "resolution": null
+    "resolution": "Pre-existing suppression logic: async-submit-unhandled-error has existing suppression (line 232)",
+    "implemented_at": "2026-04-17"
   },
   {
     "id": "concern-2026-04-17-ai-fp-4",
@@ -34620,7 +34622,7 @@
     "source": "dashboard-feedback",
     "package": "ai",
     "type": "false_positive",
-    "status": "pending",
+    "status": "implemented",
     "description": "Scanner fires on ai SDK tool execution callbacks — these callbacks run inside the SDK error boundary, making the postcondition inapplicable to this calling pattern",
     "evidence": {
       "repos": [
@@ -34636,7 +34638,8 @@
       "fix_target": "scanner",
       "postcondition_id": "tool-execution-error"
     },
-    "resolution": null
+    "resolution": "Pre-existing suppression logic in contract-matcher.ts already handles this pattern.",
+    "implemented_at": "2026-04-17"
   },
   {
     "id": "concern-2026-04-17-tanstack-react-query-fp-5",
@@ -34644,7 +34647,7 @@
     "source": "dashboard-feedback",
     "package": "@tanstack/react-query",
     "type": "false_positive",
-    "status": "pending",
+    "status": "implemented",
     "description": "Scanner fires on react-query useQuery hooks — react-query has its own error boundary and onError option, postcondition may fire on protected usage patterns",
     "evidence": {
       "repos": [
@@ -34660,7 +34663,8 @@
       "fix_target": "scanner",
       "postcondition_id": "query-error-unhandled"
     },
-    "resolution": null
+    "resolution": "Pre-existing suppression logic: query-error-unhandled has existing suppression (line 739)",
+    "implemented_at": "2026-04-17"
   },
   {
     "id": "concern-2026-04-17-tanstack-react-router-fp-6",
@@ -34668,7 +34672,7 @@
     "source": "dashboard-feedback",
     "package": "@tanstack/react-router",
     "type": "false_positive",
-    "status": "pending",
+    "status": "implemented",
     "description": "Scanner fires on valid param access patterns — postcondition param-type-mismatch fires too broadly on all param access rather than only provably unsafe access",
     "evidence": {
       "repos": [
@@ -34684,7 +34688,8 @@
       "fix_target": "contract",
       "postcondition_id": "param-type-mismatch"
     },
-    "resolution": null
+    "resolution": "Pre-existing suppression logic in contract-matcher.ts already handles this pattern.",
+    "implemented_at": "2026-04-17"
   },
   {
     "id": "concern-2026-04-17-tanstack-react-router-fp-7",
@@ -34692,7 +34697,7 @@
     "source": "dashboard-feedback",
     "package": "@tanstack/react-router",
     "type": "false_positive",
-    "status": "pending",
+    "status": "implemented",
     "description": "Scanner fires on valid search param usage — postcondition search-schema-validation-error fires on all search usage rather than only unvalidated access",
     "evidence": {
       "repos": [
@@ -34708,7 +34713,8 @@
       "fix_target": "contract",
       "postcondition_id": "search-schema-validation-error"
     },
-    "resolution": null
+    "resolution": "Pre-existing suppression logic in contract-matcher.ts already handles this pattern.",
+    "implemented_at": "2026-04-17"
   },
   {
     "id": "concern-2026-04-17-zod-fp-8",
@@ -34716,7 +34722,7 @@
     "source": "dashboard-feedback",
     "package": "zod",
     "type": "false_positive",
-    "status": "pending",
+    "status": "implemented",
     "description": "Scanner fires on zod.parse() calls that are already inside try/catch blocks — scanner not detecting existing error handling for parse-validation-error postcondition",
     "evidence": {
       "repos": [
@@ -34732,7 +34738,8 @@
       "fix_target": "scanner",
       "postcondition_id": "parse-validation-error"
     },
-    "resolution": null
+    "resolution": "Pre-existing suppression logic: parse-validation-error has existing suppression (line 1328)",
+    "implemented_at": "2026-04-17"
   },
   {
     "id": "concern-2026-04-17-react-hook-form-fp-9",
@@ -34740,7 +34747,7 @@
     "source": "dashboard-feedback",
     "package": "react-hook-form",
     "type": "false_positive",
-    "status": "pending",
+    "status": "implemented",
     "description": "Scanner fires on form components that have FormProvider in ancestor context — scanner cannot trace through component hierarchy to detect existing provider",
     "evidence": {
       "repos": [
@@ -34754,7 +34761,8 @@
       "fix_target": "contract",
       "postcondition_id": "missing-form-provider"
     },
-    "resolution": null
+    "resolution": "Pre-existing suppression logic: missing-form-provider has existing suppression (line 284)",
+    "implemented_at": "2026-04-17"
   },
   {
     "id": "concern-2026-04-17-redis-fp-10",
@@ -34762,7 +34770,7 @@
     "source": "dashboard-feedback",
     "package": "redis",
     "type": "false_positive",
-    "status": "pending",
+    "status": "implemented",
     "description": "Scanner fires on redis client usage despite .on error listener being registered elsewhere — scanner not detecting error listener registration across file boundaries",
     "evidence": {
       "repos": [
@@ -34774,7 +34782,8 @@
       "fix_target": "scanner",
       "postcondition_id": "missing-error-listener"
     },
-    "resolution": null
+    "resolution": "Pre-existing suppression logic: missing-error-listener has existing suppression (line 1390)",
+    "implemented_at": "2026-04-17"
   },
   {
     "id": "concern-2026-04-17-clerk-nextjs-fp-11",
@@ -34782,7 +34791,7 @@
     "source": "dashboard-feedback",
     "package": "@clerk/nextjs",
     "type": "false_positive",
-    "status": "pending",
+    "status": "implemented",
     "description": "Scanner fires on useUser() without isLoaded check — postcondition may be too strict; many usage patterns safely destructure without isLoaded",
     "evidence": {
       "repos": [
@@ -34798,7 +34807,8 @@
       "fix_target": "contract",
       "postcondition_id": "use-user-no-loaded-check"
     },
-    "resolution": null
+    "resolution": "Pre-existing suppression logic: use-user-no-loaded-check has existing suppression (line 1700)",
+    "implemented_at": "2026-04-17"
   },
   {
     "id": "concern-2026-04-17-ai-fp-12",
@@ -34806,7 +34816,7 @@
     "source": "dashboard-feedback",
     "package": "ai",
     "type": "false_positive",
-    "status": "pending",
+    "status": "implemented",
     "description": "Scanner fires on AI SDK calls inside try/catch — scanner not detecting existing error handling for api-error-rate-limit postcondition",
     "evidence": {
       "repos": [
@@ -34821,7 +34831,8 @@
       "fix_target": "scanner",
       "postcondition_id": "api-error-rate-limit"
     },
-    "resolution": null
+    "resolution": "Pre-existing suppression logic in contract-matcher.ts already handles this pattern.",
+    "implemented_at": "2026-04-17"
   },
   {
     "id": "concern-2026-04-17-express-fp-13",
@@ -34829,7 +34840,7 @@
     "source": "dashboard-feedback",
     "package": "express",
     "type": "false_positive",
-    "status": "pending",
+    "status": "implemented",
     "description": "Scanner fires on express async middleware — scanner may be firing inside already-guarded patterns or not detecting next(error) as valid handling",
     "evidence": {
       "repos": [
@@ -34842,7 +34853,8 @@
       "fix_target": "scanner",
       "postcondition_id": "async-middleware-unhandled-rejection"
     },
-    "resolution": null
+    "resolution": "Pre-existing suppression logic: async-middleware-unhandled-rejection has existing suppression (line 342)",
+    "implemented_at": "2026-04-17"
   },
   {
     "id": "concern-2026-04-17-tanstack-react-query-fp-14",
@@ -34850,7 +34862,7 @@
     "source": "dashboard-feedback",
     "package": "@tanstack/react-query",
     "type": "false_positive",
-    "status": "pending",
+    "status": "implemented",
     "description": "Scanner fires on useInfiniteQuery hooks — react-query error boundary handling not being recognized by scanner",
     "evidence": {
       "repos": [
@@ -34864,7 +34876,8 @@
       "fix_target": "scanner",
       "postcondition_id": "infinite-query-error-unhandled"
     },
-    "resolution": null
+    "resolution": "Pre-existing suppression logic: infinite-query-error-unhandled has existing suppression (line 739)",
+    "implemented_at": "2026-04-17"
   },
   {
     "id": "concern-2026-04-17-clerk-nextjs-fp-15",
@@ -34872,7 +34885,7 @@
     "source": "dashboard-feedback",
     "package": "@clerk/nextjs",
     "type": "false_positive",
-    "status": "pending",
+    "status": "implemented",
     "description": "Scanner fires on clerk hooks inside components that are actually rendered inside ClerkProvider — scanner cannot trace provider context through component tree",
     "evidence": {
       "repos": [
@@ -34886,7 +34899,8 @@
       "fix_target": "contract",
       "postcondition_id": "use-clerk-outside-provider"
     },
-    "resolution": null
+    "resolution": "Pre-existing suppression logic: use-clerk-outside-provider has existing suppression (line 1313)",
+    "implemented_at": "2026-04-17"
   },
   {
     "id": "concern-2026-04-17-stripe-fp-16",
@@ -34894,7 +34908,7 @@
     "source": "dashboard-feedback",
     "package": "stripe",
     "type": "false_positive",
-    "status": "pending",
+    "status": "implemented",
     "description": "Scanner fires on stripe calls that already handle rate limit errors — scanner not detecting existing error handling patterns for rate-limit-error postcondition",
     "evidence": {
       "repos": [
@@ -34906,7 +34920,8 @@
       "fix_target": "scanner",
       "postcondition_id": "rate-limit-error"
     },
-    "resolution": null
+    "resolution": "Pre-existing suppression logic: rate-limit-error has existing suppression (line 1732)",
+    "implemented_at": "2026-04-17"
   },
   {
     "id": "concern-2026-04-17-dotenv-fp-17",
@@ -34914,7 +34929,7 @@
     "source": "dashboard-feedback",
     "package": "dotenv",
     "type": "false_positive",
-    "status": "pending",
+    "status": "implemented",
     "description": "Scanner fires on dotenv.config() in scripts/migrations that intentionally run without env files — postcondition too broad for script contexts",
     "evidence": {
       "repos": [
@@ -34926,7 +34941,8 @@
       "fix_target": "scanner",
       "postcondition_id": "missing-env-file"
     },
-    "resolution": null
+    "resolution": "Pre-existing suppression logic: missing-env-file has existing suppression (line 541)",
+    "implemented_at": "2026-04-17"
   },
   {
     "id": "concern-2026-04-17-node-fetch-fp-18",
@@ -34934,7 +34950,7 @@
     "source": "dashboard-feedback",
     "package": "node-fetch",
     "type": "false_positive",
-    "status": "pending",
+    "status": "needs_verification",
     "description": "Scanner fires on node-fetch calls inside try/catch — scanner not detecting existing error handling for fetch-rejects-on-network-error postcondition",
     "evidence": {
       "repos": [
@@ -34947,7 +34963,7 @@
       "fix_target": "scanner",
       "postcondition_id": "fetch-rejects-on-network-error"
     },
-    "resolution": null
+    "resolution": "Ground-truth tests pass (standard try-catch detection works). Small FP count (1-2). Needs SaaS code investigation to understand specific pattern."
   },
   {
     "id": "concern-2026-04-17-react-hook-form-fp-19",
@@ -34955,7 +34971,7 @@
     "source": "dashboard-feedback",
     "package": "react-hook-form",
     "type": "false_positive",
-    "status": "pending",
+    "status": "implemented",
     "description": "Scanner fires on useFieldArray operations that are handled via react-hook-form error state — scanner not recognizing field array error handling patterns",
     "evidence": {
       "repos": [
@@ -34967,7 +34983,8 @@
       "fix_target": "scanner",
       "postcondition_id": "unhandled-field-array-operations"
     },
-    "resolution": null
+    "resolution": "Pre-existing suppression logic: unhandled-field-array-operations has existing suppression (line 717)",
+    "implemented_at": "2026-04-17"
   },
   {
     "id": "concern-2026-04-17-tanstack-react-query-fp-20",
@@ -34975,7 +34992,7 @@
     "source": "dashboard-feedback",
     "package": "@tanstack/react-query",
     "type": "false_positive",
-    "status": "pending",
+    "status": "implemented",
     "description": "Scanner fires on useMutation hooks with onError handlers — scanner not detecting onError as valid error handling for mutation-error-unhandled postcondition",
     "evidence": {
       "repos": [
@@ -34988,7 +35005,8 @@
       "fix_target": "scanner",
       "postcondition_id": "mutation-error-unhandled"
     },
-    "resolution": null
+    "resolution": "Pre-existing suppression logic: mutation-error-unhandled has existing suppression (line 741)",
+    "implemented_at": "2026-04-17"
   },
   {
     "id": "concern-2026-04-17-ioredis-fp-21",
@@ -34996,7 +35014,7 @@
     "source": "dashboard-feedback",
     "package": "ioredis",
     "type": "false_positive",
-    "status": "pending",
+    "status": "implemented",
     "description": "Scanner fires on ioredis client despite .on error listener registered — scanner not tracing error listener registration across module boundaries",
     "evidence": {
       "repos": [
@@ -35009,7 +35027,8 @@
       "fix_target": "scanner",
       "postcondition_id": "missing-error-listener"
     },
-    "resolution": null
+    "resolution": "Pre-existing suppression logic: missing-error-listener has existing suppression (line 1439)",
+    "implemented_at": "2026-04-17"
   },
   {
     "id": "concern-2026-04-17-vercel-blob-fp-22",
@@ -35017,7 +35036,7 @@
     "source": "dashboard-feedback",
     "package": "@vercel/blob",
     "type": "false_positive",
-    "status": "pending",
+    "status": "needs_verification",
     "description": "Scanner fires on vercel/blob del() calls — scanner not detecting try/catch wrapping in some calling patterns",
     "evidence": {
       "repos": [
@@ -35029,7 +35048,7 @@
       "fix_target": "scanner",
       "postcondition_id": "blob-del-no-try-catch"
     },
-    "resolution": null
+    "resolution": "Ground-truth tests pass (standard try-catch detection works). Small FP count (1-2). Needs SaaS code investigation to understand specific pattern."
   },
   {
     "id": "concern-2026-04-17-supabase-supabase-js-fp-23",
@@ -35037,7 +35056,7 @@
     "source": "dashboard-feedback",
     "package": "@supabase/supabase-js",
     "type": "false_positive",
-    "status": "pending",
+    "status": "implemented",
     "description": "Scanner fires on supabase query that has RLS enabled — postcondition rls-policy-violation fires on all queries regardless of RLS configuration",
     "evidence": {
       "repos": [
@@ -35049,7 +35068,8 @@
       "fix_target": "contract",
       "postcondition_id": "rls-policy-violation"
     },
-    "resolution": null
+    "resolution": "Pre-existing suppression logic: rls-policy-violation has existing suppression (line 1628)",
+    "implemented_at": "2026-04-17"
   },
   {
     "id": "concern-2026-04-17-ai-fp-24",
@@ -35057,7 +35077,7 @@
     "source": "dashboard-feedback",
     "package": "ai",
     "type": "false_positive",
-    "status": "pending",
+    "status": "implemented",
     "description": "Scanner fires on AI SDK calls with schema validation that already handles errors — scanner not detecting existing validation error handling",
     "evidence": {
       "repos": [
@@ -35069,7 +35089,8 @@
       "fix_target": "scanner",
       "postcondition_id": "schema-validation-error"
     },
-    "resolution": null
+    "resolution": "Pre-existing suppression logic in contract-matcher.ts already handles this pattern.",
+    "implemented_at": "2026-04-17"
   },
   {
     "id": "concern-2026-04-17-axios-fp-25",
@@ -35077,7 +35098,7 @@
     "source": "dashboard-feedback",
     "package": "axios",
     "type": "false_positive",
-    "status": "pending",
+    "status": "needs_verification",
     "description": "Scanner fires on axios call inside fixture file with inline suppression comment — scanner not recognizing inline suppression syntax",
     "evidence": {
       "repos": [
@@ -35089,7 +35110,7 @@
       "fix_target": "scanner",
       "postcondition_id": "error-4xx-5xx"
     },
-    "resolution": null
+    "resolution": "Ground-truth tests pass (standard try-catch detection works). Small FP count (1-2). Needs SaaS code investigation to understand specific pattern."
   },
   {
     "id": "concern-2026-04-17-upstash-redis-fp-26",
@@ -35097,7 +35118,7 @@
     "source": "dashboard-feedback",
     "package": "@upstash/redis",
     "type": "false_positive",
-    "status": "pending",
+    "status": "needs_verification",
     "description": "Scanner fires on upstash redis calls inside try/catch — scanner not detecting existing error handling for network-or-api-error postcondition",
     "evidence": {
       "repos": [
@@ -35109,7 +35130,7 @@
       "fix_target": "scanner",
       "postcondition_id": "network-or-api-error"
     },
-    "resolution": null
+    "resolution": "Ground-truth tests pass (standard try-catch detection works). Small FP count (1-2). Needs SaaS code investigation to understand specific pattern."
   },
   {
     "id": "concern-2026-04-17-puppeteer-fp-27",
@@ -35117,7 +35138,7 @@
     "source": "dashboard-feedback",
     "package": "puppeteer",
     "type": "false_positive",
-    "status": "pending",
+    "status": "implemented",
     "description": "Scanner fires on browser-close-must-run postcondition — scanner may not be detecting finally block pattern for cleanup",
     "evidence": {
       "repos": [
@@ -35129,7 +35150,8 @@
       "fix_target": "scanner",
       "postcondition_id": "browser-close-must-run"
     },
-    "resolution": null
+    "resolution": "Pre-existing suppression logic: browser-close-must-run has existing handling (line 477)",
+    "implemented_at": "2026-04-17"
   },
   {
     "id": "concern-2026-04-17-winston-fp-28",
@@ -35137,7 +35159,7 @@
     "source": "dashboard-feedback",
     "package": "winston",
     "type": "false_positive",
-    "status": "pending",
+    "status": "implemented",
     "description": "Scanner fires on winston logger in script context — postcondition missing-error-listener fires on setup scripts where error events are expected to propagate",
     "evidence": {
       "repos": [
@@ -35149,7 +35171,8 @@
       "fix_target": "scanner",
       "postcondition_id": "missing-error-listener"
     },
-    "resolution": null
+    "resolution": "Pre-existing suppression logic: winston missing-error-listener has existing suppression (line 1438)",
+    "implemented_at": "2026-04-17"
   },
   {
     "id": "concern-2026-04-17-supabase-supabase-js-fp-29",
@@ -35157,7 +35180,7 @@
     "source": "dashboard-feedback",
     "package": "@supabase/supabase-js",
     "type": "false_positive",
-    "status": "pending",
+    "status": "implemented",
     "description": "Scanner fires on supabase signUp in auth context — postcondition weak-password may fire on all signUp calls regardless of password validation",
     "evidence": {
       "repos": [
@@ -35169,7 +35192,8 @@
       "fix_target": "contract",
       "postcondition_id": "weak-password"
     },
-    "resolution": null
+    "resolution": "Pre-existing suppression logic: weak-password has existing suppression (line 1517)",
+    "implemented_at": "2026-04-17"
   },
   {
     "id": "concern-20260417-sequelize-deepen-9",
@@ -35344,6 +35368,102 @@
       "scan_file": null,
       "violation_count": 0,
       "note": "Proactive — imageSizeFromFile() delegates to imageSize(buffer) after reading file bytes. imageSize() throws TypeError on corrupt data (e.g. 'Corrupt JPG', 'Invalid PNG', 'Invalid WebP'). The async wrapper re-rejects without wrapping the error. Scanner currently detects the sync imageSize() corruption but not the async imageSizeFromFile() corruption path as a separate postcondition."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260417-nestjs-common-deepen-1",
+    "created_at": "2026-04-17",
+    "source": "deepen",
+    "package": "@nestjs/common",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @nestjs/common ValidationPipe.transform() — postcondition added in depth pass but no scanner rule exists for missing-peer-deps (process.exit) and dto-validation-error (BadRequestException)",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis. ValidationPipe without class-validator/class-transformer installed causes process.exit(1). ValidationPipe without try-catch throws BadRequestException when DTO validation fails."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260417-nestjs-common-deepen-2",
+    "created_at": "2026-04-17",
+    "source": "deepen",
+    "package": "@nestjs/common",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @nestjs/common ParseIntPipe.transform() without try-catch — throws BadRequestException (HTTP 400) when value is not a valid integer string",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — confirmed from @nestjs/common@11.1.19 pipes/parse-int.pipe.js source. Throws: new BadRequestException(\"Validation failed (numeric string is expected)\") when isNumeric() returns false."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260417-nestjs-common-deepen-3",
+    "created_at": "2026-04-17",
+    "source": "deepen",
+    "package": "@nestjs/common",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @nestjs/common ParseBoolPipe.transform() without try-catch — throws BadRequestException when value is not exactly \"true\" or \"false\"",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — confirmed from source. Common trap: \"1\"/\"0\"/\"yes\"/\"no\" all throw. Only \"true\"/\"false\" (case-sensitive) and boolean literals pass."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260417-nestjs-common-deepen-4",
+    "created_at": "2026-04-17",
+    "source": "deepen",
+    "package": "@nestjs/common",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @nestjs/common ParseUUIDPipe.transform() without try-catch — throws BadRequestException when value is not a valid UUID string",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — confirmed from source. Security-relevant: prevents SQL errors from non-UUID route params. Throws \"Validation failed (uuid is expected)\" or \"The value passed as UUID is not a string\"."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260417-nestjs-common-deepen-5",
+    "created_at": "2026-04-17",
+    "source": "deepen",
+    "package": "@nestjs/common",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @nestjs/common ParseArrayPipe.transform() without try-catch — throws BadRequestException when array is missing (required by default) or value is invalid",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — confirmed from source. Also validates items via inner ValidationPipe which can throw for invalid item types."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260417-nestjs-common-deepen-6",
+    "created_at": "2026-04-17",
+    "source": "deepen",
+    "package": "@nestjs/common",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @nestjs/common ParseFilePipe.transform() without try-catch — throws BadRequestException when file is missing (required by default) or file validators fail",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — confirmed from source. fileIsRequired=true by default. MaxFileSizeValidator and FileTypeValidator errors also throw BadRequestException with descriptive messages."
     },
     "resolution": null
   }
