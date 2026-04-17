@@ -32190,5 +32190,466 @@
       "note": "Proactive -- provider.send() is used for advanced RPC calls (trace_, debug_, eth_getProof). provider-send-unsupported-method and provider-send-network-error postconditions added in deepen pass 8."
     },
     "resolution": null
+  },
+  {
+    "id": "concern-20260417-tedious-deepen-1",
+    "created_at": "2026-04-17",
+    "source": "deepen",
+    "package": "tedious",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for tedious execute() — postcondition execute-parameter-validation-error added in depth pass but no scanner rule exists. The execute() call delivers RequestError to the Request callback on parameter type mismatch. Requires tracking connection.execute(request, params) pattern and verifying the Request callback checks err.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive -- execute() paired with prepare()/unprepare() (already contracted). Needs scanner detection for missing err-check in Request callback when execute() is used."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260417-tedious-deepen-2",
+    "created_at": "2026-04-17",
+    "source": "deepen",
+    "package": "tedious",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for tedious execBulkLoad() — postconditions bulk-load-constraint-violation, bulk-load-column-definition-mismatch, bulk-load-timeout added in depth pass but no scanner rule exists. The BulkLoad callback (passed to newBulkLoad) must check err. Requires tracking connection.newBulkLoad(table, callback) and connection.newBulkLoad(table, options, callback) patterns and verifying the callback checks err.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive -- bulk operations are high-risk for silent failure when constraint violations are silently ignored. The callback receiving (err, rowCount) must check err."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260417-tedious-deepen-3",
+    "created_at": "2026-04-17",
+    "source": "deepen",
+    "package": "tedious",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for tedious saveTransaction() — postconditions save-transaction-state-error, save-transaction-connection-error added in depth pass but no scanner rule exists. The callback to saveTransaction(callback, name) must check err. Requires tracking connection.saveTransaction() pattern and verifying callback handles the err argument.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive -- savepoints used in nested transaction patterns; errors are common when connection state is wrong or server is unreachable."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260417-tedious-deepen-4",
+    "created_at": "2026-04-17",
+    "source": "deepen",
+    "package": "tedious",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for tedious transaction() helper — postconditions transaction-begin-error, transaction-commit-error added in depth pass but no scanner rule exists. The cb(err, done) callback must check err before using done. Also done(err) errors must be handled. Requires tracking connection.transaction(cb) pattern with two levels of error handling: cb(err) check AND done callback error handling.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive -- transaction() is the recommended high-level API. begin errors and commit errors have different error delivery paths. Complex detection needed for the two-callback pattern."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260417-tedious-deepen-5",
+    "created_at": "2026-04-17",
+    "source": "deepen",
+    "package": "tedious",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for tedious execSqlBatch() — postcondition exec-sql-batch-invalid-state added in depth pass but no scanner rule exists. The Request callback must check err. execSqlBatch() has the same error profile as execSql() (already detected) — needs the existing tedious detection rules extended to cover the execSqlBatch pattern.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive -- execSqlBatch is an alternative to execSql used for temp table scoping. Same detection as execSql but separate method name."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-17-tanstack-react-router-1",
+    "created_at": "2026-04-17",
+    "source": "dashboard-feedback",
+    "package": "@tanstack/react-router",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "invalid-route-path postcondition fires on useNavigate() and Link calls where the route path is a valid typed route string — the scanner does not recognize typed route strings as valid path parameters",
+    "evidence": {
+      "repos": [
+        "src/components/command-menu.tsx",
+        "src/features/auth/sign-in/components/user-auth-form.tsx",
+        "src/features/auth/sign-up/components/sign-up-form.tsx",
+        "src/routes/(auth)/accept-invite.tsx",
+        "src/routes/(auth)/invite.tsx"
+      ],
+      "scan_file": null,
+      "violation_count": 94,
+      "fp_reason": "HUMAN marked FALSE_POSITIVE — no written reason (94 instances across 46 files)",
+      "fix_target": "contract",
+      "postcondition_id": "invalid-route-path"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-17-tanstack-react-router-2",
+    "created_at": "2026-04-17",
+    "source": "dashboard-feedback",
+    "package": "@tanstack/react-router",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "param-type-mismatch postcondition fires on useParams() usages where the param types are correctly typed via route registration — scanner does not recognize TanStack Router generic typing patterns",
+    "evidence": {
+      "repos": [
+        "src/features/browser-agents/browser-agent-detail.tsx",
+        "src/features/customers/customer-detail.tsx",
+        "src/features/invoices/invoice-detail.tsx",
+        "src/features/loans/loan-detail.tsx",
+        "src/routes/_authenticated/workflow-builder/$workflowId.tsx"
+      ],
+      "scan_file": null,
+      "violation_count": 18,
+      "fp_reason": "HUMAN marked FALSE_POSITIVE — no written reason (18 instances across 9 files)",
+      "fix_target": "contract",
+      "postcondition_id": "param-type-mismatch"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-17-tanstack-react-router-3",
+    "created_at": "2026-04-17",
+    "source": "dashboard-feedback",
+    "package": "@tanstack/react-router",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "search-schema-validation-error postcondition fires on useSearch() usages where search params are validated via route-level validateSearch — scanner does not detect route-level validation as satisfying the postcondition",
+    "evidence": {
+      "repos": [
+        "src/features/apps/index.tsx",
+        "src/features/auth/email-confirm/index.tsx",
+        "src/features/auth/sign-in/index.tsx",
+        "src/features/chats/index.tsx",
+        "src/routes/(auth)/accept-invite.tsx"
+      ],
+      "scan_file": null,
+      "violation_count": 14,
+      "fp_reason": "HUMAN marked FALSE_POSITIVE — no written reason (14 instances across 7 files)",
+      "fix_target": "contract",
+      "postcondition_id": "search-schema-validation-error"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-17-undici-1",
+    "created_at": "2026-04-17",
+    "source": "dashboard-feedback",
+    "package": "undici",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "response-json-parse-error postcondition fires on fetch() calls that use .json() where the response handling is safe — scanner may be matching undici fetch patterns in Next.js files where the native fetch is used, not undici directly",
+    "evidence": {
+      "repos": [
+        "apps/web/app/api/github/debug/route.ts",
+        "apps/web/app/api/oss-scan/route.ts",
+        "apps/web/app/(dashboard)/repositories/connect/connect-repository-form.tsx",
+        "apps/web/components/billing/change-plan-modal.tsx",
+        "apps/web/hooks/use-scan-poller.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 64,
+      "fp_reason": "HUMAN marked FALSE_POSITIVE — no written reason (64 instances across 37 files)",
+      "fix_target": "contract",
+      "postcondition_id": "response-json-parse-error"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-17-react-hook-form-1",
+    "created_at": "2026-04-17",
+    "source": "dashboard-feedback",
+    "package": "react-hook-form",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "async-submit-unhandled-error postcondition fires on handleSubmit() calls where errors are handled at the UI layer or via form state (formState.errors) rather than a try-catch inside the handler — scanner does not recognize UI-level error handling as satisfying the postcondition",
+    "evidence": {
+      "repos": [
+        "src/features/auth/sign-in/components/user-auth-form.tsx",
+        "src/features/auth/sign-up/components/sign-up-form.tsx",
+        "src/features/auth/reset-password/components/reset-password-form.tsx",
+        "src/features/settings/account/account-form.tsx",
+        "src/features/tasks/components/tasks-mutate-drawer.tsx"
+      ],
+      "scan_file": null,
+      "violation_count": 60,
+      "fp_reason": "HUMAN marked FALSE_POSITIVE — no written reason (60 instances across 15 files)",
+      "fix_target": "contract",
+      "postcondition_id": "async-submit-unhandled-error"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-17-react-hook-form-2",
+    "created_at": "2026-04-17",
+    "source": "dashboard-feedback",
+    "package": "react-hook-form",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "missing-form-provider postcondition fires on useFormContext() usages inside components that are always rendered within a FormProvider — scanner cannot trace the component tree to verify provider presence at call site",
+    "evidence": {
+      "repos": [
+        "components/Account/ArtistInstructionTextArea.tsx",
+        "components/Input.tsx",
+        "src/components/ui/form.tsx"
+      ],
+      "scan_file": null,
+      "violation_count": 9,
+      "fp_reason": "HUMAN marked FALSE_POSITIVE — no written reason (9 instances across 3 files)",
+      "fix_target": "scanner",
+      "postcondition_id": "missing-form-provider"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-17-tanstack-react-query-1",
+    "created_at": "2026-04-17",
+    "source": "dashboard-feedback",
+    "package": "@tanstack/react-query",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "query-error-unhandled postcondition fires on useQuery() calls where errors are handled via the returned error state (const { error } = useQuery()) rather than onError callback — scanner requires explicit onError but React Query v5 uses error state pattern",
+    "evidence": {
+      "repos": [
+        "hooks/useAccountOrganizations.ts",
+        "hooks/useAvailableModels.ts",
+        "hooks/useCatalogs.ts",
+        "hooks/useCredits.ts",
+        "components/Agents/AgentCreator.tsx"
+      ],
+      "scan_file": null,
+      "violation_count": 25,
+      "fp_reason": "HUMAN marked FALSE_POSITIVE — no written reason (25 instances across 21 files)",
+      "fix_target": "contract",
+      "postcondition_id": "query-error-unhandled"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-17-tanstack-react-query-2",
+    "created_at": "2026-04-17",
+    "source": "dashboard-feedback",
+    "package": "@tanstack/react-query",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "infinite-query-error-unhandled postcondition fires on useInfiniteQuery() calls where error is handled via destructured error state — same pattern as query-error-unhandled v5 migration",
+    "evidence": {
+      "repos": [
+        "hooks/useArtistFans.ts",
+        "hooks/useArtistPosts.ts",
+        "hooks/useCatalogSongs.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 3,
+      "fp_reason": "HUMAN marked FALSE_POSITIVE — no written reason (3 instances across 3 files)",
+      "fix_target": "contract",
+      "postcondition_id": "infinite-query-error-unhandled"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-17-tanstack-react-query-3",
+    "created_at": "2026-04-17",
+    "source": "dashboard-feedback",
+    "package": "@tanstack/react-query",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "mutation-error-unhandled postcondition fires on useMutation() calls where errors are handled via the returned error state or onError in mutateAsync caller — scanner requires onError in useMutation options but React Query v5 pattern allows caller-side handling",
+    "evidence": {
+      "repos": [
+        "hooks/useCatalogSongsFileSelect.ts",
+        "hooks/useSandboxFileContent.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 2,
+      "fp_reason": "HUMAN marked FALSE_POSITIVE — no written reason (2 instances across 2 files)",
+      "fix_target": "contract",
+      "postcondition_id": "mutation-error-unhandled"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-17-zod-1",
+    "created_at": "2026-04-17",
+    "source": "dashboard-feedback",
+    "package": "zod",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "parse-validation-error postcondition fires on z.parse() calls in API route handlers where the ZodError is caught and converted to a 400 response — scanner may not recognize the catch-and-respond pattern as satisfying the postcondition",
+    "evidence": {
+      "repos": [
+        "apps/web/app/api/ai/analyze-sender-pattern/route.ts",
+        "apps/web/app/api/clean/gmail/route.ts",
+        "apps/web/app/api/labels/create/route.ts",
+        "apps/web/app/api/sso/signin/route.ts",
+        "apps/web/app/api/threads/[id]/route.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 14,
+      "fp_reason": "HUMAN marked FALSE_POSITIVE — no written reason (14 instances across 14 files)",
+      "fix_target": "contract",
+      "postcondition_id": "parse-validation-error"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-17-clerk-nextjs-1",
+    "created_at": "2026-04-17",
+    "source": "dashboard-feedback",
+    "package": "@clerk/nextjs",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "use-user-no-loaded-check postcondition fires on useUser() calls in layout/provider components where isLoaded check is done in the parent or Clerk ClerkLoaded wrapper is used — scanner does not trace conditional rendering at parent level",
+    "evidence": {
+      "repos": [
+        "apps/web/components/layout/header.tsx",
+        "apps/web/components/layout/sidebar.tsx",
+        "apps/web/components/layout/top-nav.tsx",
+        "apps/web/components/providers/analytics-provider.tsx",
+        "apps/web/app/(dashboard)/onboarding/onboarding-form.tsx"
+      ],
+      "scan_file": null,
+      "violation_count": 7,
+      "fp_reason": "HUMAN marked FALSE_POSITIVE — no written reason (7 instances across 7 files)",
+      "fix_target": "scanner",
+      "postcondition_id": "use-user-no-loaded-check"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-17-clerk-nextjs-2",
+    "created_at": "2026-04-17",
+    "source": "dashboard-feedback",
+    "package": "@clerk/nextjs",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "use-clerk-outside-provider postcondition fires in layout components that are rendered inside ClerkProvider in the root layout — scanner cannot verify the component tree structure to confirm provider presence",
+    "evidence": {
+      "repos": [
+        "apps/web/components/layout/header.tsx",
+        "apps/web/components/layout/sidebar.tsx",
+        "apps/web/components/layout/top-nav.tsx"
+      ],
+      "scan_file": null,
+      "violation_count": 3,
+      "fp_reason": "HUMAN marked FALSE_POSITIVE — no written reason (3 instances across 3 files)",
+      "fix_target": "scanner",
+      "postcondition_id": "use-clerk-outside-provider"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-17-redis-1",
+    "created_at": "2026-04-17",
+    "source": "dashboard-feedback",
+    "package": "redis",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "missing-error-listener postcondition fires in packages/api/src/main.ts where the Redis client is used with error handling — scanner may be detecting the client creation without verifying the .on(\"error\") registration nearby",
+    "evidence": {
+      "repos": [
+        "packages/api/src/main.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 7,
+      "fp_reason": "HUMAN marked FALSE_POSITIVE — no written reason (7 instances in 1 file)",
+      "fix_target": "scanner",
+      "postcondition_id": "missing-error-listener"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-17-ioredis-1",
+    "created_at": "2026-04-17",
+    "source": "dashboard-feedback",
+    "package": "ioredis",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "missing-error-listener postcondition fires in ioredis client files where .on(\"error\") may be registered elsewhere or on a wrapper — scanner does not trace error listener registration across module boundaries",
+    "evidence": {
+      "repos": [
+        "apps/web/lib/auth-cache.ts",
+        "apps/web/lib/rate-limit.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 2,
+      "fp_reason": "HUMAN marked FALSE_POSITIVE — no written reason (2 instances across 2 files)",
+      "fix_target": "scanner",
+      "postcondition_id": "missing-error-listener"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-17-express-1",
+    "created_at": "2026-04-17",
+    "source": "dashboard-feedback",
+    "package": "express",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "async-middleware-unhandled-rejection postcondition fires on async route handlers in Express dev servers where error propagation is handled by the framework or a global error handler registered elsewhere",
+    "evidence": {
+      "repos": [
+        "api/browser-agent-server.ts",
+        "api/dev-server.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 5,
+      "fp_reason": "HUMAN marked FALSE_POSITIVE — no written reason (5 instances across 2 files)",
+      "fix_target": "scanner",
+      "postcondition_id": "async-middleware-unhandled-rejection"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-17-stripe-1",
+    "created_at": "2026-04-17",
+    "source": "dashboard-feedback",
+    "package": "stripe",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "rate-limit-error postcondition fires in stripe utility/setup files where rate limit handling is managed at a higher layer or retry logic is external to the call site",
+    "evidence": {
+      "repos": [
+        "apps/web/lib/stripe.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 3,
+      "fp_reason": "HUMAN marked FALSE_POSITIVE — no written reason (3 instances in 1 file)",
+      "fix_target": "contract",
+      "postcondition_id": "rate-limit-error"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-17-dotenv-1",
+    "created_at": "2026-04-17",
+    "source": "dashboard-feedback",
+    "package": "dotenv",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "missing-env-file postcondition fires in migration/setup scripts where dotenv is used in contexts where missing .env files are expected and handled by fallback logic or environment defaults",
+    "evidence": {
+      "repos": [
+        "src/lib/migrations/supabase.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 3,
+      "fp_reason": "HUMAN marked FALSE_POSITIVE — no written reason (3 instances in 1 file)",
+      "fix_target": "contract",
+      "postcondition_id": "missing-env-file"
+    },
+    "resolution": null
   }
 ]
