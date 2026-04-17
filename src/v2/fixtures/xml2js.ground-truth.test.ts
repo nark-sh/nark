@@ -5,13 +5,19 @@
  * corpus/packages/xml2js/fixtures/ground-truth.ts becomes one test case.
  *
  * Postcondition IDs from corpus/packages/xml2js/contract.yaml:
- *   parse-error-malformed-xml (one contracted function: parseStringPromise)
+ *   parse-error-malformed-xml, parse-promise-null-return, parse-string-callback-error-ignored,
+ *   parse-string-no-callback, build-object-invalid-root-name, build-object-invalid-xml-chars,
+ *   parser-instance-malformed-xml
  *
  * Key behaviors under test:
- *   - xml2js.parseStringPromise() without try-catch → SHOULD_FIRE: parse-error-malformed-xml
- *   - parseStringPromise() without try-catch         → SHOULD_FIRE: parse-error-malformed-xml
- *   - parser.parseStringPromise() without try-catch  → SHOULD_FIRE: parse-error-malformed-xml
- *   - All of the above inside try-catch              → SHOULD_NOT_FIRE
+ *   - xml2js.parseStringPromise() without try-catch  → SHOULD_FIRE: parse-error-malformed-xml
+ *   - parseStringPromise() without try-catch          → SHOULD_FIRE: parse-error-malformed-xml
+ *   - parser.parseStringPromise() without try-catch   → SHOULD_FIRE: parser-instance-malformed-xml
+ *   - builder.buildObject() without try-catch         → SHOULD_FIRE: build-object-invalid-root-name
+ *   - parseString callback ignores err                → SHOULD_FIRE: parse-string-callback-error-ignored
+ *   - parseStringPromise result not null-checked      → SHOULD_FIRE: parse-promise-null-return
+ *   - parseStringPromise on Parser instance           → routes to parser-instance-malformed-xml
+ *   - All protected patterns                          → SHOULD_NOT_FIRE
  *
  * Design: spec-driven, NOT based on V1 behavior.
  */

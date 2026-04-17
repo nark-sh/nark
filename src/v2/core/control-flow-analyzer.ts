@@ -387,6 +387,24 @@ export class ControlFlowAnalysis implements IControlFlowAnalyzer {
     return !this.hasNonOptionalPropertyAccess(varName, funcBody);
   }
 
+  /**
+   * Returns true if the call result is explicitly null-guarded (if (x == null) etc.)
+   * but the result IS also accessed with non-optional property access somewhere.
+   * Used to distinguish "guarded against null" from "result never accessed as object".
+   */
+  public isResultExplicitlyNullGuarded(callNode: ts.Node): boolean {
+    let resultNode: ts.Node = callNode;
+    if (callNode.parent && ts.isAwaitExpression(callNode.parent)) {
+      resultNode = callNode.parent;
+    }
+    if (resultNode.parent && ts.isReturnStatement(resultNode.parent)) return false;
+    const varName = this.getAssignedVariableName(resultNode);
+    if (!varName) return false;
+    const funcBody = this.getContainingFunctionBody(resultNode);
+    if (!funcBody) return false;
+    return this.hasExplicitNullGuard(varName, funcBody);
+  }
+
   /** Returns true if varName is accessed with non-optional property access (var.prop, not var?.prop) */
   private hasNonOptionalPropertyAccess(varName: string, scope: ts.Node): boolean {
     let found = false;

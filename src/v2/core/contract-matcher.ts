@@ -140,6 +140,31 @@ export class ContractMatcher {
         effectiveFunctionName = "agent";
       }
 
+      // xml2js: Parser instance rerouting.
+      // When a Parser instance calls parseStringPromise(), the ThrowingFunctionDetector resolves
+      // the call as packageName='xml2js', functionName='parseStringPromise'. The exact-match
+      // findFunctionContract would return the module-level parseStringPromise entry (postcondition:
+      // parse-error-malformed-xml). But Parser instances have their own contract entry:
+      // Parser.parseStringPromise (postcondition: parser-instance-malformed-xml).
+      //
+      // Detection: metadata.chain is ['parser', 'parseStringPromise'] for parser.parseStringPromise()
+      // and ['xml2js', 'parseStringPromise'] or ['parseStringPromise'] for module-level calls.
+      // When chain[0] is not the xml2js import name and not the function name itself (i.e., it's a
+      // variable holding a Parser instance), reroute to Parser.parseStringPromise.
+      //
+      // Evidence: concern-20260417-xml2js-deepen-3 ground-truth test (line 148: parser.parseStringPromise
+      // should fire parser-instance-malformed-xml, not the module-level parse-error-malformed-xml).
+      if (
+        detection.packageName === "xml2js" &&
+        detection.functionName === "parseStringPromise" &&
+        Array.isArray(detection.metadata?.chain) &&
+        (detection.metadata.chain as string[])[0] !== "xml2js" &&
+        (detection.metadata.chain as string[])[0] !== "parseStringPromise"
+      ) {
+        // Call is on a Parser instance variable — use Parser.parseStringPromise entry
+        effectiveFunctionName = "Parser.parseStringPromise";
+      }
+
       const funcContract = this.findFunctionContract(
         contract,
         effectiveFunctionName,
@@ -793,6 +818,146 @@ export class ContractMatcher {
         primaryPostcondition.id === "tool-execution-error"
       ) {
         continue;
+      }
+
+      // xml2js parseString: parse-string-callback-error-ignored fires on ALL parseString
+      // calls, including ones where the callback DOES check the err parameter. The
+      // standard try-catch analysis does not apply to callback-style APIs.
+      //
+      // Suppress when: the last argument to parseString() is a function whose first
+      // parameter is referenced in an if-check (i.e., `if (err)`) within the callback body.
+      //
+      // Works for both throwing-function detection (node = CallExpression) and
+      // error-first-callback detection (node = ArrowFunction/FunctionExpression).
+      //
+      // Evidence: concern-20260417-xml2js-deepen-1 ground-truth test (line 82 FP:
+      // parseString(xml, (err, result) => { if (err) { return; } ... }) fires incorrectly).
+      if (
+        detection.packageName === "xml2js" &&
+        detection.functionName === "parseString" &&
+        primaryPostcondition.id === "parse-string-callback-error-ignored"
+      ) {
+        // Resolve the callback node: either the detection.node itself (error-first-callback),
+        // or the last function-like argument of the CallExpression (throwing-function).
+        let cbNode: ts.Node = detection.node;
+        if (
+          !ts.isArrowFunction(cbNode) &&
+          !ts.isFunctionExpression(cbNode) &&
+          ts.isCallExpression(detection.node)
+        ) {
+          const args = detection.node.arguments;
+          for (let i = args.length - 1; i >= 0; i--) {
+            if (ts.isArrowFunction(args[i]) || ts.isFunctionExpression(args[i])) {
+              cbNode = args[i];
+              break;
+            }
+          }
+        }
+        if (ts.isArrowFunction(cbNode) || ts.isFunctionExpression(cbNode)) {
+          const func = cbNode as ts.ArrowFunction | ts.FunctionExpression;
+          const errParamName =
+            func.parameters.length > 0 && ts.isIdentifier(func.parameters[0].name)
+              ? func.parameters[0].name.text
+              : null;
+          if (errParamName) {
+            let errIsChecked = false;
+            const walkForErrCheck = (n: ts.Node): void => {
+              if (errIsChecked) return;
+              // Match: if (err) {...} or if (err !== null) {...} or if (err != null) {...}
+              if (ts.isIfStatement(n)) {
+                const condText = n.expression.getText(sourceFile);
+                if (
+                  condText === errParamName ||
+                  condText.startsWith(errParamName + " ") ||
+                  condText.startsWith(errParamName + "!") ||
+                  condText.startsWith(errParamName + ")")
+                ) {
+                  errIsChecked = true;
+                  return;
+                }
+              }
+              ts.forEachChild(n, walkForErrCheck);
+            };
+            if (func.body) walkForErrCheck(func.body);
+            if (errIsChecked) continue;
+          }
+        }
+      }
+
+      // xml2js parseStringPromise: null-return handling for module-level calls.
+      // parseStringPromise() can either (a) reject with Error on malformed XML (parse-error-malformed-xml)
+      // or (b) resolve with null on empty/whitespace input (parse-promise-null-return).
+      // These are independent failure modes. When the caller DOES null-check the result, they are
+      // correctly handling the (b) case. Suppress the violation entirely for callers that null-guard.
+      // When the caller does NOT null-check and accesses result.prop directly, fire parse-promise-null-return.
+      //
+      // This path only applies to module-level parseStringPromise calls (not Parser instances, which
+      // are routed to Parser.parseStringPromise / parser-instance-malformed-xml above).
+      //
+      // Evidence: concern-20260417-xml2js-deepen-2 ground-truth test (lines 156/165:
+      //   line 156 null-checks result → SHOULD_NOT_FIRE; line 165 no null-check → SHOULD_FIRE: parse-promise-null-return).
+      if (
+        detection.packageName === "xml2js" &&
+        effectiveFunctionName === "parseStringPromise" &&
+        postconditions.some((p) => p.id === "parse-promise-null-return")
+      ) {
+        const nullPostcondition = postconditions.find(
+          (p) => p.id === "parse-promise-null-return",
+        );
+        if (nullPostcondition) {
+          if (this.controlFlow.isResultExplicitlyNullGuarded(detection.node)) {
+            // Result has an explicit null guard (if (result == null)): suppress violation entirely.
+            // The caller is correctly handling the empty-input case.
+            continue;
+          }
+          // If the result is null-guarded (no non-optional property access), fall through to
+          // standard try-catch analysis (parse-error-malformed-xml path).
+          if (!this.controlFlow.isResultNullGuarded(detection.node)) {
+            // Not null-guarded: result accessed without null check → fire parse-promise-null-return
+            // (skip standard try-catch analysis for this detection)
+            const { line, column } = this.getLocation(detection.node, sourceFile);
+            const { json: codeContext, startLine: codeContextStartLine } =
+              this.buildCodeContext(sourceFile, line - 1);
+            const fingerprint = computeViolationFingerprint({
+              packageName: detection.packageName,
+              postconditionId: nullPostcondition.id,
+              filePath: sourceFile.fileName,
+              lineNumber: line,
+              callExpression: detection.functionName,
+            });
+            const suppressionResult = checkSuppression({
+              projectRoot: this.options.projectRoot,
+              sourceFile,
+              line,
+              column,
+              packageName: detection.packageName,
+              postconditionId: nullPostcondition.id,
+              analyzerVersion: this.options.analyzerVersion || "2.0.0",
+              updateManifest: false,
+              fingerprint,
+            });
+            if (!suppressionResult.suppressed) {
+              violations.push({
+                file: sourceFile.fileName,
+                line,
+                column,
+                package: detection.packageName,
+                function: detection.functionName,
+                postconditionId: nullPostcondition.id,
+                severity: nullPostcondition.severity as "error" | "warning",
+                message: `parseStringPromise() resolves with null on empty input — caller must null-check the result before accessing properties`,
+                codeContext,
+                codeContextStartLine,
+                inTryCatch: false,
+                suppressed: false,
+                fingerprint,
+                callExpression: detection.functionName,
+                business_impact: nullPostcondition.business_impact,
+              });
+            }
+            continue;
+          }
+        }
       }
 
       // @supabase/supabase-js auth functions (signUp, signIn, signInWithPassword, etc.):
