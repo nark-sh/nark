@@ -406,16 +406,22 @@ export class InstanceTrackerPlugin implements DetectorPlugin {
 
       const objName = obj.text;
 
-      // Check if method is a known factory method
-      const fromFactoryMap = this.factoryToPackage.get(methodName);
-      if (fromFactoryMap) {
-        return fromFactoryMap;
-      }
-
-      // Check if the object is an import and method looks like a factory
+      // Check if the object is an import — importMap is authoritative.
+      // If the object is a direct import (e.g., MongoClient, SomeClass), use its package
+      // regardless of whether the method name is also a generic factory method name.
+      // This prevents false matches like MongoClient.connect() → undici (via undici's
+      // factory_methods: [connect]) when MongoClient is actually imported from mongodb.
       const importInfo = context.importMap.get(objName);
       if (importInfo && this.isFactoryMethodName(methodName)) {
         return importInfo.packageName;
+      }
+
+      // Check if method is a known factory method AND the object is NOT a direct import.
+      // Only use factoryToPackage when the object isn't from a specific known import —
+      // otherwise the factory method name (e.g., 'connect') would match calls on any object.
+      const fromFactoryMap = this.factoryToPackage.get(methodName);
+      if (fromFactoryMap && !importInfo) {
+        return fromFactoryMap;
       }
 
       // Check if the object is already a tracked instance
@@ -470,8 +476,15 @@ export class InstanceTrackerPlugin implements DetectorPlugin {
       return importInfo.packageName;
     }
 
-    // Check if root is already a tracked schema instance
-    return this.instanceMap.get(rootName) ?? null;
+    // Check if root is already a tracked instance.
+    // This handles method chains like client.db().collection(), mapper.forModel('User'),
+    // model.startChat(), etc. where the root variable was already tracked as a package instance.
+    const trackedPkg = this.instanceMap.get(rootName);
+    if (trackedPkg) {
+      return trackedPkg;
+    }
+
+    return null;
   }
 
   /**

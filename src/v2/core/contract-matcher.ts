@@ -2399,31 +2399,47 @@ export class ContractMatcher {
         s.replace(/([a-z])([A-Z])/g, "$1_$2").toLowerCase();
       const normalizedChainStr = normalizeChain(chainStr);
 
-      const chainMatch = functions.find((f) => {
-        // Build the effective full name when the contract uses the `namespace` field.
-        // Contracts that use namespace+name (e.g., namespace: "messages", name: "create")
-        // must be compared against chainStr using the combined "messages.create" form,
-        // not just the bare function name "create".
-        // Example: twilio messages.create, calls.update, calls.recordings.create, etc.
-        const effectiveName = f.namespace ? `${f.namespace}.${f.name}` : f.name;
+      // Guard: only use chainStr for function-chain matching when the chainStr actually
+      // contains the functionName as a suffix (i.e., it is a real call chain like
+      // "embeddings.create" for functionName="create", or "messages.create" for "create").
+      // When chainStr is an instanceTypeName like "Collection" or "GuildChannel", it is
+      // only used for disambiguation among dotted-name contracts later in this function —
+      // not for direct function matching here. Without this guard, "Collection" would match
+      // the function named "collection" in the contract, incorrectly overriding an exact
+      // match on "distinct", "createIndexes", etc.
+      const chainStrContainsFunctionName =
+        chainStr === functionName ||
+        normalizedChainStr === normalizeChain(functionName) ||
+        chainStr.endsWith("." + functionName) ||
+        normalizedChainStr.endsWith("." + normalizeChain(functionName));
 
-        // Exact match on the full chain string (both as-is and normalized)
-        if (effectiveName === chainStr) return true;
-        if (normalizeChain(effectiveName) === normalizedChainStr) return true;
-        // Suffix match: effective name ends with chainStr (handles leading package root)
-        if (effectiveName.endsWith("." + chainStr)) return true;
-        if (normalizeChain(effectiveName).endsWith("." + normalizedChainStr)) return true;
-        // Also match the plain f.name for non-namespaced contracts
-        if (!f.namespace) {
-          if (f.name === chainStr) return true;
-          if (normalizeChain(f.name) === normalizedChainStr) return true;
-          if (f.name.endsWith("." + chainStr)) return true;
-          if (normalizeChain(f.name).endsWith("." + normalizedChainStr)) return true;
+      if (chainStrContainsFunctionName) {
+        const chainMatch = functions.find((f) => {
+          // Build the effective full name when the contract uses the `namespace` field.
+          // Contracts that use namespace+name (e.g., namespace: "messages", name: "create")
+          // must be compared against chainStr using the combined "messages.create" form,
+          // not just the bare function name "create".
+          // Example: twilio messages.create, calls.update, calls.recordings.create, etc.
+          const effectiveName = f.namespace ? `${f.namespace}.${f.name}` : f.name;
+
+          // Exact match on the full chain string (both as-is and normalized)
+          if (effectiveName === chainStr) return true;
+          if (normalizeChain(effectiveName) === normalizedChainStr) return true;
+          // Suffix match: effective name ends with chainStr (handles leading package root)
+          if (effectiveName.endsWith("." + chainStr)) return true;
+          if (normalizeChain(effectiveName).endsWith("." + normalizedChainStr)) return true;
+          // Also match the plain f.name for non-namespaced contracts
+          if (!f.namespace) {
+            if (f.name === chainStr) return true;
+            if (normalizeChain(f.name) === normalizedChainStr) return true;
+            if (f.name.endsWith("." + chainStr)) return true;
+            if (normalizeChain(f.name).endsWith("." + normalizedChainStr)) return true;
+          }
+          return false;
+        });
+        if (chainMatch) {
+          return chainMatch;
         }
-        return false;
-      });
-      if (chainMatch) {
-        return chainMatch;
       }
     }
 

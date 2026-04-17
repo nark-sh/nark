@@ -32037,7 +32037,7 @@
     "source": "deepen",
     "package": "mongodb",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for Db.createCollection() \u2014 postcondition added in depth pass. Detect await db.createCollection() without try-catch. Needs Db instance tracking (db = client.db(...) pattern) plus createcollection await_pattern.",
     "evidence": {
       "repos": [],
@@ -32045,7 +32045,7 @@
       "violation_count": 0,
       "note": "Proactive \u2014 contract added via API surface analysis. createCollection() used in startup/migration code without error handling is a common pattern causing NamespaceExists (code 48) errors."
     },
-    "resolution": null
+    "resolution": "Fixed instance-tracker.ts: importMap now checked before factoryToPackage in resolveFactoryCall (case 2) to prevent undici 'connect' factory method from overriding MongoClient.connect() package attribution. Fixed contract-matcher.ts: chainStr only used for chain-matching when it contains the functionName as a suffix (prevents 'Collection' instanceTypeName from matching 'collection' function contract). Fixed ground-truth fixture annotations to match correct per-function postconditions. All 29 mongodb ground-truth tests pass."
   },
   {
     "id": "concern-20260417-mongodb-deepen-2",
@@ -32053,7 +32053,7 @@
     "source": "deepen",
     "package": "mongodb",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for Collection.distinct() \u2014 postcondition added in depth pass. Detect await collection.distinct() without try-catch. distinct await_pattern already added to contract detection section. Needs scanner to recognize .distinct( call pattern.",
     "evidence": {
       "repos": [],
@@ -32061,7 +32061,7 @@
       "violation_count": 0,
       "note": "Proactive \u2014 contract added via API surface analysis. distinct() used in faceted query APIs without error handling is a common pattern."
     },
-    "resolution": null
+    "resolution": "Resolved as part of mongodb-deepen-1 fix. The chainStr guard in contract-matcher.ts now correctly routes distinct() calls to the distinct-no-try-catch postcondition. Ground-truth test passes."
   },
   {
     "id": "concern-20260417-mongodb-deepen-3",
@@ -32069,7 +32069,7 @@
     "source": "deepen",
     "package": "mongodb",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for Collection.createIndexes() \u2014 postcondition added in depth pass. Detect await collection.createIndexes() without try-catch. Distinct from createIndex() (singular). Needs .createindexes( await_pattern in scanner.",
     "evidence": {
       "repos": [],
@@ -32077,7 +32077,7 @@
       "violation_count": 0,
       "note": "Proactive \u2014 IndexOptionsConflict (code 85) and IndexKeySpecsConflict (code 86) are common in migration scripts that re-run createIndexes without checking existing indexes."
     },
-    "resolution": null
+    "resolution": "Resolved as part of mongodb-deepen-1 fix. createindexes-options-conflict postcondition fires correctly. Ground-truth test passes."
   },
   {
     "id": "concern-20260417-mongodb-deepen-4",
@@ -32085,7 +32085,7 @@
     "source": "deepen",
     "package": "mongodb",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for Collection.dropIndexes() \u2014 postcondition added in depth pass. Detect await collection.dropIndexes() without try-catch. Distinct from dropIndex() (singular). Needs .dropindexes( await_pattern.",
     "evidence": {
       "repos": [],
@@ -32093,7 +32093,7 @@
       "violation_count": 0,
       "note": "Proactive \u2014 NamespaceNotFound (code 26) thrown when collection does not yet exist in migration scripts."
     },
-    "resolution": null
+    "resolution": "Resolved as part of mongodb-deepen-1 fix. dropindexes-namespace-not-found postcondition fires correctly. Ground-truth test passes."
   },
   {
     "id": "concern-20260417-mongodb-deepen-5",
@@ -32101,7 +32101,7 @@
     "source": "deepen",
     "package": "mongodb",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for MongoClient.withSession() \u2014 postcondition added in depth pass. Detect await client.withSession(...) without outer try-catch. Requires recognizing withSession as a MongoClient method distinct from withTransaction (which is ClientSession). .withsession( await_pattern added.",
     "evidence": {
       "repos": [],
@@ -32109,7 +32109,7 @@
       "violation_count": 0,
       "note": "Proactive \u2014 withSession() callback errors propagate directly unlike withTransaction() which retries. A common mistake is using withSession() expecting retry behavior, then missing the outer try-catch."
     },
-    "resolution": null
+    "resolution": "Resolved as part of mongodb-deepen-1 fix. withsession-callback-error-propagates postcondition fires correctly. Ground-truth test passes."
   },
   {
     "id": "concern-20260417-mongodb-deepen-6",
@@ -32117,7 +32117,7 @@
     "source": "deepen",
     "package": "mongodb",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for Collection.rename() \u2014 postcondition added in depth pass. Detect await collection.rename() without try-catch. .rename( await_pattern needed. Note: rename sends to admin database internally \u2014 may need special-casing for admin auth requirements.",
     "evidence": {
       "repos": [],
@@ -32125,6 +32125,6 @@
       "violation_count": 0,
       "note": "Proactive \u2014 used in blue-green migration patterns without error handling. TargetNamespaceExists and NamespaceNotFound (code 26) are common."
     },
-    "resolution": null
+    "resolution": "Resolved as part of mongodb-deepen-1 fix. rename-target-exists postcondition fires correctly. Ground-truth test passes."
   }
 ]
