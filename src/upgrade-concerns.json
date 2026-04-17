@@ -33347,5 +33347,69 @@
       "note": "Proactive \u2014 OAuth token exchange throws ApiException on invalid_grant (expired/used code). OAuth callback handlers that do not wrap in try-catch crash during installation flow."
     },
     "resolution": null
+  },
+  {
+    "id": "concern-20260416-hubspot-api-client-deepen-5",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@hubspot/api-client",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @hubspot/api-client batchApi.upsert() partial failure \u2014 upsert-partial-failure-unchecked postcondition added but no scanner rule for checking response.errors[] after HTTP 207",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed. HTTP 207 returns BatchResponseSimplePublicObjectWithErrors without throwing."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-hubspot-api-client-deepen-6",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@hubspot/api-client",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @hubspot/api-client basicApi.merge() \u2014 merge-no-try-catch postcondition added but no scanner rule for merge() method detection",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. merge() throws ApiException with HTTP 414 for records with 250+ merge history."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-hubspot-api-client-deepen-7",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@hubspot/api-client",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @hubspot/api-client basicApi.purge() (GDPR delete) \u2014 purge-no-try-catch postcondition added but no scanner rule for purge() method detection",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. purge() calls /crm/v3/objects/contacts/gdpr-delete, requires special GDPR scope, has legal compliance implications."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-hubspot-api-client-deepen-8",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "@hubspot/api-client",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @hubspot/api-client crm.<object>.getAll() \u2014 getall-no-try-catch postcondition added but no scanner rule for getAll() method",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. getAll() auto-paginates and loads ALL records into memory \u2014 OOM risk on large portals."
+    },
+    "resolution": null
   }
 ]
