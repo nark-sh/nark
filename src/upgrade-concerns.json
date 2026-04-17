@@ -35473,7 +35473,7 @@
     "source": "deepen",
     "package": "react-hook-form",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "deferred",
     "description": "Add detection for trigger() calls where async validate functions in register() can throw \u2014 postcondition trigger-async-validator-throws added but no scanner rule exists. Detection requires tracking async validate functions registered via register(name, { validate: async () => ... }) and checking if trigger() is called on those fields without outer try-catch.",
     "evidence": {
       "repos": [],
@@ -35481,7 +35481,7 @@
       "violation_count": 0,
       "note": "Proactive \u2014 confirmed from dist/index.esm.mjs line 1330-1344: validate() called with await but no surrounding try-catch in validateField(). Common pattern in multi-step forms that do email uniqueness or similar async API checks."
     },
-    "resolution": null
+    "resolution": "Deferred: trigger-async-validator-throws requires cross-reference tracking \u2014 detect if any field registered via form.register(name, { validate: async fn }) in the same component has an un-try-caught async validator, then check if form.trigger() calls that field without outer try-catch. Complex cross-reference detection not yet in scanner architecture. Ground-truth test confirms gap at line 202."
   },
   {
     "id": "concern-20260417-react-hook-form-deepen-2",
@@ -35489,7 +35489,7 @@
     "source": "deepen",
     "package": "react-hook-form",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "deferred",
     "description": "Add detection for trigger() result not awaited \u2014 postcondition trigger-result-not-awaited added but no scanner rule exists. Detection pattern: trigger() return value assigned to variable without await, then used in boolean check. Common in multi-step form handlers.",
     "evidence": {
       "repos": [],
@@ -35497,7 +35497,7 @@
       "violation_count": 0,
       "note": "Proactive \u2014 trigger() returns Promise<boolean> (confirmed from types). Synchronous use evaluates Promise as truthy, bypassing all validation. Pattern: const isValid = trigger() \u2192 if (isValid) is always true."
     },
-    "resolution": null
+    "resolution": "Deferred: trigger-result-not-awaited requires detecting that trigger() is NOT awaited before using the result in a boolean check. This is a return-value-async pattern \u2014 the standard scanner flow skips return-value-async at contract-matcher line 193. Would require a new detection path for non-awaited Promises. Ground-truth tests at lines 242/257 confirm the gap."
   },
   {
     "id": "concern-20260417-react-hook-form-deepen-3",
@@ -35505,7 +35505,7 @@
     "source": "deepen",
     "package": "react-hook-form",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "deferred",
     "description": "Add detection for Form component used with action prop but no onError callback \u2014 postcondition form-network-error-no-feedback added but no scanner rule exists. Detection: import Form from react-hook-form; usage includes action prop but no onError prop.",
     "evidence": {
       "repos": [],
@@ -35513,7 +35513,7 @@
       "violation_count": 0,
       "note": "Proactive \u2014 confirmed from dist/index.esm.mjs line 709-775: Form component catches all fetch errors internally. Without onError callback, network failures and HTTP errors are silently dropped."
     },
-    "resolution": null
+    "resolution": "Deferred: form-network-error-no-feedback requires JSX prop detection \u2014 detect <Form action={...} /> without an onError prop. This requires JSX-aware traversal (detecting JSXElement vs CallExpression) which is not currently in the scanner architecture. The ThrowingFunctionDetector would need a JSX mode."
   },
   {
     "id": "concern-20260417-react-hook-form-deepen-4",
@@ -35521,7 +35521,7 @@
     "source": "deepen",
     "package": "react-hook-form",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "deferred",
     "description": "Add detection for useForm() with async defaultValues function that has no try-catch \u2014 postcondition async-default-values-unhandled-rejection added but no scanner rule exists. Detection: useForm({ defaultValues: async () => { ... } }) where the async function body has no try-catch.",
     "evidence": {
       "repos": [],
@@ -35529,7 +35529,7 @@
       "violation_count": 0,
       "note": "Proactive \u2014 useForm async defaultValues is a documented pattern but RHF has no error callback for rejected async defaultValues. Confirmed from docs: the form stays in isLoading state if the Promise rejects."
     },
-    "resolution": null
+    "resolution": "Deferred: async-default-values-unhandled-rejection requires detecting async function nested inside a useForm() options object literal (defaultValues: async () => {...}). The scanner currently detects top-level await calls; detecting async lambdas inside object literals requires a new traversal pattern. Ground-truth test at line 276 confirms the gap."
   },
   {
     "id": "concern-20260417-simple-oauth2-deepen-1",
@@ -35537,7 +35537,7 @@
     "source": "deepen",
     "package": "simple-oauth2",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "deferred",
     "description": "Add detection for simple-oauth2 AccessToken.revokeAll() \u2014 postcondition revokeall-partial-failure added in depth pass but no scanner rule exists. When revokeAll() is called without try-catch, the refresh_token may remain active if access_token revoke fails.",
     "evidence": {
       "repos": [],
@@ -35545,7 +35545,7 @@
       "violation_count": 0,
       "note": "Proactive \u2014 contract added via API surface analysis. revokeAll() is a security-critical method: sequential await means partial revocation is possible. Detection rule needed for unguarded revokeAll() calls."
     },
-    "resolution": null
+    "resolution": "Deferred: revokeall-partial-failure requires detecting AccessToken.revokeAll() \u2014 an instance method on an AccessToken object returned from client.createToken(). This is a 2-level property chain (token.revokeAll()) where token is an AccessToken instance. Instance tracking for simple-oauth2 createToken() factory not yet registered. Would need factory registration + instance-method detection."
   },
   {
     "id": "concern-20260417-simple-oauth2-deepen-2",
@@ -35553,7 +35553,7 @@
     "source": "deepen",
     "package": "simple-oauth2",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "deferred",
     "description": "Add detection for simple-oauth2 AccessToken.revokeAll() \u2014 postcondition revokeall-network-error added in depth pass but no scanner rule exists. Network errors prevent token revocation silently.",
     "evidence": {
       "repos": [],
@@ -35561,7 +35561,7 @@
       "violation_count": 0,
       "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed for unguarded revokeAll() network error path."
     },
-    "resolution": null
+    "resolution": "Deferred: revokeall-network-error \u2014 same detection gap as revokeall-partial-failure above. Both require AccessToken instance tracking."
   },
   {
     "id": "concern-20260417-ai-fp-1",
@@ -36270,6 +36270,22 @@
       "scan_file": null,
       "violation_count": 0,
       "note": "Proactive \u2014 detect when getDocument().promise is used but destroy() is not called in a finally block. This requires tracking the document lifecycle across the function body."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260417-cross-fetch-deepen-1",
+    "created_at": "2026-04-17",
+    "source": "deepen",
+    "package": "cross-fetch",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for cross-fetch response.text() body-consumed-twice \u2014 postcondition text-body-consumed-twice added in depth pass but no scanner rule exists. Detect when response.text() (or any body method) is called on a Response object after its body stream has already been consumed.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. node-fetch/consumeBody() rejects with TypeError \"body used already\" when body is called twice. MDN confirms: TypeError when body is disturbed or locked. Detection requires tracking response object identity and body-read state across calls."
     },
     "resolution": null
   }
