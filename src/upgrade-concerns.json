@@ -31157,5 +31157,37 @@
       "note": "Proactive \u2014 contract added via API surface analysis. createFolder() is a niche API used in file browser implementations. Low priority."
     },
     "resolution": null
+  },
+  {
+    "id": "concern-20260416-superagent-deepen-1",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "superagent",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for superagent.get().pipe() \u2014 postcondition pipe-errors-not-promise-rejections added in depth pass but no scanner rule exists. pipe() bypasses the Promise chain entirely; try-catch provides no protection. Errors emit as Node.js events on the Request object or dest stream.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. pipe() calls end() internally, setting this.piped=true. The normal response handler checks if(this.piped)return \u2014 skipping the callback/Promise path. Errors route to req.emit(\"error\",err) instead. Scanner needs to detect .pipe() calls on superagent Requests and flag the absence of req.on(\"error\") listener."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260416-superagent-deepen-2",
+    "created_at": "2026-04-16",
+    "source": "deepen",
+    "package": "superagent",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for mixing superagent .pipe() with await/then() \u2014 postcondition pipe-cannot-be-mixed-with-promise added in depth pass but no scanner rule exists. Detecting \"await superagent.get(url)\" followed by \".pipe()\" or calling res.pipe() on the Response object.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 common developer mistake: const res = await superagent.get(url); res.pipe(stream) throws synchronously \"end() has already been called\". Scanner needs to detect this anti-pattern: superagent response object being used with .pipe() after an await."
+    },
+    "resolution": null
   }
 ]
