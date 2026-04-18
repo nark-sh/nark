@@ -36817,636 +36817,6 @@
     "resolved_at": "2026-04-17"
   },
   {
-    "id": "concern-2026-04-17-tanstack-react-router-1",
-    "created_at": "2026-04-17",
-    "source": "dashboard-feedback",
-    "package": "@tanstack/react-router",
-    "type": "false_positive",
-    "status": "pending",
-    "description": "Multiple false positives reported for @tanstack/react-router / invalid-route-path postcondition (no reason notes provided)",
-    "evidence": {
-      "repos": [
-        "src/components/command-menu.tsx",
-        "src/components/create-organization-modal.tsx",
-        "src/features/auth/sign-in/components/user-auth-form.tsx",
-        "src/features/errors/general-error.tsx",
-        "src/routes/(auth)/accept-invite.tsx"
-      ],
-      "scan_file": null,
-      "violation_count": 94,
-      "fp_reason": null,
-      "fix_target": null,
-      "postcondition_id": "invalid-route-path"
-    },
-    "resolution": null
-  },
-  {
-    "id": "concern-2026-04-17-undici-2",
-    "created_at": "2026-04-17",
-    "source": "dashboard-feedback",
-    "package": "undici",
-    "type": "false_positive",
-    "status": "pending",
-    "description": "Multiple false positives reported for undici / response-json-parse-error postcondition (no reason notes provided)",
-    "evidence": {
-      "repos": [
-        "apps/web/app/api/github/debug/route.ts",
-        "apps/web/app/api/oss-scan/route.ts",
-        "apps/web/components/repositories/scan-button.tsx",
-        "apps/web/components/violations/violation-review-panel.tsx",
-        "apps/web/hooks/use-scan-poller.ts"
-      ],
-      "scan_file": null,
-      "violation_count": 64,
-      "fp_reason": null,
-      "fix_target": null,
-      "postcondition_id": "response-json-parse-error"
-    },
-    "resolution": null
-  },
-  {
-    "id": "concern-2026-04-17-react-hook-form-3",
-    "created_at": "2026-04-17",
-    "source": "dashboard-feedback",
-    "package": "react-hook-form",
-    "type": "false_positive",
-    "status": "pending",
-    "description": "Multiple false positives reported for react-hook-form / async-submit-unhandled-error postcondition (no reason notes provided)",
-    "evidence": {
-      "repos": [
-        "src/features/auth/sign-in/components/user-auth-form.tsx",
-        "src/features/auth/sign-up/components/sign-up-form.tsx",
-        "src/features/auth/reset-password/components/reset-password-form.tsx",
-        "src/features/settings/profile/profile-form.tsx",
-        "src/features/customers/components/users-action-dialog.tsx"
-      ],
-      "scan_file": null,
-      "violation_count": 60,
-      "fp_reason": null,
-      "fix_target": null,
-      "postcondition_id": "async-submit-unhandled-error"
-    },
-    "resolution": null
-  },
-  {
-    "id": "concern-2026-04-17-ai-4",
-    "created_at": "2026-04-17",
-    "source": "dashboard-feedback",
-    "package": "ai",
-    "type": "false_positive",
-    "status": "pending",
-    "description": "Multiple false positives reported for ai / tool-execution-error postcondition (no reason notes provided)",
-    "evidence": {
-      "repos": [
-        "lib/tools/browser/browserAct.ts",
-        "lib/tools/files/readFile.ts",
-        "lib/tools/files/writeFile.ts",
-        "lib/tools/searchTwitter.ts",
-        "lib/tools/getArtistSegments.ts"
-      ],
-      "scan_file": null,
-      "violation_count": 25,
-      "fp_reason": null,
-      "fix_target": null,
-      "postcondition_id": "tool-execution-error"
-    },
-    "resolution": null
-  },
-  {
-    "id": "concern-2026-04-17-tanstack-react-query-5",
-    "created_at": "2026-04-17",
-    "source": "dashboard-feedback",
-    "package": "@tanstack/react-query",
-    "type": "false_positive",
-    "status": "pending",
-    "description": "Multiple false positives reported for @tanstack/react-query / query-error-unhandled postcondition (no reason notes provided)",
-    "evidence": {
-      "repos": [
-        "hooks/useAccountOrganizations.ts",
-        "hooks/useArtistInstruction.ts",
-        "hooks/useCatalogs.ts",
-        "hooks/useCredits.ts",
-        "hooks/useReportData.ts"
-      ],
-      "scan_file": null,
-      "violation_count": 25,
-      "fp_reason": null,
-      "fix_target": null,
-      "postcondition_id": "query-error-unhandled"
-    },
-    "resolution": null
-  },
-  {
-    "id": "concern-2026-04-17-tanstack-react-router-6",
-    "created_at": "2026-04-17",
-    "source": "dashboard-feedback",
-    "package": "@tanstack/react-router",
-    "type": "false_positive",
-    "status": "pending",
-    "description": "Multiple false positives reported for @tanstack/react-router / param-type-mismatch postcondition (no reason notes provided)",
-    "evidence": {
-      "repos": [
-        "src/features/browser-agents/browser-agent-detail.tsx",
-        "src/features/customers/customer-detail.tsx",
-        "src/features/documents/document-builder.tsx",
-        "src/features/invoices/invoice-detail.tsx",
-        "src/routes/_authenticated/workflow-builder/workflowId.tsx"
-      ],
-      "scan_file": null,
-      "violation_count": 18,
-      "fp_reason": null,
-      "fix_target": null,
-      "postcondition_id": "param-type-mismatch"
-    },
-    "resolution": null
-  },
-  {
-    "id": "concern-2026-04-17-tanstack-react-router-7",
-    "created_at": "2026-04-17",
-    "source": "dashboard-feedback",
-    "package": "@tanstack/react-router",
-    "type": "false_positive",
-    "status": "pending",
-    "description": "Multiple false positives reported for @tanstack/react-router / search-schema-validation-error postcondition (no reason notes provided)",
-    "evidence": {
-      "repos": [
-        "src/features/apps/index.tsx",
-        "src/features/auth/sign-in/index.tsx",
-        "src/features/auth/sign-up/index.tsx",
-        "src/features/chats/index.tsx",
-        "src/routes/(auth)/accept-invite.tsx"
-      ],
-      "scan_file": null,
-      "violation_count": 14,
-      "fp_reason": null,
-      "fix_target": null,
-      "postcondition_id": "search-schema-validation-error"
-    },
-    "resolution": null
-  },
-  {
-    "id": "concern-2026-04-17-zod-8",
-    "created_at": "2026-04-17",
-    "source": "dashboard-feedback",
-    "package": "zod",
-    "type": "false_positive",
-    "status": "pending",
-    "description": "Multiple false positives reported for zod / parse-validation-error postcondition (no reason notes provided)",
-    "evidence": {
-      "repos": [
-        "apps/web/app/api/ai/analyze-sender-pattern/route.ts",
-        "apps/web/app/api/clean/route.ts",
-        "apps/web/app/api/google/contacts/route.ts",
-        "apps/web/app/api/sso/signin/route.ts",
-        "apps/web/app/api/threads/route.ts"
-      ],
-      "scan_file": null,
-      "violation_count": 14,
-      "fp_reason": null,
-      "fix_target": null,
-      "postcondition_id": "parse-validation-error"
-    },
-    "resolution": null
-  },
-  {
-    "id": "concern-2026-04-17-react-hook-form-9",
-    "created_at": "2026-04-17",
-    "source": "dashboard-feedback",
-    "package": "react-hook-form",
-    "type": "false_positive",
-    "status": "pending",
-    "description": "Multiple false positives reported for react-hook-form / missing-form-provider postcondition (no reason notes provided)",
-    "evidence": {
-      "repos": [
-        "components/Account/ArtistInstructionTextArea.tsx",
-        "components/Input.tsx",
-        "src/components/ui/form.tsx"
-      ],
-      "scan_file": null,
-      "violation_count": 9,
-      "fp_reason": null,
-      "fix_target": null,
-      "postcondition_id": "missing-form-provider"
-    },
-    "resolution": null
-  },
-  {
-    "id": "concern-2026-04-17-redis-10",
-    "created_at": "2026-04-17",
-    "source": "dashboard-feedback",
-    "package": "redis",
-    "type": "false_positive",
-    "status": "pending",
-    "description": "Multiple false positives reported for redis / missing-error-listener postcondition (no reason notes provided)",
-    "evidence": {
-      "repos": [
-        "packages/api/src/main.ts"
-      ],
-      "scan_file": null,
-      "violation_count": 7,
-      "fp_reason": null,
-      "fix_target": null,
-      "postcondition_id": "missing-error-listener"
-    },
-    "resolution": null
-  },
-  {
-    "id": "concern-2026-04-17-clerk-nextjs-11",
-    "created_at": "2026-04-17",
-    "source": "dashboard-feedback",
-    "package": "@clerk/nextjs",
-    "type": "false_positive",
-    "status": "pending",
-    "description": "Multiple false positives reported for @clerk/nextjs / use-user-no-loaded-check postcondition (no reason notes provided)",
-    "evidence": {
-      "repos": [
-        "apps/web/app/(auth)/invite/[token]/page.tsx",
-        "apps/web/app/(dashboard)/onboarding/onboarding-form.tsx",
-        "apps/web/components/layout/header.tsx",
-        "apps/web/components/layout/sidebar.tsx",
-        "apps/web/components/settings/profile-settings.tsx"
-      ],
-      "scan_file": null,
-      "violation_count": 7,
-      "fp_reason": null,
-      "fix_target": null,
-      "postcondition_id": "use-user-no-loaded-check"
-    },
-    "resolution": null
-  },
-  {
-    "id": "concern-2026-04-17-ai-12",
-    "created_at": "2026-04-17",
-    "source": "dashboard-feedback",
-    "package": "ai",
-    "type": "false_positive",
-    "status": "pending",
-    "description": "Multiple false positives reported for ai / api-error-rate-limit postcondition (no reason notes provided)",
-    "evidence": {
-      "repos": [
-        "apps/web/utils/llms/index.ts",
-        "lib/ai/generateArray.ts",
-        "lib/catalog/analyzeCatalogBatch.ts",
-        "lib/evals/scorers/CatalogAvailability.ts",
-        "lib/evals/scorers/QuestionAnswered.ts"
-      ],
-      "scan_file": null,
-      "violation_count": 7,
-      "fp_reason": null,
-      "fix_target": null,
-      "postcondition_id": "api-error-rate-limit"
-    },
-    "resolution": null
-  },
-  {
-    "id": "concern-2026-04-17-express-13",
-    "created_at": "2026-04-17",
-    "source": "dashboard-feedback",
-    "package": "express",
-    "type": "false_positive",
-    "status": "pending",
-    "description": "Multiple false positives reported for express / async-middleware-unhandled-rejection postcondition (no reason notes provided)",
-    "evidence": {
-      "repos": [
-        "api/browser-agent-server.ts",
-        "api/dev-server.ts"
-      ],
-      "scan_file": null,
-      "violation_count": 5,
-      "fp_reason": null,
-      "fix_target": null,
-      "postcondition_id": "async-middleware-unhandled-rejection"
-    },
-    "resolution": null
-  },
-  {
-    "id": "concern-2026-04-17-tanstack-react-query-14",
-    "created_at": "2026-04-17",
-    "source": "dashboard-feedback",
-    "package": "@tanstack/react-query",
-    "type": "false_positive",
-    "status": "pending",
-    "description": "Multiple false positives reported for @tanstack/react-query / infinite-query-error-unhandled postcondition (no reason notes provided)",
-    "evidence": {
-      "repos": [
-        "hooks/useArtistFans.ts",
-        "hooks/useArtistPosts.ts",
-        "hooks/useCatalogSongs.ts"
-      ],
-      "scan_file": null,
-      "violation_count": 3,
-      "fp_reason": null,
-      "fix_target": null,
-      "postcondition_id": "infinite-query-error-unhandled"
-    },
-    "resolution": null
-  },
-  {
-    "id": "concern-2026-04-17-clerk-nextjs-15",
-    "created_at": "2026-04-17",
-    "source": "dashboard-feedback",
-    "package": "@clerk/nextjs",
-    "type": "false_positive",
-    "status": "pending",
-    "description": "Multiple false positives reported for @clerk/nextjs / use-clerk-outside-provider postcondition (no reason notes provided)",
-    "evidence": {
-      "repos": [
-        "apps/web/components/layout/header.tsx",
-        "apps/web/components/layout/sidebar.tsx",
-        "apps/web/components/layout/top-nav.tsx"
-      ],
-      "scan_file": null,
-      "violation_count": 3,
-      "fp_reason": null,
-      "fix_target": null,
-      "postcondition_id": "use-clerk-outside-provider"
-    },
-    "resolution": null
-  },
-  {
-    "id": "concern-2026-04-17-stripe-16",
-    "created_at": "2026-04-17",
-    "source": "dashboard-feedback",
-    "package": "stripe",
-    "type": "false_positive",
-    "status": "pending",
-    "description": "Multiple false positives reported for stripe / rate-limit-error postcondition (no reason notes provided)",
-    "evidence": {
-      "repos": [
-        "apps/web/lib/stripe.ts"
-      ],
-      "scan_file": null,
-      "violation_count": 3,
-      "fp_reason": null,
-      "fix_target": null,
-      "postcondition_id": "rate-limit-error"
-    },
-    "resolution": null
-  },
-  {
-    "id": "concern-2026-04-17-dotenv-17",
-    "created_at": "2026-04-17",
-    "source": "dashboard-feedback",
-    "package": "dotenv",
-    "type": "false_positive",
-    "status": "pending",
-    "description": "Multiple false positives reported for dotenv / missing-env-file postcondition (no reason notes provided)",
-    "evidence": {
-      "repos": [
-        "src/lib/migrations/supabase.ts"
-      ],
-      "scan_file": null,
-      "violation_count": 3,
-      "fp_reason": null,
-      "fix_target": null,
-      "postcondition_id": "missing-env-file"
-    },
-    "resolution": null
-  },
-  {
-    "id": "concern-2026-04-17-node-fetch-18",
-    "created_at": "2026-04-17",
-    "source": "dashboard-feedback",
-    "package": "node-fetch",
-    "type": "false_positive",
-    "status": "pending",
-    "description": "Multiple false positives reported for node-fetch / fetch-rejects-on-network-error postcondition (no reason notes provided)",
-    "evidence": {
-      "repos": [
-        "api/analysis/post-game-analysis.ts",
-        "api/utils/ai-client.ts"
-      ],
-      "scan_file": null,
-      "violation_count": 2,
-      "fp_reason": null,
-      "fix_target": null,
-      "postcondition_id": "fetch-rejects-on-network-error"
-    },
-    "resolution": null
-  },
-  {
-    "id": "concern-2026-04-17-react-hook-form-19",
-    "created_at": "2026-04-17",
-    "source": "dashboard-feedback",
-    "package": "react-hook-form",
-    "type": "false_positive",
-    "status": "pending",
-    "description": "Multiple false positives reported for react-hook-form / unhandled-field-array-operations postcondition (no reason notes provided)",
-    "evidence": {
-      "repos": [
-        "src/features/settings/profile/profile-form.tsx"
-      ],
-      "scan_file": null,
-      "violation_count": 2,
-      "fp_reason": null,
-      "fix_target": null,
-      "postcondition_id": "unhandled-field-array-operations"
-    },
-    "resolution": null
-  },
-  {
-    "id": "concern-2026-04-17-tanstack-react-query-20",
-    "created_at": "2026-04-17",
-    "source": "dashboard-feedback",
-    "package": "@tanstack/react-query",
-    "type": "false_positive",
-    "status": "pending",
-    "description": "Multiple false positives reported for @tanstack/react-query / mutation-error-unhandled postcondition (no reason notes provided)",
-    "evidence": {
-      "repos": [
-        "hooks/useCatalogSongsFileSelect.ts",
-        "hooks/useSandboxFileContent.ts"
-      ],
-      "scan_file": null,
-      "violation_count": 2,
-      "fp_reason": null,
-      "fix_target": null,
-      "postcondition_id": "mutation-error-unhandled"
-    },
-    "resolution": null
-  },
-  {
-    "id": "concern-2026-04-17-ioredis-21",
-    "created_at": "2026-04-17",
-    "source": "dashboard-feedback",
-    "package": "ioredis",
-    "type": "false_positive",
-    "status": "pending",
-    "description": "Multiple false positives reported for ioredis / missing-error-listener postcondition (no reason notes provided)",
-    "evidence": {
-      "repos": [
-        "apps/web/lib/auth-cache.ts",
-        "apps/web/lib/rate-limit.ts"
-      ],
-      "scan_file": null,
-      "violation_count": 2,
-      "fp_reason": null,
-      "fix_target": null,
-      "postcondition_id": "missing-error-listener"
-    },
-    "resolution": null
-  },
-  {
-    "id": "concern-2026-04-17-vercel-blob-22",
-    "created_at": "2026-04-17",
-    "source": "dashboard-feedback",
-    "package": "@vercel/blob",
-    "type": "false_positive",
-    "status": "pending",
-    "description": "Multiple false positives reported for @vercel/blob / blob-del-no-try-catch postcondition (no reason notes provided)",
-    "evidence": {
-      "repos": [
-        "lib/sandbox/postSandboxesFilesHandler.ts"
-      ],
-      "scan_file": null,
-      "violation_count": 2,
-      "fp_reason": null,
-      "fix_target": null,
-      "postcondition_id": "blob-del-no-try-catch"
-    },
-    "resolution": null
-  },
-  {
-    "id": "concern-2026-04-17-supabase-supabase-js-23",
-    "created_at": "2026-04-17",
-    "source": "dashboard-feedback",
-    "package": "@supabase/supabase-js",
-    "type": "false_positive",
-    "status": "pending",
-    "description": "Multiple false positives reported for @supabase/supabase-js / rls-policy-violation postcondition (no reason notes provided)",
-    "evidence": {
-      "repos": [
-        "packages/api/src/main.ts"
-      ],
-      "scan_file": null,
-      "violation_count": 1,
-      "fp_reason": null,
-      "fix_target": null,
-      "postcondition_id": "rls-policy-violation"
-    },
-    "resolution": null
-  },
-  {
-    "id": "concern-2026-04-17-ai-24",
-    "created_at": "2026-04-17",
-    "source": "dashboard-feedback",
-    "package": "ai",
-    "type": "false_positive",
-    "status": "pending",
-    "description": "Multiple false positives reported for ai / schema-validation-error postcondition (no reason notes provided)",
-    "evidence": {
-      "repos": [
-        "apps/web/utils/llms/index.ts"
-      ],
-      "scan_file": null,
-      "violation_count": 1,
-      "fp_reason": null,
-      "fix_target": null,
-      "postcondition_id": "schema-validation-error"
-    },
-    "resolution": null
-  },
-  {
-    "id": "concern-2026-04-17-axios-25",
-    "created_at": "2026-04-17",
-    "source": "dashboard-feedback",
-    "package": "axios",
-    "type": "false_positive",
-    "status": "pending",
-    "description": "Multiple false positives reported for axios / error-4xx-5xx postcondition (no reason notes provided)",
-    "evidence": {
-      "repos": [
-        "packages/scanner/src/v2/fixtures/test-suppressions/with-inline-suppression.ts"
-      ],
-      "scan_file": null,
-      "violation_count": 1,
-      "fp_reason": null,
-      "fix_target": null,
-      "postcondition_id": "error-4xx-5xx"
-    },
-    "resolution": null
-  },
-  {
-    "id": "concern-2026-04-17-upstash-redis-26",
-    "created_at": "2026-04-17",
-    "source": "dashboard-feedback",
-    "package": "@upstash/redis",
-    "type": "false_positive",
-    "status": "pending",
-    "description": "Multiple false positives reported for @upstash/redis / network-or-api-error postcondition (no reason notes provided)",
-    "evidence": {
-      "repos": [
-        "apps/web/utils/redis/index.ts"
-      ],
-      "scan_file": null,
-      "violation_count": 1,
-      "fp_reason": null,
-      "fix_target": null,
-      "postcondition_id": "network-or-api-error"
-    },
-    "resolution": null
-  },
-  {
-    "id": "concern-2026-04-17-puppeteer-27",
-    "created_at": "2026-04-17",
-    "source": "dashboard-feedback",
-    "package": "puppeteer",
-    "type": "false_positive",
-    "status": "pending",
-    "description": "Multiple false positives reported for puppeteer / browser-close-must-run postcondition (no reason notes provided)",
-    "evidence": {
-      "repos": [
-        "api/browser-agent-executor.ts"
-      ],
-      "scan_file": null,
-      "violation_count": 1,
-      "fp_reason": null,
-      "fix_target": null,
-      "postcondition_id": "browser-close-must-run"
-    },
-    "resolution": null
-  },
-  {
-    "id": "concern-2026-04-17-winston-28",
-    "created_at": "2026-04-17",
-    "source": "dashboard-feedback",
-    "package": "winston",
-    "type": "false_positive",
-    "status": "pending",
-    "description": "Multiple false positives reported for winston / missing-error-listener postcondition (no reason notes provided)",
-    "evidence": {
-      "repos": [
-        "apps/web/scripts/setup-telegram-bot.ts"
-      ],
-      "scan_file": null,
-      "violation_count": 1,
-      "fp_reason": null,
-      "fix_target": null,
-      "postcondition_id": "missing-error-listener"
-    },
-    "resolution": null
-  },
-  {
-    "id": "concern-2026-04-17-supabase-supabase-js-29",
-    "created_at": "2026-04-17",
-    "source": "dashboard-feedback",
-    "package": "@supabase/supabase-js",
-    "type": "false_positive",
-    "status": "pending",
-    "description": "Multiple false positives reported for @supabase/supabase-js / weak-password postcondition (no reason notes provided)",
-    "evidence": {
-      "repos": [
-        "src/contexts/auth-context.tsx"
-      ],
-      "scan_file": null,
-      "violation_count": 1,
-      "fp_reason": null,
-      "fix_target": null,
-      "postcondition_id": "weak-password"
-    },
-    "resolution": null
-  },
-  {
     "id": "concern-20260418-cors-deepen-1",
     "created_at": "2026-04-18",
     "source": "deepen",
@@ -37459,6 +36829,70 @@
       "scan_file": null,
       "violation_count": 0,
       "note": "Proactive \u2014 contract added via API surface analysis (depth pass 2026-04-18). Detection requires analyzing callback body for Promise chains missing .catch(err => callback(err)) tail."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260417-yup-deepen-1",
+    "created_at": "2026-04-17",
+    "source": "deepen",
+    "package": "yup",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add factory-method tracking for yup schema instances \u2014 yup.object(), yup.string(), yup.number(), yup.boolean(), yup.date(), yup.array(), yup.mixed(), yup.lazy() all return schema instances. The analyzer cannot currently track method calls on factory-returned instances. Implementing this would unlock detection of validate(), validateSync(), validateAt(), cast(), and isValid() violations.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis (depth pass 2026-04-17). Detection blocked by factory-method tracking limitation. All SHOULD_FIRE tests in yup.ground-truth.test.ts currently fail due to this limitation."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260417-yup-deepen-2",
+    "created_at": "2026-04-17",
+    "source": "deepen",
+    "package": "yup",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for yup.isValid() called without catch handler \u2014 postcondition isvalid-non-validation-error-rethrows. isValid() re-throws non-ValidationError exceptions from async test() functions. The scanner should detect when isValid() is awaited without try-catch or .catch() handler. Most developers assume isValid() never rejects, which is incorrect.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 confirmed from yup/index.js line 930: throw err \u2014 non-ValidationError propagates from isValid(). Blocks on factory-method tracking (concern-20260417-yup-deepen-1)."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260417-yup-deepen-3",
+    "created_at": "2026-04-17",
+    "source": "deepen",
+    "package": "yup",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for yup.cast() called without try-catch \u2014 postcondition cast-type-error. schema.cast() throws TypeError when the cast result does not satisfy the schema type check (default assert: true). Common in SaaS API handlers that use cast() to coerce incoming data. Detect when cast() is called without try-catch.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 confirmed from yup/index.js line 772: throw new TypeError(...). Blocks on factory-method tracking (concern-20260417-yup-deepen-1)."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260417-yup-deepen-4",
+    "created_at": "2026-04-17",
+    "source": "deepen",
+    "package": "yup",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for validateSync() called on schema with async test() functions \u2014 postcondition validatesync-async-test-throws. When validateSync() is used on a schema that has Promise-returning test() functions, it throws a plain Error (not ValidationError). Detect when validateSync() is called and the schema definition contains .test() calls with async functions.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 confirmed from yup/index.js line 386. This is a programmer error (mixing sync validate with async schema) rather than a runtime user-data error. Blocks on factory-method tracking (concern-20260417-yup-deepen-1)."
     },
     "resolution": null
   }
