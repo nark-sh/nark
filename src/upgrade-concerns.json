@@ -36822,7 +36822,7 @@
     "source": "deepen",
     "package": "cors",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "deferred",
     "description": "Add detection for cors() CorsOptionsDelegate \u2014 delegate-error-propagation postcondition added in depth pass but no scanner rule exists. Detect when cors() is called with a function delegate that uses Promise chains without .catch(err => callback(err)).",
     "evidence": {
       "repos": [],
@@ -36830,7 +36830,7 @@
       "violation_count": 0,
       "note": "Proactive \u2014 contract added via API surface analysis (depth pass 2026-04-18). Detection requires analyzing callback body for Promise chains missing .catch(err => callback(err)) tail."
     },
-    "resolution": null
+    "resolution": "Deferred: delegate-error-propagation detection requires analyzing the callback body for Promise chains missing .catch(err => callback(err)). This pattern requires deep AST analysis of lambda arguments \u2014 not supported by current plugins. The contract notes FP risk. No real-world violations in evidence (0 repos). Defer until a callback-body-analysis plugin is implemented."
   },
   {
     "id": "concern-20260417-yup-deepen-1",
@@ -36838,7 +36838,7 @@
     "source": "deepen",
     "package": "yup",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "deferred",
     "description": "Add factory-method tracking for yup schema instances \u2014 yup.object(), yup.string(), yup.number(), yup.boolean(), yup.date(), yup.array(), yup.mixed(), yup.lazy() all return schema instances. The analyzer cannot currently track method calls on factory-returned instances. Implementing this would unlock detection of validate(), validateSync(), validateAt(), cast(), and isValid() violations.",
     "evidence": {
       "repos": [],
@@ -36846,7 +36846,7 @@
       "violation_count": 0,
       "note": "Proactive \u2014 contract added via API surface analysis (depth pass 2026-04-17). Detection blocked by factory-method tracking limitation. All SHOULD_FIRE tests in yup.ground-truth.test.ts currently fail due to this limitation."
     },
-    "resolution": null
+    "resolution": "Deferred: factory-method tracking is a fundamental scanner architecture gap. Implementing it requires the traversal engine to track objects returned by factory functions (yup.object(), yup.string(), etc.) and detect method calls on those instances. This is a multi-day engineering effort. All 4 yup deepen concerns block on this. Defer until factory-method tracking is added to instance-tracker.ts."
   },
   {
     "id": "concern-20260417-yup-deepen-2",
@@ -36854,7 +36854,7 @@
     "source": "deepen",
     "package": "yup",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "deferred",
     "description": "Add detection for yup.isValid() called without catch handler \u2014 postcondition isvalid-non-validation-error-rethrows. isValid() re-throws non-ValidationError exceptions from async test() functions. The scanner should detect when isValid() is awaited without try-catch or .catch() handler. Most developers assume isValid() never rejects, which is incorrect.",
     "evidence": {
       "repos": [],
@@ -36862,7 +36862,7 @@
       "violation_count": 0,
       "note": "Proactive \u2014 confirmed from yup/index.js line 930: throw err \u2014 non-ValidationError propagates from isValid(). Blocks on factory-method tracking (concern-20260417-yup-deepen-1)."
     },
-    "resolution": null
+    "resolution": "Deferred: blocked by concern-20260417-yup-deepen-1 (factory-method tracking). Cannot detect isValid() calls on schema instances until factory-return tracking is implemented."
   },
   {
     "id": "concern-20260417-yup-deepen-3",
@@ -36870,7 +36870,7 @@
     "source": "deepen",
     "package": "yup",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "deferred",
     "description": "Add detection for yup.cast() called without try-catch \u2014 postcondition cast-type-error. schema.cast() throws TypeError when the cast result does not satisfy the schema type check (default assert: true). Common in SaaS API handlers that use cast() to coerce incoming data. Detect when cast() is called without try-catch.",
     "evidence": {
       "repos": [],
@@ -36878,7 +36878,7 @@
       "violation_count": 0,
       "note": "Proactive \u2014 confirmed from yup/index.js line 772: throw new TypeError(...). Blocks on factory-method tracking (concern-20260417-yup-deepen-1)."
     },
-    "resolution": null
+    "resolution": "Deferred: blocked by concern-20260417-yup-deepen-1 (factory-method tracking). Cannot detect cast() calls on schema instances until factory-return tracking is implemented."
   },
   {
     "id": "concern-20260417-yup-deepen-4",
@@ -36886,7 +36886,7 @@
     "source": "deepen",
     "package": "yup",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "deferred",
     "description": "Add detection for validateSync() called on schema with async test() functions \u2014 postcondition validatesync-async-test-throws. When validateSync() is used on a schema that has Promise-returning test() functions, it throws a plain Error (not ValidationError). Detect when validateSync() is called and the schema definition contains .test() calls with async functions.",
     "evidence": {
       "repos": [],
@@ -36894,6 +36894,6 @@
       "violation_count": 0,
       "note": "Proactive \u2014 confirmed from yup/index.js line 386. This is a programmer error (mixing sync validate with async schema) rather than a runtime user-data error. Blocks on factory-method tracking (concern-20260417-yup-deepen-1)."
     },
-    "resolution": null
+    "resolution": "Deferred: blocked by concern-20260417-yup-deepen-1 (factory-method tracking). Cannot detect validateSync() on schemas with async tests until factory-return tracking is implemented."
   }
 ]
