@@ -36480,5 +36480,181 @@
       "note": "Proactive \u2014 contract added via API surface analysis. embedStyleMap returns {toBuffer, toArrayBuffer} that must be persisted. This is a DATA_LOSS silent-failure pattern similar to deleteObjects response checking in @aws-sdk/client-s3."
     },
     "resolution": null
+  },
+  {
+    "id": "concern-20260417-upstash-qstash-deepen-1",
+    "created_at": "2026-04-17",
+    "source": "deepen",
+    "package": "@upstash/qstash",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @upstash/qstash queue.delete() \u2014 postcondition queue-delete-api-error added in depth pass but no scanner rule exists",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260417-upstash-qstash-deepen-2",
+    "created_at": "2026-04-17",
+    "source": "deepen",
+    "package": "@upstash/qstash",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @upstash/qstash messages.cancel() \u2014 postcondition messages-cancel-api-error added in depth pass but no scanner rule exists",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260417-upstash-qstash-deepen-3",
+    "created_at": "2026-04-17",
+    "source": "deepen",
+    "package": "@upstash/qstash",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @upstash/qstash dlq.delete() \u2014 postcondition dlq-delete-api-error added in depth pass but no scanner rule exists",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260417-upstash-qstash-deepen-4",
+    "created_at": "2026-04-17",
+    "source": "deepen",
+    "package": "@upstash/qstash",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @upstash/qstash dlq.retry() \u2014 postcondition dlq-retry-api-error added in depth pass but no scanner rule exists",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260417-upstash-qstash-deepen-5",
+    "created_at": "2026-04-17",
+    "source": "deepen",
+    "package": "@upstash/qstash",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @upstash/qstash logs() \u2014 postcondition logs-api-error added in depth pass but no scanner rule exists",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260417-unzipper-deepen-1",
+    "created_at": "2026-04-17",
+    "source": "deepen",
+    "package": "unzipper",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for unzipper.ParseOne() \u2014 postconditions parseone-pattern-not-found and parseone-corrupt-archive-error added in depth pass but no scanner rule exists",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed. Key pattern: .pipe(unzipper.ParseOne(...)).buffer() without try-catch"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260417-unzipper-deepen-2",
+    "created_at": "2026-04-17",
+    "source": "deepen",
+    "package": "unzipper",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for unzipper.Open.buffer() \u2014 postcondition open-buffer-invalid-zip added in depth pass but no scanner rule exists",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed. Key pattern: await unzipper.Open.buffer(data) without try-catch"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260417-unzipper-deepen-3",
+    "created_at": "2026-04-17",
+    "source": "deepen",
+    "package": "unzipper",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for unzipper.Open.url() \u2014 postconditions open-url-missing-content-length and open-url-network-error added in depth pass but no scanner rule exists",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed. Key pattern: await unzipper.Open.url(request, url) without try-catch"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260417-unzipper-deepen-4",
+    "created_at": "2026-04-17",
+    "source": "deepen",
+    "package": "unzipper",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for unzipper.Open.s3_v3() \u2014 postcondition open-s3v3-not-found-or-access-denied added in depth pass but no scanner rule exists",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed. Key pattern: await unzipper.Open.s3_v3(client, params) without try-catch"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260417-unzipper-deepen-5",
+    "created_at": "2026-04-17",
+    "source": "deepen",
+    "package": "unzipper",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for unzipper CentralDirectory.extract() \u2014 postconditions extract-path-missing and extract-filesystem-error added in depth pass but no scanner rule exists",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed. Key pattern: await directory.extract({path}) without try-catch, called after Open.*"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260417-unzipper-deepen-6",
+    "created_at": "2026-04-17",
+    "source": "deepen",
+    "package": "unzipper",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for unzipper Entry.buffer() / File.buffer() \u2014 postconditions entry-buffer-missing-password and entry-buffer-decompression-error added in depth pass but no scanner rule exists",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed. Key patterns: await entry.buffer() without try-catch in Parse 'entry' handler, await file.buffer() without try-catch after Open.*"
+    },
+    "resolution": null
   }
 ]
