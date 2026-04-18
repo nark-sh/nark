@@ -40244,5 +40244,261 @@
       "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
     },
     "resolution": null
+  },
+  {
+    "id": "concern-20260418-stripe-deepen-1",
+    "created_at": "2026-04-18",
+    "source": "deepen",
+    "package": "stripe",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for stripe.webhooks.constructEventAsync() \u2014 postcondition construct-event-async-signature-failed added in depth pass but no scanner rule exists. constructEventAsync is the async webhook verifier for Edge Runtime.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis (stripe v22 constructEventAsync), detection rule needed"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260418-stripe-deepen-2",
+    "created_at": "2026-04-18",
+    "source": "deepen",
+    "package": "stripe",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for stripe.invoices.finalizeInvoice() \u2014 postconditions finalize-no-payment-method-types and finalize-invoice-not-editable added in depth pass but no scanner rule exists.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260418-stripe-deepen-3",
+    "created_at": "2026-04-18",
+    "source": "deepen",
+    "package": "stripe",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for stripe.invoices.pay() \u2014 postconditions pay-requires-action, pay-card-declined, pay-invoice-not-payable added in depth pass. invoice_payment_intent_requires_action is a common silent failure in SaaS billing portals.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260418-stripe-deepen-4",
+    "created_at": "2026-04-18",
+    "source": "deepen",
+    "package": "stripe",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for stripe.invoices.sendInvoice() \u2014 postconditions send-invoice-not-open and send-invoice-invalid-email added in depth pass but no scanner rule exists.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260418-stripe-deepen-5",
+    "created_at": "2026-04-18",
+    "source": "deepen",
+    "package": "stripe",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for stripe.invoices.voidInvoice() \u2014 postconditions void-invoice-invalid-state and void-invoice-rate-limit added in depth pass but no scanner rule exists.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260418-stripe-deepen-6",
+    "created_at": "2026-04-18",
+    "source": "deepen",
+    "package": "stripe",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for stripe.invoices.markUncollectible() \u2014 postcondition mark-uncollectible-invalid-state added in depth pass but no scanner rule exists.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260418-stripe-deepen-7",
+    "created_at": "2026-04-18",
+    "source": "deepen",
+    "package": "stripe",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for stripe.subscriptions.resume() \u2014 postconditions resume-invalid-state and resume-payment-required added. resume-payment-required is a silent behavior bug: the subscription stays paused even after resume() if payment fails.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260418-stripe-deepen-8",
+    "created_at": "2026-04-18",
+    "source": "deepen",
+    "package": "stripe",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for stripe.paymentIntents.incrementAuthorization() \u2014 postconditions increment-authorization-card-declined and increment-authorization-invalid-state added. card_declined during increment should NOT cancel the intent.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260418-stripe-deepen-9",
+    "created_at": "2026-04-18",
+    "source": "deepen",
+    "package": "stripe",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for stripe.paymentIntents.verifyMicrodeposits() \u2014 postconditions verify-microdeposits-amounts-mismatch, verify-microdeposits-attempts-exceeded, verify-microdeposits-timeout added. Multiple distinct error codes all specific to ACH bank verification.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260418-vite-deepen-1",
+    "created_at": "2026-04-18",
+    "source": "deepen",
+    "package": "vite",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for vite server.listen() \u2014 postcondition server-listen-port-conflict added in depth pass but no scanner rule exists for bare server.listen() calls without try-catch",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed. Source: node_modules/vite/dist/node/chunks/node.js:26299 (middleware mode), :10660 (strictPort)"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260418-vite-deepen-2",
+    "created_at": "2026-04-18",
+    "source": "deepen",
+    "package": "vite",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for vite server.close() \u2014 postcondition server-close-not-awaited added in depth pass. Pattern: server.close() called without await, or not called in signal handlers",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 fire-and-forget server.close() leads to port leaks and dangling watchers. Detection requires tracking ViteDevServer instances and verifying close() is awaited."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260418-vite-deepen-3",
+    "created_at": "2026-04-18",
+    "source": "deepen",
+    "package": "vite",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for vite server.restart() \u2014 postcondition server-restart-port-conflict added in depth pass but no scanner rule exists for bare server.restart() calls without try-catch",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 server.restart() can throw if port conflict occurs during the restart window. Source: node_modules/vite/dist/node/chunks/node.js:26156-26166"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260418-vite-deepen-4",
+    "created_at": "2026-04-18",
+    "source": "deepen",
+    "package": "vite",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for vite resolveConfig() \u2014 postconditions resolveconfig-config-hook-throws and resolveconfig-environments-stripped added in depth pass but no scanner rule exists",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 resolveConfig() used by tools building on Vite. Plugin config hooks can throw any error. Source: node_modules/vite/dist/node/chunks/node.js:34109-34203"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260418-vite-deepen-5",
+    "created_at": "2026-04-18",
+    "source": "deepen",
+    "package": "vite",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for vite loadConfigFromFile() \u2014 postconditions for invalid-loader, not-an-object, esm-only-dependency, tsx-jiti-missing added in depth pass but no scanner rule exists",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 loadConfigFromFile() used in CLI tools and meta-frameworks. Multiple throw paths confirmed in source. Source: node_modules/vite/dist/node/chunks/node.js:34493-34530"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260418-vite-deepen-6",
+    "created_at": "2026-04-18",
+    "source": "deepen",
+    "package": "vite",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for vite createBuilder() \u2014 postconditions createbuilder-config-resolution-failure and createbuilder-environment-init-failure added in depth pass but no scanner rule exists",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 createBuilder() new in Vite 6+, used for multi-environment builds. Source: node_modules/vite/dist/node/chunks/node.js:33346-33440"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260418-vite-deepen-7",
+    "created_at": "2026-04-18",
+    "source": "deepen",
+    "package": "vite",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for vite transformWithOxc() \u2014 postcondition transformwithoxc-parse-error added in depth pass. Throws Error with .errors array of OxcTransformError objects on syntax failures",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 transformWithOxc() replaces deprecated transformWithEsbuild(). Confirmed throw at node_modules/vite/dist/node/chunks/node.js:3750-3800. Error has .errors array."
+    },
+    "resolution": null
   }
 ]
