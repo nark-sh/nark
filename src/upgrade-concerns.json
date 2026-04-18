@@ -40100,5 +40100,149 @@
       "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
     },
     "resolution": null
+  },
+  {
+    "id": "concern-2026-04-18-validator-deepen-1",
+    "created_at": "2026-04-18",
+    "source": "deepen",
+    "package": "validator",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for validator.matches() called with a user-supplied pattern string \u2014 postcondition matches-redos-user-pattern added in depth pass. README explicitly warns that user-provided patterns are NOT checked for ReDoS attacks. Detect when second argument is a variable or parameter (not a RegExp literal or string literal).",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-18-validator-deepen-2",
+    "created_at": "2026-04-18",
+    "source": "deepen",
+    "package": "validator",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for validator.matches() called with user-supplied flags argument \u2014 postcondition matches-redos-user-pattern. When the third argument (modifiers) is a variable or parameter rather than a string literal, flag the call.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-18-validator-deepen-3",
+    "created_at": "2026-04-18",
+    "source": "deepen",
+    "package": "validator",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for validator.isCurrency() called without options \u2014 postcondition currency-locale-mismatch added in depth pass. Default options use USD formatting ($ symbol, comma thousands separator, period decimal). When isCurrency() is called with no options or an empty options object, flag as likely locale mismatch for international amounts.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-18-validator-deepen-4",
+    "created_at": "2026-04-18",
+    "source": "deepen",
+    "package": "validator",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for validator.isBase64() called without urlSafe option in JWT/OAuth context \u2014 postcondition base64-urlsafe-confusion added in depth pass. JWT segments and OAuth state tokens use base64url encoding (- and _ instead of + and /); standard isBase64() returns false for these. Detect when isBase64() is called without { urlSafe: true } and the variable/function name suggests JWT or OAuth context.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-18-validator-deepen-5",
+    "created_at": "2026-04-18",
+    "source": "deepen",
+    "package": "validator",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for str.length comparison used instead of validator.isLength() \u2014 postcondition length-vs-string-length-mismatch added in depth pass. String.prototype.length counts surrogate pairs (emoji) as 2 units; isLength() counts grapheme clusters as 1. When code checks value.length > N as a DB column limit guard without using isLength(), flag as potential surrogate-pair mismatch. Scanner approach: look for .length comparisons adjacent to string validation code in the same function.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-18-validator-deepen-6",
+    "created_at": "2026-04-18",
+    "source": "deepen",
+    "package": "validator",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for validator.isISO8601() called without strict mode \u2014 postcondition iso8601-non-strict-invalid-dates added in depth pass. Non-strict mode accepts calendar-invalid dates like '2009-02-29' (Feb 29 in a non-leap year). These pass isISO8601() but are silently coerced by Date.parse() (e.g. to March 1). Detect when isISO8601() is called with no options or without { strict: true }.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-18-validator-deepen-7",
+    "created_at": "2026-04-18",
+    "source": "deepen",
+    "package": "validator",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for validator.isISO8601() called without strictSeparator option \u2014 postcondition iso8601-strict-separator added in depth pass. Without strictSeparator, mixed-separator dates like '2009-01-01T00:00 00:00' pass. Detect when isISO8601() is called with { strict: true } but without { strictSeparator: true } as a lower-severity warning.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-18-validator-deepen-8",
+    "created_at": "2026-04-18",
+    "source": "deepen",
+    "package": "validator",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for validator.isCurrency() called without allowing_negative or symbol options in payment context \u2014 postcondition currency-symbol-not-required added in depth pass. When symbol_required is false (or absent), any numeric string passes regardless of currency symbol. Detect when isCurrency() options include symbol_required: false in payment validation context.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-18-validator-deepen-9",
+    "created_at": "2026-04-18",
+    "source": "deepen",
+    "package": "validator",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for validator.isBase64() accepting empty string \u2014 postcondition base64-empty-string-valid added in depth pass. isBase64('') returns true by default (validator 13.x default). When isBase64() is used as a guard for non-empty base64 payloads (e.g. file content, keys) without an explicit emptiness check, empty strings will pass through.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
   }
 ]
