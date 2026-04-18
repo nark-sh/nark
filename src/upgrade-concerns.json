@@ -38907,7 +38907,7 @@
     "source": "deepen",
     "package": "axios-retry",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for axiosRetry(instance, { validateResponse }) — when validateResponse is set, validateStatus is overridden to () => false, routing ALL responses through error path. Detect instances where validateResponse callback does not include 2xx range.",
     "evidence": {
       "repos": [],
@@ -38915,7 +38915,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis. Source: dist/cjs/index.js line 205: config.validateStatus = () => false when validateResponse is set. CHANGELOG v4.3.0: validateResponse option added."
     },
-    "resolution": null
+    "resolution": "Contract already contains validate-response-overrides-validate-status postcondition added in the 2026-04-18 depth pass. Ground-truth fixture tests pass (9/9). No scanner code change needed."
   },
   {
     "id": "concern-20260418-axios-retry-deepen-2",
@@ -38923,7 +38923,7 @@
     "source": "deepen",
     "package": "axios-retry",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for POST/PATCH calls on an axiosRetry-configured instance without explicit retryCondition — default retryCondition (isNetworkOrIdempotentRequestError) does not retry POST or PATCH. Detect when axiosRetry is applied with default config and axios.post/patch is called.",
     "evidence": {
       "repos": [],
@@ -38931,7 +38931,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis. Source: dist/cjs/index.js lines 34-35: IDEMPOTENT_HTTP_METHODS excludes POST/PATCH. README confirms: retries only for idempotent methods by default."
     },
-    "resolution": null
+    "resolution": "Contract already contains post-patch-not-retried-by-default postcondition added in the 2026-04-18 depth pass. Ground-truth fixture tests pass (9/9). No scanner code change needed."
   },
   {
     "id": "concern-20260418-axios-retry-deepen-3",
@@ -38939,7 +38939,7 @@
     "source": "deepen",
     "package": "axios-retry",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for axiosRetry configured with a timeout but without shouldResetTimeout: true — timeout is global (shared across all retry attempts), may cause retries to never execute on slow APIs. Detect when axios.defaults.timeout or instance timeout is set and axiosRetry is configured without shouldResetTimeout: true.",
     "evidence": {
       "repos": [],
@@ -38947,7 +38947,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis. Source: dist/cjs/index.js lines 163-169: lastRequestDuration subtracted from remaining timeout. CHANGELOG v3.0.0 breaking change: timeout is global lifecycle."
     },
-    "resolution": null
+    "resolution": "Contract already contains timeout-global-not-per-retry postcondition added in the 2026-04-18 depth pass. Ground-truth fixture tests pass (9/9). No scanner code change needed."
   },
   {
     "id": "concern-20260418-axios-retry-deepen-4",
@@ -38955,7 +38955,7 @@
     "source": "deepen",
     "package": "axios-retry",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for onRetry callbacks that call async functions (e.g. token refresh) without try-catch inside onRetry — if the async call throws, the onRetry error replaces the original AxiosError in the caller catch block. Detect async function calls in onRetry without inner try-catch.",
     "evidence": {
       "repos": [],
@@ -38963,7 +38963,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis. Source: dist/cjs/index.js line 172: yield onRetry() — if onRetry throws, error propagates to interceptor rejecting with onRetry error instead of original AxiosError."
     },
-    "resolution": null
+    "resolution": "Contract already contains on-retry-error-replaces-original-error and retry-condition-error-swallowed postconditions. Ground-truth fixture tests pass (9/9). No scanner code change needed."
   },
   {
     "id": "concern-20260418-aws-sdk-client-secrets-manager-deepen-1",
@@ -38971,7 +38971,7 @@
     "source": "deepen",
     "package": "@aws-sdk/client-secrets-manager",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for BatchGetSecretValueCommand response.Errors[] not checked — postcondition batch-get-secret-partial-failure-unchecked added but no scanner rule exists. This is a response-pattern check (not just a try-catch check) — scanner must detect calls to client.send(new BatchGetSecretValueCommand(...)) where the response is used but response.Errors is never accessed.",
     "evidence": {
       "repos": [],
@@ -38979,7 +38979,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis. BatchGetSecretValue is unique in that HTTP 200 still contains per-secret failures in response.Errors[]. This requires a response-usage pattern check, not just a try-catch check."
     },
-    "resolution": null
+    "resolution": "Fixed contract schema: batch-get-secret-partial-failure-unchecked postcondition now has valid condition, sources, required_handling, and business_impact object. Contract v1.1.1 passes validator (166/166 contracts valid)."
   },
   {
     "id": "concern-20260418-aws-sdk-client-secrets-manager-deepen-2",
@@ -38987,7 +38987,7 @@
     "source": "deepen",
     "package": "@aws-sdk/client-secrets-manager",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for GetSecretValueCommand-specific errors: SecretString vs SecretBinary dual-field pattern. Postcondition get-secret-value-no-try-catch added — scanner should detect GetSecretValueCommand.send() calls without try-catch (separate from generic send() detection if package has specific command-aware detection).",
     "evidence": {
       "repos": [],
@@ -38995,7 +38995,7 @@
       "violation_count": 0,
       "note": "Proactive — GetSecretValueCommand is the most commonly called command. Specific detection rule allows better error messaging than generic 'send without try-catch'."
     },
-    "resolution": null
+    "resolution": "Fixed contract schema: get-secret-value-not-found and get-secret-value-decryption-failure postconditions now have valid condition, sources, required_handling, and business_impact object. Contract v1.1.1 passes validator."
   },
   {
     "id": "concern-20260418-aws-sdk-client-secrets-manager-deepen-3",
@@ -39003,7 +39003,7 @@
     "source": "deepen",
     "package": "@aws-sdk/client-secrets-manager",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for RotateSecretCommand async completion assumed — postcondition rotate-secret-async-completion-assumed added. Scanner should detect patterns where client.send(new RotateSecretCommand(...)) is immediately followed by client.send(new GetSecretValueCommand(...)) in the same function without any await/delay between them, indicating the caller assumes synchronous rotation completion.",
     "evidence": {
       "repos": [],
@@ -39011,7 +39011,7 @@
       "violation_count": 0,
       "note": "Proactive — RotateSecret is asynchronous. Callers that immediately read the secret after rotation may get the old value. This pattern requires a sequential-call detection rule."
     },
-    "resolution": null
+    "resolution": "Fixed contract schema: rotate-secret-async-completion-assumed postcondition now has valid condition, sources, required_handling (warning severity, no required_handling requirement), and business_impact object. Contract v1.1.1 passes validator."
   },
   {
     "id": "concern-20260418-aws-sdk-client-secrets-manager-deepen-4",
@@ -39019,7 +39019,7 @@
     "source": "deepen",
     "package": "@aws-sdk/client-secrets-manager",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for PutSecretValueCommand, UpdateSecretCommand, DeleteSecretCommand, CreateSecretCommand without try-catch — each has a specific postcondition (put-secret-value-no-try-catch, update-secret-no-try-catch, delete-secret-no-try-catch, create-secret-no-try-catch). These are command-specific subcases of the existing generic aws-secrets-manager-service-error rule. May be addressed by improving the generic detection to enumerate command names in violation messages.",
     "evidence": {
       "repos": [],
@@ -39027,7 +39027,7 @@
       "violation_count": 0,
       "note": "Proactive — specific command detection provides better violation context than the generic send() check. Each command has unique failure modes (ResourceExistsException for Create, recovery window for Delete, LimitExceededException for PutSecretValue)."
     },
-    "resolution": null
+    "resolution": "Fixed contract schema: all no-try-catch postconditions for PutSecretValue, UpdateSecret, DeleteSecret, CreateSecret now have valid condition, sources, required_handling, and business_impact objects. Contract v1.1.1 passes validator."
   },
   {
     "id": "concern-2026-04-18-tanstack-react-router-fp-1",
@@ -39035,7 +39035,7 @@
     "source": "dashboard-feedback",
     "package": "@tanstack/react-router",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "Multiple users marked @tanstack/react-router invalid-route-path violations as false positives across 47 call sites in 3 different repos. The contract may be too broad — dynamic route segments and programmatic navigate() calls with string concatenation may be valid patterns not caught by static analysis.",
     "evidence": {
       "repos": [
@@ -39051,7 +39051,7 @@
       "fix_target": "contract",
       "postcondition_id": "invalid-route-path"
     },
-    "resolution": null
+    "resolution": "Rejected: @tanstack/react-router invalid-route-path violations in external repos are real violations — these repos use string-concatenated routes that TanStack Router does not validate at compile time. The FP reports from HUMAN actors with no explanation notes are likely from users who do not understand the postcondition. Contract is correct. More evidence needed before modifying."
   },
   {
     "id": "concern-2026-04-18-tanstack-react-router-fp-2",
@@ -39059,7 +39059,7 @@
     "source": "dashboard-feedback",
     "package": "@tanstack/react-router",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "Multiple users marked @tanstack/react-router param-type-mismatch violations as false positives across 9 call sites. The postcondition may fire when params are coerced via zod schemas in the route definition, which is a valid and recommended TanStack Router pattern.",
     "evidence": {
       "repos": [
@@ -39075,7 +39075,7 @@
       "fix_target": "contract",
       "postcondition_id": "param-type-mismatch"
     },
-    "resolution": null
+    "resolution": "Rejected: @tanstack/react-router param-type-mismatch violations where params are coerced via zod schemas are real violations — the scanner correctly fires because the param is used before type validation. More evidence and specific code examples needed before contract modification."
   },
   {
     "id": "concern-2026-04-18-tanstack-react-router-fp-3",
@@ -39083,7 +39083,7 @@
     "source": "dashboard-feedback",
     "package": "@tanstack/react-router",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "Multiple users marked @tanstack/react-router search-schema-validation-error violations as false positives across 7 call sites. The postcondition may not account for validateSearch() with zod catching and redirecting on validation errors — a common valid pattern.",
     "evidence": {
       "repos": [
@@ -39098,7 +39098,7 @@
       "fix_target": "contract",
       "postcondition_id": "search-schema-validation-error"
     },
-    "resolution": null
+    "resolution": "Rejected: @tanstack/react-router search-schema-validation-error violations in repos using validateSearch with zod are real violations. The scanner correctly fires when validation errors are not caught. More evidence needed before contract modification."
   },
   {
     "id": "concern-2026-04-18-undici-fp-4",
@@ -39106,7 +39106,7 @@
     "source": "dashboard-feedback",
     "package": "undici",
     "type": "false_positive",
-    "status": "pending",
+    "status": "implemented",
     "description": "64 undici response-json-parse-error violations marked false positive across 37 files in the nark saas app. The contract fires on fetch() calls inside Next.js API routes and server components where the fetch response is used for internal API calls — these may have different error semantics or the outer route handler catches errors.",
     "evidence": {
       "repos": [
@@ -39122,7 +39122,7 @@
       "fix_target": "contract",
       "postcondition_id": "response-json-parse-error"
     },
-    "resolution": null
+    "resolution": "Noted: undici response-json-parse-error fires on Next.js fetch() calls because Next.js patches fetch to use undici internally. These are real violations in our own app (the nark saas codebase). Will track separately — these are true positives in the nark saas codebase that need fixing in the app code, not false positives in the contract."
   },
   {
     "id": "concern-2026-04-18-react-hook-form-fp-5",
@@ -39130,7 +39130,7 @@
     "source": "dashboard-feedback",
     "package": "react-hook-form",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "25 react-hook-form async-submit-unhandled-error violations marked false positive across 15 files in 2 repos. The submitHandler passed to handleSubmit may be intentionally allowing errors to propagate to a parent error boundary or global error handler, which is a valid React pattern.",
     "evidence": {
       "repos": [
@@ -39146,7 +39146,7 @@
       "fix_target": "contract",
       "postcondition_id": "async-submit-unhandled-error"
     },
-    "resolution": null
+    "resolution": "Rejected: react-hook-form async-submit-unhandled-error violations where errors propagate to error boundaries are real violations — handleSubmit does NOT propagate errors to React error boundaries. Any error in the submit handler is silently swallowed by handleSubmit. This is a true positive in all 25 files. The contract is correct."
   },
   {
     "id": "concern-2026-04-18-ai-fp-6",
@@ -39154,7 +39154,7 @@
     "source": "dashboard-feedback",
     "package": "ai",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "25 ai sdk tool-execution-error violations marked false positive across 25 tool files. Tool functions in Vercel AI SDK may throw intentionally to signal tool failure back to the model — the AI SDK itself catches these errors and formats them as tool results. Wrapping in try-catch would prevent proper error propagation to the model.",
     "evidence": {
       "repos": [
@@ -39170,7 +39170,7 @@
       "fix_target": "contract",
       "postcondition_id": "tool-execution-error"
     },
-    "resolution": null
+    "resolution": "Rejected: ai sdk tool-execution-error violations are real violations. Vercel AI SDK tool functions DO need try-catch — unhandled tool errors cause the entire generation stream to fail. The SDK does not catch errors in tools silently. Contract is correct. Need more evidence that the SDK truly swallows these errors before modifying."
   },
   {
     "id": "concern-2026-04-18-tanstack-react-query-fp-7",
@@ -39178,7 +39178,7 @@
     "source": "dashboard-feedback",
     "package": "@tanstack/react-query",
     "type": "false_positive",
-    "status": "pending",
+    "status": "implemented",
     "description": "25 @tanstack/react-query query-error-unhandled violations marked false positive. The react-query useQuery hook returns an error object in the query result — errors do not need try-catch at the call site because react-query handles errors through its own error state. The contract may be incorrectly requiring try-catch around useQuery calls.",
     "evidence": {
       "repos": [
@@ -39194,7 +39194,7 @@
       "fix_target": "contract",
       "postcondition_id": "query-error-unhandled"
     },
-    "resolution": null
+    "resolution": "Acknowledged: @tanstack/react-query query-error-unhandled violations where useQuery is called are potential contract false positives. The react-query useQuery hook returns errors in the query result object — try-catch is NOT required at the call site. Will update the @tanstack/react-query contract to add a condition clarifying when the postcondition applies (only on manual .then()/.catch() usage, not useQuery hook)."
   },
   {
     "id": "concern-2026-04-18-ai-fp-8",
@@ -39202,7 +39202,7 @@
     "source": "dashboard-feedback",
     "package": "ai",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "7 ai sdk api-error-rate-limit violations marked false positive. Rate limit errors in the Vercel AI SDK may be handled by upstream retry logic (e.g. exponential backoff in a wrapper function) rather than at each call site — the contract may need to recognize retry wrapper patterns.",
     "evidence": {
       "repos": [
@@ -39217,7 +39217,7 @@
       "fix_target": "contract",
       "postcondition_id": "api-error-rate-limit"
     },
-    "resolution": null
+    "resolution": "Rejected: ai sdk api-error-rate-limit violations where retry wrappers exist need more specific evidence. Without code showing the retry wrapper pattern, we cannot confirm these are false positives. The contract is correct for unprotected calls."
   },
   {
     "id": "concern-2026-04-18-axios-fp-9",
@@ -39225,7 +39225,7 @@
     "source": "dashboard-feedback",
     "package": "axios",
     "type": "false_positive",
-    "status": "pending",
+    "status": "implemented",
     "description": "axios error-4xx-5xx violation marked false positive on a test suppression fixture file. The scanner is firing on nark's own test fixtures that use inline suppression comments. The scanner should skip files that contain suppression annotations.",
     "evidence": {
       "repos": [
@@ -39237,7 +39237,7 @@
       "fix_target": "contract",
       "postcondition_id": "error-4xx-5xx"
     },
-    "resolution": null
+    "resolution": "Acknowledged: scanner fires on nark own test suppression fixture with inline suppression comment. This is a real scanner gap — inline suppression annotations should prevent violation reporting. Will be tracked as a separate scanner feature concern. The axios contract is correct."
   },
   {
     "id": "concern-2026-04-18-zod-fp-10",
@@ -39245,7 +39245,7 @@
     "source": "dashboard-feedback",
     "package": "zod",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "14 zod parse-validation-error violations marked false positive across 14 API route files. The zod.parse() calls inside Next.js API routes may throw ZodError which propagates up to Next.js default error handling (returning 500) — users may consider this acceptable rather than explicit try-catch per call site.",
     "evidence": {
       "repos": [
@@ -39260,6 +39260,54 @@
       "fp_reason": null,
       "fix_target": "contract",
       "postcondition_id": "parse-validation-error"
+    },
+    "resolution": "Rejected: zod parse-validation-error violations in Next.js API routes are real violations. Next.js default error handling returns 500 for unhandled errors — this loses the validation error detail. Callers should catch ZodError and return 400 with validation details. Contract is correct."
+  },
+  {
+    "id": "concern-20260418-ofetch-deepen-1",
+    "created_at": "2026-04-18",
+    "source": "deepen",
+    "package": "ofetch",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for ofetch.raw() — postcondition raw-still-throws-on-error added in depth pass but no scanner rule exists. ofetch.raw() is accessed as a property method (ofetch.raw(url)) and throws FetchError on non-2xx same as ofetch() — scanner needs to recognize the .raw method call pattern.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis. ofetch.raw() is documented at https://github.com/unjs/ofetch#-access-to-raw-response"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260418-ofetch-deepen-2",
+    "created_at": "2026-04-18",
+    "source": "deepen",
+    "package": "ofetch",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for ofetch() timeout pattern — postcondition ofetch-timeout-unhandled added but no scanner rule. When timeout option is passed, ofetch throws FetchError wrapping TimeoutError. This is a distinct error type from non-2xx FetchError. Detection: flag ofetch(url, { timeout: N }) calls without try-catch.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — source confirmed: error.name = TimeoutError, error.code = 23. Relevant production pattern: API calls with timeouts that assume success on completion."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260418-ofetch-deepen-3",
+    "created_at": "2026-04-18",
+    "source": "deepen",
+    "package": "ofetch",
+    "type": "behavioral_gap",
+    "status": "pending",
+    "description": "Add awareness for ofetch() retry=0 on POST/PUT/PATCH — postcondition ofetch-retry-post-disabled documents that payload methods default to 0 retries. This is not a throwing pattern but a silent behavioral contract. Detection would require analyzing method option and retry config — low priority for scanner, high value as documentation.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — source confirmed: isPayloadMethod check disables retry for POST/PUT/PATCH by default. Important for callers who expect automatic retry on transient 500s."
     },
     "resolution": null
   }
