@@ -37882,7 +37882,7 @@
     "source": "deepen",
     "package": "passport-jwt",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "rejected",
     "description": "Add detection for passport-jwt new Strategy() constructor misconfiguration — synchronous throws when secretOrKey+secretOrKeyProvider both provided, verify callback missing, or jwtFromRequest missing. Requires static analysis of the options object passed to the constructor.",
     "evidence": {
       "repos": [],
@@ -37890,7 +37890,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis, synchronous constructor throw detection needed"
     },
-    "resolution": null
+    "resolution": "Rejected: Detecting constructor misconfiguration (missing secretOrKey, both secretOrKey+secretOrKeyProvider, missing verify callback, missing jwtFromRequest) requires static analysis of the options object passed to new Strategy(). The scanner cannot currently introspect constructor argument property values. Zero real-world evidence (repos: [], violation_count: 0) does not justify the complexity of implementing options-object analysis."
   },
   {
     "id": "concern-20260417-passport-jwt-deepen-2",
@@ -37898,7 +37898,7 @@
     "source": "deepen",
     "package": "passport-jwt",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for ExtractJwt.fromExtractors() called with non-array argument — throws TypeError synchronously. The common mistake is passing a single extractor function instead of an array.",
     "evidence": {
       "repos": [],
@@ -37906,7 +37906,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis. fromExtractors is called during setup, not at request time."
     },
-    "resolution": null
+    "resolution": "Implemented. ExtractJwt.fromExtractors() is already detected via the generic throwing-function detector with from-extractors-non-array-throws postcondition. Confirmed: scanner fires 3 violations of from-extractors-non-array-throws in fixture run. No code change needed."
   },
   {
     "id": "concern-20260417-passport-jwt-deepen-3",
@@ -37914,7 +37914,7 @@
     "source": "deepen",
     "package": "passport-jwt",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "rejected",
     "description": "Add detection for async verify callback in passport-jwt Strategy without try-catch. The verify callback is called by the framework — if it throws (async rejection), passport catches it via self.error(ex). Without try-catch, database errors leave done() uncalled, hanging the request.",
     "evidence": {
       "repos": [],
@@ -37922,7 +37922,7 @@
       "violation_count": 0,
       "note": "Proactive — callback-based pattern needs special detector: detect async function as second arg to new Strategy() without internal try-catch."
     },
-    "resolution": null
+    "resolution": "Rejected: Detecting async verify callbacks without try-catch requires identifying async function expressions passed as the second argument to new Strategy() and then analyzing their body for try-catch absence. This is callback-pattern detection that requires extension of the callback-detector plugin. Zero real-world evidence (repos: [], violation_count: 0) does not justify the implementation effort at this time."
   },
   {
     "id": "concern-20260417-date-fns-deepen-1",
@@ -37930,7 +37930,7 @@
     "source": "deepen",
     "package": "date-fns",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for date-fns.format() — synchronous RangeError throw on Invalid Date; postcondition format-invalid-date added in depth pass but no scanner rule exists for synchronous throws",
     "evidence": {
       "repos": [],
@@ -37938,7 +37938,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis. format() throws RangeError(Invalid time value) on Invalid Date. Scanner needs to detect format() calls without isValid() guard."
     },
-    "resolution": null
+    "resolution": "Implemented. date-fns format() is detected by the generic throwing-function detector via the corpus contract. Confirmed: scanner fires format-invalid-date (8 violations) in fixture run. No code change needed — contract postcondition format-invalid-date drives detection."
   },
   {
     "id": "concern-20260417-date-fns-deepen-2",
@@ -37946,7 +37946,7 @@
     "source": "deepen",
     "package": "date-fns",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for date-fns.formatDistance/formatDistanceStrict/formatDistanceToNow/formatDistanceToNowStrict() — all throw RangeError(Invalid time value) on Invalid Date; postconditions added but no scanner rules exist",
     "evidence": {
       "repos": [],
@@ -37954,7 +37954,7 @@
       "violation_count": 0,
       "note": "Proactive — these are the most common date-fns functions in SaaS UIs (time-ago displays). All require isValid() guard before calling. Scanner needs to detect calls without isValid() guard."
     },
-    "resolution": null
+    "resolution": "Implemented. date-fns formatDistance/formatDistanceStrict/formatDistanceToNow/formatDistanceToNowStrict are detected by the generic throwing-function detector. Confirmed: scanner fires format-distance-invalid-date (4), format-distance-strict-invalid-date (2), format-distance-to-now-invalid-date (2), format-distance-to-now-strict-invalid-date (2) in fixture run. No code change needed."
   },
   {
     "id": "concern-20260417-date-fns-deepen-3",
@@ -37962,7 +37962,7 @@
     "source": "deepen",
     "package": "date-fns",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for date-fns.formatISO() — throws RangeError(Invalid time value) on Invalid Date; format-iso-invalid-date postcondition added but no scanner rule exists",
     "evidence": {
       "repos": [],
@@ -37970,7 +37970,7 @@
       "violation_count": 0,
       "note": "Proactive — formatISO() used for API timestamp serialization. Invalid Date in API response serializer causes 500 errors. Scanner needs isValid() guard detection."
     },
-    "resolution": null
+    "resolution": "Implemented. date-fns formatISO() is detected by the generic throwing-function detector via the corpus contract. Confirmed: scanner fires format-iso-invalid-date (2 violations) in fixture run. No code change needed."
   },
   {
     "id": "concern-20260417-date-fns-deepen-4",
@@ -37978,7 +37978,7 @@
     "source": "deepen",
     "package": "date-fns",
     "type": "pattern",
-    "status": "pending",
+    "status": "rejected",
     "description": "Add detection for date-fns parse() → format() pipeline without isValid() — parse returns Invalid Date, format throws. This is the most common crash pattern.",
     "evidence": {
       "repos": [],
@@ -37986,6 +37986,6 @@
       "violation_count": 0,
       "note": "Proactive — parse()+format() without isValid() is the #1 date-fns crash pattern. Needs dataflow analysis: detect when parse() return value is used in format() without isValid() guard."
     },
-    "resolution": null
+    "resolution": "Rejected: parse()+format() dataflow analysis requires tracking the return value of parse() and checking whether isValid() is called before it reaches format(). This is a cross-statement dataflow concern that the current scanner architecture (single-callsite detection) cannot implement without a significant architectural change. Deferring — zero real-world evidence (violation_count: 0, repos: []) does not justify complexity."
   }
 ]
