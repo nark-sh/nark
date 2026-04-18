@@ -1298,6 +1298,67 @@ export class ContractMatcher {
         }
       }
 
+      // ofetch / $fetch / ofetch.raw: option-aware postcondition routing.
+      //
+      // 1. ignoreResponseError suppression: ofetch.raw() with { ignoreResponseError: true }
+      //    behaves like native fetch() — returns the response for all status codes without
+      //    throwing FetchError. This is a documented ofetch escape hatch for inspecting error
+      //    responses. Suppress raw-still-throws-on-error when this option is statically present.
+      //    Evidence: concern-20260418-ofetch-deepen-1 (ground-truth rawWithIgnoreError).
+      //
+      // 2. timeout option routing: when ofetch() / $fetch() is called with { timeout: N },
+      //    fire ofetch-timeout-unhandled (more specific guidance about TimeoutError) rather
+      //    than the generic ofetch-no-try-catch. Both indicate a missing try-catch, but the
+      //    timeout variant tells the developer to check error.cause?.name === 'TimeoutError'.
+      //    Evidence: concern-20260418-ofetch-deepen-2 (ground-truth fetchWithTimeoutNoCatch).
+      if (
+        detection.packageName === "ofetch" &&
+        ts.isCallExpression(detection.node)
+      ) {
+        // Detect the options argument: ofetch(url, opts) → args[1]; ofetch.raw(url, opts) → args[1]
+        const ofetchArgs = detection.node.arguments;
+        const ofetchOptsArg = ofetchArgs.length >= 2 ? ofetchArgs[1] : undefined;
+
+        if (ofetchOptsArg && ts.isObjectLiteralExpression(ofetchOptsArg)) {
+          const ofetchOptionKeys = new Map<string, ts.Expression>();
+          for (const prop of ofetchOptsArg.properties) {
+            if (ts.isPropertyAssignment(prop) && ts.isIdentifier(prop.name)) {
+              ofetchOptionKeys.set(prop.name.text, prop.initializer);
+            }
+          }
+
+          // 1. ignoreResponseError suppression (raw-still-throws-on-error only)
+          if (
+            ofetchOptionKeys.has("ignoreResponseError") &&
+            postcondition.id === "raw-still-throws-on-error"
+          ) {
+            const ignoreVal = ofetchOptionKeys.get("ignoreResponseError");
+            // Only suppress when literally `true` — false/variable cannot be statically determined
+            if (ignoreVal && ignoreVal.kind === ts.SyntaxKind.TrueKeyword) {
+              continue; // ignoreResponseError: true — ofetch.raw() will not throw
+            }
+          }
+
+          // 2. timeout option routing: prefer ofetch-timeout-unhandled over ofetch-no-try-catch
+          if (
+            ofetchOptionKeys.has("timeout") &&
+            !postconditionResolved &&
+            (postcondition.id === "ofetch-no-try-catch" ||
+              postcondition.id === "dollar-fetch-no-try-catch")
+          ) {
+            const timeoutSpecific = postconditions.find(
+              (p) =>
+                p.id === "ofetch-timeout-unhandled" ||
+                p.id === "raw-timeout-unhandled",
+            );
+            if (timeoutSpecific) {
+              postcondition = timeoutSpecific;
+              postconditionResolved = true;
+            }
+          }
+        }
+      }
+
       // Skip warning-only postconditions that have no `throws` — these are informational
       // return-value risks (e.g., dayjs.format ReDoS) that don't require try-catch handling.
       // Warning postconditions WITH `throws` (e.g., clerk setActive) should still fire.
