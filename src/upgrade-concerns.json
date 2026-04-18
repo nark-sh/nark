@@ -39310,5 +39310,667 @@
       "note": "Proactive — source confirmed: isPayloadMethod check disables retry for POST/PUT/PATCH by default. Important for callers who expect automatic retry on transient 500s."
     },
     "resolution": null
+  },
+  {
+    "id": "concern-20260418-mysql2-deepen-1",
+    "created_at": "2026-04-18",
+    "source": "deepen",
+    "package": "mysql2",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for mysql2 connection.reset() — postconditions reset-connection-dead and reset-invalidates-prepared-statements added in depth pass but no scanner rule exists. The reset() method sends COM_RESET_CONNECTION and clears all server-side prepared statements. Callers that do not wrap reset() in try-catch risk PROTOCOL_CONNECTION_LOST going unhandled. Callers that cache PreparedStatementInfo across reset() will get unknown statement ID errors. Detection: add .reset( to await_patterns in contract.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — source confirmed: mysql2/lib/promise/connection.js lines 121-138 (reject path exists), mysql2/lib/commands/reset_connection.js (clears _statements cache). Detection rule needed for await_patterns: .reset("
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260418-mysql2-deepen-2",
+    "created_at": "2026-04-18",
+    "source": "deepen",
+    "package": "mysql2",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for mysql2 PreparedStatementInfo.close() missing call — postcondition prepared-statement-close-missing documents that not calling stmt.close() after connection.prepare() leaks server-side prepared statement slots. MySQL's max_prepared_stmt_count (default: 16,382) is exhausted over time causing ER_MAX_PREPARED_STMT_COUNT_REACHED on new prepare() calls. Detection pattern: connection.prepare() call exists but corresponding stmt.close() is absent in finally block — this is a static analysis unpaired-resource pattern.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — source confirmed: mysql2/lib/promise/prepared_statement_info.js close() always resolves (fire-and-forget). Resource leak detection: look for connection.prepare() calls without paired close() in finally. This is a resource pairing static analysis pattern distinct from try-catch patterns."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-18-tanstack-react-router-1",
+    "created_at": "2026-04-18",
+    "source": "dashboard-feedback",
+    "package": "@tanstack/react-router",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Multiple FP reports for @tanstack/react-router/invalid-route-path — 94 instances marked as false positive across 5 files",
+    "evidence": {
+      "repos": [
+        "src/components/command-menu.tsx",
+        "src/features/auth/sign-in/components/user-auth-form.tsx",
+        "src/routes/(auth)/accept-invite.tsx",
+        "src/routes/_authenticated/invoice/$invoiceId.tsx",
+        "src/features/errors/not-found-error.tsx"
+      ],
+      "scan_file": null,
+      "violation_count": 94,
+      "fp_reason": null,
+      "fix_target": "contract",
+      "postcondition_id": "invalid-route-path"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-18-undici-2",
+    "created_at": "2026-04-18",
+    "source": "dashboard-feedback",
+    "package": "undici",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Multiple FP reports for undici/response-json-parse-error — 64 instances marked as false positive across 5 files",
+    "evidence": {
+      "repos": [
+        "apps/web/app/api/github/debug/route.ts",
+        "apps/web/app/api/oss-scan/route.ts",
+        "apps/web/components/repositories/scan-button.tsx",
+        "apps/web/components/billing/change-plan-modal.tsx",
+        "apps/web/hooks/use-scan-poller.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 64,
+      "fp_reason": null,
+      "fix_target": "contract",
+      "postcondition_id": "response-json-parse-error"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-18-react-hook-form-3",
+    "created_at": "2026-04-18",
+    "source": "dashboard-feedback",
+    "package": "react-hook-form",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Multiple FP reports for react-hook-form/async-submit-unhandled-error — 60 instances marked as false positive across 5 files",
+    "evidence": {
+      "repos": [
+        "src/features/auth/sign-in/components/user-auth-form.tsx",
+        "src/features/auth/sign-up/components/sign-up-form.tsx",
+        "src/features/settings/profile/profile-form.tsx",
+        "src/features/customers/components/users-action-dialog.tsx",
+        "src/features/auth/forgot-password/components/forgot-password-form.tsx"
+      ],
+      "scan_file": null,
+      "violation_count": 60,
+      "fp_reason": null,
+      "fix_target": "contract",
+      "postcondition_id": "async-submit-unhandled-error"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-18-ai-4",
+    "created_at": "2026-04-18",
+    "source": "dashboard-feedback",
+    "package": "ai",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Multiple FP reports for ai/tool-execution-error — 25 instances marked as false positive across 5 files",
+    "evidence": {
+      "repos": [
+        "lib/tools/browser/browserAct.ts",
+        "lib/tools/browser/browserAgent.ts",
+        "lib/tools/files/readFile.ts",
+        "lib/tools/files/writeFile.ts",
+        "lib/tools/searchTwitter.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 25,
+      "fp_reason": null,
+      "fix_target": "contract",
+      "postcondition_id": "tool-execution-error"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-18-tanstack-react-query-5",
+    "created_at": "2026-04-18",
+    "source": "dashboard-feedback",
+    "package": "@tanstack/react-query",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Multiple FP reports for @tanstack/react-query/query-error-unhandled — 25 instances marked as false positive across 5 files",
+    "evidence": {
+      "repos": [
+        "hooks/useAccountOrganizations.ts",
+        "hooks/useArtistInstruction.ts",
+        "hooks/useCatalogs.ts",
+        "hooks/useCredits.ts",
+        "hooks/useProStatus.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 25,
+      "fp_reason": null,
+      "fix_target": "contract",
+      "postcondition_id": "query-error-unhandled"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-18-tanstack-react-router-6",
+    "created_at": "2026-04-18",
+    "source": "dashboard-feedback",
+    "package": "@tanstack/react-router",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Multiple FP reports for @tanstack/react-router/param-type-mismatch — 18 instances marked as false positive across 5 files",
+    "evidence": {
+      "repos": [
+        "src/features/browser-agents/browser-agent-detail.tsx",
+        "src/features/customers/customer-detail.tsx",
+        "src/features/documents/document-builder.tsx",
+        "src/features/invoices/invoice-detail.tsx",
+        "src/routes/_authenticated/executions/$workflowId.tsx"
+      ],
+      "scan_file": null,
+      "violation_count": 18,
+      "fp_reason": null,
+      "fix_target": "contract",
+      "postcondition_id": "param-type-mismatch"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-18-tanstack-react-router-7",
+    "created_at": "2026-04-18",
+    "source": "dashboard-feedback",
+    "package": "@tanstack/react-router",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Multiple FP reports for @tanstack/react-router/search-schema-validation-error — 14 instances marked as false positive across 5 files",
+    "evidence": {
+      "repos": [
+        "src/features/apps/index.tsx",
+        "src/features/auth/sign-in/index.tsx",
+        "src/features/auth/sign-up/index.tsx",
+        "src/features/chats/index.tsx",
+        "src/routes/(auth)/accept-invite.tsx"
+      ],
+      "scan_file": null,
+      "violation_count": 14,
+      "fp_reason": null,
+      "fix_target": "contract",
+      "postcondition_id": "search-schema-validation-error"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-18-zod-8",
+    "created_at": "2026-04-18",
+    "source": "dashboard-feedback",
+    "package": "zod",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Multiple FP reports for zod/parse-validation-error — 14 instances marked as false positive across 5 files",
+    "evidence": {
+      "repos": [
+        "apps/web/app/api/ai/analyze-sender-pattern/route.ts",
+        "apps/web/app/api/clean/gmail/route.ts",
+        "apps/web/app/api/google/contacts/route.ts",
+        "apps/web/app/api/labels/create/route.ts",
+        "apps/web/app/api/sso/signin/route.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 14,
+      "fp_reason": null,
+      "fix_target": "contract",
+      "postcondition_id": "parse-validation-error"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-18-react-hook-form-9",
+    "created_at": "2026-04-18",
+    "source": "dashboard-feedback",
+    "package": "react-hook-form",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Multiple FP reports for react-hook-form/missing-form-provider — 9 instances marked as false positive across 3 files",
+    "evidence": {
+      "repos": [
+        "components/Account/ArtistInstructionTextArea.tsx",
+        "components/Input.tsx",
+        "src/components/ui/form.tsx"
+      ],
+      "scan_file": null,
+      "violation_count": 9,
+      "fp_reason": null,
+      "fix_target": "contract",
+      "postcondition_id": "missing-form-provider"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-18-redis-10",
+    "created_at": "2026-04-18",
+    "source": "dashboard-feedback",
+    "package": "redis",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Multiple FP reports for redis/missing-error-listener — 7 instances marked as false positive across 1 files",
+    "evidence": {
+      "repos": [
+        "packages/api/src/main.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 7,
+      "fp_reason": null,
+      "fix_target": "contract",
+      "postcondition_id": "missing-error-listener"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-18-clerk-nextjs-11",
+    "created_at": "2026-04-18",
+    "source": "dashboard-feedback",
+    "package": "@clerk/nextjs",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Multiple FP reports for @clerk/nextjs/use-user-no-loaded-check — 7 instances marked as false positive across 5 files",
+    "evidence": {
+      "repos": [
+        "apps/web/app/(auth)/invite/[token]/page.tsx",
+        "apps/web/components/layout/header.tsx",
+        "apps/web/components/layout/sidebar.tsx",
+        "apps/web/components/layout/top-nav.tsx",
+        "apps/web/components/providers/analytics-provider.tsx"
+      ],
+      "scan_file": null,
+      "violation_count": 7,
+      "fp_reason": null,
+      "fix_target": "contract",
+      "postcondition_id": "use-user-no-loaded-check"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-18-ai-12",
+    "created_at": "2026-04-18",
+    "source": "dashboard-feedback",
+    "package": "ai",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Multiple FP reports for ai/api-error-rate-limit — 7 instances marked as false positive across 5 files",
+    "evidence": {
+      "repos": [
+        "apps/web/utils/llms/index.ts",
+        "lib/ai/generateArray.ts",
+        "lib/catalog/analyzeCatalogBatch.ts",
+        "lib/evals/scorers/CatalogAvailability.ts",
+        "lib/evals/scorers/QuestionAnswered.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 7,
+      "fp_reason": null,
+      "fix_target": "contract",
+      "postcondition_id": "api-error-rate-limit"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-18-express-13",
+    "created_at": "2026-04-18",
+    "source": "dashboard-feedback",
+    "package": "express",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Multiple FP reports for express/async-middleware-unhandled-rejection — 5 instances marked as false positive across 2 files",
+    "evidence": {
+      "repos": [
+        "api/browser-agent-server.ts",
+        "api/dev-server.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 5,
+      "fp_reason": null,
+      "fix_target": "contract",
+      "postcondition_id": "async-middleware-unhandled-rejection"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-18-tanstack-react-query-14",
+    "created_at": "2026-04-18",
+    "source": "dashboard-feedback",
+    "package": "@tanstack/react-query",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Multiple FP reports for @tanstack/react-query/infinite-query-error-unhandled — 3 instances marked as false positive across 3 files",
+    "evidence": {
+      "repos": [
+        "hooks/useArtistFans.ts",
+        "hooks/useArtistPosts.ts",
+        "hooks/useCatalogSongs.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 3,
+      "fp_reason": null,
+      "fix_target": "contract",
+      "postcondition_id": "infinite-query-error-unhandled"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-18-clerk-nextjs-15",
+    "created_at": "2026-04-18",
+    "source": "dashboard-feedback",
+    "package": "@clerk/nextjs",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Multiple FP reports for @clerk/nextjs/use-clerk-outside-provider — 3 instances marked as false positive across 3 files",
+    "evidence": {
+      "repos": [
+        "apps/web/components/layout/header.tsx",
+        "apps/web/components/layout/sidebar.tsx",
+        "apps/web/components/layout/top-nav.tsx"
+      ],
+      "scan_file": null,
+      "violation_count": 3,
+      "fp_reason": null,
+      "fix_target": "contract",
+      "postcondition_id": "use-clerk-outside-provider"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-18-stripe-16",
+    "created_at": "2026-04-18",
+    "source": "dashboard-feedback",
+    "package": "stripe",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Multiple FP reports for stripe/rate-limit-error — 3 instances marked as false positive across 1 files",
+    "evidence": {
+      "repos": [
+        "apps/web/lib/stripe.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 3,
+      "fp_reason": null,
+      "fix_target": "contract",
+      "postcondition_id": "rate-limit-error"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-18-dotenv-17",
+    "created_at": "2026-04-18",
+    "source": "dashboard-feedback",
+    "package": "dotenv",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Multiple FP reports for dotenv/missing-env-file — 3 instances marked as false positive across 1 files",
+    "evidence": {
+      "repos": [
+        "src/lib/migrations/supabase.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 3,
+      "fp_reason": null,
+      "fix_target": "contract",
+      "postcondition_id": "missing-env-file"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-18-node-fetch-18",
+    "created_at": "2026-04-18",
+    "source": "dashboard-feedback",
+    "package": "node-fetch",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Multiple FP reports for node-fetch/fetch-rejects-on-network-error — 2 instances marked as false positive across 2 files",
+    "evidence": {
+      "repos": [
+        "api/analysis/post-game-analysis.ts",
+        "api/utils/ai-client.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 2,
+      "fp_reason": null,
+      "fix_target": "contract",
+      "postcondition_id": "fetch-rejects-on-network-error"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-18-react-hook-form-19",
+    "created_at": "2026-04-18",
+    "source": "dashboard-feedback",
+    "package": "react-hook-form",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Multiple FP reports for react-hook-form/unhandled-field-array-operations — 2 instances marked as false positive across 1 files",
+    "evidence": {
+      "repos": [
+        "src/features/settings/profile/profile-form.tsx"
+      ],
+      "scan_file": null,
+      "violation_count": 2,
+      "fp_reason": null,
+      "fix_target": "contract",
+      "postcondition_id": "unhandled-field-array-operations"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-18-tanstack-react-query-20",
+    "created_at": "2026-04-18",
+    "source": "dashboard-feedback",
+    "package": "@tanstack/react-query",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Multiple FP reports for @tanstack/react-query/mutation-error-unhandled — 2 instances marked as false positive across 2 files",
+    "evidence": {
+      "repos": [
+        "hooks/useCatalogSongsFileSelect.ts",
+        "hooks/useSandboxFileContent.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 2,
+      "fp_reason": null,
+      "fix_target": "contract",
+      "postcondition_id": "mutation-error-unhandled"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-18-ioredis-21",
+    "created_at": "2026-04-18",
+    "source": "dashboard-feedback",
+    "package": "ioredis",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Multiple FP reports for ioredis/missing-error-listener — 2 instances marked as false positive across 2 files",
+    "evidence": {
+      "repos": [
+        "apps/web/lib/auth-cache.ts",
+        "apps/web/lib/rate-limit.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 2,
+      "fp_reason": null,
+      "fix_target": "contract",
+      "postcondition_id": "missing-error-listener"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-18-vercel-blob-22",
+    "created_at": "2026-04-18",
+    "source": "dashboard-feedback",
+    "package": "@vercel/blob",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Multiple FP reports for @vercel/blob/blob-del-no-try-catch — 2 instances marked as false positive across 1 files",
+    "evidence": {
+      "repos": [
+        "lib/sandbox/postSandboxesFilesHandler.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 2,
+      "fp_reason": null,
+      "fix_target": "contract",
+      "postcondition_id": "blob-del-no-try-catch"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-18-supabase-supabase-js-23",
+    "created_at": "2026-04-18",
+    "source": "dashboard-feedback",
+    "package": "@supabase/supabase-js",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Multiple FP reports for @supabase/supabase-js/rls-policy-violation — 1 instances marked as false positive across 1 files",
+    "evidence": {
+      "repos": [
+        "packages/api/src/main.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 1,
+      "fp_reason": null,
+      "fix_target": "contract",
+      "postcondition_id": "rls-policy-violation"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-18-ai-24",
+    "created_at": "2026-04-18",
+    "source": "dashboard-feedback",
+    "package": "ai",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Multiple FP reports for ai/schema-validation-error — 1 instances marked as false positive across 1 files",
+    "evidence": {
+      "repos": [
+        "apps/web/utils/llms/index.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 1,
+      "fp_reason": null,
+      "fix_target": "contract",
+      "postcondition_id": "schema-validation-error"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-18-axios-25",
+    "created_at": "2026-04-18",
+    "source": "dashboard-feedback",
+    "package": "axios",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Multiple FP reports for axios/error-4xx-5xx — 1 instances marked as false positive across 1 files",
+    "evidence": {
+      "repos": [
+        "packages/scanner/src/v2/fixtures/test-suppressions/with-inline-suppression.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 1,
+      "fp_reason": null,
+      "fix_target": "contract",
+      "postcondition_id": "error-4xx-5xx"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-18-upstash-redis-26",
+    "created_at": "2026-04-18",
+    "source": "dashboard-feedback",
+    "package": "@upstash/redis",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Multiple FP reports for @upstash/redis/network-or-api-error — 1 instances marked as false positive across 1 files",
+    "evidence": {
+      "repos": [
+        "apps/web/utils/redis/index.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 1,
+      "fp_reason": null,
+      "fix_target": "contract",
+      "postcondition_id": "network-or-api-error"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-18-puppeteer-27",
+    "created_at": "2026-04-18",
+    "source": "dashboard-feedback",
+    "package": "puppeteer",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Multiple FP reports for puppeteer/browser-close-must-run — 1 instances marked as false positive across 1 files",
+    "evidence": {
+      "repos": [
+        "api/browser-agent-executor.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 1,
+      "fp_reason": null,
+      "fix_target": "contract",
+      "postcondition_id": "browser-close-must-run"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-18-winston-28",
+    "created_at": "2026-04-18",
+    "source": "dashboard-feedback",
+    "package": "winston",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Multiple FP reports for winston/missing-error-listener — 1 instances marked as false positive across 1 files",
+    "evidence": {
+      "repos": [
+        "apps/web/scripts/setup-telegram-bot.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 1,
+      "fp_reason": null,
+      "fix_target": "contract",
+      "postcondition_id": "missing-error-listener"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-18-supabase-supabase-js-29",
+    "created_at": "2026-04-18",
+    "source": "dashboard-feedback",
+    "package": "@supabase/supabase-js",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Multiple FP reports for @supabase/supabase-js/weak-password — 1 instances marked as false positive across 1 files",
+    "evidence": {
+      "repos": [
+        "src/contexts/auth-context.tsx"
+      ],
+      "scan_file": null,
+      "violation_count": 1,
+      "fp_reason": null,
+      "fix_target": "contract",
+      "postcondition_id": "weak-password"
+    },
+    "resolution": null
   }
 ]
