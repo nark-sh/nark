@@ -37197,5 +37197,53 @@
       "postcondition_id": "unhandled-field-array-operations"
     },
     "resolution": null
+  },
+  {
+    "id": "concern-20260417-uuid-deepen-1",
+    "created_at": "2026-04-17",
+    "source": "deepen",
+    "package": "uuid",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for uuid.parse() without validate() guard \u2014 postcondition parse-invalid-uuid added in depth pass but no scanner rule exists. Pattern: parse(userInput) without preceding validate(userInput) check.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. parse() throws TypeError(\"Invalid UUID\") on invalid input. Most common in Express route handlers: parse(req.params.id) without validate() first."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260417-uuid-deepen-2",
+    "created_at": "2026-04-17",
+    "source": "deepen",
+    "package": "uuid",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for uuid.version() without validate() guard \u2014 postcondition version-invalid-uuid added in depth pass. Same pattern as parse(): version(userInput) without validate(userInput) throws TypeError.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. version() throws TypeError(\"Invalid UUID\") for any non-UUID string. Less common than parse() but same risk profile."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260417-uuid-deepen-3",
+    "created_at": "2026-04-17",
+    "source": "deepen",
+    "package": "uuid",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for uuid.v3()/v5() with invalid namespace \u2014 postconditions v3-invalid-namespace and v5-invalid-namespace added. Pattern: v3(name, string) or v5(name, string) where string is not a valid UUID.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 v35.js throws TypeError(\"Namespace must be array-like...\") when namespace is not a 16-byte array or valid UUID string. Use v3.DNS, v3.URL, v5.DNS, v5.URL constants instead."
+    },
+    "resolution": null
   }
 ]
