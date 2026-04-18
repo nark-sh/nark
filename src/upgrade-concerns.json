@@ -40644,5 +40644,65 @@
       "note": "Proactive \u2014 confirmed throw from typescript.js source line 126937"
     },
     "resolution": "ts.createProgram() detected via direct function call import. typescript/contract.yaml fixed invalid business_impact enum values."
+  },
+  {
+    "id": "concern-20260418-nock-deepen-1",
+    "created_at": "2026-04-18",
+    "source": "deepen",
+    "package": "nock",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for nock.load() \u2014 no try-catch around sync file read crashes test setup with ENOENT or SyntaxError; postcondition load-file-not-found / load-invalid-json added in depth pass",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
+    }
+  },
+  {
+    "id": "concern-20260418-nock-deepen-2",
+    "created_at": "2026-04-18",
+    "source": "deepen",
+    "package": "nock",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for nock.loadDefs() \u2014 identical error profile to load(); loaddefs-file-not-found postcondition added in depth pass",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
+    }
+  },
+  {
+    "id": "concern-20260418-nock-deepen-3",
+    "created_at": "2026-04-18",
+    "source": "deepen",
+    "package": "nock",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for scope.done() \u2014 called without prior request consumption throws AssertionError; also detect scope.done() called inside async callback (hidden failures); postconditions scope-done-unused-mocks-throw and scope-done-swallowed-in-async-callback added",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
+    }
+  },
+  {
+    "id": "concern-20260418-nock-deepen-4",
+    "created_at": "2026-04-18",
+    "source": "deepen",
+    "package": "nock",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for nock.back() \u2014 called without nock.back.fixtures set throws synchronously; setMode() with invalid string throws; postconditions back-fixtures-not-set and back-unknown-mode added",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
+    }
   }
 ]
