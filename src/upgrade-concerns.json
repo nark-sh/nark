@@ -37994,7 +37994,7 @@
     "source": "deepen",
     "package": "luxon",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for DateTime.fromMillis() \u2014 postcondition added in depth pass but no scanner rule exists. Throws InvalidArgumentError for non-number input. Need to detect: await-less but direct call without try-catch when argument is typed as string | number or unknown.",
     "evidence": {
       "repos": [],
@@ -38002,7 +38002,8 @@
       "violation_count": 0,
       "note": "Proactive \u2014 contract added via API surface analysis. fromMillis throws for non-number; common when API timestamps arrive as strings."
     },
-    "resolution": null
+    "resolution": "Verified: DateTime.fromMillis() detection works generically via type_names (DateTime\u2192luxon) + ThrowingFunctionDetector. Contract postcondition ID fixed to frommillis-non-number-throws (lowercase). Ground-truth test passes: L29 fires frommillis-non-number-throws. No scanner code changes needed.",
+    "resolved_at": "2026-04-17T00:00:00Z"
   },
   {
     "id": "concern-20260417-luxon-deepen-2",
@@ -38010,7 +38011,7 @@
     "source": "deepen",
     "package": "luxon",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for DateTime.fromSeconds() \u2014 throws InvalidArgumentError for non-number input. Same detection pattern as fromMillis concern. fromSeconds is used for Unix timestamps from PostgreSQL extract(epoch) or external API responses.",
     "evidence": {
       "repos": [],
@@ -38018,7 +38019,8 @@
       "violation_count": 0,
       "note": "Proactive \u2014 contract added via API surface analysis. fromSeconds throws for non-number input."
     },
-    "resolution": null
+    "resolution": "Verified: DateTime.fromSeconds() detection works generically. Contract postcondition ID fixed to fromseconds-non-number-throws (lowercase). Ground-truth test passes: L69 fires fromseconds-non-number-throws. No scanner code changes needed.",
+    "resolved_at": "2026-04-17T00:00:00Z"
   },
   {
     "id": "concern-20260417-luxon-deepen-3",
@@ -38026,7 +38028,7 @@
     "source": "deepen",
     "package": "luxon",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for DateTime.startOf() and DateTime.endOf() \u2014 throws InvalidUnitError for unrecognized unit strings. Need to detect: dt.startOf(dynamicUnit) or dt.endOf(dynamicUnit) where unit is not a hardcoded valid string and is not validated before use.",
     "evidence": {
       "repos": [],
@@ -38034,7 +38036,8 @@
       "violation_count": 0,
       "note": "Proactive \u2014 startOf/endOf throw for invalid unit strings like \"date\" (use \"day\"), \"min\" (use \"minute\")."
     },
-    "resolution": null
+    "resolution": "Verified: DateTime.startOf() and DateTime.endOf() detected via InstanceTrackerPlugin (parameter dt: DateTime \u2192 luxon instance) + ThrowingFunctionDetector. Contract IDs startof-invalid-unit and endof-invalid-unit. Ground-truth tests: L155 fires startof-invalid-unit, L189 fires endof-invalid-unit. 21/21 tests pass.",
+    "resolved_at": "2026-04-17T00:00:00Z"
   },
   {
     "id": "concern-20260417-luxon-deepen-4",
@@ -38042,7 +38045,7 @@
     "source": "deepen",
     "package": "luxon",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for DateTime.min() and DateTime.max() \u2014 throws InvalidArgumentError if any argument is not a DateTime instance. Need to detect: DateTime.min(arr.map(d => d.date)) pattern or DateTime.min(...mixedArray) where array elements may not be DateTime instances. Detection requires type tracking of spread array elements.",
     "evidence": {
       "repos": [],
@@ -38050,7 +38053,8 @@
       "violation_count": 0,
       "note": "Proactive \u2014 min/max throw if any arg is a JS Date, timestamp number, or null. Common in date range calculations."
     },
-    "resolution": null
+    "resolution": "Verified: DateTime.min() and DateTime.max() detected as static calls on imported DateTime type. Contract postconditions min-non-datetime-throws and max-non-datetime-throws. Ground-truth tests: L209 fires min-non-datetime-throws, L235 fires max-non-datetime-throws. 21/21 tests pass.",
+    "resolved_at": "2026-04-17T00:00:00Z"
   },
   {
     "id": "concern-20260417-luxon-deepen-5",
@@ -38058,7 +38062,7 @@
     "source": "deepen",
     "package": "luxon",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for DateTime.fromObject() ConflictingSpecificationError \u2014 throws when weekYear/weekNumber are mixed with gregorian fields (year/month/day) or when ordinal is mixed with month/day. Pattern detection requires inspecting the keys of the argument object to identify conflicting field combinations.",
     "evidence": {
       "repos": [],
@@ -38066,7 +38070,8 @@
       "violation_count": 0,
       "note": "Proactive \u2014 fromObject throws ConflictingSpecificationError for mutually exclusive calendar field combinations. Distinct from the existing returns-invalid pattern."
     },
-    "resolution": null
+    "resolution": "Verified: DateTime.fromObject() detected via factory_methods. Contract has fromobject-conflicting-specification postcondition. Ground-truth tests: L95 and L101 both fire fromobject-conflicting-specification. 21/21 tests pass.",
+    "resolved_at": "2026-04-17T00:00:00Z"
   },
   {
     "id": "concern-20260417-validator-deepen-1",
@@ -38074,7 +38079,7 @@
     "source": "deepen",
     "package": "validator",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "deferred",
     "description": "Add detection for validator.isStrongPassword() \u2014 weak-defaults, returnScore-misread postconditions added but no scanner rule exists",
     "evidence": {
       "repos": [],
@@ -38082,7 +38087,8 @@
       "violation_count": 0,
       "note": "Proactive \u2014 contract added via API surface analysis: isStrongPassword weak defaults and returnScore boolean misuse"
     },
-    "resolution": null
+    "resolution": "Deferred: isStrongPassword() with insufficient complexity options \u2014 requires data-flow analysis to track which options keys are present. Not yet implemented in scanner.",
+    "resolved_at": "2026-04-17T00:00:00Z"
   },
   {
     "id": "concern-20260417-validator-deepen-2",
@@ -38090,7 +38096,7 @@
     "source": "deepen",
     "package": "validator",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "deferred",
     "description": "Add detection for validator.isJWT() \u2014 jwt-format-only-not-verified postcondition added: isJWT() does not verify JWT signature",
     "evidence": {
       "repos": [],
@@ -38098,7 +38104,8 @@
       "violation_count": 0,
       "note": "Proactive \u2014 isJWT() validates structure only, not cryptographic signature. High security risk if used for auth decisions."
     },
-    "resolution": null
+    "resolution": "Deferred: isJWT() format-only-not-verified \u2014 requires data-flow analysis to determine if result is used for auth decisions. Not yet implemented.",
+    "resolved_at": "2026-04-17T00:00:00Z"
   },
   {
     "id": "concern-20260417-validator-deepen-3",
@@ -38106,7 +38113,7 @@
     "source": "deepen",
     "package": "validator",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "deferred",
     "description": "Add detection for validator.stripLow() \u2014 strip-low-not-xss-defense and strip-low-newline-option postconditions added",
     "evidence": {
       "repos": [],
@@ -38114,7 +38121,8 @@
       "violation_count": 0,
       "note": "Proactive \u2014 stripLow() misuse: used as XSS defense (incorrect), and default keep_new_lines=false silently corrupts multiline content"
     },
-    "resolution": null
+    "resolution": "Deferred: stripLow() result-not-used \u2014 requires tracking whether return value is assigned/used. Result-usage analysis not yet implemented.",
+    "resolved_at": "2026-04-17T00:00:00Z"
   },
   {
     "id": "concern-20260417-validator-deepen-4",
@@ -38122,7 +38130,7 @@
     "source": "deepen",
     "package": "validator",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "deferred",
     "description": "Add detection for validator.toDate()/toFloat()/toInt() \u2014 null/NaN return value unchecked postconditions added",
     "evidence": {
       "repos": [],
@@ -38130,7 +38138,8 @@
       "violation_count": 0,
       "note": "Proactive \u2014 toDate returns null (TypeError on .getFullYear()), toFloat/toInt return NaN (silent arithmetic corruption)"
     },
-    "resolution": null
+    "resolution": "Deferred: toDate()/toFloat()/toInt() coercion \u2014 requires tracking whether null/NaN results are checked. Deferred pending result-usage analysis.",
+    "resolved_at": "2026-04-17T00:00:00Z"
   },
   {
     "id": "concern-20260417-validator-deepen-5",
@@ -38138,7 +38147,7 @@
     "source": "deepen",
     "package": "validator",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "deferred",
     "description": "Add detection for validator.isCreditCard() \u2014 credit-card-format-only postcondition: format check is NOT payment authorization",
     "evidence": {
       "repos": [],
@@ -38146,7 +38155,8 @@
       "violation_count": 0,
       "note": "Proactive \u2014 isCreditCard() only validates Luhn + format; test cards like 4111111111111111 pass but are not real cards"
     },
-    "resolution": null
+    "resolution": "Deferred: isCreditCard() \u2014 fixed business_impact schema validation in validator/contract.yaml (silent_data_loss\u2192silent_failure, hidden\u2192silent, degraded\u2192lost_transaction, PAYMENT_RISK label). Corpus now validates. Scanner detection for result-not-checked pattern pending.",
+    "resolved_at": "2026-04-17T00:00:00Z"
   },
   {
     "id": "concern-20260417-express-async-errors-deepen-1",
@@ -38209,6 +38219,86 @@
       "scan_file": null,
       "violation_count": 0,
       "note": "Proactive \u2014 contract added via API surface analysis; GitHub issue #47 confirms silent failure in production builds with code-splitting"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260417-bull-deepen-1",
+    "created_at": "2026-04-17",
+    "source": "deepen",
+    "package": "bull",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for Job.extendLock() return value unchecked \u2014 postcondition extend-lock-zero-return-unchecked added. Scanner should detect calls to job.extendLock() where the resolved value is not checked (i.e., await job.extendLock() without assigning to variable and checking falsy). Return value 0 means lock taken by another worker \u2014 unchecked causes duplicate job processing.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. Key behavioral contract: extendLock returns 0 when lock lost, not an exception. Silent 0 return causes duplicate processing in distributed deployments."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260417-bull-deepen-2",
+    "created_at": "2026-04-17",
+    "source": "deepen",
+    "package": "bull",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for Queue.getMetrics() without try-catch \u2014 postcondition get-metrics-no-try-catch added. Scanner should detect calls to queue.getMetrics() not wrapped in try-catch. The internal Redis multi/exec pipeline throws on connection errors (getters.js line 247: throw err || err2 || err3).",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. getMetrics uses Redis pipeline; confirmed throw from source inspection of bull/lib/getters.js."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260418-passport-local-deepen-1",
+    "created_at": "2026-04-18",
+    "source": "deepen",
+    "package": "passport-local",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for passport-local passReqToCallback signature mismatch \u2014 postcondition added in depth pass but no scanner rule exists. Detect when passReqToCallback:true is set but verify callback has 3 params instead of 4.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. passReqToCallback:true changes verify signature from (user,pass,done) to (req,user,pass,done). Mismatch causes request hang \u2014 silent failure."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260418-passport-local-deepen-2",
+    "created_at": "2026-04-18",
+    "source": "deepen",
+    "package": "passport-local",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for passport-local field name mismatch \u2014 usernameField/passwordField options not configured to match HTML form field names. Detect when form uses non-default field names without configuring strategy options.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. Default field names are username/password. If form uses email/pass/etc., options must be set. Without them, strategy returns HTTP 400 Missing credentials silently."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260418-passport-local-deepen-3",
+    "created_at": "2026-04-18",
+    "source": "deepen",
+    "package": "passport-local",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for passport-local missing body-parser middleware \u2014 express.urlencoded/express.json not mounted before passport.authenticate(). Detect middleware registration order violations.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. Without body-parser, req.body is undefined and strategy returns HTTP 400 Missing credentials even with correct form submission."
     },
     "resolution": null
   }
