@@ -5,16 +5,16 @@
  * corpus/packages/mammoth/fixtures/ground-truth.ts becomes one test case.
  *
  * Postcondition IDs from corpus/packages/mammoth/contract.yaml:
- *   file-read-error      (convertToHtml/extractRawText without try-catch throws on file errors)
- *   corrupt-docx-error   (convertToHtml/extractRawText without try-catch throws on corrupt input)
+ *   file-read-error                     (convertToHtml/extractRawText without try-catch)
+ *   converttomarkdown-file-read-error   (convertToMarkdown without try-catch)
+ *   embedstylemap-file-read-error       (embedStyleMap without try-catch)
  *
  * Key behaviors under test:
- *   - await mammoth.convertToHtml({path}) without try-catch → SHOULD_FIRE
- *   - await mammoth.convertToHtml({buffer}) without try-catch → SHOULD_FIRE (file-read-error)
- *   - await mammoth.extractRawText({path}) without try-catch → SHOULD_FIRE
- *   - await mammoth.extractRawText({buffer}) without try-catch → SHOULD_FIRE (file-read-error)
- *   - await mammoth.convertToHtml({path}) inside try-catch → SHOULD_NOT_FIRE
- *   - await mammoth.extractRawText({path}) inside try-catch → SHOULD_NOT_FIRE
+ *   - await mammoth.convertToHtml({path/buffer}) without try-catch → SHOULD_FIRE (file-read-error)
+ *   - await mammoth.extractRawText({path/buffer}) without try-catch → SHOULD_FIRE (file-read-error)
+ *   - await mammoth.convertToMarkdown({path/buffer}) without try-catch → SHOULD_FIRE (converttomarkdown-file-read-error)
+ *   - await mammoth.embedStyleMap({path/buffer}) without try-catch → SHOULD_FIRE (embedstylemap-file-read-error)
+ *   - all of the above inside try-catch → SHOULD_NOT_FIRE
  */
 
 import { describe, it, expect, beforeAll } from 'vitest';
