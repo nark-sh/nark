@@ -40500,5 +40500,69 @@
       "note": "Proactive \u2014 transformWithOxc() replaces deprecated transformWithEsbuild(). Confirmed throw at node_modules/vite/dist/node/chunks/node.js:3750-3800. Error has .errors array."
     },
     "resolution": null
+  },
+  {
+    "id": "concern-20260418-supertest-deepen-1",
+    "created_at": "2026-04-18",
+    "source": "deepen",
+    "package": "supertest",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for request.agent() \u2014 postcondition agent-async-unhandled-rejection added in depth pass but no scanner rule exists. Detect when agent() method call result chain is not awaited/returned in async test context.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260418-supertest-deepen-2",
+    "created_at": "2026-04-18",
+    "source": "deepen",
+    "package": "supertest",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for request.agent() \u2014 postcondition agent-cookie-state-leak: detect when agent instance is created at module scope (outside describe/beforeEach) and used across multiple async test functions, which risks cookie state pollution between tests.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260418-supertest-deepen-3",
+    "created_at": "2026-04-18",
+    "source": "deepen",
+    "package": "supertest",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for request.agent() \u2014 postcondition agent-server-not-closed: detect when agent(server) is called with a net.Server argument and no server.close() appears in afterAll/after cleanup hooks in the same file.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260418-supertest-deepen-4",
+    "created_at": "2026-04-18",
+    "source": "deepen",
+    "package": "supertest",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for request.agent() \u2014 postcondition agent-http2-not-supported: detect when { http2: true } is passed to request.agent() without a Node.js version guard or try-catch. Synchronous throw in constructor.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
   }
 ]
