@@ -36895,5 +36895,307 @@
       "note": "Proactive \u2014 confirmed from yup/index.js line 386. This is a programmer error (mixing sync validate with async schema) rather than a runtime user-data error. Blocks on factory-method tracking (concern-20260417-yup-deepen-1)."
     },
     "resolution": "Deferred: blocked by concern-20260417-yup-deepen-1 (factory-method tracking). Cannot detect validateSync() on schemas with async tests until factory-return tracking is implemented."
+  },
+  {
+    "id": "concern-2026-04-17-ai-1",
+    "created_at": "2026-04-17",
+    "source": "dashboard-feedback",
+    "package": "ai",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "tool-execution-error postcondition fires on async tool functions where the tool framework (ai SDK) handles errors at the callback boundary; each tool file exports a single async arrow function and the SDK wraps calls in its own try/catch",
+    "evidence": {
+      "repos": [
+        "lib/tools/searchTwitter.ts",
+        "lib/tools/getArtistSegments.ts",
+        "lib/tools/getSocialPosts.ts",
+        "lib/tools/getApifyScraper.ts",
+        "lib/tools/browser/browserObserve.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 26,
+      "fp_reason": "",
+      "fix_target": "contract",
+      "postcondition_id": "tool-execution-error"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-17-ai-2",
+    "created_at": "2026-04-17",
+    "source": "dashboard-feedback",
+    "package": "ai",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "api-error-rate-limit postcondition fires on AI SDK call sites that are themselves inside evaluation/scoring helpers \u2014 these are not production paths and the calling framework handles retries and error aggregation",
+    "evidence": {
+      "repos": [
+        "lib/evals/scorers/QuestionAnswered.ts",
+        "lib/evals/scorers/CatalogAvailability.ts",
+        "lib/catalog/analyzeCatalogBatch.ts",
+        "lib/ai/generateArray.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 7,
+      "fp_reason": "",
+      "fix_target": "contract",
+      "postcondition_id": "api-error-rate-limit"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-17-ai-3",
+    "created_at": "2026-04-17",
+    "source": "dashboard-feedback",
+    "package": "ai",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "schema-validation-error postcondition fires on a utility function in apps/web/utils/llms/index.ts that wraps schema validation \u2014 the outer caller handles the error",
+    "evidence": {
+      "repos": [
+        "apps/web/utils/llms/index.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 1,
+      "fp_reason": "",
+      "fix_target": "contract",
+      "postcondition_id": "schema-validation-error"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-17-axios-4",
+    "created_at": "2026-04-17",
+    "source": "dashboard-feedback",
+    "package": "axios",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "error-4xx-5xx violation fires on test fixture file (test-suppressions/with-inline-suppression.ts) that contains an inline suppression comment \u2014 scanner is not honoring the suppression",
+    "evidence": {
+      "repos": [
+        "packages/scanner/src/v2/fixtures/test-suppressions/with-inline-suppression.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 1,
+      "fp_reason": "",
+      "fix_target": "scanner",
+      "postcondition_id": "error-4xx-5xx"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-17-clerk-nextjs-5",
+    "created_at": "2026-04-17",
+    "source": "dashboard-feedback",
+    "package": "@clerk/nextjs",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "use-user-no-loaded-check postcondition fires on components that call useUser() without checking isLoaded \u2014 but these are layout/provider components (sidebar, header, top-nav, analytics-provider) that render conditionally based on auth state managed by ClerkProvider; the isLoaded check is not needed when Clerk wraps the entire app",
+    "evidence": {
+      "repos": [
+        "apps/web/components/layout/sidebar.tsx",
+        "apps/web/components/settings/profile-settings.tsx",
+        "apps/web/app/(auth)/invite/[token]/page.tsx",
+        "apps/web/components/layout/top-nav.tsx",
+        "apps/web/components/layout/header.tsx"
+      ],
+      "scan_file": null,
+      "violation_count": 7,
+      "fp_reason": "",
+      "fix_target": "contract",
+      "postcondition_id": "use-user-no-loaded-check"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-17-clerk-nextjs-6",
+    "created_at": "2026-04-17",
+    "source": "dashboard-feedback",
+    "package": "@clerk/nextjs",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "use-clerk-outside-provider violation fires on components inside ClerkProvider boundary \u2014 scanner does not trace the component tree to confirm ClerkProvider wraps the call site",
+    "evidence": {
+      "repos": [
+        "apps/web/components/layout/top-nav.tsx",
+        "apps/web/components/layout/sidebar.tsx",
+        "apps/web/components/layout/header.tsx"
+      ],
+      "scan_file": null,
+      "violation_count": 3,
+      "fp_reason": "",
+      "fix_target": "scanner",
+      "postcondition_id": "use-clerk-outside-provider"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-17-dotenv-7",
+    "created_at": "2026-04-17",
+    "source": "dashboard-feedback",
+    "package": "dotenv",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "missing-env-file postcondition fires on a migration script (src/lib/migrations/supabase.ts) that intentionally loads .env.local \u2014 this is a one-off script run locally, not production code, and the contract should not apply to migration scripts",
+    "evidence": {
+      "repos": [
+        "src/lib/migrations/supabase.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 2,
+      "fp_reason": "",
+      "fix_target": "contract",
+      "postcondition_id": "missing-env-file"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-17-express-8",
+    "created_at": "2026-04-17",
+    "source": "dashboard-feedback",
+    "package": "express",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "async-middleware-unhandled-rejection postcondition fires on a dev-server.ts file that is not deployed to production \u2014 these are development-only express handlers; the contract should not apply to dev-only server files",
+    "evidence": {
+      "repos": [
+        "api/dev-server.ts",
+        "api/browser-agent-server.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 5,
+      "fp_reason": "",
+      "fix_target": "contract",
+      "postcondition_id": "async-middleware-unhandled-rejection"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-17-ioredis-9",
+    "created_at": "2026-04-17",
+    "source": "dashboard-feedback",
+    "package": "ioredis",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "missing-error-listener postcondition fires on Redis clients in auth-cache.ts and rate-limit.ts \u2014 scanner does not detect that the error listener is registered elsewhere in the module or through a shared client factory",
+    "evidence": {
+      "repos": [
+        "apps/web/lib/auth-cache.ts",
+        "apps/web/lib/rate-limit.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 2,
+      "fp_reason": "",
+      "fix_target": "scanner",
+      "postcondition_id": "missing-error-listener"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-17-node-fetch-10",
+    "created_at": "2026-04-17",
+    "source": "dashboard-feedback",
+    "package": "node-fetch",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "fetch-rejects-on-network-error postcondition fires on fetch calls inside utility functions (ai-client.ts, post-game-analysis.ts) that are wrapped by the calling code \u2014 inner utility functions should not require try/catch if the caller handles errors",
+    "evidence": {
+      "repos": [
+        "api/utils/ai-client.ts",
+        "api/analysis/post-game-analysis.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 2,
+      "fp_reason": "",
+      "fix_target": "contract",
+      "postcondition_id": "fetch-rejects-on-network-error"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-17-puppeteer-11",
+    "created_at": "2026-04-17",
+    "source": "dashboard-feedback",
+    "package": "puppeteer",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "browser-close-must-run postcondition fires on a browser executor function (browser-agent-executor.ts:921) that already uses try/finally to ensure browser.close() is called \u2014 scanner may not be recognizing the finally block pattern",
+    "evidence": {
+      "repos": [
+        "api/browser-agent-executor.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 1,
+      "fp_reason": "",
+      "fix_target": "contract",
+      "postcondition_id": "browser-close-must-run"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-17-react-hook-form-12",
+    "created_at": "2026-04-17",
+    "source": "dashboard-feedback",
+    "package": "react-hook-form",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "missing-form-provider postcondition fires on FormField/Input components that use useFormContext \u2014 these are reusable form components designed to be used inside FormProvider; the postcondition is too broad and should only fire if the component is rendered outside any FormProvider",
+    "evidence": {
+      "repos": [
+        "components/Input.tsx",
+        "components/Account/ArtistInstructionTextArea.tsx",
+        "src/components/ui/form.tsx"
+      ],
+      "scan_file": null,
+      "violation_count": 5,
+      "fp_reason": "",
+      "fix_target": "contract",
+      "postcondition_id": "missing-form-provider"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-17-react-hook-form-13",
+    "created_at": "2026-04-17",
+    "source": "dashboard-feedback",
+    "package": "react-hook-form",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "async-submit-unhandled-error postcondition fires on handleSubmit callbacks that pass error handling to the caller or use a global error boundary \u2014 the postcondition is too broad for forms that use React error boundaries or toast-based error handling patterns",
+    "evidence": {
+      "repos": [
+        "src/features/auth/sign-in/components/user-auth-form.tsx",
+        "src/features/auth/reset-password/components/reset-password-form.tsx",
+        "src/features/auth/sign-up/components/sign-up-form.tsx",
+        "src/features/settings/profile/profile-form.tsx",
+        "src/features/customers/components/users-action-dialog.tsx"
+      ],
+      "scan_file": null,
+      "violation_count": 14,
+      "fp_reason": "",
+      "fix_target": "contract",
+      "postcondition_id": "async-submit-unhandled-error"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-17-react-hook-form-14",
+    "created_at": "2026-04-17",
+    "source": "dashboard-feedback",
+    "package": "react-hook-form",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "unhandled-field-array-operations postcondition fires on profile-form.tsx \u2014 the field array operation is wrapped in the calling component error boundary",
+    "evidence": {
+      "repos": [
+        "src/features/settings/profile/profile-form.tsx"
+      ],
+      "scan_file": null,
+      "violation_count": 1,
+      "fp_reason": "",
+      "fix_target": "contract",
+      "postcondition_id": "unhandled-field-array-operations"
+    },
+    "resolution": null
   }
 ]
