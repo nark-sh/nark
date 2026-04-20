@@ -519,6 +519,57 @@ export class ContractMatcher {
         if (inCatchOrFinally) continue;
       }
 
+      // puppeteer browser-close-must-run: suppress when the launch() call is inside a
+      // try statement that has a finally block containing a .close() call. The pattern
+      //   try { browser = await puppeteer.launch(); ... } finally { await browser.close(); }
+      // correctly satisfies browser-close-must-run even without a catch clause.
+      // Standard isInTryCatch() returns false for try-finally (no catch), causing FPs.
+      // Evidence: concern-2026-04-20-puppeteer-feedback-20 — 1 FP:
+      //   api/browser-agent-executor.ts using try-finally pattern.
+      if (
+        detection.packageName === "puppeteer" &&
+        primaryPostcondition.id === "browser-close-must-run"
+      ) {
+        // Walk up to find the enclosing try statement
+        let puppeteerCur: ts.Node | undefined = detection.node.parent;
+        let enclosingTry: ts.TryStatement | undefined;
+        while (puppeteerCur) {
+          if (ts.isTryStatement(puppeteerCur)) {
+            // Verify the detection node is in the try block (not in catch/finally)
+            if (this.controlFlow.isInTryCatch(detection.node) || puppeteerCur.finallyBlock) {
+              enclosingTry = puppeteerCur;
+              break;
+            }
+          }
+          if (
+            ts.isFunctionDeclaration(puppeteerCur) ||
+            ts.isFunctionExpression(puppeteerCur) ||
+            ts.isArrowFunction(puppeteerCur) ||
+            ts.isMethodDeclaration(puppeteerCur)
+          )
+            break;
+          puppeteerCur = puppeteerCur.parent;
+        }
+        if (enclosingTry?.finallyBlock) {
+          // Check if the finally block contains a .close() call
+          let hasCloseInFinally = false;
+          const checkForClose = (node: ts.Node): void => {
+            if (hasCloseInFinally) return;
+            if (
+              ts.isCallExpression(node) &&
+              ts.isPropertyAccessExpression(node.expression) &&
+              node.expression.name.text === "close"
+            ) {
+              hasCloseInFinally = true;
+              return;
+            }
+            ts.forEachChild(node, checkForClose);
+          };
+          checkForClose(enclosingTry.finallyBlock);
+          if (hasCloseInFinally) continue; // try-finally with close() — postcondition satisfied
+        }
+      }
+
       // simple-git: suppress all missing-try-catch violations when the call is
       // directly inside a catch {} block (without crossing a function boundary).
       // A catch block is already an error-handling context — git.push() inside catch
@@ -645,6 +696,20 @@ export class ContractMatcher {
           cur = cur.parent;
         }
         if (inAllSettled) continue;
+
+        // @vercel/blob: suppress blob-del-no-try-catch in server-side request handler files.
+        // Handler files in lib/sandbox/, api/, or similar server-side directories are invoked
+        // by framework routing (Next.js, Express, custom HTTP servers) that provides a
+        // framework-level error boundary — uncaught errors become 500 responses, not process crashes.
+        // Evidence: concern-2026-04-20-vercel-blob-feedback-16 — 2 FPs:
+        //   lib/sandbox/postSandboxesFilesHandler.ts:87 (server handler in /sandbox/ directory).
+        if (
+          primaryPostcondition.id === "blob-del-no-try-catch" &&
+          (/[/\\](sandbox|handlers?|routes?|controllers?)[/\\]/i.test(sourceFile.fileName) ||
+            /Handler\.(ts|tsx)$/.test(sourceFile.fileName))
+        ) {
+          continue; // Server-side handler file — framework error boundary handles uncaught errors
+        }
       }
 
       // ai (Vercel AI SDK) tool(): the tool() function is a factory that creates a tool
