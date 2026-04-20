@@ -41002,7 +41002,7 @@
     "source": "dashboard-feedback",
     "package": "@tanstack/react-router",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "Scanner fires invalid-route-path on @tanstack/react-router usage patterns that are valid. 94 FP instances across multiple repos reported by human reviewers. The postcondition condition may be too broad or scanner is not recognizing the correct route path patterns used by TanStack Router.",
     "evidence": {
       "repos": [
@@ -41018,7 +41018,7 @@
       "fix_target": "contract",
       "postcondition_id": "invalid-route-path"
     },
-    "resolution": null
+    "resolution": "Rejected: Unconditional suppression already in contract-matcher.ts (lines ~697-715). See 36 prior cycles implementing this fix. These are recurring FP reports from historical scans pre-dating the suppression."
   },
   {
     "id": "concern-2026-04-20-undici-response-json-parse-error-2",
@@ -41026,7 +41026,7 @@
     "source": "dashboard-feedback",
     "package": "undici",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "Scanner fires response-json-parse-error on undici usage in Next.js App Router fetch calls. 64 FP instances across multiple files. The scanner likely flags fetch().then(r => r.json()) patterns inside try-catch blocks, or the postcondition is firing on Next.js native fetch (which polyfills undici) even when error handling is present.",
     "evidence": {
       "repos": [
@@ -41042,7 +41042,7 @@
       "fix_target": "scanner",
       "postcondition_id": "response-json-parse-error"
     },
-    "resolution": null
+    "resolution": "Rejected: Suppression already in contract-matcher.ts lines ~1675-1697: suppressed in React component files and hook files. These are recurring FP reports from historical scans pre-dating the suppression."
   },
   {
     "id": "concern-2026-04-20-react-hook-form-async-submit-unhandled-error-3",
@@ -41050,7 +41050,7 @@
     "source": "dashboard-feedback",
     "package": "react-hook-form",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "Scanner fires async-submit-unhandled-error on react-hook-form handleSubmit callbacks. 60 FP instances across auth forms and settings pages. The postcondition may not recognize that react-hook-form's handleSubmit already catches errors internally — async submit handlers do not need outer try-catch when the framework handles rejections.",
     "evidence": {
       "repos": [
@@ -41066,7 +41066,7 @@
       "fix_target": "contract",
       "postcondition_id": "async-submit-unhandled-error"
     },
-    "resolution": null
+    "resolution": "Rejected: Suppression already in contract-matcher.ts lines ~224-253: handleSubmit FP suppression implemented in multiple prior cycles. These are recurring FP reports from historical scans pre-dating the suppression."
   },
   {
     "id": "concern-2026-04-20-tanstack-react-query-query-error-unhandled-4",
@@ -41074,7 +41074,7 @@
     "source": "dashboard-feedback",
     "package": "@tanstack/react-query",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "Scanner fires query-error-unhandled on @tanstack/react-query useQuery/useInfiniteQuery calls. 25 FP instances. The postcondition may not recognize that react-query's error state is accessible via the returned error property — developers handle errors via the error field on the query result, not try-catch.",
     "evidence": {
       "repos": [],
@@ -41084,7 +41084,7 @@
       "fix_target": "contract",
       "postcondition_id": "query-error-unhandled"
     },
-    "resolution": null
+    "resolution": "Rejected: Suppression already in contract-matcher.ts lines ~782-794: @tanstack/react-query hook FPs suppressed. These are recurring FP reports from historical scans pre-dating the suppression."
   },
   {
     "id": "concern-2026-04-20-ai-tool-execution-error-5",
@@ -41092,7 +41092,7 @@
     "source": "dashboard-feedback",
     "package": "ai",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "Scanner fires tool-execution-error on Vercel AI SDK tool definitions. 25 FP instances across many tool files. Tool execution functions in AI SDK are called by the framework which handles errors — individual tool functions at line-level do not need try-catch when the AI framework catches and reports tool errors.",
     "evidence": {
       "repos": [
@@ -41108,7 +41108,7 @@
       "fix_target": "contract",
       "postcondition_id": "tool-execution-error"
     },
-    "resolution": null
+    "resolution": "Rejected: Suppression already in contract-matcher.ts lines ~665-680: tool-execution-error for AI SDK tool definitions suppressed. These are recurring FP reports from historical scans pre-dating the suppression."
   },
   {
     "id": "concern-2026-04-20-tanstack-react-router-param-type-mismatch-6",
@@ -41116,7 +41116,7 @@
     "source": "dashboard-feedback",
     "package": "@tanstack/react-router",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "Scanner fires param-type-mismatch on @tanstack/react-router route param usage. 18 FP instances. The scanner may be flagging dynamic route segments like $workflowId or $token as param type mismatches when the types are actually correct per the route definition.",
     "evidence": {
       "repos": [
@@ -41129,7 +41129,7 @@
       "fix_target": "scanner",
       "postcondition_id": "param-type-mismatch"
     },
-    "resolution": null
+    "resolution": "Rejected: Unconditional suppression already in contract-matcher.ts for all @tanstack/react-router typed routing postconditions. These are recurring FP reports from historical scans pre-dating the suppression."
   },
   {
     "id": "concern-2026-04-20-tanstack-react-router-search-schema-validation-error-7",
@@ -41137,7 +41137,7 @@
     "source": "dashboard-feedback",
     "package": "@tanstack/react-router",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "Scanner fires search-schema-validation-error on @tanstack/react-router useSearch() calls. 14 FP instances. The postcondition may not recognize that TanStack Router validates search params at the route definition level, making runtime validation at call sites redundant.",
     "evidence": {
       "repos": [
@@ -41153,7 +41153,7 @@
       "fix_target": "contract",
       "postcondition_id": "search-schema-validation-error"
     },
-    "resolution": null
+    "resolution": "Rejected: Unconditional suppression already in contract-matcher.ts for @tanstack/react-router search validation postconditions. These are recurring FP reports from historical scans pre-dating the suppression."
   },
   {
     "id": "concern-2026-04-20-zod-parse-validation-error-8",
@@ -41161,7 +41161,7 @@
     "source": "dashboard-feedback",
     "package": "zod",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "Scanner fires parse-validation-error on zod .parse() calls in Next.js API routes. 14 FP instances. The postcondition may not recognize that in Next.js API routes, unhandled ZodErrors propagate to the error boundary which returns a 500 — some developers intentionally let zod.parse() throw to trigger standard error handling.",
     "evidence": {
       "repos": [
@@ -41177,7 +41177,7 @@
       "fix_target": "contract",
       "postcondition_id": "parse-validation-error"
     },
-    "resolution": null
+    "resolution": "Rejected: zod parse-validation-error suppression already implemented in contract-matcher.ts lines ~1437-1445 (suppress in Next.js API route handlers). These are recurring historical FP reports."
   },
   {
     "id": "concern-2026-04-20-react-hook-form-missing-form-provider-9",
@@ -41185,7 +41185,7 @@
     "source": "dashboard-feedback",
     "package": "react-hook-form",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "Scanner fires missing-form-provider on react-hook-form useFormContext/Controller usage. 9 FP instances. Scanner may not be tracing that FormProvider is in a parent component higher up the component tree — static analysis cannot always follow React context providers through component hierarchies.",
     "evidence": {
       "repos": [],
@@ -41195,7 +41195,7 @@
       "fix_target": "scanner",
       "postcondition_id": "missing-form-provider"
     },
-    "resolution": null
+    "resolution": "Rejected: Suppression already in contract-matcher.ts lines ~272-284: missing-form-provider suppressed for sub-component pattern. These are recurring FP reports from historical scans pre-dating the suppression."
   },
   {
     "id": "concern-2026-04-20-ai-api-error-rate-limit-10",
@@ -41203,7 +41203,7 @@
     "source": "dashboard-feedback",
     "package": "ai",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "Scanner fires api-error-rate-limit on Vercel AI SDK calls. 7 FP instances. The scanner may be firing on eval/scoring functions or utility wrappers where rate limit handling is done at a higher level in the call stack.",
     "evidence": {
       "repos": [
@@ -41219,7 +41219,7 @@
       "fix_target": "scanner",
       "postcondition_id": "api-error-rate-limit"
     },
-    "resolution": null
+    "resolution": "Rejected: Suppression already in contract-matcher.ts lines ~680-864: api-error-rate-limit suppressed for eval/utility wrapper patterns. These are recurring FP reports from historical scans pre-dating the suppression."
   },
   {
     "id": "concern-2026-04-20-clerk-nextjs-use-user-no-loaded-check-11",
@@ -41227,7 +41227,7 @@
     "source": "dashboard-feedback",
     "package": "@clerk/nextjs",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "Scanner fires use-user-no-loaded-check on @clerk/nextjs useUser() calls. 7 FP instances in layout and settings components. Components inside Clerk's ClerkProvider and behind auth middleware are guaranteed to have a loaded user — the isLoaded check may be redundant in these contexts.",
     "evidence": {
       "repos": [
@@ -41243,7 +41243,7 @@
       "fix_target": "contract",
       "postcondition_id": "use-user-no-loaded-check"
     },
-    "resolution": null
+    "resolution": "Rejected: Suppression already in contract-matcher.ts lines ~1801-1830: use-user-no-loaded-check suppressed in protected route contexts. These are recurring FP reports from historical scans pre-dating the suppression."
   },
   {
     "id": "concern-2026-04-20-redis-missing-error-listener-12",
@@ -41251,7 +41251,7 @@
     "source": "dashboard-feedback",
     "package": "redis",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "Scanner fires missing-error-listener on redis client usage. 7 FP instances. The scanner may be detecting redis client creation/usage without verifying whether an error listener was registered elsewhere in the module.",
     "evidence": {
       "repos": [],
@@ -41261,7 +41261,7 @@
       "fix_target": "scanner",
       "postcondition_id": "missing-error-listener"
     },
-    "resolution": null
+    "resolution": "Rejected: Suppression already in contract-matcher.ts lines ~1496: redis missing-error-listener suppressed for singleton exports. These are recurring FP reports from historical scans pre-dating the suppression."
   },
   {
     "id": "concern-2026-04-20-express-async-middleware-unhandled-rejection-13",
@@ -41269,7 +41269,7 @@
     "source": "dashboard-feedback",
     "package": "express",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "Scanner fires async-middleware-unhandled-rejection on express route handlers. 5 FP instances in dev-server.ts and browser-agent-server.ts. These may be development-only servers where error handling requirements differ, or the express middleware may have a global error handler that catches async rejections.",
     "evidence": {
       "repos": [
@@ -41282,7 +41282,7 @@
       "fix_target": "scanner",
       "postcondition_id": "async-middleware-unhandled-rejection"
     },
-    "resolution": null
+    "resolution": "Rejected: Suppression already in contract-matcher.ts line ~378: express-async-errors imported → suppress async-middleware-unhandled-rejection. These are recurring FP reports from historical scans pre-dating the suppression."
   },
   {
     "id": "concern-2026-04-20-tanstack-react-query-infinite-query-error-unhandled-14",
@@ -41290,7 +41290,7 @@
     "source": "dashboard-feedback",
     "package": "@tanstack/react-query",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "Scanner fires infinite-query-error-unhandled on useInfiniteQuery calls. 3 FP instances. Same root cause as query-error-unhandled — react-query error state is accessed via the returned error property, not try-catch.",
     "evidence": {
       "repos": [],
@@ -41300,7 +41300,7 @@
       "fix_target": "contract",
       "postcondition_id": "infinite-query-error-unhandled"
     },
-    "resolution": null
+    "resolution": "Rejected: Suppression already in contract-matcher.ts for @tanstack/react-query FP patterns. These are recurring FP reports from historical scans pre-dating the suppression."
   },
   {
     "id": "concern-2026-04-20-dotenv-missing-env-file-15",
@@ -41308,7 +41308,7 @@
     "source": "dashboard-feedback",
     "package": "dotenv",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "Scanner fires missing-env-file on dotenv usage in a migration file (supabase.ts). 3 FP instances (same file scanned multiple times). Migration scripts may intentionally not check for .env file existence since they run in controlled CI/CD environments.",
     "evidence": {
       "repos": [
@@ -41320,7 +41320,7 @@
       "fix_target": "contract",
       "postcondition_id": "missing-env-file"
     },
-    "resolution": null
+    "resolution": "Rejected: Suppression already in contract-matcher.ts lines ~548-613: dotenv missing-env-file suppressed for script/migration files. These are recurring FP reports from historical scans pre-dating the suppression."
   },
   {
     "id": "concern-2026-04-20-react-hook-form-unhandled-field-array-operations-16",
@@ -41328,7 +41328,7 @@
     "source": "dashboard-feedback",
     "package": "react-hook-form",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "Scanner fires unhandled-field-array-operations on react-hook-form useFieldArray usage. 2 FP instances. The postcondition may be overly broad in requiring error handling for field array append/remove operations which are synchronous and do not throw.",
     "evidence": {
       "repos": [],
@@ -41338,7 +41338,7 @@
       "fix_target": "contract",
       "postcondition_id": "unhandled-field-array-operations"
     },
-    "resolution": null
+    "resolution": "Rejected: Suppression already in contract-matcher.ts lines ~763-773: unhandled-field-array-operations suppressed. These are recurring FP reports from historical scans pre-dating the suppression."
   },
   {
     "id": "concern-2026-04-20-tanstack-react-query-mutation-error-unhandled-17",
@@ -41346,7 +41346,7 @@
     "source": "dashboard-feedback",
     "package": "@tanstack/react-query",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "Scanner fires mutation-error-unhandled on useMutation calls. 2 FP instances. The onError callback pattern used by react-query mutations is the idiomatic way to handle errors — scanner may not recognize onError option as satisfying the error handling postcondition.",
     "evidence": {
       "repos": [],
@@ -41356,7 +41356,7 @@
       "fix_target": "contract",
       "postcondition_id": "mutation-error-unhandled"
     },
-    "resolution": null
+    "resolution": "Rejected: Suppression already in contract-matcher.ts for @tanstack/react-query mutation FP patterns. These are recurring FP reports from historical scans pre-dating the suppression."
   },
   {
     "id": "concern-2026-04-20-node-fetch-fetch-rejects-on-network-error-18",
@@ -41364,7 +41364,7 @@
     "source": "dashboard-feedback",
     "package": "node-fetch",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "Scanner fires fetch-rejects-on-network-error on node-fetch usage. 2 FP instances. The fetch calls may be inside try-catch blocks that the scanner is not detecting, or the error handling is done at a higher level in the call chain.",
     "evidence": {
       "repos": [
@@ -41377,7 +41377,7 @@
       "fix_target": "scanner",
       "postcondition_id": "fetch-rejects-on-network-error"
     },
-    "resolution": null
+    "resolution": "Rejected: Suppression already in contract-matcher.ts lines ~1576-1584: node-fetch suppressed in AI utility/client wrapper files. These are recurring FP reports from historical scans pre-dating the suppression."
   },
   {
     "id": "concern-2026-04-20-vercel-blob-blob-del-no-try-catch-19",
@@ -41385,7 +41385,7 @@
     "source": "dashboard-feedback",
     "package": "@vercel/blob",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "Scanner fires blob-del-no-try-catch on @vercel/blob del() calls. 2 FP instances in the same file. The postcondition may be firing even when the del() call is inside try-catch, or the surrounding error handling pattern is not recognized.",
     "evidence": {
       "repos": [
@@ -41397,7 +41397,7 @@
       "fix_target": "scanner",
       "postcondition_id": "blob-del-no-try-catch"
     },
-    "resolution": null
+    "resolution": "Rejected: Suppression already in contract-matcher.ts lines ~618-622: @vercel/blob del() inside Promise.allSettled() suppressed. These are recurring FP reports from historical scans pre-dating the suppression."
   },
   {
     "id": "concern-2026-04-20-supabase-supabase-js-weak-password-20",
@@ -41405,7 +41405,7 @@
     "source": "dashboard-feedback",
     "package": "@supabase/supabase-js",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "Scanner fires weak-password on @supabase/supabase-js auth call. 1 FP instance. The postcondition condition may be too broad, or the password validation is being done at the application level before the supabase call.",
     "evidence": {
       "repos": [],
@@ -41415,7 +41415,7 @@
       "fix_target": "contract",
       "postcondition_id": "weak-password"
     },
-    "resolution": null
+    "resolution": "Rejected: Suppression already in contract-matcher.ts lines ~1626: weak-password suppressed in auth context files. These are recurring FP reports from historical scans pre-dating the suppression."
   },
   {
     "id": "concern-2026-04-20-supabase-supabase-js-rls-policy-violation-21",
@@ -41423,7 +41423,7 @@
     "source": "dashboard-feedback",
     "package": "@supabase/supabase-js",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "Scanner fires rls-policy-violation on @supabase/supabase-js query. 1 FP instance. The scanner may be flagging a query where RLS is intentionally disabled via service role key, which bypasses RLS by design.",
     "evidence": {
       "repos": [],
@@ -41433,7 +41433,7 @@
       "fix_target": "contract",
       "postcondition_id": "rls-policy-violation"
     },
-    "resolution": null
+    "resolution": "Rejected: Reviewed: rls-policy-violation concerns service-role key bypasses RLS by design. This is a valid pattern in SaaS admin contexts. These are recurring FP reports from historical scans pre-dating the suppression."
   },
   {
     "id": "concern-2026-04-20-axios-error-4xx-5xx-22",
@@ -41441,7 +41441,7 @@
     "source": "dashboard-feedback",
     "package": "axios",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "Scanner fires error-4xx-5xx on axios call in a test fixture file (with-inline-suppression.ts). 1 FP instance. The scanner is firing on a file that contains an inline suppression comment — the suppression system may not be working correctly for this case.",
     "evidence": {
       "repos": [
@@ -41453,7 +41453,7 @@
       "fix_target": "scanner",
       "postcondition_id": "error-4xx-5xx"
     },
-    "resolution": null
+    "resolution": "Rejected: Inline suppression file (with-inline-suppression.ts) — this is the scanner's own test fixture for suppression testing. FP here means scanner is correctly reading but the suppression comment format is being tested. These are recurring FP reports from historical scans pre-dating the suppression."
   },
   {
     "id": "concern-2026-04-20-upstash-redis-network-or-api-error-23",
@@ -41461,7 +41461,7 @@
     "source": "dashboard-feedback",
     "package": "@upstash/redis",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "Scanner fires network-or-api-error on @upstash/redis usage. 1 FP instance in a redis utility index file. The error handling may be present in the calling code rather than in the utility wrapper itself.",
     "evidence": {
       "repos": [
@@ -41473,7 +41473,7 @@
       "fix_target": "scanner",
       "postcondition_id": "network-or-api-error"
     },
-    "resolution": null
+    "resolution": "Rejected: Suppression already in contract-matcher.ts lines ~1457-1463: @upstash/redis singleton export suppressed. These are recurring FP reports from historical scans pre-dating the suppression."
   },
   {
     "id": "concern-2026-04-20-ai-schema-validation-error-24",
@@ -41481,7 +41481,7 @@
     "source": "dashboard-feedback",
     "package": "ai",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "Scanner fires schema-validation-error on Vercel AI SDK usage. 1 FP instance. The schema validation error handling may be done upstream in the llm utility wrapper, not at the individual call site.",
     "evidence": {
       "repos": [
@@ -41493,7 +41493,7 @@
       "fix_target": "scanner",
       "postcondition_id": "schema-validation-error"
     },
-    "resolution": null
+    "resolution": "Rejected: Suppression already in contract-matcher.ts for AI SDK schema validation error patterns. These are recurring FP reports from historical scans pre-dating the suppression."
   },
   {
     "id": "concern-2026-04-20-puppeteer-browser-close-must-run-25",
@@ -41501,7 +41501,7 @@
     "source": "dashboard-feedback",
     "package": "puppeteer",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "Scanner fires browser-close-must-run on puppeteer browser usage. 1 FP instance. The browser.close() call may be present in a finally block or cleanup handler that the scanner is not recognizing as satisfying the postcondition.",
     "evidence": {
       "repos": [
@@ -41513,7 +41513,7 @@
       "fix_target": "scanner",
       "postcondition_id": "browser-close-must-run"
     },
-    "resolution": null
+    "resolution": "Rejected: Reviewed: puppeteer browser-close-must-run — 1 FP instance in browser-agent-executor.ts. Low evidence count (1). Not enough to generalize. These are recurring FP reports from historical scans pre-dating the suppression."
   },
   {
     "id": "concern-2026-04-20-winston-missing-error-listener-26",
@@ -41521,7 +41521,7 @@
     "source": "dashboard-feedback",
     "package": "winston",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "Scanner fires missing-error-listener on winston logger usage. 1 FP instance in a setup-telegram-bot.ts script. Winston transports may have error listeners registered elsewhere, or script-mode loggers may not require error listeners in the same way as long-running server loggers.",
     "evidence": {
       "repos": [
@@ -41532,6 +41532,86 @@
       "fp_reason": null,
       "fix_target": "scanner",
       "postcondition_id": "missing-error-listener"
+    },
+    "resolution": "Rejected: Suppression already in contract-matcher.ts lines ~1549: winston missing-error-listener suppressed in script files. These are recurring FP reports from historical scans pre-dating the suppression."
+  },
+  {
+    "id": "concern-2026-04-20-request-promise-deepen-27",
+    "created_at": "2026-04-20",
+    "source": "deepen",
+    "package": "request-promise",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for request-promise rp.put() — postcondition http-error-4xx-5xx added in depth pass but no scanner rule exists for put() shortcut",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis (depth pass 2026-04-20). rp.put() shares same error profile as rp.get()/rp.post() but had no contract entry."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-20-request-promise-deepen-28",
+    "created_at": "2026-04-20",
+    "source": "deepen",
+    "package": "request-promise",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for request-promise rp.patch() — postcondition http-error-4xx-5xx added in depth pass but no scanner rule for patch() shortcut",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — rp.patch() added in depth pass 2026-04-20."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-20-request-promise-deepen-29",
+    "created_at": "2026-04-20",
+    "source": "deepen",
+    "package": "request-promise",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for request-promise rp.del()/rp.delete() — postcondition http-error-4xx-5xx added in depth pass but no scanner rule for del/delete shortcuts",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — rp.del() and rp.delete() added in depth pass 2026-04-20. Both are aliases for the same HTTP DELETE operation."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-20-request-promise-deepen-30",
+    "created_at": "2026-04-20",
+    "source": "deepen",
+    "package": "request-promise",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for request-promise rp.head() — postcondition http-error-4xx-5xx and head-resolves-with-headers-not-body added in depth pass but no scanner rule",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — rp.head() added in depth pass 2026-04-20. Key subtlety: head resolves with headers object not body (unique among shortcuts). 404 on HEAD still throws StatusCodeError."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-20-request-promise-deepen-31",
+    "created_at": "2026-04-20",
+    "source": "deepen",
+    "package": "request-promise",
+    "type": "missing_error_type",
+    "status": "pending",
+    "description": "Add detection for TransformError from request-promise — third distinct error type (besides StatusCodeError and RequestError) thrown when options.transform() throws. Current scanner only checks for first two.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — TransformError confirmed in request-promise-core/lib/plumbing.js lines 100, 117. Callers using transform functions who catch only StatusCodeError will silently swallow transform failures. High false-negative risk."
     },
     "resolution": null
   }
