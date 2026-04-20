@@ -43148,5 +43148,53 @@
       "note": "Proactive \u2014 contract added via API surface analysis (deepen-stream-2 pass 5). Two detection rules needed: null-chars arg and unchecked return value."
     },
     "resolution": null
+  },
+  {
+    "id": "concern-20260420-mocha-deepen-3",
+    "created_at": "2026-04-20",
+    "source": "deepen",
+    "package": "mocha",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for mocha.parallelMode() called after run() \u2014 postcondition parallel-mode-after-run-throws added in depth pass but no scanner rule exists",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. parallelMode() throws ERR_MOCHA_UNSUPPORTED when called after run(). Detection requires state-ordering awareness (call after run())."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260420-mocha-deepen-4",
+    "created_at": "2026-04-20",
+    "source": "deepen",
+    "package": "mocha",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for mocha.parallelMode() called in browser \u2014 postcondition parallel-mode-in-browser-throws added in depth pass but no scanner rule exists",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. Uncommon but affects universal test harnesses. Detection requires browser-context analysis."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260420-mocha-deepen-5",
+    "created_at": "2026-04-20",
+    "source": "deepen",
+    "package": "mocha",
+    "type": "postcondition_gap",
+    "status": "pending",
+    "description": "Add detection for mocha.run() called on disposed instance \u2014 postcondition run-already-disposed-throws added in depth pass; extends existing run-already-running-throws detector to also check disposed state",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 gap in existing Mocha.run postconditions. ERR_MOCHA_INSTANCE_ALREADY_DISPOSED thrown when run() called after cleanReferencesAfterRun auto-disposes. Common mistake in watch mode or programmatic orchestration."
+    },
+    "resolution": null
   }
 ]
