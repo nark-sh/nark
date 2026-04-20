@@ -41893,5 +41893,242 @@
       "postcondition_id": "error-4xx-5xx"
     },
     "resolution": "Already implemented: the suppression inline comment in the fixture file (with-inline-suppression.ts) triggers the existing inline suppression system — scanner reads // nark-suppress directives. No scanner change needed; the fixture correctly tests the suppression mechanism."
+  },
+  {
+    "id": "concern-2026-04-20-validator-deepen-1",
+    "created_at": "2026-04-20",
+    "source": "deepen",
+    "package": "validator",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for validator.isLicensePlate() — throws Error (not TypeError) on invalid locale; postcondition license-plate-invalid-locale-throws added in depth pass but no scanner rule exists",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — isLicensePlate throws non-TypeError Error on invalid locale; unique among validator.js functions; callers passing locale from user input or env vars are at risk"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-20-validator-deepen-2",
+    "created_at": "2026-04-20",
+    "source": "deepen",
+    "package": "validator",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for validator.isBase32() — Crockford vs standard Base32 confusion; postcondition base32-crockford-confusion added in depth pass but no scanner rule exists",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — isBase32() default validates standard RFC 4648 Base32; Crockford Base32 (ULID, NanoID) requires crockford: true option; using wrong encoding silently rejects valid data"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-20-socket.io-deepen-1",
+    "created_at": "2026-04-20",
+    "source": "deepen",
+    "package": "socket.io",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for socket.io socket.use() per-socket middleware — postcondition added in depth pass (socket-use-middleware-error-no-listener, socket-use-middleware-async-unhandled) but no scanner rule exists for per-socket middleware error listener detection",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — per-socket middleware error patterns require tracking socket.use() calls and verifying socket.on(\"error\") listener presence on same socket instance"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-20-socket.io-deepen-2",
+    "created_at": "2026-04-20",
+    "source": "deepen",
+    "package": "socket.io",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for socket.io BroadcastOperator.emitWithAck() — postconditions added (broadcast-emit-with-ack-timeout-unhandled, broadcast-emit-with-ack-no-timeout) but scanner needs to detect io.timeout().emitWithAck() and io.to(room).emitWithAck() call chains",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — BroadcastOperator chains via io.to()/io.in()/io.timeout() — requires chained method detection for emitWithAck on BroadcastOperator. Distinct from socket.emitWithAck() already contracted"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-20-ai-1",
+    "created_at": "2026-04-20",
+    "source": "dashboard-feedback",
+    "package": "ai",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "tool-execution-error postcondition fires on async tool wrapper functions that expose tool handlers as top-level exports — these are not awaited by user code but by the AI SDK runtime, which handles errors internally",
+    "evidence": {
+      "repos": [
+        "lib/tools/searchTwitter.ts",
+        "lib/tools/getArtistSegments.ts",
+        "lib/tools/getSocialPosts.ts",
+        "lib/tools/getApifyScraper.ts",
+        "lib/tools/browser/browserObserve.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 25,
+      "fp_reason": "HUMAN marked FALSE_POSITIVE — no reason note provided; pattern: all violations in files exporting AI tool handler functions where the SDK runtime manages execution and error handling",
+      "fix_target": "contract",
+      "postcondition_id": "tool-execution-error"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-20-ai-2",
+    "created_at": "2026-04-20",
+    "source": "dashboard-feedback",
+    "package": "ai",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "api-error-rate-limit postcondition fires on AI SDK calls where rate limit handling is delegated to the calling framework or eval harness rather than the individual function",
+    "evidence": {
+      "repos": [
+        "lib/evals/scorers/QuestionAnswered.ts",
+        "lib/evals/scorers/CatalogAvailability.ts",
+        "lib/catalog/analyzeCatalogBatch.ts",
+        "lib/ai/generateArray.ts",
+        "apps/web/utils/llms/index.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 7,
+      "fp_reason": "HUMAN marked FALSE_POSITIVE — no reason note provided; pattern: eval harness and batch utility functions where retry/rate-limit handling is managed by the orchestrating layer",
+      "fix_target": "contract",
+      "postcondition_id": "api-error-rate-limit"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-20-ai-3",
+    "created_at": "2026-04-20",
+    "source": "dashboard-feedback",
+    "package": "ai",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "schema-validation-error postcondition fires inside apps/web/utils/llms/index.ts which appears to handle schema errors via a higher-level wrapper rather than inline",
+    "evidence": {
+      "repos": [
+        "apps/web/utils/llms/index.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 1,
+      "fp_reason": "HUMAN marked FALSE_POSITIVE — no reason note provided; utility function in LLM abstraction layer",
+      "fix_target": "contract",
+      "postcondition_id": "schema-validation-error"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-20-axios-1",
+    "created_at": "2026-04-20",
+    "source": "dashboard-feedback",
+    "package": "axios",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "error-4xx-5xx postcondition fires on test fixture file that has an inline suppression comment — scanner may not be respecting inline suppression directives",
+    "evidence": {
+      "repos": [
+        "packages/scanner/src/v2/fixtures/test-suppressions/with-inline-suppression.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 1,
+      "fp_reason": "HUMAN marked FALSE_POSITIVE — file path indicates this is a suppression test fixture; scanner may not be honoring suppression markers",
+      "fix_target": "scanner",
+      "postcondition_id": "error-4xx-5xx"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-20-clerk-nextjs-1",
+    "created_at": "2026-04-20",
+    "source": "dashboard-feedback",
+    "package": "@clerk/nextjs",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "use-user-no-loaded-check postcondition fires on components where isLoaded check is deferred to a parent component or layout — scanner does not trace isLoaded guard through component hierarchy",
+    "evidence": {
+      "repos": [
+        "apps/web/components/layout/sidebar.tsx",
+        "apps/web/components/settings/profile-settings.tsx",
+        "apps/web/app/(auth)/invite/[token]/page.tsx",
+        "apps/web/components/layout/top-nav.tsx",
+        "apps/web/components/layout/header.tsx"
+      ],
+      "scan_file": null,
+      "violation_count": 7,
+      "fp_reason": "HUMAN marked FALSE_POSITIVE — no reason note provided; pattern: child components rendered only after parent confirms isLoaded; also fires in analytics-provider and onboarding-form which may guard via conditional rendering",
+      "fix_target": "scanner",
+      "postcondition_id": "use-user-no-loaded-check"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-20-dotenv-1",
+    "created_at": "2026-04-20",
+    "source": "dashboard-feedback",
+    "package": "dotenv",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "missing-env-file postcondition fires on src/lib/migrations/supabase.ts — a migration utility script where the env file path is intentional and the missing-file scenario is acceptable",
+    "evidence": {
+      "repos": [
+        "src/lib/migrations/supabase.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 2,
+      "fp_reason": "HUMAN marked FALSE_POSITIVE — no reason note provided; same file/fingerprint across two scans; migration scripts have different env expectations than application code",
+      "fix_target": "contract",
+      "postcondition_id": "missing-env-file"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-20-express-1",
+    "created_at": "2026-04-20",
+    "source": "dashboard-feedback",
+    "package": "express",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "async-middleware-unhandled-rejection fires on Express middleware in dev server and browser agent server — errors likely bubble to top-level Express error handler not recognized by scanner",
+    "evidence": {
+      "repos": [
+        "api/dev-server.ts",
+        "api/browser-agent-server.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 5,
+      "fp_reason": "HUMAN marked FALSE_POSITIVE — no reason note provided; dev server middleware; project likely uses express-async-errors or similar global rejection handler",
+      "fix_target": "scanner",
+      "postcondition_id": "async-middleware-unhandled-rejection"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-20-node-fetch-1",
+    "created_at": "2026-04-20",
+    "source": "dashboard-feedback",
+    "package": "node-fetch",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "fetch-rejects-on-network-error fires on api/utils/ai-client.ts — AI client utility likely wraps fetch in a higher-level error handler not recognized by scanner",
+    "evidence": {
+      "repos": [
+        "api/utils/ai-client.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 1,
+      "fp_reason": "HUMAN marked FALSE_POSITIVE — no reason note provided; AI client utility likely has centralized error handling",
+      "fix_target": "scanner",
+      "postcondition_id": "fetch-rejects-on-network-error"
+    },
+    "resolution": null
   }
 ]
