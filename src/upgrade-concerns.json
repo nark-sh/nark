@@ -40986,7 +40986,7 @@
     "source": "deepen",
     "package": "chai",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "rejected",
     "description": "Add detection for chai.assert.ifError() — postcondition assert-iferror-rethrows-value added in depth pass. assert.ifError(val) rethrows val directly (not AssertionError), so catch blocks expecting only AssertionError will silently miss errors from assert.ifError. Scanner needs to detect assert.ifError() calls that are either: (1) not in a try-catch at all, or (2) in a try-catch that only catches AssertionError (via instanceof check). The unique behavioral contract is that the thrown error is val itself, not a chai AssertionError.",
     "evidence": {
       "repos": [],
@@ -40994,7 +40994,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis (depth pass 2026-04-20). assert.ifError is the only chai method that does NOT throw AssertionError on failure — it rethrows val. Detection rule needed to catch misuse in production code (try-catch that only catches AssertionError)."
     },
-    "resolution": null
+    "resolution": "Rejected: Insufficient evidence (violation_count: 0, no real-repo sightings). chai.assert.ifError() is a rarely-used method that rethrows val (not AssertionError). Requires specialized scanner rule to detect misuse. No FP reports from dashboard. Revisit when real-world violations are observed."
   },
   {
     "id": "concern-2026-04-20-tanstack-react-router-invalid-route-path-1",
@@ -41541,7 +41541,7 @@
     "source": "deepen",
     "package": "request-promise",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "rejected",
     "description": "Add detection for request-promise rp.put() — postcondition http-error-4xx-5xx added in depth pass but no scanner rule exists for put() shortcut",
     "evidence": {
       "repos": [],
@@ -41549,7 +41549,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis (depth pass 2026-04-20). rp.put() shares same error profile as rp.get()/rp.post() but had no contract entry."
     },
-    "resolution": null
+    "resolution": "Rejected: request-promise is deprecated (since 2020-02-11). violation_count: 0 (proactive concern, no real-repo sightings). Complex detection gap: await rp(url) direct call (default export called as function) vs property chain rp.put() requires different detection path. Low business value for deprecated package. Revisit if users report violations."
   },
   {
     "id": "concern-2026-04-20-request-promise-deepen-28",
@@ -41557,7 +41557,7 @@
     "source": "deepen",
     "package": "request-promise",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "rejected",
     "description": "Add detection for request-promise rp.patch() — postcondition http-error-4xx-5xx added in depth pass but no scanner rule for patch() shortcut",
     "evidence": {
       "repos": [],
@@ -41565,7 +41565,7 @@
       "violation_count": 0,
       "note": "Proactive — rp.patch() added in depth pass 2026-04-20."
     },
-    "resolution": null
+    "resolution": "Rejected: request-promise is deprecated (since 2020-02-11). violation_count: 0 (proactive concern). Same detection gap as deepen-27. Low priority."
   },
   {
     "id": "concern-2026-04-20-request-promise-deepen-29",
@@ -41573,7 +41573,7 @@
     "source": "deepen",
     "package": "request-promise",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "rejected",
     "description": "Add detection for request-promise rp.del()/rp.delete() — postcondition http-error-4xx-5xx added in depth pass but no scanner rule for del/delete shortcuts",
     "evidence": {
       "repos": [],
@@ -41581,7 +41581,7 @@
       "violation_count": 0,
       "note": "Proactive — rp.del() and rp.delete() added in depth pass 2026-04-20. Both are aliases for the same HTTP DELETE operation."
     },
-    "resolution": null
+    "resolution": "Rejected: request-promise is deprecated (since 2020-02-11). violation_count: 0 (proactive concern). Same detection gap as deepen-27. Low priority."
   },
   {
     "id": "concern-2026-04-20-request-promise-deepen-30",
@@ -41589,7 +41589,7 @@
     "source": "deepen",
     "package": "request-promise",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "rejected",
     "description": "Add detection for request-promise rp.head() — postcondition http-error-4xx-5xx and head-resolves-with-headers-not-body added in depth pass but no scanner rule",
     "evidence": {
       "repos": [],
@@ -41597,7 +41597,7 @@
       "violation_count": 0,
       "note": "Proactive — rp.head() added in depth pass 2026-04-20. Key subtlety: head resolves with headers object not body (unique among shortcuts). 404 on HEAD still throws StatusCodeError."
     },
-    "resolution": null
+    "resolution": "Rejected: request-promise is deprecated (since 2020-02-11). violation_count: 0 (proactive concern). Same detection gap as deepen-27. Low priority."
   },
   {
     "id": "concern-2026-04-20-request-promise-deepen-31",
@@ -41605,7 +41605,7 @@
     "source": "deepen",
     "package": "request-promise",
     "type": "missing_error_type",
-    "status": "pending",
+    "status": "rejected",
     "description": "Add detection for TransformError from request-promise — third distinct error type (besides StatusCodeError and RequestError) thrown when options.transform() throws. Current scanner only checks for first two.",
     "evidence": {
       "repos": [],
@@ -41613,6 +41613,6 @@
       "violation_count": 0,
       "note": "Proactive — TransformError confirmed in request-promise-core/lib/plumbing.js lines 100, 117. Callers using transform functions who catch only StatusCodeError will silently swallow transform failures. High false-negative risk."
     },
-    "resolution": null
+    "resolution": "Rejected: request-promise is deprecated (since 2020-02-11). violation_count: 0 (proactive concern, no TransformError sightings in real repos). Low priority for deprecated package."
   }
 ]
