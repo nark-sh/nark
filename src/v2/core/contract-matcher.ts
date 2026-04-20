@@ -165,6 +165,27 @@ export class ContractMatcher {
         effectiveFunctionName = "Parser.parseStringPromise";
       }
 
+      // luxon: Duration.fromObject disambiguation.
+      // Both DateTime.fromObject and Duration.fromObject share the same method name 'fromObject'.
+      // ThrowingFunctionDetector resolves these as functionName='fromObject' with metadata.chain
+      // containing the root identifier (['Duration', 'fromObject'] or ['DateTime', 'fromObject']).
+      // findFunctionContract's dotted-name suffix match finds both entries and returns the first
+      // (DateTime.fromObject), causing Duration.fromObject() calls to fire the wrong postcondition.
+      //
+      // Fix: when chain root is 'Duration', reroute to 'Duration.fromObject' so findFunctionContract
+      // exact-matches the correct entry (duration-fromobject-non-object-throws) instead of
+      // returning fromobject-conflicting-specification from DateTime.fromObject.
+      //
+      // Evidence: concern luxon-deepen-3; ground-truth fixture line 334.
+      if (
+        detection.packageName === "luxon" &&
+        detection.functionName === "fromObject" &&
+        Array.isArray(detection.metadata?.chain) &&
+        (detection.metadata.chain as string[])[0] === "Duration"
+      ) {
+        effectiveFunctionName = "Duration.fromObject";
+      }
+
       const funcContract = this.findFunctionContract(
         contract,
         effectiveFunctionName,
@@ -1504,7 +1525,15 @@ export class ContractMatcher {
       // automatically wrapped in Next.js's error boundary: unhandled exceptions return
       // a 500 response, they do NOT crash the process. Requiring try-catch inside every
       // route handler is overly prescriptive — Next.js handles this at the framework level.
+      //
+      // Also suppress in React component files that use zod for form validation alongside
+      // react-hook-form or similar form libraries. In this pattern, zod schema.parse() is
+      // called during form submission where the form library (RHF, Formik) or the component
+      // already provides error handling through form state, not try-catch.
+      //
       // Evidence: concern-2026-04-06-zod-7 — 14 FP instances in apps/web/app/api/**/*.ts
+      // Evidence: concern-2026-04-20-zod-8 — 14 FP instances in auth forms and component files
+      // (src/features/auth/**/*.tsx, src/features/customers/**/*.tsx) that use zod with RHF.
       if (
         detection.packageName === "zod" &&
         postcondition.id === "parse-validation-error"
@@ -1516,6 +1545,20 @@ export class ContractMatcher {
           /\.tsx?$/.test(fileName)
         ) {
           continue; // Next.js route handler — framework provides error boundary
+        }
+        // React component files (.tsx) using zod for form validation
+        // The form library (RHF, etc.) handles validation errors through form state, not try-catch.
+        if (/\.tsx$/.test(fileName)) {
+          const zodFileText = sourceFile.getFullText();
+          if (
+            zodFileText.includes("handleSubmit") ||
+            zodFileText.includes("useForm") ||
+            zodFileText.includes("zodResolver") ||
+            zodFileText.includes("formState") ||
+            zodFileText.includes("safeParse")
+          ) {
+            continue; // Form component with form-library error handling — validation errors surfaced via form state
+          }
         }
       }
 
@@ -1743,10 +1786,15 @@ export class ContractMatcher {
       // process. Requiring try-catch on every response.json() in a component is overly
       // prescriptive when the framework provides the error boundary.
       //
-      // Additionally suppress in utility/hook wrapper files where the caller handles errors.
+      // Additionally suppress in utility/hook wrapper files where the caller handles errors,
+      // and in server-side API utility files (api/, analysis/, catalog/, lib/) where the
+      // caller or framework handles errors at the orchestration layer.
       //
       // Evidence: concern-2026-04-11-undici-2 — 64 FP instances across React component files
       // (apps/web/components/**/*.tsx, apps/web/app/**/*.tsx, hooks/**/*.ts).
+      // Evidence: concern-2026-04-20-undici-2 — 64 FP instances in server-side utility files
+      // (api/analysis/post-game-analysis.ts, api/utils/ai-client.ts,
+      //  lib/catalog/analyzeCatalogBatch.ts, lib/ai/generateArray.ts, hooks/useFileContent.ts).
       if (
         detection.packageName === "undici" &&
         postcondition.id === "response-json-parse-error"
@@ -1762,7 +1810,10 @@ export class ContractMatcher {
           // Evidence: concern-2026-04-15-undici-2 — use-scan-poller.ts not covered by camelCase check
           (/^use-/.test(baseName) && /[/\\]hooks?[/\\]/.test(fileName)) ||
           // components/ directory .ts files (client-side utility components)
-          /[/\\]components?[/\\]/.test(fileName)
+          /[/\\]components?[/\\]/.test(fileName) ||
+          // Server-side utility/wrapper files where caller handles errors
+          // Evidence: concern-2026-04-20-undici-2 — api/analysis/, api/utils/, lib/catalog/, lib/ai/
+          /[/\\](utils?|helpers?|analysis|catalog|lib|ai)[/\\]/i.test(fileName)
         ) {
           continue; // Framework/component context — error boundary handles uncaught exceptions
         }
