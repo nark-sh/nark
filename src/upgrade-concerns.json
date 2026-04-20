@@ -43276,5 +43276,53 @@
       "note": "Proactive \u2014 isIBAN as sole payment gate is high-risk. Detection: flag isIBAN() calls whose result directly gates payment/transfer functions without an intermediate payment provider call."
     },
     "resolution": null
+  },
+  {
+    "id": "concern-20260420-luxon-deepen-1",
+    "created_at": "2026-04-20",
+    "source": "deepen",
+    "package": "luxon",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for luxon.DateTime.set() \u2014 postcondition set-conflicting-specification added in depth pass but no scanner rule exists",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. DateTime.set() throws ConflictingSpecificationError when mixing weekYear/weekNumber with Gregorian fields (lines 1630-1636 of datetime.js). Same throw condition as fromObject(). Detection pattern: look for .set() calls with mixed calendar field keys in the argument object."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260420-luxon-deepen-2",
+    "created_at": "2026-04-20",
+    "source": "deepen",
+    "package": "luxon",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for luxon.DateTime.diff() \u2014 postcondition diff-invalid-unit added in depth pass but no scanner rule exists",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. DateTime.diff(other, unit) throws InvalidUnitError when unit is not recognized (via Duration.normalizeUnit() at line 2162). Same unit validation as startOf()/endOf(). Detection pattern: look for .diff() calls where the unit string is dynamic (from variable) without prior validation against VALID_UNITS list."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260420-luxon-deepen-3",
+    "created_at": "2026-04-20",
+    "source": "deepen",
+    "package": "luxon",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for luxon.Duration.fromObject() \u2014 postcondition duration-fromobject-non-object-throws added in depth pass but no scanner rule exists",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis (promoted from edge_cases). Duration.fromObject(obj) throws InvalidArgumentError when obj is null or non-object (lines 289-295 of duration.js). Detection pattern: look for Duration.fromObject() calls where the argument is potentially null/undefined (e.g., from object property access config.delay or API response field) without a null/type guard."
+    },
+    "resolution": null
   }
 ]
