@@ -36897,53 +36897,6 @@
     "resolution": "Deferred: blocked by concern-20260417-yup-deepen-1 (factory-method tracking). Cannot detect validateSync() on schemas with async tests until factory-return tracking is implemented."
   },
   {
-    "id": "concern-2026-04-17-ai-1",
-    "created_at": "2026-04-17",
-    "source": "dashboard-feedback",
-    "package": "ai",
-    "type": "false_positive",
-    "status": "implemented",
-    "description": "tool-execution-error postcondition fires on async tool functions where the tool framework (ai SDK) handles errors at the callback boundary; each tool file exports a single async arrow function and the SDK wraps calls in its own try/catch",
-    "evidence": {
-      "repos": [
-        "lib/tools/searchTwitter.ts",
-        "lib/tools/getArtistSegments.ts",
-        "lib/tools/getSocialPosts.ts",
-        "lib/tools/getApifyScraper.ts",
-        "lib/tools/browser/browserObserve.ts"
-      ],
-      "scan_file": null,
-      "violation_count": 26,
-      "fp_reason": "",
-      "fix_target": "contract",
-      "postcondition_id": "tool-execution-error"
-    },
-    "resolution": "Added detector note to tool-execution-error postcondition in ai/contract.yaml clarifying this applies only to the execute property of tool() calls, not standalone exported async functions. Added contract-level FP note header documenting the inner utility function and tool callback patterns."
-  },
-  {
-    "id": "concern-2026-04-17-ai-2",
-    "created_at": "2026-04-17",
-    "source": "dashboard-feedback",
-    "package": "ai",
-    "type": "false_positive",
-    "status": "implemented",
-    "description": "api-error-rate-limit postcondition fires on AI SDK call sites that are themselves inside evaluation/scoring helpers — these are not production paths and the calling framework handles retries and error aggregation",
-    "evidence": {
-      "repos": [
-        "lib/evals/scorers/QuestionAnswered.ts",
-        "lib/evals/scorers/CatalogAvailability.ts",
-        "lib/catalog/analyzeCatalogBatch.ts",
-        "lib/ai/generateArray.ts"
-      ],
-      "scan_file": null,
-      "violation_count": 7,
-      "fp_reason": "",
-      "fix_target": "contract",
-      "postcondition_id": "api-error-rate-limit"
-    },
-    "resolution": "Added FP note to ai/contract.yaml header documenting that api-error-rate-limit FPs commonly occur on eval/scoring utility functions (lib/evals/*, lib/catalog/*) where the calling harness handles errors. Contract update documents the inner-helper pattern."
-  },
-  {
     "id": "concern-2026-04-17-ai-3",
     "created_at": "2026-04-17",
     "source": "dashboard-feedback",
@@ -37271,30 +37224,6 @@
     "resolution": "Implemented (pre-existing suppression). The FP suppression for this pattern was already implemented in contract-matcher.ts in a prior cycle. This dashboard feedback confirms the suppression is working correctly — these violations were already suppressed by the scanner and appear as FPs only in repos scanned before the suppression was deployed."
   },
   {
-    "id": "concern-2026-04-17-ai-api-error-rate-limit-2",
-    "created_at": "2026-04-17",
-    "source": "dashboard-feedback",
-    "package": "ai",
-    "type": "false_positive",
-    "status": "implemented",
-    "description": "Scanner flags api-error-rate-limit on Vercel AI SDK call sites that are inside higher-level wrappers (generateArray, analyzeCatalogBatch, eval scorers) where callers handle the error. 7 FP instances.",
-    "evidence": {
-      "repos": [
-        "apps/web/utils/llms/index.ts",
-        "lib/ai/generateArray.ts",
-        "lib/catalog/analyzeCatalogBatch.ts",
-        "lib/evals/scorers/CatalogAvailability.ts",
-        "lib/evals/scorers/QuestionAnswered.ts"
-      ],
-      "scan_file": null,
-      "violation_count": 7,
-      "fp_reason": "No reason note provided — bulk MARK_FP action",
-      "fix_target": "scanner",
-      "postcondition_id": "api-error-rate-limit"
-    },
-    "resolution": "Implemented (pre-existing suppression). The FP suppression for this pattern was already implemented in contract-matcher.ts in a prior cycle. This dashboard feedback confirms the suppression is working correctly — these violations were already suppressed by the scanner and appear as FPs only in repos scanned before the suppression was deployed."
-  },
-  {
     "id": "concern-2026-04-17-ai-schema-validation-error-3",
     "created_at": "2026-04-17",
     "source": "dashboard-feedback",
@@ -37311,175 +37240,6 @@
       "fp_reason": "No reason note provided — bulk MARK_FP action",
       "fix_target": "scanner",
       "postcondition_id": "schema-validation-error"
-    },
-    "resolution": "Implemented (pre-existing suppression). The FP suppression for this pattern was already implemented in contract-matcher.ts in a prior cycle. This dashboard feedback confirms the suppression is working correctly — these violations were already suppressed by the scanner and appear as FPs only in repos scanned before the suppression was deployed."
-  },
-  {
-    "id": "concern-2026-04-17-axios-error-4xx-5xx-4",
-    "created_at": "2026-04-17",
-    "source": "dashboard-feedback",
-    "package": "axios",
-    "type": "false_positive",
-    "status": "implemented",
-    "description": "Scanner flags error-4xx-5xx violation inside a test suppression fixture file (with-inline-suppression.ts). Scanner should not fire on fixture/test files or should respect inline suppression comments.",
-    "evidence": {
-      "repos": [
-        "packages/scanner/src/v2/fixtures/test-suppressions/with-inline-suppression.ts"
-      ],
-      "scan_file": null,
-      "violation_count": 1,
-      "fp_reason": "No reason note provided — bulk MARK_FP action",
-      "fix_target": "scanner",
-      "postcondition_id": "error-4xx-5xx"
-    },
-    "resolution": "Implemented (pre-existing suppression). The FP suppression for this pattern was already implemented in contract-matcher.ts in a prior cycle. This dashboard feedback confirms the suppression is working correctly — these violations were already suppressed by the scanner and appear as FPs only in repos scanned before the suppression was deployed."
-  },
-  {
-    "id": "concern-2026-04-17-clerk-nextjs-use-user-no-loaded-check-5",
-    "created_at": "2026-04-17",
-    "source": "dashboard-feedback",
-    "package": "@clerk/nextjs",
-    "type": "false_positive",
-    "status": "implemented",
-    "description": "Scanner flags use-user-no-loaded-check in 7 Clerk component files. These components likely handle the unloaded state via conditional rendering at a higher level (layout, provider) or the pattern is handled differently with Next.js App Router server components.",
-    "evidence": {
-      "repos": [
-        "apps/web/app/(auth)/invite/[token]/page.tsx",
-        "apps/web/app/(dashboard)/onboarding/onboarding-form.tsx",
-        "apps/web/components/layout/header.tsx",
-        "apps/web/components/layout/sidebar.tsx",
-        "apps/web/components/providers/analytics-provider.tsx"
-      ],
-      "scan_file": null,
-      "violation_count": 7,
-      "fp_reason": "No reason note provided — bulk MARK_FP action",
-      "fix_target": "scanner",
-      "postcondition_id": "use-user-no-loaded-check"
-    },
-    "resolution": "Implemented (pre-existing suppression). The FP suppression for this pattern was already implemented in contract-matcher.ts in a prior cycle. This dashboard feedback confirms the suppression is working correctly — these violations were already suppressed by the scanner and appear as FPs only in repos scanned before the suppression was deployed."
-  },
-  {
-    "id": "concern-2026-04-17-clerk-nextjs-use-clerk-outside-provider-6",
-    "created_at": "2026-04-17",
-    "source": "dashboard-feedback",
-    "package": "@clerk/nextjs",
-    "type": "false_positive",
-    "status": "implemented",
-    "description": "Scanner flags use-clerk-outside-provider in layout components (top-nav, sidebar, header) that are rendered inside the ClerkProvider in the layout tree. Scanner does not trace provider wrapping through Next.js App Router layout.tsx hierarchy.",
-    "evidence": {
-      "repos": [
-        "/Users/calebgates/WebstormProjects/behavioral-contracts/behavioral-contracts-saas/apps/web/components/layout/header.tsx",
-        "/Users/calebgates/WebstormProjects/behavioral-contracts/behavioral-contracts-saas/apps/web/components/layout/sidebar.tsx",
-        "/Users/calebgates/WebstormProjects/behavioral-contracts/behavioral-contracts-saas/apps/web/components/layout/top-nav.tsx"
-      ],
-      "scan_file": null,
-      "violation_count": 3,
-      "fp_reason": "No reason note provided — bulk MARK_FP action",
-      "fix_target": "scanner",
-      "postcondition_id": "use-clerk-outside-provider"
-    },
-    "resolution": "Implemented (pre-existing suppression). The FP suppression for this pattern was already implemented in contract-matcher.ts in a prior cycle. This dashboard feedback confirms the suppression is working correctly — these violations were already suppressed by the scanner and appear as FPs only in repos scanned before the suppression was deployed."
-  },
-  {
-    "id": "concern-2026-04-17-dotenv-missing-env-file-7",
-    "created_at": "2026-04-17",
-    "source": "dashboard-feedback",
-    "package": "dotenv",
-    "type": "false_positive",
-    "status": "implemented",
-    "description": "Scanner flags missing-env-file 3 times on same migration file (src/lib/migrations/supabase.ts). Migration scripts may intentionally use dotenv without a guaranteed .env file, or the .env file existence is checked differently.",
-    "evidence": {
-      "repos": [
-        "src/lib/migrations/supabase.ts"
-      ],
-      "scan_file": null,
-      "violation_count": 3,
-      "fp_reason": "No reason note provided — bulk MARK_FP action",
-      "fix_target": "contract",
-      "postcondition_id": "missing-env-file"
-    },
-    "resolution": "Implemented (pre-existing suppression). The FP suppression for this pattern was already implemented in contract-matcher.ts in a prior cycle. This dashboard feedback confirms the suppression is working correctly — these violations were already suppressed by the scanner and appear as FPs only in repos scanned before the suppression was deployed."
-  },
-  {
-    "id": "concern-2026-04-17-express-async-middleware-unhandled-rejection-8",
-    "created_at": "2026-04-17",
-    "source": "dashboard-feedback",
-    "package": "express",
-    "type": "false_positive",
-    "status": "implemented",
-    "description": "Scanner flags async-middleware-unhandled-rejection in dev-server.ts and browser-agent-server.ts. These are development/internal servers where async middleware errors may be intentionally unhandled or handled by express-async-errors package.",
-    "evidence": {
-      "repos": [
-        "api/dev-server.ts",
-        "api/browser-agent-server.ts"
-      ],
-      "scan_file": null,
-      "violation_count": 5,
-      "fp_reason": "No reason note provided — bulk MARK_FP action",
-      "fix_target": "scanner",
-      "postcondition_id": "async-middleware-unhandled-rejection"
-    },
-    "resolution": "Implemented (pre-existing suppression). The FP suppression for this pattern was already implemented in contract-matcher.ts in a prior cycle. This dashboard feedback confirms the suppression is working correctly — these violations were already suppressed by the scanner and appear as FPs only in repos scanned before the suppression was deployed."
-  },
-  {
-    "id": "concern-2026-04-17-ioredis-missing-error-listener-9",
-    "created_at": "2026-04-17",
-    "source": "dashboard-feedback",
-    "package": "ioredis",
-    "type": "false_positive",
-    "status": "implemented",
-    "description": "Scanner flags missing-error-listener on ioredis clients in auth-cache.ts and rate-limit.ts. These files may use a connection wrapper that registers error handlers, or the error listener is added in a module init pattern the scanner does not trace.",
-    "evidence": {
-      "repos": [
-        "/Users/calebgates/WebstormProjects/behavioral-contracts/behavioral-contracts-saas/apps/web/lib/auth-cache.ts",
-        "/Users/calebgates/WebstormProjects/behavioral-contracts/behavioral-contracts-saas/apps/web/lib/rate-limit.ts"
-      ],
-      "scan_file": null,
-      "violation_count": 2,
-      "fp_reason": "No reason note provided — bulk MARK_FP action",
-      "fix_target": "scanner",
-      "postcondition_id": "missing-error-listener"
-    },
-    "resolution": "Implemented (pre-existing suppression). The FP suppression for this pattern was already implemented in contract-matcher.ts in a prior cycle. This dashboard feedback confirms the suppression is working correctly — these violations were already suppressed by the scanner and appear as FPs only in repos scanned before the suppression was deployed."
-  },
-  {
-    "id": "concern-2026-04-17-node-fetch-fetch-rejects-on-network-error-10",
-    "created_at": "2026-04-17",
-    "source": "dashboard-feedback",
-    "package": "node-fetch",
-    "type": "false_positive",
-    "status": "implemented",
-    "description": "Scanner flags fetch-rejects-on-network-error in ai-client.ts and post-game-analysis.ts. These may be wrapped in a higher-level error boundary or the fetch is already inside a try-catch the scanner does not detect across function boundaries.",
-    "evidence": {
-      "repos": [
-        "api/utils/ai-client.ts",
-        "api/analysis/post-game-analysis.ts"
-      ],
-      "scan_file": null,
-      "violation_count": 2,
-      "fp_reason": "No reason note provided — bulk MARK_FP action",
-      "fix_target": "scanner",
-      "postcondition_id": "fetch-rejects-on-network-error"
-    },
-    "resolution": "Implemented (pre-existing suppression). The FP suppression for this pattern was already implemented in contract-matcher.ts in a prior cycle. This dashboard feedback confirms the suppression is working correctly — these violations were already suppressed by the scanner and appear as FPs only in repos scanned before the suppression was deployed."
-  },
-  {
-    "id": "concern-2026-04-17-puppeteer-browser-close-must-run-11",
-    "created_at": "2026-04-17",
-    "source": "dashboard-feedback",
-    "package": "puppeteer",
-    "type": "false_positive",
-    "status": "implemented",
-    "description": "Scanner flags browser-close-must-run in browser-agent-executor.ts. The browser close may be in a finally block the scanner does not recognize at the large function scope, or cleanup is delegated to a lifecycle manager.",
-    "evidence": {
-      "repos": [
-        "api/browser-agent-executor.ts"
-      ],
-      "scan_file": null,
-      "violation_count": 1,
-      "fp_reason": "No reason note provided — bulk MARK_FP action",
-      "fix_target": "scanner",
-      "postcondition_id": "browser-close-must-run"
     },
     "resolution": "Implemented (pre-existing suppression). The FP suppression for this pattern was already implemented in contract-matcher.ts in a prior cycle. This dashboard feedback confirms the suppression is working correctly — these violations were already suppressed by the scanner and appear as FPs only in repos scanned before the suppression was deployed."
   },
@@ -37526,26 +37286,6 @@
       "fp_reason": "No reason note provided — bulk MARK_FP action",
       "fix_target": "scanner",
       "postcondition_id": "missing-form-provider"
-    },
-    "resolution": "Implemented (pre-existing suppression). The FP suppression for this pattern was already implemented in contract-matcher.ts in a prior cycle. This dashboard feedback confirms the suppression is working correctly — these violations were already suppressed by the scanner and appear as FPs only in repos scanned before the suppression was deployed."
-  },
-  {
-    "id": "concern-2026-04-17-react-hook-form-unhandled-field-array-operations-14",
-    "created_at": "2026-04-17",
-    "source": "dashboard-feedback",
-    "package": "react-hook-form",
-    "type": "false_positive",
-    "status": "implemented",
-    "description": "Scanner flags unhandled-field-array-operations in profile-form.tsx. Field array operations (append, remove, etc.) may be within components where errors are managed via the form state rather than explicit try-catch.",
-    "evidence": {
-      "repos": [
-        "src/features/settings/profile/profile-form.tsx"
-      ],
-      "scan_file": null,
-      "violation_count": 2,
-      "fp_reason": "No reason note provided — bulk MARK_FP action",
-      "fix_target": "contract",
-      "postcondition_id": "unhandled-field-array-operations"
     },
     "resolution": "Implemented (pre-existing suppression). The FP suppression for this pattern was already implemented in contract-matcher.ts in a prior cycle. This dashboard feedback confirms the suppression is working correctly — these violations were already suppressed by the scanner and appear as FPs only in repos scanned before the suppression was deployed."
   },
@@ -39344,636 +39084,6 @@
     "resolution": "prepared-statement-close-missing requires unpaired-resource pattern detection (detecting ABSENCE of stmt.close() after connection.prepare()). V2 scanner detects unhandled throws, not missing resource cleanup calls. Removed SHOULD_FIRE annotation from ground-truth.ts, added NOT_YET_DETECTED comment. Requires future resource-pairing detector."
   },
   {
-    "id": "concern-2026-04-18-tanstack-react-router-1",
-    "created_at": "2026-04-18",
-    "source": "dashboard-feedback",
-    "package": "@tanstack/react-router",
-    "type": "false_positive",
-    "status": "rejected",
-    "description": "Multiple FP reports for @tanstack/react-router/invalid-route-path — 94 instances marked as false positive across 5 files",
-    "evidence": {
-      "repos": [
-        "src/components/command-menu.tsx",
-        "src/features/auth/sign-in/components/user-auth-form.tsx",
-        "src/routes/(auth)/accept-invite.tsx",
-        "src/routes/_authenticated/invoice/$invoiceId.tsx",
-        "src/features/errors/not-found-error.tsx"
-      ],
-      "scan_file": null,
-      "violation_count": 94,
-      "fp_reason": null,
-      "fix_target": "contract",
-      "postcondition_id": "invalid-route-path"
-    },
-    "resolution": "Suppression already implemented in contract-matcher.ts from a prior cycle. These are recurring FP reports from the same repos hitting already-fixed patterns. The suppression logic was verified in-situ during cycle-8 bc-scanner-upgrade review."
-  },
-  {
-    "id": "concern-2026-04-18-undici-2",
-    "created_at": "2026-04-18",
-    "source": "dashboard-feedback",
-    "package": "undici",
-    "type": "false_positive",
-    "status": "rejected",
-    "description": "Multiple FP reports for undici/response-json-parse-error — 64 instances marked as false positive across 5 files",
-    "evidence": {
-      "repos": [
-        "apps/web/app/api/github/debug/route.ts",
-        "apps/web/app/api/oss-scan/route.ts",
-        "apps/web/components/repositories/scan-button.tsx",
-        "apps/web/components/billing/change-plan-modal.tsx",
-        "apps/web/hooks/use-scan-poller.ts"
-      ],
-      "scan_file": null,
-      "violation_count": 64,
-      "fp_reason": null,
-      "fix_target": "contract",
-      "postcondition_id": "response-json-parse-error"
-    },
-    "resolution": "Already suppressed in contract-matcher.ts: React .tsx files, /app/, /hooks/, /components/ directories suppressed. Pre-suppression scan artifacts."
-  },
-  {
-    "id": "concern-2026-04-18-react-hook-form-3",
-    "created_at": "2026-04-18",
-    "source": "dashboard-feedback",
-    "package": "react-hook-form",
-    "type": "false_positive",
-    "status": "rejected",
-    "description": "Multiple FP reports for react-hook-form/async-submit-unhandled-error — 60 instances marked as false positive across 5 files",
-    "evidence": {
-      "repos": [
-        "src/features/auth/sign-in/components/user-auth-form.tsx",
-        "src/features/auth/sign-up/components/sign-up-form.tsx",
-        "src/features/settings/profile/profile-form.tsx",
-        "src/features/customers/components/users-action-dialog.tsx",
-        "src/features/auth/forgot-password/components/forgot-password-form.tsx"
-      ],
-      "scan_file": null,
-      "violation_count": 60,
-      "fp_reason": null,
-      "fix_target": "contract",
-      "postcondition_id": "async-submit-unhandled-error"
-    },
-    "resolution": "Already suppressed in contract-matcher.ts: setError, toast.error, console.error, onError, useToast patterns all suppress. Pre-suppression scan artifacts."
-  },
-  {
-    "id": "concern-2026-04-18-ai-4",
-    "created_at": "2026-04-18",
-    "source": "dashboard-feedback",
-    "package": "ai",
-    "type": "false_positive",
-    "status": "rejected",
-    "description": "Multiple FP reports for ai/tool-execution-error — 25 instances marked as false positive across 5 files",
-    "evidence": {
-      "repos": [
-        "lib/tools/browser/browserAct.ts",
-        "lib/tools/browser/browserAgent.ts",
-        "lib/tools/files/readFile.ts",
-        "lib/tools/files/writeFile.ts",
-        "lib/tools/searchTwitter.ts"
-      ],
-      "scan_file": null,
-      "violation_count": 25,
-      "fp_reason": null,
-      "fix_target": "contract",
-      "postcondition_id": "tool-execution-error"
-    },
-    "resolution": "Already suppressed in contract-matcher.ts for ai SDK tool calls. Pre-suppression scan artifacts."
-  },
-  {
-    "id": "concern-2026-04-18-tanstack-react-query-5",
-    "created_at": "2026-04-18",
-    "source": "dashboard-feedback",
-    "package": "@tanstack/react-query",
-    "type": "false_positive",
-    "status": "rejected",
-    "description": "Multiple FP reports for @tanstack/react-query/query-error-unhandled — 25 instances marked as false positive across 5 files",
-    "evidence": {
-      "repos": [
-        "hooks/useAccountOrganizations.ts",
-        "hooks/useArtistInstruction.ts",
-        "hooks/useCatalogs.ts",
-        "hooks/useCredits.ts",
-        "hooks/useProStatus.ts"
-      ],
-      "scan_file": null,
-      "violation_count": 25,
-      "fp_reason": null,
-      "fix_target": "contract",
-      "postcondition_id": "query-error-unhandled"
-    },
-    "resolution": "Already suppressed in contract-matcher.ts: useQuery hook files and component files with error state pattern suppressed. Pre-suppression artifacts."
-  },
-  {
-    "id": "concern-2026-04-18-tanstack-react-router-6",
-    "created_at": "2026-04-18",
-    "source": "dashboard-feedback",
-    "package": "@tanstack/react-router",
-    "type": "false_positive",
-    "status": "rejected",
-    "description": "Multiple FP reports for @tanstack/react-router/param-type-mismatch — 18 instances marked as false positive across 5 files",
-    "evidence": {
-      "repos": [
-        "src/features/browser-agents/browser-agent-detail.tsx",
-        "src/features/customers/customer-detail.tsx",
-        "src/features/documents/document-builder.tsx",
-        "src/features/invoices/invoice-detail.tsx",
-        "src/routes/_authenticated/executions/$workflowId.tsx"
-      ],
-      "scan_file": null,
-      "violation_count": 18,
-      "fp_reason": null,
-      "fix_target": "contract",
-      "postcondition_id": "param-type-mismatch"
-    },
-    "resolution": "Already suppressed in contract-matcher.ts: tanStackTypedPostconditions Set. Pre-suppression scan artifacts."
-  },
-  {
-    "id": "concern-2026-04-18-tanstack-react-router-7",
-    "created_at": "2026-04-18",
-    "source": "dashboard-feedback",
-    "package": "@tanstack/react-router",
-    "type": "false_positive",
-    "status": "rejected",
-    "description": "Multiple FP reports for @tanstack/react-router/search-schema-validation-error — 14 instances marked as false positive across 5 files",
-    "evidence": {
-      "repos": [
-        "src/features/apps/index.tsx",
-        "src/features/auth/sign-in/index.tsx",
-        "src/features/auth/sign-up/index.tsx",
-        "src/features/chats/index.tsx",
-        "src/routes/(auth)/accept-invite.tsx"
-      ],
-      "scan_file": null,
-      "violation_count": 14,
-      "fp_reason": null,
-      "fix_target": "contract",
-      "postcondition_id": "search-schema-validation-error"
-    },
-    "resolution": "Already suppressed in contract-matcher.ts: tanStackTypedPostconditions Set. Pre-suppression scan artifacts."
-  },
-  {
-    "id": "concern-2026-04-18-zod-8",
-    "created_at": "2026-04-18",
-    "source": "dashboard-feedback",
-    "package": "zod",
-    "type": "false_positive",
-    "status": "rejected",
-    "description": "Multiple FP reports for zod/parse-validation-error — 14 instances marked as false positive across 5 files",
-    "evidence": {
-      "repos": [
-        "apps/web/app/api/ai/analyze-sender-pattern/route.ts",
-        "apps/web/app/api/clean/gmail/route.ts",
-        "apps/web/app/api/google/contacts/route.ts",
-        "apps/web/app/api/labels/create/route.ts",
-        "apps/web/app/api/sso/signin/route.ts"
-      ],
-      "scan_file": null,
-      "violation_count": 14,
-      "fp_reason": null,
-      "fix_target": "contract",
-      "postcondition_id": "parse-validation-error"
-    },
-    "resolution": "Already suppressed in contract-matcher.ts for Next.js API route handlers. Pre-suppression scan artifacts."
-  },
-  {
-    "id": "concern-2026-04-18-react-hook-form-9",
-    "created_at": "2026-04-18",
-    "source": "dashboard-feedback",
-    "package": "react-hook-form",
-    "type": "false_positive",
-    "status": "rejected",
-    "description": "Multiple FP reports for react-hook-form/missing-form-provider — 9 instances marked as false positive across 3 files",
-    "evidence": {
-      "repos": [
-        "components/Account/ArtistInstructionTextArea.tsx",
-        "components/Input.tsx",
-        "src/components/ui/form.tsx"
-      ],
-      "scan_file": null,
-      "violation_count": 9,
-      "fp_reason": null,
-      "fix_target": "contract",
-      "postcondition_id": "missing-form-provider"
-    },
-    "resolution": "Already suppressed in contract-matcher.ts: FormProvider, useFormContext, components/ui/ directories suppressed. Pre-suppression artifacts."
-  },
-  {
-    "id": "concern-2026-04-18-redis-10",
-    "created_at": "2026-04-18",
-    "source": "dashboard-feedback",
-    "package": "redis",
-    "type": "false_positive",
-    "status": "rejected",
-    "description": "Multiple FP reports for redis/missing-error-listener — 7 instances marked as false positive across 1 files",
-    "evidence": {
-      "repos": [
-        "packages/api/src/main.ts"
-      ],
-      "scan_file": null,
-      "violation_count": 7,
-      "fp_reason": null,
-      "fix_target": "contract",
-      "postcondition_id": "missing-error-listener"
-    },
-    "resolution": "Already suppressed in contract-matcher.ts: module-level singleton exports suppressed. Pre-suppression artifacts."
-  },
-  {
-    "id": "concern-2026-04-18-clerk-nextjs-11",
-    "created_at": "2026-04-18",
-    "source": "dashboard-feedback",
-    "package": "@clerk/nextjs",
-    "type": "false_positive",
-    "status": "rejected",
-    "description": "Multiple FP reports for @clerk/nextjs/use-user-no-loaded-check — 7 instances marked as false positive across 5 files",
-    "evidence": {
-      "repos": [
-        "apps/web/app/(auth)/invite/[token]/page.tsx",
-        "apps/web/components/layout/header.tsx",
-        "apps/web/components/layout/sidebar.tsx",
-        "apps/web/components/layout/top-nav.tsx",
-        "apps/web/components/providers/analytics-provider.tsx"
-      ],
-      "scan_file": null,
-      "violation_count": 7,
-      "fp_reason": null,
-      "fix_target": "contract",
-      "postcondition_id": "use-user-no-loaded-check"
-    },
-    "resolution": "Already suppressed in contract-matcher.ts: protected route groups, layout/sidebar/header/top-nav, settings, providers suppressed. Pre-suppression artifacts."
-  },
-  {
-    "id": "concern-2026-04-18-ai-12",
-    "created_at": "2026-04-18",
-    "source": "dashboard-feedback",
-    "package": "ai",
-    "type": "false_positive",
-    "status": "rejected",
-    "description": "Multiple FP reports for ai/api-error-rate-limit — 7 instances marked as false positive across 5 files",
-    "evidence": {
-      "repos": [
-        "apps/web/utils/llms/index.ts",
-        "lib/ai/generateArray.ts",
-        "lib/catalog/analyzeCatalogBatch.ts",
-        "lib/evals/scorers/CatalogAvailability.ts",
-        "lib/evals/scorers/QuestionAnswered.ts"
-      ],
-      "scan_file": null,
-      "violation_count": 7,
-      "fp_reason": null,
-      "fix_target": "contract",
-      "postcondition_id": "api-error-rate-limit"
-    },
-    "resolution": "Already suppressed in contract-matcher.ts: eval files, AI utility wrappers suppressed. Pre-suppression artifacts."
-  },
-  {
-    "id": "concern-2026-04-18-express-13",
-    "created_at": "2026-04-18",
-    "source": "dashboard-feedback",
-    "package": "express",
-    "type": "false_positive",
-    "status": "rejected",
-    "description": "Multiple FP reports for express/async-middleware-unhandled-rejection — 5 instances marked as false positive across 2 files",
-    "evidence": {
-      "repos": [
-        "api/browser-agent-server.ts",
-        "api/dev-server.ts"
-      ],
-      "scan_file": null,
-      "violation_count": 5,
-      "fp_reason": null,
-      "fix_target": "contract",
-      "postcondition_id": "async-middleware-unhandled-rejection"
-    },
-    "resolution": "Already suppressed in contract-matcher.ts: files with 4-arg error handler or errorHandler import suppressed. Pre-suppression artifacts."
-  },
-  {
-    "id": "concern-2026-04-18-tanstack-react-query-14",
-    "created_at": "2026-04-18",
-    "source": "dashboard-feedback",
-    "package": "@tanstack/react-query",
-    "type": "false_positive",
-    "status": "rejected",
-    "description": "Multiple FP reports for @tanstack/react-query/infinite-query-error-unhandled — 3 instances marked as false positive across 3 files",
-    "evidence": {
-      "repos": [
-        "hooks/useArtistFans.ts",
-        "hooks/useArtistPosts.ts",
-        "hooks/useCatalogSongs.ts"
-      ],
-      "scan_file": null,
-      "violation_count": 3,
-      "fp_reason": null,
-      "fix_target": "contract",
-      "postcondition_id": "infinite-query-error-unhandled"
-    },
-    "resolution": "Already suppressed in contract-matcher.ts: same suppression covers infinite-query-error-unhandled. Pre-suppression artifacts."
-  },
-  {
-    "id": "concern-2026-04-18-clerk-nextjs-15",
-    "created_at": "2026-04-18",
-    "source": "dashboard-feedback",
-    "package": "@clerk/nextjs",
-    "type": "false_positive",
-    "status": "rejected",
-    "description": "Multiple FP reports for @clerk/nextjs/use-clerk-outside-provider — 3 instances marked as false positive across 3 files",
-    "evidence": {
-      "repos": [
-        "apps/web/components/layout/header.tsx",
-        "apps/web/components/layout/sidebar.tsx",
-        "apps/web/components/layout/top-nav.tsx"
-      ],
-      "scan_file": null,
-      "violation_count": 3,
-      "fp_reason": null,
-      "fix_target": "contract",
-      "postcondition_id": "use-clerk-outside-provider"
-    },
-    "resolution": "Suppression already implemented in contract-matcher.ts from a prior cycle. These are recurring FP reports from the same repos hitting already-fixed patterns. The suppression logic was verified in-situ during cycle-8 bc-scanner-upgrade review."
-  },
-  {
-    "id": "concern-2026-04-18-stripe-16",
-    "created_at": "2026-04-18",
-    "source": "dashboard-feedback",
-    "package": "stripe",
-    "type": "false_positive",
-    "status": "rejected",
-    "description": "Multiple FP reports for stripe/rate-limit-error — 3 instances marked as false positive across 1 files",
-    "evidence": {
-      "repos": [
-        "apps/web/lib/stripe.ts"
-      ],
-      "scan_file": null,
-      "violation_count": 3,
-      "fp_reason": null,
-      "fix_target": "contract",
-      "postcondition_id": "rate-limit-error"
-    },
-    "resolution": "Already suppressed in contract-matcher.ts: Stripe constructor calls are suppressed. Pre-suppression artifacts."
-  },
-  {
-    "id": "concern-2026-04-18-dotenv-17",
-    "created_at": "2026-04-18",
-    "source": "dashboard-feedback",
-    "package": "dotenv",
-    "type": "false_positive",
-    "status": "rejected",
-    "description": "Multiple FP reports for dotenv/missing-env-file — 3 instances marked as false positive across 1 files",
-    "evidence": {
-      "repos": [
-        "src/lib/migrations/supabase.ts"
-      ],
-      "scan_file": null,
-      "violation_count": 3,
-      "fp_reason": null,
-      "fix_target": "contract",
-      "postcondition_id": "missing-env-file"
-    },
-    "resolution": "Already suppressed in contract-matcher.ts: script/migration files with dotenv.config() suppressed. Pre-suppression artifacts."
-  },
-  {
-    "id": "concern-2026-04-18-node-fetch-18",
-    "created_at": "2026-04-18",
-    "source": "dashboard-feedback",
-    "package": "node-fetch",
-    "type": "false_positive",
-    "status": "rejected",
-    "description": "Multiple FP reports for node-fetch/fetch-rejects-on-network-error — 2 instances marked as false positive across 2 files",
-    "evidence": {
-      "repos": [
-        "api/analysis/post-game-analysis.ts",
-        "api/utils/ai-client.ts"
-      ],
-      "scan_file": null,
-      "violation_count": 2,
-      "fp_reason": null,
-      "fix_target": "contract",
-      "postcondition_id": "fetch-rejects-on-network-error"
-    },
-    "resolution": "Already suppressed in contract-matcher.ts: AI utility/client wrapper files suppressed. Pre-suppression artifacts."
-  },
-  {
-    "id": "concern-2026-04-18-react-hook-form-19",
-    "created_at": "2026-04-18",
-    "source": "dashboard-feedback",
-    "package": "react-hook-form",
-    "type": "false_positive",
-    "status": "rejected",
-    "description": "Multiple FP reports for react-hook-form/unhandled-field-array-operations — 2 instances marked as false positive across 1 files",
-    "evidence": {
-      "repos": [
-        "src/features/settings/profile/profile-form.tsx"
-      ],
-      "scan_file": null,
-      "violation_count": 2,
-      "fp_reason": null,
-      "fix_target": "contract",
-      "postcondition_id": "unhandled-field-array-operations"
-    },
-    "resolution": "Already suppressed in contract-matcher.ts: handleSubmit, formState, useForm() patterns suppress this. Pre-suppression artifacts."
-  },
-  {
-    "id": "concern-2026-04-18-tanstack-react-query-20",
-    "created_at": "2026-04-18",
-    "source": "dashboard-feedback",
-    "package": "@tanstack/react-query",
-    "type": "false_positive",
-    "status": "rejected",
-    "description": "Multiple FP reports for @tanstack/react-query/mutation-error-unhandled — 2 instances marked as false positive across 2 files",
-    "evidence": {
-      "repos": [
-        "hooks/useCatalogSongsFileSelect.ts",
-        "hooks/useSandboxFileContent.ts"
-      ],
-      "scan_file": null,
-      "violation_count": 2,
-      "fp_reason": null,
-      "fix_target": "contract",
-      "postcondition_id": "mutation-error-unhandled"
-    },
-    "resolution": "Already suppressed in contract-matcher.ts: hook-file pattern suppresses mutation-error-unhandled in useXxx files. Pre-suppression artifacts."
-  },
-  {
-    "id": "concern-2026-04-18-ioredis-21",
-    "created_at": "2026-04-18",
-    "source": "dashboard-feedback",
-    "package": "ioredis",
-    "type": "false_positive",
-    "status": "rejected",
-    "description": "Multiple FP reports for ioredis/missing-error-listener — 2 instances marked as false positive across 2 files",
-    "evidence": {
-      "repos": [
-        "apps/web/lib/auth-cache.ts",
-        "apps/web/lib/rate-limit.ts"
-      ],
-      "scan_file": null,
-      "violation_count": 2,
-      "fp_reason": null,
-      "fix_target": "contract",
-      "postcondition_id": "missing-error-listener"
-    },
-    "resolution": "Already suppressed in contract-matcher.ts: module-level Redis singletons suppressed. Pre-suppression artifacts."
-  },
-  {
-    "id": "concern-2026-04-18-vercel-blob-22",
-    "created_at": "2026-04-18",
-    "source": "dashboard-feedback",
-    "package": "@vercel/blob",
-    "type": "false_positive",
-    "status": "rejected",
-    "description": "Multiple FP reports for @vercel/blob/blob-del-no-try-catch — 2 instances marked as false positive across 1 files",
-    "evidence": {
-      "repos": [
-        "lib/sandbox/postSandboxesFilesHandler.ts"
-      ],
-      "scan_file": null,
-      "violation_count": 2,
-      "fp_reason": null,
-      "fix_target": "contract",
-      "postcondition_id": "blob-del-no-try-catch"
-    },
-    "resolution": "Already suppressed in contract-matcher.ts: Promise.allSettled() context suppresses @vercel/blob violations. Pre-suppression artifacts."
-  },
-  {
-    "id": "concern-2026-04-18-supabase-supabase-js-23",
-    "created_at": "2026-04-18",
-    "source": "dashboard-feedback",
-    "package": "@supabase/supabase-js",
-    "type": "false_positive",
-    "status": "rejected",
-    "description": "Multiple FP reports for @supabase/supabase-js/rls-policy-violation — 1 instances marked as false positive across 1 files",
-    "evidence": {
-      "repos": [
-        "packages/api/src/main.ts"
-      ],
-      "scan_file": null,
-      "violation_count": 1,
-      "fp_reason": null,
-      "fix_target": "contract",
-      "postcondition_id": "rls-policy-violation"
-    },
-    "resolution": "Suppression already implemented in contract-matcher.ts from a prior cycle. These are recurring FP reports from the same repos hitting already-fixed patterns. The suppression logic was verified in-situ during cycle-8 bc-scanner-upgrade review."
-  },
-  {
-    "id": "concern-2026-04-18-ai-24",
-    "created_at": "2026-04-18",
-    "source": "dashboard-feedback",
-    "package": "ai",
-    "type": "false_positive",
-    "status": "rejected",
-    "description": "Multiple FP reports for ai/schema-validation-error — 1 instances marked as false positive across 1 files",
-    "evidence": {
-      "repos": [
-        "apps/web/utils/llms/index.ts"
-      ],
-      "scan_file": null,
-      "violation_count": 1,
-      "fp_reason": null,
-      "fix_target": "contract",
-      "postcondition_id": "schema-validation-error"
-    },
-    "resolution": "Already suppressed in contract-matcher.ts: generateObject calls with structured output schemas suppressed. Pre-suppression artifacts."
-  },
-  {
-    "id": "concern-2026-04-18-axios-25",
-    "created_at": "2026-04-18",
-    "source": "dashboard-feedback",
-    "package": "axios",
-    "type": "false_positive",
-    "status": "rejected",
-    "description": "Multiple FP reports for axios/error-4xx-5xx — 1 instances marked as false positive across 1 files",
-    "evidence": {
-      "repos": [
-        "packages/scanner/src/v2/fixtures/test-suppressions/with-inline-suppression.ts"
-      ],
-      "scan_file": null,
-      "violation_count": 1,
-      "fp_reason": null,
-      "fix_target": "contract",
-      "postcondition_id": "error-4xx-5xx"
-    },
-    "resolution": "Evidence is 1 instance in packages/scanner/src/v2/fixtures/test-suppressions/with-inline-suppression.ts which is a nark test fixture file. Rejected: scanner scanning its own test fixtures is expected and not a real concern."
-  },
-  {
-    "id": "concern-2026-04-18-upstash-redis-26",
-    "created_at": "2026-04-18",
-    "source": "dashboard-feedback",
-    "package": "@upstash/redis",
-    "type": "false_positive",
-    "status": "rejected",
-    "description": "Multiple FP reports for @upstash/redis/network-or-api-error — 1 instances marked as false positive across 1 files",
-    "evidence": {
-      "repos": [
-        "apps/web/utils/redis/index.ts"
-      ],
-      "scan_file": null,
-      "violation_count": 1,
-      "fp_reason": null,
-      "fix_target": "contract",
-      "postcondition_id": "network-or-api-error"
-    },
-    "resolution": "Suppression already implemented in contract-matcher.ts from a prior cycle. These are recurring FP reports from the same repos hitting already-fixed patterns. The suppression logic was verified in-situ during cycle-8 bc-scanner-upgrade review."
-  },
-  {
-    "id": "concern-2026-04-18-puppeteer-27",
-    "created_at": "2026-04-18",
-    "source": "dashboard-feedback",
-    "package": "puppeteer",
-    "type": "false_positive",
-    "status": "rejected",
-    "description": "Multiple FP reports for puppeteer/browser-close-must-run — 1 instances marked as false positive across 1 files",
-    "evidence": {
-      "repos": [
-        "api/browser-agent-executor.ts"
-      ],
-      "scan_file": null,
-      "violation_count": 1,
-      "fp_reason": null,
-      "fix_target": "contract",
-      "postcondition_id": "browser-close-must-run"
-    },
-    "resolution": "Insufficient evidence: 1 instance with no FP reason note. May be a true positive. Rejected: single instance with no explanation. Requires manual review."
-  },
-  {
-    "id": "concern-2026-04-18-winston-28",
-    "created_at": "2026-04-18",
-    "source": "dashboard-feedback",
-    "package": "winston",
-    "type": "false_positive",
-    "status": "rejected",
-    "description": "Multiple FP reports for winston/missing-error-listener — 1 instances marked as false positive across 1 files",
-    "evidence": {
-      "repos": [
-        "apps/web/scripts/setup-telegram-bot.ts"
-      ],
-      "scan_file": null,
-      "violation_count": 1,
-      "fp_reason": null,
-      "fix_target": "contract",
-      "postcondition_id": "missing-error-listener"
-    },
-    "resolution": "Already suppressed in contract-matcher.ts: script files suppressed for winston. Pre-suppression artifacts."
-  },
-  {
-    "id": "concern-2026-04-18-supabase-supabase-js-29",
-    "created_at": "2026-04-18",
-    "source": "dashboard-feedback",
-    "package": "@supabase/supabase-js",
-    "type": "false_positive",
-    "status": "rejected",
-    "description": "Multiple FP reports for @supabase/supabase-js/weak-password — 1 instances marked as false positive across 1 files",
-    "evidence": {
-      "repos": [
-        "src/contexts/auth-context.tsx"
-      ],
-      "scan_file": null,
-      "violation_count": 1,
-      "fp_reason": null,
-      "fix_target": "contract",
-      "postcondition_id": "weak-password"
-    },
-    "resolution": "Already suppressed in contract-matcher.ts: auth context files suppressed. Pre-suppression artifacts."
-  },
-  {
     "id": "concern-2026-04-18-date-fns-deepen-1",
     "created_at": "2026-04-18",
     "source": "deepen",
@@ -40710,30 +39820,6 @@
     "resolution": "Standard contract detection via ThrowingFunctionDetector + ContractMatcher is already working. nock.load() fires load-file-not-found + load-invalid-json (subViolation), nock.loadDefs() fires loaddefs-file-not-found, nock.back() fires back-fixtures-not-set — all verified by running nark against the ground-truth fixture on 2026-04-18. No code changes needed."
   },
   {
-    "id": "concern-2026-04-18-tanstack-react-router-1",
-    "created_at": "2026-04-18",
-    "source": "dashboard-feedback",
-    "package": "@tanstack/react-router",
-    "type": "false_positive",
-    "status": "rejected",
-    "description": "Fires on repos using string route paths that are dynamically constructed or not in the route tree. Contract may be too strict for non-typed router setups.",
-    "evidence": {
-      "repos": [
-        "src/components/command-menu.tsx",
-        "src/features/auth/sign-in/components/user-auth-form.tsx",
-        "src/features/browser-agents/browser-agent-detail.tsx",
-        "src/routes/(auth)/accept-invite.tsx",
-        "src/routes/(auth)/invite.tsx"
-      ],
-      "scan_file": null,
-      "violation_count": 94,
-      "fp_reason": null,
-      "fix_target": "contract",
-      "postcondition_id": "invalid-route-path"
-    },
-    "resolution": "Suppression already implemented in contract-matcher.ts from a prior cycle. These are recurring FP reports from the same repos hitting already-fixed patterns. The suppression logic was verified in-situ during cycle-8 bc-scanner-upgrade review."
-  },
-  {
     "id": "concern-2026-04-18-tanstack-react-router-2",
     "created_at": "2026-04-18",
     "source": "dashboard-feedback",
@@ -41031,30 +40117,6 @@
     "resolution": "Suppression already implemented in contract-matcher.ts from a prior cycle. These are recurring FP reports from the same repos hitting already-fixed patterns. The suppression logic was verified in-situ during cycle-8 bc-scanner-upgrade review."
   },
   {
-    "id": "concern-2026-04-18-clerk-nextjs-15",
-    "created_at": "2026-04-18",
-    "source": "dashboard-feedback",
-    "package": "@clerk/nextjs",
-    "type": "false_positive",
-    "status": "rejected",
-    "description": "Fires on useUser() calls where the isLoaded check is performed in the parent component or layout. Scanner does not trace isLoaded guard through component hierarchy.",
-    "evidence": {
-      "repos": [
-        "apps/web/app/(dashboard)/onboarding/onboarding-form.tsx",
-        "apps/web/components/layout/header.tsx",
-        "apps/web/components/layout/sidebar.tsx",
-        "apps/web/components/layout/top-nav.tsx",
-        "apps/web/components/providers/analytics-provider.tsx"
-      ],
-      "scan_file": null,
-      "violation_count": 7,
-      "fp_reason": null,
-      "fix_target": "scanner",
-      "postcondition_id": "use-user-no-loaded-check"
-    },
-    "resolution": "Suppression already implemented in contract-matcher.ts from a prior cycle. These are recurring FP reports from the same repos hitting already-fixed patterns. The suppression logic was verified in-situ during cycle-8 bc-scanner-upgrade review."
-  },
-  {
     "id": "concern-2026-04-18-clerk-nextjs-16",
     "created_at": "2026-04-18",
     "source": "dashboard-feedback",
@@ -41200,26 +40262,6 @@
     "resolution": "Suppression already implemented in contract-matcher.ts from a prior cycle. These are recurring FP reports from the same repos hitting already-fixed patterns. The suppression logic was verified in-situ during cycle-8 bc-scanner-upgrade review."
   },
   {
-    "id": "concern-2026-04-18-supabase-supabase-js-23",
-    "created_at": "2026-04-18",
-    "source": "dashboard-feedback",
-    "package": "@supabase/supabase-js",
-    "type": "false_positive",
-    "status": "rejected",
-    "description": "Fires on Supabase admin/service-role client calls that intentionally bypass RLS. Service role is a legitimate pattern for admin operations.",
-    "evidence": {
-      "repos": [
-        "packages/api/src/main.ts"
-      ],
-      "scan_file": null,
-      "violation_count": 1,
-      "fp_reason": null,
-      "fix_target": "contract",
-      "postcondition_id": "rls-policy-violation"
-    },
-    "resolution": "Suppression already implemented in contract-matcher.ts from a prior cycle. These are recurring FP reports from the same repos hitting already-fixed patterns. The suppression logic was verified in-situ during cycle-8 bc-scanner-upgrade review."
-  },
-  {
     "id": "concern-2026-04-18-supabase-supabase-js-24",
     "created_at": "2026-04-18",
     "source": "dashboard-feedback",
@@ -41256,26 +40298,6 @@
       "fp_reason": null,
       "fix_target": "scanner",
       "postcondition_id": "blob-del-no-try-catch"
-    },
-    "resolution": "Suppression already implemented in contract-matcher.ts from a prior cycle. These are recurring FP reports from the same repos hitting already-fixed patterns. The suppression logic was verified in-situ during cycle-8 bc-scanner-upgrade review."
-  },
-  {
-    "id": "concern-2026-04-18-upstash-redis-26",
-    "created_at": "2026-04-18",
-    "source": "dashboard-feedback",
-    "package": "@upstash/redis",
-    "type": "false_positive",
-    "status": "rejected",
-    "description": "Fires on upstash redis calls in a utility module where error handling is deferred to callers.",
-    "evidence": {
-      "repos": [
-        "apps/web/utils/redis/index.ts"
-      ],
-      "scan_file": null,
-      "violation_count": 1,
-      "fp_reason": null,
-      "fix_target": "scanner",
-      "postcondition_id": "network-or-api-error"
     },
     "resolution": "Suppression already implemented in contract-matcher.ts from a prior cycle. These are recurring FP reports from the same repos hitting already-fixed patterns. The suppression logic was verified in-situ during cycle-8 bc-scanner-upgrade review."
   },
@@ -41579,7 +40601,7 @@
       "fix_target": "scanner",
       "postcondition_id": "tool-execution-error"
     },
-    "resolution": "Already implemented: contract-matcher.ts ~line 632 unconditionally suppresses tool-execution-error for ai.tool() calls — SDK wraps the execute callback in its own error boundary. Prior concern concern-20260402-ai-2 addressed 25 FP instances."
+    "resolution": "Added suppression in contract-matcher.ts: when detection.packageName === \"ai\" && postcondition.id === \"tool-execution-error\" && file is in a tools/ directory, suppress unconditionally. Tool handler files export standalone execute callbacks that are composed at the tool() call site — the SDK runtime manages errors at invocation time, not at definition time. Evidence: 25 FP instances across lib/tools/*.ts files."
   },
   {
     "id": "concern-2026-04-20-ai-2",
@@ -41602,7 +40624,7 @@
       "fix_target": "scanner",
       "postcondition_id": "api-error-rate-limit"
     },
-    "resolution": "Already implemented: contract-matcher.ts ~line 767 suppresses api-error-rate-limit for ai package when call is inside a retry wrapper or eval/test file. Prior concern concern-2026-04-02-ai-api-error-rate-limit-7 addressed this."
+    "resolution": "Added suppression in contract-matcher.ts: when detection.packageName === \"ai\" && postcondition.id === \"api-error-rate-limit\" && file is in evals/, catalog/, or scorers/ directory, suppress unconditionally. Eval harness and batch processing pipelines handle rate limits at the orchestration layer — individual scorer/analyzer functions are not the correct site for try-catch. Evidence: 7 FP instances in lib/evals/scorers/, lib/catalog/, lib/ai/."
   },
   {
     "id": "concern-2026-04-20-ai-3",
@@ -41610,7 +40632,7 @@
     "source": "dashboard-feedback",
     "package": "ai",
     "type": "false_positive",
-    "status": "implemented",
+    "status": "rejected",
     "description": "schema-validation-error fires on AI SDK usage where schema validation errors are caught by a surrounding context",
     "evidence": {
       "repos": [
@@ -41622,7 +40644,7 @@
       "fix_target": "scanner",
       "postcondition_id": "schema-validation-error"
     },
-    "resolution": "Already implemented: contract-matcher.ts ~line 1705 suppresses schema-validation-error in utility/wrapper files (utils/, llms/, ai/). Prior concern concern-2026-04-11-ai-24 addressed this."
+    "resolution": "Rejected: Single FP instance (violation_count: 1) — insufficient evidence per rejection rule. If this recurs across multiple repos, queue a new concern with more evidence."
   },
   {
     "id": "concern-2026-04-20-zod-1",
@@ -41654,7 +40676,7 @@
     "source": "dashboard-feedback",
     "package": "@clerk/nextjs",
     "type": "false_positive",
-    "status": "implemented",
+    "status": "rejected",
     "description": "use-user-no-loaded-check fires on useUser() calls in components where isLoaded check is done through parent conditional rendering or layout guards",
     "evidence": {
       "repos": [
@@ -41670,7 +40692,7 @@
       "fix_target": "scanner",
       "postcondition_id": "use-user-no-loaded-check"
     },
-    "resolution": "Already implemented: contract-matcher.ts ~line 1759 suppresses use-user-no-loaded-check in protected route groups, layout files, settings, and providers. Prior concerns concern-2026-04-13-clerk-nextjs-9 and concern-2026-04-13-clerk-nextjs-1 addressed 7 FP instances."
+    "resolution": "Rejected: Already suppressed in contract-matcher.ts lines 1759-1780 (concern-2026-04-13-clerk-nextjs-9). The suppression covers sidebar.tsx, header.tsx, top-nav.tsx, settings/, providers/, (dashboard)/, (auth)/. The 7 FP reports are from files already covered by this suppression — likely from an older scanner build before suppression was deployed."
   },
   {
     "id": "concern-2026-04-20-redis-1",
@@ -41711,7 +40733,7 @@
       "fix_target": "scanner",
       "postcondition_id": "async-middleware-unhandled-rejection"
     },
-    "resolution": "Already implemented: contract-matcher.ts ~line 1650 suppresses async-middleware-unhandled-rejection in files that import express-async-errors or use asyncHandler wrappers."
+    "resolution": "Added suppression in contract-matcher.ts express async-middleware block: when the source file imports express-async-errors (sourceFile.getFullText().includes(\"express-async-errors\")), suppress async-middleware-unhandled-rejection. express-async-errors patches Express to forward all async rejections to the next error handler, making per-route try-catch unnecessary. Evidence: 5 FP instances in api/dev-server.ts and api/browser-agent-server.ts using express-async-errors for global handling."
   },
   {
     "id": "concern-2026-04-20-dotenv-1",
@@ -41731,7 +40753,7 @@
       "fix_target": "contract",
       "postcondition_id": "missing-env-file"
     },
-    "resolution": "Already implemented: contract-matcher.ts ~line 1601 extends dotenv missing-env-file suppression to script/migration files (src/lib/migrations/ pattern covered)."
+    "resolution": "Extended migration script detection in contract-matcher.ts dotenv suppression block: added path-based unconditional suppression for files in migrations/, scripts/, seed.ts, or migrate.ts paths. The previous implementation required process.env or .error in lookahead statements, but src/lib/migrations/supabase.ts uses Supabase-specific env loading that does not contain these strings. Migration scripts are not production application startup code and should be suppressed unconditionally. Evidence: 2 FP instances (same fingerprint) in src/lib/migrations/supabase.ts."
   },
   {
     "id": "concern-2026-04-20-supabase-supabase-js-1",
@@ -41779,7 +40801,7 @@
     "source": "dashboard-feedback",
     "package": "node-fetch",
     "type": "false_positive",
-    "status": "implemented",
+    "status": "rejected",
     "description": "fetch-rejects-on-network-error fires on node-fetch calls that are wrapped in higher-level retry/error handling utilities",
     "evidence": {
       "repos": [
@@ -41792,7 +40814,7 @@
       "fix_target": "scanner",
       "postcondition_id": "fetch-rejects-on-network-error"
     },
-    "resolution": "Already implemented: contract-matcher.ts ~line 1520 suppresses fetch-rejects-on-network-error in AI utility/client wrapper files."
+    "resolution": "Rejected: Already suppressed in contract-matcher.ts lines 1527-1568 (concern-2026-04-06-node-fetch-1). Suppression covers utils/, helpers/, analysis/, *-client.ts — api/utils/ai-client.ts matches /utils?/ pattern."
   },
   {
     "id": "concern-2026-04-20-puppeteer-1",
@@ -41880,7 +40902,7 @@
     "source": "dashboard-feedback",
     "package": "axios",
     "type": "false_positive",
-    "status": "implemented",
+    "status": "rejected",
     "description": "error-4xx-5xx fires on axios call inside a test fixture file that explicitly tests suppression behavior — scanner should not fire on fixture/test files",
     "evidence": {
       "repos": [
@@ -41892,7 +40914,7 @@
       "fix_target": "scanner",
       "postcondition_id": "error-4xx-5xx"
     },
-    "resolution": "Already implemented: the suppression inline comment in the fixture file (with-inline-suppression.ts) triggers the existing inline suppression system — scanner reads // nark-suppress directives. No scanner change needed; the fixture correctly tests the suppression mechanism."
+    "resolution": "Rejected: The inline suppression system is implemented. Violation at packages/scanner/src/v2/fixtures/test-suppressions/with-inline-suppression.ts:12 is a test artifact from the SaaS repo scanning its own fixture files. The inline suppression comment on line 11 is honored. No scanner change needed."
   },
   {
     "id": "concern-2026-04-20-validator-deepen-1",
@@ -41900,7 +40922,7 @@
     "source": "deepen",
     "package": "validator",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "rejected",
     "description": "Add detection for validator.isLicensePlate() — throws Error (not TypeError) on invalid locale; postcondition license-plate-invalid-locale-throws added in depth pass but no scanner rule exists",
     "evidence": {
       "repos": [],
@@ -41908,7 +40930,7 @@
       "violation_count": 0,
       "note": "Proactive — isLicensePlate throws non-TypeError Error on invalid locale; unique among validator.js functions; callers passing locale from user input or env vars are at risk"
     },
-    "resolution": null
+    "resolution": "Rejected: Rejected: isLicensePlate() throws Error on invalid locale argument — detecting this requires argument-value inspection (checking if locale is a valid enum member), which is beyond the scanner's current AST pattern-matching architecture. The scanner analyzes control-flow (try-catch presence), not argument values. Queuing this would require a new argument-value-checker plugin. Defer to a future cycle when argument inspection is implemented."
   },
   {
     "id": "concern-2026-04-20-validator-deepen-2",
@@ -41916,7 +40938,7 @@
     "source": "deepen",
     "package": "validator",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "rejected",
     "description": "Add detection for validator.isBase32() — Crockford vs standard Base32 confusion; postcondition base32-crockford-confusion added in depth pass but no scanner rule exists",
     "evidence": {
       "repos": [],
@@ -41924,7 +40946,7 @@
       "violation_count": 0,
       "note": "Proactive — isBase32() default validates standard RFC 4648 Base32; Crockford Base32 (ULID, NanoID) requires crockford: true option; using wrong encoding silently rejects valid data"
     },
-    "resolution": null
+    "resolution": "Rejected: Rejected: isBase32() Crockford confusion requires detecting the presence/absence of the crockford option in the argument object — argument-value inspection beyond current scanner architecture. Defer to a future cycle."
   },
   {
     "id": "concern-2026-04-20-socket.io-deepen-1",
@@ -41932,7 +40954,7 @@
     "source": "deepen",
     "package": "socket.io",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "rejected",
     "description": "Add detection for socket.io socket.use() per-socket middleware — postcondition added in depth pass (socket-use-middleware-error-no-listener, socket-use-middleware-async-unhandled) but no scanner rule exists for per-socket middleware error listener detection",
     "evidence": {
       "repos": [],
@@ -41940,7 +40962,7 @@
       "violation_count": 0,
       "note": "Proactive — per-socket middleware error patterns require tracking socket.use() calls and verifying socket.on(\"error\") listener presence on same socket instance"
     },
-    "resolution": null
+    "resolution": "Rejected: Rejected: socket.use() per-socket middleware requires tracking that a socket.on(\"error\") listener is registered on the same socket instance. This requires per-instance event listener correlation across statements — more complex than the current event-listener-absence plugin which checks class-level patterns. Defer to a future cycle."
   },
   {
     "id": "concern-2026-04-20-socket.io-deepen-2",
@@ -41948,7 +40970,7 @@
     "source": "deepen",
     "package": "socket.io",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "rejected",
     "description": "Add detection for socket.io BroadcastOperator.emitWithAck() — postconditions added (broadcast-emit-with-ack-timeout-unhandled, broadcast-emit-with-ack-no-timeout) but scanner needs to detect io.timeout().emitWithAck() and io.to(room).emitWithAck() call chains",
     "evidence": {
       "repos": [],
@@ -41956,178 +40978,21 @@
       "violation_count": 0,
       "note": "Proactive — BroadcastOperator chains via io.to()/io.in()/io.timeout() — requires chained method detection for emitWithAck on BroadcastOperator. Distinct from socket.emitWithAck() already contracted"
     },
-    "resolution": null
+    "resolution": "Rejected: Rejected: BroadcastOperator.emitWithAck() requires detecting chained calls like io.timeout(ms).emitWithAck() and io.to(room).emitWithAck() — a chained-method pattern on the BroadcastOperator. The property-chain-detector covers linear chains but BroadcastOperator is accessed via multiple entry points (io.to, io.in, io.timeout). Defer to a future cycle when BroadcastOperator chain detection is implemented."
   },
   {
-    "id": "concern-2026-04-20-ai-1",
+    "id": "concern-2026-04-20-chai-deepen-1",
     "created_at": "2026-04-20",
-    "source": "dashboard-feedback",
-    "package": "ai",
-    "type": "false_positive",
+    "source": "deepen",
+    "package": "chai",
+    "type": "uncovered_function",
     "status": "pending",
-    "description": "tool-execution-error postcondition fires on async tool wrapper functions that expose tool handlers as top-level exports — these are not awaited by user code but by the AI SDK runtime, which handles errors internally",
+    "description": "Add detection for chai.assert.ifError() — postcondition assert-iferror-rethrows-value added in depth pass. assert.ifError(val) rethrows val directly (not AssertionError), so catch blocks expecting only AssertionError will silently miss errors from assert.ifError. Scanner needs to detect assert.ifError() calls that are either: (1) not in a try-catch at all, or (2) in a try-catch that only catches AssertionError (via instanceof check). The unique behavioral contract is that the thrown error is val itself, not a chai AssertionError.",
     "evidence": {
-      "repos": [
-        "lib/tools/searchTwitter.ts",
-        "lib/tools/getArtistSegments.ts",
-        "lib/tools/getSocialPosts.ts",
-        "lib/tools/getApifyScraper.ts",
-        "lib/tools/browser/browserObserve.ts"
-      ],
+      "repos": [],
       "scan_file": null,
-      "violation_count": 25,
-      "fp_reason": "HUMAN marked FALSE_POSITIVE — no reason note provided; pattern: all violations in files exporting AI tool handler functions where the SDK runtime manages execution and error handling",
-      "fix_target": "contract",
-      "postcondition_id": "tool-execution-error"
-    },
-    "resolution": null
-  },
-  {
-    "id": "concern-2026-04-20-ai-2",
-    "created_at": "2026-04-20",
-    "source": "dashboard-feedback",
-    "package": "ai",
-    "type": "false_positive",
-    "status": "pending",
-    "description": "api-error-rate-limit postcondition fires on AI SDK calls where rate limit handling is delegated to the calling framework or eval harness rather than the individual function",
-    "evidence": {
-      "repos": [
-        "lib/evals/scorers/QuestionAnswered.ts",
-        "lib/evals/scorers/CatalogAvailability.ts",
-        "lib/catalog/analyzeCatalogBatch.ts",
-        "lib/ai/generateArray.ts",
-        "apps/web/utils/llms/index.ts"
-      ],
-      "scan_file": null,
-      "violation_count": 7,
-      "fp_reason": "HUMAN marked FALSE_POSITIVE — no reason note provided; pattern: eval harness and batch utility functions where retry/rate-limit handling is managed by the orchestrating layer",
-      "fix_target": "contract",
-      "postcondition_id": "api-error-rate-limit"
-    },
-    "resolution": null
-  },
-  {
-    "id": "concern-2026-04-20-ai-3",
-    "created_at": "2026-04-20",
-    "source": "dashboard-feedback",
-    "package": "ai",
-    "type": "false_positive",
-    "status": "pending",
-    "description": "schema-validation-error postcondition fires inside apps/web/utils/llms/index.ts which appears to handle schema errors via a higher-level wrapper rather than inline",
-    "evidence": {
-      "repos": [
-        "apps/web/utils/llms/index.ts"
-      ],
-      "scan_file": null,
-      "violation_count": 1,
-      "fp_reason": "HUMAN marked FALSE_POSITIVE — no reason note provided; utility function in LLM abstraction layer",
-      "fix_target": "contract",
-      "postcondition_id": "schema-validation-error"
-    },
-    "resolution": null
-  },
-  {
-    "id": "concern-2026-04-20-axios-1",
-    "created_at": "2026-04-20",
-    "source": "dashboard-feedback",
-    "package": "axios",
-    "type": "false_positive",
-    "status": "pending",
-    "description": "error-4xx-5xx postcondition fires on test fixture file that has an inline suppression comment — scanner may not be respecting inline suppression directives",
-    "evidence": {
-      "repos": [
-        "packages/scanner/src/v2/fixtures/test-suppressions/with-inline-suppression.ts"
-      ],
-      "scan_file": null,
-      "violation_count": 1,
-      "fp_reason": "HUMAN marked FALSE_POSITIVE — file path indicates this is a suppression test fixture; scanner may not be honoring suppression markers",
-      "fix_target": "scanner",
-      "postcondition_id": "error-4xx-5xx"
-    },
-    "resolution": null
-  },
-  {
-    "id": "concern-2026-04-20-clerk-nextjs-1",
-    "created_at": "2026-04-20",
-    "source": "dashboard-feedback",
-    "package": "@clerk/nextjs",
-    "type": "false_positive",
-    "status": "pending",
-    "description": "use-user-no-loaded-check postcondition fires on components where isLoaded check is deferred to a parent component or layout — scanner does not trace isLoaded guard through component hierarchy",
-    "evidence": {
-      "repos": [
-        "apps/web/components/layout/sidebar.tsx",
-        "apps/web/components/settings/profile-settings.tsx",
-        "apps/web/app/(auth)/invite/[token]/page.tsx",
-        "apps/web/components/layout/top-nav.tsx",
-        "apps/web/components/layout/header.tsx"
-      ],
-      "scan_file": null,
-      "violation_count": 7,
-      "fp_reason": "HUMAN marked FALSE_POSITIVE — no reason note provided; pattern: child components rendered only after parent confirms isLoaded; also fires in analytics-provider and onboarding-form which may guard via conditional rendering",
-      "fix_target": "scanner",
-      "postcondition_id": "use-user-no-loaded-check"
-    },
-    "resolution": null
-  },
-  {
-    "id": "concern-2026-04-20-dotenv-1",
-    "created_at": "2026-04-20",
-    "source": "dashboard-feedback",
-    "package": "dotenv",
-    "type": "false_positive",
-    "status": "pending",
-    "description": "missing-env-file postcondition fires on src/lib/migrations/supabase.ts — a migration utility script where the env file path is intentional and the missing-file scenario is acceptable",
-    "evidence": {
-      "repos": [
-        "src/lib/migrations/supabase.ts"
-      ],
-      "scan_file": null,
-      "violation_count": 2,
-      "fp_reason": "HUMAN marked FALSE_POSITIVE — no reason note provided; same file/fingerprint across two scans; migration scripts have different env expectations than application code",
-      "fix_target": "contract",
-      "postcondition_id": "missing-env-file"
-    },
-    "resolution": null
-  },
-  {
-    "id": "concern-2026-04-20-express-1",
-    "created_at": "2026-04-20",
-    "source": "dashboard-feedback",
-    "package": "express",
-    "type": "false_positive",
-    "status": "pending",
-    "description": "async-middleware-unhandled-rejection fires on Express middleware in dev server and browser agent server — errors likely bubble to top-level Express error handler not recognized by scanner",
-    "evidence": {
-      "repos": [
-        "api/dev-server.ts",
-        "api/browser-agent-server.ts"
-      ],
-      "scan_file": null,
-      "violation_count": 5,
-      "fp_reason": "HUMAN marked FALSE_POSITIVE — no reason note provided; dev server middleware; project likely uses express-async-errors or similar global rejection handler",
-      "fix_target": "scanner",
-      "postcondition_id": "async-middleware-unhandled-rejection"
-    },
-    "resolution": null
-  },
-  {
-    "id": "concern-2026-04-20-node-fetch-1",
-    "created_at": "2026-04-20",
-    "source": "dashboard-feedback",
-    "package": "node-fetch",
-    "type": "false_positive",
-    "status": "pending",
-    "description": "fetch-rejects-on-network-error fires on api/utils/ai-client.ts — AI client utility likely wraps fetch in a higher-level error handler not recognized by scanner",
-    "evidence": {
-      "repos": [
-        "api/utils/ai-client.ts"
-      ],
-      "scan_file": null,
-      "violation_count": 1,
-      "fp_reason": "HUMAN marked FALSE_POSITIVE — no reason note provided; AI client utility likely has centralized error handling",
-      "fix_target": "scanner",
-      "postcondition_id": "fetch-rejects-on-network-error"
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis (depth pass 2026-04-20). assert.ifError is the only chai method that does NOT throw AssertionError on failure — it rethrows val. Detection rule needed to catch misuse in production code (try-catch that only catches AssertionError)."
     },
     "resolution": null
   }

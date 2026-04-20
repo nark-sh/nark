@@ -374,6 +374,19 @@ export class ContractMatcher {
               continue;
             }
           }
+
+          // express-async-errors imported → suppress async-middleware-unhandled-rejection
+          // globally for the file. express-async-errors patches Express to forward all
+          // async rejections to the next error handler, making individual try-catch
+          // unnecessary for all middleware in the file.
+          // Evidence: concern-2026-04-20-express-1 — 5 FPs in api/dev-server.ts and
+          //   api/browser-agent-server.ts which use express-async-errors for global handling.
+          if (
+            primaryPostcondition.id === "async-middleware-unhandled-rejection" &&
+            sourceFile.getFullText().includes("express-async-errors")
+          ) {
+            continue; // express-async-errors installed — global rejection forwarding active
+          }
         }
       }
 
@@ -569,11 +582,22 @@ export class ContractMatcher {
             // Migration scripts (files with 'migration' in the path) can have many
             // statements between config() and the first env var access.
             // Evidence: concern-20260402-dotenv-2 — migration file with 3-statement gap.
-            const isMigrationScript = sourceFile.fileName
-              .toLowerCase()
-              .includes("migrat");
-            const lookahead = isMigrationScript ? stmts.length : 3;
+            // Evidence: concern-2026-04-20-dotenv-1 — src/lib/migrations/supabase.ts uses
+            //   Supabase-specific env loading (not process.env) after config(), so lookahead
+            //   scan never matches. Extend: migration scripts in migrations/ paths are
+            //   unconditionally suppressed — they are not production startup code.
+            const isMigrationScript =
+              sourceFile.fileName.toLowerCase().includes("migrat") ||
+              /[/\\]migrations?[/\\]/i.test(sourceFile.fileName) ||
+              /[/\\]scripts?[/\\]/i.test(sourceFile.fileName) ||
+              /[/\\]seed\.(ts|js)$/.test(sourceFile.fileName) ||
+              /[/\\]migrate\.(ts|js)$/.test(sourceFile.fileName);
 
+            if (isMigrationScript) {
+              continue; // Migration/utility script — not production application startup code
+            }
+
+            const lookahead = 3;
             let dotenvSuppressed = false;
             for (
               let i = idx + 1;
@@ -636,6 +660,38 @@ export class ContractMatcher {
           primaryPostcondition.id === "tool-schema-validation-error")
       ) {
         continue;
+      }
+
+      // ai (Vercel AI SDK): tool-execution-error fires on async functions exported from
+      // files in a tools/ directory — these are standalone execute-callback implementations
+      // that are composed into tool() at the call site. The try-catch responsibility lies
+      // with the tool() caller, not the individual execute function.
+      // Pattern: lib/tools/*.ts, tools/*.ts — files that export individual tool handlers
+      // Evidence: concern-2026-04-20-ai-1 — 25 FP instances (searchTwitter.ts,
+      //   getArtistSegments.ts, getSocialPosts.ts, browser/browserObserve.ts, etc.)
+      if (
+        detection.packageName === "ai" &&
+        primaryPostcondition.id === "tool-execution-error" &&
+        /[/\\]tools?[/\\]/i.test(sourceFile.fileName)
+      ) {
+        continue; // Tool handler file — SDK runtime manages errors at invocation time
+      }
+
+      // ai (Vercel AI SDK): api-error-rate-limit fires on AI SDK calls inside eval harness
+      // functions and batch processing utilities. These are not production application code —
+      // they are evaluation/testing pipelines where the harness itself handles rate limits
+      // via retry logic or explicit error tracking. The individual scorer/analyzer functions
+      // inside these files are not the correct place to require try-catch.
+      // Evidence: concern-2026-04-20-ai-2 — 7 FP instances in lib/evals/scorers/*,
+      //   lib/catalog/analyzeCatalogBatch.ts, lib/ai/generateArray.ts
+      if (
+        detection.packageName === "ai" &&
+        primaryPostcondition.id === "api-error-rate-limit" &&
+        (/[/\\]evals?[/\\]/i.test(sourceFile.fileName) ||
+          /[/\\]catalog[/\\]/i.test(sourceFile.fileName) ||
+          /[/\\]scorers?[/\\]/i.test(sourceFile.fileName))
+      ) {
+        continue; // Eval/batch pipeline — harness manages rate limits at orchestration layer
       }
 
       // @tanstack/react-router: TypeScript-generated route trees enforce path and param
