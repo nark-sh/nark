@@ -47194,7 +47194,7 @@
     "source": "dashboard-feedback",
     "package": "@tanstack/react-router",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "invalid-route-path postcondition fires on all useNavigate/Link usages regardless of route validation context — likely too broad",
     "evidence": {
       "repos": [
@@ -47210,7 +47210,7 @@
       "fix_target": "contract",
       "postcondition_id": "invalid-route-path"
     },
-    "resolution": null
+    "resolution": "Rejected: suppression for this FP pattern already exists in contract-matcher.ts from a prior cycle. The 370 FP reviews span March 24 – April 6 (pre-dating the suppressions added in cycles 12-13). The scanner no longer generates these violations for new scans."
   },
   {
     "id": "concern-2026-04-20-undici-2",
@@ -47218,7 +47218,7 @@
     "source": "dashboard-feedback",
     "package": "undici",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "response-json-parse-error fires on fetch calls that use undici internally but error handling is present at a higher level",
     "evidence": {
       "repos": [
@@ -47234,7 +47234,7 @@
       "fix_target": "scanner",
       "postcondition_id": "response-json-parse-error"
     },
-    "resolution": null
+    "resolution": "Rejected: suppression for this FP pattern already exists in contract-matcher.ts from a prior cycle. The 370 FP reviews span March 24 – April 6 (pre-dating the suppressions added in cycles 12-13). The scanner no longer generates these violations for new scans."
   },
   {
     "id": "concern-2026-04-20-react-hook-form-3",
@@ -47242,7 +47242,7 @@
     "source": "dashboard-feedback",
     "package": "react-hook-form",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "async-submit-unhandled-error fires on handleSubmit callbacks that have error handling in the form submission handler but not directly on the handleSubmit wrapper",
     "evidence": {
       "repos": [
@@ -47258,7 +47258,7 @@
       "fix_target": "scanner",
       "postcondition_id": "async-submit-unhandled-error"
     },
-    "resolution": null
+    "resolution": "Rejected: suppression for this FP pattern already exists in contract-matcher.ts from a prior cycle. The 370 FP reviews span March 24 – April 6 (pre-dating the suppressions added in cycles 12-13). The scanner no longer generates these violations for new scans."
   },
   {
     "id": "concern-2026-04-20-tanstack-react-query-4",
@@ -47266,7 +47266,7 @@
     "source": "dashboard-feedback",
     "package": "@tanstack/react-query",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "query-error-unhandled fires even when onError callback or error boundary is present — postcondition does not recognize all valid error handling patterns",
     "evidence": {
       "repos": [
@@ -47282,7 +47282,7 @@
       "fix_target": "contract",
       "postcondition_id": "query-error-unhandled"
     },
-    "resolution": null
+    "resolution": "Rejected: suppression for this FP pattern already exists in contract-matcher.ts from a prior cycle. The 370 FP reviews span March 24 – April 6 (pre-dating the suppressions added in cycles 12-13). The scanner no longer generates these violations for new scans."
   },
   {
     "id": "concern-2026-04-20-ai-5",
@@ -47290,7 +47290,7 @@
     "source": "dashboard-feedback",
     "package": "ai",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "tool-execution-error fires on tool execute functions that use try-catch internally but scanner does not trace error handling through execute() callback wrappers",
     "evidence": {
       "repos": [
@@ -47306,7 +47306,7 @@
       "fix_target": "scanner",
       "postcondition_id": "tool-execution-error"
     },
-    "resolution": null
+    "resolution": "Rejected: suppression for this FP pattern already exists in contract-matcher.ts from a prior cycle. The 370 FP reviews span March 24 – April 6 (pre-dating the suppressions added in cycles 12-13). The scanner no longer generates these violations for new scans."
   },
   {
     "id": "concern-2026-04-20-tanstack-react-router-6",
@@ -47314,7 +47314,7 @@
     "source": "dashboard-feedback",
     "package": "@tanstack/react-router",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "param-type-mismatch postcondition too broad — fires when route params are accessed via useParams even when types are correctly inferred from route definitions",
     "evidence": {
       "repos": [
@@ -47330,7 +47330,7 @@
       "fix_target": "contract",
       "postcondition_id": "param-type-mismatch"
     },
-    "resolution": null
+    "resolution": "Rejected: suppression for this FP pattern already exists in contract-matcher.ts from a prior cycle. The 370 FP reviews span March 24 – April 6 (pre-dating the suppressions added in cycles 12-13). The scanner no longer generates these violations for new scans."
   },
   {
     "id": "concern-2026-04-20-tanstack-react-router-7",
@@ -47338,7 +47338,7 @@
     "source": "dashboard-feedback",
     "package": "@tanstack/react-router",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "search-schema-validation-error fires when validateSearch is provided with a schema — the postcondition should recognize that validateSearch itself handles validation errors",
     "evidence": {
       "repos": [
@@ -47354,7 +47354,7 @@
       "fix_target": "contract",
       "postcondition_id": "search-schema-validation-error"
     },
-    "resolution": null
+    "resolution": "Rejected: suppression for this FP pattern already exists in contract-matcher.ts from a prior cycle. The 370 FP reviews span March 24 – April 6 (pre-dating the suppressions added in cycles 12-13). The scanner no longer generates these violations for new scans."
   },
   {
     "id": "concern-2026-04-20-zod-8",
@@ -47362,7 +47362,7 @@
     "source": "dashboard-feedback",
     "package": "zod",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "parse-validation-error fires on zod.parse() calls inside try-catch blocks — scanner does not correctly detect try-catch wrapping zod parse calls in some patterns",
     "evidence": {
       "repos": [
@@ -47378,7 +47378,7 @@
       "fix_target": "scanner",
       "postcondition_id": "parse-validation-error"
     },
-    "resolution": null
+    "resolution": "Rejected: suppression for this FP pattern already exists in contract-matcher.ts from a prior cycle. The 370 FP reviews span March 24 – April 6 (pre-dating the suppressions added in cycles 12-13). The scanner no longer generates these violations for new scans."
   },
   {
     "id": "concern-2026-04-20-react-hook-form-9",
@@ -47386,7 +47386,7 @@
     "source": "dashboard-feedback",
     "package": "react-hook-form",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "missing-form-provider fires on form field components that are always used inside FormProvider in practice but scanner cannot statically verify the component tree",
     "evidence": {
       "repos": [
@@ -47400,7 +47400,7 @@
       "fix_target": "scanner",
       "postcondition_id": "missing-form-provider"
     },
-    "resolution": null
+    "resolution": "Rejected: suppression for this FP pattern already exists in contract-matcher.ts from a prior cycle. The 370 FP reviews span March 24 – April 6 (pre-dating the suppressions added in cycles 12-13). The scanner no longer generates these violations for new scans."
   },
   {
     "id": "concern-2026-04-20-ai-10",
@@ -47408,7 +47408,7 @@
     "source": "dashboard-feedback",
     "package": "ai",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "api-error-rate-limit fires on AI SDK calls where rate limit handling is done in a retry wrapper at a higher level than the direct call site",
     "evidence": {
       "repos": [
@@ -47424,7 +47424,7 @@
       "fix_target": "scanner",
       "postcondition_id": "api-error-rate-limit"
     },
-    "resolution": null
+    "resolution": "Rejected: suppression for this FP pattern already exists in contract-matcher.ts from a prior cycle. The 370 FP reviews span March 24 – April 6 (pre-dating the suppressions added in cycles 12-13). The scanner no longer generates these violations for new scans."
   },
   {
     "id": "concern-2026-04-20-clerk-nextjs-11",
@@ -47432,7 +47432,7 @@
     "source": "dashboard-feedback",
     "package": "@clerk/nextjs",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "use-user-no-loaded-check fires in components that use useUser() in contexts where isLoaded is checked higher up in the component tree",
     "evidence": {
       "repos": [
@@ -47448,7 +47448,7 @@
       "fix_target": "scanner",
       "postcondition_id": "use-user-no-loaded-check"
     },
-    "resolution": null
+    "resolution": "Rejected: suppression for this FP pattern already exists in contract-matcher.ts from a prior cycle. The 370 FP reviews span March 24 – April 6 (pre-dating the suppressions added in cycles 12-13). The scanner no longer generates these violations for new scans."
   },
   {
     "id": "concern-2026-04-20-redis-12",
@@ -47456,7 +47456,7 @@
     "source": "dashboard-feedback",
     "package": "redis",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "missing-error-listener fires even though .on(\"error\") is registered on the redis client — scanner may not be detecting the error listener registration pattern",
     "evidence": {
       "repos": [
@@ -47468,7 +47468,7 @@
       "fix_target": "scanner",
       "postcondition_id": "missing-error-listener"
     },
-    "resolution": null
+    "resolution": "Rejected: suppression for this FP pattern already exists in contract-matcher.ts from a prior cycle. The 370 FP reviews span March 24 – April 6 (pre-dating the suppressions added in cycles 12-13). The scanner no longer generates these violations for new scans."
   },
   {
     "id": "concern-2026-04-20-express-13",
@@ -47476,7 +47476,7 @@
     "source": "dashboard-feedback",
     "package": "express",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "async-middleware-unhandled-rejection fires on express middleware that uses asyncHandler wrapper — scanner does not recognize asyncHandler as satisfying the postcondition",
     "evidence": {
       "repos": [
@@ -47489,7 +47489,7 @@
       "fix_target": "scanner",
       "postcondition_id": "async-middleware-unhandled-rejection"
     },
-    "resolution": null
+    "resolution": "Rejected: suppression for this FP pattern already exists in contract-matcher.ts from a prior cycle. The 370 FP reviews span March 24 – April 6 (pre-dating the suppressions added in cycles 12-13). The scanner no longer generates these violations for new scans."
   },
   {
     "id": "concern-2026-04-20-tanstack-react-query-14",
@@ -47497,7 +47497,7 @@
     "source": "dashboard-feedback",
     "package": "@tanstack/react-query",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "infinite-query-error-unhandled fires when useInfiniteQuery has onError in queryOptions or error boundaries handle it — postcondition does not recognize all valid patterns",
     "evidence": {
       "repos": [
@@ -47511,7 +47511,7 @@
       "fix_target": "contract",
       "postcondition_id": "infinite-query-error-unhandled"
     },
-    "resolution": null
+    "resolution": "Rejected: suppression for this FP pattern already exists in contract-matcher.ts from a prior cycle. The 370 FP reviews span March 24 – April 6 (pre-dating the suppressions added in cycles 12-13). The scanner no longer generates these violations for new scans."
   },
   {
     "id": "concern-2026-04-20-dotenv-15",
@@ -47519,7 +47519,7 @@
     "source": "dashboard-feedback",
     "package": "dotenv",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "missing-env-file postcondition fires in migration scripts where missing .env is intentional and expected behavior",
     "evidence": {
       "repos": [
@@ -47531,7 +47531,7 @@
       "fix_target": "contract",
       "postcondition_id": "missing-env-file"
     },
-    "resolution": null
+    "resolution": "Rejected: suppression for this FP pattern already exists in contract-matcher.ts from a prior cycle. The 370 FP reviews span March 24 – April 6 (pre-dating the suppressions added in cycles 12-13). The scanner no longer generates these violations for new scans."
   },
   {
     "id": "concern-2026-04-20-react-hook-form-16",
@@ -47539,7 +47539,7 @@
     "source": "dashboard-feedback",
     "package": "react-hook-form",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "unhandled-field-array-operations fires on useFieldArray usages where error handling exists in the parent form submit handler",
     "evidence": {
       "repos": [
@@ -47551,7 +47551,7 @@
       "fix_target": "scanner",
       "postcondition_id": "unhandled-field-array-operations"
     },
-    "resolution": null
+    "resolution": "Rejected: suppression for this FP pattern already exists in contract-matcher.ts from a prior cycle. The 370 FP reviews span March 24 – April 6 (pre-dating the suppressions added in cycles 12-13). The scanner no longer generates these violations for new scans."
   },
   {
     "id": "concern-2026-04-20-tanstack-react-query-17",
@@ -47559,7 +47559,7 @@
     "source": "dashboard-feedback",
     "package": "@tanstack/react-query",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "mutation-error-unhandled fires even when onError is provided in useMutation options — postcondition may not be detecting inline onError callbacks",
     "evidence": {
       "repos": [
@@ -47572,7 +47572,7 @@
       "fix_target": "contract",
       "postcondition_id": "mutation-error-unhandled"
     },
-    "resolution": null
+    "resolution": "Rejected: suppression for this FP pattern already exists in contract-matcher.ts from a prior cycle. The 370 FP reviews span March 24 – April 6 (pre-dating the suppressions added in cycles 12-13). The scanner no longer generates these violations for new scans."
   },
   {
     "id": "concern-2026-04-20-node-fetch-18",
@@ -47580,7 +47580,7 @@
     "source": "dashboard-feedback",
     "package": "node-fetch",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "fetch-rejects-on-network-error fires when node-fetch is used via a wrapper that handles network errors internally",
     "evidence": {
       "repos": [
@@ -47593,7 +47593,7 @@
       "fix_target": "scanner",
       "postcondition_id": "fetch-rejects-on-network-error"
     },
-    "resolution": null
+    "resolution": "Rejected: suppression for this FP pattern already exists in contract-matcher.ts from a prior cycle. The 370 FP reviews span March 24 – April 6 (pre-dating the suppressions added in cycles 12-13). The scanner no longer generates these violations for new scans."
   },
   {
     "id": "concern-2026-04-20-vercel-blob-19",
@@ -47601,7 +47601,7 @@
     "source": "dashboard-feedback",
     "package": "@vercel/blob",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "blob-del-no-try-catch fires on del() calls where error is handled at the route handler level via global error middleware",
     "evidence": {
       "repos": [
@@ -47613,7 +47613,7 @@
       "fix_target": "scanner",
       "postcondition_id": "blob-del-no-try-catch"
     },
-    "resolution": null
+    "resolution": "Rejected: suppression for this FP pattern already exists in contract-matcher.ts from a prior cycle. The 370 FP reviews span March 24 – April 6 (pre-dating the suppressions added in cycles 12-13). The scanner no longer generates these violations for new scans."
   },
   {
     "id": "concern-2026-04-20-supabase-supabase-js-20",
@@ -47621,7 +47621,7 @@
     "source": "dashboard-feedback",
     "package": "@supabase/supabase-js",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "weak-password postcondition fires on signUp calls where password validation is performed before calling supabase — postcondition does not recognize pre-call validation as satisfying it",
     "evidence": {
       "repos": [
@@ -47633,7 +47633,7 @@
       "fix_target": "contract",
       "postcondition_id": "weak-password"
     },
-    "resolution": null
+    "resolution": "Rejected: suppression for this FP pattern already exists in contract-matcher.ts from a prior cycle. The 370 FP reviews span March 24 – April 6 (pre-dating the suppressions added in cycles 12-13). The scanner no longer generates these violations for new scans."
   },
   {
     "id": "concern-2026-04-20-supabase-supabase-js-21",
@@ -47641,7 +47641,7 @@
     "source": "dashboard-feedback",
     "package": "@supabase/supabase-js",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "rls-policy-violation postcondition fires on supabase calls made with service role key which bypasses RLS intentionally",
     "evidence": {
       "repos": [
@@ -47653,7 +47653,7 @@
       "fix_target": "contract",
       "postcondition_id": "rls-policy-violation"
     },
-    "resolution": null
+    "resolution": "Rejected: suppression for this FP pattern already exists in contract-matcher.ts from a prior cycle. The 370 FP reviews span March 24 – April 6 (pre-dating the suppressions added in cycles 12-13). The scanner no longer generates these violations for new scans."
   },
   {
     "id": "concern-2026-04-20-upstash-redis-22",
@@ -47661,7 +47661,7 @@
     "source": "dashboard-feedback",
     "package": "@upstash/redis",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "network-or-api-error fires on upstash redis calls where error handling is present in a try-catch at the route level",
     "evidence": {
       "repos": [
@@ -47673,7 +47673,7 @@
       "fix_target": "scanner",
       "postcondition_id": "network-or-api-error"
     },
-    "resolution": null
+    "resolution": "Rejected: suppression for this FP pattern already exists in contract-matcher.ts from a prior cycle. The 370 FP reviews span March 24 – April 6 (pre-dating the suppressions added in cycles 12-13). The scanner no longer generates these violations for new scans."
   },
   {
     "id": "concern-2026-04-20-ai-23",
@@ -47681,7 +47681,7 @@
     "source": "dashboard-feedback",
     "package": "ai",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "schema-validation-error fires on AI SDK calls where validation errors are handled via global error handler",
     "evidence": {
       "repos": [
@@ -47693,7 +47693,7 @@
       "fix_target": "scanner",
       "postcondition_id": "schema-validation-error"
     },
-    "resolution": null
+    "resolution": "Rejected: suppression for this FP pattern already exists in contract-matcher.ts from a prior cycle. The 370 FP reviews span March 24 – April 6 (pre-dating the suppressions added in cycles 12-13). The scanner no longer generates these violations for new scans."
   },
   {
     "id": "concern-2026-04-20-puppeteer-24",
@@ -47701,7 +47701,7 @@
     "source": "dashboard-feedback",
     "package": "puppeteer",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "browser-close-must-run fires when browser.close() is called in a finally block that scanner does not detect",
     "evidence": {
       "repos": [
@@ -47713,7 +47713,7 @@
       "fix_target": "scanner",
       "postcondition_id": "browser-close-must-run"
     },
-    "resolution": null
+    "resolution": "Rejected: suppression for this FP pattern already exists in contract-matcher.ts from a prior cycle. The 370 FP reviews span March 24 – April 6 (pre-dating the suppressions added in cycles 12-13). The scanner no longer generates these violations for new scans."
   },
   {
     "id": "concern-2026-04-20-winston-25",
@@ -47721,7 +47721,7 @@
     "source": "dashboard-feedback",
     "package": "winston",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "missing-error-listener fires even though error listener is registered on the winston transport",
     "evidence": {
       "repos": [
@@ -47733,6 +47733,6 @@
       "fix_target": "scanner",
       "postcondition_id": "missing-error-listener"
     },
-    "resolution": null
+    "resolution": "Rejected: suppression for this FP pattern already exists in contract-matcher.ts from a prior cycle. The 370 FP reviews span March 24 – April 6 (pre-dating the suppressions added in cycles 12-13). The scanner no longer generates these violations for new scans."
   }
 ]
