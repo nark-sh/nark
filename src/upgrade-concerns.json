@@ -44244,5 +44244,303 @@
       "postcondition_id": "missing-error-listener"
     },
     "resolution": "Rejected: winston missing-error-listener is already suppressed for scripts/ and setup/ directory files (contract-matcher.ts line 1635-1660). FP file apps/web/scripts/setup-telegram-bot.ts matches the scripts/ path."
+  },
+  {
+    "id": "concern-2026-04-20-tanstack-react-router-1",
+    "created_at": "2026-04-20",
+    "source": "dashboard-feedback",
+    "package": "@tanstack/react-router",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Recurring FP: invalid-route-path postcondition fires on valid TanStack Router route usage across 45+ files in multiple repos. Previous implementations/rejections have not resolved the issue — still generating 94 FP instances in the last 30 days.",
+    "evidence": {
+      "repos": [
+        "src/routes/_authenticated/loan/$loanId.tsx",
+        "src/components/profile-dropdown.tsx",
+        "src/components/layout/nav-user.tsx",
+        "src/features/errors/general-error.tsx",
+        "src/features/loans/index.tsx"
+      ],
+      "scan_file": null,
+      "violation_count": 94,
+      "fp_reason": "Recurring false positive — users marking as FP without notes, indicating systematic mis-detection of valid route path patterns",
+      "fix_target": "contract",
+      "postcondition_id": "invalid-route-path"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-20-undici-2",
+    "created_at": "2026-04-20",
+    "source": "dashboard-feedback",
+    "package": "undici",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Recurring FP: response-json-parse-error postcondition fires across 36+ distinct files in multiple repos (64 instances in last 30 days). Prior fixes insufficient — pattern keeps generating FPs.",
+    "evidence": {
+      "repos": [
+        "api/analysis/post-game-analysis.ts",
+        "api/utils/ai-client.ts",
+        "lib/catalog/analyzeCatalogBatch.ts",
+        "lib/ai/generateArray.ts",
+        "hooks/useFileContent.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 64,
+      "fp_reason": "Recurring false positive across many codebases — json parse error postcondition detecting valid usage patterns",
+      "fix_target": "contract",
+      "postcondition_id": "response-json-parse-error"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-20-react-hook-form-3",
+    "created_at": "2026-04-20",
+    "source": "dashboard-feedback",
+    "package": "react-hook-form",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Recurring FP: async-submit-unhandled-error fires across 15 distinct files in multiple repos (60 instances). Pattern recurs after prior fixes — scanner not recognizing error handling patterns in RHF submit handlers.",
+    "evidence": {
+      "repos": [
+        "src/features/auth/sign-up/components/sign-up-form.tsx",
+        "src/features/auth/sign-in/components/user-auth-form.tsx",
+        "src/features/customers/components/users-action-dialog.tsx",
+        "src/features/settings/profile/profile-form.tsx",
+        "src/features/auth/forgot-password/components/forgot-password-form.tsx"
+      ],
+      "scan_file": null,
+      "violation_count": 60,
+      "fp_reason": "Recurring false positive — scanner not detecting error handling patterns within react-hook-form handleSubmit wrappers",
+      "fix_target": "scanner",
+      "postcondition_id": "async-submit-unhandled-error"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-20-tanstack-react-query-4",
+    "created_at": "2026-04-20",
+    "source": "dashboard-feedback",
+    "package": "@tanstack/react-query",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Recurring FP: query-error-unhandled postcondition fires across 21 distinct files (25 instances in 30 days). Scanner not recognizing React Query global error boundary or onError/throwOnError configurations.",
+    "evidence": {
+      "repos": [
+        "hooks/useAvailableModels.ts",
+        "components/TasksPage/TasksList.tsx",
+        "components/Files/FileInfoDialog.tsx",
+        "hooks/useArtistKnowledge.ts",
+        "hooks/useTaskRunStatus.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 25,
+      "fp_reason": "Recurring false positive — query-error-unhandled firing when error handling is delegated to global QueryClient errorHandler or ErrorBoundary",
+      "fix_target": "scanner",
+      "postcondition_id": "query-error-unhandled"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-20-ai-5",
+    "created_at": "2026-04-20",
+    "source": "dashboard-feedback",
+    "package": "ai",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Recurring FP: tool-execution-error postcondition fires across 25 distinct files (25 instances). Pattern recurs after prior implementations — tool callback functions in Vercel AI SDK flagged even when error handling is done by the SDK.",
+    "evidence": {
+      "repos": [
+        "lib/tools/files/readFile.ts",
+        "lib/tools/searchTwitter.ts",
+        "lib/tools/browser/browserAgent.ts",
+        "lib/tools/getApifyScraper.ts",
+        "lib/tools/getSocialPosts.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 25,
+      "fp_reason": "Recurring false positive — AI SDK tool functions are wrapped by the SDK framework which handles errors, individual tool implementations need not catch errors",
+      "fix_target": "contract",
+      "postcondition_id": "tool-execution-error"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-20-tanstack-react-router-6",
+    "created_at": "2026-04-20",
+    "source": "dashboard-feedback",
+    "package": "@tanstack/react-router",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Recurring FP: param-type-mismatch postcondition fires across 9 distinct files (18 instances). Route parameter type checking generating false positives on valid parameterized routes.",
+    "evidence": {
+      "repos": [
+        "src/routes/_authenticated/loan/$loanId.tsx",
+        "src/features/auth/reset-password/components/reset-password-form.tsx",
+        "src/features/tasks/components/columns.tsx"
+      ],
+      "scan_file": null,
+      "violation_count": 18,
+      "fp_reason": "Recurring false positive — param-type-mismatch fires on valid typed route parameters",
+      "fix_target": "contract",
+      "postcondition_id": "param-type-mismatch"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-20-tanstack-react-router-7",
+    "created_at": "2026-04-20",
+    "source": "dashboard-feedback",
+    "package": "@tanstack/react-router",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Recurring FP: search-schema-validation-error postcondition fires across 7 distinct files (14 instances). Search parameter schema validation detection generating FPs on valid TanStack Router search params.",
+    "evidence": {
+      "repos": [
+        "src/routes/(auth)/invite.tsx",
+        "src/routes/(auth)/accept-invite.tsx",
+        "src/features/settings/organization.tsx"
+      ],
+      "scan_file": null,
+      "violation_count": 14,
+      "fp_reason": "Recurring false positive — search-schema-validation-error fires on valid search parameter usage patterns",
+      "fix_target": "contract",
+      "postcondition_id": "search-schema-validation-error"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-20-zod-8",
+    "created_at": "2026-04-20",
+    "source": "dashboard-feedback",
+    "package": "zod",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Recurring FP: parse-validation-error fires across 14 distinct files (14 instances). Zod parse() calls being flagged even when error handling is done at a higher level or .safeParse() is used.",
+    "evidence": {
+      "repos": [
+        "src/features/auth/sign-up/components/sign-up-form.tsx",
+        "src/features/auth/sign-in/components/user-auth-form.tsx",
+        "apps/web/utils/llms/index.ts",
+        "lib/catalog/analyzeCatalogBatch.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 14,
+      "fp_reason": "Recurring false positive — parse-validation-error fires when .safeParse() used or when validation errors are handled by framework error boundaries",
+      "fix_target": "scanner",
+      "postcondition_id": "parse-validation-error"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-20-react-hook-form-9",
+    "created_at": "2026-04-20",
+    "source": "dashboard-feedback",
+    "package": "react-hook-form",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Recurring FP: missing-form-provider fires across 3 distinct files (9 instances). Scanner not recognizing when form fields are used within a component that is always rendered inside a FormProvider.",
+    "evidence": {
+      "repos": [
+        "src/components/ui/form.tsx",
+        "components/Input.tsx",
+        "components/Account/ArtistInstructionTextArea.tsx"
+      ],
+      "scan_file": null,
+      "violation_count": 9,
+      "fp_reason": "Recurring false positive — missing-form-provider fires on reusable form field components that are always rendered inside FormProvider by convention",
+      "fix_target": "scanner",
+      "postcondition_id": "missing-form-provider"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-20-ai-10",
+    "created_at": "2026-04-20",
+    "source": "dashboard-feedback",
+    "package": "ai",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Recurring FP: api-error-rate-limit fires across 5 distinct files (7 instances). Rate limit error handling postcondition flagging code that uses Vercel AI SDK wrapping which handles retries internally.",
+    "evidence": {
+      "repos": [
+        "apps/web/utils/llms/index.ts",
+        "lib/evals/scorers/CatalogAvailability.ts",
+        "lib/evals/scorers/QuestionAnswered.ts",
+        "lib/catalog/analyzeCatalogBatch.ts",
+        "lib/ai/generateArray.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 7,
+      "fp_reason": "Recurring false positive — api-error-rate-limit fires even when SDK-level retry/rate-limit handling is in place",
+      "fix_target": "contract",
+      "postcondition_id": "api-error-rate-limit"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-20-clerk-nextjs-11",
+    "created_at": "2026-04-20",
+    "source": "dashboard-feedback",
+    "package": "@clerk/nextjs",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Recurring FP: use-user-no-loaded-check fires across 7 distinct files (7 instances). Scanner not recognizing Clerk loading state guards that exist in parent components or conditional renders.",
+    "evidence": {
+      "repos": [
+        "apps/web/components/layout/header.tsx",
+        "apps/web/components/layout/top-nav.tsx",
+        "apps/web/components/layout/sidebar.tsx",
+        "apps/web/components/settings/profile-settings.tsx",
+        "apps/web/components/providers/analytics-provider.tsx"
+      ],
+      "scan_file": null,
+      "violation_count": 7,
+      "fp_reason": "Recurring false positive — use-user-no-loaded-check fires when isLoaded check is done in parent or wrapping component",
+      "fix_target": "scanner",
+      "postcondition_id": "use-user-no-loaded-check"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-20-redis-12",
+    "created_at": "2026-04-20",
+    "source": "dashboard-feedback",
+    "package": "redis",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Recurring FP: missing-error-listener fires 7 times all in the same file (packages/api/src/main.ts) at different lines. Redis client instances being flagged despite error listeners being registered elsewhere in the module.",
+    "evidence": {
+      "repos": [
+        "packages/api/src/main.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 7,
+      "fp_reason": "Recurring false positive — missing-error-listener fires on multiple Redis client usages in same file even when .on('error') listener is registered once for each client",
+      "fix_target": "scanner",
+      "postcondition_id": "missing-error-listener"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-20-express-13",
+    "created_at": "2026-04-20",
+    "source": "dashboard-feedback",
+    "package": "express",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Recurring FP: async-middleware-unhandled-rejection fires across 2 files (5 instances). Express async middleware being flagged even when a global error handler is registered in the same file.",
+    "evidence": {
+      "repos": [
+        "api/dev-server.ts",
+        "api/browser-agent-server.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 5,
+      "fp_reason": "Recurring false positive — async-middleware-unhandled-rejection fires when global express error handler handles rejections from async middleware",
+      "fix_target": "scanner",
+      "postcondition_id": "async-middleware-unhandled-rejection"
+    },
+    "resolution": null
   }
 ]
