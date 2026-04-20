@@ -500,6 +500,20 @@ async function main(options: any) {
   const analysisEndTime = Date.now();
   const analysisDuration = ((analysisEndTime - analysisStartTime) / 1000).toFixed(1);
 
+  // Inject deprecation notice for contracts with deprecated: true
+  // (These are loaded because their status is 'production', but the package is
+  // deprecated — consumers should migrate away.)
+  violations = violations.map(v => {
+    const contract = corpusResult.contracts.get(v.package);
+    if (contract?.deprecated && contract.deprecated_reason) {
+      return {
+        ...v,
+        description: `⚠ [deprecated package] ${contract.deprecated_reason}\n${v.description}`,
+      };
+    }
+    return v;
+  });
+
   if (verbose) console.log(chalk.green(`✓ Analyzed ${stats.filesAnalyzed} files in ${analysisDuration}s\n`));
 
   // Checkpoint 3: verbose analysis timing output
