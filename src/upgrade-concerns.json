@@ -42181,5 +42181,229 @@
       "postcondition_id": "error-4xx-5xx"
     },
     "resolution": "Already handled by inline suppression comments in the fixture file (line 12: @behavioral-contract-ignore axios/error-4xx-5xx). The checkSuppression() function processes inline comments before violations are emitted. 1 FP in test suppression fixture \u2014 already suppressed."
+  },
+  {
+    "id": "concern-2026-04-20-sinon-deepen-1",
+    "created_at": "2026-04-20",
+    "source": "deepen",
+    "package": "sinon",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for sinon.fake(nonFunction) \u2014 postcondition fake-non-function-arg-throws added in depth pass but no scanner rule exists",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. Throws TypeError: Expected f argument to be a Function. Source confirmed: sinon/lib/sinon/fake.js lines 30-32"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-20-sinon-deepen-2",
+    "created_at": "2026-04-20",
+    "source": "deepen",
+    "package": "sinon",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for sinon.fake.yields()/yieldsAsync() invoked without callback \u2014 postcondition fake-yields-missing-callback added in depth pass but no scanner rule exists",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. Throws TypeError: Expected last argument to be a function at invocation time."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-20-sinon-deepen-3",
+    "created_at": "2026-04-20",
+    "source": "deepen",
+    "package": "sinon",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for sandbox.replace() on non-existent property \u2014 postcondition replace-non-existent-property added in depth pass but no scanner rule exists",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. Throws TypeError: Cannot replace non-existent property. Source confirmed: sinon/lib/sinon/sandbox.js"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-20-sinon-deepen-4",
+    "created_at": "2026-04-20",
+    "source": "deepen",
+    "package": "sinon",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for sandbox.replace() double-replace without restore \u2014 postcondition replace-already-replaced-throws added in depth pass but no scanner rule exists",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. Throws TypeError: Attempted to replace X which is already replaced."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-20-sinon-deepen-5",
+    "created_at": "2026-04-20",
+    "source": "deepen",
+    "package": "sinon",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for sandbox.replace() on accessor property \u2014 postcondition replace-accessor-property-throws added in depth pass but no scanner rule exists",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. Throws Error: Use sandbox.replaceGetter for replacing getters."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-20-sinon-deepen-6",
+    "created_at": "2026-04-20",
+    "source": "deepen",
+    "package": "sinon",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for sandbox.replace() with mismatched types \u2014 postcondition replace-type-mismatch-throws added in depth pass but no scanner rule exists",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. Throws TypeError: Cannot replace <type> with <type>."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-20-validator-deepen-1",
+    "created_at": "2026-04-20",
+    "source": "deepen",
+    "package": "validator",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for isMobilePhone() called with user-derived locale \u2014 postcondition mobile-phone-invalid-locale-throws added in depth pass but no scanner rule exists",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. Throws Error(\"Invalid locale '<locale>'\") for unrecognized locale strings. Hard to catch because it is Error not TypeError."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-20-validator-deepen-2",
+    "created_at": "2026-04-20",
+    "source": "deepen",
+    "package": "validator",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for isPostalCode() called with user-derived locale \u2014 postcondition postal-code-invalid-locale-throws added in depth pass but no scanner rule exists",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. Same locale-throw pattern as isMobilePhone, isTaxID, isIdentityCard, isLicensePlate."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-20-validator-deepen-3",
+    "created_at": "2026-04-20",
+    "source": "deepen",
+    "package": "validator",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for isTaxID() called with short country code or non-locale string \u2014 postcondition tax-id-invalid-locale-throws added in depth pass but no scanner rule exists",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. Common pattern: isTaxID(str, countryCode) where countryCode is ISO alpha-2 (\"US\") instead of locale (\"en-US\")."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-20-validator-deepen-4",
+    "created_at": "2026-04-20",
+    "source": "deepen",
+    "package": "validator",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for isVAT() called with non-uppercase or 3-letter country code \u2014 postcondition vat-invalid-country-code-throws added in depth pass but no scanner rule exists",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. Error message format differs: \"Invalid country code: \"<cc>\"\" (colon syntax) unlike other locale-throwing functions."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-20-validator-deepen-5",
+    "created_at": "2026-04-20",
+    "source": "deepen",
+    "package": "validator",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for validator.unescape() output flowing directly to HTML template \u2014 postcondition unescape-xss-reintroduction added in depth pass but no scanner rule exists",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. High severity: unescape() reverses escape() protection. Output passed to innerHTML/template literals creates XSS vector."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-20-validator-deepen-6",
+    "created_at": "2026-04-20",
+    "source": "deepen",
+    "package": "validator",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for validator.blacklist()/whitelist() with dynamic chars argument \u2014 postconditions blacklist-regex-injection and whitelist-regex-injection added in depth pass but no scanner rule exists",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. chars param directly interpolated into RegExp without escaping. Dynamic chars from user input or config causes regex injection."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-20-validator-deepen-7",
+    "created_at": "2026-04-20",
+    "source": "deepen",
+    "package": "validator",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for validator.toBoolean() called without strict=true in config/feature-flag contexts \u2014 postcondition to-boolean-loose-mode-truthy-surprise added in depth pass",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. Non-strict mode (default): toBoolean(\"no\") = true, toBoolean(\"off\") = true, toBoolean(\"disabled\") = true \u2014 all counterintuitive."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-2026-04-20-validator-deepen-8",
+    "created_at": "2026-04-20",
+    "source": "deepen",
+    "package": "validator",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for validator.trim()/ltrim()/rtrim() called with non-string argument \u2014 postcondition trim-non-string-throws added in depth pass but no scanner rule exists",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. Optional form fields (null/undefined) cause TypeError when passed directly to trim() without null guard."
+    },
+    "resolution": null
   }
 ]
