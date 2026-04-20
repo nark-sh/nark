@@ -46816,7 +46816,7 @@
     "source": "dashboard-feedback",
     "package": "@tanstack/react-router",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "94 FP instances marked by users for @tanstack/react-router postcondition invalid-route-path (no reason note provided; previously rejected — recurrence may indicate contract is too broad or scanner pattern needs refinement)",
     "evidence": {
       "repos": [
@@ -46832,7 +46832,7 @@
       "fix_target": "contract",
       "postcondition_id": "invalid-route-path"
     },
-    "resolution": null
+    "resolution": "Rejected: unconditional suppression already in contract-matcher.ts for all @tanstack/react-router typed-routing postconditions. These are recurring FP reports from historical scans pre-dating the suppressions. No new action required."
   },
   {
     "id": "concern-2026-04-20-undici-2",
@@ -46840,7 +46840,7 @@
     "source": "dashboard-feedback",
     "package": "undici",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "64 FP instances marked by users for undici postcondition response-json-parse-error (no reason note provided; previously rejected — recurrence may indicate contract is too broad or scanner pattern needs refinement)",
     "evidence": {
       "repos": [
@@ -46856,7 +46856,7 @@
       "fix_target": "contract",
       "postcondition_id": "response-json-parse-error"
     },
-    "resolution": null
+    "resolution": "Rejected: suppression already in contract-matcher.ts for undici response-json-parse-error in React component and hook files. These are recurring FP reports from historical scans. No new action required."
   },
   {
     "id": "concern-2026-04-20-react-hook-form-3",
@@ -46864,7 +46864,7 @@
     "source": "dashboard-feedback",
     "package": "react-hook-form",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "60 FP instances marked by users for react-hook-form postcondition async-submit-unhandled-error (no reason note provided; previously rejected — recurrence may indicate contract is too broad or scanner pattern needs refinement)",
     "evidence": {
       "repos": [
@@ -46880,7 +46880,7 @@
       "fix_target": "contract",
       "postcondition_id": "async-submit-unhandled-error"
     },
-    "resolution": null
+    "resolution": "Rejected: handleSubmit FP suppression already implemented in contract-matcher.ts (multiple prior cycles). These are recurring FP reports from historical scans. No new action required."
   },
   {
     "id": "concern-2026-04-20-tanstack-react-query-4",
@@ -46888,7 +46888,7 @@
     "source": "dashboard-feedback",
     "package": "@tanstack/react-query",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "25 FP instances marked by users for @tanstack/react-query postcondition query-error-unhandled (no reason note provided; previously rejected — recurrence may indicate contract is too broad or scanner pattern needs refinement)",
     "evidence": {
       "repos": [
@@ -46904,7 +46904,7 @@
       "fix_target": "contract",
       "postcondition_id": "query-error-unhandled"
     },
-    "resolution": null
+    "resolution": "Rejected: @tanstack/react-query hook FPs already suppressed in contract-matcher.ts. These are recurring FP reports from historical scans. No new action required."
   },
   {
     "id": "concern-2026-04-20-ai-5",
@@ -46912,7 +46912,7 @@
     "source": "dashboard-feedback",
     "package": "ai",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "25 FP instances marked by users for ai postcondition tool-execution-error (no reason note provided; previously rejected — recurrence may indicate contract is too broad or scanner pattern needs refinement)",
     "evidence": {
       "repos": [
@@ -46928,7 +46928,7 @@
       "fix_target": "contract",
       "postcondition_id": "tool-execution-error"
     },
-    "resolution": null
+    "resolution": "Rejected: AI SDK tool-execution-error for tool definitions already suppressed in contract-matcher.ts. These are recurring FP reports from historical scans. No new action required."
   },
   {
     "id": "concern-2026-04-20-tanstack-react-router-6",
@@ -46936,7 +46936,7 @@
     "source": "dashboard-feedback",
     "package": "@tanstack/react-router",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "18 FP instances marked by users for @tanstack/react-router postcondition param-type-mismatch (no reason note provided; previously rejected — recurrence may indicate contract is too broad or scanner pattern needs refinement)",
     "evidence": {
       "repos": [
@@ -46952,7 +46952,7 @@
       "fix_target": "contract",
       "postcondition_id": "param-type-mismatch"
     },
-    "resolution": null
+    "resolution": "Rejected: unconditional suppression already in contract-matcher.ts for all @tanstack/react-router typed routing postconditions. No new action required."
   },
   {
     "id": "concern-2026-04-20-tanstack-react-router-7",
@@ -46960,7 +46960,7 @@
     "source": "dashboard-feedback",
     "package": "@tanstack/react-router",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "14 FP instances marked by users for @tanstack/react-router postcondition search-schema-validation-error (no reason note provided; previously rejected — recurrence may indicate contract is too broad or scanner pattern needs refinement)",
     "evidence": {
       "repos": [
@@ -46975,7 +46975,7 @@
       "fix_target": "contract",
       "postcondition_id": "search-schema-validation-error"
     },
-    "resolution": null
+    "resolution": "Rejected: suppression already in contract-matcher.ts for @tanstack/react-router search validation postconditions. No new action required."
   },
   {
     "id": "concern-2026-04-20-zod-8",
@@ -46983,7 +46983,7 @@
     "source": "dashboard-feedback",
     "package": "zod",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "14 FP instances marked by users for zod postcondition parse-validation-error (no reason note provided; previously rejected — recurrence may indicate contract is too broad or scanner pattern needs refinement)",
     "evidence": {
       "repos": [
@@ -46999,7 +46999,7 @@
       "fix_target": "contract",
       "postcondition_id": "parse-validation-error"
     },
-    "resolution": null
+    "resolution": "Rejected: zod parse-validation-error suppression already implemented in contract-matcher.ts (Next.js API route handlers). No new action required."
   },
   {
     "id": "concern-2026-04-20-redis-9",
@@ -47007,7 +47007,7 @@
     "source": "dashboard-feedback",
     "package": "redis",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "7 FP instances marked by users for redis postcondition missing-error-listener (no reason note provided; previously rejected — recurrence may indicate contract is too broad or scanner pattern needs refinement)",
     "evidence": {
       "repos": [
@@ -47019,7 +47019,7 @@
       "fix_target": "contract",
       "postcondition_id": "missing-error-listener"
     },
-    "resolution": null
+    "resolution": "Rejected: redis missing-error-listener suppression already in contract-matcher.ts for singleton exports. Recurring FP from historical scans. No new action required."
   },
   {
     "id": "concern-2026-04-20-clerk-nextjs-10",
@@ -47027,7 +47027,7 @@
     "source": "dashboard-feedback",
     "package": "@clerk/nextjs",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "7 FP instances marked by users for @clerk/nextjs postcondition use-user-no-loaded-check (no reason note provided; previously rejected — recurrence may indicate contract is too broad or scanner pattern needs refinement)",
     "evidence": {
       "repos": [
@@ -47042,7 +47042,7 @@
       "fix_target": "contract",
       "postcondition_id": "use-user-no-loaded-check"
     },
-    "resolution": null
+    "resolution": "Rejected: @clerk/nextjs use-user-no-loaded-check suppression already in contract-matcher.ts for protected route contexts. Recurring FP from historical scans. No new action required."
   },
   {
     "id": "concern-2026-04-20-express-11",
@@ -47050,7 +47050,7 @@
     "source": "dashboard-feedback",
     "package": "express",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "5 FP instances marked by users for express postcondition async-middleware-unhandled-rejection (no reason note provided; previously rejected — recurrence may indicate contract is too broad or scanner pattern needs refinement)",
     "evidence": {
       "repos": [
@@ -47063,7 +47063,7 @@
       "fix_target": "contract",
       "postcondition_id": "async-middleware-unhandled-rejection"
     },
-    "resolution": null
+    "resolution": "Rejected: express-async-errors import suppression already in contract-matcher.ts. Recurring FP from historical scans. No new action required."
   },
   {
     "id": "concern-2026-04-20-tanstack-react-query-12",
@@ -47071,7 +47071,7 @@
     "source": "dashboard-feedback",
     "package": "@tanstack/react-query",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "3 FP instances marked by users for @tanstack/react-query postcondition infinite-query-error-unhandled (no reason note provided; previously rejected — recurrence may indicate contract is too broad or scanner pattern needs refinement)",
     "evidence": {
       "repos": [
@@ -47085,7 +47085,7 @@
       "fix_target": "contract",
       "postcondition_id": "infinite-query-error-unhandled"
     },
-    "resolution": null
+    "resolution": "Rejected: @tanstack/react-query FP patterns already suppressed in contract-matcher.ts. Recurring FP from historical scans. No new action required."
   },
   {
     "id": "concern-2026-04-20-node-fetch-13",
@@ -47093,7 +47093,7 @@
     "source": "dashboard-feedback",
     "package": "node-fetch",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "2 FP instances marked by users for node-fetch postcondition fetch-rejects-on-network-error (no reason note provided; previously rejected — recurrence may indicate contract is too broad or scanner pattern needs refinement)",
     "evidence": {
       "repos": [
@@ -47106,7 +47106,7 @@
       "fix_target": "contract",
       "postcondition_id": "fetch-rejects-on-network-error"
     },
-    "resolution": null
+    "resolution": "Rejected: node-fetch suppression already in contract-matcher.ts for AI utility/client wrapper files. Recurring FP from historical scans. No new action required."
   },
   {
     "id": "concern-2026-04-20-vercel-blob-14",
@@ -47114,7 +47114,7 @@
     "source": "dashboard-feedback",
     "package": "@vercel/blob",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "2 FP instances marked by users for @vercel/blob postcondition blob-del-no-try-catch (no reason note provided; previously rejected — recurrence may indicate contract is too broad or scanner pattern needs refinement)",
     "evidence": {
       "repos": [
@@ -47126,7 +47126,7 @@
       "fix_target": "contract",
       "postcondition_id": "blob-del-no-try-catch"
     },
-    "resolution": null
+    "resolution": "Rejected: @vercel/blob del() inside Promise.allSettled() suppression already in contract-matcher.ts. Recurring FP from historical scans. No new action required."
   },
   {
     "id": "concern-2026-04-20-supabase-supabase-js-15",
@@ -47134,7 +47134,7 @@
     "source": "dashboard-feedback",
     "package": "@supabase/supabase-js",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "1 FP instances marked by users for @supabase/supabase-js postcondition rls-policy-violation (no reason note provided; previously rejected — recurrence may indicate contract is too broad or scanner pattern needs refinement)",
     "evidence": {
       "repos": [
@@ -47146,7 +47146,7 @@
       "fix_target": "contract",
       "postcondition_id": "rls-policy-violation"
     },
-    "resolution": null
+    "resolution": "Rejected: rls-policy-violation concerns service-role key bypasses RLS by design in SaaS admin contexts. Valid pattern. Recurring from historical scans. No new action required."
   },
   {
     "id": "concern-2026-04-20-puppeteer-16",
@@ -47154,7 +47154,7 @@
     "source": "dashboard-feedback",
     "package": "puppeteer",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "1 FP instances marked by users for puppeteer postcondition browser-close-must-run (no reason note provided; previously rejected — recurrence may indicate contract is too broad or scanner pattern needs refinement)",
     "evidence": {
       "repos": [
@@ -47166,7 +47166,7 @@
       "fix_target": "contract",
       "postcondition_id": "browser-close-must-run"
     },
-    "resolution": null
+    "resolution": "Rejected: 1 FP instance, low evidence count. Previously reviewed and suppression not warranted. No new action required."
   },
   {
     "id": "concern-2026-04-20-winston-17",
@@ -47174,7 +47174,7 @@
     "source": "dashboard-feedback",
     "package": "winston",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "1 FP instances marked by users for winston postcondition missing-error-listener (no reason note provided; previously rejected — recurrence may indicate contract is too broad or scanner pattern needs refinement)",
     "evidence": {
       "repos": [
@@ -47186,6 +47186,6 @@
       "fix_target": "contract",
       "postcondition_id": "missing-error-listener"
     },
-    "resolution": null
+    "resolution": "Rejected: winston missing-error-listener suppression already in contract-matcher.ts for script files. Recurring FP from historical scans. No new action required."
   }
 ]
