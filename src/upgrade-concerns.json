@@ -43196,5 +43196,85 @@
       "note": "Proactive \u2014 gap in existing Mocha.run postconditions. ERR_MOCHA_INSTANCE_ALREADY_DISPOSED thrown when run() called after cleanReferencesAfterRun auto-disposes. Common mistake in watch mode or programmatic orchestration."
     },
     "resolution": null
+  },
+  {
+    "id": "concern-20260420-validator-deepen-1",
+    "created_at": "2026-04-20",
+    "source": "deepen",
+    "package": "validator",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for validator.isAlpha() called with dynamic locale argument \u2014 postcondition alpha-invalid-locale-throws added in depth pass but no scanner rule exists for locale-from-variable pattern",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. isAlpha/isAlphanumeric locale-throw pattern mirrors isMobilePhone/isPostalCode already contracted. Detection rule should check if locale argument is a variable (not string literal) without pre-validation against isAlpha.locales set."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260420-validator-deepen-2",
+    "created_at": "2026-04-20",
+    "source": "deepen",
+    "package": "validator",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for validator.isAlphanumeric() called with dynamic locale argument \u2014 postcondition alphanumeric-invalid-locale-throws added in depth pass but no scanner rule exists",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 same locale-throw pattern as isAlpha. Detection rule reusable from alpha-invalid-locale-throws concern."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260420-validator-deepen-3",
+    "created_at": "2026-04-20",
+    "source": "deepen",
+    "package": "validator",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for validator.isDecimal() called with dynamic locale in options \u2014 postcondition decimal-invalid-locale-throws added in depth pass but no scanner rule exists",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 locale-throw via options.locale property (not positional argument). Detection requires tracking options object keys."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260420-validator-deepen-4",
+    "created_at": "2026-04-20",
+    "source": "deepen",
+    "package": "validator",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for validator.isDate() used without strictMode in API input validation \u2014 postcondition isdate-non-strict-accepts-date-objects added but no scanner rule exists for non-strict isDate pattern",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 non-strict isDate() accepting Date objects is a subtle behavior. Detection: flag isDate() calls that do not pass strictMode: true option, especially when result is used to validate user input."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260420-validator-deepen-5",
+    "created_at": "2026-04-20",
+    "source": "deepen",
+    "package": "validator",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for validator.isIBAN() used as sole payment validation without payment provider verification \u2014 postcondition iban-format-only-not-account-verified added but no scanner rule exists",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 isIBAN as sole payment gate is high-risk. Detection: flag isIBAN() calls whose result directly gates payment/transfer functions without an intermediate payment provider call."
+    },
+    "resolution": null
   }
 ]
