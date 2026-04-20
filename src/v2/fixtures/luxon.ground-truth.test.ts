@@ -48,15 +48,15 @@ const GROUND_TRUTH_PATH = path.resolve(
 // Command: node dist/index.js --tsconfig <fixturedir>/__gt-tsconfig.json --corpus ../nark-corpus
 
 const EXPECTED_VIOLATIONS: { line: number; postconditionId: string; label: string }[] = [
-  { line: 29,  postconditionId: 'frommillis-non-number-throws',        label: 'fromMillis — no try-catch' },
-  { line: 69,  postconditionId: 'fromseconds-non-number-throws',       label: 'fromSeconds — no try-catch' },
-  { line: 95,  postconditionId: 'fromobject-conflicting-specification', label: 'fromObject — weekYear+month mix' },
-  { line: 101, postconditionId: 'fromobject-conflicting-specification', label: 'fromObject — ordinal+month mix' },
-  { line: 131, postconditionId: 'fromformat-missing-args',             label: 'fromFormat — undefined format arg' },
-  { line: 155, postconditionId: 'startof-invalid-unit',                label: 'startOf — dynamic unit, no validation' },
-  { line: 189, postconditionId: 'endof-invalid-unit',                  label: 'endOf — dynamic unit, no validation' },
-  { line: 209, postconditionId: 'min-non-datetime-throws',             label: 'min — non-DateTime args' },
-  { line: 235, postconditionId: 'max-non-datetime-throws',             label: 'max — non-DateTime args' },
+  { line: 32,  postconditionId: 'frommillis-non-number-throws',        label: 'fromMillis — no try-catch' },
+  { line: 72,  postconditionId: 'fromseconds-non-number-throws',       label: 'fromSeconds — no try-catch' },
+  { line: 98,  postconditionId: 'fromobject-conflicting-specification', label: 'fromObject — weekYear+month mix' },
+  { line: 104, postconditionId: 'fromobject-conflicting-specification', label: 'fromObject — ordinal+month mix' },
+  { line: 134, postconditionId: 'fromformat-missing-args',             label: 'fromFormat — undefined format arg' },
+  { line: 158, postconditionId: 'startof-invalid-unit',                label: 'startOf — dynamic unit, no validation' },
+  { line: 192, postconditionId: 'endof-invalid-unit',                  label: 'endOf — dynamic unit, no validation' },
+  { line: 212, postconditionId: 'min-non-datetime-throws',             label: 'min — non-DateTime args' },
+  { line: 238, postconditionId: 'max-non-datetime-throws',             label: 'max — non-DateTime args' },
 ];
 
 // Lines expected to be clean (no error-level violations).
