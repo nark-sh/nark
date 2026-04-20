@@ -97,13 +97,13 @@ for repo_dir in "$REPOS_DIR"/*/; do
   if [ "$TIMEOUT_CMD" = "run_with_timeout" ]; then
     run_with_timeout "$TIMEOUT_SECS" node "$NARK_BIN" \
       --tsconfig "$TSCONFIG" \
-      --json \
+      --no-terminal \
       --output "$AUDIT_FILE" \
       > /dev/null 2>&1
   else
     $TIMEOUT_CMD "$TIMEOUT_SECS" node "$NARK_BIN" \
       --tsconfig "$TSCONFIG" \
-      --json \
+      --no-terminal \
       --output "$AUDIT_FILE" \
       > /dev/null 2>&1
   fi
