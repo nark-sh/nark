@@ -74,7 +74,7 @@ const _narkRc = (() => {
 program
   .name('nark')
   .description('Contract coverage scanner — find missing error handling before production')
-  .version('1.1.0');
+  .version('1.2.0');
 
 // Add suppressions subcommand
 program.addCommand(createSuppressionsCommand());
