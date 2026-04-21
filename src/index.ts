@@ -1278,6 +1278,13 @@ process.on('uncaughtException', (error) => {
     process.exit(1);
   }
 
+  // Tsconfig resolution errors (missing extends, missing files)
+  if (message.includes('TSCONFIG_RESOLVE_ERROR') || message.includes('NO_TS_FILES')) {
+    console.error('');
+    console.error(error instanceof Error ? error.message : error);
+    process.exit(1);
+  }
+
   // Permission errors when writing to the filesystem
   if (message.includes('EPERM') || message.includes('EACCES')) {
     console.error('');

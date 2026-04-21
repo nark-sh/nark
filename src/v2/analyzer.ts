@@ -92,6 +92,49 @@ export class UniversalAnalyzer {
         );
       }
 
+      // Detect missing extends targets (npm packages not installed, missing relative refs)
+      // Fall back to synthetic tsconfig — nark only needs to find .ts files, not exact compiler options
+      const isMissingExtends = errors.includes('not found') || errors.includes('Cannot read file');
+      if (isMissingExtends) {
+        const projectDir = path.dirname(configPath);
+        const syntheticConfig = {
+          compilerOptions: {
+            target: ts.ScriptTarget.ES2020,
+            module: ts.ModuleKind.CommonJS,
+            strict: true,
+            esModuleInterop: true,
+            skipLibCheck: true,
+            moduleResolution: ts.ModuleResolutionKind.Node10,
+          },
+        };
+        const fallbackParsed = ts.parseJsonConfigFileContent(
+          syntheticConfig,
+          ts.sys,
+          projectDir
+        );
+        // Filter out "no inputs found" — means truly no TS files
+        if (fallbackParsed.fileNames.length === 0) {
+          throw new Error(
+            'NO_TS_FILES: No TypeScript files found to analyze.\n' +
+            '\n' +
+            '  tsconfig.json could not be fully resolved (missing extends),\n' +
+            '  and no .ts files were found in the project directory.\n'
+          );
+        }
+        // Use the synthetic config — log a warning but continue
+        if (typeof process !== 'undefined' && process.stderr) {
+          process.stderr.write(
+            `Warning: tsconfig extends could not be resolved (${errors.split('\n')[0]}). ` +
+            `Falling back to default compiler options. Scanning ${fallbackParsed.fileNames.length} files.\n`
+          );
+        }
+        this.program = ts.createProgram({
+          rootNames: fallbackParsed.fileNames,
+          options: fallbackParsed.options,
+        });
+        return;
+      }
+
       throw new Error(`Error parsing tsconfig.json: ${errors}`);
     }
 
@@ -108,10 +151,12 @@ export class UniversalAnalyzer {
     const fileNotFoundDiagnostics = ts.getPreEmitDiagnostics(this.program)
       .filter(d => d.code === 6053);
     if (fileNotFoundDiagnostics.length > 0) {
-      const messages = fileNotFoundDiagnostics
-        .map(d => ts.flattenDiagnosticMessageText(d.messageText, '\n'))
-        .join('\n');
-      throw new Error(`TypeScript file-not-found errors:\n${messages}`);
+      if (typeof process !== 'undefined' && process.stderr) {
+        process.stderr.write(
+          `Warning: ${fileNotFoundDiagnostics.length} file(s) listed in tsconfig not found on disk (codegen or missing build output). ` +
+          `Skipping missing files and scanning ${this.program.getSourceFiles().length} available files.\n`
+        );
+      }
     }
 
     // Create contract matcher if contracts are provided

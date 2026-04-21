@@ -31,7 +31,7 @@ fi
 
 NARK_BIN="$(pwd)/dist/index.js"
 REPOS_DIR="/Users/calebgates/WebstormProjects/behavioral-contracts/corpus-builder/active"
-RESULTS_DIR="output/$(date +%Y%m%d)-corpus-bulk"
+RESULTS_DIR="${RESULTS_DIR:-output/$(date +%Y%m%d)-corpus-bulk}"
 TIMEOUT_SECS=300
 ERRORS_FILE="$RESULTS_DIR/ERRORS.txt"
 
@@ -70,18 +70,35 @@ for repo_dir in "$REPOS_DIR"/*/; do
   # Clean any existing .nark/ artifacts before scanning
   rm -rf "$repo_dir/.nark"
 
-  # Find tsconfig — check common locations
+  # Find tsconfig — check root, then common subdirs, then monorepo globs
   TSCONFIG=""
   for candidate in \
     "$repo_dir/tsconfig.json" \
     "$repo_dir/tsconfig.build.json" \
     "$repo_dir/tsconfig.base.json" \
-    "$repo_dir/tsconfig.app.json"; do
+    "$repo_dir/tsconfig.app.json" \
+    "$repo_dir/src/tsconfig.json" \
+    "$repo_dir/app/tsconfig.json" \
+    "$repo_dir/server/tsconfig.json" \
+    "$repo_dir/frontend/tsconfig.json" \
+    "$repo_dir/web/tsconfig.json" \
+    "$repo_dir/client/tsconfig.json" \
+    "$repo_dir/backend/tsconfig.json"; do
     if [ -f "$candidate" ]; then
       TSCONFIG="$candidate"
       break
     fi
   done
+
+  # Monorepo fallback: check apps/*/tsconfig.json and packages/*/tsconfig.json
+  if [ -z "$TSCONFIG" ]; then
+    for pattern in "$repo_dir"/apps/*/tsconfig.json "$repo_dir"/packages/*/tsconfig.json; do
+      if [ -f "$pattern" ]; then
+        TSCONFIG="$pattern"
+        break
+      fi
+    done
+  fi
 
   if [ -z "$TSCONFIG" ]; then
     SKIPPED=$((SKIPPED + 1))
@@ -89,6 +106,12 @@ for repo_dir in "$REPOS_DIR"/*/; do
   fi
 
   AUDIT_FILE="$RESULTS_DIR/${repo_name}-audit.json"
+
+  # Resume support: skip if already scanned
+  if [ -f "$AUDIT_FILE" ]; then
+    SCANNED=$((SCANNED + 1))
+    continue
+  fi
 
   echo -n "[$TOTAL] $repo_name... "
 

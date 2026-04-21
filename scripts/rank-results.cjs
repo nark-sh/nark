@@ -65,8 +65,8 @@ for (const file of files) {
         // Default to error if no severity specified
         errors++;
       }
-      if (v.packageName || v.contract || v.contractId) {
-        packagesHit.add(v.packageName || v.contract || v.contractId);
+      if (v.package || v.packageName || v.contract || v.contractId) {
+        packagesHit.add(v.package || v.packageName || v.contract || v.contractId);
       }
     }
 
