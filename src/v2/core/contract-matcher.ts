@@ -846,6 +846,22 @@ export class ContractMatcher {
         if (inRetryWrapper) continue;
       }
 
+      // dayjs(): suppress dayjs-invalid-date when the call has zero arguments.
+      // dayjs() with no arguments always returns the current time and is always valid —
+      // there is no user-supplied input to validate, so requiring .isValid() is a false positive.
+      // dayjs("someString") with an argument still needs validation (may produce Invalid Date).
+      // Evidence: concern-20260421-dayjs-no-args-fp — 195 FPs across ant-design (85),
+      //   mantine (55), and notesnook (55) from bulk-scan-audit 2026-04-21.
+      if (
+        detection.packageName === "dayjs" &&
+        detection.functionName === "dayjs" &&
+        primaryPostcondition.id === "dayjs-invalid-date" &&
+        ts.isCallExpression(detection.node) &&
+        detection.node.arguments.length === 0
+      ) {
+        continue; // dayjs() with no args always returns current time — always valid
+      }
+
       // react-hook-form useFieldArray: unhandled-field-array-operations fires even when
       // the parent form already has submit error handling. When the component uses
       // handleSubmit (indicating form-level error handling exists), the individual
@@ -1237,6 +1253,27 @@ export class ContractMatcher {
           });
         }
         continue;
+      }
+
+      // got: suppress all violations when 'got' is not imported in the file.
+      // Zod's schema.extend() method (and any other package's .extend() method) collide
+      // with got.extend() detection because the ThrowingFunctionDetector matches .extend()
+      // by method name without verifying the receiver's import. In botpress all 22 got
+      // violations were Zod calls — no `got` import anywhere in those files.
+      // Fix: check that the file actually imports from "got" or "got/<subpath>" before
+      // firing any got contract violation.
+      // Evidence: concern-20260421-got-zod-extend-collision (22 FPs in botpress/botpress).
+      if (detection.packageName === "got") {
+        const hasGotImport = sourceFile.statements.some(
+          (stmt) =>
+            ts.isImportDeclaration(stmt) &&
+            ts.isStringLiteral(stmt.moduleSpecifier) &&
+            (stmt.moduleSpecifier.text === "got" ||
+              stmt.moduleSpecifier.text.startsWith("got/")),
+        );
+        if (!hasGotImport) {
+          continue; // got is not imported in this file — .extend() is from another package (e.g., Zod)
+        }
       }
 
       // Special-case: Clerk middleware postconditions require file-system inspection,

@@ -5,14 +5,14 @@
  * corpus/packages/fastify/fixtures/ground-truth.ts becomes one test case.
  *
  * Postcondition IDs from corpus/packages/fastify/contract.yaml:
- *   route-handler-async-error     (app.get/post/put/delete/patch)
+ *   route-handler-async-error     REMOVED (Fastify 5 always catches async handler errors internally)
  *   listen-port-in-use            (app.listen())
  *   close-hook-error              (app.close())
  *   ready-plugin-timeout          (app.ready())
  *   after-error-parameter-unchecked (app.after())
  *
  * Key behaviors under test:
- *   - app.get(async without try-catch)       → SHOULD_FIRE: route-handler-async-error
+ *   - app.get(async without try-catch)       → SHOULD_NOT_FIRE: route-handler-async-error removed
  *   - app.get(async with try-catch)          → SHOULD_NOT_FIRE
  *   - app.listen() without try-catch         → SHOULD_FIRE: listen-port-in-use
  *   - app.listen() with try-catch            → SHOULD_NOT_FIRE
