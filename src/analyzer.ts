@@ -65,16 +65,96 @@ export class Analyzer {
     this.awaitPatternToPackage = new Map();
     this.buildDetectionMaps();
 
-    // Create TypeScript program
-    const configFile = ts.readConfigFile(config.tsconfigPath, ts.sys.readFile);
-    const parsedConfig = ts.parseJsonConfigFileContent(
-      configFile.config,
-      ts.sys,
-      path.dirname(config.tsconfigPath),
-    );
-
     // Store project root for file system operations
     this.projectRoot = path.dirname(config.tsconfigPath);
+
+    // Create TypeScript program with graceful error handling
+    // (concern-20260421-graceful-error-handling-1)
+    //
+    // Common failure modes from bulk scan of 6,974 repos:
+    //   - 344 repos: tsconfig `extends` an npm package not installed (e.g. @tsconfig/node20)
+    //   - 253 repos: tsconfig `extends` a relative path that doesn't exist
+    //   - 26 repos: files listed in tsconfig `include` don't exist on disk
+    //   - 8 repos: OOM on huge monorepos with thousands of TS files
+    //   - 3 repos: malformed JSON with comments (JSON5-style)
+    //
+    // Strategy: parse tsconfig as tolerantly as possible, warn instead of throwing,
+    // and skip missing files rather than aborting the entire scan.
+
+    let configFile: ReturnType<typeof ts.readConfigFile>;
+    try {
+      configFile = ts.readConfigFile(config.tsconfigPath, ts.sys.readFile);
+    } catch (readErr: unknown) {
+      // Malformed JSON (e.g. JSON5 with comments) — emit a clear diagnostic and rethrow
+      // so the CLI can print a friendly message rather than a raw stack trace.
+      throw new Error(
+        `Cannot read tsconfig.json at ${config.tsconfigPath}: ` +
+        `${readErr instanceof Error ? readErr.message : String(readErr)}.\n` +
+        `Tip: tsconfig.json must be valid JSON (no comments or trailing commas).`
+      );
+    }
+
+    if (configFile.error) {
+      // ts.readConfigFile sets .error for missing files or JSON parse failures.
+      const msg = ts.flattenDiagnosticMessageText(configFile.error.messageText, "\n");
+      throw new Error(
+        `Cannot parse tsconfig.json at ${config.tsconfigPath}: ${msg}.\n` +
+        `Tip: if tsconfig.json uses JSON5 syntax (comments/trailing commas), remove them.`
+      );
+    }
+
+    // parseJsonConfigFileContent resolves `extends` chains. When the extended config
+    // lives in an npm package that isn't installed the TypeScript API records an error
+    // diagnostic but still returns a usable partial config. We log a warning and
+    // continue rather than aborting — the base compiler options are usually irrelevant
+    // for AST-level contract scanning.
+    let parsedConfig: ts.ParsedCommandLine;
+    try {
+      parsedConfig = ts.parseJsonConfigFileContent(
+        configFile.config,
+        ts.sys,
+        path.dirname(config.tsconfigPath),
+      );
+    } catch (parseErr: unknown) {
+      throw new Error(
+        `Failed to parse tsconfig.json at ${config.tsconfigPath}: ` +
+        `${parseErr instanceof Error ? parseErr.message : String(parseErr)}`
+      );
+    }
+
+    // Warn about tsconfig errors (e.g. unresolvable `extends`) but don't abort.
+    // These are usually missing devDependencies (@tsconfig/* packages) — the file
+    // list and compiler options are still usable for scanning purposes.
+    if (parsedConfig.errors && parsedConfig.errors.length > 0) {
+      const extendsErrors = parsedConfig.errors.filter(
+        (e) => e.code === 6053 || e.code === 18003 || e.code === 5083
+      );
+      if (extendsErrors.length > 0) {
+        // Silently ignore unresolvable extends — the scanner doesn't need type resolution
+        // for its AST-level checks. Common in repos that install @tsconfig/* at runtime.
+      } else if (parsedConfig.errors.length > 0) {
+        // Other tsconfig errors — warn but continue
+        const firstMsg = ts.flattenDiagnosticMessageText(parsedConfig.errors[0].messageText, "\n");
+        process.stderr.write(
+          `nark: warning: tsconfig parse issue (continuing anyway): ${firstMsg}\n`
+        );
+      }
+    }
+
+    // OOM guard: warn and skip if the resolved file list is enormous (> 5000 files).
+    // Bulk scan found 8 repos where Node ran out of memory on huge monorepos.
+    const OOM_FILE_LIMIT = 5000;
+    if (parsedConfig.fileNames.length > OOM_FILE_LIMIT) {
+      process.stderr.write(
+        `nark: warning: tsconfig resolves to ${parsedConfig.fileNames.length} files — ` +
+        `this exceeds the ${OOM_FILE_LIMIT}-file limit.\n` +
+        `Consider narrowing the "include" globs in tsconfig.json or passing a more specific tsconfig.\n`
+      );
+      throw new Error(
+        `tsconfig at ${config.tsconfigPath} resolves to ${parsedConfig.fileNames.length} files ` +
+        `(limit: ${OOM_FILE_LIMIT}). Narrow the include globs or use a more specific tsconfig.`
+      );
+    }
 
     try {
       this.program = ts.createProgram({
@@ -87,14 +167,41 @@ export class Analyzer {
       );
     }
 
+    // File-not-found diagnostics: previously a hard crash (exit 2). Now we warn and
+    // continue scanning whatever files are available. This recovers 26 repos from the
+    // bulk scan where some files referenced in tsconfig.include didn't exist on disk.
     const fileNotFoundDiagnostics = ts
       .getPreEmitDiagnostics(this.program)
       .filter((d) => d.code === 6053);
     if (fileNotFoundDiagnostics.length > 0) {
-      const messages = fileNotFoundDiagnostics
+      const fileList = fileNotFoundDiagnostics
         .map((d) => ts.flattenDiagnosticMessageText(d.messageText, "\n"))
-        .join("\n");
-      throw new Error(`TypeScript file-not-found errors:\n${messages}`);
+        .slice(0, 5) // cap to first 5 so we don't flood stderr
+        .join("\n  ");
+      const extra = fileNotFoundDiagnostics.length > 5
+        ? `\n  ... and ${fileNotFoundDiagnostics.length - 5} more` : "";
+      process.stderr.write(
+        `nark: warning: ${fileNotFoundDiagnostics.length} file(s) listed in tsconfig not found ` +
+        `(scanning remaining files):\n  ${fileList}${extra}\n`
+      );
+      // Rebuild program without the missing files
+      const missingFiles = new Set(
+        fileNotFoundDiagnostics
+          .map((d) => d.file?.fileName)
+          .filter((f): f is string => f !== undefined)
+      );
+      const availableFiles = parsedConfig.fileNames.filter((f) => !missingFiles.has(f));
+      try {
+        this.program = ts.createProgram({
+          rootNames: availableFiles,
+          options: parsedConfig.options,
+        });
+      } catch (rebuildErr: unknown) {
+        throw new Error(
+          `Failed to create TypeScript program after skipping missing files: ` +
+          `${rebuildErr instanceof Error ? rebuildErr.message : String(rebuildErr)}`
+        );
+      }
     }
 
     // Initialize type checker for type-aware detection
