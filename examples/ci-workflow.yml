@@ -1,0 +1,58 @@
+# Example: GitHub Actions CI with nark
+#
+# Copy this file to your repo at .github/workflows/ci.yml
+# This runs four quality gates on every push and pull request:
+#   1. Type check   — catches type errors (tsc)
+#   2. Lint         — catches style issues (eslint)
+#   3. Test         — catches regressions (vitest/jest)
+#   4. Error handling — catches unhandled errors in library usage (nark)
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  quality-gates:
+    name: Quality Gates
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Gate 1: Type check
+      # Catches type errors without emitting files.
+      - name: Type check
+        run: npx tsc --noEmit
+
+      # Gate 2: Lint
+      # Catches style violations and common mistakes.
+      - name: Lint
+        run: npx eslint .
+
+      # Gate 3: Tests
+      # Catches regressions. Replace with your test runner if different.
+      - name: Test
+        run: npx vitest run
+        # Alternative runners:
+        #   run: npm test
+        #   run: npx jest --ci
+
+      # Gate 4: Error handling check
+      # Scans your code for unhandled errors in 165+ npm packages.
+      # Fails if any violations are found at the "error" severity level.
+      - name: Check error handling (nark)
+        run: npx nark

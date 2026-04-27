@@ -1,0 +1,79 @@
+# Example: GitHub Actions CI with nark + SARIF (Code Scanning annotations)
+#
+# Copy this file to your repo at .github/workflows/ci.yml
+#
+# This is the advanced setup. In addition to the four quality gates,
+# it uploads nark results as SARIF so violations appear as inline
+# annotations on pull requests via GitHub Code Scanning.
+#
+# Requirements:
+#   - GitHub Advanced Security must be enabled on the repo
+#     (free for public repos, paid feature for private repos)
+#   - The workflow needs `security-events: write` permission
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# Required for uploading SARIF to GitHub Code Scanning.
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  quality-gates:
+    name: Quality Gates
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Gate 1: Type check
+      - name: Type check
+        run: npx tsc --noEmit
+
+      # Gate 2: Lint
+      - name: Lint
+        run: npx eslint .
+
+      # Gate 3: Tests
+      - name: Test
+        run: npx vitest run
+
+      # Gate 4: Error handling check (with SARIF output)
+      #
+      # --sarif-output writes results in SARIF format, the standard for
+      # static analysis tools. GitHub Code Scanning reads this file and
+      # shows violations as inline annotations on the pull request diff.
+      #
+      # We use `|| true` so the step always succeeds — the SARIF upload
+      # step handles surfacing the results. Remove `|| true` if you want
+      # nark violations to block the build.
+      - name: Check error handling (nark)
+        run: npx nark --sarif-output results.sarif || true
+
+      # Upload SARIF to GitHub Code Scanning.
+      # Violations appear as annotations on the PR Files Changed tab.
+      # Results are also visible under Security > Code scanning alerts.
+      - name: Upload SARIF results
+        if: always()
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: results.sarif
+          # Optional: use a category to distinguish nark results from
+          # other SARIF-producing tools (e.g., CodeQL, Semgrep).
+          category: nark
