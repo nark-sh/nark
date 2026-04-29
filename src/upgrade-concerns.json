@@ -48294,7 +48294,7 @@
     "source": "dashboard-feedback",
     "package": "undici",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "response-json-parse-error postcondition fires on 64 instances across 36 files; all marked FALSE_POSITIVE by users. Postcondition is likely too broad — fires on fetch calls that already handle errors via framework-level error boundaries or callers that catch errors upstream.",
     "evidence": {
       "repos": [
@@ -48310,7 +48310,7 @@
       "fix_target": "contract",
       "postcondition_id": "response-json-parse-error"
     },
-    "resolution": null
+    "resolution": "Rejected: suppression already implemented in commit 59e4c12 (2026-04-29). undici response-json-parse-error is suppressed for .tsx, /app/, /components/, /utils/, /hooks/ paths. These 64 FP instances are from April 6 scans predating the fix."
   },
   {
     "id": "concern-2026-04-29-react-hook-form-2",
@@ -48318,7 +48318,7 @@
     "source": "dashboard-feedback",
     "package": "react-hook-form",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "async-submit-unhandled-error fires on 30 instances across 15 form components; all FALSE_POSITIVE. React Hook Form onSubmit handlers often have framework-level error boundaries above them — postcondition may be firing on submit handlers that are legitimately unprotected at the component level but caught by the framework.",
     "evidence": {
       "repos": [
@@ -48334,7 +48334,7 @@
       "fix_target": "contract",
       "postcondition_id": "async-submit-unhandled-error"
     },
-    "resolution": null
+    "resolution": "Rejected: suppression already implemented in commit 59e4c12 (2026-04-29). async-submit-unhandled-error is suppressed when file contains setError/toast/console.error patterns. These 30 FP instances from April 6 were confirmed already-suppressed by previous processing run."
   },
   {
     "id": "concern-2026-04-29-tanstack-react-query-3",
@@ -48342,7 +48342,7 @@
     "source": "dashboard-feedback",
     "package": "@tanstack/react-query",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "query-error-unhandled fires on 25 instances across 21 files; all FALSE_POSITIVE. TanStack Query has built-in error state via the query result object — postcondition may not recognize the error: queryResult.error pattern as valid error handling, or may not recognize useQuery's onError callback.",
     "evidence": {
       "repos": [
@@ -48358,7 +48358,7 @@
       "fix_target": "contract",
       "postcondition_id": "query-error-unhandled"
     },
-    "resolution": null
+    "resolution": "Rejected: suppression already implemented in commit 59e4c12 (2026-04-29). query-error-unhandled suppressed for useXxx hook files and files containing isError/onError patterns. 25 FP instances confirmed already-suppressed."
   },
   {
     "id": "concern-2026-04-29-ai-4",
@@ -48366,7 +48366,7 @@
     "source": "dashboard-feedback",
     "package": "ai",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "tool-execution-error fires on 25 tool implementations across 25 files; all FALSE_POSITIVE. AI SDK tool execute() functions may have implicit error handling via the SDK's tool execution wrapper — the postcondition may not recognize that the SDK catches errors from tool execute() calls and converts them to tool result errors automatically.",
     "evidence": {
       "repos": [
@@ -48382,7 +48382,7 @@
       "fix_target": "contract",
       "postcondition_id": "tool-execution-error"
     },
-    "resolution": null
+    "resolution": "Rejected: suppression already implemented (commit history). ai tool-execution-error unconditionally suppressed for tool() factory calls and files in /tools?/ directory. 25 FP instances confirmed already-suppressed."
   },
   {
     "id": "concern-2026-04-29-zod-5",
@@ -48390,7 +48390,7 @@
     "source": "dashboard-feedback",
     "package": "zod",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "parse-validation-error fires on 14 Next.js API route files; all FALSE_POSITIVE. Next.js route handlers have global error handling and Zod parse errors are often caught at the route level via try-catch wrapping the entire handler body — postcondition may be detecting parse() calls inside already-protected try blocks.",
     "evidence": {
       "repos": [
@@ -48406,7 +48406,7 @@
       "fix_target": "scanner",
       "postcondition_id": "parse-validation-error"
     },
-    "resolution": null
+    "resolution": "Rejected: suppression already implemented in commit 59e4c12 (2026-04-29). zod parse-validation-error suppressed in Next.js /app/api/ route files. 14 FP instances confirmed already-suppressed."
   },
   {
     "id": "concern-2026-04-29-ai-6",
@@ -48414,7 +48414,7 @@
     "source": "dashboard-feedback",
     "package": "ai",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "api-error-rate-limit fires on 7 instances across 5 files; all FALSE_POSITIVE. Pattern appears to fire when AI SDK calls are made inside functions that handle errors at a higher level — postcondition may not be tracing error handling across function boundaries.",
     "evidence": {
       "repos": [
@@ -48429,7 +48429,7 @@
       "fix_target": "scanner",
       "postcondition_id": "api-error-rate-limit"
     },
-    "resolution": null
+    "resolution": "Rejected: suppression already implemented in commit 59e4c12 (2026-04-29). ai api-error-rate-limit extended to utils/llms/ paths. 7 FP instances confirmed already-suppressed."
   },
   {
     "id": "concern-2026-04-29-clerk-nextjs-7",
@@ -48437,7 +48437,7 @@
     "source": "dashboard-feedback",
     "package": "@clerk/nextjs",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "use-user-no-loaded-check fires on 7 components; all FALSE_POSITIVE. Clerk useUser() in Next.js App Router components wrapped in Clerk's auth() or with Clerk middleware protection — postcondition may not recognize that server-side Clerk auth guarantees user is loaded for protected routes.",
     "evidence": {
       "repos": [
@@ -48453,7 +48453,7 @@
       "fix_target": "contract",
       "postcondition_id": "use-user-no-loaded-check"
     },
-    "resolution": null
+    "resolution": "Rejected: suppression already implemented in commit 59e4c12 (2026-04-29). @clerk/nextjs use-user-no-loaded-check suppressed in /(auth)/ route groups and protected routes. 7 FP instances confirmed already-suppressed."
   },
   {
     "id": "concern-2026-04-29-redis-8",
@@ -48461,7 +48461,7 @@
     "source": "dashboard-feedback",
     "package": "redis",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "missing-error-listener fires 7 times in packages/api/src/main.ts; all FALSE_POSITIVE. Error listener may be registered via a wrapper or after initialization in a different file — scanner may not be tracing .on(\"error\") registration across module boundaries.",
     "evidence": {
       "repos": [
@@ -48473,7 +48473,7 @@
       "fix_target": "scanner",
       "postcondition_id": "missing-error-listener"
     },
-    "resolution": null
+    "resolution": "Rejected: suppression already implemented in commit 59e4c12 (2026-04-29). redis missing-error-listener suppressed in bootstrap files (main.ts, server.ts, app.ts, index.ts). 7 FP instances confirmed already-suppressed."
   },
   {
     "id": "concern-2026-04-29-react-hook-form-9",
@@ -48481,7 +48481,7 @@
     "source": "dashboard-feedback",
     "package": "react-hook-form",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "missing-form-provider fires on 6 component instances; all FALSE_POSITIVE. FormProvider may be provided via a parent component in a different file — scanner cannot trace component tree hierarchy to verify FormProvider is present in the render tree.",
     "evidence": {
       "repos": [
@@ -48495,7 +48495,7 @@
       "fix_target": "scanner",
       "postcondition_id": "missing-form-provider"
     },
-    "resolution": null
+    "resolution": "Rejected: suppression already implemented in commit 59e4c12 (2026-04-29). missing-form-provider suppressed for useFormContext files and named sub-component suffixes (TextArea, Select, etc.). 6 FP instances confirmed already-suppressed."
   },
   {
     "id": "concern-2026-04-29-express-10",
@@ -48503,7 +48503,7 @@
     "source": "dashboard-feedback",
     "package": "express",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "async-middleware-unhandled-rejection fires 5 times across 2 Express server files; all FALSE_POSITIVE. Server files may register a global express-async-errors handler or use express-async-handler wrapper — postcondition may not recognize these global error handling patterns.",
     "evidence": {
       "repos": [
@@ -48516,7 +48516,7 @@
       "fix_target": "contract",
       "postcondition_id": "async-middleware-unhandled-rejection"
     },
-    "resolution": null
+    "resolution": "Rejected: suppression already implemented in commit 59e4c12 (2026-04-29). express async-middleware-unhandled-rejection suppressed when file contains err param pattern or errorHandler import. 5 FP instances confirmed already-suppressed."
   },
   {
     "id": "concern-2026-04-29-tanstack-react-query-11",
@@ -48524,7 +48524,7 @@
     "source": "dashboard-feedback",
     "package": "@tanstack/react-query",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "infinite-query-error-unhandled fires on 3 infinite query hooks; all FALSE_POSITIVE. Same root cause as query-error-unhandled — TanStack Query infinite queries expose error state via query result object which postcondition does not recognize as valid error handling.",
     "evidence": {
       "repos": [
@@ -48538,7 +48538,7 @@
       "fix_target": "contract",
       "postcondition_id": "infinite-query-error-unhandled"
     },
-    "resolution": null
+    "resolution": "Rejected: same root cause as concern-2026-04-29-tanstack-react-query-3. infinite-query-error-unhandled is suppressed for useXxx hook files. 3 FP instances confirmed already-suppressed."
   },
   {
     "id": "concern-2026-04-29-node-fetch-12",
@@ -48546,7 +48546,7 @@
     "source": "dashboard-feedback",
     "package": "node-fetch",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "fetch-rejects-on-network-error fires on 2 instances; all FALSE_POSITIVE. Fetch calls may be inside functions whose callers handle errors — postcondition likely fires without tracing error handling across function call boundaries.",
     "evidence": {
       "repos": [
@@ -48559,7 +48559,7 @@
       "fix_target": "scanner",
       "postcondition_id": "fetch-rejects-on-network-error"
     },
-    "resolution": null
+    "resolution": "Rejected: insufficient evidence (2 instances, 1 repo). Additionally, node-fetch fetch-rejects-on-network-error may already be addressed by existing context suppression. Insufficient signal to warrant new suppression code."
   },
   {
     "id": "concern-2026-04-29-tanstack-react-query-13",
@@ -48567,7 +48567,7 @@
     "source": "dashboard-feedback",
     "package": "@tanstack/react-query",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "mutation-error-unhandled fires on 2 mutation hooks; all FALSE_POSITIVE. TanStack Query mutations expose error state via mutation result object — postcondition does not recognize useMutation result.error access as valid error handling.",
     "evidence": {
       "repos": [
@@ -48580,7 +48580,7 @@
       "fix_target": "contract",
       "postcondition_id": "mutation-error-unhandled"
     },
-    "resolution": null
+    "resolution": "Rejected: same root cause as concern-2026-04-29-tanstack-react-query-3. mutation-error-unhandled suppressed for useXxx hook files. 2 FP instances confirmed already-suppressed."
   },
   {
     "id": "concern-2026-04-29-vercel-blob-14",
@@ -48588,7 +48588,7 @@
     "source": "dashboard-feedback",
     "package": "@vercel/blob",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "blob-del-no-try-catch fires 2 times in one sandbox file; all FALSE_POSITIVE. del() calls may be inside a function whose caller handles errors, or the file uses a top-level error handler — postcondition may not trace error handling across call boundaries.",
     "evidence": {
       "repos": [
@@ -48600,7 +48600,7 @@
       "fix_target": "scanner",
       "postcondition_id": "blob-del-no-try-catch"
     },
-    "resolution": null
+    "resolution": "Rejected: insufficient evidence (2 instances, 1 repo). @vercel/blob blob-del-no-try-catch with 2 FPs from a single sandbox handler file — insufficient signal to warrant new suppression code."
   },
   {
     "id": "concern-2026-04-29-upstash-redis-15",
@@ -48608,7 +48608,7 @@
     "source": "dashboard-feedback",
     "package": "@upstash/redis",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "network-or-api-error fires once in Redis utility file; marked FALSE_POSITIVE. Redis calls in a utility wrapper likely catch errors at the call site — postcondition may be firing on the wrapper itself rather than the unprotected call.",
     "evidence": {
       "repos": [
@@ -48620,7 +48620,7 @@
       "fix_target": "contract",
       "postcondition_id": "network-or-api-error"
     },
-    "resolution": null
+    "resolution": "Rejected: insufficient evidence (1 instance, 1 repo). @upstash/redis network-or-api-error with 1 FP — insufficient signal per rejection rules (<3 violations)."
   },
   {
     "id": "concern-2026-04-29-puppeteer-16",
@@ -48628,7 +48628,7 @@
     "source": "dashboard-feedback",
     "package": "puppeteer",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "browser-close-must-run fires once in browser executor; marked FALSE_POSITIVE. browser.close() may be called via a finally block or cleanup handler not recognized by the scanner as a guaranteed execution path.",
     "evidence": {
       "repos": [
@@ -48640,7 +48640,7 @@
       "fix_target": "scanner",
       "postcondition_id": "browser-close-must-run"
     },
-    "resolution": null
+    "resolution": "Rejected: insufficient evidence (1 instance, 1 repo). puppeteer browser-close-must-run with 1 FP — insufficient signal per rejection rules (<3 violations)."
   },
   {
     "id": "concern-2026-04-29-supabase-supabase-js-17",
@@ -48648,7 +48648,7 @@
     "source": "dashboard-feedback",
     "package": "@supabase/supabase-js",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "rls-policy-violation fires once in API main; marked FALSE_POSITIVE. Supabase calls in the API server likely use service role key which bypasses RLS — postcondition does not distinguish between anon key (requires RLS) and service role key (bypasses RLS) callers.",
     "evidence": {
       "repos": [
@@ -48660,7 +48660,7 @@
       "fix_target": "contract",
       "postcondition_id": "rls-policy-violation"
     },
-    "resolution": null
+    "resolution": "Rejected: suppression already implemented in contract-matcher.ts. @supabase/supabase-js rls-policy-violation is suppressed for server-side bootstrap files (main.ts, API server files using service role key). 1 FP instance confirmed already-suppressed."
   },
   {
     "id": "concern-2026-04-29-supabase-supabase-js-18",
@@ -48668,7 +48668,7 @@
     "source": "dashboard-feedback",
     "package": "@supabase/supabase-js",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "weak-password fires once in auth context; marked FALSE_POSITIVE. Password validation may be enforced at the UI layer or via Supabase dashboard settings — postcondition may not recognize client-side validation that precedes the signUp() call.",
     "evidence": {
       "repos": [
@@ -48680,7 +48680,7 @@
       "fix_target": "contract",
       "postcondition_id": "weak-password"
     },
-    "resolution": null
+    "resolution": "Rejected: insufficient evidence (1 instance, 1 repo). @supabase/supabase-js weak-password with 1 FP in auth-context — insufficient signal per rejection rules (<3 violations)."
   },
   {
     "id": "concern-2026-04-29-winston-19",
@@ -48688,7 +48688,7 @@
     "source": "dashboard-feedback",
     "package": "winston",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "missing-error-listener fires once in telegram bot setup script; marked FALSE_POSITIVE. Winston transport error listeners may be configured globally or in a shared logger setup module not visible to the scanner.",
     "evidence": {
       "repos": [
@@ -48700,7 +48700,7 @@
       "fix_target": "scanner",
       "postcondition_id": "missing-error-listener"
     },
-    "resolution": null
+    "resolution": "Rejected: insufficient evidence (1 instance, 1 repo). winston missing-error-listener with 1 FP in a telegram bot script — insufficient signal per rejection rules (<3 violations)."
   },
   {
     "id": "concern-2026-04-29-dotenv-20",
@@ -48708,7 +48708,7 @@
     "source": "dashboard-feedback",
     "package": "dotenv",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "missing-env-file fires once in a migrations file; marked FALSE_POSITIVE. Migration scripts run in a controlled environment where .env files are guaranteed to exist — postcondition does not account for controlled execution contexts where missing .env is expected to fail-fast.",
     "evidence": {
       "repos": [
@@ -48720,6 +48720,6 @@
       "fix_target": "contract",
       "postcondition_id": "missing-env-file"
     },
-    "resolution": null
+    "resolution": "Rejected: insufficient evidence (1 instance, 1 repo). dotenv missing-env-file with 1 FP in a migration script — insufficient signal per rejection rules (<3 violations)."
   }
 ]
