@@ -223,9 +223,12 @@ function convertViolation(
     // code_snippet not populated (would need async file read)
   };
 
-  // Pass through fingerprint from v2 analyzer (used by suppression system)
+  // Pass through fingerprint and suppression metadata from v2 analyzer
   if (v2.fingerprint) {
     (v1 as any).fingerprint = v2.fingerprint;
+  }
+  if (v2.suppressionReason) {
+    (v1 as any).suppressionReason = v2.suppressionReason;
   }
 
   return v1;

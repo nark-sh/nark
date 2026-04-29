@@ -952,19 +952,35 @@ async function main(options: any) {
     // Build suppressionDetails: per-suppression signal for corpus quality improvement.
     // High suppress:fix ratios on a postconditionId → likely FP in the profile.
     // Max 100 entries per scan to keep payload size bounded.
-    // concern-20260429-telemetry-suppression-insights
+    // Enriches with human-written reasons from .nark-suppressions.json when available.
     const suppressionDetails = (() => {
       try {
         const suppressed = v2Result?.suppressedViolations ?? [];
+        // Load .nark-suppressions.json to cross-reference human-written reasons
+        let storeSuppressions: Array<{ fingerprint: string; reason: string }> = [];
+        try {
+          const storePath = path.join(options.project, ".nark-suppressions.json");
+          if (fs.existsSync(storePath)) {
+            const storeData = JSON.parse(fs.readFileSync(storePath, "utf-8"));
+            storeSuppressions = storeData.suppressions ?? [];
+          }
+        } catch {
+          // ignore — store read failure should not affect telemetry
+        }
+        const storeByFp = new Map(storeSuppressions.map(s => [s.fingerprint, s.reason]));
+
         return suppressed
           .slice(0, 100)
-          .map((v: any) => ({
-            fingerprint: (v.fingerprint ?? "").substring(0, 16),
-            package: v.package ?? "",
-            postconditionId: v.postconditionId ?? v.contract_id ?? "",
-            reason: v.suppressionReason ?? v.reason ?? undefined,
-            suppressedBy: v.suppressedBy ?? undefined,
-          }))
+          .map((v: any) => {
+            const fp = v.fingerprint ?? "";
+            return {
+              fingerprint: fp.substring(0, 16),
+              package: v.package ?? "",
+              postconditionId: v.postconditionId ?? v.contract_id ?? "",
+              reason: storeByFp.get(fp) ?? v.suppressionReason ?? undefined,
+              suppressedBy: storeByFp.has(fp) ? "suppression-file" : (v.suppressedBy ?? undefined),
+            };
+          })
           .filter((s: any) => s.package && s.postconditionId);
       } catch {
         return undefined;
