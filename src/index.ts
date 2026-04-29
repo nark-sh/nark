@@ -581,8 +581,8 @@ async function main(options: any) {
   writeAuditRecord(finalRecord, outputPath);
   if (verbose) console.log(chalk.gray(`Audit record written to ${outputPath}`));
 
-  // Automatically clean stale suppressions from .bc-suppressions.json
-  const suppressionsStorePath = path.join(options.project, '.bc-suppressions.json');
+  // Automatically clean stale suppressions from .nark-suppressions.json
+  const suppressionsStorePath = path.join(options.project, '.nark-suppressions.json');
   if (fs.existsSync(suppressionsStorePath)) {
     try {
       const store = loadStore(options.project);
@@ -758,6 +758,23 @@ async function main(options: any) {
       : 0;
     const suppressionCount = v2Result?.suppressedViolations?.length ?? 0;
 
+    // Build suppressionDetails: per-suppression signal for corpus quality improvement.
+    // High suppress:fix ratios on a postconditionId → likely FP in the profile.
+    // Max 100 entries per scan to keep payload size bounded.
+    // concern-20260429-telemetry-suppression-insights
+    const suppressionDetails = (() => {
+      try {
+        const suppressed = v2Result?.suppressedViolations ?? [];
+        return suppressed.slice(0, 100).map((v: any) => ({
+          fingerprint: (v.fingerprint ?? '').substring(0, 16),
+          package: v.package ?? '',
+          postconditionId: v.postconditionId ?? v.contract_id ?? '',
+          reason: v.suppressionReason ?? v.reason ?? undefined,
+          suppressedBy: v.suppressedBy ?? undefined,
+        })).filter((s: any) => s.package && s.postconditionId);
+      } catch { return undefined; }
+    })();
+
     // Compute exit code (mirrors logic below)
     const telemetryExitCode = (() => {
       if (options.reportOnly) return 0;
@@ -786,6 +803,8 @@ async function main(options: any) {
       suppressionCount,
       scanMode: 'full',
       exitCode: telemetryExitCode,
+      // concern-20260429-telemetry-suppression-insights: per-suppression signal
+      ...(suppressionDetails && suppressionDetails.length > 0 ? { suppressionDetails } : {}),
     };
 
     const token = getToken();

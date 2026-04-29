@@ -340,6 +340,105 @@ export class ControlFlowAnalysis implements IControlFlowAnalyzer {
   }
 
   /**
+   * Checks if a node (e.g. a .json() call) is inside an if-block that guards on
+   * response.ok or response.status, which is the idiomatic fetch/undici pattern.
+   *
+   * Recognizes patterns like:
+   *   if (res.ok) { ... res.json() ... }
+   *   if (res.status === 200) { ... res.json() ... }
+   *   if (response.ok) { ... await response.json() ... }
+   *
+   * This is distinct from the axios pattern where status is checked INSIDE the catch block.
+   * For fetch/undici, checking response.ok BEFORE calling .json() is the correct idiom
+   * and satisfies the response-json-parse-error postcondition.
+   *
+   * Evidence: concern-20260429-undici-generic-error-handling-false-positive —
+   * nark's own auth.ts checks res.status === 200 before res.json() but the analyzer
+   * flagged it as "Generic error handling" because it looks inside the catch block,
+   * not at the pre-call guard.
+   */
+  public isNodeInsideResponseOkGuard(node: ts.Node): boolean {
+    let current: ts.Node | undefined = node.parent;
+
+    while (current) {
+      // Check if we're inside an IfStatement's then-block
+      if (ts.isBlock(current) && current.parent && ts.isIfStatement(current.parent)) {
+        const ifStmt = current.parent as ts.IfStatement;
+        // Is this block the then-block (not else)?
+        if (ifStmt.thenStatement === current || ifStmt.thenStatement === node) {
+          if (this.expressionIsResponseOkGuard(ifStmt.expression)) {
+            return true;
+          }
+        }
+      }
+
+      // Also check direct then-block (when the if body is not wrapped in {})
+      if (ts.isIfStatement(current)) {
+        if (this.expressionIsResponseOkGuard(current.expression)) {
+          return true;
+        }
+      }
+
+      current = current.parent;
+    }
+
+    return false;
+  }
+
+  /**
+   * Check if an expression is a response.ok or response.status guard.
+   * Matches: res.ok, response.ok, res.status === 200, res.status < 400, !res.ok is NOT a guard
+   */
+  private expressionIsResponseOkGuard(expr: ts.Expression): boolean {
+    // Direct: res.ok, response.ok
+    if (ts.isPropertyAccessExpression(expr)) {
+      if (expr.name.text === 'ok') {
+        return true; // res.ok
+      }
+      if (expr.name.text === 'status') {
+        return true; // bare res.status as condition (e.g. if (res.status))
+      }
+    }
+
+    // Binary: res.status === 200, res.ok === true, res.status < 400, res.status >= 200
+    if (ts.isBinaryExpression(expr)) {
+      const op = expr.operatorToken.kind;
+      const isComparisonOp = (
+        op === ts.SyntaxKind.EqualsEqualsEqualsToken ||
+        op === ts.SyntaxKind.EqualsEqualsToken ||
+        op === ts.SyntaxKind.LessThanToken ||
+        op === ts.SyntaxKind.LessThanEqualsToken ||
+        op === ts.SyntaxKind.GreaterThanToken ||
+        op === ts.SyntaxKind.GreaterThanEqualsToken
+      );
+      if (isComparisonOp) {
+        const left = expr.left;
+        const right = expr.right;
+        // res.status === 200 or 200 === res.status
+        if (ts.isPropertyAccessExpression(left) && (left.name.text === 'status' || left.name.text === 'ok')) {
+          return true;
+        }
+        if (ts.isPropertyAccessExpression(right) && (right.name.text === 'status' || right.name.text === 'ok')) {
+          return true;
+        }
+      }
+
+      // && combination: res.ok && res.status === 200 (any part is a guard)
+      if (op === ts.SyntaxKind.AmpersandAmpersandToken) {
+        return this.expressionIsResponseOkGuard(expr.left as ts.Expression) ||
+               this.expressionIsResponseOkGuard(expr.right as ts.Expression);
+      }
+    }
+
+    // Parenthesized
+    if (ts.isParenthesizedExpression(expr)) {
+      return this.expressionIsResponseOkGuard(expr.expression);
+    }
+
+    return false;
+  }
+
+  /**
    * Checks if the result of a call node is null-guarded in the containing function scope.
    *
    * Returns true if:

@@ -189,6 +189,12 @@ export interface ControlFlowAnalyzer {
 
   /** Check if a node is in a conditional branch */
   isInConditional(node: ts.Node): boolean;
+
+  /**
+   * Check if a node is inside an if-block guarded by response.ok or response.status.
+   * Recognizes the idiomatic fetch/undici pattern where status is checked BEFORE .json().
+   */
+  isNodeInsideResponseOkGuard(node: ts.Node): boolean;
 }
 
 // ============================================================================

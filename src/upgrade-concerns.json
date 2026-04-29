@@ -47892,7 +47892,7 @@
     "source": "bulk-scan-audit",
     "package": "@tanstack/react-query",
     "type": "false_positive",
-    "status": "pending",
+    "status": "implemented",
     "description": "invalidateQueries triggers a background refetch by design. Silent failure is expected React Query behavior, not a bug. In bulk scan: 288 in lightdash, 150 in vendure, 51 in openstatus, 23 in nango. Fix: downgrade to info severity or remove invalidatequeries-silent-refetch-failure clause.",
     "evidence": {
       "repos": [
@@ -47904,7 +47904,8 @@
       "scan_file": "output/20260420-corpus-bulk/",
       "violation_count": 512,
       "fix_target": "contract"
-    }
+    },
+    "implementedAt": "2026-04-29T00:00:00.000Z"
   },
   {
     "id": "concern-20260421-migration-file-noise",
@@ -47912,7 +47913,7 @@
     "source": "bulk-scan-audit",
     "package": "knex",
     "type": "false_positive",
-    "status": "pending",
+    "status": "implemented",
     "description": "Database migration files (up()/down() methods) run within the migration runner error handling context. Flagging every queryRunner.query() or knex.raw() in migrations is noise. In bulk scan: 6599 FPs in activepieces (TypeORM), 107 in nango (knex), 153 in lightdash (knex). Fix: detect migration file patterns (db/migrations/, **/migrations/*.ts) and suppress or downgrade violations.",
     "evidence": {
       "repos": [
@@ -47923,6 +47924,123 @@
       "scan_file": "output/20260420-corpus-bulk/",
       "violation_count": 6859,
       "fix_target": "analyzer"
-    }
+    },
+    "implementedAt": "2026-04-29T00:00:00.000Z"
+  },
+  {
+    "id": "concern-20260429-undici-generic-error-handling-false-positive",
+    "created_at": "2026-04-29",
+    "source": "self-scan",
+    "package": "undici",
+    "type": "false_positive",
+    "status": "implemented",
+    "description": "The undici contract concern `response-json-parse-error` flags `res.json()` as \"Generic error handling found\" even when the code has BOTH required layers: (1) an explicit `res.status === 200` or `res.ok` guard before calling `.json()`, and (2) a try-catch around `.json()` with specific `SyntaxError` inspection. The analyzer's control-flow checker sees the catch block but classifies it as \"generic\" because it does not detect `error.response.status` inspection inside the catch. However, for fetch/undici, the idiomatic pattern is to check `response.ok` or `response.status` BEFORE calling `.json()` (not inside the catch), and then catch JSON parse errors separately. The analyzer should recognize this two-layer pattern as compliant: status-guard-before-json + typed-catch-after-json. Currently it only recognizes the axios-style pattern where error inspection happens inside the catch block. This was discovered scanning nark's own codebase (`src/cli/auth.ts:76`) where the auth polling loop checks `res.status === 200` before `res.json()` and wraps the parse in `try { res.json() } catch (jsonErr) { if (jsonErr instanceof SyntaxError) ... }`. The violation was suppressed as a false positive.",
+    "evidence": {
+      "repos": [
+        "nark-sh/nark"
+      ],
+      "scan_file": ".nark/runs/2026042917412-53dcd7c/audit.json",
+      "violation_count": 1,
+      "fix_target": "analyzer",
+      "details": {
+        "file": "src/cli/auth.ts",
+        "line": 76,
+        "concern_id": "response-json-parse-error",
+        "contract_package": "undici",
+        "current_behavior": "Flags as WARNING with message: Generic error handling found. Consider inspecting error.response.status to distinguish between 4xx client errors and 5xx server errors.",
+        "expected_behavior": "Should recognize res.ok/res.status guard before .json() call as compliant. The status-before-json pattern is the correct fetch/undici idiom, unlike axios where status is inspected inside the catch.",
+        "pattern_to_recognize": "if (res.ok) { try { await res.json() } catch (e) { ... } } OR if (res.status === 200) { try { await res.json() } catch (e) { ... } }",
+        "root_cause": "control-flow-analyzer classifies any catch block without error.response.status inspection as generic. It does not consider that the status was already checked in a parent if-condition before the .json() call site.",
+        "suppression_fingerprint": "c9efc51aff549bf4baa8aeb784e1f1b0",
+        "also_fixed": "V2-to-V1 adapter (src/v2/adapter.ts) was not passing fingerprint field through convertViolation(), causing all V2 violations to have fingerprint:null in scan JSON output. Fixed by forwarding v2.fingerprint to the V1 violation object."
+      }
+    },
+    "implementedAt": "2026-04-29T00:00:00.000Z"
+  },
+  {
+    "id": "concern-20260429-v2-adapter-fingerprint-passthrough",
+    "created_at": "2026-04-29",
+    "source": "self-scan",
+    "package": "_scanner",
+    "type": "bug_fix",
+    "status": "implemented",
+    "description": "The V2-to-V1 adapter in src/v2/adapter.ts was dropping the fingerprint field when converting V2 violations to V1 format. The V2 analyzer (contract-matcher.ts) computes fingerprints via computeViolationFingerprint() and stores them on each violation, but convertViolation() did not include the field in the returned V1 object. This caused all violations in .nark/scans/*.json to have fingerprint:null, which broke the suppression system (suppressions are keyed by fingerprint). The scan-writer had a fallback that recomputes fingerprints, but it mutated violation objects AFTER the scan JSON was already written. Fixed by forwarding v2.fingerprint through the adapter as (v1 as any).fingerprint = v2.fingerprint.",
+    "evidence": {
+      "repos": [
+        "nark-sh/nark"
+      ],
+      "scan_file": ".nark/scans/latest",
+      "violation_count": 0,
+      "fix_target": "scanner",
+      "details": {
+        "file": "src/v2/adapter.ts",
+        "function": "convertViolation",
+        "line": 206,
+        "impact": "All V2-generated violations had fingerprint:null in scan JSON, breaking suppressions add/verify workflow",
+        "fix_applied": "Added fingerprint passthrough: if (v2.fingerprint) { (v1 as any).fingerprint = v2.fingerprint; }",
+        "note": "V1 Violation interface in types.ts does not have a fingerprint field. The field is carried as an ad-hoc property. A proper fix would add fingerprint to the V1 Violation interface, but that is a broader change."
+      }
+    },
+    "resolution": "Fixed in src/v2/adapter.ts convertViolation() — fingerprint now passed through from V2 to V1 violation objects."
+  },
+  {
+    "id": "concern-20260429-telemetry-suppression-insights",
+    "created_at": "2026-04-29",
+    "source": "product-strategy",
+    "package": "_scanner",
+    "type": "new_feature",
+    "status": "implemented",
+    "description": "Extend telemetry to send suppression details and fix-vs-suppress resolution data. Currently telemetry sends suppressionCount (a number) but not WHY violations were suppressed. Adding suppression reasons, per-contract-clause fix/suppress ratios, and nark-fix agent resolution data would crowdsource false-positive detection from thousands of users. High suppress rates on a specific contract clause = likely FP or overly strict rule. Agent reasons explain WHY. This data feeds directly back into profile quality improvements. Three additions: (1) Include suppression details in scan telemetry — for each suppressed violation send { fingerprint, package, postconditionId, reason, suppressedBy }. (2) Add fix-vs-suppress ratio per contract clause — when a violation is resolved (code fix or suppression), track which path was taken. High suppress:fix ratio on a clause signals a profile quality issue. (3) Add nark-fix agent telemetry endpoint — when nark-fix resolves a violation, send { violationId, resolution: fixed|suppressed|skipped, agentReason: string, codeChangeSize: number }. This is the richest signal — the AI agent has already analyzed the code and determined whether the violation is real. Privacy: suppression reasons are about Nark profiles, not user code. Code snippets are already sent for authenticated users. Frame as: help improve Nark profiles — suppression reasons are sent anonymously to reduce false positives. Respect existing NARK_TELEMETRY=off and DO_NOT_TRACK=1 opt-outs.",
+    "evidence": {
+      "repos": [],
+      "scan_file": "",
+      "violation_count": 0,
+      "fix_target": "scanner",
+      "details": {
+        "current_telemetry_fields": [
+          "version",
+          "os",
+          "arch",
+          "nodeVersion",
+          "packageNames",
+          "contractIds",
+          "violationCountsByContract",
+          "scanDurationMs",
+          "isCiMode",
+          "repoFingerprint",
+          "deviceId",
+          "fileCount",
+          "totalCallSites",
+          "corpusVersion",
+          "suppressionCount",
+          "scanMode",
+          "exitCode"
+        ],
+        "enriched_telemetry_fields": [
+          "repoName",
+          "repoUrl",
+          "gitAuthor",
+          "branch",
+          "commitSha",
+          "ciProvider",
+          "codeSnippets"
+        ],
+        "proposed_new_fields": {
+          "suppressionDetails": "Array<{ fingerprint, package, postconditionId, reason, suppressedBy }>",
+          "resolutionsByClause": "Record<string, { fixed: number, suppressed: number, skipped: number }>",
+          "agentResolutions": "Array<{ fingerprint, resolution, agentReason, codeChangeLines }>"
+        },
+        "files_to_modify": [
+          "src/cli/telemetry.ts",
+          "src/index.ts"
+        ],
+        "saas_files_to_modify": [
+          "apps/api/src/routes/telemetry.ts",
+          "packages/database/prisma/schema.prisma"
+        ],
+        "privacy_note": "Suppression reasons describe Nark profile behavior, not user business logic. Same opt-out mechanisms apply (NARK_TELEMETRY=off, DO_NOT_TRACK=1)."
+      }
+    },
+    "implementedAt": "2026-04-29T00:00:00.000Z"
   }
 ]

@@ -128,10 +128,23 @@ export class UniversalAnalyzer {
             `Falling back to default compiler options. Scanning ${fallbackParsed.fileNames.length} files.\n`
           );
         }
-        this.program = ts.createProgram({
-          rootNames: fallbackParsed.fileNames,
-          options: fallbackParsed.options,
-        });
+        try {
+          this.program = ts.createProgram({
+            rootNames: fallbackParsed.fileNames,
+            options: fallbackParsed.options,
+          });
+        } catch (error: unknown) {
+          throw new Error(`Failed to create TypeScript program (fallback): ${error instanceof Error ? error.message : String(error)}`);
+        }
+
+        const fallbackDiagnostics = ts.getPreEmitDiagnostics(this.program)
+          .filter(d => d.code === 6053);
+        if (fallbackDiagnostics.length > 0 && typeof process !== 'undefined' && process.stderr) {
+          process.stderr.write(
+            `Warning: ${fallbackDiagnostics.length} file(s) listed in tsconfig not found on disk (codegen or missing build output). ` +
+            `Skipping missing files and scanning ${this.program.getSourceFiles().length} available files.\n`
+          );
+        }
         return;
       }
 
@@ -293,6 +306,19 @@ export class UniversalAnalyzer {
         violations = this.contractMatcher.matchDetections(detections, sourceFile);
       }
 
+      // Suppress violations in database migration files.
+      // Migration files run inside a managed migration-runner context (knex, TypeORM, Prisma)
+      // that provides its own error handling and rollback. Raw DB calls in up()/down() methods
+      // are not unprotected — they are protected by the runner's try-catch.
+      // Evidence: concern-20260421-migration-file-noise — 6859 FPs across activepieces/nango/lightdash.
+      if (this.isMigrationFile(sourceFile.fileName)) {
+        violations = violations.map(v => ({
+          ...v,
+          suppressed: true,
+          suppressionReason: 'migration-file: database migration runner provides error handling context',
+        }));
+      }
+
       const duration = Date.now() - startTime;
 
       return {
@@ -448,6 +474,39 @@ export class UniversalAnalyzer {
       '.e2e-spec.js',
     ];
     return testPatterns.some((pattern) => filePath.includes(pattern));
+  }
+
+  /**
+   * Check if a file is a database migration file.
+   *
+   * Migration files run inside a managed migration-runner context that provides
+   * its own error handling, retries, and rollback. Flagging every raw query call
+   * inside up()/down() migration methods generates ~6859 false positives across
+   * bulk-scanned repos (activepieces, nango, lightdash).
+   *
+   * Evidence: concern-20260421-migration-file-noise — 6599 FPs in activepieces
+   * (TypeORM), 107 in nango (knex), 153 in lightdash (knex).
+   */
+  private isMigrationFile(filePath: string): boolean {
+    const migrationPatterns = [
+      '/migrations/',
+      '/migration/',
+      '/db/migrations/',
+      '/database/migrations/',
+      '/src/migrations/',
+      '/src/migration/',
+    ];
+    // Also catch TypeORM-style 1234567890-MigrationName.ts files at common paths
+    const migrationFilePatterns = [
+      /\/migrations\/\d{13}-\w+\.(ts|js)$/,  // TypeORM timestamp format: 1609459200000-CreateUser.ts
+      /\/migration\/\d{13}-\w+\.(ts|js)$/,
+      /\/migrations\/\d+_\w+\.(ts|js)$/,      // knex/sequelize format: 001_create_users.ts
+      /\/migration\/\d+_\w+\.(ts|js)$/,
+    ];
+    return (
+      migrationPatterns.some((pattern) => filePath.includes(pattern)) ||
+      migrationFilePatterns.some((pattern) => pattern.test(filePath))
+    );
   }
 
   /**

@@ -2226,6 +2226,23 @@ export class ContractMatcher {
         }
       } else if (pc.severity === "error") {
         if (isHttpClient && !checksStatus) {
+          // For undici/fetch response-json-parse-error: the idiomatic pattern is to check
+          // response.ok or response.status BEFORE calling .json() (not inside the catch block).
+          // If the detection node is inside an if (res.ok) or if (res.status === 200) guard,
+          // the postcondition is satisfied — the status was checked before the .json() call.
+          // This differs from the axios pattern where status is checked inside catch.
+          //
+          // Evidence: concern-20260429-undici-generic-error-handling-false-positive —
+          // nark's own auth.ts has: if (res.status === 200) { try { await res.json() } catch (e) {...} }
+          // The outer status guard satisfies response-json-parse-error but the analyzer only
+          // checked inside the catch block.
+          if (
+            (pkg === "undici" || pkg === "node-fetch" || pkg === "got" || pkg === "ky") &&
+            pc.id === "response-json-parse-error" &&
+            this.controlFlow.isNodeInsideResponseOkGuard(detection.node)
+          ) {
+            continue; // Status was checked before .json() — fetch idiom satisfied
+          }
           matchedPostcondition = pc;
           message =
             "Generic error handling found. Consider inspecting error.response.status to distinguish between 4xx client errors and 5xx server errors.";

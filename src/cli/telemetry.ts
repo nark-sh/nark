@@ -24,6 +24,25 @@ export interface TelemetryConfig {
   deviceId?: string;
 }
 
+/**
+ * Per-suppression detail sent in telemetry (opt-in, never-throw).
+ * Describes WHY a violation was suppressed — this data feeds back into
+ * corpus quality improvements: high suppress rates on a clause → likely FP.
+ * Privacy: suppression reasons describe Nark profile behavior, not user code.
+ */
+export interface SuppressionDetail {
+  /** Short fingerprint to deduplicate across scans (first 16 hex chars) */
+  fingerprint: string;
+  /** Package name, e.g. "axios" */
+  package: string;
+  /** Postcondition ID, e.g. "error-4xx-5xx" */
+  postconditionId: string;
+  /** Human-readable reason (from .nark-suppressions.json or inline comment) */
+  reason?: string;
+  /** How the suppression was created */
+  suppressedBy?: string;
+}
+
 export interface TelemetryPayload {
   version: string;
   os: string;
@@ -42,6 +61,13 @@ export interface TelemetryPayload {
   suppressionCount?: number;
   scanMode?: string;
   exitCode?: number;
+  /**
+   * Per-suppression details — crowdsources FP signal from users.
+   * High suppress rates on a clause → likely FP or overly strict profile.
+   * Respect NARK_TELEMETRY=off and DO_NOT_TRACK=1 opt-outs (checked in fireTelemetryEvent).
+   * concern-20260429-telemetry-suppression-insights
+   */
+  suppressionDetails?: SuppressionDetail[];
 }
 
 export interface EnrichedTelemetryPayload extends TelemetryPayload {
