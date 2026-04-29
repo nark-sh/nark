@@ -1,6 +1,6 @@
 {
   "name": "nark",
-  "version": "1.9.0",
+  "version": "1.9.1",
   "description": "Static analysis tool that checks TypeScript projects against 169+ profiles for npm dependency error handling — catches missing try-catch for axios, prisma, stripe, and more",
   "type": "module",
   "bin": {
