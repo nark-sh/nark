@@ -29,6 +29,40 @@ If your project doesn't have a `tsconfig.json`, nark will generate a minimal one
 
 If `nark-corpus` is installed as an npm package, nark finds it automatically — no `--corpus` flag needed.
 
+## Add to Your Project
+
+Install nark as a dev dependency so your whole team runs it:
+
+```bash
+npm install --save-dev nark
+# or
+pnpm add -D nark
+```
+
+Add a script to your `package.json`:
+
+```json
+{
+  "scripts": {
+    "nark": "nark"
+  }
+}
+```
+
+Then scan with:
+
+```bash
+npm run nark
+# or just
+pnpm nark
+```
+
+For CI, fail the build on violations:
+
+```bash
+pnpm nark --fail-threshold warning
+```
+
 ## What It Finds
 
 nark knows how 169+ npm packages fail at runtime. For each one, it checks that your code handles those failures. Example violations:
