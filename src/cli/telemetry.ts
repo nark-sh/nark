@@ -237,8 +237,14 @@ export function handleFirstRunNotice(): void {
   if (!fileExists || !config.notified) {
     process.stderr.write(
       chalk.dim(
-        "\nNark collects anonymous usage data to improve the tool.\n" +
-          "Run `nark telemetry off` to opt out. Learn more: https://nark.sh/telemetry\n\n",
+        "\nNark collects anonymous usage data on each scan:\n" +
+          "  • which packages are scanned and their installed versions\n" +
+          "  • violation counts by package — to reduce false positives in profiles\n" +
+          "  • packages without profiles, ranked by usage — to prioritize what to build next\n" +
+          "  • an anonymous device ID and a SHA256 hash of your git remote URL (not the URL itself)\n" +
+          "Run `nark telemetry status` to see exactly what is sent.\n" +
+          "Run `nark telemetry off` to opt out, or set DO_NOT_TRACK=1.\n" +
+          "Learn more: https://nark.sh/telemetry\n\n",
       ),
     );
     writeTelemetryConfig({ ...config, notified: true });
@@ -573,6 +579,100 @@ export function createTelemetryCommand(): Command {
           }
           console.log(`Config:   ${getTelemetryConfigPath()}`);
           console.log(`Endpoint: ${TELEMETRY_ENDPOINT}`);
+          console.log("");
+          console.log(chalk.bold("What we collect (all scans):"));
+          console.log(
+            chalk.dim("  • Nark version, OS, Node.js version, architecture"),
+          );
+          console.log(
+            chalk.dim("  • Scan duration, file count, total call sites"),
+          );
+          console.log(
+            chalk.dim(
+              "  • Names and installed versions of contracted packages",
+            ),
+          );
+          console.log(
+            chalk.dim(
+              "    → Lets us detect which exact versions are in the wild and",
+            ),
+          );
+          console.log(
+            chalk.dim("      correlate violations with specific releases."),
+          );
+          console.log(chalk.dim("  • Violation counts per package"));
+          console.log(
+            chalk.dim(
+              "    → High counts on a rule = likely false positive; we tighten the profile.",
+            ),
+          );
+          console.log(
+            chalk.dim("  • Suppression counts and which rules were suppressed"),
+          );
+          console.log(
+            chalk.dim(
+              "    → High suppress rates on a rule = profile is too strict; we fix it.",
+            ),
+          );
+          console.log(
+            chalk.dim(
+              "  • Packages you use that have no profile yet, ranked by call site count",
+            ),
+          );
+          console.log(
+            chalk.dim(
+              "    → Tells us which profiles would cover the most real-world code.",
+            ),
+          );
+          console.log(
+            chalk.dim(
+              "  • Anonymous device ID (stable UUID, no connection to your identity)",
+            ),
+          );
+          console.log(
+            chalk.dim(
+              "  • SHA256 hash of your git remote URL (not the URL itself)",
+            ),
+          );
+          console.log(
+            chalk.dim(
+              "    → Lets us count unique repos without seeing what they are.",
+            ),
+          );
+          console.log("");
+          console.log(
+            chalk.bold("Additional data when logged in (nark login):"),
+          );
+          console.log(
+            chalk.dim("  • Git repo URL, branch, commit SHA, author name"),
+          );
+          console.log(chalk.dim("  • Code snippets around violations"));
+          console.log(
+            chalk.dim(
+              "    → Used to identify patterns causing false positives and",
+            ),
+          );
+          console.log(
+            chalk.dim(
+              "      improve profile accuracy for your specific codebase.",
+            ),
+          );
+          console.log("");
+          console.log(chalk.bold("What we never collect:"));
+          console.log(
+            chalk.dim(
+              "  • Your source code (only small snippets around violations, when logged in)",
+            ),
+          );
+          console.log(chalk.dim("  • File names or directory structure"));
+          console.log(
+            chalk.dim("  • Credentials, tokens, or environment variables"),
+          );
+          console.log(
+            chalk.dim(
+              "  • Personal information beyond git author name (when logged in)",
+            ),
+          );
           console.log("");
           console.log(chalk.dim("Run `nark telemetry off` to opt out."));
           console.log(
