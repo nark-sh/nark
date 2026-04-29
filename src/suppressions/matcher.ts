@@ -4,16 +4,17 @@
  * Combines inline comments and config rules to check if violations are suppressed
  */
 
-import * as ts from 'typescript';
-import * as path from 'path';
+import * as ts from "typescript";
+import * as path from "path";
+import { getSuppressionForLine, suppressionMatches } from "./parser.js";
+import { loadConfigSync, findMatchingRules } from "./config-loader.js";
 import {
-  getSuppressionForLine,
-  suppressionMatches
-} from './parser.js';
-import { loadConfigSync, findMatchingRules } from './config-loader.js';
-import { loadManifestSync, saveManifestSync, createSuppression, upsertSuppression } from './manifest.js';
-import { loadStore, findByFingerprint } from './suppression-store.js';
-import { SuppressionCheckResult } from './types.js';
+  loadManifestSync,
+  saveManifestSync,
+  createSuppression,
+  upsertSuppression,
+} from "./manifest.js";
+import { SuppressionCheckResult } from "./types.js";
 
 /**
  * Options for checking suppressions
@@ -44,8 +45,9 @@ export interface CheckSuppressionOptions {
   updateManifest?: boolean;
 
   /**
-   * Precomputed fingerprint for this violation.
-   * When provided, .nark-suppressions.json is checked first (preferred over inline comments).
+   * Precomputed fingerprint for this violation (informational only).
+   * Note: .nark-suppressions.json is telemetry-only and does NOT suppress violations.
+   * Use .narkrc.json ignore rules or `nark suppressions add` for actual suppression.
    */
   fingerprint?: string;
 }
@@ -59,7 +61,9 @@ export interface CheckSuppressionOptions {
  * @param options - Check options
  * @returns Suppression check result
  */
-export function checkSuppression(options: CheckSuppressionOptions): SuppressionCheckResult {
+export function checkSuppression(
+  options: CheckSuppressionOptions,
+): SuppressionCheckResult {
   const {
     projectRoot,
     sourceFile,
@@ -69,40 +73,24 @@ export function checkSuppression(options: CheckSuppressionOptions): SuppressionC
     postconditionId,
     analyzerVersion,
     updateManifest = true,
-    fingerprint,
   } = options;
 
   // Get relative file path from project root
   const absoluteFilePath = sourceFile.fileName;
   const relativeFilePath = path.relative(projectRoot, absoluteFilePath);
 
-  // 1. Check .nark-suppressions.json (preferred: fingerprint-keyed, out-of-code)
-  if (fingerprint) {
-    try {
-      const store = loadStore(projectRoot);
-      const bcSuppression = findByFingerprint(store, fingerprint);
-      if (bcSuppression) {
-        return {
-          suppressed: true,
-          matchedSuppression: bcSuppression,
-          source: 'suppression-file',
-          originalSource: bcSuppression,
-        };
-      }
-    } catch {
-      // Store not readable — fall through to other checks
-    }
-  }
-
-  // 2. Check inline comment suppression (deprecated — warn and still honour it)
+  // 1. Check inline comment suppression (deprecated — warn and still honour it)
   const inlineSuppress = getSuppressionForLine(sourceFile, line);
 
-  if (inlineSuppress && suppressionMatches(inlineSuppress, packageName, postconditionId)) {
+  if (
+    inlineSuppress &&
+    suppressionMatches(inlineSuppress, packageName, postconditionId)
+  ) {
     // Emit deprecation warning so developers know to migrate
     process.stderr.write(
-      `[bc-warn] Inline suppression at ${relativeFilePath}:${line} is deprecated.\n` +
-      `  Use "nark suppressions add --fingerprint <fp> --reason <reason>" instead.\n` +
-      `  Fingerprint: ${fingerprint ?? '(run scan to get fingerprint)'}\n`
+      `[nark-warn] Inline suppression at ${relativeFilePath}:${line} is deprecated.\n` +
+        `  Add an ignore rule to .narkrc.json instead:\n` +
+        `  nark suppressions add --package ${packageName} --postcondition ${postconditionId} --file <path> --reason "<reason>"\n`,
     );
 
     if (updateManifest) {
@@ -114,15 +102,15 @@ export function checkSuppression(options: CheckSuppressionOptions): SuppressionC
         packageName,
         postconditionId,
         reason: inlineSuppress.reason,
-        suppressedBy: 'inline-comment',
-        analyzerVersion
+        suppressedBy: "inline-comment",
+        analyzerVersion,
       });
     }
 
     return {
       suppressed: true,
-      source: 'inline-comment',
-      originalSource: inlineSuppress
+      source: "inline-comment",
+      originalSource: inlineSuppress,
     };
   }
 
@@ -132,7 +120,7 @@ export function checkSuppression(options: CheckSuppressionOptions): SuppressionC
     config,
     relativeFilePath,
     packageName,
-    postconditionId
+    postconditionId,
   );
 
   if (matchingRules.length > 0) {
@@ -147,22 +135,22 @@ export function checkSuppression(options: CheckSuppressionOptions): SuppressionC
         packageName,
         postconditionId,
         reason: rule.reason,
-        suppressedBy: 'config-file',
-        analyzerVersion
+        suppressedBy: "config-file",
+        analyzerVersion,
       });
     }
 
     return {
       suppressed: true,
       matchedSuppression: rule,
-      source: 'config-file',
-      originalSource: rule
+      source: "config-file",
+      originalSource: rule,
     };
   }
 
   // Not suppressed
   return {
-    suppressed: false
+    suppressed: false,
   };
 }
 
@@ -181,7 +169,7 @@ function updateManifestWithSuppression(options: {
   packageName: string;
   postconditionId: string;
   reason: string;
-  suppressedBy: 'inline-comment' | 'config-file';
+  suppressedBy: "inline-comment" | "config-file";
   analyzerVersion: string;
 }): void {
   try {
@@ -195,7 +183,7 @@ function updateManifestWithSuppression(options: {
       postconditionId: options.postconditionId,
       reason: options.reason,
       suppressedBy: options.suppressedBy,
-      analyzerVersion: options.analyzerVersion
+      analyzerVersion: options.analyzerVersion,
     });
 
     // Update last checked time
@@ -207,7 +195,7 @@ function updateManifestWithSuppression(options: {
   } catch (error) {
     // Don't fail the analysis if manifest update fails
     console.warn(
-      `Warning: Failed to update suppression manifest: ${error instanceof Error ? error.message : String(error)}`
+      `Warning: Failed to update suppression manifest: ${error instanceof Error ? error.message : String(error)}`,
     );
   }
 }
@@ -230,7 +218,7 @@ export function batchCheckSuppressions(
     postconditionId: string;
   }>,
   projectRoot: string,
-  analyzerVersion: string
+  analyzerVersion: string,
 ): Map<string, SuppressionCheckResult> {
   const results = new Map<string, SuppressionCheckResult>();
 
@@ -243,7 +231,7 @@ export function batchCheckSuppressions(
       packageName: violation.packageName,
       postconditionId: violation.postconditionId,
       analyzerVersion,
-      updateManifest: true
+      updateManifest: true,
     });
 
     results.set(violation.id, result);
@@ -272,18 +260,23 @@ export function getSuppressionStats(projectRoot: string): {
 } {
   const manifest = loadManifestSync(projectRoot);
 
-  const active = manifest.suppressions.filter(s => s.stillViolates);
-  const dead = manifest.suppressions.filter(s => !s.stillViolates);
+  const active = manifest.suppressions.filter((s) => s.stillViolates);
+  const dead = manifest.suppressions.filter((s) => !s.stillViolates);
 
   const bySource = {
-    inlineComment: manifest.suppressions.filter(s => s.suppressedBy === 'inline-comment').length,
-    configFile: manifest.suppressions.filter(s => s.suppressedBy === 'config-file').length,
-    aiAgent: manifest.suppressions.filter(s => s.suppressedBy === 'ai-agent').length,
-    cli: manifest.suppressions.filter(s => s.suppressedBy === 'cli').length
+    inlineComment: manifest.suppressions.filter(
+      (s) => s.suppressedBy === "inline-comment",
+    ).length,
+    configFile: manifest.suppressions.filter(
+      (s) => s.suppressedBy === "config-file",
+    ).length,
+    aiAgent: manifest.suppressions.filter((s) => s.suppressedBy === "ai-agent")
+      .length,
+    cli: manifest.suppressions.filter((s) => s.suppressedBy === "cli").length,
   };
 
   const byPackage = new Map<string, number>();
-  manifest.suppressions.forEach(s => {
+  manifest.suppressions.forEach((s) => {
     const count = byPackage.get(s.package) || 0;
     byPackage.set(s.package, count + 1);
   });
@@ -293,6 +286,6 @@ export function getSuppressionStats(projectRoot: string): {
     activeSuppressions: active.length,
     deadSuppressions: dead.length,
     bySource,
-    byPackage
+    byPackage,
   };
 }
