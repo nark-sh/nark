@@ -1040,6 +1040,43 @@ async function main(options: any) {
       }
     })();
 
+    // Collect uncovered packages (no profile yet) with installed versions and
+    // call site counts so the server can prioritize which profiles to write.
+    // Sorted by callSiteCount descending. Capped at 100 entries.
+    const uncoveredPackages = (() => {
+      try {
+        const uncontracted = (packageDiscovery?.packages ?? [])
+          .filter((p: any) => !p.hasContract)
+          .sort(
+            (a: any, b: any) => (b.callSiteCount ?? 0) - (a.callSiteCount ?? 0),
+          )
+          .slice(0, 100);
+        if (uncontracted.length === 0) return undefined;
+        return uncontracted.map((pkg: any) => {
+          let version: string | undefined;
+          try {
+            const pkgJsonPath = path.join(
+              options.project,
+              "node_modules",
+              pkg.name,
+              "package.json",
+            );
+            const raw = fs.readFileSync(pkgJsonPath, "utf-8");
+            version = (JSON.parse(raw) as { version?: string }).version;
+          } catch {
+            // not installed or unreadable — omit version
+          }
+          return {
+            name: pkg.name,
+            ...(version ? { version } : {}),
+            callSiteCount: pkg.callSiteCount ?? 0,
+          };
+        });
+      } catch {
+        return undefined;
+      }
+    })();
+
     // Compute exit code (mirrors logic below)
     const telemetryExitCode = (() => {
       if (options.reportOnly) return 0;
@@ -1075,6 +1112,7 @@ async function main(options: any) {
         ? { suppressionDetails }
         : {}),
       ...(packageVersions ? { packageVersions } : {}),
+      ...(uncoveredPackages ? { uncoveredPackages } : {}),
     };
 
     let telemetryResult: TelemetryResult | undefined;

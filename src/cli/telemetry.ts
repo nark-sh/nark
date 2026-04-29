@@ -75,6 +75,17 @@ export interface TelemetryPayload {
    * and correlate violations with specific release series.
    */
   packageVersions?: Record<string, string>;
+  /**
+   * Packages used in the scanned project that have no Nark profile yet.
+   * Sorted by callSiteCount descending — most-used packages first.
+   * Used to prioritize which profiles to write next.
+   * version is the installed version from node_modules (omitted if unresolvable).
+   */
+  uncoveredPackages?: Array<{
+    name: string;
+    version?: string;
+    callSiteCount: number;
+  }>;
 }
 
 export interface TelemetryResult {
