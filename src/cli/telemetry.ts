@@ -15,7 +15,7 @@ import * as os from 'os';
 import { createHash, randomUUID } from 'crypto';
 import { execSync } from 'child_process';
 import chalk from 'chalk';
-import { getToken } from '../lib/auth.js';
+import { getToken, getCredentials } from '../lib/auth.js';
 import type { Violation } from '../types.js';
 
 export interface TelemetryConfig {
@@ -388,12 +388,13 @@ function extractCodeSnippets(violations: Violation[]): Array<{ file: string; lin
 export async function fireEnrichedTelemetryEvent(
   payload: TelemetryPayload,
   violations: Violation[],
-): Promise<void> {
+): Promise<TelemetryResult> {
   const config = readTelemetryConfig();
-  if (!config.enabled) return;
+  const enrichedEndpoint = `${NARK_API_BASE}/api/telemetry/scan-enriched`;
+  if (!config.enabled) return { sent: false, authenticated: false, endpoint: enrichedEndpoint, disabled: true };
   try {
     const token = getToken();
-    if (!token) return;
+    if (!token) return { sent: false, authenticated: false, endpoint: TELEMETRY_ENDPOINT };
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${token}`,
@@ -422,15 +423,20 @@ export async function fireEnrichedTelemetryEvent(
       ...(codeSnippets.length > 0 ? { codeSnippets } : {}),
     };
 
-    const endpoint = `${NARK_API_BASE}/api/telemetry/scan-enriched`;
-    await fetch(endpoint, {
+    let fetchFailed = false;
+    await fetch(enrichedEndpoint, {
       method: 'POST',
       headers,
       body: JSON.stringify(enriched),
       signal: AbortSignal.timeout(2000),
-    }).catch(() => {});
+    }).catch(() => { fetchFailed = true; });
+    if (fetchFailed) {
+      return { sent: false, authenticated: true, endpoint: enrichedEndpoint, error: true };
+    }
+    return { sent: true, authenticated: true, endpoint: enrichedEndpoint, email: getCredentials()?.email };
   } catch {
     // ignore — telemetry must never affect the scanner
+    return { sent: false, authenticated: true, endpoint: enrichedEndpoint, error: true };
   }
 }
 
