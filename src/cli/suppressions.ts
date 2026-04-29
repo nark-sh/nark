@@ -14,10 +14,6 @@ import {
   removeDeadSuppressionsFromManifest,
   getSuppressionStats,
   loadConfigSync,
-  loadStore,
-  saveStore,
-  findStaleSuppressions,
-  removeStaleSuppressions,
 } from "../suppressions/index.js";
 import type { Suppression } from "../suppressions/types.js";
 
@@ -33,8 +29,7 @@ export function createSuppressionsCommand(): Command {
     .addCommand(createShowCommand())
     .addCommand(createCleanCommand())
     .addCommand(createStatsCommand())
-    .addCommand(createAddCommand())
-    .addCommand(createVerifyCommand());
+    .addCommand(createAddCommand());
 
   return suppressions;
 }
@@ -269,19 +264,13 @@ function createStatsCommand(): Command {
 }
 
 /**
- * Add an ignore rule to .narkrc.json
- *
- * This is the correct way to suppress violations — writes a rule to .narkrc.json
- * which the analyzer actually reads. Rules are commit-tracked and shared with the
- * whole team. .nark-suppressions.json is telemetry-only and does NOT suppress anything.
+ * Add an ignore rule to .nark-suppressions.json
  */
 function createAddCommand(): Command {
   const add = new Command("add");
 
   add
-    .description(
-      "Add an ignore rule to .narkrc.json (the actual suppression mechanism)",
-    )
+    .description("Add an ignore rule to .nark-suppressions.json")
     .requiredOption(
       "--package <name>",
       "Package name (e.g. stripe, axios, @prisma/client)",
@@ -310,7 +299,7 @@ function createAddCommand(): Command {
       }
 
       try {
-        const configPath = path.join(projectRoot, ".narkrc.json");
+        const configPath = path.join(projectRoot, ".nark-suppressions.json");
         const config = loadConfigSync(projectRoot);
 
         if (!config.ignore) {
@@ -326,7 +315,9 @@ function createAddCommand(): Command {
         );
         if (duplicate) {
           console.log(
-            chalk.yellow(`⚠️  A matching rule already exists in .narkrc.json:`),
+            chalk.yellow(
+              `⚠️  A matching rule already exists in .nark-suppressions.json:`,
+            ),
           );
           console.log(chalk.dim(`   package: ${duplicate.package}`));
           console.log(
@@ -354,7 +345,7 @@ function createAddCommand(): Command {
           "utf-8",
         );
 
-        console.log(chalk.green(`✅ Rule added to .narkrc.json`));
+        console.log(chalk.green(`✅ Rule added to .nark-suppressions.json`));
         console.log(chalk.dim(`   package: ${options.package}`));
         console.log(chalk.dim(`   postconditionId: ${options.postcondition}`));
         if (options.file) console.log(chalk.dim(`   file: ${options.file}`));
@@ -362,7 +353,7 @@ function createAddCommand(): Command {
         console.log();
         console.log(
           chalk.dim(
-            "Commit .narkrc.json to share this suppression with your team.",
+            "Commit .nark-suppressions.json to share this suppression with your team.",
           ),
         );
       } catch (error) {
@@ -376,158 +367,6 @@ function createAddCommand(): Command {
     });
 
   return add;
-}
-
-/**
- * Verify telemetry entries in .nark-suppressions.json against a scan result.
- *
- * NOTE: .nark-suppressions.json is telemetry-only — it enriches FP signal sent
- * to nark.sh but does NOT suppress violations from scan output.
- * Use .narkrc.json (via `nark suppressions add`) for actual suppression.
- *
- * This command checks whether fingerprints stored in .nark-suppressions.json
- * still appear in a recent scan. Entries whose fingerprint is no longer seen
- * are flagged as stale (violation was fixed or moved).
- *
- * Usage:
- *   nark suppressions verify --scan output/20260324/repo-audit.json
- *   nark suppressions verify --scan output/20260324/repo-audit.json --clean
- */
-function createVerifyCommand(): Command {
-  const verify = new Command("verify");
-
-  verify
-    .description(
-      "Check .nark-suppressions.json telemetry entries for stale fingerprints (does not affect suppression)",
-    )
-    .requiredOption(
-      "--scan <file>",
-      "Path to scan output JSON (from nark --output)",
-    )
-    .option("--clean", "Automatically remove stale suppressions")
-    .option("--json", "Output results as JSON")
-    .option("--project <path>", "Project root directory", process.cwd())
-    .action(async (options) => {
-      const projectRoot = path.resolve(options.project);
-      const scanPath = path.resolve(options.scan);
-
-      try {
-        // Load scan results
-        const { readFileSync } = await import("fs");
-        let scanData: any;
-        try {
-          scanData = JSON.parse(readFileSync(scanPath, "utf-8"));
-        } catch {
-          console.error(
-            chalk.red(`Error: Could not read scan file: ${scanPath}`),
-          );
-          process.exit(1);
-        }
-
-        // Extract fingerprints from scan results
-        // Supports both v2 format ({violations: [...], files: [...]}) and flat arrays
-        const violations: any[] = Array.isArray(scanData)
-          ? scanData
-          : (scanData.violations ??
-            scanData.files?.flatMap((f: any) => f.violations ?? []) ??
-            []);
-
-        const seenFingerprints = new Set<string>(
-          violations
-            .map((v: any) => v.fingerprint)
-            .filter((fp: any) => typeof fp === "string"),
-        );
-
-        const store = loadStore(projectRoot);
-
-        if (store.suppressions.length === 0) {
-          console.log(chalk.dim("No suppressions in .nark-suppressions.json"));
-          return;
-        }
-
-        const stale = findStaleSuppressions(store, seenFingerprints);
-        const active = store.suppressions.filter((s) =>
-          seenFingerprints.has(s.fingerprint),
-        );
-
-        if (options.json) {
-          console.log(
-            JSON.stringify(
-              {
-                total: store.suppressions.length,
-                active: active.length,
-                stale,
-              },
-              null,
-              2,
-            ),
-          );
-          return;
-        }
-
-        console.log(chalk.bold(`\n🔍 Suppression Verification\n`));
-        console.log(
-          `  Scan file: ${chalk.cyan(path.relative(projectRoot, scanPath))}`,
-        );
-        console.log(
-          `  Violations in scan: ${violations.length} (${seenFingerprints.size} with fingerprints)`,
-        );
-        console.log(
-          `  Suppressions: ${store.suppressions.length} total, ${active.length} active, ${stale.length} stale\n`,
-        );
-
-        if (stale.length === 0) {
-          console.log(
-            chalk.green(
-              "✅ All suppressions are active — no stale entries found.",
-            ),
-          );
-          return;
-        }
-
-        console.log(
-          chalk.yellow(`⚠️  ${stale.length} stale suppression(s) found:\n`),
-        );
-        stale.forEach((s, i) => {
-          console.log(
-            `  ${i + 1}. ${chalk.cyan(s.filePath)}:${chalk.yellow(String(s.lineNumber))}`,
-          );
-          console.log(`     ${s.package}/${s.postconditionId}`);
-          console.log(chalk.dim(`     Fingerprint: ${s.fingerprint}`));
-          console.log(chalk.dim(`     Reason: ${s.reason}`));
-          console.log(
-            chalk.dim(
-              `     Added: ${new Date(s.suppressedAt).toLocaleDateString()}\n`,
-            ),
-          );
-        });
-
-        if (options.clean) {
-          removeStaleSuppressions(store, seenFingerprints);
-          saveStore(projectRoot, store);
-          console.log(
-            chalk.green(
-              `✅ Removed ${stale.length} stale suppression(s) from .nark-suppressions.json`,
-            ),
-          );
-        } else {
-          console.log(
-            chalk.dim(
-              "Run with --clean to remove stale suppressions automatically.",
-            ),
-          );
-        }
-      } catch (error) {
-        console.error(
-          chalk.red(
-            `Error: ${error instanceof Error ? error.message : String(error)}`,
-          ),
-        );
-        process.exit(1);
-      }
-    });
-
-  return verify;
 }
 
 /**

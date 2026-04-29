@@ -34,7 +34,7 @@ export interface Suppression {
   suppressedAt: string;
 
   /** How the suppression was created */
-  suppressedBy: 'inline-comment' | 'config-file' | 'ai-agent' | 'cli';
+  suppressedBy: "inline-comment" | "config-file" | "ai-agent" | "cli";
 
   /** ISO 8601 timestamp when last checked */
   lastChecked: string;
@@ -64,7 +64,7 @@ export interface SuppressionManifest {
 }
 
 /**
- * Configuration file structure (.narkrc.json)
+ * Configuration file structure (.nark-suppressions.json)
  */
 export interface NarkConfig {
   /** Suppression rules */
@@ -147,52 +147,11 @@ export interface SuppressionCheckResult {
   suppressed: boolean;
 
   /** The suppression that matched (if any) */
-  matchedSuppression?: Suppression | IgnoreRule | BcScanSuppression;
+  matchedSuppression?: Suppression | IgnoreRule;
 
   /** How it was suppressed */
-  source?: 'inline-comment' | 'config-file' | 'suppression-file';
+  source?: "inline-comment" | "config-file";
 
   /** Original comment or rule */
   originalSource?: any;
-}
-
-/**
- * A suppression entry in .nark-suppressions.json
- *
- * Keyed by fingerprint rather than line number, so it is stable across
- * line-number shifts caused by unrelated code additions. If code actually
- * moves (and the fingerprint changes), the entry is flagged as stale.
- */
-export interface BcScanSuppression {
-  /** Violation fingerprint (sha256 of package:postcondition:file:line:call, first 32 chars) */
-  fingerprint: string;
-
-  /** Package name (e.g., "axios") — stored for human reference only */
-  package: string;
-
-  /** Postcondition ID (e.g., "network-failure") — stored for human reference only */
-  postconditionId: string;
-
-  /** File path at time of suppression — stored for human reference only */
-  filePath: string;
-
-  /** Line number at time of suppression — stored for human reference only */
-  lineNumber: number;
-
-  /** Human-readable reason this violation is being suppressed */
-  reason: string;
-
-  /** ISO 8601 timestamp when suppression was created */
-  suppressedAt: string;
-}
-
-/**
- * The .nark-suppressions.json file structure
- */
-export interface BcScanStore {
-  /** Schema version */
-  version: string;
-
-  /** All fingerprint-keyed suppressions */
-  suppressions: BcScanSuppression[];
 }

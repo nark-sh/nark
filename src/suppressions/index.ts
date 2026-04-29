@@ -5,7 +5,7 @@
  */
 
 // Types
-export * from './types.js';
+export * from "./types.js";
 
 // Inline comment parsing
 export {
@@ -14,8 +14,8 @@ export {
   suppressionMatches,
   validateSuppressionComment,
   generateSuppressionComment,
-  getNodeComments
-} from './parser.js';
+  getNodeComments,
+} from "./parser.js";
 
 // Config file loading
 export {
@@ -23,8 +23,8 @@ export {
   loadConfigSync,
   ruleMatches,
   findMatchingRules,
-  createDefaultConfig
-} from './config-loader.js';
+  createDefaultConfig,
+} from "./config-loader.js";
 
 // Manifest management
 export {
@@ -40,37 +40,24 @@ export {
   createSuppression,
   getDeadSuppressions,
   getActiveSuppressions,
-  removeDeadSuppressions
-} from './manifest.js';
+  removeDeadSuppressions,
+} from "./manifest.js";
 
 // Suppression checking
 export {
   checkSuppression,
   batchCheckSuppressions,
-  getSuppressionStats
-} from './matcher.js';
+  getSuppressionStats,
+} from "./matcher.js";
 
 // Dead suppression detection
 export {
   detectDeadSuppressions,
   removeDeadSuppressionsFromManifest,
   getDeadSuppressionSummary,
-  formatDeadSuppression
-} from './dead-suppression-detector.js';
+  formatDeadSuppression,
+} from "./dead-suppression-detector.js";
 
 // Fingerprint computation (mirrors SaaS)
-export { computeViolationFingerprint } from './fingerprint.js';
-export type { FingerprintParams } from './fingerprint.js';
-
-// Suppression store (.nark-suppressions.json)
-export {
-  getStorePath,
-  loadStore,
-  saveStore,
-  findByFingerprint,
-  upsertByFingerprint,
-  removeByFingerprint,
-  findStaleSuppressions,
-  removeStaleSuppressions,
-  createBcScanSuppression
-} from './suppression-store.js';
+export { computeViolationFingerprint } from "./fingerprint.js";
+export type { FingerprintParams } from "./fingerprint.js";

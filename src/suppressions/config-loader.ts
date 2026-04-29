@@ -1,24 +1,22 @@
 /**
  * Configuration File Loader
  *
- * Loads and validates .narkrc.json config file
+ * Loads and validates .nark-suppressions.json config file
  */
 
-import * as fs from 'fs';
-import * as path from 'path';
-import { NarkConfig, IgnoreRule } from './types.js';
+import * as fs from "fs";
+import * as path from "path";
+import { NarkConfig, IgnoreRule } from "./types.js";
 
-const CONFIG_FILENAME = '.narkrc.json';
+const CONFIG_FILENAME = ".nark-suppressions.json";
 
 /**
- * Load nark configuration from project root (.narkrc.json)
+ * Load nark configuration from project root (.nark-suppressions.json)
  *
  * @param projectRoot - Absolute path to project root
  * @returns Configuration object, or empty config if file doesn't exist
  */
-export async function loadConfig(
-  projectRoot: string
-): Promise<NarkConfig> {
+export async function loadConfig(projectRoot: string): Promise<NarkConfig> {
   const configPath = path.join(projectRoot, CONFIG_FILENAME);
 
   if (!fs.existsSync(configPath)) {
@@ -26,7 +24,7 @@ export async function loadConfig(
   }
 
   try {
-    const content = await fs.promises.readFile(configPath, 'utf-8');
+    const content = await fs.promises.readFile(configPath, "utf-8");
     const config: NarkConfig = JSON.parse(content);
 
     // Validate config structure
@@ -35,7 +33,7 @@ export async function loadConfig(
     return config;
   } catch (error) {
     throw new Error(
-      `Failed to load ${CONFIG_FILENAME}: ${error instanceof Error ? error.message : String(error)}`
+      `Failed to load ${CONFIG_FILENAME}: ${error instanceof Error ? error.message : String(error)}`,
     );
   }
 }
@@ -46,9 +44,7 @@ export async function loadConfig(
  * @param projectRoot - Absolute path to project root
  * @returns Configuration object
  */
-export function loadConfigSync(
-  projectRoot: string
-): NarkConfig {
+export function loadConfigSync(projectRoot: string): NarkConfig {
   const configPath = path.join(projectRoot, CONFIG_FILENAME);
 
   if (!fs.existsSync(configPath)) {
@@ -56,7 +52,7 @@ export function loadConfigSync(
   }
 
   try {
-    const content = fs.readFileSync(configPath, 'utf-8');
+    const content = fs.readFileSync(configPath, "utf-8");
     const config: NarkConfig = JSON.parse(content);
 
     // Validate config structure
@@ -65,7 +61,7 @@ export function loadConfigSync(
     return config;
   } catch (error) {
     throw new Error(
-      `Failed to load ${CONFIG_FILENAME}: ${error instanceof Error ? error.message : String(error)}`
+      `Failed to load ${CONFIG_FILENAME}: ${error instanceof Error ? error.message : String(error)}`,
     );
   }
 }
@@ -77,8 +73,8 @@ export function loadConfigSync(
  * @throws Error if configuration is invalid
  */
 function validateConfig(config: NarkConfig): void {
-  if (typeof config !== 'object' || config === null) {
-    throw new Error('Configuration must be an object');
+  if (typeof config !== "object" || config === null) {
+    throw new Error("Configuration must be an object");
   }
 
   if (config.ignore && !Array.isArray(config.ignore)) {
@@ -100,40 +96,40 @@ function validateConfig(config: NarkConfig): void {
  * @throws Error if rule is invalid
  */
 function validateIgnoreRule(rule: IgnoreRule, index: number): void {
-  if (typeof rule !== 'object' || rule === null) {
+  if (typeof rule !== "object" || rule === null) {
     throw new Error(`ignore[${index}]: Rule must be an object`);
   }
 
   // Require at least one matching criterion
   if (!rule.file && !rule.package && !rule.postconditionId) {
     throw new Error(
-      `ignore[${index}]: Rule must specify at least one of: file, package, postconditionId`
+      `ignore[${index}]: Rule must specify at least one of: file, package, postconditionId`,
     );
   }
 
   // Require reason
-  if (!rule.reason || typeof rule.reason !== 'string') {
+  if (!rule.reason || typeof rule.reason !== "string") {
     throw new Error(`ignore[${index}]: Rule must have a "reason" field`);
   }
 
   if (rule.reason.trim().length < 10) {
     throw new Error(
-      `ignore[${index}]: Reason must be at least 10 characters. Provide meaningful explanation.`
+      `ignore[${index}]: Reason must be at least 10 characters. Provide meaningful explanation.`,
     );
   }
 
   // Validate file pattern if present
-  if (rule.file && typeof rule.file !== 'string') {
+  if (rule.file && typeof rule.file !== "string") {
     throw new Error(`ignore[${index}]: "file" must be a string`);
   }
 
   // Validate package if present
-  if (rule.package && typeof rule.package !== 'string') {
+  if (rule.package && typeof rule.package !== "string") {
     throw new Error(`ignore[${index}]: "package" must be a string`);
   }
 
   // Validate postconditionId if present
-  if (rule.postconditionId && typeof rule.postconditionId !== 'string') {
+  if (rule.postconditionId && typeof rule.postconditionId !== "string") {
     throw new Error(`ignore[${index}]: "postconditionId" must be a string`);
   }
 }
@@ -151,7 +147,7 @@ export function ruleMatches(
   rule: IgnoreRule,
   file: string,
   packageName: string,
-  postconditionId: string
+  postconditionId: string,
 ): boolean {
   // Check file pattern (glob match)
   if (rule.file) {
@@ -163,7 +159,7 @@ export function ruleMatches(
 
   // Check package name
   if (rule.package) {
-    const packageMatches = rule.package === '*' || rule.package === packageName;
+    const packageMatches = rule.package === "*" || rule.package === packageName;
     if (!packageMatches) {
       return false;
     }
@@ -172,7 +168,7 @@ export function ruleMatches(
   // Check postcondition ID
   if (rule.postconditionId) {
     const postconditionMatches =
-      rule.postconditionId === '*' || rule.postconditionId === postconditionId;
+      rule.postconditionId === "*" || rule.postconditionId === postconditionId;
     if (!postconditionMatches) {
       return false;
     }
@@ -198,15 +194,15 @@ function matchGlob(pattern: string, text: string): boolean {
   // Convert glob pattern to regex
   let regexPattern = pattern
     // Escape regex special characters (except * and ?)
-    .replace(/[.+^${}()|[\]\\]/g, '\\$&')
+    .replace(/[.+^${}()|[\]\\]/g, "\\$&")
     // Replace ** with placeholder
-    .replace(/\*\*/g, '___DOUBLE_STAR___')
+    .replace(/\*\*/g, "___DOUBLE_STAR___")
     // Replace * with regex (match anything except /)
-    .replace(/\*/g, '[^/]*')
+    .replace(/\*/g, "[^/]*")
     // Replace ** placeholder with regex (match anything including /)
-    .replace(/___DOUBLE_STAR___/g, '.*')
+    .replace(/___DOUBLE_STAR___/g, ".*")
     // Replace ? with regex (match single character)
-    .replace(/\?/g, '.');
+    .replace(/\?/g, ".");
 
   // Add anchors
   regexPattern = `^${regexPattern}$`;
@@ -228,14 +224,14 @@ export function findMatchingRules(
   config: NarkConfig,
   file: string,
   packageName: string,
-  postconditionId: string
+  postconditionId: string,
 ): IgnoreRule[] {
   if (!config.ignore) {
     return [];
   }
 
   return config.ignore.filter((rule: IgnoreRule) =>
-    ruleMatches(rule, file, packageName, postconditionId)
+    ruleMatches(rule, file, packageName, postconditionId),
   );
 }
 
@@ -254,23 +250,23 @@ export async function createDefaultConfig(projectRoot: string): Promise<void> {
   const defaultConfig: NarkConfig = {
     ignore: [
       {
-        file: 'src/test/**',
-        reason: 'Test files intentionally trigger errors'
+        file: "src/test/**",
+        reason: "Test files intentionally trigger errors",
       },
       {
-        file: '**/*.test.ts',
-        reason: 'Test files intentionally trigger errors'
+        file: "**/*.test.ts",
+        reason: "Test files intentionally trigger errors",
       },
       {
-        file: '**/*.spec.ts',
-        reason: 'Test files intentionally trigger errors'
-      }
-    ]
+        file: "**/*.spec.ts",
+        reason: "Test files intentionally trigger errors",
+      },
+    ],
   };
 
   await fs.promises.writeFile(
     configPath,
     JSON.stringify(defaultConfig, null, 2),
-    'utf-8'
+    "utf-8",
   );
 }

@@ -46,8 +46,6 @@ export interface CheckSuppressionOptions {
 
   /**
    * Precomputed fingerprint for this violation (informational only).
-   * Note: .nark-suppressions.json is telemetry-only and does NOT suppress violations.
-   * Use .narkrc.json ignore rules or `nark suppressions add` for actual suppression.
    */
   fingerprint?: string;
 }
@@ -89,7 +87,7 @@ export function checkSuppression(
     // Emit deprecation warning so developers know to migrate
     process.stderr.write(
       `[nark-warn] Inline suppression at ${relativeFilePath}:${line} is deprecated.\n` +
-        `  Add an ignore rule to .narkrc.json instead:\n` +
+        `  Add an ignore rule to .nark-suppressions.json instead:\n` +
         `  nark suppressions add --package ${packageName} --postcondition ${postconditionId} --file <path> --reason "<reason>"\n`,
     );
 
@@ -114,7 +112,7 @@ export function checkSuppression(
     };
   }
 
-  // 3. Check config file suppression (.narkrc.json)
+  // 3. Check config file suppression (.nark-suppressions.json)
   const config = loadConfigSync(projectRoot);
   const matchingRules = findMatchingRules(
     config,

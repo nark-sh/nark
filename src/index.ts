@@ -952,33 +952,47 @@ async function main(options: any) {
     // Build suppressionDetails: per-suppression signal for corpus quality improvement.
     // High suppress:fix ratios on a postconditionId → likely FP in the profile.
     // Max 100 entries per scan to keep payload size bounded.
-    // Enriches with human-written reasons from .nark-suppressions.json when available.
+    // Enriches with human-written reasons from .nark-suppressions.json ignore rules.
     const suppressionDetails = (() => {
       try {
         const suppressed = v2Result?.suppressedViolations ?? [];
-        // Load .nark-suppressions.json to cross-reference human-written reasons
-        let storeSuppressions: Array<{ fingerprint: string; reason: string }> = [];
+        // Load ignore rules from .nark-suppressions.json to enrich reasons
+        let ignoreRules: Array<{
+          package?: string;
+          postconditionId?: string;
+          reason: string;
+        }> = [];
         try {
-          const storePath = path.join(options.project, ".nark-suppressions.json");
-          if (fs.existsSync(storePath)) {
-            const storeData = JSON.parse(fs.readFileSync(storePath, "utf-8"));
-            storeSuppressions = storeData.suppressions ?? [];
+          const configPath = path.join(
+            options.project,
+            ".nark-suppressions.json",
+          );
+          if (fs.existsSync(configPath)) {
+            const configData = JSON.parse(fs.readFileSync(configPath, "utf-8"));
+            ignoreRules = configData.ignore ?? [];
           }
         } catch {
-          // ignore — store read failure should not affect telemetry
+          // ignore — config read failure should not affect telemetry
         }
-        const storeByFp = new Map(storeSuppressions.map(s => [s.fingerprint, s.reason]));
 
         return suppressed
           .slice(0, 100)
           .map((v: any) => {
-            const fp = v.fingerprint ?? "";
+            const pkg = v.package ?? "";
+            const pcId = v.postconditionId ?? v.contract_id ?? "";
+            const matchedRule = ignoreRules.find(
+              (r) =>
+                (!r.package || r.package === pkg || r.package === "*") &&
+                (!r.postconditionId ||
+                  r.postconditionId === pcId ||
+                  r.postconditionId === "*"),
+            );
             return {
-              fingerprint: fp.substring(0, 16),
-              package: v.package ?? "",
-              postconditionId: v.postconditionId ?? v.contract_id ?? "",
-              reason: storeByFp.get(fp) ?? v.suppressionReason ?? undefined,
-              suppressedBy: storeByFp.has(fp) ? "suppression-file" : (v.suppressedBy ?? undefined),
+              fingerprint: (v.fingerprint ?? "").substring(0, 16),
+              package: pkg,
+              postconditionId: pcId,
+              reason: matchedRule?.reason ?? v.suppressionReason ?? undefined,
+              suppressedBy: v.suppressedBy ?? undefined,
             };
           })
           .filter((s: any) => s.package && s.postconditionId);
