@@ -48310,7 +48310,7 @@
       "fix_target": "contract",
       "postcondition_id": "response-json-parse-error"
     },
-    "resolution": "Already implemented: contract-matcher.ts lines 1854-1890 suppress response-json-parse-error in React component files, server-side utility files (api/, lib/, utils/), and response.ok-checked patterns. 64 FPs already suppressed by concern-2026-04-11-undici-2 and concern-2026-04-20-undici-2 implementations."
+    "resolution": "Suppression already exists in contract-matcher.ts (lines 1854-1891): undici response-json-parse-error suppressed in React component files, Next.js app router pages, hook files, and server-side utility directories. Recurrence of concern-2026-04-11-undici-2 and concern-2026-04-20-undici-2. No new scanner changes needed."
   },
   {
     "id": "concern-2026-04-29-react-hook-form-2",
@@ -48334,7 +48334,7 @@
       "fix_target": "contract",
       "postcondition_id": "async-submit-unhandled-error"
     },
-    "resolution": "Already implemented: contract-matcher.ts lines 293-334 suppress missing-form-provider in files with FormProvider, useFormContext, shared UI component paths, and named sub-components (TextArea, Input, etc.). Concern-20260429-react-hook-form-2 is already cited in the implementation at line 313."
+    "resolution": "Suppression already exists in contract-matcher.ts (lines 271-289): async-submit-unhandled-error suppressed when file contains setError, toast.error, toast(, sonner, useToast, onError, or console.error. These files all use one of those patterns. Recurrence of concern-20260402-react-hook-form-1. No new scanner changes needed."
   },
   {
     "id": "concern-2026-04-29-tanstack-react-query-3",
@@ -48358,7 +48358,7 @@
       "fix_target": "contract",
       "postcondition_id": "query-error-unhandled"
     },
-    "resolution": "Already implemented: contract-matcher.ts lines 914-919 suppress mutation-error-unhandled in hook files (useXxx naming pattern). Covers concern-2026-04-02-tanstack-react-query-mutation-error-unhandled-18."
+    "resolution": "Suppression already exists in contract-matcher.ts (lines 904-943): query-error-unhandled suppressed in hook files (useXxx pattern) and component files that use isError, { error }, error }, or onError. Recurrence of concern-2026-04-02-dashboard-tanstack-react-query-1. No new scanner changes needed."
   },
   {
     "id": "concern-2026-04-29-ai-4",
@@ -48366,7 +48366,7 @@
     "source": "dashboard-feedback",
     "package": "ai",
     "type": "false_positive",
-    "status": "rejected",
+    "status": "implemented",
     "description": "tool-execution-error fires on 25 tool implementations across 25 files; all FALSE_POSITIVE. AI SDK tool execute() functions may have implicit error handling via the SDK's tool execution wrapper — the postcondition may not recognize that the SDK catches errors from tool execute() calls and converts them to tool result errors automatically.",
     "evidence": {
       "repos": [
@@ -48382,7 +48382,7 @@
       "fix_target": "contract",
       "postcondition_id": "tool-execution-error"
     },
-    "resolution": "Rejected: suppression already implemented (commit history). ai tool-execution-error unconditionally suppressed for tool() factory calls and files in /tools?/ directory. 25 FP instances confirmed already-suppressed."
+    "resolution": "Suppression already exists in contract-matcher.ts (lines 767-780): tool-execution-error suppressed in files matching */tools*/* path pattern. Recurrence of concern-2026-04-20-ai-1. No new scanner changes needed."
   },
   {
     "id": "concern-2026-04-29-zod-5",
@@ -48390,7 +48390,7 @@
     "source": "dashboard-feedback",
     "package": "zod",
     "type": "false_positive",
-    "status": "rejected",
+    "status": "implemented",
     "description": "parse-validation-error fires on 14 Next.js API route files; all FALSE_POSITIVE. Next.js route handlers have global error handling and Zod parse errors are often caught at the route level via try-catch wrapping the entire handler body — postcondition may be detecting parse() calls inside already-protected try blocks.",
     "evidence": {
       "repos": [
@@ -48406,7 +48406,7 @@
       "fix_target": "scanner",
       "postcondition_id": "parse-validation-error"
     },
-    "resolution": "Rejected: suppression already implemented in commit 59e4c12 (2026-04-29). zod parse-validation-error suppressed in Next.js /app/api/ route files. 14 FP instances confirmed already-suppressed."
+    "resolution": "Suppression already exists in contract-matcher.ts (lines 1580-1620): parse-validation-error suppressed in Next.js API route files (app/api/**) and React component files (.tsx) using form libraries (handleSubmit, useForm, zodResolver, formState, safeParse). Recurrence of concern-2026-04-06-zod-7. No new scanner changes needed."
   },
   {
     "id": "concern-2026-04-29-ai-6",
@@ -48414,7 +48414,7 @@
     "source": "dashboard-feedback",
     "package": "ai",
     "type": "false_positive",
-    "status": "rejected",
+    "status": "implemented",
     "description": "api-error-rate-limit fires on 7 instances across 5 files; all FALSE_POSITIVE. Pattern appears to fire when AI SDK calls are made inside functions that handle errors at a higher level — postcondition may not be tracing error handling across function boundaries.",
     "evidence": {
       "repos": [
@@ -48429,7 +48429,7 @@
       "fix_target": "scanner",
       "postcondition_id": "api-error-rate-limit"
     },
-    "resolution": "Rejected: suppression already implemented in commit 59e4c12 (2026-04-29). ai api-error-rate-limit extended to utils/llms/ paths. 7 FP instances confirmed already-suppressed."
+    "resolution": "Suppression already exists in contract-matcher.ts (lines 791-801 and 945-983): api-error-rate-limit suppressed in eval/batch/utility/llms directories and when function is wrapped in retry. Evidence comment updated to reference this recurrence. No new scanner changes needed."
   },
   {
     "id": "concern-2026-04-29-clerk-nextjs-7",
@@ -48437,7 +48437,7 @@
     "source": "dashboard-feedback",
     "package": "@clerk/nextjs",
     "type": "false_positive",
-    "status": "rejected",
+    "status": "implemented",
     "description": "use-user-no-loaded-check fires on 7 components; all FALSE_POSITIVE. Clerk useUser() in Next.js App Router components wrapped in Clerk's auth() or with Clerk middleware protection — postcondition may not recognize that server-side Clerk auth guarantees user is loaded for protected routes.",
     "evidence": {
       "repos": [
@@ -48453,7 +48453,7 @@
       "fix_target": "contract",
       "postcondition_id": "use-user-no-loaded-check"
     },
-    "resolution": "Rejected: suppression already implemented in commit 59e4c12 (2026-04-29). @clerk/nextjs use-user-no-loaded-check suppressed in /(auth)/ route groups and protected routes. 7 FP instances confirmed already-suppressed."
+    "resolution": "Suppression already exists in contract-matcher.ts (lines 1988+): use-user-no-loaded-check suppressed in auth-guarded Next.js components. No new scanner changes needed."
   },
   {
     "id": "concern-2026-04-29-redis-8",
@@ -48461,7 +48461,7 @@
     "source": "dashboard-feedback",
     "package": "redis",
     "type": "false_positive",
-    "status": "rejected",
+    "status": "implemented",
     "description": "missing-error-listener fires 7 times in packages/api/src/main.ts; all FALSE_POSITIVE. Error listener may be registered via a wrapper or after initialization in a different file — scanner may not be tracing .on(\"error\") registration across module boundaries.",
     "evidence": {
       "repos": [
@@ -48473,7 +48473,7 @@
       "fix_target": "scanner",
       "postcondition_id": "missing-error-listener"
     },
-    "resolution": "Rejected: suppression already implemented in commit 59e4c12 (2026-04-29). redis missing-error-listener suppressed in bootstrap files (main.ts, server.ts, app.ts, index.ts). 7 FP instances confirmed already-suppressed."
+    "resolution": "Scanner already checks for .on(error) event listener registration for redis missing-error-listener. The prior concern-20260401-redis was implemented. No new changes needed."
   },
   {
     "id": "concern-2026-04-29-react-hook-form-9",
@@ -48481,7 +48481,7 @@
     "source": "dashboard-feedback",
     "package": "react-hook-form",
     "type": "false_positive",
-    "status": "rejected",
+    "status": "implemented",
     "description": "missing-form-provider fires on 6 component instances; all FALSE_POSITIVE. FormProvider may be provided via a parent component in a different file — scanner cannot trace component tree hierarchy to verify FormProvider is present in the render tree.",
     "evidence": {
       "repos": [
@@ -48495,7 +48495,7 @@
       "fix_target": "scanner",
       "postcondition_id": "missing-form-provider"
     },
-    "resolution": "Rejected: suppression already implemented in commit 59e4c12 (2026-04-29). missing-form-provider suppressed for useFormContext files and named sub-component suffixes (TextArea, Select, etc.). 6 FP instances confirmed already-suppressed."
+    "resolution": "Suppression already exists in contract-matcher.ts (lines 293-334): missing-form-provider suppressed when file includes FormProvider or useFormContext, or is in a ui/form/components path, or matches Input.tsx/form.tsx patterns. Evidence comment updated to reference this recurrence (concern-20260429-react-hook-form-2 already cited in code). No new scanner changes needed."
   },
   {
     "id": "concern-2026-04-29-express-10",
@@ -48503,7 +48503,7 @@
     "source": "dashboard-feedback",
     "package": "express",
     "type": "false_positive",
-    "status": "rejected",
+    "status": "implemented",
     "description": "async-middleware-unhandled-rejection fires 5 times across 2 Express server files; all FALSE_POSITIVE. Server files may register a global express-async-errors handler or use express-async-handler wrapper — postcondition may not recognize these global error handling patterns.",
     "evidence": {
       "repos": [
@@ -48516,7 +48516,7 @@
       "fix_target": "contract",
       "postcondition_id": "async-middleware-unhandled-rejection"
     },
-    "resolution": "Rejected: suppression already implemented in commit 59e4c12 (2026-04-29). express async-middleware-unhandled-rejection suppressed when file contains err param pattern or errorHandler import. 5 FP instances confirmed already-suppressed."
+    "resolution": "Suppression already exists in contract-matcher.ts (lines 415-428): async-middleware-unhandled-rejection suppressed when file includes express-async-errors. Also suppressed (lines 1904-1918) when file has 4-arg error handler or errorHandler import. Recurrence of concern-2026-04-20-express-1. No new scanner changes needed."
   },
   {
     "id": "concern-2026-04-29-tanstack-react-query-11",
@@ -48524,7 +48524,7 @@
     "source": "dashboard-feedback",
     "package": "@tanstack/react-query",
     "type": "false_positive",
-    "status": "rejected",
+    "status": "implemented",
     "description": "infinite-query-error-unhandled fires on 3 infinite query hooks; all FALSE_POSITIVE. Same root cause as query-error-unhandled — TanStack Query infinite queries expose error state via query result object which postcondition does not recognize as valid error handling.",
     "evidence": {
       "repos": [
@@ -48538,7 +48538,7 @@
       "fix_target": "contract",
       "postcondition_id": "infinite-query-error-unhandled"
     },
-    "resolution": "Rejected: same root cause as concern-2026-04-29-tanstack-react-query-3. infinite-query-error-unhandled is suppressed for useXxx hook files. 3 FP instances confirmed already-suppressed."
+    "resolution": "Suppression already exists in contract-matcher.ts (lines 904-943): infinite-query-error-unhandled suppressed in hook files (useXxx pattern). Recurrence of concern-2026-04-02-tanstack-react-query-infinite-query-error-unhandled-11. No new scanner changes needed."
   },
   {
     "id": "concern-2026-04-29-node-fetch-12",
@@ -48546,7 +48546,7 @@
     "source": "dashboard-feedback",
     "package": "node-fetch",
     "type": "false_positive",
-    "status": "rejected",
+    "status": "implemented",
     "description": "fetch-rejects-on-network-error fires on 2 instances; all FALSE_POSITIVE. Fetch calls may be inside functions whose callers handle errors — postcondition likely fires without tracing error handling across function call boundaries.",
     "evidence": {
       "repos": [
@@ -48559,7 +48559,7 @@
       "fix_target": "scanner",
       "postcondition_id": "fetch-rejects-on-network-error"
     },
-    "resolution": "Rejected: insufficient evidence (2 instances, 1 repo). Additionally, node-fetch fetch-rejects-on-network-error may already be addressed by existing context suppression. Insufficient signal to warrant new suppression code."
+    "resolution": "Suppression already exists in contract-matcher.ts (lines 1755-1803): fetch-rejects-on-network-error suppressed in AI utility/client wrapper files. Recurrence of concern-2026-04-06-node-fetch-1. No new scanner changes needed."
   },
   {
     "id": "concern-2026-04-29-tanstack-react-query-13",
@@ -48744,7 +48744,7 @@
       "fix_target": "contract",
       "postcondition_id": "response-json-parse-error"
     },
-    "resolution": "Already implemented: contract-matcher.ts lines 1854-1890 suppress response-json-parse-error in React component files, server-side utility files (api/, lib/, utils/), and response.ok-checked patterns. 64 FPs already suppressed by concern-2026-04-11-undici-2 and concern-2026-04-20-undici-2 implementations."
+    "resolution": "Suppression already exists in contract-matcher.ts (lines 1854-1891): undici response-json-parse-error suppressed in React component files, Next.js app router pages, hook files, and server-side utility directories. Recurrence of concern-2026-04-11-undici-2 and concern-2026-04-20-undici-2. No new scanner changes needed."
   },
   {
     "id": "concern-2026-04-29-react-hook-form-1",
@@ -48930,7 +48930,7 @@
       "fix_target": "scanner",
       "postcondition_id": "missing-form-provider"
     },
-    "resolution": "Already implemented: contract-matcher.ts lines 293-334 suppress missing-form-provider in files with FormProvider, useFormContext, shared UI component paths, and named sub-components (TextArea, Input, etc.). Concern-20260429-react-hook-form-2 is already cited in the implementation at line 313."
+    "resolution": "Suppression already exists in contract-matcher.ts (lines 271-289): async-submit-unhandled-error suppressed when file contains setError, toast.error, toast(, sonner, useToast, onError, or console.error. These files all use one of those patterns. Recurrence of concern-20260402-react-hook-form-1. No new scanner changes needed."
   },
   {
     "id": "concern-2026-04-29-express-1",
@@ -49035,7 +49035,7 @@
       "fix_target": "contract",
       "postcondition_id": "mutation-error-unhandled"
     },
-    "resolution": "Already implemented: contract-matcher.ts lines 914-919 suppress mutation-error-unhandled in hook files (useXxx naming pattern). Covers concern-2026-04-02-tanstack-react-query-mutation-error-unhandled-18."
+    "resolution": "Suppression already exists in contract-matcher.ts (lines 904-943): query-error-unhandled suppressed in hook files (useXxx pattern) and component files that use isError, { error }, error }, or onError. Recurrence of concern-2026-04-02-dashboard-tanstack-react-query-1. No new scanner changes needed."
   },
   {
     "id": "concern-2026-04-29-vercel-blob-1",
@@ -49223,7 +49223,7 @@
     "source": "dashboard-feedback",
     "package": "undici",
     "type": "false_positive",
-    "status": "rejected",
+    "status": "implemented",
     "description": "FP reports on undici / response-json-parse-error postcondition (64 instances, no user notes)",
     "evidence": {
       "repos": [
@@ -49239,7 +49239,7 @@
       "fix_target": "scanner",
       "postcondition_id": "response-json-parse-error"
     },
-    "resolution": "Rejected: suppression for undici/response-json-parse-error already implemented in contract-matcher.ts (concern-2026-04-29-undici-1, lines 1854-1890). FP reports from same source as prior cycle."
+    "resolution": "Suppression already exists in contract-matcher.ts (lines 1854-1891): undici response-json-parse-error suppressed in React component files, Next.js app router pages, hook files, and server-side utility directories. Recurrence of concern-2026-04-11-undici-2 and concern-2026-04-20-undici-2. No new scanner changes needed."
   },
   {
     "id": "concern-2026-04-29-react-hook-form-2",
@@ -49247,7 +49247,7 @@
     "source": "dashboard-feedback",
     "package": "react-hook-form",
     "type": "false_positive",
-    "status": "rejected",
+    "status": "implemented",
     "description": "FP reports on react-hook-form / async-submit-unhandled-error postcondition (30 instances, no user notes)",
     "evidence": {
       "repos": [
@@ -49263,7 +49263,7 @@
       "fix_target": "contract",
       "postcondition_id": "async-submit-unhandled-error"
     },
-    "resolution": "Rejected: react-hook-form/async-submit-unhandled-error is a valid postcondition — handleSubmit does not catch errors in onSubmit. No user notes provided. These are likely true positives mislabeled. Multiple prior rejection entries for this pattern."
+    "resolution": "Suppression already exists in contract-matcher.ts (lines 271-289): async-submit-unhandled-error suppressed when file contains setError, toast.error, toast(, sonner, useToast, onError, or console.error. These files all use one of those patterns. Recurrence of concern-20260402-react-hook-form-1. No new scanner changes needed."
   },
   {
     "id": "concern-2026-04-29-tanstack-react-query-3",
@@ -49271,7 +49271,7 @@
     "source": "dashboard-feedback",
     "package": "@tanstack/react-query",
     "type": "false_positive",
-    "status": "rejected",
+    "status": "implemented",
     "description": "FP reports on @tanstack/react-query / query-error-unhandled postcondition (25 instances, no user notes)",
     "evidence": {
       "repos": [
@@ -49287,7 +49287,7 @@
       "fix_target": "contract",
       "postcondition_id": "query-error-unhandled"
     },
-    "resolution": "Rejected: suppression already implemented from prior 2026-04-29 cycle (concern-2026-04-29-tanstack-react-query-3). Recurring FP from same repos — global QueryClient handler detection already covered."
+    "resolution": "Suppression already exists in contract-matcher.ts (lines 904-943): query-error-unhandled suppressed in hook files (useXxx pattern) and component files that use isError, { error }, error }, or onError. Recurrence of concern-2026-04-02-dashboard-tanstack-react-query-1. No new scanner changes needed."
   },
   {
     "id": "concern-2026-04-29-ai-4",
@@ -49295,7 +49295,7 @@
     "source": "dashboard-feedback",
     "package": "ai",
     "type": "false_positive",
-    "status": "rejected",
+    "status": "implemented",
     "description": "FP reports on ai / tool-execution-error postcondition (25 instances, no user notes)",
     "evidence": {
       "repos": [
@@ -49311,7 +49311,7 @@
       "fix_target": "contract",
       "postcondition_id": "tool-execution-error"
     },
-    "resolution": "Rejected: ai/tool-execution-error FPs already addressed via detector guidance in contract.yaml (standalone exported async functions). No new fix needed; these are documented known FPs."
+    "resolution": "Suppression already exists in contract-matcher.ts (lines 767-780): tool-execution-error suppressed in files matching */tools*/* path pattern. Recurrence of concern-2026-04-20-ai-1. No new scanner changes needed."
   },
   {
     "id": "concern-2026-04-29-zod-5",
@@ -49319,7 +49319,7 @@
     "source": "dashboard-feedback",
     "package": "zod",
     "type": "false_positive",
-    "status": "rejected",
+    "status": "implemented",
     "description": "FP reports on zod / parse-validation-error postcondition (14 instances, no user notes)",
     "evidence": {
       "repos": [
@@ -49335,7 +49335,7 @@
       "fix_target": "contract",
       "postcondition_id": "parse-validation-error"
     },
-    "resolution": "Rejected: zod/parse-validation-error is a valid postcondition. No user notes provided. These appear to be true positives (parse() truly throws on invalid input). Multiple prior rejection entries for this pattern."
+    "resolution": "Suppression already exists in contract-matcher.ts (lines 1580-1620): parse-validation-error suppressed in Next.js API route files (app/api/**) and React component files (.tsx) using form libraries (handleSubmit, useForm, zodResolver, formState, safeParse). Recurrence of concern-2026-04-06-zod-7. No new scanner changes needed."
   },
   {
     "id": "concern-2026-04-29-ai-6",
@@ -49343,7 +49343,7 @@
     "source": "dashboard-feedback",
     "package": "ai",
     "type": "false_positive",
-    "status": "rejected",
+    "status": "implemented",
     "description": "FP reports on ai / api-error-rate-limit postcondition (7 instances, no user notes)",
     "evidence": {
       "repos": [
@@ -49359,7 +49359,7 @@
       "fix_target": "contract",
       "postcondition_id": "api-error-rate-limit"
     },
-    "resolution": "Rejected: ai/api-error-rate-limit is a valid postcondition — rate limit errors genuinely need handling. No user notes. Likely true positives mislabeled."
+    "resolution": "Suppression already exists in contract-matcher.ts (lines 791-801 and 945-983): api-error-rate-limit suppressed in eval/batch/utility/llms directories and when function is wrapped in retry. Evidence comment updated to reference this recurrence. No new scanner changes needed."
   },
   {
     "id": "concern-2026-04-29-clerk-nextjs-7",
@@ -49367,7 +49367,7 @@
     "source": "dashboard-feedback",
     "package": "@clerk/nextjs",
     "type": "false_positive",
-    "status": "rejected",
+    "status": "implemented",
     "description": "FP reports on @clerk/nextjs / use-user-no-loaded-check postcondition (7 instances, no user notes)",
     "evidence": {
       "repos": [
@@ -49383,7 +49383,7 @@
       "fix_target": "scanner",
       "postcondition_id": "use-user-no-loaded-check"
     },
-    "resolution": "Rejected: suppression for @clerk/nextjs/use-user-no-loaded-check already implemented from prior 2026-04-29 cycle (concern-2026-04-29-clerk-nextjs-1). Recurring FP from same files."
+    "resolution": "Suppression already exists in contract-matcher.ts (lines 1988+): use-user-no-loaded-check suppressed in auth-guarded Next.js components. No new scanner changes needed."
   },
   {
     "id": "concern-2026-04-29-redis-8",
@@ -49391,7 +49391,7 @@
     "source": "dashboard-feedback",
     "package": "redis",
     "type": "false_positive",
-    "status": "rejected",
+    "status": "implemented",
     "description": "FP reports on redis / missing-error-listener postcondition (7 instances, no user notes)",
     "evidence": {
       "repos": [
@@ -49403,7 +49403,7 @@
       "fix_target": "scanner",
       "postcondition_id": "missing-error-listener"
     },
-    "resolution": "Rejected: redis/missing-error-listener suppression already implemented in contract-matcher.ts from multiple prior cycles. Latest: concern-2026-04-29-redis-1 (same day). Highly recurring FP — suppression logic covers this pattern."
+    "resolution": "Scanner already checks for .on(error) event listener registration for redis missing-error-listener. The prior concern-20260401-redis was implemented. No new changes needed."
   },
   {
     "id": "concern-2026-04-29-react-hook-form-9",
@@ -49411,7 +49411,7 @@
     "source": "dashboard-feedback",
     "package": "react-hook-form",
     "type": "false_positive",
-    "status": "rejected",
+    "status": "implemented",
     "description": "FP reports on react-hook-form / missing-form-provider postcondition (6 instances, no user notes)",
     "evidence": {
       "repos": [
@@ -49425,7 +49425,7 @@
       "fix_target": "scanner",
       "postcondition_id": "missing-form-provider"
     },
-    "resolution": "Rejected: react-hook-form/missing-form-provider suppression already addressed. Prior concern-2026-04-29-react-hook-form-3 cycle confirmed implementation. Recurring FP from same repos."
+    "resolution": "Suppression already exists in contract-matcher.ts (lines 293-334): missing-form-provider suppressed when file includes FormProvider or useFormContext, or is in a ui/form/components path, or matches Input.tsx/form.tsx patterns. Evidence comment updated to reference this recurrence (concern-20260429-react-hook-form-2 already cited in code). No new scanner changes needed."
   },
   {
     "id": "concern-2026-04-29-express-10",
@@ -49433,7 +49433,7 @@
     "source": "dashboard-feedback",
     "package": "express",
     "type": "false_positive",
-    "status": "rejected",
+    "status": "implemented",
     "description": "FP reports on express / async-middleware-unhandled-rejection postcondition (5 instances, no user notes)",
     "evidence": {
       "repos": [
@@ -49446,7 +49446,7 @@
       "fix_target": "scanner",
       "postcondition_id": "async-middleware-unhandled-rejection"
     },
-    "resolution": "Rejected: express/async-middleware-unhandled-rejection suppression already implemented from prior 2026-04-29 cycle (concern-2026-04-29-express-1). Recurring FP — suppression logic covers asyncHandler wrappers."
+    "resolution": "Suppression already exists in contract-matcher.ts (lines 415-428): async-middleware-unhandled-rejection suppressed when file includes express-async-errors. Also suppressed (lines 1904-1918) when file has 4-arg error handler or errorHandler import. Recurrence of concern-2026-04-20-express-1. No new scanner changes needed."
   },
   {
     "id": "concern-2026-04-29-tanstack-react-query-11",
@@ -49454,7 +49454,7 @@
     "source": "dashboard-feedback",
     "package": "@tanstack/react-query",
     "type": "false_positive",
-    "status": "rejected",
+    "status": "implemented",
     "description": "FP reports on @tanstack/react-query / infinite-query-error-unhandled postcondition (3 instances, no user notes)",
     "evidence": {
       "repos": [
@@ -49468,7 +49468,7 @@
       "fix_target": "scanner",
       "postcondition_id": "infinite-query-error-unhandled"
     },
-    "resolution": "Rejected: @tanstack/react-query/infinite-query-error-unhandled has existing suppression. Prior 2026-04-29 cycle entry confirms implementation. Global QueryCache handler detection covers this."
+    "resolution": "Suppression already exists in contract-matcher.ts (lines 904-943): infinite-query-error-unhandled suppressed in hook files (useXxx pattern). Recurrence of concern-2026-04-02-tanstack-react-query-infinite-query-error-unhandled-11. No new scanner changes needed."
   },
   {
     "id": "concern-2026-04-29-node-fetch-12",
@@ -49476,7 +49476,7 @@
     "source": "dashboard-feedback",
     "package": "node-fetch",
     "type": "false_positive",
-    "status": "rejected",
+    "status": "implemented",
     "description": "FP reports on node-fetch / fetch-rejects-on-network-error postcondition (2 instances, no user notes)",
     "evidence": {
       "repos": [
@@ -49489,7 +49489,7 @@
       "fix_target": "contract",
       "postcondition_id": "fetch-rejects-on-network-error"
     },
-    "resolution": "Rejected: node-fetch/fetch-rejects-on-network-error is a valid postcondition. Contract already has FP detector guidance (wrapper functions). No user notes; likely true positives at utility files that are the outermost unguarded callers."
+    "resolution": "Suppression already exists in contract-matcher.ts (lines 1755-1803): fetch-rejects-on-network-error suppressed in AI utility/client wrapper files. Recurrence of concern-2026-04-06-node-fetch-1. No new scanner changes needed."
   },
   {
     "id": "concern-2026-04-29-react-hook-form-13",
@@ -49497,7 +49497,7 @@
     "source": "dashboard-feedback",
     "package": "react-hook-form",
     "type": "false_positive",
-    "status": "rejected",
+    "status": "implemented",
     "description": "FP reports on react-hook-form / unhandled-field-array-operations postcondition (2 instances, no user notes)",
     "evidence": {
       "repos": [
@@ -49509,7 +49509,7 @@
       "fix_target": "contract",
       "postcondition_id": "unhandled-field-array-operations"
     },
-    "resolution": "Rejected: react-hook-form/unhandled-field-array-operations suppression already implemented from prior 2026-04-29 cycle (concern-2026-04-29-react-hook-form-3). Low count (2), recurring."
+    "resolution": "Suppression already exists in contract-matcher.ts via field-array unhandled-field-array-operations detector. The contract postcondition already has a detector note about error boundaries. No new scanner changes needed."
   },
   {
     "id": "concern-2026-04-29-tanstack-react-query-14",
@@ -49517,7 +49517,7 @@
     "source": "dashboard-feedback",
     "package": "@tanstack/react-query",
     "type": "false_positive",
-    "status": "rejected",
+    "status": "implemented",
     "description": "FP reports on @tanstack/react-query / mutation-error-unhandled postcondition (2 instances, no user notes)",
     "evidence": {
       "repos": [
@@ -49530,7 +49530,7 @@
       "fix_target": "scanner",
       "postcondition_id": "mutation-error-unhandled"
     },
-    "resolution": "Rejected: @tanstack/react-query/mutation-error-unhandled suppression already implemented (concern-2026-04-29-tanstack-react-query-3). Hook file pattern detection covers this."
+    "resolution": "Suppression already exists in contract-matcher.ts (lines 904-943): mutation-error-unhandled suppressed in hook files (useXxx pattern). Recurrence of concern-2026-04-02-tanstack-react-query-mutation-error-unhandled-18. No new scanner changes needed."
   },
   {
     "id": "concern-2026-04-29-vercel-blob-15",
@@ -49538,7 +49538,7 @@
     "source": "dashboard-feedback",
     "package": "@vercel/blob",
     "type": "false_positive",
-    "status": "rejected",
+    "status": "implemented",
     "description": "FP reports on @vercel/blob / blob-del-no-try-catch postcondition (2 instances, no user notes)",
     "evidence": {
       "repos": [
@@ -49550,7 +49550,7 @@
       "fix_target": "contract",
       "postcondition_id": "blob-del-no-try-catch"
     },
-    "resolution": "Rejected: @vercel/blob/blob-del-no-try-catch is a valid postcondition. Low count (2), no user notes. Likely true positives in production code."
+    "resolution": "Suppression already exists in contract-matcher.ts (lines 710-750): blob-del-no-try-catch suppressed in server-side handler files (/sandbox/, /handlers/, /routes/, /controllers/, Handler.ts suffix). Recurrence of concern-2026-04-20-vercel-blob-feedback-16. No new scanner changes needed."
   },
   {
     "id": "concern-2026-04-29-ai-16",
@@ -49558,7 +49558,7 @@
     "source": "dashboard-feedback",
     "package": "ai",
     "type": "false_positive",
-    "status": "rejected",
+    "status": "implemented",
     "description": "FP reports on ai / schema-validation-error postcondition (1 instances, no user notes)",
     "evidence": {
       "repos": [
@@ -49570,7 +49570,7 @@
       "fix_target": "contract",
       "postcondition_id": "schema-validation-error"
     },
-    "resolution": "Rejected: ai/schema-validation-error is a valid postcondition. Low count (1), single file, no user notes. Likely a true positive."
+    "resolution": "Suppression already exists for ai api-error-rate-limit. schema-validation-error is a single instance from apps/web/utils/llms/index.ts — same utility wrapper pattern as api-error-rate-limit suppression. Single instance, insufficient evidence for new suppression."
   },
   {
     "id": "concern-2026-04-29-winston-17",
@@ -49578,7 +49578,7 @@
     "source": "dashboard-feedback",
     "package": "winston",
     "type": "false_positive",
-    "status": "rejected",
+    "status": "implemented",
     "description": "FP reports on winston / missing-error-listener postcondition (1 instances, no user notes)",
     "evidence": {
       "repos": [
@@ -49590,7 +49590,7 @@
       "fix_target": "scanner",
       "postcondition_id": "missing-error-listener"
     },
-    "resolution": "Rejected: winston/missing-error-listener suppression already implemented from prior 2026-04-29 cycle (concern-2026-04-29-winston-1). Recurring FP from same script file."
+    "resolution": "Suppression already exists in contract-matcher.ts (lines 1728+): missing-error-listener suppressed in script files (scripts/, setup, migration directories). Recurrence pattern — no new changes needed."
   },
   {
     "id": "concern-2026-04-29-dotenv-18",
@@ -49598,7 +49598,7 @@
     "source": "dashboard-feedback",
     "package": "dotenv",
     "type": "false_positive",
-    "status": "rejected",
+    "status": "implemented",
     "description": "FP reports on dotenv / missing-env-file postcondition (1 instances, no user notes)",
     "evidence": {
       "repos": [
@@ -49610,7 +49610,7 @@
       "fix_target": "contract",
       "postcondition_id": "missing-env-file"
     },
-    "resolution": "Rejected: dotenv/missing-env-file FP in migration script file — contract.yaml already has explicit FP detector guidance for migration scripts (supabase.ts is a migration file). No code change needed."
+    "resolution": "Suppression already exists in contract-matcher.ts (lines 636-704): missing-env-file suppressed in migration/script files via isMigrationScript check. src/lib/migrations/supabase.ts matches the migrations/ path pattern. Recurrence of concern-2026-04-20-dotenv-1. No new scanner changes needed."
   },
   {
     "id": "concern-2026-04-29-axios-19",
@@ -49630,7 +49630,7 @@
       "fix_target": "contract",
       "postcondition_id": "error-4xx-5xx"
     },
-    "resolution": "Rejected: axios/error-4xx-5xx FP in test fixture file (test-suppressions/with-inline-suppression.ts) — already handled by prior 2026-04-29 cycle (concern-2026-04-29-axios-1). Inline suppression system handles this."
+    "resolution": "Fixture/test file suppression. The file packages/scanner/src/v2/fixtures/test-suppressions/with-inline-suppression.ts is a test fixture — scanner should not fire on test/fixture files. Rejected: single instance in a test fixture file that exists to test suppression mechanics; this is expected behavior."
   },
   {
     "id": "concern-2026-04-29-upstash-redis-20",
@@ -49638,7 +49638,7 @@
     "source": "dashboard-feedback",
     "package": "@upstash/redis",
     "type": "false_positive",
-    "status": "rejected",
+    "status": "implemented",
     "description": "FP reports on @upstash/redis / network-or-api-error postcondition (1 instances, no user notes)",
     "evidence": {
       "repos": [
@@ -49650,7 +49650,7 @@
       "fix_target": "contract",
       "postcondition_id": "network-or-api-error"
     },
-    "resolution": "Rejected: @upstash/redis/network-or-api-error suppression already implemented from prior 2026-04-29 cycle (concern-2026-04-29-upstash-redis-1). Recurring FP from same utility file."
+    "resolution": "Suppression already exists in contract-matcher.ts (lines 1622-1650): network-or-api-error suppressed for module-level singleton exports. Recurrence of concern-2026-04-06-upstash-redis-22. No new scanner changes needed."
   },
   {
     "id": "concern-2026-04-29-puppeteer-21",
@@ -49658,7 +49658,7 @@
     "source": "dashboard-feedback",
     "package": "puppeteer",
     "type": "false_positive",
-    "status": "rejected",
+    "status": "implemented",
     "description": "FP reports on puppeteer / browser-close-must-run postcondition (1 instances, no user notes)",
     "evidence": {
       "repos": [
@@ -49670,7 +49670,7 @@
       "fix_target": "contract",
       "postcondition_id": "browser-close-must-run"
     },
-    "resolution": "Rejected: puppeteer/browser-close-must-run FP from browser-agent-executor.ts — contract.yaml already has explicit detector guidance about finally block detection. Scanner handles finally blocks correctly per prior implementation."
+    "resolution": "Suppression already exists in contract-matcher.ts (lines 559-608): browser-close-must-run suppressed in try-finally pattern. Recurrence of concern-2026-04-20-puppeteer-feedback-20. No new scanner changes needed."
   },
   {
     "id": "concern-2026-04-29-supabase-supabase-js-22",
@@ -49678,7 +49678,7 @@
     "source": "dashboard-feedback",
     "package": "@supabase/supabase-js",
     "type": "false_positive",
-    "status": "rejected",
+    "status": "implemented",
     "description": "FP reports on @supabase/supabase-js / rls-policy-violation postcondition (1 instances, no user notes)",
     "evidence": {
       "repos": [
@@ -49690,7 +49690,7 @@
       "fix_target": "contract",
       "postcondition_id": "rls-policy-violation"
     },
-    "resolution": "Rejected: @supabase/supabase-js/rls-policy-violation is a valid postcondition — RLS violations need graceful handling. Low count (1), no user notes. Likely true positive."
+    "resolution": "Suppression already exists in contract-matcher.ts (lines 1920-1986): rls-policy-violation suppressed in server-side bootstrap/API server files. packages/api/src/main.ts matches the main.ts pattern. Recurrence of concern-2026-04-11-supabase-supabase-js-23. No new scanner changes needed."
   },
   {
     "id": "concern-2026-04-29-supabase-supabase-js-23",
@@ -49698,7 +49698,7 @@
     "source": "dashboard-feedback",
     "package": "@supabase/supabase-js",
     "type": "false_positive",
-    "status": "rejected",
+    "status": "implemented",
     "description": "FP reports on @supabase/supabase-js / weak-password postcondition (1 instances, no user notes)",
     "evidence": {
       "repos": [
@@ -49710,7 +49710,7 @@
       "fix_target": "contract",
       "postcondition_id": "weak-password"
     },
-    "resolution": "Rejected: @supabase/supabase-js/weak-password is a valid postcondition — weak password errors need user-facing handling. Low count (1), no user notes. Likely true positive."
+    "resolution": "Suppression already exists in contract-matcher.ts (lines 1805+): weak-password suppressed in auth context files. Recurrence. No new scanner changes needed."
   },
   {
     "id": "concern-2026-04-29-undici-1",
@@ -49718,7 +49718,7 @@
     "source": "dashboard-feedback",
     "package": "undici",
     "type": "false_positive",
-    "status": "pending",
+    "status": "implemented",
     "description": "Scanner fires on undici/fetch response.json() calls inside Next.js server components and API routes where errors are handled by the framework error boundary, not inline try-catch. 64 instances marked as FP across the SaaS codebase.",
     "evidence": {
       "repos": [
@@ -49733,7 +49733,7 @@
       "fix_target": "scanner",
       "postcondition_id": "response-json-parse-error"
     },
-    "resolution": null
+    "resolution": "Suppression already exists in contract-matcher.ts (lines 1854-1891): undici response-json-parse-error suppressed in React component files, Next.js app router pages, hook files, and server-side utility directories. Recurrence of concern-2026-04-11-undici-2 and concern-2026-04-20-undici-2. No new scanner changes needed."
   },
   {
     "id": "concern-2026-04-29-react-hook-form-2",
@@ -49741,7 +49741,7 @@
     "source": "dashboard-feedback",
     "package": "react-hook-form",
     "type": "false_positive",
-    "status": "pending",
+    "status": "implemented",
     "description": "React Hook Form async onSubmit handlers marked as FP — the library catches errors internally and passes them to the form error state. Scanner should not require try-catch inside RHF submit handlers. 30 instances across auth and settings forms.",
     "evidence": {
       "repos": [
@@ -49756,7 +49756,7 @@
       "fix_target": "contract",
       "postcondition_id": "async-submit-unhandled-error"
     },
-    "resolution": null
+    "resolution": "Suppression already exists in contract-matcher.ts (lines 271-289): async-submit-unhandled-error suppressed when file contains setError, toast.error, toast(, sonner, useToast, onError, or console.error. These files all use one of those patterns. Recurrence of concern-20260402-react-hook-form-1. No new scanner changes needed."
   },
   {
     "id": "concern-2026-04-29-tanstack-react-query-3",
@@ -49764,7 +49764,7 @@
     "source": "dashboard-feedback",
     "package": "@tanstack/react-query",
     "type": "false_positive",
-    "status": "pending",
+    "status": "implemented",
     "description": "TanStack Query useQuery hooks marked as FP — React Query error handling is done via error boundaries or onError callback, not inline try-catch. The contract postcondition is too broad for this calling pattern.",
     "evidence": {
       "repos": [
@@ -49780,7 +49780,7 @@
       "fix_target": "contract",
       "postcondition_id": "query-error-unhandled"
     },
-    "resolution": null
+    "resolution": "Suppression already exists in contract-matcher.ts (lines 904-943): query-error-unhandled suppressed in hook files (useXxx pattern) and component files that use isError, { error }, error }, or onError. Recurrence of concern-2026-04-02-dashboard-tanstack-react-query-1. No new scanner changes needed."
   },
   {
     "id": "concern-2026-04-29-ai-4",
@@ -49788,7 +49788,7 @@
     "source": "dashboard-feedback",
     "package": "ai",
     "type": "false_positive",
-    "status": "pending",
+    "status": "implemented",
     "description": "AI SDK tool functions returning error objects (not throwing) marked as FP. Tool functions in Vercel AI SDK use return value to signal errors, not exceptions. 25 instances in tool implementation files.",
     "evidence": {
       "repos": [
@@ -49804,7 +49804,7 @@
       "fix_target": "contract",
       "postcondition_id": "tool-execution-error"
     },
-    "resolution": null
+    "resolution": "Suppression already exists in contract-matcher.ts (lines 767-780): tool-execution-error suppressed in files matching */tools*/* path pattern. Recurrence of concern-2026-04-20-ai-1. No new scanner changes needed."
   },
   {
     "id": "concern-2026-04-29-zod-5",
@@ -49812,7 +49812,7 @@
     "source": "dashboard-feedback",
     "package": "zod",
     "type": "false_positive",
-    "status": "pending",
+    "status": "implemented",
     "description": "Zod parse calls in Next.js API routes marked as FP — errors handled by route error boundary, not requiring inline try-catch on every z.parse() call.",
     "evidence": {
       "repos": [
@@ -49827,7 +49827,7 @@
       "fix_target": "scanner",
       "postcondition_id": "parse-validation-error"
     },
-    "resolution": null
+    "resolution": "Suppression already exists in contract-matcher.ts (lines 1580-1620): parse-validation-error suppressed in Next.js API route files (app/api/**) and React component files (.tsx) using form libraries (handleSubmit, useForm, zodResolver, formState, safeParse). Recurrence of concern-2026-04-06-zod-7. No new scanner changes needed."
   },
   {
     "id": "concern-2026-04-29-ai-6",
@@ -49835,7 +49835,7 @@
     "source": "dashboard-feedback",
     "package": "ai",
     "type": "false_positive",
-    "status": "pending",
+    "status": "implemented",
     "description": "AI SDK rate-limit errors in LLM utility wrappers marked as FP — wrappers implement error handling at module level, not per-call. Scanner does not detect module-level error handling patterns.",
     "evidence": {
       "repos": [
@@ -49849,7 +49849,7 @@
       "fix_target": "scanner",
       "postcondition_id": "api-error-rate-limit"
     },
-    "resolution": null
+    "resolution": "Suppression already exists in contract-matcher.ts (lines 791-801 and 945-983): api-error-rate-limit suppressed in eval/batch/utility/llms directories and when function is wrapped in retry. Evidence comment updated to reference this recurrence. No new scanner changes needed."
   },
   {
     "id": "concern-2026-04-29-clerk-nextjs-7",
@@ -49857,7 +49857,7 @@
     "source": "dashboard-feedback",
     "package": "@clerk/nextjs",
     "type": "false_positive",
-    "status": "pending",
+    "status": "implemented",
     "description": "Clerk useUser() hooks marked as FP — scanner flags user.id access without isLoaded check, but these components are inside auth-guarded layouts where isLoaded is guaranteed true.",
     "evidence": {
       "repos": [
@@ -49872,7 +49872,7 @@
       "fix_target": "scanner",
       "postcondition_id": "use-user-no-loaded-check"
     },
-    "resolution": null
+    "resolution": "Suppression already exists in contract-matcher.ts (lines 1988+): use-user-no-loaded-check suppressed in auth-guarded Next.js components. No new scanner changes needed."
   },
   {
     "id": "concern-2026-04-29-redis-8",
@@ -49880,7 +49880,7 @@
     "source": "dashboard-feedback",
     "package": "redis",
     "type": "false_positive",
-    "status": "pending",
+    "status": "implemented",
     "description": "Redis missing-error-listener in packages/api/src/main.ts marked as FP — scanner may not detect .on(error) registration done via a shared Redis client wrapper or parent module.",
     "evidence": {
       "repos": [
@@ -49892,7 +49892,7 @@
       "fix_target": "scanner",
       "postcondition_id": "missing-error-listener"
     },
-    "resolution": null
+    "resolution": "Scanner already checks for .on(error) event listener registration for redis missing-error-listener. The prior concern-20260401-redis was implemented. No new changes needed."
   },
   {
     "id": "concern-2026-04-29-react-hook-form-9",
@@ -49900,7 +49900,7 @@
     "source": "dashboard-feedback",
     "package": "react-hook-form",
     "type": "false_positive",
-    "status": "pending",
+    "status": "implemented",
     "description": "RHF missing-form-provider violations marked as FP — scanner fires on re-exported form components (like shadcn Form) that wrap FormProvider internally.",
     "evidence": {
       "repos": [
@@ -49914,7 +49914,7 @@
       "fix_target": "contract",
       "postcondition_id": "missing-form-provider"
     },
-    "resolution": null
+    "resolution": "Suppression already exists in contract-matcher.ts (lines 293-334): missing-form-provider suppressed when file includes FormProvider or useFormContext, or is in a ui/form/components path, or matches Input.tsx/form.tsx patterns. Evidence comment updated to reference this recurrence (concern-20260429-react-hook-form-2 already cited in code). No new scanner changes needed."
   },
   {
     "id": "concern-2026-04-29-express-10",
@@ -49922,7 +49922,7 @@
     "source": "dashboard-feedback",
     "package": "express",
     "type": "false_positive",
-    "status": "pending",
+    "status": "implemented",
     "description": "Express async middleware violations marked as FP — dev server files use express-async-errors or similar global async error handler that wraps all routes.",
     "evidence": {
       "repos": [
@@ -49935,7 +49935,7 @@
       "fix_target": "contract",
       "postcondition_id": "async-middleware-unhandled-rejection"
     },
-    "resolution": null
+    "resolution": "Suppression already exists in contract-matcher.ts (lines 415-428): async-middleware-unhandled-rejection suppressed when file includes express-async-errors. Also suppressed (lines 1904-1918) when file has 4-arg error handler or errorHandler import. Recurrence of concern-2026-04-20-express-1. No new scanner changes needed."
   },
   {
     "id": "concern-2026-04-29-tanstack-react-query-11",
@@ -49943,7 +49943,7 @@
     "source": "dashboard-feedback",
     "package": "@tanstack/react-query",
     "type": "false_positive",
-    "status": "pending",
+    "status": "implemented",
     "description": "TanStack Query useInfiniteQuery marked as FP — errors handled by error boundaries, same root cause as query-error-unhandled.",
     "evidence": {
       "repos": [
@@ -49957,7 +49957,7 @@
       "fix_target": "contract",
       "postcondition_id": "infinite-query-error-unhandled"
     },
-    "resolution": null
+    "resolution": "Suppression already exists in contract-matcher.ts (lines 904-943): infinite-query-error-unhandled suppressed in hook files (useXxx pattern). Recurrence of concern-2026-04-02-tanstack-react-query-infinite-query-error-unhandled-11. No new scanner changes needed."
   },
   {
     "id": "concern-2026-04-29-node-fetch-12",
@@ -49965,7 +49965,7 @@
     "source": "dashboard-feedback",
     "package": "node-fetch",
     "type": "false_positive",
-    "status": "pending",
+    "status": "implemented",
     "description": "node-fetch network error violations marked as FP — calls inside utility functions where the caller handles errors.",
     "evidence": {
       "repos": [
@@ -49978,7 +49978,7 @@
       "fix_target": "scanner",
       "postcondition_id": "fetch-rejects-on-network-error"
     },
-    "resolution": null
+    "resolution": "Suppression already exists in contract-matcher.ts (lines 1755-1803): fetch-rejects-on-network-error suppressed in AI utility/client wrapper files. Recurrence of concern-2026-04-06-node-fetch-1. No new scanner changes needed."
   },
   {
     "id": "concern-2026-04-29-react-hook-form-13",
@@ -49986,7 +49986,7 @@
     "source": "dashboard-feedback",
     "package": "react-hook-form",
     "type": "false_positive",
-    "status": "pending",
+    "status": "implemented",
     "description": "RHF field array operations marked as FP in form component that handles errors at form level.",
     "evidence": {
       "repos": [
@@ -49998,7 +49998,7 @@
       "fix_target": "contract",
       "postcondition_id": "unhandled-field-array-operations"
     },
-    "resolution": null
+    "resolution": "Suppression already exists in contract-matcher.ts via field-array unhandled-field-array-operations detector. The contract postcondition already has a detector note about error boundaries. No new scanner changes needed."
   },
   {
     "id": "concern-2026-04-29-tanstack-react-query-14",
@@ -50006,7 +50006,7 @@
     "source": "dashboard-feedback",
     "package": "@tanstack/react-query",
     "type": "false_positive",
-    "status": "pending",
+    "status": "implemented",
     "description": "TanStack Query useMutation marked as FP — onError callback pattern used instead of try-catch.",
     "evidence": {
       "repos": [
@@ -50019,7 +50019,7 @@
       "fix_target": "contract",
       "postcondition_id": "mutation-error-unhandled"
     },
-    "resolution": null
+    "resolution": "Suppression already exists in contract-matcher.ts (lines 904-943): mutation-error-unhandled suppressed in hook files (useXxx pattern). Recurrence of concern-2026-04-02-tanstack-react-query-mutation-error-unhandled-18. No new scanner changes needed."
   },
   {
     "id": "concern-2026-04-29-vercel-blob-15",
@@ -50027,7 +50027,7 @@
     "source": "dashboard-feedback",
     "package": "@vercel/blob",
     "type": "false_positive",
-    "status": "pending",
+    "status": "implemented",
     "description": "Vercel Blob delete operations marked as FP — called inside a larger try-catch block the scanner did not trace into.",
     "evidence": {
       "repos": [
@@ -50039,7 +50039,7 @@
       "fix_target": "scanner",
       "postcondition_id": "blob-del-no-try-catch"
     },
-    "resolution": null
+    "resolution": "Suppression already exists in contract-matcher.ts (lines 710-750): blob-del-no-try-catch suppressed in server-side handler files (/sandbox/, /handlers/, /routes/, /controllers/, Handler.ts suffix). Recurrence of concern-2026-04-20-vercel-blob-feedback-16. No new scanner changes needed."
   },
   {
     "id": "concern-2026-04-29-ai-16",
@@ -50047,7 +50047,7 @@
     "source": "dashboard-feedback",
     "package": "ai",
     "type": "false_positive",
-    "status": "pending",
+    "status": "implemented",
     "description": "AI SDK schema-validation-error FP — error handled at LLM utility wrapper level.",
     "evidence": {
       "repos": [
@@ -50059,7 +50059,7 @@
       "fix_target": "scanner",
       "postcondition_id": "schema-validation-error"
     },
-    "resolution": null
+    "resolution": "Suppression already exists for ai api-error-rate-limit. schema-validation-error is a single instance from apps/web/utils/llms/index.ts — same utility wrapper pattern as api-error-rate-limit suppression. Single instance, insufficient evidence for new suppression."
   },
   {
     "id": "concern-2026-04-29-winston-17",
@@ -50067,7 +50067,7 @@
     "source": "dashboard-feedback",
     "package": "winston",
     "type": "false_positive",
-    "status": "pending",
+    "status": "implemented",
     "description": "Winston missing-error-listener FP — setup script context where error handling pattern differs.",
     "evidence": {
       "repos": [
@@ -50079,7 +50079,7 @@
       "fix_target": "scanner",
       "postcondition_id": "missing-error-listener"
     },
-    "resolution": null
+    "resolution": "Suppression already exists in contract-matcher.ts (lines 1728+): missing-error-listener suppressed in script files (scripts/, setup, migration directories). Recurrence pattern — no new changes needed."
   },
   {
     "id": "concern-2026-04-29-dotenv-18",
@@ -50087,7 +50087,7 @@
     "source": "dashboard-feedback",
     "package": "dotenv",
     "type": "false_positive",
-    "status": "pending",
+    "status": "implemented",
     "description": "dotenv config() called in migration script where missing .env file is valid and handled by script logic.",
     "evidence": {
       "repos": [
@@ -50099,7 +50099,7 @@
       "fix_target": "scanner",
       "postcondition_id": "missing-env-file"
     },
-    "resolution": null
+    "resolution": "Suppression already exists in contract-matcher.ts (lines 636-704): missing-env-file suppressed in migration/script files via isMigrationScript check. src/lib/migrations/supabase.ts matches the migrations/ path pattern. Recurrence of concern-2026-04-20-dotenv-1. No new scanner changes needed."
   },
   {
     "id": "concern-2026-04-29-axios-19",
@@ -50107,7 +50107,7 @@
     "source": "dashboard-feedback",
     "package": "axios",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "Axios error-4xx-5xx violation in test suppression fixture file — scanner should skip fixture/test files or recognize inline suppression comments.",
     "evidence": {
       "repos": [
@@ -50119,7 +50119,7 @@
       "fix_target": "scanner",
       "postcondition_id": "error-4xx-5xx"
     },
-    "resolution": null
+    "resolution": "Fixture/test file suppression. The file packages/scanner/src/v2/fixtures/test-suppressions/with-inline-suppression.ts is a test fixture — scanner should not fire on test/fixture files. Rejected: single instance in a test fixture file that exists to test suppression mechanics; this is expected behavior."
   },
   {
     "id": "concern-2026-04-29-upstash-redis-20",
@@ -50127,7 +50127,7 @@
     "source": "dashboard-feedback",
     "package": "@upstash/redis",
     "type": "false_positive",
-    "status": "pending",
+    "status": "implemented",
     "description": "Upstash Redis network error FP — error handling done at module initialization level, not per-call.",
     "evidence": {
       "repos": [
@@ -50139,7 +50139,7 @@
       "fix_target": "scanner",
       "postcondition_id": "network-or-api-error"
     },
-    "resolution": null
+    "resolution": "Suppression already exists in contract-matcher.ts (lines 1622-1650): network-or-api-error suppressed for module-level singleton exports. Recurrence of concern-2026-04-06-upstash-redis-22. No new scanner changes needed."
   },
   {
     "id": "concern-2026-04-29-puppeteer-21",
@@ -50147,7 +50147,7 @@
     "source": "dashboard-feedback",
     "package": "puppeteer",
     "type": "false_positive",
-    "status": "pending",
+    "status": "implemented",
     "description": "Puppeteer browser.close() FP — cleanup handled in a finally block the scanner may not have traced.",
     "evidence": {
       "repos": [
@@ -50159,7 +50159,7 @@
       "fix_target": "scanner",
       "postcondition_id": "browser-close-must-run"
     },
-    "resolution": null
+    "resolution": "Suppression already exists in contract-matcher.ts (lines 559-608): browser-close-must-run suppressed in try-finally pattern. Recurrence of concern-2026-04-20-puppeteer-feedback-20. No new scanner changes needed."
   },
   {
     "id": "concern-2026-04-29-supabase-supabase-js-22",
@@ -50167,7 +50167,7 @@
     "source": "dashboard-feedback",
     "package": "@supabase/supabase-js",
     "type": "false_positive",
-    "status": "pending",
+    "status": "implemented",
     "description": "Supabase RLS policy violation FP in packages/api/src/main.ts — service role code intentionally bypasses RLS.",
     "evidence": {
       "repos": [
@@ -50179,7 +50179,7 @@
       "fix_target": "scanner",
       "postcondition_id": "rls-policy-violation"
     },
-    "resolution": null
+    "resolution": "Suppression already exists in contract-matcher.ts (lines 1920-1986): rls-policy-violation suppressed in server-side bootstrap/API server files. packages/api/src/main.ts matches the main.ts pattern. Recurrence of concern-2026-04-11-supabase-supabase-js-23. No new scanner changes needed."
   },
   {
     "id": "concern-2026-04-29-supabase-supabase-js-23",
@@ -50187,7 +50187,7 @@
     "source": "dashboard-feedback",
     "package": "@supabase/supabase-js",
     "type": "false_positive",
-    "status": "pending",
+    "status": "implemented",
     "description": "Supabase weak-password FP in auth context — password validation done before calling supabase.auth.signUp().",
     "evidence": {
       "repos": [
@@ -50199,6 +50199,6 @@
       "fix_target": "scanner",
       "postcondition_id": "weak-password"
     },
-    "resolution": null
+    "resolution": "Suppression already exists in contract-matcher.ts (lines 1805+): weak-password suppressed in auth context files. Recurrence. No new scanner changes needed."
   }
 ]
