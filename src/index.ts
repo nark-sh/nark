@@ -49,11 +49,6 @@ import { createAuthCommand } from "./cli/auth.js";
 import { getToken } from "./lib/auth.js";
 import { createCiCommand } from "./cli/ci.js";
 import { generateAIPrompt } from "./ai-prompt-generator.js";
-import {
-  loadStore,
-  removeStaleSuppressions,
-  saveStore,
-} from "./suppressions/suppression-store.js";
 import { writeScanResults, findNarkDir } from "./output/index.js";
 import { getSuppressedFingerprints } from "./triage/suppressor.js";
 import { writeSarifOutput } from "./output/sarif-writer.js";
@@ -752,57 +747,10 @@ async function main(options: any) {
   writeAuditRecord(finalRecord, outputPath);
   if (verbose) console.log(chalk.gray(`Audit record written to ${outputPath}`));
 
-  // Automatically clean stale suppressions from .nark-suppressions.json
-  const suppressionsStorePath = path.join(
-    options.project,
-    ".nark-suppressions.json",
-  );
-  if (fs.existsSync(suppressionsStorePath)) {
-    try {
-      const store = loadStore(options.project);
-      if (store.suppressions.length > 0) {
-        // Collect all fingerprints seen in this scan (suppressed and active).
-        // We must include fingerprints from both the remaining violations AND
-        // any suppressed violations (which were already filtered out above).
-        const seenFingerprints = new Set<string>();
-        violations.forEach((v) => {
-          const fp = (v as any).fingerprint;
-          if (fp) seenFingerprints.add(fp);
-        });
-        // Include suppressed violations from the v1 analyzer
-        const suppressedVios = analyzer.getSuppressedViolations?.() ?? [];
-        suppressedVios.forEach((v: any) => {
-          const fp = v.fingerprint;
-          if (fp) seenFingerprints.add(fp);
-        });
-        // Include suppressed violations from the v2 analyzer
-        const v2Suppressed = v2Result?.suppressedViolations ?? [];
-        v2Suppressed.forEach((v: any) => {
-          const fp = v.fingerprint;
-          if (fp) seenFingerprints.add(fp);
-        });
-
-        const removed = removeStaleSuppressions(store, seenFingerprints);
-        if (removed.length > 0) {
-          saveStore(options.project, store);
-          console.log(
-            chalk.green(
-              `\n✓ Removed ${removed.length} stale suppression${removed.length === 1 ? "" : "s"} (violations no longer detected):`,
-            ),
-          );
-          removed.forEach((s) => {
-            console.log(
-              chalk.dim(
-                `    ${s.filePath}:${s.lineNumber} — ${s.package}/${s.postconditionId}`,
-              ),
-            );
-          });
-        }
-      }
-    } catch {
-      // Don't fail the scan if suppression cleanup errors
-    }
-  }
+  // Stale suppression cleanup is intentionally NOT automatic.
+  // Different corpus versions or analyzer versions produce different violations,
+  // so a suppression that doesn't match in one scan may be needed in another.
+  // Users can run `nark suppressions clean` to manually prune stale entries.
 
   // Generate AI agent prompt file
   const aiPromptPath = await generateAIPrompt(finalRecord, outputPath);

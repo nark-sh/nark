@@ -9,6 +9,42 @@
       "lineNumber": 76,
       "reason": "FP: res.ok is checked before .json() (line 65), and .json() is wrapped in try-catch with SyntaxError inspection",
       "suppressedAt": "2026-04-29T19:10:00Z"
+    },
+    {
+      "fingerprint": "ac714aa66c77d4db20c54fcbd6d56ed8",
+      "package": "typescript",
+      "postconditionId": "preemit-diagnostics-not-called-before-emit",
+      "filePath": "src/analyzer.ts",
+      "lineNumber": 173,
+      "reason": "FP: diagnostics ARE checked on line 176 (if fileNotFoundDiagnostics.length > 0); used for graceful degradation, not emit",
+      "suppressedAt": "2026-04-29T20:15:00Z"
+    },
+    {
+      "fingerprint": "561e49e837f5042a4c82b2b79e9a0d8a",
+      "package": "typescript",
+      "postconditionId": "readconfigfile-error-not-checked",
+      "filePath": "src/v2/analyzer.ts",
+      "lineNumber": 63,
+      "reason": "FP: configFile.error IS checked on line 64 with throw",
+      "suppressedAt": "2026-04-29T20:15:00Z"
+    },
+    {
+      "fingerprint": "1534962a49e4354177ce7a5bcb52f954",
+      "package": "typescript",
+      "postconditionId": "preemit-diagnostics-not-called-before-emit",
+      "filePath": "src/v2/analyzer.ts",
+      "lineNumber": 140,
+      "reason": "FP: diagnostics ARE checked on line 142 (if fallbackDiagnostics.length > 0); used for graceful degradation, not emit",
+      "suppressedAt": "2026-04-29T20:15:00Z"
+    },
+    {
+      "fingerprint": "5f57094019132ca61de76747e984bc3b",
+      "package": "typescript",
+      "postconditionId": "preemit-diagnostics-not-called-before-emit",
+      "filePath": "src/v2/analyzer.ts",
+      "lineNumber": 164,
+      "reason": "FP: diagnostics ARE checked on line 166 (if fileNotFoundDiagnostics.length > 0); used for graceful degradation, not emit",
+      "suppressedAt": "2026-04-29T20:15:00Z"
     }
   ]
 }
