@@ -1,6 +1,6 @@
 /**
  * CLI Command: init
- * Bootstraps a project for behavioral contract scanning.
+ * Bootstraps a project for nark scanning.
  */
 
 import { Command } from 'commander';
@@ -99,24 +99,28 @@ export function createInitCommand(): Command {
       // Step 4 — Write tsconfig.scan.json
       fs.writeFileSync(tsconfigScanPath, JSON.stringify(syntheticConfig, null, 2) + '\n', 'utf-8');
 
-      // Step 5 — Update .bc-scan
-      const bcScanPath = path.join(cwd, '.bc-scan');
-      let bcScan: Record<string, unknown> = {};
-      if (fs.existsSync(bcScanPath)) {
+      // Step 5 — Update .nark/config.json
+      const narkDir = path.join(cwd, '.nark');
+      if (!fs.existsSync(narkDir)) {
+        fs.mkdirSync(narkDir, { recursive: true });
+      }
+      const configPath = path.join(narkDir, 'config.json');
+      let config: Record<string, unknown> = {};
+      if (fs.existsSync(configPath)) {
         try {
-          const raw = fs.readFileSync(bcScanPath, 'utf-8');
-          bcScan = JSON.parse(raw);
+          const raw = fs.readFileSync(configPath, 'utf-8');
+          config = JSON.parse(raw);
         } catch {
           // If unreadable, start fresh
-          bcScan = {};
+          config = {};
         }
       }
-      bcScan.tsconfig = 'tsconfig.scan.json';
-      fs.writeFileSync(bcScanPath, JSON.stringify(bcScan, null, 2) + '\n', 'utf-8');
+      config.tsconfig = 'tsconfig.scan.json';
+      fs.writeFileSync(configPath, JSON.stringify(config, null, 2) + '\n', 'utf-8');
 
       // Step 6 — Print success summary
       console.log(chalk.green('✓') + ' Created tsconfig.scan.json');
-      console.log(chalk.green('✓') + ' Updated .bc-scan \u2192 { "tsconfig": "tsconfig.scan.json" }');
+      console.log(chalk.green('✓') + ' Updated .nark/config.json \u2192 { "tsconfig": "tsconfig.scan.json" }');
       console.log('');
       console.log(
         chalk.dim(

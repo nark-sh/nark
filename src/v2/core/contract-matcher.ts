@@ -2085,7 +2085,7 @@ export class ContractMatcher {
         callExpression: detection.functionName,
       });
 
-      // Check suppression (bc-scan store checked first, then inline, then config)
+      // Check suppression (suppression store checked first, then inline, then config)
       const suppressionResult = checkSuppression({
         projectRoot: this.options.projectRoot,
         sourceFile,

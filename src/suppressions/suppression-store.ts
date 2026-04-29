@@ -1,5 +1,5 @@
 /**
- * BC-Scan Suppression Store
+ * Suppression Store
  *
  * Manages .bc-suppressions.json — a project-level file that stores suppressions
  * keyed by fingerprint, completely outside of production source code.
@@ -11,7 +11,6 @@
  * - Suppressions can be cross-referenced with SaaS violation records
  *
  * File location: <projectRoot>/.bc-suppressions.json
- * (Alongside .bc-scan which holds scan configuration)
  */
 
 import * as fs from 'fs';

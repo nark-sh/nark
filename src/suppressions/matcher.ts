@@ -12,7 +12,7 @@ import {
 } from './parser.js';
 import { loadConfigSync, findMatchingRules } from './config-loader.js';
 import { loadManifestSync, saveManifestSync, createSuppression, upsertSuppression } from './manifest.js';
-import { loadStore, findByFingerprint } from './bc-scan-store.js';
+import { loadStore, findByFingerprint } from './suppression-store.js';
 import { SuppressionCheckResult } from './types.js';
 
 /**
@@ -85,7 +85,7 @@ export function checkSuppression(options: CheckSuppressionOptions): SuppressionC
         return {
           suppressed: true,
           matchedSuppression: bcSuppression,
-          source: 'bc-scan',
+          source: 'suppression-file',
           originalSource: bcSuppression,
         };
       }

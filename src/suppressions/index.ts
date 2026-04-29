@@ -62,7 +62,7 @@ export {
 export { computeViolationFingerprint } from './fingerprint.js';
 export type { FingerprintParams } from './fingerprint.js';
 
-// BC-scan suppression store (.bc-suppressions.json)
+// Suppression store (.bc-suppressions.json)
 export {
   getStorePath,
   loadStore,
@@ -73,4 +73,4 @@ export {
   findStaleSuppressions,
   removeStaleSuppressions,
   createBcScanSuppression
-} from './bc-scan-store.js';
+} from './suppression-store.js';

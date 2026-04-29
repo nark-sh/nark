@@ -43,7 +43,7 @@ import { createAuthCommand } from './cli/auth.js';
 import { getToken } from './lib/auth.js';
 import { createCiCommand } from './cli/ci.js';
 import { generateAIPrompt } from './ai-prompt-generator.js';
-import { loadStore, removeStaleSuppressions, saveStore } from './suppressions/bc-scan-store.js';
+import { loadStore, removeStaleSuppressions, saveStore } from './suppressions/suppression-store.js';
 import { writeScanResults } from './output/index.js';
 import { writeSarifOutput } from './output/sarif-writer.js';
 import { loadNarkRc } from './config/narkrc.js';

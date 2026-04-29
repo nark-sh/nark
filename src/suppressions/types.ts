@@ -150,7 +150,7 @@ export interface SuppressionCheckResult {
   matchedSuppression?: Suppression | IgnoreRule | BcScanSuppression;
 
   /** How it was suppressed */
-  source?: 'inline-comment' | 'config-file' | 'bc-scan';
+  source?: 'inline-comment' | 'config-file' | 'suppression-file';
 
   /** Original comment or rule */
   originalSource?: any;
