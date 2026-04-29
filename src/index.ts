@@ -761,10 +761,24 @@ async function main(options: any) {
     try {
       const store = loadStore(options.project);
       if (store.suppressions.length > 0) {
-        // Collect all fingerprints seen in this scan (suppressed and active)
+        // Collect all fingerprints seen in this scan (suppressed and active).
+        // We must include fingerprints from both the remaining violations AND
+        // any suppressed violations (which were already filtered out above).
         const seenFingerprints = new Set<string>();
         violations.forEach((v) => {
           const fp = (v as any).fingerprint;
+          if (fp) seenFingerprints.add(fp);
+        });
+        // Include suppressed violations from the v1 analyzer
+        const suppressedVios = analyzer.getSuppressedViolations?.() ?? [];
+        suppressedVios.forEach((v: any) => {
+          const fp = v.fingerprint;
+          if (fp) seenFingerprints.add(fp);
+        });
+        // Include suppressed violations from the v2 analyzer
+        const v2Suppressed = v2Result?.suppressedViolations ?? [];
+        v2Suppressed.forEach((v: any) => {
+          const fp = v.fingerprint;
           if (fp) seenFingerprints.add(fp);
         });
 
