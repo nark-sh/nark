@@ -45,7 +45,7 @@ export interface ScanResult {
 }
 
 /**
- * Run a behavioral contract scan against a TypeScript project.
+ * Run a Nark profile scan against a TypeScript project.
  * Throws on corpus load failure or analyzer error.
  */
 export async function runScan(options: ScanOptions): Promise<ScanResult> {

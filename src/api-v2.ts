@@ -60,7 +60,7 @@ export function isWorkingTreeDirty(repoRoot: string): boolean {
 }
 
 /**
- * Run a behavioral contract scan against a TypeScript project using the V2 analyzer.
+ * Run a Nark profile scan against a TypeScript project using the V2 analyzer.
  * Returns V2-native violations directly (no V1 conversion).
  * Throws on corpus load failure or analyzer error.
  */

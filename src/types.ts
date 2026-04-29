@@ -1,5 +1,5 @@
 /**
- * Core type definitions for behavioral contract verification
+ * Core type definitions for Nark profile verification
  */
 
 export type Severity = "error" | "warning" | "info";

@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * CLI Entry Point - behavioral contract verification tool
+ * CLI Entry Point - Nark profile verification tool
  */
 
 import { Command } from 'commander';
@@ -38,7 +38,7 @@ import { createInitCommand } from './cli/init.js';
 import { createTriageCommand } from './cli/triage.js';
 import { createCompactCommand } from './cli/compact.js';
 import { createShowCommand } from './cli/show.js';
-import { createTelemetryCommand, handleFirstRunNotice, fireTelemetryEvent, fireEnrichedTelemetryEvent } from './cli/telemetry.js';
+import { createTelemetryCommand, handleFirstRunNotice, fireTelemetryEvent, fireEnrichedTelemetryEvent, type TelemetryResult } from './cli/telemetry.js';
 import { createAuthCommand } from './cli/auth.js';
 import { getToken } from './lib/auth.js';
 import { createCiCommand } from './cli/ci.js';
@@ -807,15 +807,30 @@ async function main(options: any) {
       ...(suppressionDetails && suppressionDetails.length > 0 ? { suppressionDetails } : {}),
     };
 
+    let telemetryResult: TelemetryResult | undefined;
     const token = getToken();
     if (token !== null) {
-      await fireEnrichedTelemetryEvent(telemetryPayload, violations);
+      telemetryResult = await fireEnrichedTelemetryEvent(telemetryPayload, violations);
     } else {
-      await fireTelemetryEvent(telemetryPayload);
+      telemetryResult = await fireTelemetryEvent(telemetryPayload);
+    }
+
+    // Checkpoint 4b: verbose telemetry feedback
+    if (verbose && telemetryResult) {
+      const r = telemetryResult;
+      if (r.disabled) {
+        verboseLog(`\n[verbose] Telemetry: disabled (opt out via nark telemetry off)`);
+      } else if (r.error) {
+        verboseLog(`\n[verbose] Telemetry: failed to send (network error)`);
+      } else if (r.sent && r.authenticated) {
+        verboseLog(`\n[verbose] Telemetry: sent to ${r.endpoint} (authenticated as ${r.email ?? 'unknown'})`);
+      } else if (r.sent) {
+        verboseLog(`\n[verbose] Telemetry: sent anonymously — run 'nark login' to link scans to your dashboard`);
+      }
     }
   }
 
-  // Checkpoint 4: verbose time breakdown
+  // Checkpoint 5: verbose time breakdown
   if (verbose) {
     const totalTime = Date.now() - scanStartTime;
     verboseLog(`\n[verbose] Time breakdown:`);

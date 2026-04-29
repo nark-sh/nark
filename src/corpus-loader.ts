@@ -1,5 +1,5 @@
 /**
- * Corpus Loader - loads and validates behavioral contract files
+ * Corpus Loader - loads and validates Nark profile files
  */
 
 import * as fs from 'fs';
@@ -19,7 +19,7 @@ export interface LoadCorpusOptions {
 }
 
 /**
- * Loads all behavioral contracts from the corpus directory
+ * Loads all Nark profiles from the corpus directory
  */
 export async function loadCorpus(
   corpusPath: string,

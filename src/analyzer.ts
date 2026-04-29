@@ -1,5 +1,5 @@
 /**
- * AST Analyzer - uses TypeScript Compiler API to detect behavioral contract violations
+ * AST Analyzer - uses TypeScript Compiler API to detect Nark profile violations
  */
 
 import * as ts from "typescript";
