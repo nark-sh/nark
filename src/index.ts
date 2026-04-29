@@ -4,15 +4,15 @@
  * CLI Entry Point - Nark profile verification tool
  */
 
-import { Command } from 'commander';
-import * as path from 'path';
-import * as fs from 'fs';
-import { fileURLToPath } from 'url';
-import { createRequire } from 'module';
-import chalk from 'chalk';
-import { loadCorpus } from './corpus-loader.js';
-import { Analyzer } from './analyzer.js';
-import { PackageDiscovery } from './package-discovery.js';
+import { Command } from "commander";
+import * as path from "path";
+import * as fs from "fs";
+import { fileURLToPath } from "url";
+import { createRequire } from "module";
+import chalk from "chalk";
+import { loadCorpus } from "./corpus-loader.js";
+import { Analyzer } from "./analyzer.js";
+import { PackageDiscovery } from "./package-discovery.js";
 import {
   generateAuditRecord,
   generateEnhancedAuditRecord,
@@ -20,7 +20,7 @@ import {
   printTerminalReport,
   printEnhancedTerminalReport,
   printCorpusErrors,
-} from './reporter.js';
+} from "./reporter.js";
 import {
   printPositiveEvidenceReport,
   writePositiveEvidenceReport,
@@ -30,23 +30,34 @@ import {
   buildPackageBreakdown,
   compareAgainstBenchmark,
   loadBenchmark,
-} from './reporters/index.js';
-import { ensureTsconfig } from './tsconfig-generator.js';
-import type { AnalyzerConfig, Violation } from './types.js';
-import { createSuppressionsCommand } from './cli/suppressions.js';
-import { createInitCommand } from './cli/init.js';
-import { createTriageCommand } from './cli/triage.js';
-import { createCompactCommand } from './cli/compact.js';
-import { createShowCommand } from './cli/show.js';
-import { createTelemetryCommand, handleFirstRunNotice, fireTelemetryEvent, fireEnrichedTelemetryEvent, type TelemetryResult } from './cli/telemetry.js';
-import { createAuthCommand } from './cli/auth.js';
-import { getToken } from './lib/auth.js';
-import { createCiCommand } from './cli/ci.js';
-import { generateAIPrompt } from './ai-prompt-generator.js';
-import { loadStore, removeStaleSuppressions, saveStore } from './suppressions/suppression-store.js';
-import { writeScanResults } from './output/index.js';
-import { writeSarifOutput } from './output/sarif-writer.js';
-import { loadNarkRc } from './config/narkrc.js';
+} from "./reporters/index.js";
+import { ensureTsconfig } from "./tsconfig-generator.js";
+import type { AnalyzerConfig, Violation } from "./types.js";
+import { createSuppressionsCommand } from "./cli/suppressions.js";
+import { createInitCommand } from "./cli/init.js";
+import { createTriageCommand } from "./cli/triage.js";
+import { createCompactCommand } from "./cli/compact.js";
+import { createShowCommand } from "./cli/show.js";
+import {
+  createTelemetryCommand,
+  handleFirstRunNotice,
+  fireTelemetryEvent,
+  fireEnrichedTelemetryEvent,
+  type TelemetryResult,
+} from "./cli/telemetry.js";
+import { createAuthCommand } from "./cli/auth.js";
+import { getToken } from "./lib/auth.js";
+import { createCiCommand } from "./cli/ci.js";
+import { generateAIPrompt } from "./ai-prompt-generator.js";
+import {
+  loadStore,
+  removeStaleSuppressions,
+  saveStore,
+} from "./suppressions/suppression-store.js";
+import { writeScanResults, findNarkDir } from "./output/index.js";
+import { getSuppressedFingerprints } from "./triage/suppressor.js";
+import { writeSarifOutput } from "./output/sarif-writer.js";
+import { loadNarkRc } from "./config/narkrc.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -55,7 +66,7 @@ const program = new Command();
 
 // Load .narkrc.yaml from the project root (cwd at invocation time).
 // Commander hasn't parsed yet, so extract --project from argv manually.
-const _projectArgIdx = process.argv.indexOf('--project');
+const _projectArgIdx = process.argv.indexOf("--project");
 const _projectRootForRc =
   _projectArgIdx !== -1 && process.argv[_projectArgIdx + 1]
     ? process.argv[_projectArgIdx + 1]
@@ -65,16 +76,20 @@ const _narkRc = (() => {
     return loadNarkRc(_projectRootForRc);
   } catch (err) {
     console.error(
-      chalk.yellow(`Warning: ${err instanceof Error ? err.message : String(err)}`)
+      chalk.yellow(
+        `Warning: ${err instanceof Error ? err.message : String(err)}`,
+      ),
     );
     return null;
   }
 })();
 
 program
-  .name('nark')
-  .description('Contract coverage scanner — find missing error handling before production')
-  .version('1.2.0');
+  .name("nark")
+  .description(
+    "Contract coverage scanner — find missing error handling before production",
+  )
+  .version("1.2.0");
 
 // Add suppressions subcommand
 program.addCommand(createSuppressionsCommand());
@@ -87,30 +102,102 @@ program.addCommand(createAuthCommand());
 program.addCommand(createCiCommand());
 
 program
-  .option('--tsconfig <path>', 'Path to tsconfig.json or project directory', _narkRc?.tsconfig ?? './tsconfig.json')
-  .option('--corpus <path>', 'Path to corpus directory (default: auto-resolves from nark-corpus package)', _narkRc?.corpus ?? findDefaultCorpusPath())
-  .option('--output <path>', 'Output path for audit record JSON (default: auto-generated in output/runs/)', _narkRc?.output?.json)
-  .option('--project <path>', 'Path to project root (for package.json discovery)', process.cwd())
-  .option('--no-terminal', 'Disable terminal output (JSON only)')
-  .option('--fail-on-warnings', 'Exit with error code if warnings are found')
-  .option('--report-only', 'Always exit 0 regardless of violations (report-only mode)', false)
-  .option('--fail-threshold <level>', 'Exit 1 if violations at or above this severity are found (error|warning|info)', _narkRc?.failThreshold ?? 'error')
-  .option('--discover-packages', 'Enable package discovery and coverage reporting', true)
-  .option('--include-tests', 'Include test files in analysis (default: excludes test files)', _narkRc?.includeTests ?? false)
-  .option('--include-drafts', 'Include draft and in-development contracts (default: excludes draft/in-development)', _narkRc?.includeDrafts ?? false)
-  .option('--include-deprecated', 'Include deprecated contracts (default: excludes deprecated)', _narkRc?.includeDeprecated ?? false)
-  .option('--positive-report', 'Generate positive evidence report (default: true)', true)
-  .option('--no-positive-report', 'Disable positive evidence report')
-  .option('--show-suppressions', 'Show suppressed violations in output', false)
-  .option('--check-dead-suppressions', 'Check for and report dead suppressions', false)
-  .option('--fail-on-dead-suppressions', 'Exit with error if dead suppressions are found', false)
-  .option('--use-v1-analyzer', 'Use legacy v1 analyzer instead of the default v2', false)
-  .option('--use-v2-analyzer', 'Deprecated no-op: v2 is now the default', false)
-  .option('--compare-analyzers', 'Run both v1 and v2 analyzers and show diff (for validation)', false)
-  .option('--instructions-path', 'Print the path to FORAIAGENTS.md and exit', false)
-  .option('--sarif', 'Output results in SARIF 2.1.0 format (stdout)')
-  .option('--sarif-output <path>', 'Write SARIF 2.1.0 output to file', _narkRc?.output?.sarif)
-  .option('--verbose', 'Show full detailed output (default: compact summary)', false)
+  .option(
+    "--tsconfig <path>",
+    "Path to tsconfig.json or project directory",
+    _narkRc?.tsconfig ?? "./tsconfig.json",
+  )
+  .option(
+    "--corpus <path>",
+    "Path to corpus directory (default: auto-resolves from nark-corpus package)",
+    _narkRc?.corpus ?? findDefaultCorpusPath(),
+  )
+  .option(
+    "--output <path>",
+    "Output path for audit record JSON (default: auto-generated in output/runs/)",
+    _narkRc?.output?.json,
+  )
+  .option(
+    "--project <path>",
+    "Path to project root (for package.json discovery)",
+    process.cwd(),
+  )
+  .option("--no-terminal", "Disable terminal output (JSON only)")
+  .option("--fail-on-warnings", "Exit with error code if warnings are found")
+  .option(
+    "--report-only",
+    "Always exit 0 regardless of violations (report-only mode)",
+    false,
+  )
+  .option(
+    "--fail-threshold <level>",
+    "Exit 1 if violations at or above this severity are found (error|warning|info)",
+    _narkRc?.failThreshold ?? "error",
+  )
+  .option(
+    "--discover-packages",
+    "Enable package discovery and coverage reporting",
+    true,
+  )
+  .option(
+    "--include-tests",
+    "Include test files in analysis (default: excludes test files)",
+    _narkRc?.includeTests ?? false,
+  )
+  .option(
+    "--include-drafts",
+    "Include draft and in-development contracts (default: excludes draft/in-development)",
+    _narkRc?.includeDrafts ?? false,
+  )
+  .option(
+    "--include-deprecated",
+    "Include deprecated contracts (default: excludes deprecated)",
+    _narkRc?.includeDeprecated ?? false,
+  )
+  .option(
+    "--positive-report",
+    "Generate positive evidence report (default: true)",
+    true,
+  )
+  .option("--no-positive-report", "Disable positive evidence report")
+  .option("--show-suppressions", "Show suppressed violations in output", false)
+  .option(
+    "--check-dead-suppressions",
+    "Check for and report dead suppressions",
+    false,
+  )
+  .option(
+    "--fail-on-dead-suppressions",
+    "Exit with error if dead suppressions are found",
+    false,
+  )
+  .option(
+    "--use-v1-analyzer",
+    "Use legacy v1 analyzer instead of the default v2",
+    false,
+  )
+  .option("--use-v2-analyzer", "Deprecated no-op: v2 is now the default", false)
+  .option(
+    "--compare-analyzers",
+    "Run both v1 and v2 analyzers and show diff (for validation)",
+    false,
+  )
+  .option(
+    "--instructions-path",
+    "Print the path to FORAIAGENTS.md and exit",
+    false,
+  )
+  .option("--sarif", "Output results in SARIF 2.1.0 format (stdout)")
+  .option(
+    "--sarif-output <path>",
+    "Write SARIF 2.1.0 output to file",
+    _narkRc?.output?.sarif,
+  )
+  .option(
+    "--verbose",
+    "Show full detailed output (default: compact summary)",
+    false,
+  )
   .action(async (options) => {
     // This action handler is called when the main command is invoked
     // (i.e., not a subcommand like 'suppressions')
@@ -127,7 +214,7 @@ function findGitRepoRoot(startPath: string): string | null {
   const root = path.parse(currentDir).root;
 
   while (currentDir !== root) {
-    const gitPath = path.join(currentDir, '.git');
+    const gitPath = path.join(currentDir, ".git");
     if (fs.existsSync(gitPath)) {
       return currentDir;
     }
@@ -143,22 +230,22 @@ function findGitRepoRoot(startPath: string): string | null {
 function getGitHashFromRepo(tsconfigPath: string): string {
   try {
     const _require = createRequire(import.meta.url);
-    const { execSync } = _require('child_process');
+    const { execSync } = _require("child_process");
 
     // Get the directory containing the tsconfig (the repo root)
     const repoDir = path.dirname(path.resolve(tsconfigPath));
 
     // Run git command in the analyzed repo's directory
-    const gitHash = execSync('git rev-parse --short HEAD', {
+    const gitHash = execSync("git rev-parse --short HEAD", {
       cwd: repoDir,
-      encoding: 'utf-8',
-      stdio: ['pipe', 'pipe', 'pipe'],
+      encoding: "utf-8",
+      stdio: ["pipe", "pipe", "pipe"],
     }).trim();
 
     return gitHash;
   } catch {
     // Not a git repo or git not available
-    return 'nogit';
+    return "nogit";
   }
 }
 
@@ -166,25 +253,25 @@ function getGitHashFromRepo(tsconfigPath: string): string {
  * Ensure .nark is in .gitignore
  */
 function ensureGitignore(projectRoot: string): void {
-  const gitignorePath = path.join(projectRoot, '.gitignore');
-  const entry = '.nark';
+  const gitignorePath = path.join(projectRoot, ".gitignore");
+  const entry = ".nark";
 
   try {
-    let gitignoreContent = '';
+    let gitignoreContent = "";
     if (fs.existsSync(gitignorePath)) {
-      gitignoreContent = fs.readFileSync(gitignorePath, 'utf-8');
+      gitignoreContent = fs.readFileSync(gitignorePath, "utf-8");
     }
 
     // Check if already ignored
-    const lines = gitignoreContent.split('\n');
-    const alreadyIgnored = lines.some(line => line.trim() === entry);
+    const lines = gitignoreContent.split("\n");
+    const alreadyIgnored = lines.some((line) => line.trim() === entry);
 
     if (!alreadyIgnored) {
       // Add entry to .gitignore
-      const newContent = gitignoreContent.endsWith('\n')
-        ? gitignoreContent + entry + '\n'
-        : gitignoreContent + '\n' + entry + '\n';
-      fs.writeFileSync(gitignorePath, newContent, 'utf-8');
+      const newContent = gitignoreContent.endsWith("\n")
+        ? gitignoreContent + entry + "\n"
+        : gitignoreContent + "\n" + entry + "\n";
+      fs.writeFileSync(gitignorePath, newContent, "utf-8");
     }
   } catch (err) {
     // If we can't update .gitignore, just warn but don't fail
@@ -196,19 +283,23 @@ function ensureGitignore(projectRoot: string): void {
  * Generate organized output path in the analyzed project's .nark directory
  */
 function generateOutputPath(tsconfigPath: string): string {
-  const timestamp = new Date().toISOString().replace(/[:.]/g, '-').substring(0, 19);
+  const timestamp = new Date()
+    .toISOString()
+    .replace(/[:.]/g, "-")
+    .substring(0, 19);
 
   // Get git commit hash from the analyzed repo
   const gitHash = getGitHashFromRepo(tsconfigPath);
 
   // Find the project root (git root or directory containing tsconfig)
-  const projectRoot = findGitRepoRoot(tsconfigPath) || path.dirname(path.resolve(tsconfigPath));
+  const projectRoot =
+    findGitRepoRoot(tsconfigPath) || path.dirname(path.resolve(tsconfigPath));
 
   // Create run directory name
-  const runDir = `${timestamp.replace(/T/, '-').replace(/-/g, '').substring(0, 13)}-${gitHash}`;
+  const runDir = `${timestamp.replace(/T/, "-").replace(/-/g, "").substring(0, 13)}-${gitHash}`;
 
   // Output goes to .nark/runs/{runDir}/ in the analyzed project
-  const outputDir = path.join(projectRoot, '.nark', 'runs', runDir);
+  const outputDir = path.join(projectRoot, ".nark", "runs", runDir);
 
   // Create directory if it doesn't exist
   fs.mkdirSync(outputDir, { recursive: true });
@@ -216,35 +307,39 @@ function generateOutputPath(tsconfigPath: string): string {
   // Ensure .nark is in .gitignore
   ensureGitignore(projectRoot);
 
-  return path.join(outputDir, 'audit.json');
+  return path.join(outputDir, "audit.json");
 }
 
 /**
  * Setup output logging to capture all terminal output to output.txt
  */
 function setupOutputLogging(outputDir: string): () => void {
-  const outputTxtPath = path.join(outputDir, 'output.txt');
-  const logStream = fs.createWriteStream(outputTxtPath, { flags: 'w' });
+  const outputTxtPath = path.join(outputDir, "output.txt");
+  const logStream = fs.createWriteStream(outputTxtPath, { flags: "w" });
 
   // Store original console methods
   const originalLog = console.log;
   const originalError = console.error;
 
   // Strip ANSI codes for file output
-  const stripAnsi = (str: string) => str.replace(/\x1b\[[0-9;]*m/g, '');
+  const stripAnsi = (str: string) => str.replace(/\x1b\[[0-9;]*m/g, "");
 
   // Override console.log
   console.log = (...args: any[]) => {
-    const message = args.map(arg => typeof arg === 'string' ? arg : JSON.stringify(arg)).join(' ');
+    const message = args
+      .map((arg) => (typeof arg === "string" ? arg : JSON.stringify(arg)))
+      .join(" ");
     originalLog(...args); // Original output to terminal (with colors)
-    logStream.write(stripAnsi(message) + '\n'); // Clean output to file
+    logStream.write(stripAnsi(message) + "\n"); // Clean output to file
   };
 
   // Override console.error
   console.error = (...args: any[]) => {
-    const message = args.map(arg => typeof arg === 'string' ? arg : JSON.stringify(arg)).join(' ');
+    const message = args
+      .map((arg) => (typeof arg === "string" ? arg : JSON.stringify(arg)))
+      .join(" ");
     originalError(...args); // Original output to terminal (with colors)
-    logStream.write(stripAnsi(message) + '\n'); // Clean output to file
+    logStream.write(stripAnsi(message) + "\n"); // Clean output to file
   };
 
   // Return cleanup function
@@ -264,7 +359,7 @@ function normalizeTsconfigPath(tsconfigPath: string): string {
 
   // If it's a directory, append tsconfig.json
   if (fs.existsSync(resolved) && fs.statSync(resolved).isDirectory()) {
-    return path.join(resolved, 'tsconfig.json');
+    return path.join(resolved, "tsconfig.json");
   }
 
   // Otherwise assume it's already pointing to tsconfig.json
@@ -277,7 +372,7 @@ function normalizeTsconfigPath(tsconfigPath: string): string {
  * in setupOutputLogging — verbose output must not appear in output.txt.
  */
 function verboseLog(message: string): void {
-  process.stderr.write(message + '\n');
+  process.stderr.write(message + "\n");
 }
 
 /**
@@ -286,7 +381,7 @@ function verboseLog(message: string): void {
 async function main(options: any) {
   // Handle --instructions-path: print FORAIAGENTS.md path and exit
   if (options.instructionsPath) {
-    const forAiAgentsPath = path.join(__dirname, '../FORAIAGENTS.md');
+    const forAiAgentsPath = path.join(__dirname, "../FORAIAGENTS.md");
     console.log(forAiAgentsPath);
     process.exit(0);
   }
@@ -301,12 +396,14 @@ async function main(options: any) {
   const narkVersion = (() => {
     try {
       const _require = createRequire(import.meta.url);
-      return (_require('../package.json') as { version: string }).version;
-    } catch { return 'unknown'; }
+      return (_require("../package.json") as { version: string }).version;
+    } catch {
+      return "unknown";
+    }
   })();
 
   if (verbose) {
-    console.log(chalk.bold('\nNark Contract Verification\n'));
+    console.log(chalk.bold("\nNark Contract Verification\n"));
   }
 
   // Normalize and auto-discover tsconfig path
@@ -326,8 +423,14 @@ async function main(options: any) {
 
   // Validate corpus exists
   if (!fs.existsSync(options.corpus)) {
-    console.error(chalk.red(`Error: Corpus directory not found at ${options.corpus}`));
-    console.error(chalk.yellow('Tip: npm install nark-corpus, or use --corpus <path>, or set NARK_CORPUS_PATH'));
+    console.error(
+      chalk.red(`Error: Corpus directory not found at ${options.corpus}`),
+    );
+    console.error(
+      chalk.yellow(
+        "Tip: npm install nark-corpus, or use --corpus <path>, or set NARK_CORPUS_PATH",
+      ),
+    );
     process.exit(2);
   }
 
@@ -346,7 +449,7 @@ async function main(options: any) {
     if (options.corpus === findDefaultCorpusPath()) {
       try {
         const _require = createRequire(import.meta.url);
-        _require.resolve('nark-corpus');
+        _require.resolve("nark-corpus");
         console.log(chalk.dim(`  (using npm package nark-corpus)`));
       } catch {
         console.log(chalk.dim(`  (using local corpus for development)`));
@@ -359,7 +462,7 @@ async function main(options: any) {
   }
 
   // Load corpus
-  if (verbose) console.log(chalk.dim('Loading contracts...'));
+  if (verbose) console.log(chalk.dim("Loading contracts..."));
   const corpusStartTime = Date.now();
   const corpusResult = await loadCorpus(options.corpus, {
     includeDrafts: options.includeDrafts,
@@ -374,34 +477,51 @@ async function main(options: any) {
   }
 
   if (corpusResult.contracts.size === 0) {
-    console.error(chalk.red('Error: No contracts loaded from corpus'));
+    console.error(chalk.red("Error: No contracts loaded from corpus"));
     process.exit(2);
   }
 
   if (verbose) {
-    console.log(chalk.green(`✓ Loaded ${corpusResult.contracts.size} package contracts`));
+    console.log(
+      chalk.green(`✓ Loaded ${corpusResult.contracts.size} package contracts`),
+    );
 
     // Show skipped contracts (if any)
     if (corpusResult.skipped && corpusResult.skipped.length > 0) {
-      const draftCount = corpusResult.skipped.filter(s => s.status === 'draft').length;
-      const inDevCount = corpusResult.skipped.filter(s => s.status === 'in-development').length;
-      const deprecatedCount = corpusResult.skipped.filter(s => s.status === 'deprecated').length;
+      const draftCount = corpusResult.skipped.filter(
+        (s) => s.status === "draft",
+      ).length;
+      const inDevCount = corpusResult.skipped.filter(
+        (s) => s.status === "in-development",
+      ).length;
+      const deprecatedCount = corpusResult.skipped.filter(
+        (s) => s.status === "deprecated",
+      ).length;
 
       const skippedParts: string[] = [];
       if (draftCount > 0) skippedParts.push(`${draftCount} draft`);
       if (inDevCount > 0) skippedParts.push(`${inDevCount} in-development`);
-      if (deprecatedCount > 0) skippedParts.push(`${deprecatedCount} deprecated`);
+      if (deprecatedCount > 0)
+        skippedParts.push(`${deprecatedCount} deprecated`);
 
-      console.log(chalk.dim(`  (Skipped ${skippedParts.join(', ')} - use --include-drafts to include)`));
+      console.log(
+        chalk.dim(
+          `  (Skipped ${skippedParts.join(", ")} - use --include-drafts to include)`,
+        ),
+      );
     }
     console.log();
   }
 
   // Checkpoint 1: verbose corpus output
   if (options.verbose && corpusResult.contractFiles) {
-    const totalFiles = Array.from(corpusResult.contractFiles.values())
-      .reduce((sum, files) => sum + files.length, 0);
-    verboseLog(`\n[verbose] Contracts loaded: ${totalFiles} files across ${corpusResult.contracts.size} packages`);
+    const totalFiles = Array.from(corpusResult.contractFiles.values()).reduce(
+      (sum, files) => sum + files.length,
+      0,
+    );
+    verboseLog(
+      `\n[verbose] Contracts loaded: ${totalFiles} files across ${corpusResult.contracts.size} packages`,
+    );
     if (totalFiles <= 20) {
       for (const [pkg, files] of corpusResult.contractFiles) {
         for (const f of files) verboseLog(`  ${pkg}: ${f}`);
@@ -417,13 +537,16 @@ async function main(options: any) {
   let packageDiscovery;
   const discoveryStartTime = Date.now();
   if (options.discoverPackages !== false) {
-    if (verbose) console.log(chalk.dim('Discovering packages...'));
+    if (verbose) console.log(chalk.dim("Discovering packages..."));
     const discoveryTool = new PackageDiscovery(corpusResult.contracts);
     packageDiscovery = await discoveryTool.discoverPackages(
       options.project,
-      path.resolve(tsconfigPath)
+      path.resolve(tsconfigPath),
     );
-    if (verbose) console.log(chalk.green(`✓ Discovered ${packageDiscovery.total} packages\n`));
+    if (verbose)
+      console.log(
+        chalk.green(`✓ Discovered ${packageDiscovery.total} packages\n`),
+      );
   }
   const discoveryEndTime = Date.now();
 
@@ -445,14 +568,18 @@ async function main(options: any) {
     includeTests: options.includeTests,
   };
 
-  if (verbose) console.log(chalk.dim('Analyzing TypeScript code...'));
+  if (verbose) console.log(chalk.dim("Analyzing TypeScript code..."));
 
   // Always create a v1 analyzer instance (used for suppression checks and dead suppression detection)
   const analyzer = new Analyzer(config, corpusResult.contracts);
 
   let violations: Violation[];
-  let stats: { filesAnalyzed: number; contractsApplied: number; [key: string]: any };
-  let v2Result: import('./v2/adapter.js').V2AdapterResult | undefined;
+  let stats: {
+    filesAnalyzed: number;
+    contractsApplied: number;
+    [key: string]: any;
+  };
+  let v2Result: import("./v2/adapter.js").V2AdapterResult | undefined;
 
   const analysisStartTime = Date.now();
   if (options.useV1Analyzer && !options.compareAnalyzers) {
@@ -461,7 +588,7 @@ async function main(options: any) {
     stats = analyzer.getStats();
   } else if (options.compareAnalyzers) {
     // Compare mode: run both and show diff
-    const { runV2Analyzer } = await import('./v2/adapter.js');
+    const { runV2Analyzer } = await import("./v2/adapter.js");
     v2Result = await runV2Analyzer(config, corpusResult.contracts);
     const v1Violations = analyzer.analyze();
     const v1Stats = analyzer.getStats();
@@ -477,18 +604,26 @@ async function main(options: any) {
     void v1Stats; // used only for the diff above
   } else {
     // Default: v2 plugin-based analyzer
-    const { runV2Analyzer } = await import('./v2/adapter.js');
+    const { runV2Analyzer } = await import("./v2/adapter.js");
 
     // Progress feedback in compact mode (overwritten in-place)
-    const progressCallback = !verbose ? (current: number, total: number, fileName: string) => {
-      const shortName = path.basename(fileName);
-      process.stdout.write(`\r${chalk.dim(`  Scanning... ${current}/${total} files (${shortName})`)}\x1b[K`);
-    } : undefined;
+    const progressCallback = !verbose
+      ? (current: number, total: number, fileName: string) => {
+          const shortName = path.basename(fileName);
+          process.stdout.write(
+            `\r${chalk.dim(`  Scanning... ${current}/${total} files (${shortName})`)}\x1b[K`,
+          );
+        }
+      : undefined;
 
-    v2Result = await runV2Analyzer(config, corpusResult.contracts, progressCallback);
+    v2Result = await runV2Analyzer(
+      config,
+      corpusResult.contracts,
+      progressCallback,
+    );
 
     // Clear the progress line
-    if (!verbose) process.stdout.write('\r\x1b[K');
+    if (!verbose) process.stdout.write("\r\x1b[K");
 
     violations = v2Result.violations;
     stats = {
@@ -498,12 +633,15 @@ async function main(options: any) {
     };
   }
   const analysisEndTime = Date.now();
-  const analysisDuration = ((analysisEndTime - analysisStartTime) / 1000).toFixed(1);
+  const analysisDuration = (
+    (analysisEndTime - analysisStartTime) /
+    1000
+  ).toFixed(1);
 
   // Inject deprecation notice for contracts with deprecated: true
   // (These are loaded because their status is 'production', but the package is
   // deprecated — consumers should migrate away.)
-  violations = violations.map(v => {
+  violations = violations.map((v) => {
     const contract = corpusResult.contracts.get(v.package);
     if (contract?.deprecated && contract.deprecated_reason) {
       return {
@@ -514,12 +652,17 @@ async function main(options: any) {
     return v;
   });
 
-  if (verbose) console.log(chalk.green(`✓ Analyzed ${stats.filesAnalyzed} files in ${analysisDuration}s\n`));
+  if (verbose)
+    console.log(
+      chalk.green(
+        `✓ Analyzed ${stats.filesAnalyzed} files in ${analysisDuration}s\n`,
+      ),
+    );
 
   // Checkpoint 3: verbose analysis timing output
   if (verbose && v2Result) {
     const slowFiles = v2Result.fileDurations
-      .filter(f => f.durationMs > 500)
+      .filter((f) => f.durationMs > 500)
       .sort((a, b) => b.durationMs - a.durationMs);
     verboseLog(`\n[verbose] Analysis timing:`);
     if (slowFiles.length > 0) {
@@ -537,7 +680,11 @@ async function main(options: any) {
   if (options.showSuppressions) {
     const suppressedViolations = analyzer.getSuppressedViolations();
     if (suppressedViolations.length > 0) {
-      console.log(chalk.yellow(`⚠️  ${suppressedViolations.length} suppressions active\n`));
+      console.log(
+        chalk.yellow(
+          `⚠️  ${suppressedViolations.length} suppressions active\n`,
+        ),
+      );
     }
   }
 
@@ -545,21 +692,45 @@ async function main(options: any) {
   if (options.checkDeadSuppressions || options.failOnDeadSuppressions) {
     const deadSuppressions = analyzer.detectDeadSuppressions();
     if (deadSuppressions.length > 0) {
-      console.log(chalk.yellow(`\n🎉 Found ${deadSuppressions.length} dead suppressions (analyzer improved!):\n`));
+      console.log(
+        chalk.yellow(
+          `\n🎉 Found ${deadSuppressions.length} dead suppressions (analyzer improved!):\n`,
+        ),
+      );
       deadSuppressions.forEach((dead) => {
         console.log(analyzer.formatDeadSuppression(dead));
       });
 
       if (options.failOnDeadSuppressions) {
-        console.error(chalk.red('\n❌ Failing due to dead suppressions (--fail-on-dead-suppressions)'));
+        console.error(
+          chalk.red(
+            "\n❌ Failing due to dead suppressions (--fail-on-dead-suppressions)",
+          ),
+        );
         process.exit(1);
       }
     } else {
-      console.log(chalk.green('✨ No dead suppressions found!\n'));
+      console.log(chalk.green("✨ No dead suppressions found!\n"));
     }
   }
 
   const outputStartTime = Date.now();
+
+  // Apply triage suppression from .nark/violations/ — filter false-positive violations before
+  // generating the audit record so exit code and JSON output reflect the triaged state.
+  // Runs regardless of --no-terminal.
+  {
+    const _triageRoot =
+      findGitRepoRoot(tsconfigPath) || path.dirname(path.resolve(tsconfigPath));
+    const _narkDirPath = findNarkDir(_triageRoot);
+    const _suppressedFps = getSuppressedFingerprints(_narkDirPath);
+    if (_suppressedFps.size > 0) {
+      violations = violations.filter((v) => {
+        const fp = (v as any).fingerprint as string | undefined;
+        return !fp || !_suppressedFps.has(fp);
+      });
+    }
+  }
 
   // Generate audit record
   const packagesAnalyzed = Array.from(corpusResult.contracts.keys());
@@ -568,7 +739,7 @@ async function main(options: any) {
     packagesAnalyzed,
     contractsApplied: stats.contractsApplied,
     filesAnalyzed: stats.filesAnalyzed,
-    corpusVersion: '1.0.0', // TODO: Read from corpus metadata
+    corpusVersion: "1.0.0", // TODO: Read from corpus metadata
     callsitesByPackage: stats.callsitesByPackage,
   });
 
@@ -582,14 +753,17 @@ async function main(options: any) {
   if (verbose) console.log(chalk.gray(`Audit record written to ${outputPath}`));
 
   // Automatically clean stale suppressions from .nark-suppressions.json
-  const suppressionsStorePath = path.join(options.project, '.nark-suppressions.json');
+  const suppressionsStorePath = path.join(
+    options.project,
+    ".nark-suppressions.json",
+  );
   if (fs.existsSync(suppressionsStorePath)) {
     try {
       const store = loadStore(options.project);
       if (store.suppressions.length > 0) {
         // Collect all fingerprints seen in this scan (suppressed and active)
         const seenFingerprints = new Set<string>();
-        violations.forEach(v => {
+        violations.forEach((v) => {
           const fp = (v as any).fingerprint;
           if (fp) seenFingerprints.add(fp);
         });
@@ -597,9 +771,17 @@ async function main(options: any) {
         const removed = removeStaleSuppressions(store, seenFingerprints);
         if (removed.length > 0) {
           saveStore(options.project, store);
-          console.log(chalk.green(`\n✓ Removed ${removed.length} stale suppression${removed.length === 1 ? '' : 's'} (violations no longer detected):`));
-          removed.forEach(s => {
-            console.log(chalk.dim(`    ${s.filePath}:${s.lineNumber} — ${s.package}/${s.postconditionId}`));
+          console.log(
+            chalk.green(
+              `\n✓ Removed ${removed.length} stale suppression${removed.length === 1 ? "" : "s"} (violations no longer detected):`,
+            ),
+          );
+          removed.forEach((s) => {
+            console.log(
+              chalk.dim(
+                `    ${s.filePath}:${s.lineNumber} — ${s.package}/${s.postconditionId}`,
+              ),
+            );
           });
         }
       }
@@ -621,9 +803,9 @@ async function main(options: any) {
     showBenchmarking: true,
   };
 
-  const positiveReportTxtPath = path.join(outputDir, 'positive-report.txt');
-  const positiveReportMdPath = path.join(outputDir, 'positive-report.md');
-  const d3HtmlPath = path.join(outputDir, 'index.html');
+  const positiveReportTxtPath = path.join(outputDir, "positive-report.txt");
+  const positiveReportMdPath = path.join(outputDir, "positive-report.md");
+  const d3HtmlPath = path.join(outputDir, "index.html");
 
   // Calculate metrics
   const healthMetrics = calculateHealthScore(finalRecord);
@@ -633,7 +815,7 @@ async function main(options: any) {
   let benchmarkComparison;
   let benchmarkData;
   try {
-    const benchmarkPath = path.join(__dirname, '../data/benchmarks.json');
+    const benchmarkPath = path.join(__dirname, "../data/benchmarks.json");
     benchmarkData = await loadBenchmark(benchmarkPath);
     if (benchmarkData) {
       benchmarkComparison = compareAgainstBenchmark(finalRecord, benchmarkData);
@@ -644,8 +826,16 @@ async function main(options: any) {
 
   // Write report files
   if (options.positiveReport !== false) {
-    await writePositiveEvidenceReport(finalRecord as any, positiveReportTxtPath, reportOptions);
-    await writePositiveEvidenceReportMarkdown(finalRecord as any, positiveReportMdPath, reportOptions);
+    await writePositiveEvidenceReport(
+      finalRecord as any,
+      positiveReportTxtPath,
+      reportOptions,
+    );
+    await writePositiveEvidenceReportMarkdown(
+      finalRecord as any,
+      positiveReportMdPath,
+      reportOptions,
+    );
   }
 
   await writeD3Visualization(
@@ -656,11 +846,12 @@ async function main(options: any) {
       benchmarking: benchmarkComparison,
       benchmark: benchmarkData || undefined,
     },
-    d3HtmlPath
+    d3HtmlPath,
   );
 
   // Write .nark/ output directory
-  const projectRoot = findGitRepoRoot(tsconfigPath) || path.dirname(path.resolve(tsconfigPath));
+  const projectRoot =
+    findGitRepoRoot(tsconfigPath) || path.dirname(path.resolve(tsconfigPath));
   const narkResult = await writeScanResults({
     projectRoot,
     auditRecord: finalRecord,
@@ -685,37 +876,68 @@ async function main(options: any) {
     }
 
     if (options.positiveReport !== false) {
-      console.log('');
+      console.log("");
       await printPositiveEvidenceReport(finalRecord as any, reportOptions);
     }
 
-    const outputTxtPath = path.join(outputDir, 'output.txt');
+    const outputTxtPath = path.join(outputDir, "output.txt");
     console.log(chalk.gray(`Reports written to:`));
     console.log(chalk.gray(`  - ${outputTxtPath} (full terminal output)`));
     console.log(chalk.gray(`  - ${positiveReportTxtPath}`));
     console.log(chalk.gray(`  - ${positiveReportMdPath}`));
-    console.log(chalk.green(`  - file://${d3HtmlPath} (interactive visualization)`));
+    console.log(
+      chalk.green(`  - file://${d3HtmlPath} (interactive visualization)`),
+    );
     if (aiPromptPath) {
-      console.log(chalk.hex('#FFA500')(`  - ${aiPromptPath} (AI agent instructions)`));
+      console.log(
+        chalk.hex("#FFA500")(`  - ${aiPromptPath} (AI agent instructions)`),
+      );
     }
-    console.log('');
+    console.log("");
 
     if (narkResult) {
       console.log(chalk.gray(`\nScan results saved to ${narkResult.scanPath}`));
-      console.log(chalk.gray(`Violation details: ${path.join(narkResult.narkDir, 'violations')}/`));
-      console.log(chalk.gray(`For AI agent instructions: nark --instructions-path`));
+      console.log(
+        chalk.gray(
+          `Violation details: ${path.join(narkResult.narkDir, "violations")}/`,
+        ),
+      );
+      console.log(
+        chalk.gray(`For AI agent instructions: nark --instructions-path`),
+      );
     }
 
     // Final verbose summary box
-    const totalViolations = auditRecord.summary.error_count + auditRecord.summary.warning_count;
+    const totalViolations =
+      auditRecord.summary.error_count + auditRecord.summary.warning_count;
     if (totalViolations > 0) {
-      console.log(chalk.yellow('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'));
-      console.log(chalk.yellow.bold(`  ⚠️  ${totalViolations} violation${totalViolations === 1 ? '' : 's'} found - scroll up for full report`));
-      console.log(chalk.yellow('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n'));
+      console.log(
+        chalk.yellow(
+          "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━",
+        ),
+      );
+      console.log(
+        chalk.yellow.bold(
+          `  ⚠️  ${totalViolations} violation${totalViolations === 1 ? "" : "s"} found - scroll up for full report`,
+        ),
+      );
+      console.log(
+        chalk.yellow(
+          "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n",
+        ),
+      );
     } else {
-      console.log(chalk.green('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'));
-      console.log(chalk.green.bold('  ✓ No violations found - great work!'));
-      console.log(chalk.green('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n'));
+      console.log(
+        chalk.green(
+          "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━",
+        ),
+      );
+      console.log(chalk.green.bold("  ✓ No violations found - great work!"));
+      console.log(
+        chalk.green(
+          "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n",
+        ),
+      );
     }
   } else if (options.terminal !== false) {
     // Compact output (new default)
@@ -739,22 +961,29 @@ async function main(options: any) {
   {
     const corpusPkgVersion = (() => {
       try {
-        const pkgPath = path.join(options.corpus, 'package.json');
-        const raw = fs.readFileSync(pkgPath, 'utf-8');
+        const pkgPath = path.join(options.corpus, "package.json");
+        const raw = fs.readFileSync(pkgPath, "utf-8");
         return (JSON.parse(raw) as { version?: string }).version;
-      } catch { return undefined; }
+      } catch {
+        return undefined;
+      }
     })();
     const contractIds = corpusResult.contracts
-      ? Array.from((corpusResult.contracts as Map<string, any>).values()).map((c: any) => c.id ?? c.contractId ?? c.package ?? '').filter(Boolean)
+      ? Array.from((corpusResult.contracts as Map<string, any>).values())
+          .map((c: any) => c.id ?? c.contractId ?? c.package ?? "")
+          .filter(Boolean)
       : [];
-    const packageNames = packageDiscovery?.packages?.map((p: any) => p.name) ?? [];
+    const packageNames =
+      packageDiscovery?.packages?.map((p: any) => p.name) ?? [];
     const violationCountsByContract: Record<string, number> = {};
     for (const v of violations) {
-      const id: string = v.package ?? (v as any).contractId ?? 'unknown';
+      const id: string = v.package ?? (v as any).contractId ?? "unknown";
       violationCountsByContract[id] = (violationCountsByContract[id] ?? 0) + 1;
     }
     const totalCallSites = stats.callsitesByPackage
-      ? Object.values(stats.callsitesByPackage as Record<string, number>).reduce((sum: number, n: number) => sum + n, 0)
+      ? Object.values(
+          stats.callsitesByPackage as Record<string, number>,
+        ).reduce((sum: number, n: number) => sum + n, 0)
       : 0;
     const suppressionCount = v2Result?.suppressedViolations?.length ?? 0;
 
@@ -765,14 +994,19 @@ async function main(options: any) {
     const suppressionDetails = (() => {
       try {
         const suppressed = v2Result?.suppressedViolations ?? [];
-        return suppressed.slice(0, 100).map((v: any) => ({
-          fingerprint: (v.fingerprint ?? '').substring(0, 16),
-          package: v.package ?? '',
-          postconditionId: v.postconditionId ?? v.contract_id ?? '',
-          reason: v.suppressionReason ?? v.reason ?? undefined,
-          suppressedBy: v.suppressedBy ?? undefined,
-        })).filter((s: any) => s.package && s.postconditionId);
-      } catch { return undefined; }
+        return suppressed
+          .slice(0, 100)
+          .map((v: any) => ({
+            fingerprint: (v.fingerprint ?? "").substring(0, 16),
+            package: v.package ?? "",
+            postconditionId: v.postconditionId ?? v.contract_id ?? "",
+            reason: v.suppressionReason ?? v.reason ?? undefined,
+            suppressedBy: v.suppressedBy ?? undefined,
+          }))
+          .filter((s: any) => s.package && s.postconditionId);
+      } catch {
+        return undefined;
+      }
     })();
 
     // Compute exit code (mirrors logic below)
@@ -781,9 +1015,11 @@ async function main(options: any) {
       const _hasErrors = auditRecord.summary.error_count > 0;
       const _hasWarnings = auditRecord.summary.warning_count > 0;
       const _hasInfo = (auditRecord.summary as any).info_count > 0;
-      const t = options.failOnWarnings ? 'warning' : (options.failThreshold || 'error');
-      if (t === 'info') return (_hasErrors || _hasWarnings || _hasInfo) ? 1 : 0;
-      if (t === 'warning') return (_hasErrors || _hasWarnings) ? 1 : 0;
+      const t = options.failOnWarnings
+        ? "warning"
+        : options.failThreshold || "error";
+      if (t === "info") return _hasErrors || _hasWarnings || _hasInfo ? 1 : 0;
+      if (t === "warning") return _hasErrors || _hasWarnings ? 1 : 0;
       return _hasErrors ? 1 : 0;
     })();
 
@@ -801,16 +1037,21 @@ async function main(options: any) {
       totalCallSites,
       corpusVersion: corpusPkgVersion,
       suppressionCount,
-      scanMode: 'full',
+      scanMode: "full",
       exitCode: telemetryExitCode,
       // concern-20260429-telemetry-suppression-insights: per-suppression signal
-      ...(suppressionDetails && suppressionDetails.length > 0 ? { suppressionDetails } : {}),
+      ...(suppressionDetails && suppressionDetails.length > 0
+        ? { suppressionDetails }
+        : {}),
     };
 
     let telemetryResult: TelemetryResult | undefined;
     const token = getToken();
     if (token !== null) {
-      telemetryResult = await fireEnrichedTelemetryEvent(telemetryPayload, violations);
+      telemetryResult = await fireEnrichedTelemetryEvent(
+        telemetryPayload,
+        violations,
+      );
     } else {
       telemetryResult = await fireTelemetryEvent(telemetryPayload);
     }
@@ -819,13 +1060,19 @@ async function main(options: any) {
     if (verbose && telemetryResult) {
       const r = telemetryResult;
       if (r.disabled) {
-        verboseLog(`\n[verbose] Telemetry: disabled (opt out via nark telemetry off)`);
+        verboseLog(
+          `\n[verbose] Telemetry: disabled (opt out via nark telemetry off)`,
+        );
       } else if (r.error) {
         verboseLog(`\n[verbose] Telemetry: failed to send (network error)`);
       } else if (r.sent && r.authenticated) {
-        verboseLog(`\n[verbose] Telemetry: sent to ${r.endpoint} (authenticated as ${r.email ?? 'unknown'})`);
+        verboseLog(
+          `\n[verbose] Telemetry: sent to ${r.endpoint} (authenticated as ${r.email ?? "unknown"})`,
+        );
       } else if (r.sent) {
-        verboseLog(`\n[verbose] Telemetry: sent anonymously — run 'nark login' to link scans to your dashboard`);
+        verboseLog(
+          `\n[verbose] Telemetry: sent anonymously — run 'nark login' to link scans to your dashboard`,
+        );
       }
     }
   }
@@ -835,8 +1082,12 @@ async function main(options: any) {
     const totalTime = Date.now() - scanStartTime;
     verboseLog(`\n[verbose] Time breakdown:`);
     verboseLog(`  Contract loading:     ${corpusEndTime - corpusStartTime}ms`);
-    verboseLog(`  Package discovery:    ${discoveryEndTime - discoveryStartTime}ms`);
-    verboseLog(`  TypeScript analysis:  ${analysisEndTime - analysisStartTime}ms`);
+    verboseLog(
+      `  Package discovery:    ${discoveryEndTime - discoveryStartTime}ms`,
+    );
+    verboseLog(
+      `  TypeScript analysis:  ${analysisEndTime - analysisStartTime}ms`,
+    );
     verboseLog(`  Output generation:    ${outputEndTime - outputStartTime}ms`);
     verboseLog(`  Total:                ${totalTime}ms`);
   }
@@ -857,12 +1108,14 @@ async function main(options: any) {
   // Determine effective threshold
   // --fail-on-warnings is kept for backward compatibility (equivalent to --fail-threshold warning)
   // --fail-threshold overrides for explicit control
-  const threshold = options.failOnWarnings ? 'warning' : (options.failThreshold || 'error');
+  const threshold = options.failOnWarnings
+    ? "warning"
+    : options.failThreshold || "error";
 
   let shouldFail = false;
-  if (threshold === 'info') {
+  if (threshold === "info") {
     shouldFail = hasErrors || hasWarnings || hasInfo;
-  } else if (threshold === 'warning') {
+  } else if (threshold === "warning") {
     shouldFail = hasErrors || hasWarnings;
   } else {
     // 'error' (default)
@@ -886,26 +1139,34 @@ async function main(options: any) {
  */
 function discoverTsconfig(projectDir: string): string | null {
   const candidates: string[] = [
-    path.join(projectDir, 'tsconfig.json'),
-    path.join(projectDir, 'tsconfig.build.json'),
+    path.join(projectDir, "tsconfig.json"),
+    path.join(projectDir, "tsconfig.build.json"),
   ];
 
   // P1: Common named subdirectory fallbacks (single-app repos that put source in a subdir)
   // Ordered by frequency from bulk-scan data: frontend(102), web(50), server(42), src(36),
   // app(34), client(31), backend(~20), website(45 — usually non-TS), docs(64 — usually non-TS)
-  const namedSubdirs = ['src', 'server', 'frontend', 'web', 'client', 'backend', 'app'];
+  const namedSubdirs = [
+    "src",
+    "server",
+    "frontend",
+    "web",
+    "client",
+    "backend",
+    "app",
+  ];
   for (const subdir of namedSubdirs) {
     const dir = path.join(projectDir, subdir);
     if (fs.existsSync(dir)) {
-      candidates.push(path.join(dir, 'tsconfig.json'));
-      candidates.push(path.join(dir, 'tsconfig.build.json'));
+      candidates.push(path.join(dir, "tsconfig.json"));
+      candidates.push(path.join(dir, "tsconfig.build.json"));
     }
   }
 
   // P0+P1: Monorepo wildcard patterns — depth 2 (apps/*, packages/*, libs/*)
   // and depth 3 (apps/*/packages/*, packages/*/packages/*) for nested monorepos.
   // Scanning evidence: 592 repos use packages/*, 229 use apps/*.
-  const monorepoRoots = ['apps', 'packages', 'libs'];
+  const monorepoRoots = ["apps", "packages", "libs"];
   for (const monorepoRoot of monorepoRoots) {
     const rootDir = path.join(projectDir, monorepoRoot);
     if (!fs.existsSync(rootDir)) continue;
@@ -920,21 +1181,23 @@ function discoverTsconfig(projectDir: string): string | null {
       if (!entry.isDirectory()) continue;
       const depth2Dir = path.join(rootDir, entry.name);
       // Depth 2: apps/web/tsconfig.json, packages/core/tsconfig.json
-      candidates.push(path.join(depth2Dir, 'tsconfig.json'));
-      candidates.push(path.join(depth2Dir, 'tsconfig.build.json'));
+      candidates.push(path.join(depth2Dir, "tsconfig.json"));
+      candidates.push(path.join(depth2Dir, "tsconfig.build.json"));
 
       // P1: named subdirs inside monorepo packages (e.g. apps/backend/src/tsconfig.json)
       for (const subdir of namedSubdirs) {
         const subDir = path.join(depth2Dir, subdir);
         if (fs.existsSync(subDir)) {
-          candidates.push(path.join(subDir, 'tsconfig.json'));
+          candidates.push(path.join(subDir, "tsconfig.json"));
         }
       }
 
       // Depth 3: nested monorepo pattern (packages/myapp/packages/server/tsconfig.json)
       try {
-        const depth3Entries = fs.readdirSync(depth2Dir, { withFileTypes: true });
-        for (const innerMonorepoDir of ['apps', 'packages', 'libs']) {
+        const depth3Entries = fs.readdirSync(depth2Dir, {
+          withFileTypes: true,
+        });
+        for (const innerMonorepoDir of ["apps", "packages", "libs"]) {
           const innerRootDir = path.join(depth2Dir, innerMonorepoDir);
           if (!fs.existsSync(innerRootDir)) continue;
           for (const inner of depth3Entries) {
@@ -942,10 +1205,14 @@ function discoverTsconfig(projectDir: string): string | null {
             // Only descend if the directory name matches a known inner monorepo root
           }
           try {
-            const depth3DirEntries = fs.readdirSync(innerRootDir, { withFileTypes: true });
+            const depth3DirEntries = fs.readdirSync(innerRootDir, {
+              withFileTypes: true,
+            });
             for (const innerEntry of depth3DirEntries) {
               if (!innerEntry.isDirectory()) continue;
-              candidates.push(path.join(innerRootDir, innerEntry.name, 'tsconfig.json'));
+              candidates.push(
+                path.join(innerRootDir, innerEntry.name, "tsconfig.json"),
+              );
             }
           } catch {
             // Permission errors — skip
@@ -977,91 +1244,135 @@ function printCompactReport(opts: {
   scanDuration: string;
   score: number;
   violations: Violation[];
-  packageDiscovery: import('./types.js').PackageDiscoveryResult | undefined;
+  packageDiscovery: import("./types.js").PackageDiscoveryResult | undefined;
   d3HtmlPath: string;
   aiPromptPath: string | null;
   finalRecord: any;
 }): void {
   const {
-    narkVersion, filesAnalyzed, packagesMatched, scanDuration,
-    score, violations, packageDiscovery, d3HtmlPath, aiPromptPath,
+    narkVersion,
+    filesAnalyzed,
+    packagesMatched,
+    scanDuration,
+    score,
+    violations,
+    packageDiscovery,
+    d3HtmlPath,
+    aiPromptPath,
   } = opts;
 
-  const errorCount = violations.filter(v => v.severity === 'error').length;
-  const warningCount = violations.filter(v => v.severity === 'warning').length;
+  const errorCount = violations.filter((v) => v.severity === "error").length;
+  const warningCount = violations.filter(
+    (v) => v.severity === "warning",
+  ).length;
   const totalViolations = errorCount + warningCount;
 
   // Header line
-  console.log('');
-  console.log(chalk.bold(`nark`) + chalk.dim(` v${narkVersion}`) +
-    chalk.dim(` · ${filesAnalyzed} files · ${packagesMatched} packages matched · ${scanDuration}s`));
-  console.log('');
+  console.log("");
+  console.log(
+    chalk.bold(`nark`) +
+      chalk.dim(` v${narkVersion}`) +
+      chalk.dim(
+        ` · ${filesAnalyzed} files · ${packagesMatched} packages matched · ${scanDuration}s`,
+      ),
+  );
+  console.log("");
 
   // Score line
-  const scoreColor = score >= 90 ? chalk.green : score >= 70 ? chalk.yellow : chalk.red;
+  const scoreColor =
+    score >= 90 ? chalk.green : score >= 70 ? chalk.yellow : chalk.red;
   if (totalViolations > 0) {
     const parts = [];
-    if (errorCount > 0) parts.push(`${errorCount} error${errorCount === 1 ? '' : 's'}`);
-    if (warningCount > 0) parts.push(`${warningCount} warning${warningCount === 1 ? '' : 's'}`);
-    console.log(`  ${scoreColor.bold(`Score: ${score}/100`)}  ·  ${chalk.red(`${totalViolations} violation${totalViolations === 1 ? '' : 's'}`)} ${chalk.dim(`(${parts.join(', ')})`)}`)
+    if (errorCount > 0)
+      parts.push(`${errorCount} error${errorCount === 1 ? "" : "s"}`);
+    if (warningCount > 0)
+      parts.push(`${warningCount} warning${warningCount === 1 ? "" : "s"}`);
+    console.log(
+      `  ${scoreColor.bold(`Score: ${score}/100`)}  ·  ${chalk.red(`${totalViolations} violation${totalViolations === 1 ? "" : "s"}`)} ${chalk.dim(`(${parts.join(", ")})`)}`,
+    );
   } else {
-    console.log(`  ${scoreColor.bold(`Score: ${score}/100`)}  ·  ${chalk.green('0 violations')}`);
+    console.log(
+      `  ${scoreColor.bold(`Score: ${score}/100`)}  ·  ${chalk.green("0 violations")}`,
+    );
   }
-  console.log('');
+  console.log("");
 
   if (totalViolations === 0) {
     // Clean scan — show passing packages
-    const passingPkgs = packageDiscovery?.packages
-      .filter(p => p.hasContract)
-      .map(p => p.name) ?? [];
+    const passingPkgs =
+      packageDiscovery?.packages
+        .filter((p) => p.hasContract)
+        .map((p) => p.name) ?? [];
     if (passingPkgs.length > 0) {
-      console.log(`  ${chalk.green('✓')} ${passingPkgs.join(', ')} — all compliant`);
-      console.log('');
+      console.log(
+        `  ${chalk.green("✓")} ${passingPkgs.join(", ")} — all compliant`,
+      );
+      console.log("");
     }
   } else {
     // Group violations by package
     const byPackage = new Map<string, Violation[]>();
     for (const v of violations) {
-      if (v.severity === 'error' || v.severity === 'warning') {
+      if (v.severity === "error" || v.severity === "warning") {
         if (!byPackage.has(v.package)) byPackage.set(v.package, []);
         byPackage.get(v.package)!.push(v);
       }
     }
 
     // Sort packages by violation count descending
-    const sortedPackages = [...byPackage.entries()].sort((a, b) => b[1].length - a[1].length);
+    const sortedPackages = [...byPackage.entries()].sort(
+      (a, b) => b[1].length - a[1].length,
+    );
 
     // Show all packages with inline violations
     const MAX_INLINE_VIOLATIONS = 5;
-    const projectRoot = findGitRepoRoot(opts.finalRecord.tsconfig_path || '') || process.cwd();
+    const projectRoot =
+      findGitRepoRoot(opts.finalRecord.tsconfig_path || "") || process.cwd();
 
     for (const [pkg, pkgViolations] of sortedPackages) {
-      console.log(`  ${chalk.red('✗')} ${chalk.bold(pkg)}     ${chalk.dim(`${pkgViolations.length} violation${pkgViolations.length === 1 ? '' : 's'}`)}`);
+      console.log(
+        `  ${chalk.red("✗")} ${chalk.bold(pkg)}     ${chalk.dim(`${pkgViolations.length} violation${pkgViolations.length === 1 ? "" : "s"}`)}`,
+      );
 
       // Show first N violations inline
-      for (let j = 0; j < Math.min(MAX_INLINE_VIOLATIONS, pkgViolations.length); j++) {
+      for (
+        let j = 0;
+        j < Math.min(MAX_INLINE_VIOLATIONS, pkgViolations.length);
+        j++
+      ) {
         const v = pkgViolations[j];
         const relFile = path.relative(projectRoot, v.file);
         const shortDesc = getCompactDescription(v);
-        console.log(chalk.dim(`    ${relFile}:${v.line}`) + `    ${v.function}() — ${shortDesc}`);
+        console.log(
+          chalk.dim(`    ${relFile}:${v.line}`) +
+            `    ${v.function}() — ${shortDesc}`,
+        );
       }
 
       if (pkgViolations.length > MAX_INLINE_VIOLATIONS) {
-        console.log(chalk.dim(`    ... +${pkgViolations.length - MAX_INLINE_VIOLATIONS} more`));
+        console.log(
+          chalk.dim(
+            `    ... +${pkgViolations.length - MAX_INLINE_VIOLATIONS} more`,
+          ),
+        );
       }
     }
-    console.log('');
+    console.log("");
   }
 
   // Report link
-  console.log(chalk.dim(`  Full report: `) + chalk.underline(`file://${d3HtmlPath}`) + chalk.dim(`  (Cmd+click to open)`));
+  console.log(
+    chalk.dim(`  Full report: `) +
+      chalk.underline(`file://${d3HtmlPath}`) +
+      chalk.dim(`  (Cmd+click to open)`),
+  );
   if (aiPromptPath && totalViolations > 0) {
     console.log(chalk.dim(`  AI fix:      `) + `nark --instructions-path`);
   }
   if (totalViolations > 0) {
     console.log(chalk.dim(`  Verbose:     `) + `npx nark --verbose`);
   }
-  console.log('');
+  console.log("");
 }
 
 /**
@@ -1072,14 +1383,14 @@ function getCompactDescription(v: Violation): string {
   // Use business impact if available
   if (v.business_impact?.incident_label) {
     const labels: Record<string, string> = {
-      'PAYMENT_RISK': 'payment will fail silently',
-      'DATA_LOSS': 'data loss risk',
-      'SILENT_FAILURE': 'will fail silently',
-      'DOWNTIME': 'will crash in production',
-      'SECURITY_RISK': 'security vulnerability',
-      'COMPLIANCE_VIOLATION': 'compliance risk',
+      PAYMENT_RISK: "payment will fail silently",
+      DATA_LOSS: "data loss risk",
+      SILENT_FAILURE: "will fail silently",
+      DOWNTIME: "will crash in production",
+      SECURITY_RISK: "security vulnerability",
+      COMPLIANCE_VIOLATION: "compliance risk",
     };
-    return labels[v.business_impact.incident_label] || 'missing error handling';
+    return labels[v.business_impact.incident_label] || "missing error handling";
   }
 
   // Extract the key info from the description
@@ -1087,39 +1398,64 @@ function getCompactDescription(v: Violation): string {
   // We want: "missing try-catch, network errors will crash"
   const desc = v.description.toLowerCase();
 
-  if (desc.includes('no try-catch') || desc.includes('missing try-catch') || desc.includes('not wrapped')) {
+  if (
+    desc.includes("no try-catch") ||
+    desc.includes("missing try-catch") ||
+    desc.includes("not wrapped")
+  ) {
     // Try to extract what will happen
-    if (v.contract_clause.toLowerCase().includes('p2002') || v.contract_clause.toLowerCase().includes('unique')) {
-      return 'missing try-catch, duplicate key will crash';
+    if (
+      v.contract_clause.toLowerCase().includes("p2002") ||
+      v.contract_clause.toLowerCase().includes("unique")
+    ) {
+      return "missing try-catch, duplicate key will crash";
     }
-    if (v.contract_clause.toLowerCase().includes('p2003') || v.contract_clause.toLowerCase().includes('foreign')) {
-      return 'missing try-catch, FK constraint will crash';
+    if (
+      v.contract_clause.toLowerCase().includes("p2003") ||
+      v.contract_clause.toLowerCase().includes("foreign")
+    ) {
+      return "missing try-catch, FK constraint will crash";
     }
-    if (v.contract_clause.toLowerCase().includes('p2025') || v.contract_clause.toLowerCase().includes('not found')) {
-      return 'missing try-catch, record-not-found will crash';
+    if (
+      v.contract_clause.toLowerCase().includes("p2025") ||
+      v.contract_clause.toLowerCase().includes("not found")
+    ) {
+      return "missing try-catch, record-not-found will crash";
     }
-    if (v.contract_clause.toLowerCase().includes('404') || v.contract_clause.toLowerCase().includes('not found')) {
-      return 'missing try-catch, 404 will crash';
+    if (
+      v.contract_clause.toLowerCase().includes("404") ||
+      v.contract_clause.toLowerCase().includes("not found")
+    ) {
+      return "missing try-catch, 404 will crash";
     }
-    if (v.contract_clause.toLowerCase().includes('network') || v.contract_clause.toLowerCase().includes('timeout')) {
-      return 'missing try-catch, network errors will crash';
+    if (
+      v.contract_clause.toLowerCase().includes("network") ||
+      v.contract_clause.toLowerCase().includes("timeout")
+    ) {
+      return "missing try-catch, network errors will crash";
     }
-    if (v.contract_clause.toLowerCase().includes('rate') || v.contract_clause.toLowerCase().includes('429')) {
-      return 'missing try-catch, rate limit will crash';
+    if (
+      v.contract_clause.toLowerCase().includes("rate") ||
+      v.contract_clause.toLowerCase().includes("429")
+    ) {
+      return "missing try-catch, rate limit will crash";
     }
-    if (v.contract_clause.toLowerCase().includes('auth') || v.contract_clause.toLowerCase().includes('401')) {
-      return 'missing try-catch, auth errors will crash';
+    if (
+      v.contract_clause.toLowerCase().includes("auth") ||
+      v.contract_clause.toLowerCase().includes("401")
+    ) {
+      return "missing try-catch, auth errors will crash";
     }
-    return 'missing try-catch, errors will crash';
+    return "missing try-catch, errors will crash";
   }
 
-  if (desc.includes('error handler') || desc.includes('.on(')) {
-    return 'missing error event handler';
+  if (desc.includes("error handler") || desc.includes(".on(")) {
+    return "missing error event handler";
   }
 
   // Fallback: truncate the original description
-  const shortDesc = v.description.replace(/\.$/, '');
-  return shortDesc.length > 50 ? shortDesc.substring(0, 47) + '...' : shortDesc;
+  const shortDesc = v.description.replace(/\.$/, "");
+  return shortDesc.length > 50 ? shortDesc.substring(0, 47) + "..." : shortDesc;
 }
 
 /**
@@ -1130,19 +1466,19 @@ function getCompactDescription(v: Violation): string {
 function findDefaultCorpusPath(): string {
   // Try 1: NARK_CORPUS_PATH env var (highest priority override, for development)
   const envPath = process.env.NARK_CORPUS_PATH;
-  if (envPath && fs.existsSync(path.join(envPath, 'packages'))) {
+  if (envPath && fs.existsSync(path.join(envPath, "packages"))) {
     return envPath;
   }
 
   // Try 2: Published npm package (production use)
   try {
     const _require = createRequire(import.meta.url);
-    const corpusModule = _require('nark-corpus');
+    const corpusModule = _require("nark-corpus");
     // getCorpusPath() returns the packages/ subdirectory
     // corpus-loader expects the parent (the corpus root containing packages/ and schema/)
     const corpusRoot = path.dirname(corpusModule.getCorpusPath());
 
-    if (fs.existsSync(path.join(corpusRoot, 'packages'))) {
+    if (fs.existsSync(path.join(corpusRoot, "packages"))) {
       return corpusRoot;
     }
   } catch (err) {
@@ -1151,22 +1487,22 @@ function findDefaultCorpusPath(): string {
 
   // Try 3: Local corpus repo (development fallback)
   const possiblePaths = [
-    path.join(process.cwd(), '../nark-corpus'),
-    path.join(process.cwd(), '../corpus'),
-    path.join(process.cwd(), '../../nark-corpus'),
-    path.join(process.cwd(), '../../corpus'),
-    path.join(__dirname, '../../nark-corpus'),
-    path.join(__dirname, '../../corpus'),
+    path.join(process.cwd(), "../nark-corpus"),
+    path.join(process.cwd(), "../corpus"),
+    path.join(process.cwd(), "../../nark-corpus"),
+    path.join(process.cwd(), "../../corpus"),
+    path.join(__dirname, "../../nark-corpus"),
+    path.join(__dirname, "../../corpus"),
   ];
 
   for (const p of possiblePaths) {
-    if (fs.existsSync(path.join(p, 'packages'))) {
+    if (fs.existsSync(path.join(p, "packages"))) {
       return p;
     }
   }
 
   // Fallback: assume sibling nark-corpus repo
-  return path.join(process.cwd(), '../nark-corpus');
+  return path.join(process.cwd(), "../nark-corpus");
 }
 
 /**
@@ -1181,10 +1517,13 @@ function findDefaultCorpusPath(): string {
  * - Call sites only in v1 (missed by v2 = true regressions)
  * - Call sites only in v2 (new detections or v2-only patterns)
  */
-function printAnalyzerDiff(v1Violations: Violation[], v2Violations: Violation[]): void {
-  console.log(chalk.bold('\n══════════════════════════════════════════════'));
-  console.log(chalk.bold('  Analyzer Comparison (v1 vs v2)'));
-  console.log(chalk.bold('══════════════════════════════════════════════\n'));
+function printAnalyzerDiff(
+  v1Violations: Violation[],
+  v2Violations: Violation[],
+): void {
+  console.log(chalk.bold("\n══════════════════════════════════════════════"));
+  console.log(chalk.bold("  Analyzer Comparison (v1 vs v2)"));
+  console.log(chalk.bold("══════════════════════════════════════════════\n"));
 
   const LINE_FUZZ = 2;
 
@@ -1201,7 +1540,12 @@ function printAnalyzerDiff(v1Violations: Violation[], v2Violations: Violation[])
       const key = `${v.file}:${v.line}:${v.package}`;
       if (!seen.has(key)) {
         seen.add(key);
-        sites.push({ file: v.file, line: v.line, pkg: v.package, fn: v.function });
+        sites.push({
+          file: v.file,
+          line: v.line,
+          pkg: v.package,
+          fn: v.function,
+        });
       }
     }
     return sites;
@@ -1253,90 +1597,123 @@ function printAnalyzerDiff(v1Violations: Violation[], v2Violations: Violation[])
   const onlyInV2 = v2Sites.filter((_, i) => !matchedV2Indices.has(i));
 
   // Print summary
-  console.log(chalk.green(`  Matching call sites (in both): ${matchedSites.length}`));
-  console.log(chalk.yellow(`  Only in v1 (missed by v2): ${onlyInV1.length} call sites`));
-  console.log(chalk.cyan(`  Only in v2 (new or false positives): ${onlyInV2.length} call sites`));
-  console.log('');
-  console.log(chalk.dim(`  Raw counts: v1=${v1Violations.length} violations, v2=${v2Violations.length} violations`));
-  console.log(chalk.dim(`  (v1 fires multiple violations per call site; call-site match is the accurate regression metric)`));
-  console.log('');
+  console.log(
+    chalk.green(`  Matching call sites (in both): ${matchedSites.length}`),
+  );
+  console.log(
+    chalk.yellow(`  Only in v1 (missed by v2): ${onlyInV1.length} call sites`),
+  );
+  console.log(
+    chalk.cyan(
+      `  Only in v2 (new or false positives): ${onlyInV2.length} call sites`,
+    ),
+  );
+  console.log("");
+  console.log(
+    chalk.dim(
+      `  Raw counts: v1=${v1Violations.length} violations, v2=${v2Violations.length} violations`,
+    ),
+  );
+  console.log(
+    chalk.dim(
+      `  (v1 fires multiple violations per call site; call-site match is the accurate regression metric)`,
+    ),
+  );
+  console.log("");
 
   if (onlyInV1.length > 0) {
-    console.log(chalk.yellow.bold('  Call sites in v1 but NOT in v2 (true regressions):'));
+    console.log(
+      chalk.yellow.bold("  Call sites in v1 but NOT in v2 (true regressions):"),
+    );
     for (const s of onlyInV1) {
       const relFile = path.relative(process.cwd(), s.file);
-      console.log(chalk.yellow(`    - ${relFile}:${s.line} [${s.pkg}.${s.fn}]`));
+      console.log(
+        chalk.yellow(`    - ${relFile}:${s.line} [${s.pkg}.${s.fn}]`),
+      );
     }
-    console.log('');
+    console.log("");
   }
 
   if (onlyInV2.length > 0) {
-    console.log(chalk.cyan.bold('  Call sites in v2 but NOT in v1 (new detections):'));
+    console.log(
+      chalk.cyan.bold("  Call sites in v2 but NOT in v1 (new detections):"),
+    );
     for (const s of onlyInV2) {
       const relFile = path.relative(process.cwd(), s.file);
       console.log(chalk.cyan(`    + ${relFile}:${s.line} [${s.pkg}.${s.fn}]`));
     }
-    console.log('');
+    console.log("");
   }
 
-  console.log(chalk.bold('══════════════════════════════════════════════\n'));
+  console.log(chalk.bold("══════════════════════════════════════════════\n"));
 }
 
 /**
  * Handle errors
  */
-process.on('uncaughtException', (error) => {
+process.on("uncaughtException", (error) => {
   const message = error instanceof Error ? error.message : String(error);
 
   // Friendly message for "no TypeScript files" errors
-  if (message.startsWith('NO_TS_FILES:')) {
-    console.error('');
-    console.error(chalk.red('  Error: Not a TypeScript project'));
-    console.error('');
+  if (message.startsWith("NO_TS_FILES:")) {
+    console.error("");
+    console.error(chalk.red("  Error: Not a TypeScript project"));
+    console.error("");
     // Print the detailed message (skip the NO_TS_FILES: prefix)
-    console.error(message.slice('NO_TS_FILES: '.length));
+    console.error(message.slice("NO_TS_FILES: ".length));
     process.exit(1);
   }
 
   // Friendly message for "No inputs were found" (fallback if not caught above)
-  if (message.includes('No inputs were found')) {
-    console.error('');
-    console.error(chalk.red('  Error: No TypeScript files found to analyze'));
-    console.error('');
-    console.error('  nark scans TypeScript projects for missing error handling.');
-    console.error('  Run it from your project directory, or point it at your tsconfig:');
-    console.error('');
-    console.error(chalk.dim('    cd my-project && npx nark'));
-    console.error(chalk.dim('    npx nark --tsconfig path/to/tsconfig.json'));
-    console.error('');
+  if (message.includes("No inputs were found")) {
+    console.error("");
+    console.error(chalk.red("  Error: No TypeScript files found to analyze"));
+    console.error("");
+    console.error(
+      "  nark scans TypeScript projects for missing error handling.",
+    );
+    console.error(
+      "  Run it from your project directory, or point it at your tsconfig:",
+    );
+    console.error("");
+    console.error(chalk.dim("    cd my-project && npx nark"));
+    console.error(chalk.dim("    npx nark --tsconfig path/to/tsconfig.json"));
+    console.error("");
     process.exit(1);
   }
 
   // Tsconfig resolution errors (missing extends, missing files)
-  if (message.includes('TSCONFIG_RESOLVE_ERROR') || message.includes('NO_TS_FILES')) {
-    console.error('');
+  if (
+    message.includes("TSCONFIG_RESOLVE_ERROR") ||
+    message.includes("NO_TS_FILES")
+  ) {
+    console.error("");
     console.error(error instanceof Error ? error.message : error);
     process.exit(1);
   }
 
   // Permission errors when writing to the filesystem
-  if (message.includes('EPERM') || message.includes('EACCES')) {
-    console.error('');
-    console.error(chalk.red('  Error: Permission denied'));
-    console.error('');
-    console.error('  nark could not write to this directory. Make sure you have');
-    console.error('  write permissions, or run nark from your project directory:');
-    console.error('');
-    console.error(chalk.dim('    cd my-project && npx nark'));
-    console.error(chalk.dim('    npx nark --tsconfig path/to/tsconfig.json'));
-    console.error('');
+  if (message.includes("EPERM") || message.includes("EACCES")) {
+    console.error("");
+    console.error(chalk.red("  Error: Permission denied"));
+    console.error("");
+    console.error(
+      "  nark could not write to this directory. Make sure you have",
+    );
+    console.error(
+      "  write permissions, or run nark from your project directory:",
+    );
+    console.error("");
+    console.error(chalk.dim("    cd my-project && npx nark"));
+    console.error(chalk.dim("    npx nark --tsconfig path/to/tsconfig.json"));
+    console.error("");
     process.exit(1);
   }
 
-  console.error(chalk.red('\nUnexpected error:'));
+  console.error(chalk.red("\nUnexpected error:"));
   console.error(error instanceof Error ? error.message : error);
   if (error instanceof Error && error.stack) {
-    console.error(chalk.dim(error.stack.split('\n').slice(1).join('\n')));
+    console.error(chalk.dim(error.stack.split("\n").slice(1).join("\n")));
   }
   process.exit(2);
 });
