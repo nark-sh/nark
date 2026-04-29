@@ -79,12 +79,16 @@ const _narkRc = (() => {
   }
 })();
 
+const _require = createRequire(import.meta.url);
+const _pkgVersion = (_require("../package.json") as { version: string })
+  .version;
+
 program
   .name("nark")
   .description(
     "Contract coverage scanner — find missing error handling before production",
   )
-  .version("1.2.0");
+  .version(_pkgVersion);
 
 // Add suppressions subcommand
 program.addCommand(createSuppressionsCommand());
