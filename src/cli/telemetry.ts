@@ -70,6 +70,15 @@ export interface TelemetryPayload {
   suppressionDetails?: SuppressionDetail[];
 }
 
+export interface TelemetryResult {
+  sent: boolean;
+  authenticated: boolean;
+  endpoint: string;
+  email?: string;
+  disabled?: boolean;
+  error?: boolean;
+}
+
 export interface EnrichedTelemetryPayload extends TelemetryPayload {
   repoName?: string;
   repoUrl?: string;
@@ -217,9 +226,9 @@ export function handleFirstRunNotice(): void {
  * When a user is logged in, includes Authorization: Bearer <token> header.
  * When a git remote is available, includes repoFingerprint (SHA256 of origin URL).
  */
-export async function fireTelemetryEvent(payload: TelemetryPayload): Promise<void> {
+export async function fireTelemetryEvent(payload: TelemetryPayload): Promise<TelemetryResult> {
   const config = readTelemetryConfig();
-  if (!config.enabled) return;
+  if (!config.enabled) return { sent: false, authenticated: false, endpoint: TELEMETRY_ENDPOINT, disabled: true };
   try {
     const headers: Record<string, string> = { 'Content-Type': 'application/json' };
     const token = getToken();
@@ -233,14 +242,20 @@ export async function fireTelemetryEvent(payload: TelemetryPayload): Promise<voi
       ...(fp ? { repoFingerprint: fp } : {}),
       ...(did ? { deviceId: did } : {}),
     };
+    let fetchFailed = false;
     await fetch(TELEMETRY_ENDPOINT, {
       method: 'POST',
       headers,
       body: JSON.stringify(enriched),
       signal: AbortSignal.timeout(2000),
-    }).catch(() => {});
+    }).catch(() => { fetchFailed = true; });
+    if (fetchFailed) {
+      return { sent: false, authenticated: token !== null, endpoint: TELEMETRY_ENDPOINT, error: true };
+    }
+    return { sent: true, authenticated: token !== null, endpoint: TELEMETRY_ENDPOINT, email: token ? getCredentials()?.email : undefined };
   } catch {
     // ignore — telemetry must never affect the scanner
+    return { sent: false, authenticated: false, endpoint: TELEMETRY_ENDPOINT, error: true };
   }
 }
 
