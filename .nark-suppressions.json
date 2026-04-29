@@ -1,14 +1,4 @@
 {
   "version": "1.0",
-  "suppressions": [
-    {
-      "fingerprint": "c9efc51aff549bf4baa8aeb784e1f1b0",
-      "package": "undici",
-      "postconditionId": "response-json-parse-error",
-      "filePath": "src/cli/auth.ts",
-      "lineNumber": 76,
-      "reason": "FP: res.ok is checked before .json() (line 65), and .json() is wrapped in try-catch with SyntaxError inspection",
-      "suppressedAt": "2026-04-29T19:10:00Z"
-    }
-  ]
+  "suppressions": []
 }
