@@ -48042,5 +48042,250 @@
       }
     },
     "implementedAt": "2026-04-29T00:00:00.000Z"
+  },
+  {
+    "id": "concern-20260429-undici-1",
+    "created_at": "2026-04-29",
+    "source": "dashboard-feedback",
+    "package": "undici",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "undici response-json-parse-error fires on fetch() calls that are already wrapped in try/catch with .json() parsing handled. 64 FP instances across multiple repos — scanner does not recognize that json parse errors are caught in existing error handlers.",
+    "evidence": {
+      "repos": [
+        "apps/web/app/admin/(protected)/lab/oss-scan/page.tsx",
+        "apps/web/app/api/oss-scan/route.ts",
+        "apps/web/components/violations/violation-review-panel.tsx",
+        "apps/web/hooks/use-scan-poller.ts",
+        "apps/web/components/billing/change-plan-modal.tsx"
+      ],
+      "scan_file": null,
+      "violation_count": 64,
+      "fp_reason": "Response .json() parse errors caught in surrounding try/catch block",
+      "fix_target": "scanner",
+      "postcondition_id": "response-json-parse-error"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260429-react-hook-form-1",
+    "created_at": "2026-04-29",
+    "source": "dashboard-feedback",
+    "package": "react-hook-form",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "react-hook-form async-submit-unhandled-error fires on handleSubmit() calls where the submit handler already has try/catch internally or where the form framework handles the rejection. 30 FP instances — scanner fires on the handleSubmit wrapper even when the async callback inside is protected.",
+    "evidence": {
+      "repos": [
+        "src/components/create-organization-modal.tsx"
+      ],
+      "scan_file": null,
+      "violation_count": 30,
+      "fp_reason": "handleSubmit async callback has internal try/catch; outer handleSubmit call flagged incorrectly",
+      "fix_target": "scanner",
+      "postcondition_id": "async-submit-unhandled-error"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260429-tanstack-react-query-1",
+    "created_at": "2026-04-29",
+    "source": "dashboard-feedback",
+    "package": "@tanstack/react-query",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "@tanstack/react-query query-error-unhandled fires on useQuery() calls where error handling is delegated to the QueryClient's global onError handler or where the component handles the error state via the returned `error` property. 25 FP instances — scanner does not detect global error boundary or onError config patterns.",
+    "evidence": {
+      "repos": [
+        "app/access/page.tsx",
+        "hooks/useArtistFans.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 25,
+      "fp_reason": "Error handled via QueryClient global onError or component-level error state from useQuery return value",
+      "fix_target": "scanner",
+      "postcondition_id": "query-error-unhandled"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260429-ai-1",
+    "created_at": "2026-04-29",
+    "source": "dashboard-feedback",
+    "package": "ai",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "ai tool-execution-error fires on tool call invocations where the tool execution error is already caught by the surrounding streamText/generateText error handler. 25 FP instances — scanner does not trace that the tool call is wrapped in the AI SDK's own error boundary.",
+    "evidence": {
+      "repos": [
+        "lib/tools/browser/browserAct.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 25,
+      "fp_reason": "Tool execution errors propagate to streamText onError / generateText try-catch which already handles them",
+      "fix_target": "scanner",
+      "postcondition_id": "tool-execution-error"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260429-zod-1",
+    "created_at": "2026-04-29",
+    "source": "dashboard-feedback",
+    "package": "zod",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "zod parse-validation-error fires on .parse() calls where safeParse() is used instead, or where the ZodError is caught in a surrounding try/catch. 14 FP instances — scanner may be flagging safeParse usage as unprotected, or not recognizing ZodError handling in catch blocks.",
+    "evidence": {
+      "repos": [
+        "apps/web/app/api/ai/analyze-sender-pattern/route.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 14,
+      "fp_reason": "Using safeParse() which never throws, or ZodError caught in try/catch",
+      "fix_target": "scanner",
+      "postcondition_id": "parse-validation-error"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260429-ai-2",
+    "created_at": "2026-04-29",
+    "source": "dashboard-feedback",
+    "package": "ai",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "ai api-error-rate-limit fires on AI SDK calls that are already protected by try/catch with rate limit error handling. 7 FP instances in utils/llms — scanner does not recognize rate limit error handling patterns in catch blocks.",
+    "evidence": {
+      "repos": [
+        "apps/web/utils/llms/index.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 7,
+      "fp_reason": "Rate limit errors caught and handled in surrounding try/catch at call site",
+      "fix_target": "scanner",
+      "postcondition_id": "api-error-rate-limit"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260429-clerk-nextjs-1",
+    "created_at": "2026-04-29",
+    "source": "dashboard-feedback",
+    "package": "@clerk/nextjs",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "@clerk/nextjs use-user-no-loaded-check fires in pages/components where isLoaded is checked via a conditional but the scanner does not recognize the pattern (e.g., conditional rendering, early return, or null check before using user). 7 FP instances.",
+    "evidence": {
+      "repos": [
+        "apps/web/app/(auth)/invite/[token]/page.tsx"
+      ],
+      "scan_file": null,
+      "violation_count": 7,
+      "fp_reason": "isLoaded checked via conditional render or early return before user is accessed",
+      "fix_target": "scanner",
+      "postcondition_id": "use-user-no-loaded-check"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260429-redis-1",
+    "created_at": "2026-04-29",
+    "source": "dashboard-feedback",
+    "package": "redis",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "redis missing-error-listener fires on redis client creation where .on('error') is registered but not at the same call site — often registered in an initialization module. 7 FP instances — scanner does not trace cross-function error listener registration.",
+    "evidence": {
+      "repos": [
+        "packages/api/src/main.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 7,
+      "fp_reason": "Error listener registered in initialization function, not at creation call site",
+      "fix_target": "scanner",
+      "postcondition_id": "missing-error-listener"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260429-react-hook-form-2",
+    "created_at": "2026-04-29",
+    "source": "dashboard-feedback",
+    "package": "react-hook-form",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "react-hook-form missing-form-provider fires on useFormContext() calls in components that are always rendered inside a FormProvider — scanner cannot trace component tree to verify the provider exists. 6 FP instances.",
+    "evidence": {
+      "repos": [
+        "components/Account/ArtistInstructionTextArea.tsx"
+      ],
+      "scan_file": null,
+      "violation_count": 6,
+      "fp_reason": "Component always rendered inside FormProvider in parent; scanner cannot trace component hierarchy",
+      "fix_target": "contract",
+      "postcondition_id": "missing-form-provider"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260429-express-1",
+    "created_at": "2026-04-29",
+    "source": "dashboard-feedback",
+    "package": "express",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "express async-middleware-unhandled-rejection fires on async route handlers where the async rejection is handled by a global error handler registered via app.use(errorHandler). 5 FP instances — scanner does not detect global Express error middleware as satisfying this postcondition.",
+    "evidence": {
+      "repos": [
+        "api/browser-agent-server.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 5,
+      "fp_reason": "Global Express error handler middleware (app.use with 4-param function) catches all async rejections",
+      "fix_target": "scanner",
+      "postcondition_id": "async-middleware-unhandled-rejection"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260429-tanstack-react-query-2",
+    "created_at": "2026-04-29",
+    "source": "dashboard-feedback",
+    "package": "@tanstack/react-query",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "@tanstack/react-query infinite-query-error-unhandled fires on useInfiniteQuery() calls with same issue as query-error-unhandled — global QueryClient error handler or component-level error state. 3 FP instances.",
+    "evidence": {
+      "repos": [
+        "hooks/useArtistFans.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 3,
+      "fp_reason": "Error handled via QueryClient global onError or component error state",
+      "fix_target": "scanner",
+      "postcondition_id": "infinite-query-error-unhandled"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260429-tanstack-react-query-3",
+    "created_at": "2026-04-29",
+    "source": "dashboard-feedback",
+    "package": "@tanstack/react-query",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "@tanstack/react-query mutation-error-unhandled fires on useMutation() calls where onError is not set inline but handled via a global mutation error handler. 2 FP instances.",
+    "evidence": {
+      "repos": [
+        "hooks/useCatalogSongsFileSelect.ts"
+      ],
+      "scan_file": null,
+      "violation_count": 2,
+      "fp_reason": "Global mutation error handler via QueryClient or onError in mutate() call rather than useMutation options",
+      "fix_target": "scanner",
+      "postcondition_id": "mutation-error-unhandled"
+    },
+    "resolution": null
   }
 ]
