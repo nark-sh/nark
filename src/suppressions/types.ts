@@ -157,7 +157,7 @@ export interface SuppressionCheckResult {
 }
 
 /**
- * A suppression entry in .bc-suppressions.json
+ * A suppression entry in .nark-suppressions.json
  *
  * Keyed by fingerprint rather than line number, so it is stable across
  * line-number shifts caused by unrelated code additions. If code actually
@@ -187,7 +187,7 @@ export interface BcScanSuppression {
 }
 
 /**
- * The .bc-suppressions.json file structure
+ * The .nark-suppressions.json file structure
  */
 export interface BcScanStore {
   /** Schema version */

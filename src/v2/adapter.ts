@@ -203,7 +203,7 @@ function convertViolation(
   // Build stable ID from location
   const id = `${v2.package}:${v2.function}:${v2.postconditionId}:${v2.line}:${v2.column}`;
 
-  return {
+  const v1: V1Violation = {
     id,
     severity: v2.severity,
     file: v2.file,
@@ -222,4 +222,11 @@ function convertViolation(
     })),
     // code_snippet not populated (would need async file read)
   };
+
+  // Pass through fingerprint from v2 analyzer (used by suppression system)
+  if (v2.fingerprint) {
+    (v1 as any).fingerprint = v2.fingerprint;
+  }
+
+  return v1;
 }

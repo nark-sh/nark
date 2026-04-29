@@ -62,7 +62,7 @@ export {
 export { computeViolationFingerprint } from './fingerprint.js';
 export type { FingerprintParams } from './fingerprint.js';
 
-// Suppression store (.bc-suppressions.json)
+// Suppression store (.nark-suppressions.json)
 export {
   getStorePath,
   loadStore,

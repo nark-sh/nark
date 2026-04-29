@@ -217,7 +217,7 @@ function createStatsCommand(): Command {
 }
 
 /**
- * Add a fingerprint-based suppression to .bc-suppressions.json
+ * Add a fingerprint-based suppression to .nark-suppressions.json
  *
  * This is the preferred way to suppress violations — no inline comments,
  * no production code pollution. The fingerprint links the suppression back
@@ -229,7 +229,7 @@ function createAddCommand(): Command {
   const add = new Command('add');
 
   add
-    .description('Add a fingerprint-based suppression to .bc-suppressions.json')
+    .description('Add a fingerprint-based suppression to .nark-suppressions.json')
     .requiredOption('--fingerprint <fp>', 'Violation fingerprint (from scan output or SaaS dashboard)')
     .requiredOption('--reason <text>', 'Why this violation is being suppressed (min 10 chars)')
     .option('--file <path>', 'File path (for reference — stored but not used for matching)')
@@ -289,7 +289,7 @@ function createAddCommand(): Command {
 }
 
 /**
- * Verify suppressions in .bc-suppressions.json against a scan result file.
+ * Verify suppressions in .nark-suppressions.json against a scan result file.
  *
  * Reads a scan output JSON and compares the fingerprints of all violations
  * found against the suppression store. Any stored suppression whose fingerprint
@@ -308,7 +308,7 @@ function createVerifyCommand(): Command {
   const verify = new Command('verify');
 
   verify
-    .description('Check .bc-suppressions.json for stale entries against a scan result')
+    .description('Check .nark-suppressions.json for stale entries against a scan result')
     .requiredOption('--scan <file>', 'Path to scan output JSON (from nark --output)')
     .option('--clean', 'Automatically remove stale suppressions')
     .option('--json', 'Output results as JSON')
@@ -343,7 +343,7 @@ function createVerifyCommand(): Command {
         const store = loadStore(projectRoot);
 
         if (store.suppressions.length === 0) {
-          console.log(chalk.dim('No suppressions in .bc-suppressions.json'));
+          console.log(chalk.dim('No suppressions in .nark-suppressions.json'));
           return;
         }
 
@@ -377,7 +377,7 @@ function createVerifyCommand(): Command {
         if (options.clean) {
           removeStaleSuppressions(store, seenFingerprints);
           saveStore(projectRoot, store);
-          console.log(chalk.green(`✅ Removed ${stale.length} stale suppression(s) from .bc-suppressions.json`));
+          console.log(chalk.green(`✅ Removed ${stale.length} stale suppression(s) from .nark-suppressions.json`));
         } else {
           console.log(chalk.dim('Run with --clean to remove stale suppressions automatically.'));
         }

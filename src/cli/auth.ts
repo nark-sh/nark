@@ -57,33 +57,38 @@ export function createAuthCommand(): Command {
         try {
           const res = await fetch(pollUrl);
 
-          if (res.status === 200) {
-            // Success — parse the token and write credentials
-            const body = await res.json() as {
-              token: string;
-              user: { email: string; orgName: string; plan: string };
-            };
-            writeCredentials({
-              token: body.token,
-              email: body.user.email,
-              orgName: body.user.orgName,
-              plan: body.user.plan,
-            });
-            console.log(
-              `\nLogged in as ${chalk.green(body.user.email)} (${body.user.orgName}, ${body.user.plan} plan)`
-            );
-            process.exit(0);
-          }
-
           if (res.status === 202 || res.status === 404) {
             // Not ready yet — keep polling
             continue;
           }
 
-          // Unexpected status — warn and continue polling
-          process.stderr.write(
-            chalk.dim(`\nWarning: unexpected poll response ${res.status}, retrying...\n`)
+          if (!res.ok) {
+            // Non-success HTTP status — warn and continue polling
+            process.stderr.write(
+              chalk.dim(`\nWarning: unexpected poll response ${res.status}, retrying...\n`)
+            );
+            continue;
+          }
+
+          // res.ok === true (status 200-299) — parse the token and write credentials
+          let body: { token: string; user: { email: string; orgName: string; plan: string } };
+          try {
+            body = await res.json() as typeof body;
+          } catch (jsonErr) {
+            const detail = jsonErr instanceof SyntaxError ? jsonErr.message : String(jsonErr);
+            process.stderr.write(chalk.dim(`\nWarning: failed to parse auth response JSON (${detail}), retrying...\n`));
+            continue;
+          }
+          writeCredentials({
+            token: body.token,
+            email: body.user.email,
+            orgName: body.user.orgName,
+            plan: body.user.plan,
+          });
+          console.log(
+            `\nLogged in as ${chalk.green(body.user.email)} (${body.user.orgName}, ${body.user.plan} plan)`
           );
+          process.exit(0);
         } catch (err) {
           // Network error — warn and continue polling
           const msg = err instanceof Error ? err.message : String(err);

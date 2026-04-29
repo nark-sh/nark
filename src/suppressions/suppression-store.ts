@@ -1,7 +1,7 @@
 /**
  * Suppression Store
  *
- * Manages .bc-suppressions.json — a project-level file that stores suppressions
+ * Manages .nark-suppressions.json — a project-level file that stores suppressions
  * keyed by fingerprint, completely outside of production source code.
  *
  * Why fingerprints instead of line numbers?
@@ -10,14 +10,15 @@
  *   becomes stale and is detected automatically
  * - Suppressions can be cross-referenced with SaaS violation records
  *
- * File location: <projectRoot>/.bc-suppressions.json
+ * File location: <projectRoot>/.nark-suppressions.json
  */
 
 import * as fs from 'fs';
 import * as path from 'path';
 import { BcScanSuppression, BcScanStore } from './types.js';
 
-const STORE_FILENAME = '.bc-suppressions.json';
+const STORE_FILENAME = '.nark-suppressions.json';
+const LEGACY_STORE_FILENAME = '.bc-suppressions.json';
 const STORE_VERSION = '1.0';
 
 /**
@@ -34,8 +35,14 @@ export function getStorePath(projectRoot: string): string {
 export function loadStore(projectRoot: string): BcScanStore {
   const storePath = getStorePath(projectRoot);
 
+  // Auto-migrate legacy .bc-suppressions.json → .nark-suppressions.json
   if (!fs.existsSync(storePath)) {
-    return { version: STORE_VERSION, suppressions: [] };
+    const legacyPath = path.join(projectRoot, LEGACY_STORE_FILENAME);
+    if (fs.existsSync(legacyPath)) {
+      fs.renameSync(legacyPath, storePath);
+    } else {
+      return { version: STORE_VERSION, suppressions: [] };
+    }
   }
 
   try {
@@ -44,7 +51,7 @@ export function loadStore(projectRoot: string): BcScanStore {
     return store;
   } catch (error) {
     throw new Error(
-      `Failed to load .bc-suppressions.json: ${error instanceof Error ? error.message : String(error)}`
+      `Failed to load .nark-suppressions.json: ${error instanceof Error ? error.message : String(error)}`
     );
   }
 }

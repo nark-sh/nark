@@ -45,7 +45,7 @@ export interface CheckSuppressionOptions {
 
   /**
    * Precomputed fingerprint for this violation.
-   * When provided, .bc-suppressions.json is checked first (preferred over inline comments).
+   * When provided, .nark-suppressions.json is checked first (preferred over inline comments).
    */
   fingerprint?: string;
 }
@@ -76,7 +76,7 @@ export function checkSuppression(options: CheckSuppressionOptions): SuppressionC
   const absoluteFilePath = sourceFile.fileName;
   const relativeFilePath = path.relative(projectRoot, absoluteFilePath);
 
-  // 1. Check .bc-suppressions.json (preferred: fingerprint-keyed, out-of-code)
+  // 1. Check .nark-suppressions.json (preferred: fingerprint-keyed, out-of-code)
   if (fingerprint) {
     try {
       const store = loadStore(projectRoot);
