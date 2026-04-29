@@ -8,15 +8,15 @@
  * Shape: { enabled: boolean, notified: boolean, deviceId?: string }
  */
 
-import { Command } from 'commander';
-import * as fs from 'fs';
-import * as path from 'path';
-import * as os from 'os';
-import { createHash, randomUUID } from 'crypto';
-import { execSync } from 'child_process';
-import chalk from 'chalk';
-import { getToken, getCredentials } from '../lib/auth.js';
-import type { Violation } from '../types.js';
+import { Command } from "commander";
+import * as fs from "fs";
+import * as path from "path";
+import * as os from "os";
+import { createHash, randomUUID } from "crypto";
+import { execSync } from "child_process";
+import chalk from "chalk";
+import { getToken, getCredentials } from "../lib/auth.js";
+import type { Violation } from "../types.js";
 
 export interface TelemetryConfig {
   enabled: boolean;
@@ -68,6 +68,13 @@ export interface TelemetryPayload {
    * concern-20260429-telemetry-suppression-insights
    */
   suppressionDetails?: SuppressionDetail[];
+  /**
+   * Installed versions of contracted packages (name → resolved version).
+   * Read from node_modules/<pkg>/package.json at scan time.
+   * Allows the server to detect which exact versions are in the wild
+   * and correlate violations with specific release series.
+   */
+  packageVersions?: Record<string, string>;
 }
 
 export interface TelemetryResult {
@@ -86,7 +93,12 @@ export interface EnrichedTelemetryPayload extends TelemetryPayload {
   branch?: string;
   commitSha?: string;
   ciProvider?: string;
-  codeSnippets?: Array<{ file: string; line: number; code: string; contractId: string }>;
+  codeSnippets?: Array<{
+    file: string;
+    line: number;
+    code: string;
+    contractId: string;
+  }>;
 }
 
 /**
@@ -96,12 +108,12 @@ export interface EnrichedTelemetryPayload extends TelemetryPayload {
  */
 function getRepoFingerprint(): string | undefined {
   try {
-    const url = execSync('git remote get-url origin', {
-      encoding: 'utf-8',
-      stdio: ['pipe', 'pipe', 'pipe'],
+    const url = execSync("git remote get-url origin", {
+      encoding: "utf-8",
+      stdio: ["pipe", "pipe", "pipe"],
     }).trim();
     if (!url) return undefined;
-    return createHash('sha256').update(url).digest('hex');
+    return createHash("sha256").update(url).digest("hex");
   } catch {
     return undefined;
   }
@@ -121,12 +133,14 @@ function getOrCreateDeviceId(): string | undefined {
     let config: Record<string, unknown> = {};
     try {
       if (fs.existsSync(configPath)) {
-        config = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
+        config = JSON.parse(fs.readFileSync(configPath, "utf-8"));
       }
-    } catch { /* ignore parse errors */ }
+    } catch {
+      /* ignore parse errors */
+    }
 
     // Return existing deviceId if present
-    if (typeof config.deviceId === 'string' && config.deviceId.length > 0) {
+    if (typeof config.deviceId === "string" && config.deviceId.length > 0) {
       return config.deviceId;
     }
 
@@ -134,18 +148,18 @@ function getOrCreateDeviceId(): string | undefined {
     const deviceId = randomUUID();
     config.deviceId = deviceId;
     fs.mkdirSync(dir, { recursive: true });
-    fs.writeFileSync(configPath, JSON.stringify(config, null, 2), 'utf-8');
+    fs.writeFileSync(configPath, JSON.stringify(config, null, 2), "utf-8");
     return deviceId;
   } catch {
     return undefined;
   }
 }
 
-const NARK_API_BASE = process.env['NARK_API_URL'] ?? 'https://app.nark.sh';
+const NARK_API_BASE = process.env["NARK_API_URL"] ?? "https://app.nark.sh";
 const TELEMETRY_ENDPOINT = `${NARK_API_BASE}/api/telemetry/scan`;
 
 export function getTelemetryConfigPath(): string {
-  return path.join(os.homedir(), '.nark', 'telemetry.json');
+  return path.join(os.homedir(), ".nark", "telemetry.json");
 }
 
 /**
@@ -153,11 +167,14 @@ export function getTelemetryConfigPath(): string {
  * Supports NARK_TELEMETRY=off and the standard DO_NOT_TRACK=1.
  */
 function isEnvDisabled(): boolean {
-  const narkEnv = process.env['NARK_TELEMETRY'];
-  if (narkEnv !== undefined && ['off', 'false', '0'].includes(narkEnv.toLowerCase())) {
+  const narkEnv = process.env["NARK_TELEMETRY"];
+  if (
+    narkEnv !== undefined &&
+    ["off", "false", "0"].includes(narkEnv.toLowerCase())
+  ) {
     return true;
   }
-  if (process.env['DO_NOT_TRACK'] === '1') {
+  if (process.env["DO_NOT_TRACK"] === "1") {
     return true;
   }
   return false;
@@ -174,13 +191,13 @@ export function readTelemetryConfig(): TelemetryConfig {
     if (!fs.existsSync(configPath)) {
       return { enabled: true, notified: false };
     }
-    const raw = fs.readFileSync(configPath, 'utf-8');
+    const raw = fs.readFileSync(configPath, "utf-8");
     const parsed = JSON.parse(raw);
     if (
-      typeof parsed === 'object' &&
+      typeof parsed === "object" &&
       parsed !== null &&
-      typeof parsed.enabled === 'boolean' &&
-      typeof parsed.notified === 'boolean'
+      typeof parsed.enabled === "boolean" &&
+      typeof parsed.notified === "boolean"
     ) {
       return parsed as TelemetryConfig;
     }
@@ -194,7 +211,7 @@ export function writeTelemetryConfig(config: TelemetryConfig): void {
   const configPath = getTelemetryConfigPath();
   const dir = path.dirname(configPath);
   fs.mkdirSync(dir, { recursive: true });
-  fs.writeFileSync(configPath, JSON.stringify(config, null, 2), 'utf-8');
+  fs.writeFileSync(configPath, JSON.stringify(config, null, 2), "utf-8");
 }
 
 /**
@@ -209,9 +226,9 @@ export function handleFirstRunNotice(): void {
   if (!fileExists || !config.notified) {
     process.stderr.write(
       chalk.dim(
-        '\nNark collects anonymous usage data to improve the tool.\n' +
-        'Run `nark telemetry off` to opt out. Learn more: https://nark.sh/telemetry\n\n'
-      )
+        "\nNark collects anonymous usage data to improve the tool.\n" +
+          "Run `nark telemetry off` to opt out. Learn more: https://nark.sh/telemetry\n\n",
+      ),
     );
     writeTelemetryConfig({ ...config, notified: true });
   }
@@ -226,14 +243,24 @@ export function handleFirstRunNotice(): void {
  * When a user is logged in, includes Authorization: Bearer <token> header.
  * When a git remote is available, includes repoFingerprint (SHA256 of origin URL).
  */
-export async function fireTelemetryEvent(payload: TelemetryPayload): Promise<TelemetryResult> {
+export async function fireTelemetryEvent(
+  payload: TelemetryPayload,
+): Promise<TelemetryResult> {
   const config = readTelemetryConfig();
-  if (!config.enabled) return { sent: false, authenticated: false, endpoint: TELEMETRY_ENDPOINT, disabled: true };
+  if (!config.enabled)
+    return {
+      sent: false,
+      authenticated: false,
+      endpoint: TELEMETRY_ENDPOINT,
+      disabled: true,
+    };
   try {
-    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+    };
     const token = getToken();
     if (token !== null) {
-      headers['Authorization'] = 'Bearer ' + token;
+      headers["Authorization"] = "Bearer " + token;
     }
     const fp = getRepoFingerprint();
     const did = getOrCreateDeviceId();
@@ -244,18 +271,35 @@ export async function fireTelemetryEvent(payload: TelemetryPayload): Promise<Tel
     };
     let fetchFailed = false;
     await fetch(TELEMETRY_ENDPOINT, {
-      method: 'POST',
+      method: "POST",
       headers,
       body: JSON.stringify(enriched),
       signal: AbortSignal.timeout(2000),
-    }).catch(() => { fetchFailed = true; });
+    }).catch(() => {
+      fetchFailed = true;
+    });
     if (fetchFailed) {
-      return { sent: false, authenticated: token !== null, endpoint: TELEMETRY_ENDPOINT, error: true };
+      return {
+        sent: false,
+        authenticated: token !== null,
+        endpoint: TELEMETRY_ENDPOINT,
+        error: true,
+      };
     }
-    return { sent: true, authenticated: token !== null, endpoint: TELEMETRY_ENDPOINT, email: token ? getCredentials()?.email : undefined };
+    return {
+      sent: true,
+      authenticated: token !== null,
+      endpoint: TELEMETRY_ENDPOINT,
+      email: token ? getCredentials()?.email : undefined,
+    };
   } catch {
     // ignore — telemetry must never affect the scanner
-    return { sent: false, authenticated: false, endpoint: TELEMETRY_ENDPOINT, error: true };
+    return {
+      sent: false,
+      authenticated: false,
+      endpoint: TELEMETRY_ENDPOINT,
+      error: true,
+    };
   }
 }
 
@@ -270,9 +314,9 @@ export async function fireTelemetryEvent(payload: TelemetryPayload): Promise<Tel
  */
 function getRepoName(): string | undefined {
   try {
-    const url = execSync('git remote get-url origin', {
-      encoding: 'utf-8',
-      stdio: ['pipe', 'pipe', 'pipe'],
+    const url = execSync("git remote get-url origin", {
+      encoding: "utf-8",
+      stdio: ["pipe", "pipe", "pipe"],
     }).trim();
     if (!url) return undefined;
     // SSH: git@github.com:owner/repo.git
@@ -286,10 +330,12 @@ function getRepoName(): string | undefined {
 
 function getRepoUrl(): string | undefined {
   try {
-    return execSync('git remote get-url origin', {
-      encoding: 'utf-8',
-      stdio: ['pipe', 'pipe', 'pipe'],
-    }).trim() || undefined;
+    return (
+      execSync("git remote get-url origin", {
+        encoding: "utf-8",
+        stdio: ["pipe", "pipe", "pipe"],
+      }).trim() || undefined
+    );
   } catch {
     return undefined;
   }
@@ -297,10 +343,12 @@ function getRepoUrl(): string | undefined {
 
 function getGitAuthor(): string | undefined {
   try {
-    return execSync('git config user.name', {
-      encoding: 'utf-8',
-      stdio: ['pipe', 'pipe', 'pipe'],
-    }).trim() || undefined;
+    return (
+      execSync("git config user.name", {
+        encoding: "utf-8",
+        stdio: ["pipe", "pipe", "pipe"],
+      }).trim() || undefined
+    );
   } catch {
     return undefined;
   }
@@ -308,10 +356,12 @@ function getGitAuthor(): string | undefined {
 
 function getBranch(): string | undefined {
   try {
-    return execSync('git branch --show-current', {
-      encoding: 'utf-8',
-      stdio: ['pipe', 'pipe', 'pipe'],
-    }).trim() || undefined;
+    return (
+      execSync("git branch --show-current", {
+        encoding: "utf-8",
+        stdio: ["pipe", "pipe", "pipe"],
+      }).trim() || undefined
+    );
   } catch {
     return undefined;
   }
@@ -319,25 +369,27 @@ function getBranch(): string | undefined {
 
 function getCommitSha(): string | undefined {
   try {
-    return execSync('git rev-parse HEAD', {
-      encoding: 'utf-8',
-      stdio: ['pipe', 'pipe', 'pipe'],
-    }).trim() || undefined;
+    return (
+      execSync("git rev-parse HEAD", {
+        encoding: "utf-8",
+        stdio: ["pipe", "pipe", "pipe"],
+      }).trim() || undefined
+    );
   } catch {
     return undefined;
   }
 }
 
 function detectCiProvider(): string | undefined {
-  if (process.env['GITHUB_ACTIONS']) return 'github-actions';
-  if (process.env['GITLAB_CI']) return 'gitlab-ci';
-  if (process.env['CIRCLECI']) return 'circleci';
-  if (process.env['JENKINS_URL']) return 'jenkins';
-  if (process.env['TRAVIS']) return 'travis';
-  if (process.env['BITBUCKET_PIPELINE_UUID']) return 'bitbucket-pipelines';
-  if (process.env['CODEBUILD_BUILD_ID']) return 'aws-codebuild';
-  if (process.env['BUILDKITE']) return 'buildkite';
-  if (process.env['TF_BUILD']) return 'azure-pipelines';
+  if (process.env["GITHUB_ACTIONS"]) return "github-actions";
+  if (process.env["GITLAB_CI"]) return "gitlab-ci";
+  if (process.env["CIRCLECI"]) return "circleci";
+  if (process.env["JENKINS_URL"]) return "jenkins";
+  if (process.env["TRAVIS"]) return "travis";
+  if (process.env["BITBUCKET_PIPELINE_UUID"]) return "bitbucket-pipelines";
+  if (process.env["CODEBUILD_BUILD_ID"]) return "aws-codebuild";
+  if (process.env["BUILDKITE"]) return "buildkite";
+  if (process.env["TF_BUILD"]) return "azure-pipelines";
   return undefined;
 }
 
@@ -349,29 +401,41 @@ const MAX_CODE_LENGTH = 2000;
  * If a violation has a code_snippet, use it; otherwise read ~5 lines from the file.
  * Caps at 50 snippets total, 2000 chars each.
  */
-function extractCodeSnippets(violations: Violation[]): Array<{ file: string; line: number; code: string; contractId: string }> {
+function extractCodeSnippets(
+  violations: Violation[],
+): Array<{ file: string; line: number; code: string; contractId: string }> {
   try {
-    const snippets: Array<{ file: string; line: number; code: string; contractId: string }> = [];
+    const snippets: Array<{
+      file: string;
+      line: number;
+      code: string;
+      contractId: string;
+    }> = [];
     for (const v of violations) {
       if (snippets.length >= MAX_SNIPPETS) break;
       let code: string;
       if (v.code_snippet) {
-        code = v.code_snippet.lines.map(l => l.content).join('\n');
+        code = v.code_snippet.lines.map((l) => l.content).join("\n");
       } else {
         try {
-          const lines = fs.readFileSync(v.file, 'utf-8').split('\n');
+          const lines = fs.readFileSync(v.file, "utf-8").split("\n");
           const start = Math.max(0, v.line - 3);
           const end = Math.min(lines.length, v.line + 2);
-          code = lines.slice(start, end).join('\n');
+          code = lines.slice(start, end).join("\n");
         } catch {
-          code = '';
+          code = "";
         }
       }
       if (code.length > MAX_CODE_LENGTH) {
-        code = code.slice(0, MAX_CODE_LENGTH) + '...';
+        code = code.slice(0, MAX_CODE_LENGTH) + "...";
       }
       if (code) {
-        snippets.push({ file: v.file, line: v.line, code, contractId: v.package });
+        snippets.push({
+          file: v.file,
+          line: v.line,
+          code,
+          contractId: v.package,
+        });
       }
     }
     return snippets;
@@ -391,13 +455,24 @@ export async function fireEnrichedTelemetryEvent(
 ): Promise<TelemetryResult> {
   const config = readTelemetryConfig();
   const enrichedEndpoint = `${NARK_API_BASE}/api/telemetry/scan-enriched`;
-  if (!config.enabled) return { sent: false, authenticated: false, endpoint: enrichedEndpoint, disabled: true };
+  if (!config.enabled)
+    return {
+      sent: false,
+      authenticated: false,
+      endpoint: enrichedEndpoint,
+      disabled: true,
+    };
   try {
     const token = getToken();
-    if (!token) return { sent: false, authenticated: false, endpoint: TELEMETRY_ENDPOINT };
+    if (!token)
+      return {
+        sent: false,
+        authenticated: false,
+        endpoint: TELEMETRY_ENDPOINT,
+      };
     const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`,
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
     };
 
     const fp = getRepoFingerprint();
@@ -425,18 +500,35 @@ export async function fireEnrichedTelemetryEvent(
 
     let fetchFailed = false;
     await fetch(enrichedEndpoint, {
-      method: 'POST',
+      method: "POST",
       headers,
       body: JSON.stringify(enriched),
       signal: AbortSignal.timeout(2000),
-    }).catch(() => { fetchFailed = true; });
+    }).catch(() => {
+      fetchFailed = true;
+    });
     if (fetchFailed) {
-      return { sent: false, authenticated: true, endpoint: enrichedEndpoint, error: true };
+      return {
+        sent: false,
+        authenticated: true,
+        endpoint: enrichedEndpoint,
+        error: true,
+      };
     }
-    return { sent: true, authenticated: true, endpoint: enrichedEndpoint, email: getCredentials()?.email };
+    return {
+      sent: true,
+      authenticated: true,
+      endpoint: enrichedEndpoint,
+      email: getCredentials()?.email,
+    };
   } catch {
     // ignore — telemetry must never affect the scanner
-    return { sent: false, authenticated: true, endpoint: enrichedEndpoint, error: true };
+    return {
+      sent: false,
+      authenticated: true,
+      endpoint: enrichedEndpoint,
+      error: true,
+    };
   }
 }
 
@@ -444,52 +536,70 @@ export async function fireEnrichedTelemetryEvent(
  * Create the `nark telemetry` subcommand.
  */
 export function createTelemetryCommand(): Command {
-  const cmd = new Command('telemetry');
+  const cmd = new Command("telemetry");
 
   cmd
-    .description('Manage anonymous usage telemetry collection')
-    .argument('[action]', 'on, off, or status (default: status)')
-    .action((action = 'status') => {
+    .description("Manage anonymous usage telemetry collection")
+    .argument("[action]", "on, off, or status (default: status)")
+    .action((action = "status") => {
       const config = readTelemetryConfig();
 
       switch (action) {
-        case 'status': {
+        case "status": {
           const envOverride = isEnvDisabled();
           const statusLabel = config.enabled
-            ? chalk.green('Enabled')
-            : chalk.yellow('Disabled');
+            ? chalk.green("Enabled")
+            : chalk.yellow("Disabled");
 
-          console.log('');
-          console.log(chalk.bold('Nark Telemetry'));
-          console.log('');
+          console.log("");
+          console.log(chalk.bold("Nark Telemetry"));
+          console.log("");
           console.log(`Status:   ${statusLabel}`);
           if (envOverride) {
-            console.log(`          ${chalk.dim('(disabled via environment variable)')}`);
+            console.log(
+              `          ${chalk.dim("(disabled via environment variable)")}`,
+            );
           }
           console.log(`Config:   ${getTelemetryConfigPath()}`);
           console.log(`Endpoint: ${TELEMETRY_ENDPOINT}`);
-          console.log('');
-          console.log(chalk.dim('Run `nark telemetry off` to opt out.'));
-          console.log(chalk.dim('Set NARK_TELEMETRY=off or DO_NOT_TRACK=1 to disable via env.'));
-          console.log(chalk.dim('Learn more: https://nark.sh/telemetry'));
-          console.log('');
+          console.log("");
+          console.log(chalk.dim("Run `nark telemetry off` to opt out."));
+          console.log(
+            chalk.dim(
+              "Set NARK_TELEMETRY=off or DO_NOT_TRACK=1 to disable via env.",
+            ),
+          );
+          console.log(chalk.dim("Learn more: https://nark.sh/telemetry"));
+          console.log("");
           break;
         }
 
-        case 'on': {
+        case "on": {
           writeTelemetryConfig({ ...config, enabled: true });
-          console.log(chalk.green('Nark telemetry has been enabled. Thank you for helping improve Nark.'));
+          console.log(
+            chalk.green(
+              "Nark telemetry has been enabled. Thank you for helping improve Nark.",
+            ),
+          );
           break;
         }
 
-        case 'off': {
+        case "off": {
           writeTelemetryConfig({ ...config, enabled: false });
-          console.log(chalk.yellow('Nark telemetry has been disabled. No data will be collected.'));
+          console.log(
+            chalk.yellow(
+              "Nark telemetry has been disabled. No data will be collected.",
+            ),
+          );
           break;
         }
 
         default: {
-          console.error(chalk.red(`Unknown telemetry action: "${action}". Use on, off, or status.`));
+          console.error(
+            chalk.red(
+              `Unknown telemetry action: "${action}". Use on, off, or status.`,
+            ),
+          );
           process.exit(1);
         }
       }

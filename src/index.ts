@@ -1009,6 +1009,37 @@ async function main(options: any) {
       }
     })();
 
+    // Collect installed versions for contracted packages only.
+    // Reads node_modules/<pkg>/package.json at the project root.
+    // Never throws — missing or unresolvable packages are silently skipped.
+    const packageVersions = (() => {
+      try {
+        const versions: Record<string, string> = {};
+        const contractedPackages = (packageDiscovery?.packages ?? []).filter(
+          (p: any) => p.hasContract,
+        );
+        for (const pkg of contractedPackages) {
+          try {
+            const pkgJsonPath = path.join(
+              options.project,
+              "node_modules",
+              pkg.name,
+              "package.json",
+            );
+            const raw = fs.readFileSync(pkgJsonPath, "utf-8");
+            const installedVersion = (JSON.parse(raw) as { version?: string })
+              .version;
+            if (installedVersion) versions[pkg.name] = installedVersion;
+          } catch {
+            // package not installed or unreadable — skip
+          }
+        }
+        return Object.keys(versions).length > 0 ? versions : undefined;
+      } catch {
+        return undefined;
+      }
+    })();
+
     // Compute exit code (mirrors logic below)
     const telemetryExitCode = (() => {
       if (options.reportOnly) return 0;
@@ -1043,6 +1074,7 @@ async function main(options: any) {
       ...(suppressionDetails && suppressionDetails.length > 0
         ? { suppressionDetails }
         : {}),
+      ...(packageVersions ? { packageVersions } : {}),
     };
 
     let telemetryResult: TelemetryResult | undefined;
