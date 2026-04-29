@@ -300,6 +300,18 @@ export class ContractMatcher {
       //           concern-2026-04-02-dashboard-react-hook-form-1 (useFormContext sub-components).
       //           concern-2026-04-11-react-hook-form-9 — 9 FP instances including
       //           components/Input.tsx, src/components/ui/form.tsx (shared form primitives).
+      // react-hook-form useFormContext: suppress missing-form-provider when
+      // FormProvider (or `const Form = FormProvider` alias) appears in the file,
+      // OR when the file uses useFormContext() — which is the sub-component pattern
+      // where the component is designed to be nested inside a FormProvider by its caller.
+      // Also suppress in shared UI component files (components/ui/, components/form)
+      // that are reusable form primitives designed to work inside any FormProvider.
+      // Evidence: concern-20260401-react-hook-form-3 (FormProvider in file),
+      //           concern-2026-04-02-dashboard-react-hook-form-1 (useFormContext sub-components).
+      //           concern-2026-04-11-react-hook-form-9 — 9 FP instances including
+      //           components/Input.tsx, src/components/ui/form.tsx (shared form primitives).
+      //           concern-20260429-react-hook-form-2 — 6 FP instances in named sub-components
+      //           like ArtistInstructionTextArea.tsx that are always rendered inside FormProvider.
       if (
         detection.packageName === "react-hook-form" &&
         primaryPostcondition.id === "missing-form-provider"
@@ -311,7 +323,11 @@ export class ContractMatcher {
           rhfProviderFileText.includes("useFormContext") ||
           /[/\\](ui|form|components?)[/\\](form|input|field)/i.test(rhfProviderFileName) ||
           /Input\.(tsx?|jsx?)$/.test(rhfProviderFileName) ||
-          /[/\\]ui[/\\]form\.(tsx?|jsx?)$/.test(rhfProviderFileName)
+          /[/\\]ui[/\\]form\.(tsx?|jsx?)$/.test(rhfProviderFileName) ||
+          // Named form-field sub-components by suffix: *TextArea*, *Select*, *Checkbox*,
+          // *Radio*, *Field*, *FormItem*, *FormControl*, *FormField* — always designed to
+          // be rendered inside a FormProvider by their parent.
+          /(TextArea|Select|Checkbox|Radio|Toggle|Switch|DatePicker|TimePicker|ColorPicker|Slider|Rating)\.(tsx?|jsx?)$/i.test(rhfProviderFileName)
         ) {
           continue;
         }
@@ -764,20 +780,24 @@ export class ContractMatcher {
       }
 
       // ai (Vercel AI SDK): api-error-rate-limit fires on AI SDK calls inside eval harness
-      // functions and batch processing utilities. These are not production application code —
-      // they are evaluation/testing pipelines where the harness itself handles rate limits
-      // via retry logic or explicit error tracking. The individual scorer/analyzer functions
-      // inside these files are not the correct place to require try-catch.
+      // functions, batch processing utilities, and AI utility/wrapper files. These are not
+      // direct user-facing call sites — the orchestration layer or utility wrapper manages
+      // rate limit errors. The individual scorer/analyzer/utility functions are not the
+      // correct place to require try-catch.
       // Evidence: concern-2026-04-20-ai-2 — 7 FP instances in lib/evals/scorers/*,
       //   lib/catalog/analyzeCatalogBatch.ts, lib/ai/generateArray.ts
+      // Evidence: concern-20260429-ai-2 — 7 FP instances in apps/web/utils/llms/index.ts
+      //   (utility wrapper that exposes AI SDK calls; callers handle rate limits).
       if (
         detection.packageName === "ai" &&
         primaryPostcondition.id === "api-error-rate-limit" &&
         (/[/\\]evals?[/\\]/i.test(sourceFile.fileName) ||
           /[/\\]catalog[/\\]/i.test(sourceFile.fileName) ||
-          /[/\\]scorers?[/\\]/i.test(sourceFile.fileName))
+          /[/\\]scorers?[/\\]/i.test(sourceFile.fileName) ||
+          /[/\\]llms?[/\\]/i.test(sourceFile.fileName) ||
+          /[/\\]utils?[/\\]llms?/i.test(sourceFile.fileName))
       ) {
-        continue; // Eval/batch pipeline — harness manages rate limits at orchestration layer
+        continue; // Eval/batch/utility pipeline — harness or caller manages rate limits
       }
 
       // @tanstack/react-router: TypeScript-generated route trees enforce path and param
@@ -1638,8 +1658,10 @@ export class ContractMatcher {
         if (isTopLevelSingleton) continue;
       }
 
-      // redis (node-redis): missing-error-listener — suppress for module-level singleton exports
-      // or when the file already registers .on('error') anywhere.
+      // redis (node-redis): missing-error-listener — suppress for module-level singleton exports,
+      // when the file registers .on('error') anywhere, or when the creation is in a bootstrap/
+      // initialization module where error listeners are registered after the function returns
+      // (cross-function or cross-file registration pattern).
       // The redis client is typically created at module level and exported as a singleton.
       // Error listeners (.on('error')) are registered in the application bootstrap,
       // not inline with the client definition. The scanner cannot trace cross-file event listener
@@ -1647,6 +1669,8 @@ export class ContractMatcher {
       // Evidence: concern-2026-04-06-redis-1 — 7 FP instances in packages/api/src/main.ts
       // (module-level redis client creation, error handler registered elsewhere in the same file
       // or in bootstrap code).
+      // Evidence: concern-20260429-redis-1 — 7 FP instances where .on('error') is registered in
+      // an initialization function that is separate from the createClient() call site.
       if (
         detection.packageName === "redis" &&
         postcondition.id === "missing-error-listener"
@@ -1659,6 +1683,16 @@ export class ContractMatcher {
           redisFileText.includes(".on(`error`")
         ) {
           continue; // File has error listener registration — suppress
+        }
+        // Suppress in bootstrap/initialization files (main.ts, server.ts, app.ts, index.ts)
+        // These files assemble the application; redis clients created here have their error
+        // listeners registered externally (callers invoke init functions that attach listeners).
+        const redisFileName = sourceFile.fileName;
+        if (
+          /[/\\](main|server|app|index)\.(ts|tsx)$/.test(redisFileName) ||
+          /[/\\](bootstrap|startup|init)\.(ts|tsx)$/.test(redisFileName)
+        ) {
+          continue; // Bootstrap/initialization file — error listener registered by caller
         }
         // Also suppress for module-level singleton exports (same ioredis pattern)
         let isRedisTopLevel = false;
