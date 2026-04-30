@@ -14,6 +14,86 @@ import {
   PackageContract,
 } from "./types.js";
 
+/**
+ * Packages that should be excluded from uncovered package reporting.
+ * These are non-runtime packages (UI libs, build tools, linters, test frameworks,
+ * framework internals, type-only packages) that produce noise rather than signal.
+ */
+export const NON_RUNTIME_PACKAGES: string[] = [
+  // UI component libs
+  "@radix-ui/*",
+  "@headlessui/*",
+  "@dnd-kit/*",
+  "lucide-react",
+  "react-icons",
+  "@heroicons/*",
+  "@phosphor-icons/*",
+  "class-variance-authority",
+  "clsx",
+  "tailwind-merge",
+  // CSS/styling
+  "tailwindcss",
+  "postcss",
+  "autoprefixer",
+  "sass",
+  "less",
+  "styled-components",
+  "@emotion/*",
+  "@stitches/*",
+  // Build tools
+  "vite",
+  "esbuild",
+  "webpack",
+  "rollup",
+  "tsup",
+  "turbo",
+  "@swc/*",
+  "@vitejs/*",
+  "@rollup/*",
+  // Linters/formatters
+  "eslint",
+  "prettier",
+  "typescript",
+  "@typescript-eslint/*",
+  "@eslint/*",
+  // Test frameworks
+  "jest",
+  "vitest",
+  "mocha",
+  "@testing-library/*",
+  "cypress",
+  "playwright",
+  "@playwright/*",
+  "@jest/*",
+  // React/framework internals
+  "react",
+  "react-dom",
+  "next",
+  "@next/*",
+  "vue",
+  "svelte",
+  "@angular/*",
+  "@sveltejs/*",
+  "solid-js",
+  "preact",
+  // Type-only packages
+  "@types/*",
+];
+
+/**
+ * Returns true if the package name matches any entry in NON_RUNTIME_PACKAGES.
+ * Handles both exact matches and glob-style prefix patterns (e.g. "@radix-ui/*").
+ */
+export function isNonRuntimePackage(name: string): boolean {
+  return NON_RUNTIME_PACKAGES.some((pattern) => {
+    if (pattern.endsWith("/*")) {
+      const prefix = pattern.slice(0, -2);
+      return name === prefix || name.startsWith(prefix + "/");
+    }
+    return name === pattern;
+  });
+}
+
 export class PackageDiscovery {
   private pathAliases: Set<string> = new Set();
 
