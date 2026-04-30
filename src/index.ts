@@ -12,7 +12,10 @@ import { createRequire } from "module";
 import chalk from "chalk";
 import { loadCorpus } from "./corpus-loader.js";
 import { Analyzer } from "./analyzer.js";
-import { PackageDiscovery } from "./package-discovery.js";
+import {
+  PackageDiscovery,
+  isNonRuntimePackage,
+} from "./package-discovery.js";
 import {
   generateAuditRecord,
   generateEnhancedAuditRecord,
@@ -1042,7 +1045,7 @@ async function main(options: any) {
     const uncoveredPackages = (() => {
       try {
         const uncontracted = (packageDiscovery?.packages ?? [])
-          .filter((p: any) => !p.hasContract)
+          .filter((p: any) => !p.hasContract && !isNonRuntimePackage(p.name))
           .sort(
             (a: any, b: any) => (b.callSiteCount ?? 0) - (a.callSiteCount ?? 0),
           )
@@ -1424,6 +1427,43 @@ function printCompactReport(opts: {
       }
     }
     console.log("");
+  }
+
+  // Uncovered packages with callsites (filtered, top 10)
+  if (packageDiscovery) {
+    const uncovered = packageDiscovery.packages
+      .filter(
+        (p) => !p.hasContract && !isNonRuntimePackage(p.name) && p.callSiteCount > 0,
+      )
+      .sort((a, b) => b.callSiteCount - a.callSiteCount);
+
+    if (uncovered.length > 0) {
+      const totalUncoveredCallsites = uncovered.reduce(
+        (sum, p) => sum + p.callSiteCount,
+        0,
+      );
+      const showing = uncovered.slice(0, 10);
+
+      console.log(
+        chalk.dim(`  Packages without Nark profiles`) +
+          chalk.dim(
+            ` (${totalUncoveredCallsites} callsite${totalUncoveredCallsites === 1 ? "" : "s"} unchecked):`,
+          ),
+      );
+      for (const pkg of showing) {
+        const nameCol = pkg.name.padEnd(30);
+        console.log(
+          chalk.dim(`    ${nameCol}`) +
+            chalk.dim(
+              `${pkg.callSiteCount} callsite${pkg.callSiteCount === 1 ? "" : "s"}`,
+            ),
+        );
+      }
+      if (uncovered.length > 10) {
+        console.log(chalk.dim(`    +${uncovered.length - 10} more`));
+      }
+      console.log("");
+    }
   }
 
   // Report link
