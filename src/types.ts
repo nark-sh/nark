@@ -293,6 +293,8 @@ export interface AnalyzerConfig {
   severityThreshold?: Severity;
   /** Whether to include test files in analysis (default: false) */
   includeTests?: boolean;
+  /** Only report violations in these files (absolute paths). Full program still loads for type resolution. */
+  changedFiles?: string[];
 }
 
 /**

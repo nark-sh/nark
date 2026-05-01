@@ -103,6 +103,7 @@ export async function runV2Analyzer(
     includePaths: config.includePaths,
     excludePaths: config.excludePaths,
     includeTests: config.includeTests,
+    changedFiles: config.changedFiles,
   };
 
   // Create analyzer with contracts for contract matching

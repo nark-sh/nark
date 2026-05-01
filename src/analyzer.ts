@@ -45,6 +45,7 @@ export class Analyzer {
   }> = [];
   private projectRoot: string;
   private includeTests: boolean;
+  private changedFiles?: string[];
   private analyzerVersion: string = "1.1.0"; // From package.json
   private callsitesByPackage: Map<string, number> = new Map();
 
@@ -57,6 +58,7 @@ export class Analyzer {
   constructor(config: AnalyzerConfig, contracts: Map<string, PackageContract>) {
     this.contracts = contracts;
     this.includeTests = config.includeTests ?? false;
+    this.changedFiles = config.changedFiles;
 
     // Build detection maps from contract definitions
     this.typeToPackage = new Map();
@@ -265,6 +267,14 @@ export class Analyzer {
       // Skip test files unless explicitly included
       if (!this.includeTests && this.isTestFile(sourceFile.fileName)) {
         continue;
+      }
+
+      // Filter to only changed files if specified
+      if (this.changedFiles) {
+        const isChanged = this.changedFiles.some(
+          (p: string) => sourceFile.fileName === p || sourceFile.fileName.endsWith('/' + p),
+        );
+        if (!isChanged) continue;
       }
 
       const beforeCount = this.violations.length;

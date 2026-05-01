@@ -189,6 +189,10 @@ program
     "Print the path to FORAIAGENTS.md and exit",
     false,
   )
+  .option(
+    "--changed-files <paths...>",
+    "Only report violations in these files (full program still loads for type resolution)",
+  )
   .option("--sarif", "Output results in SARIF 2.1.0 format (stdout)")
   .option(
     "--sarif-output <path>",
@@ -568,6 +572,7 @@ async function main(options: any) {
     tsconfigPath: path.resolve(tsconfigPath),
     corpusPath: path.resolve(options.corpus),
     includeTests: options.includeTests,
+    changedFiles: options.changedFiles?.map((f: string) => path.resolve(f)),
   };
 
   if (verbose) console.log(chalk.dim("Analyzing TypeScript code..."));

@@ -239,6 +239,11 @@ export class UniversalAnalyzer {
         return !this.config.excludePaths.some((p: string) => sf.fileName.includes(p));
       }
 
+      // Filter to only changed files if specified
+      if (this.config.changedFiles) {
+        return this.config.changedFiles.some((p: string) => sf.fileName === p || sf.fileName.endsWith('/' + p));
+      }
+
       return true;
     });
 

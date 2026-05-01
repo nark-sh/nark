@@ -551,6 +551,9 @@ export interface AnalyzerConfig {
   /** Whether to include draft contracts */
   includeDrafts?: boolean;
 
+  /** Only report violations in these files (absolute paths). Full program still loads for type resolution. */
+  changedFiles?: string[];
+
   /** Plugins to enable (if empty, all plugins are enabled) */
   enabledPlugins?: string[];
 
