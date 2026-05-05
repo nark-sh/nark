@@ -633,72 +633,33 @@ export class ContractMatcher {
         if (inCatchBlock) continue;
       }
 
-      // dotenv config(): suppress missing-env-file / parse-error when the call
-      // is immediately followed by a process.env check or result.error inspection.
-      // Evidence: concern-20260401-dotenv-1.
+      // dotenv config(): in normal (non-vault) mode, config() NEVER throws — it returns
+      // { error } on failure and { parsed } on success. Suppress missing-env-file and
+      // parse-error (now info-level in YAML). Vault postconditions only fire when the
+      // file contains vault indicators (DOTENV_KEY, .env.vault).
+      // Evidence: concern-20260401-dotenv-1, civitai audit 2026-05-05 — 1 FP.
       if (
         detection.packageName === "dotenv" &&
-        detection.functionName === "config" &&
-        (primaryPostcondition.id === "missing-env-file" ||
-          primaryPostcondition.id === "parse-error")
+        detection.functionName === "config"
       ) {
-        let blockNode: ts.Node | undefined = detection.node.parent;
-        while (
-          blockNode &&
-          !ts.isBlock(blockNode) &&
-          !ts.isSourceFile(blockNode)
-        ) {
-          blockNode = blockNode.parent;
-        }
         if (
-          blockNode &&
-          (ts.isBlock(blockNode) || ts.isSourceFile(blockNode))
+          primaryPostcondition.id === "missing-env-file" ||
+          primaryPostcondition.id === "parse-error"
         ) {
-          const stmts = (blockNode as ts.Block | ts.SourceFile).statements;
-          const idx = stmts.findIndex((s) => {
-            let found = false;
-            const v = (n: ts.Node) => {
-              if (n === detection.node) found = true;
-              ts.forEachChild(n, v);
-            };
-            v(s);
-            return found;
-          });
-          if (idx !== -1) {
-            // For script/migration files that call dotenv.config() at the top and
-            // rely on process.env throughout the file, use a wider lookahead.
-            // Migration scripts (files with 'migration' in the path) can have many
-            // statements between config() and the first env var access.
-            // Evidence: concern-20260402-dotenv-2 — migration file with 3-statement gap.
-            // Evidence: concern-2026-04-20-dotenv-1 — src/lib/migrations/supabase.ts uses
-            //   Supabase-specific env loading (not process.env) after config(), so lookahead
-            //   scan never matches. Extend: migration scripts in migrations/ paths are
-            //   unconditionally suppressed — they are not production startup code.
-            const isMigrationScript =
-              sourceFile.fileName.toLowerCase().includes("migrat") ||
-              /[/\\]migrations?[/\\]/i.test(sourceFile.fileName) ||
-              /[/\\]scripts?[/\\]/i.test(sourceFile.fileName) ||
-              /[/\\]seed\.(ts|js)$/.test(sourceFile.fileName) ||
-              /[/\\]migrate\.(ts|js)$/.test(sourceFile.fileName);
-
-            if (isMigrationScript) {
-              continue; // Migration/utility script — not production application startup code
-            }
-
-            const lookahead = 3;
-            let dotenvSuppressed = false;
-            for (
-              let i = idx + 1;
-              i < Math.min(idx + lookahead + 1, stmts.length);
-              i++
-            ) {
-              const t = stmts[i].getText(sourceFile);
-              if (t.includes("process.env") || t.includes(".error")) {
-                dotenvSuppressed = true;
-                break;
-              }
-            }
-            if (dotenvSuppressed) continue;
+          continue; // config() returns { error }, doesn't throw
+        }
+        // Vault postconditions only apply when the file uses vault mode.
+        // Detect actual vault USAGE (setting/reading DOTENV_KEY, referencing .env.vault),
+        // not mere string mentions in error-code checks (e.g., INVALID_DOTENV_KEY).
+        if (primaryPostcondition.id.startsWith("vault-")) {
+          const fileText = sourceFile.getFullText();
+          const hasVaultUsage =
+            /process\.env\.DOTENV_KEY\b/.test(fileText) ||
+            /process\.env\[['"]DOTENV_KEY['"]\]/.test(fileText) ||
+            /\.env\.vault\b/.test(fileText) ||
+            /['"]\.env\.vault['"]/.test(fileText);
+          if (!hasVaultUsage) {
+            continue; // Non-vault file — vault postconditions don't apply
           }
         }
       }
@@ -880,6 +841,18 @@ export class ContractMatcher {
         detection.node.arguments.length === 0
       ) {
         continue; // dayjs() with no args always returns current time — always valid
+      }
+
+      // dayjs: toISOString() genuinely throws on invalid dates, but in practice it's
+      // nearly always called on programmatically-constructed dayjs objects where the input
+      // is known-valid. The scanner cannot determine dayjs object validity at compile time,
+      // producing near-100% FP rate. Suppress entirely.
+      // Evidence: civitai audit 2026-05-05 — 2 remaining FPs after YAML fix.
+      if (
+        detection.packageName === "dayjs" &&
+        primaryPostcondition.id === "toisostring-invalid-date-throws"
+      ) {
+        continue;
       }
 
       // react-hook-form useFieldArray: unhandled-field-array-operations fires even when
@@ -1134,6 +1107,38 @@ export class ContractMatcher {
               });
             }
             continue;
+          }
+        }
+      }
+
+      // next-auth: signIn() from next-auth/react is a client-side browser redirect, not
+      // an async I/O operation. Default signIn() navigates the browser — there's no error
+      // to handle unless { redirect: false } is explicitly passed. Suppress unless redirect: false.
+      // Evidence: civitai audit 2026-05-05 — 3 FPs (AccountProvider.tsx, auth-helpers.ts, etc.)
+      if (
+        detection.packageName === "next-auth" &&
+        detection.functionName === "signIn" &&
+        primaryPostcondition.id === "signin-error-not-checked"
+      ) {
+        // Check if the call passes { redirect: false } — only that form needs error checking
+        if (ts.isCallExpression(detection.node)) {
+          let hasRedirectFalse = false;
+          for (const arg of detection.node.arguments) {
+            if (ts.isObjectLiteralExpression(arg)) {
+              for (const prop of arg.properties) {
+                if (
+                  ts.isPropertyAssignment(prop) &&
+                  ts.isIdentifier(prop.name) &&
+                  prop.name.text === "redirect" &&
+                  prop.initializer.kind === ts.SyntaxKind.FalseKeyword
+                ) {
+                  hasRedirectFalse = true;
+                }
+              }
+            }
+          }
+          if (!hasRedirectFalse) {
+            continue; // Default signIn() is a browser redirect — no error to catch
           }
         }
       }
@@ -1617,6 +1622,20 @@ export class ContractMatcher {
             continue; // Form component with form-library error handling — validation errors surfaced via form state
           }
         }
+      }
+
+      // zod: suppress parse-validation-error / parse-type-coercion-error / parse-async-schema-error
+      // when parse() is used as an intentional assertion (config/factory/startup validation).
+      // In these contexts, invalid data means a programming bug — crashing loudly is correct.
+      // Evidence: civitai audit 2026-05-05 — 8 FPs in orchestrator config inputFn callbacks.
+      if (
+        detection.packageName === "zod" &&
+        (postcondition.id === "parse-validation-error" ||
+          postcondition.id === "parse-type-coercion-error" ||
+          postcondition.id === "parse-async-schema-error") &&
+        this.isZodAssertionStyleParse(detection.node)
+      ) {
+        continue;
       }
 
       // @upstash/redis: network-or-api-error — suppress for module-level singleton exports.
@@ -2213,6 +2232,13 @@ export class ContractMatcher {
       this.controlFlow.extractHandledStatusCodes(catchClause);
     const hasRetry = this.controlFlow.catchHasRetryLogic(catchClause);
 
+    // If the catch block already has adequate handling (returns fallback, rethrows,
+    // logs, or is empty-catch intentional swallow), suppress "generic error handling"
+    // warnings. The developer made a conscious choice — no need for more specificity.
+    // Evidence: civitai audit 2026-05-05 — 12 undici FPs from adequate catch blocks.
+    const hasAdequateHandling =
+      this.controlFlow.catchHasAdequateHandling(catchClause);
+
     let matchedPostcondition: Postcondition | null = null;
     let message = "";
 
@@ -2252,14 +2278,14 @@ export class ContractMatcher {
           break;
         }
       } else if (id.includes("network")) {
-        if (isHttpClient && !checksResponse) {
+        if (isHttpClient && !checksResponse && !hasAdequateHandling) {
           matchedPostcondition = pc;
           message =
             "Generic error handling found. Consider checking if error.response exists to distinguish network failures from HTTP errors.";
           break;
         }
       } else if (pc.severity === "error") {
-        if (isHttpClient && !checksStatus) {
+        if (isHttpClient && !checksStatus && !hasAdequateHandling) {
           // For undici/fetch response-json-parse-error: the idiomatic pattern is to check
           // response.ok or response.status BEFORE calling .json() (not inside the catch block).
           // If the detection node is inside an if (res.ok) or if (res.status === 200) guard,
@@ -3217,5 +3243,80 @@ export class ContractMatcher {
 
     visit(catchClause.block);
     return found;
+  }
+
+  /**
+   * Detect assertion-style zod parse() usage where crashing on invalid data is intentional.
+   * Patterns: config/factory callbacks, concise arrow validators, top-level module assertions.
+   * Evidence: civitai audit 2026-05-05 — 8 FPs in orchestrator inputFn callbacks.
+   */
+  private isZodAssertionStyleParse(node: ts.Node): boolean {
+    let current: ts.Node | undefined = node;
+
+    while (current) {
+      // Stop at async functions — async parse() likely processes external/user data
+      if (
+        (ts.isArrowFunction(current) || ts.isFunctionExpression(current)) &&
+        current.modifiers?.some(
+          (m) => m.kind === ts.SyntaxKind.AsyncKeyword,
+        )
+      ) {
+        return false;
+      }
+
+      // Sync arrow/function as a property value in an object literal = config callback
+      if (
+        (ts.isArrowFunction(current) || ts.isFunctionExpression(current)) &&
+        current.parent &&
+        ts.isPropertyAssignment(current.parent) &&
+        current.parent.parent &&
+        ts.isObjectLiteralExpression(current.parent.parent)
+      ) {
+        return true; // e.g., { inputFn: (data) => schema.parse(data) }
+      }
+
+      // Concise sync arrow (expression body, not block body)
+      if (
+        ts.isArrowFunction(current) &&
+        !ts.isBlock(current.body)
+      ) {
+        return true; // e.g., (x) => schema.parse(x)
+      }
+
+      // Short sync function (1-2 statements)
+      if (
+        (ts.isArrowFunction(current) || ts.isFunctionExpression(current)) &&
+        ts.isBlock(current.body) &&
+        current.body.statements.length <= 2
+      ) {
+        return true; // Short validation helper
+      }
+
+      // Top-level variable declaration — startup assertion
+      if (
+        ts.isVariableDeclaration(current) &&
+        current.parent &&
+        ts.isVariableDeclarationList(current.parent) &&
+        current.parent.parent &&
+        ts.isVariableStatement(current.parent.parent) &&
+        current.parent.parent.parent &&
+        ts.isSourceFile(current.parent.parent.parent)
+      ) {
+        return true; // const config = schema.parse(rawConfig)
+      }
+
+      // Stop at function/class boundaries
+      if (
+        ts.isFunctionDeclaration(current) ||
+        ts.isMethodDeclaration(current) ||
+        ts.isClassDeclaration(current)
+      ) {
+        break;
+      }
+
+      current = current.parent;
+    }
+
+    return false;
   }
 }

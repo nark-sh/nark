@@ -994,4 +994,74 @@ export class ControlFlowAnalysis implements IControlFlowAnalyzer {
 
     return false;
   }
+
+  /**
+   * Check if a catch clause has adequate error handling — i.e. it returns a
+   * fallback value, rethrows, or logs the error. When the catch block does
+   * ANY of these, the "generic error handling" warning is suppressed because
+   * the developer made a conscious choice about how to handle the error.
+   */
+  public catchHasAdequateHandling(catchClause: ts.CatchClause): boolean {
+    const block = catchClause.block;
+
+    // Check for return statements (fallback values like `return null`)
+    if (this.blockHasReturn(block)) return true;
+
+    // Check for throw statements (rethrow)
+    if (this.blockHasThrow(block)) return true;
+
+    // Check for logging — console.* or passing the error variable to any function
+    if (this.blockLogsError(catchClause)) return true;
+
+    // Empty catch `catch { }` — intentional swallow
+    if (block.statements.length === 0) return true;
+
+    return false;
+  }
+
+  private blockHasReturn(block: ts.Block): boolean {
+    for (const stmt of block.statements) {
+      if (ts.isReturnStatement(stmt)) return true;
+    }
+    return false;
+  }
+
+  private blockHasThrow(block: ts.Block): boolean {
+    for (const stmt of block.statements) {
+      if (ts.isThrowStatement(stmt)) return true;
+    }
+    return false;
+  }
+
+  private blockLogsError(catchClause: ts.CatchClause): boolean {
+    const catchVarName = catchClause.variableDeclaration?.name;
+    const varName = catchVarName && ts.isIdentifier(catchVarName)
+      ? catchVarName.text
+      : undefined;
+
+    let found = false;
+    const visit = (node: ts.Node) => {
+      if (found) return;
+      if (ts.isCallExpression(node)) {
+        const text = node.expression.getText();
+        // console.error, console.warn, console.log, etc.
+        if (text.startsWith('console.')) {
+          found = true;
+          return;
+        }
+        // Any function call that passes the catch variable as an argument
+        if (varName) {
+          for (const arg of node.arguments) {
+            if (ts.isIdentifier(arg) && arg.text === varName) {
+              found = true;
+              return;
+            }
+          }
+        }
+      }
+      ts.forEachChild(node, visit);
+    };
+    visit(catchClause.block);
+    return found;
+  }
 }
