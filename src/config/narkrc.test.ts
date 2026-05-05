@@ -1,8 +1,8 @@
 /**
  * Tests for loadNarkRc()
  *
- * Tests config file discovery, YAML/JSON parsing, git root boundary,
- * precedence rules, and error handling.
+ * Tests config file discovery, YAML parsing, git root boundary,
+ * and error handling. Reads .nark/config.yaml only.
  */
 
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
@@ -33,6 +33,12 @@ function makeSubdir(base: string, ...parts: string[]): string {
   return p;
 }
 
+// Helper: write a .nark/config.yaml at the given dir (mkdirs the .nark folder first)
+function writeNarkConfig(dir: string, contents: string): void {
+  fs.mkdirSync(path.join(dir, '.nark'), { recursive: true });
+  fs.writeFileSync(path.join(dir, '.nark', 'config.yaml'), contents);
+}
+
 describe('loadNarkRc', () => {
   it('returns null when no config file exists anywhere', () => {
     makeGitRoot(tmpDir);
@@ -40,64 +46,40 @@ describe('loadNarkRc', () => {
     expect(loadNarkRc(subdir)).toBeNull();
   });
 
-  it('returns parsed NarkRcConfig from .narkrc.yaml in projectRoot', () => {
+  it('returns parsed NarkRcConfig from .nark/config.yaml in projectRoot', () => {
     makeGitRoot(tmpDir);
-    fs.writeFileSync(path.join(tmpDir, '.narkrc.yaml'), 'failThreshold: warning\n');
+    writeNarkConfig(tmpDir, 'failThreshold: warning\n');
     const result = loadNarkRc(tmpDir);
     expect(result).toEqual({ failThreshold: 'warning' });
   });
 
-  it('returns parsed NarkRcConfig from .narkrc.json in projectRoot', () => {
-    makeGitRoot(tmpDir);
-    fs.writeFileSync(
-      path.join(tmpDir, '.narkrc.json'),
-      JSON.stringify({ corpus: '../nark-corpus' })
-    );
-    const result = loadNarkRc(tmpDir);
-    expect(result).toEqual({ corpus: '../nark-corpus' });
-  });
-
-  it('traverses up to parent directory to find .narkrc.yaml', () => {
+  it('traverses up to parent directory to find .nark/config.yaml', () => {
     makeGitRoot(tmpDir);
     const subdir = makeSubdir(tmpDir, 'packages', 'my-app');
-    fs.writeFileSync(path.join(tmpDir, '.narkrc.yaml'), 'includeDrafts: true\n');
+    writeNarkConfig(tmpDir, 'includeDrafts: true\n');
     const result = loadNarkRc(subdir);
     expect(result).toEqual({ includeDrafts: true });
   });
 
   it('stops traversal at git root and does not go above it', () => {
     // Layout: tmpDir (no .git) / inner (has .git) / project
-    // .narkrc.yaml is at tmpDir (above git root) — should NOT be found
+    // .nark/config.yaml is at tmpDir (above git root) — should NOT be found
     const inner = makeSubdir(tmpDir, 'inner');
     makeGitRoot(inner);
     const project = makeSubdir(inner, 'project');
-    fs.writeFileSync(path.join(tmpDir, '.narkrc.yaml'), 'failThreshold: info\n');
+    writeNarkConfig(tmpDir, 'failThreshold: info\n');
     expect(loadNarkRc(project)).toBeNull();
-  });
-
-  it('.narkrc.yaml takes precedence over .narkrc.json at same directory level', () => {
-    makeGitRoot(tmpDir);
-    fs.writeFileSync(path.join(tmpDir, '.narkrc.yaml'), 'failThreshold: warning\n');
-    fs.writeFileSync(
-      path.join(tmpDir, '.narkrc.json'),
-      JSON.stringify({ failThreshold: 'info' })
-    );
-    const result = loadNarkRc(tmpDir);
-    expect(result?.failThreshold).toBe('warning');
   });
 
   it('throws a descriptive error for invalid YAML', () => {
     makeGitRoot(tmpDir);
-    fs.writeFileSync(path.join(tmpDir, '.narkrc.yaml'), 'key: [unclosed bracket\n');
-    expect(() => loadNarkRc(tmpDir)).toThrow(/.narkrc.yaml/);
+    writeNarkConfig(tmpDir, 'key: [unclosed bracket\n');
+    expect(() => loadNarkRc(tmpDir)).toThrow(/\.nark[\\/]config\.yaml/);
   });
 
   it('silently ignores unknown keys in YAML', () => {
     makeGitRoot(tmpDir);
-    fs.writeFileSync(
-      path.join(tmpDir, '.narkrc.yaml'),
-      'unknownKey: someValue\nfailThreshold: warning\n'
-    );
+    writeNarkConfig(tmpDir, 'unknownKey: someValue\nfailThreshold: warning\n');
     const result = loadNarkRc(tmpDir);
     // Unknown keys should come through (no strict validation)
     expect(result?.failThreshold).toBe('warning');
@@ -117,7 +99,7 @@ describe('loadNarkRc', () => {
       'includeDeprecated: false',
       'telemetry: true',
     ].join('\n');
-    fs.writeFileSync(path.join(tmpDir, '.narkrc.yaml'), yaml);
+    writeNarkConfig(tmpDir, yaml);
     const result = loadNarkRc(tmpDir);
     expect(result?.tsconfig).toBe('./tsconfig.json');
     expect(result?.corpus).toBe('../nark-corpus');
@@ -127,7 +109,7 @@ describe('loadNarkRc', () => {
 
   it('returns null when git root directory itself is checked and has no config', () => {
     makeGitRoot(tmpDir);
-    // No .narkrc.yaml anywhere
+    // No .nark/config.yaml anywhere
     expect(loadNarkRc(tmpDir)).toBeNull();
   });
 });

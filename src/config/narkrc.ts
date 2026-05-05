@@ -35,8 +35,7 @@ function findGitRoot(startDir: string): string | null {
 }
 
 /**
- * Load .narkrc.yaml or .narkrc.json from projectRoot or any ancestor up to git root.
- * .narkrc.yaml takes precedence over .narkrc.json at the same directory level.
+ * Load .nark/config.yaml from projectRoot or any ancestor up to git root.
  * Returns null if no config file is found.
  */
 export function loadNarkRc(projectRoot: string): NarkRcConfig | null {
@@ -45,8 +44,7 @@ export function loadNarkRc(projectRoot: string): NarkRcConfig | null {
   const fsRoot = path.parse(current).root;
 
   while (true) {
-    const yamlPath = path.join(current, '.narkrc.yaml');
-    const jsonPath = path.join(current, '.narkrc.json');
+    const yamlPath = path.join(current, '.nark', 'config.yaml');
 
     if (fs.existsSync(yamlPath)) {
       try {
@@ -55,16 +53,6 @@ export function loadNarkRc(projectRoot: string): NarkRcConfig | null {
       } catch (err) {
         throw new Error(
           `Failed to parse ${yamlPath}: ${err instanceof Error ? err.message : String(err)}`
-        );
-      }
-    }
-
-    if (fs.existsSync(jsonPath)) {
-      try {
-        return JSON.parse(fs.readFileSync(jsonPath, 'utf-8')) as NarkRcConfig;
-      } catch (err) {
-        throw new Error(
-          `Failed to parse ${jsonPath}: ${err instanceof Error ? err.message : String(err)}`
         );
       }
     }

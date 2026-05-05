@@ -8,7 +8,7 @@
  * Scope: scans, violations, runs/<runDir>, generated tsconfig.json,
  * init config.json, suppressions.json (manifest cache).
  *
- * NOT in scope: `.narkrc.*`, `.nark-suppressions.json` (intentional
+ * NOT in scope: `.nark/config.yaml`, `.nark/suppressions.json` (intentional
  * project-local team config), `~/.nark/credentials`, `~/.nark/telemetry.json`
  * (already global, handled elsewhere).
  */

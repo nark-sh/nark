@@ -37,7 +37,7 @@ export interface SuppressionDetail {
   package: string;
   /** Postcondition ID, e.g. "error-4xx-5xx" */
   postconditionId: string;
-  /** Human-readable reason (from .nark-suppressions.json or inline comment) */
+  /** Human-readable reason (from .nark/suppressions.json or inline comment) */
   reason?: string;
   /** How the suppression was created */
   suppressedBy?: string;

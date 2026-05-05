@@ -143,7 +143,7 @@ await axios.post('/api/users', userData);
 
 ### Method B: Config File (Recommended for Global Rules)
 
-Create \`.nark-suppressions.json\` in project root:
+Create \`.nark/suppressions.json\` in project root:
 
 \`\`\`json
 {
@@ -327,7 +327,7 @@ Then suppress with config file:
 
 ### 1. Test Files (8 violations)
 **Reason:** Test files intentionally trigger errors to validate error handling
-**Action:** Created \`.nark-suppressions.json\` with test file pattern
+**Action:** Created \`.nark/suppressions.json\` with test file pattern
 **Files:** src/test/**, **/*.test.ts, **/*.spec.ts
 
 ### 2. Global Error Handler (3 violations)

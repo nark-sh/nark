@@ -64,7 +64,7 @@ export interface SuppressionManifest {
 }
 
 /**
- * Configuration file structure (.nark-suppressions.json)
+ * Configuration file structure (.nark/suppressions.json)
  */
 export interface NarkConfig {
   /** Suppression rules */

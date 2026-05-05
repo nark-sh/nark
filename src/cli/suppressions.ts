@@ -264,13 +264,13 @@ function createStatsCommand(): Command {
 }
 
 /**
- * Add an ignore rule to .nark-suppressions.json
+ * Add an ignore rule to .nark/suppressions.json
  */
 function createAddCommand(): Command {
   const add = new Command("add");
 
   add
-    .description("Add an ignore rule to .nark-suppressions.json")
+    .description("Add an ignore rule to .nark/suppressions.json")
     .requiredOption(
       "--package <name>",
       "Package name (e.g. stripe, axios, @prisma/client)",
@@ -299,7 +299,8 @@ function createAddCommand(): Command {
       }
 
       try {
-        const configPath = path.join(projectRoot, ".nark-suppressions.json");
+        const configPath = path.join(projectRoot, ".nark", "suppressions.json");
+        fs.mkdirSync(path.dirname(configPath), { recursive: true });
         const config = loadConfigSync(projectRoot);
 
         if (!config.ignore) {
@@ -316,7 +317,7 @@ function createAddCommand(): Command {
         if (duplicate) {
           console.log(
             chalk.yellow(
-              `⚠️  A matching rule already exists in .nark-suppressions.json:`,
+              `⚠️  A matching rule already exists in .nark/suppressions.json:`,
             ),
           );
           console.log(chalk.dim(`   package: ${duplicate.package}`));
@@ -345,7 +346,7 @@ function createAddCommand(): Command {
           "utf-8",
         );
 
-        console.log(chalk.green(`✅ Rule added to .nark-suppressions.json`));
+        console.log(chalk.green(`✅ Rule added to .nark/suppressions.json`));
         console.log(chalk.dim(`   package: ${options.package}`));
         console.log(chalk.dim(`   postconditionId: ${options.postcondition}`));
         if (options.file) console.log(chalk.dim(`   file: ${options.file}`));
@@ -353,7 +354,7 @@ function createAddCommand(): Command {
         console.log();
         console.log(
           chalk.dim(
-            "Commit .nark-suppressions.json to share this suppression with your team.",
+            "Commit .nark/suppressions.json to share this suppression with your team.",
           ),
         );
       } catch (error) {

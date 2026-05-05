@@ -184,7 +184,7 @@ export DO_NOT_TRACK=1
 nark telemetry on
 ```
 
-You can also set `telemetry: false` in `.narkrc.yaml` or point telemetry to a different endpoint with `NARK_API_URL`.
+You can also set `telemetry: false` in `.nark/config.yaml` or point telemetry to a different endpoint with `NARK_API_URL`.
 
 Learn more: [https://nark.sh/telemetry](https://nark.sh/telemetry)
 
@@ -261,10 +261,10 @@ nark --instructions-path
 
 ## Configuration File
 
-Place a `.narkrc.yaml` in your project root to persist CLI options. CLI flags always override file values.
+Place a `.nark/config.yaml` in your project root to persist CLI options. CLI flags always override file values.
 
 ```yaml
-# .narkrc.yaml
+# .nark/config.yaml
 
 # Fail threshold: error | warning | info (default: error)
 failThreshold: error

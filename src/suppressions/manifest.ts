@@ -3,7 +3,7 @@
  *
  * Handles loading, saving, and updating ~/.nark/projects/<encoded>/suppressions.json
  * (the per-project manifest cache; lives under HOME so the user's project tree
- * is untouched). The team-policy `.nark-suppressions.json` file remains
+ * is untouched). The team-policy `.nark/suppressions.json` file remains
  * project-local and is handled by `suppressions/config-loader.ts`.
  */
 

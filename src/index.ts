@@ -65,7 +65,7 @@ let scanOutputTipPrinted = false;
 
 const program = new Command();
 
-// Load .narkrc.yaml from the project root (cwd at invocation time).
+// Load .nark/config.yaml from the project root (cwd at invocation time).
 // Commander hasn't parsed yet, so extract --project from argv manually.
 const _projectArgIdx = process.argv.indexOf("--project");
 const _projectRootForRc =
@@ -944,11 +944,11 @@ async function main(options: any) {
     // Build suppressionDetails: per-suppression signal for corpus quality improvement.
     // High suppress:fix ratios on a postconditionId → likely FP in the profile.
     // Max 100 entries per scan to keep payload size bounded.
-    // Enriches with human-written reasons from .nark-suppressions.json ignore rules.
+    // Enriches with human-written reasons from .nark/suppressions.json ignore rules.
     const suppressionDetails = (() => {
       try {
         const suppressed = v2Result?.suppressedViolations ?? [];
-        // Load ignore rules from .nark-suppressions.json to enrich reasons
+        // Load ignore rules from .nark/suppressions.json to enrich reasons
         let ignoreRules: Array<{
           package?: string;
           postconditionId?: string;
@@ -957,7 +957,8 @@ async function main(options: any) {
         try {
           const configPath = path.join(
             options.project,
-            ".nark-suppressions.json",
+            ".nark",
+            "suppressions.json",
           );
           if (fs.existsSync(configPath)) {
             const configData = JSON.parse(fs.readFileSync(configPath, "utf-8"));

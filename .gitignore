@@ -1,8 +1,9 @@
 node_modules/
 dist/
 *.log
-.nark/
+# Ignore nark runtime artifacts under .nark/ but keep the team-shared example config
+.nark/*
+!.nark/config.yaml.example
 pnpm-lock.yaml
-.nark
 .claude/
 output/

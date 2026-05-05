@@ -1,5 +1,16 @@
 # Changelog
 
+## [Unreleased] — 2026-05-05
+
+### Breaking Changes
+
+- **Config consolidation:** Team-shared config files now live in a single `.nark/` folder at the project root.
+  - `.narkrc.yaml` → `.nark/config.yaml`
+  - `.narkrc.json` → DROPPED — use YAML only
+  - `.nark-suppressions.json` → `.nark/suppressions.json`
+  - No legacy filename fallback. Run `mv .narkrc.yaml .nark/config.yaml` and `mv .nark-suppressions.json .nark/suppressions.json` to migrate.
+  - Runtime artifacts (scans, violations, runs, manifest cache) remain at `~/.nark/projects/<encoded>/` — no change.
+
 ## [Unreleased] — 2026-04-13 Sprint (quick-17 through quick-33)
 
 This sprint added 17 features across nark and behavioral-contracts-saas, covering CLI standards, new subcommands, config file support, telemetry, auth, CI integration, and SaaS data models.

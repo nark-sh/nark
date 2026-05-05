@@ -1,6 +1,6 @@
-# .narkrc.yaml — Nark configuration file
+# .nark/config.yaml — Nark configuration file
 #
-# Place this file (renamed to .narkrc.yaml) in your project root.
+# Place this file (renamed to config.yaml, inside a .nark/ folder) in your project root.
 # Nark will find it automatically when scanning your project.
 # CLI flags always override values set here.
 #

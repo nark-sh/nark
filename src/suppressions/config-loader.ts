@@ -1,17 +1,17 @@
 /**
  * Configuration File Loader
  *
- * Loads and validates .nark-suppressions.json config file
+ * Loads and validates .nark/suppressions.json config file
  */
 
 import * as fs from "fs";
 import * as path from "path";
 import { NarkConfig, IgnoreRule } from "./types.js";
 
-const CONFIG_FILENAME = ".nark-suppressions.json";
+const CONFIG_FILENAME = ".nark/suppressions.json";
 
 /**
- * Load nark configuration from project root (.nark-suppressions.json)
+ * Load nark configuration from project root (.nark/suppressions.json)
  *
  * @param projectRoot - Absolute path to project root
  * @returns Configuration object, or empty config if file doesn't exist
@@ -264,6 +264,7 @@ export async function createDefaultConfig(projectRoot: string): Promise<void> {
     ],
   };
 
+  fs.mkdirSync(path.dirname(configPath), { recursive: true });
   await fs.promises.writeFile(
     configPath,
     JSON.stringify(defaultConfig, null, 2),
