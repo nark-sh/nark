@@ -137,8 +137,8 @@ nark --fail-threshold warning
 nark --sarif
 nark --sarif-output results.sarif
 
-# Verbose progress output to stderr
-nark --verbose
+# Compact summary output (full report is default)
+nark --quiet
 ```
 
 ### Show
@@ -338,7 +338,8 @@ Use `--report-only` to always get `0`, or `--fail-threshold warning` to block on
 | `--fail-on-warnings` | Shorthand for `--fail-threshold warning` | false |
 | `--sarif` | Write SARIF 2.1.0 to `.nark/results.sarif` | false |
 | `--sarif-output <file>` | Write SARIF to a custom path | — |
-| `--verbose` | Emit progress checkpoints to stderr | false |
+| `--quiet, -q` | Show compact summary instead of full report | false |
+| `--verbose` | Full output (default, kept for backward compatibility) | — |
 | `--include-tests` | Include test files | false |
 | `--include-drafts` | Include draft contracts | false |
 | `--show-suppressions` | Show suppressed violations | false |

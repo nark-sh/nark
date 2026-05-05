@@ -203,9 +203,9 @@ program
   )
   .option(
     "--verbose",
-    "Show full detailed output (default: compact summary)",
-    false,
+    "Full output (default — kept for backward compatibility)",
   )
+  .option("-q, --quiet", "Show compact summary instead of full report")
   .action(async (options) => {
     // This action handler is called when the main command is invoked
     // (i.e., not a subcommand like 'suppressions')
@@ -374,7 +374,7 @@ async function main(options: any) {
   handleFirstRunNotice();
 
   const scanStartTime = Date.now();
-  const verbose = options.verbose;
+  const verbose = !options.quiet;
 
   // Read nark version from package.json
   const narkVersion = (() => {
@@ -498,7 +498,7 @@ async function main(options: any) {
   }
 
   // Checkpoint 1: verbose corpus output
-  if (options.verbose && corpusResult.contractFiles) {
+  if (verbose && corpusResult.contractFiles) {
     const totalFiles = Array.from(corpusResult.contractFiles.values()).reduce(
       (sum, files) => sum + files.length,
       0,
@@ -1459,7 +1459,7 @@ function printCompactReport(opts: {
     console.log(chalk.dim(`  AI fix:      `) + `nark --instructions-path`);
   }
   if (totalViolations > 0) {
-    console.log(chalk.dim(`  Verbose:     `) + `npx nark --verbose`);
+    console.log(chalk.dim(`  Full report: `) + `npx nark`);
   }
   console.log("");
 }
