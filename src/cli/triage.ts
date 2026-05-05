@@ -7,14 +7,21 @@ import { Command } from 'commander';
 import chalk from 'chalk';
 import * as path from 'path';
 import { readAllViolationFiles, markVerdict } from '../triage/index.js';
+import {
+  encodeProjectPath,
+  getNarkProjectDir,
+} from '../lib/global-paths.js';
 
 const VALID_VERDICTS = ['true-positive', 'false-positive', 'wont-fix'];
 
 /**
- * Resolve .nark directory from project root option.
+ * Resolve the global per-project nark dir from the --project option.
+ *
+ * Returns ~/.nark/projects/<encoded>/ where <encoded> is the absolute
+ * project root with `/` replaced by `-` and a leading `-`.
  */
 function resolveNarkDir(projectOption: string): string {
-  return path.join(path.resolve(projectOption), '.nark');
+  return getNarkProjectDir(path.resolve(projectOption));
 }
 
 /**
@@ -39,7 +46,9 @@ function createTriageListCommand(): Command {
   const list = new Command('list');
 
   list
-    .description('List all untriaged violations from .nark/violations/')
+    .description(
+      'List all untriaged violations from ~/.nark/projects/<encoded>/violations/'
+    )
     .option('--project <path>', 'Project root directory', process.cwd())
     .option('--all', 'Show all violations including triaged ones')
     .action((options) => {
@@ -47,7 +56,12 @@ function createTriageListCommand(): Command {
       const files = readAllViolationFiles(narkDir);
 
       if (files.length === 0) {
-        console.log(chalk.dim('No violation files found in .nark/violations/'));
+        const encoded = encodeProjectPath(path.resolve(options.project));
+        console.log(
+          chalk.dim(
+            `No violation files found in ~/.nark/projects/${encoded}/violations/`
+          )
+        );
         return;
       }
 

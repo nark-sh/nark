@@ -1,16 +1,18 @@
 /**
  * Suppression Manifest Management
  *
- * Handles loading, saving, and updating .nark/suppressions.json
+ * Handles loading, saving, and updating ~/.nark/projects/<encoded>/suppressions.json
+ * (the per-project manifest cache; lives under HOME so the user's project tree
+ * is untouched). The team-policy `.nark-suppressions.json` file remains
+ * project-local and is handled by `suppressions/config-loader.ts`.
  */
 
 import * as fs from 'fs';
 import * as path from 'path';
 import * as crypto from 'crypto';
 import { Suppression, SuppressionManifest } from './types.js';
+import { getNarkSuppressionsManifest } from '../lib/global-paths.js';
 
-const MANIFEST_DIR = '.nark';
-const MANIFEST_FILENAME = 'suppressions.json';
 const MANIFEST_VERSION = '1.0.0';
 
 /**
@@ -271,10 +273,10 @@ export function createSuppression(options: {
  * Get path to manifest file
  *
  * @param projectRoot - Project root directory
- * @returns Absolute path to manifest file
+ * @returns Absolute path to manifest file under ~/.nark/projects/<encoded>/
  */
 function getManifestPath(projectRoot: string): string {
-  return path.join(projectRoot, MANIFEST_DIR, MANIFEST_FILENAME);
+  return getNarkSuppressionsManifest(projectRoot);
 }
 
 /**

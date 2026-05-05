@@ -8,6 +8,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as readline from 'readline';
 import chalk from 'chalk';
+import { encodeProjectPath, getNarkInitConfig } from '../lib/global-paths.js';
 
 /**
  * Create the init subcommand
@@ -99,12 +100,8 @@ export function createInitCommand(): Command {
       // Step 4 — Write tsconfig.scan.json
       fs.writeFileSync(tsconfigScanPath, JSON.stringify(syntheticConfig, null, 2) + '\n', 'utf-8');
 
-      // Step 5 — Update .nark/config.json
-      const narkDir = path.join(cwd, '.nark');
-      if (!fs.existsSync(narkDir)) {
-        fs.mkdirSync(narkDir, { recursive: true });
-      }
-      const configPath = path.join(narkDir, 'config.json');
+      // Step 5 — Update ~/.nark/projects/<encoded>/config.json
+      const configPath = getNarkInitConfig(cwd);
       let config: Record<string, unknown> = {};
       if (fs.existsSync(configPath)) {
         try {
@@ -119,8 +116,12 @@ export function createInitCommand(): Command {
       fs.writeFileSync(configPath, JSON.stringify(config, null, 2) + '\n', 'utf-8');
 
       // Step 6 — Print success summary
+      const encoded = encodeProjectPath(cwd);
       console.log(chalk.green('✓') + ' Created tsconfig.scan.json');
-      console.log(chalk.green('✓') + ' Updated .nark/config.json \u2192 { "tsconfig": "tsconfig.scan.json" }');
+      console.log(
+        chalk.green('✓') +
+          ` Updated ~/.nark/projects/${encoded}/config.json → { "tsconfig": "tsconfig.scan.json" }`
+      );
       console.log('');
       console.log(
         chalk.dim(

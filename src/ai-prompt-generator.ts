@@ -92,12 +92,12 @@ file://${indexHtmlPath}
 
 📄 **Full Report:**
 \`\`\`bash
-cat ${path.relative(process.cwd(), path.join(outputDir, "output.txt"))}
+cat ${path.join(outputDir, "output.txt")}
 \`\`\`
 
 📋 **JSON Data:**
 \`\`\`bash
-cat ${path.relative(process.cwd(), outputPath)}
+cat ${outputPath}
 \`\`\`
 
 ### How to Review
@@ -466,8 +466,8 @@ npx nark suppressions clean --auto
 
 🔧 **Tools:**
 - Interactive Visualization: file://${indexHtmlPath}
-- Full Report: ${path.relative(process.cwd(), path.join(outputDir, "output.txt"))}
-- JSON Data: ${path.relative(process.cwd(), outputPath)}
+- Full Report: ${path.join(outputDir, "output.txt")}
+- JSON Data: ${outputPath}
 
 ---
 

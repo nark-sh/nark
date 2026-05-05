@@ -53,6 +53,7 @@ import { getToken } from "./lib/auth.js";
 import { createCiCommand } from "./cli/ci.js";
 import { generateAIPrompt } from "./ai-prompt-generator.js";
 import { writeScanResults, findNarkDir } from "./output/index.js";
+import { getNarkRunsDir } from "./lib/global-paths.js";
 import { getSuppressedFingerprints } from "./triage/suppressor.js";
 import { writeSarifOutput } from "./output/sarif-writer.js";
 import { loadNarkRc } from "./config/narkrc.js";
@@ -276,10 +277,11 @@ function generateOutputPath(tsconfigPath: string): string {
   // Create run directory name
   const runDir = `${timestamp.replace(/T/, "-").replace(/-/g, "").substring(0, 13)}-${gitHash}`;
 
-  // Output goes to .nark/runs/{runDir}/ in the analyzed project
-  const outputDir = path.join(projectRoot, ".nark", "runs", runDir);
+  // Output goes to ~/.nark/projects/<encoded>/runs/{runDir}/ — keeps the
+  // user's project tree free of any nark-generated files.
+  const outputDir = path.join(getNarkRunsDir(projectRoot), runDir);
 
-  // Create directory if it doesn't exist
+  // Create the leaf run directory (parent runs/ already created by helper)
   fs.mkdirSync(outputDir, { recursive: true });
 
   if (!scanOutputTipPrinted) {

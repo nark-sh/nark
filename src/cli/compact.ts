@@ -7,6 +7,12 @@ import { Command } from 'commander';
 import chalk from 'chalk';
 import * as fs from 'fs';
 import * as path from 'path';
+import {
+  encodeProjectPath,
+  getNarkProjectDir,
+  getNarkScansDir,
+  getNarkViolationsDir,
+} from '../lib/global-paths.js';
 
 /**
  * Create the compact subcommand
@@ -20,12 +26,22 @@ export function createCompactCommand(): Command {
     .option('--dry-run', 'Show what would be done without making changes')
     .action(async (options) => {
       const projectRoot = path.resolve(options.project);
-      const narkDir = path.join(projectRoot, '.nark');
-      const scansDir = path.join(narkDir, 'scans');
-      const violationsDir = path.join(narkDir, 'violations');
+      const narkDir = getNarkProjectDir(projectRoot);
+      const scansDir = getNarkScansDir(projectRoot);
+      const violationsDir = getNarkViolationsDir(projectRoot);
 
-      if (!fs.existsSync(scansDir)) {
-        console.log(chalk.dim('No .nark/scans/ directory found — nothing to compact.'));
+      // After getNarkScansDir() the scans dir always exists (helper creates it
+      // lazily). Treat "no scan files" as the empty case.
+      const hasScanFiles = fs
+        .readdirSync(scansDir)
+        .some((f) => /^\d{3}\.json$/.test(f));
+      if (!hasScanFiles) {
+        const encoded = encodeProjectPath(projectRoot);
+        console.log(
+          chalk.dim(
+            `No scans directory found at ~/.nark/projects/${encoded}/scans/ — nothing to compact.`
+          )
+        );
         return;
       }
 
@@ -131,7 +147,9 @@ export function createCompactCommand(): Command {
                 fs.writeFileSync(historyPath, JSON.stringify(historyData, null, 2), 'utf-8');
                 historyFilesCreated++;
               } else {
-                console.log(chalk.dim(`  Would create: ${path.relative(projectRoot, historyPath)}`));
+                // Show path relative to the global per-project nark dir
+                // (historyPath now lives under HOME, not under the user's project)
+                console.log(chalk.dim(`  Would create: ${path.relative(narkDir, historyPath)}`));
                 historyFilesCreated++;
               }
             } catch {

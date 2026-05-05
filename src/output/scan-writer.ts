@@ -1,8 +1,13 @@
 /**
- * Write scan results to .nark/ directory in the project root.
+ * Write scan results to ~/.nark/projects/<encoded>/ in the user's HOME.
+ *
+ * <encoded> is the absolute project root with `/` replaced by `-` and a
+ * leading `-` (mirrors Claude Code's per-project memory pattern). All
+ * runtime/cache artifacts live under HOME so a fresh `npx nark` leaves
+ * the user's project tree untouched.
  *
  * Directory structure:
- *   .nark/
+ *   ~/.nark/projects/<encoded>/
  *     config.yaml           — user configuration
  *     scans/
  *       001.json            — scan records (zero-padded 3-digit IDs)
@@ -21,6 +26,7 @@ import { ensureConfig } from './config.js';
 import { formatViolationMd, formatViolationJson } from './formatters.js';
 import { computeViolationFingerprint } from '../suppressions/fingerprint.js';
 import { getSuppressedFingerprints } from '../triage/suppressor.js';
+import { getNarkProjectDir } from '../lib/global-paths.js';
 
 export interface ScanRecord {
   id: string;
@@ -54,11 +60,16 @@ export interface WriteScanResult {
 }
 
 /**
- * Find the .nark/ directory for a project.
- * Uses the directory containing tsconfig.json as the project root.
+ * Find the global per-project nark directory for a project.
+ *
+ * Returns `~/.nark/projects/<encoded>/` where <encoded> is the absolute
+ * project root with `/` replaced by `-` and a leading `-`. The directory
+ * is created lazily.
+ *
+ * Public signature is preserved for callers in index.ts and other modules.
  */
 export function findNarkDir(projectRoot: string): string {
-  return path.join(projectRoot, '.nark');
+  return getNarkProjectDir(projectRoot);
 }
 
 /**
@@ -200,7 +211,7 @@ export function writeCommitScan(
     fs.writeFileSync(filePath, JSON.stringify(record, null, 2), 'utf-8');
     return filePath;
   } catch (err) {
-    console.warn(`Warning: Could not write commit scan to .nark/scans/: ${err}`);
+    console.warn(`Warning: Could not write commit scan to ~/.nark/projects/.../scans/: ${err}`);
     return null;
   }
 }
@@ -355,7 +366,7 @@ export async function writeScanResults(options: WriteScanOptions): Promise<Write
     return { narkDir, scanPath, scanId };
   } catch (err) {
     // Non-fatal: warn but don't crash the scan
-    console.warn(`Warning: Could not write .nark/ output: ${err}`);
+    console.warn(`Warning: Could not write Nark output to ~/.nark/projects/...: ${err}`);
     return null;
   }
 }

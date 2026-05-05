@@ -5,6 +5,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import chalk from 'chalk';
+import { getNarkGeneratedTsconfig } from './lib/global-paths.js';
 
 interface TsConfigOptions {
   projectDir: string;
@@ -148,7 +149,8 @@ function hasTypeScriptFiles(dir: string): boolean {
 /**
  * Ensures tsconfig.json exists, generating if necessary.
  * If no TypeScript files are found, prints a friendly message and exits.
- * Generated tsconfig goes to .nark/tsconfig.json to avoid polluting the project.
+ * Generated tsconfig goes to ~/.nark/projects/<encoded>/tsconfig.json so
+ * the user's project tree stays untouched.
  */
 export function ensureTsconfig(tsconfigPath: string): string {
   if (fs.existsSync(tsconfigPath)) {
@@ -169,12 +171,15 @@ export function ensureTsconfig(tsconfigPath: string): string {
     process.exit(0);
   }
 
-  // Generate tsconfig in .nark/ to avoid polluting the user's project
-  const narkDir = path.join(projectDir, '.nark');
-  fs.mkdirSync(narkDir, { recursive: true });
-  const generatedPath = path.join(narkDir, 'tsconfig.json');
+  // Generate tsconfig under ~/.nark/projects/<encoded>/ to keep the user's
+  // project tree untouched.
+  const generatedPath = getNarkGeneratedTsconfig(projectDir);
 
-  console.log(chalk.dim(`  tsconfig.json not found, generating temporary config...`));
+  console.log(
+    chalk.dim(
+      `  tsconfig.json not found, generating temporary config in ~/.nark/projects/...`
+    )
+  );
   generateMinimalTsconfig(generatedPath, { projectDir });
 
   return generatedPath;
