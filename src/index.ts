@@ -60,6 +60,8 @@ import { loadNarkRc } from "./config/narkrc.js";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+let scanOutputTipPrinted = false;
+
 const program = new Command();
 
 // Load .narkrc.yaml from the project root (cwd at invocation time).
@@ -256,36 +258,6 @@ function getGitHashFromRepo(tsconfigPath: string): string {
 }
 
 /**
- * Ensure .nark is in .gitignore
- */
-function ensureGitignore(projectRoot: string): void {
-  const gitignorePath = path.join(projectRoot, ".gitignore");
-  const entry = ".nark";
-
-  try {
-    let gitignoreContent = "";
-    if (fs.existsSync(gitignorePath)) {
-      gitignoreContent = fs.readFileSync(gitignorePath, "utf-8");
-    }
-
-    // Check if already ignored
-    const lines = gitignoreContent.split("\n");
-    const alreadyIgnored = lines.some((line) => line.trim() === entry);
-
-    if (!alreadyIgnored) {
-      // Add entry to .gitignore
-      const newContent = gitignoreContent.endsWith("\n")
-        ? gitignoreContent + entry + "\n"
-        : gitignoreContent + "\n" + entry + "\n";
-      fs.writeFileSync(gitignorePath, newContent, "utf-8");
-    }
-  } catch (err) {
-    // If we can't update .gitignore, just warn but don't fail
-    console.warn(chalk.yellow(`Warning: Could not update .gitignore: ${err}`));
-  }
-}
-
-/**
  * Generate organized output path in the analyzed project's .nark directory
  */
 function generateOutputPath(tsconfigPath: string): string {
@@ -310,8 +282,14 @@ function generateOutputPath(tsconfigPath: string): string {
   // Create directory if it doesn't exist
   fs.mkdirSync(outputDir, { recursive: true });
 
-  // Ensure .nark is in .gitignore
-  ensureGitignore(projectRoot);
+  if (!scanOutputTipPrinted) {
+    console.log(
+      chalk.dim(
+        "Tip: Nark scan output is stored in ~/.nark/projects/... — your project files are untouched.",
+      ),
+    );
+    scanOutputTipPrinted = true;
+  }
 
   return path.join(outputDir, "audit.json");
 }
