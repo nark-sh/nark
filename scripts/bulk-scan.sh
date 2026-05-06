@@ -69,7 +69,7 @@ for repo in "$WORKSPACE_ROOT"/test-repos/*/; do
   # Run with 90s timeout, capture output
   set +e
   if [ "$TIMEOUT_CMD" = "run_with_timeout" ]; then
-    run_with_timeout 90 node dist/index.js \
+    NARK_TELEMETRY=off run_with_timeout 90 node dist/index.js \
       --tsconfig "$tsconfig" \
       --corpus "$CORPUS_PATH" \
       --report-only \
@@ -77,7 +77,7 @@ for repo in "$WORKSPACE_ROOT"/test-repos/*/; do
       --output "$RESULTS_DIR/$name-audit.json" \
       > "$RESULTS_DIR/$name-output.txt" 2>&1
   else
-    $TIMEOUT_CMD 90 node dist/index.js \
+    NARK_TELEMETRY=off $TIMEOUT_CMD 90 node dist/index.js \
       --tsconfig "$tsconfig" \
       --corpus "$CORPUS_PATH" \
       --report-only \

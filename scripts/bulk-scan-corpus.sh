@@ -118,13 +118,13 @@ for repo_dir in "$REPOS_DIR"/*/; do
   # Run with timeout, capture exit code
   set +e
   if [ "$TIMEOUT_CMD" = "run_with_timeout" ]; then
-    run_with_timeout "$TIMEOUT_SECS" node "$NARK_BIN" \
+    NARK_TELEMETRY=off run_with_timeout "$TIMEOUT_SECS" node "$NARK_BIN" \
       --tsconfig "$TSCONFIG" \
       --no-terminal \
       --output "$AUDIT_FILE" \
       > /dev/null 2>&1
   else
-    $TIMEOUT_CMD "$TIMEOUT_SECS" node "$NARK_BIN" \
+    NARK_TELEMETRY=off $TIMEOUT_CMD "$TIMEOUT_SECS" node "$NARK_BIN" \
       --tsconfig "$TSCONFIG" \
       --no-terminal \
       --output "$AUDIT_FILE" \
