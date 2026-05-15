@@ -50676,5 +50676,46 @@
       "postcondition_id": "weak-password"
     },
     "resolution": "Rejected: insufficient evidence (violation_count=1, threshold per bc-scanner-upgrade rejection rules is >= 3 violations across multiple repos). fp_reason field is empty in the dashboard report — no actionable signal to fix the scanner without risk of regression. If this pattern recurs at higher scale (>= 3 instances with diagnostic fp_reason notes), set status back to pending to force re-evaluation. Reviewed by bc-scanner-upgrade on 2026-05-14."
+  },
+  {
+    "id": "concern-20260515-section3-gap-1-querycache-onerror",
+    "status": "pending",
+    "category": "false-positive",
+    "package": "@tanstack/react-query",
+    "postcondition": "query-error-unhandled",
+    "fp_reason": "§3 amendment 'stronger heuristic' (scanner-upgrades-todo.md line 51) not implemented in commit 59e4c12. Existing suppression at contract-matcher.ts:877-916 only checks for `isError`/`{ error`/`error }`/`onError` IN THE SAME FILE as the violation. Many React Query projects ship a global `new QueryCache({ onError: (error) => toast(...) })` wired into the queryClient at a separate file (e.g., `lib/query-client.ts`, `providers/QueryClientProvider.tsx`). Component files using useQuery in those projects don't repeat the onError handler — the global handler covers everything. Result: scanner reports false positives on every useQuery/useMutation site even when the project has comprehensive global error handling. Confirmed retros: rank-12 openstatus (269/269 FPs, scanner-upgrades-todo.md line 48 documents `QueryCache(onError)` toast wired); rank-06 chatbox (26/26 FPs, retro line 127 documents `ErrorBoundary.tsx` + `global_error_handler.ts` + Sentry stack via ERROR_HANDLING.md); plausibly rank-08 sealos (299 useQuery FPs without local error destructure, retro line 65). Existing per-file heuristic (lines 909-913) does NOT catch these because the wiring is cross-file.",
+    "violation_count": 564,
+    "source_retros": [
+      "work-packages/25-pr-initiative/prs/06-POST-PR-RETRO.md",
+      "work-packages/25-pr-initiative/prs/08-POST-PR-RETRO.md",
+      "work-packages/25-pr-initiative/prs/12-POST-PR-RETRO.md"
+    ],
+    "suggested_resolution": "Add a project-level signal to the @tanstack/react-query suppression block. Before the per-file isError/onError check at line 909, scan project files (cached, single-pass at scanner init) for: (a) `new QueryCache({` with `onError:` callback within the next 200 chars, (b) any file matching `**/ErrorBoundary.{tsx,ts}` or `**/error-boundary.{tsx,ts}`, (c) any file matching `**/{global,app,root}_error_handler.{ts,tsx}`. If any signal fires, suppress query-error-unhandled / infinite-query-error-unhandled / mutation-error-unhandled across the whole project. Implementation: cache the result on the ContractMatcher instance keyed by tsconfig path; populate on first @tanstack/react-query detection. Avoids per-violation file-scan cost."
+  },
+  {
+    "id": "concern-20260515-section3-gap-2-fetchquery-postconditions",
+    "status": "pending",
+    "category": "false-positive",
+    "package": "@tanstack/react-query",
+    "postcondition": "fetchquery-throws-on-error",
+    "fp_reason": "Postcondition gate at contract-matcher.ts:890-892 only includes query-error-unhandled, infinite-query-error-unhandled, and mutation-error-unhandled. The fetchquery-throws-on-error and fetchquery-ssr-uncaught-error postconditions (defined in @tanstack/react-query/contract.yaml lines 657, 690) are NOT in the gate. Rank-12 openstatus's leaf-level violation was `queryClient.fetchQuery(...)` inside auth/providers.ts:sendVerificationRequest, NOT useQuery. The PR was closed-rejected for unrelated §14 (framework-callback redundancy) reasons but the underlying scanner gap remains: even if §14 lands, fetchquery-throws-on-error will fire on every project-level queryClient.fetchQuery() call regardless of QueryCache(onError) wiring. Add fetchquery-throws-on-error, fetchquery-ssr-uncaught-error, refetchquery-throws-on-error, refetchqueries-silent-failure (when applicable to the same project-signal context) to the gate alongside the gap-1 project-level signal.",
+    "violation_count": 1,
+    "source_retros": [
+      "work-packages/25-pr-initiative/prs/12-POST-PR-RETRO.md"
+    ],
+    "suggested_resolution": "Expand the postcondition set at line 890-892 to also include `fetchquery-throws-on-error` and `fetchquery-ssr-uncaught-error`. Apply the gap-1 project-level signal to these postconditions too (these all share the same project-level QueryCache(onError) suppression logic — fetchQuery sites also benefit from a project-wide global handler). Keep the strict severity for fetchquery-ssr-uncaught-error if the project lacks the signal — that's a genuine SSR page-render-fails risk."
+  },
+  {
+    "id": "concern-20260515-section3-gap-3-router-loader-callbacks",
+    "status": "pending",
+    "category": "false-positive",
+    "package": "@tanstack/react-router",
+    "postcondition": "loader-async-error-unhandled",
+    "fp_reason": "§3 amendment 'Generalization to @tanstack/react-router' (scanner-upgrades-todo.md line 46) not implemented in commit 59e4c12. The existing @tanstack/react-router suppression at contract-matcher.ts:778-791 only handles TYPED-ROUTING postconditions (invalid-route-path, param-type-mismatch, search-schema-validation-error, etc.) — it does NOT handle error-handling postconditions in `loader:` / `errorComponent:` route-config callbacks. Router's `loader: async () => {...}` config catches loader exceptions and routes to `errorComponent`. Same FP class as react-query useQuery — framework owns the catch. Scanner-upgrades-todo.md line 46 cites vendure rank-24 with '34/34 react-router flags were FPs from this pattern.' Vendure's own retro confirms react-query patterns covered by 'top-level error-boundary' (retro line 142) — the router config is the analogous pattern but at the routing layer. NOTE: Verify the exact postcondition ID emitted by @tanstack/react-router contract for loader-callback unhandled awaits before drafting the fix — the contract may use a different name.",
+    "violation_count": 34,
+    "source_retros": [
+      "work-packages/25-pr-initiative/prs/24-POST-PR-RETRO.md"
+    ],
+    "suggested_resolution": "After verifying the relevant postcondition IDs in @tanstack/react-router/contract.yaml, add a new suppression block: when @tanstack/react-router is the package AND the violation is inside an async lambda passed as the `loader:` property of a `createRoute(...)` / `createFileRoute(...)` / `createRootRoute(...)` call, suppress (router's `errorComponent` covers the throw). Apply the same project-level signal from gap-1 as additional confidence (loader errors that have explicit project-wide error boundaries are extra-safe). This is a §3 generalization, not a new §3 work item."
   }
 ]
