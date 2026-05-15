@@ -17,6 +17,7 @@ import type { Detection, Violation } from "../types/index.js";
 import { ControlFlowAnalysis } from "./control-flow-analyzer.js";
 import { checkSuppression } from "../../suppressions/matcher.js";
 import { computeViolationFingerprint } from "../../suppressions/fingerprint.js";
+import { loadWrapperConfigSync } from "../../suppressions/wrapper-config.js";
 
 export interface ContractMatcherOptions {
   projectRoot: string;
@@ -42,6 +43,13 @@ export class ContractMatcher {
   private reactQueryGlobalErrorHandler: boolean | null = null;
   /** Tracks real call site evaluations per package (pass + fail) */
   private _callSitesByPackage: Map<string, number> = new Map();
+  /**
+   * Cached project-level `.nark/suppress.yaml` callback_wrappers extension list
+   * (null = not yet checked). Used to extend the built-in wrapper-name pattern
+   * list per-project.
+   * Evidence: concern-20260515-section8-promisecall-promisestate-wrapper-shells.
+   */
+  private extraCallbackWrappers: string[] | null = null;
   constructor(
     contracts: Map<string, PackageContract>,
     options: ContractMatcherOptions,
@@ -809,6 +817,34 @@ export class ContractMatcher {
           if (this.projectHasReactQueryGlobalErrorHandler()) {
             continue;
           }
+        }
+      }
+
+      // @trpc/client: PromiseCall / PromiseState / safeAsync etc. callback-wrapper shells.
+      // When `.query()` / `.mutate()` is called inside an async lambda passed as either:
+      //   (a) the direct argument to a CallExpression / NewExpression whose callee is a
+      //       top-of-file imported Identifier matching the wrapper-name pattern list, OR
+      //   (b) the value of a `function:` / `init:` / `callback:` / `fn:` property of an
+      //       object literal that is itself such an argument,
+      // the try-catch lives in the wrapper class/function one stack frame up. Scanner
+      // would otherwise FP because it walks only the immediate callback body.
+      //
+      // Evidence: concern-20260515-section8-promisecall-promisestate-wrapper-shells (~416
+      //   FPs across blinko, rybbit, gpt4free-ts) and
+      //   concern-20260515-section8-trpc-query-wrapper-shells (~100 FPs). Canonical shape:
+      //   blinko's PromiseCall(<promise>) helper and `new PromiseState({ function: async ...})`
+      //   class (app/src/store/standard/PromiseState.ts).
+      //
+      // Gated on (a) imported-at-file-level constraint to prevent name-collision over-
+      // suppression: a locally-declared function named `PromiseCall` that is NOT imported
+      // does NOT match. Project-level extension via `.nark/suppress.yaml` callback_wrappers.
+      if (
+        detection.packageName === "@trpc/client" &&
+        (primaryPostcondition.id === "trpc-mutate-missing-try-catch" ||
+          primaryPostcondition.id === "trpc-query-missing-try-catch")
+      ) {
+        if (this.isInsideCallbackWrapperShell(detection.node, sourceFile)) {
+          continue;
         }
       }
 
@@ -3444,6 +3480,279 @@ export class ContractMatcher {
         }
         return false;
       }
+      cur = cur.parent;
+    }
+    return false;
+  }
+
+  /**
+   * Built-in callback-wrapper-shell pattern list — wrapper-function / wrapper-class
+   * names whose callback argument is responsible for catching errors at the wrapper
+   * level, not inside the callback body.
+   *
+   * Evidence: concern-20260515-section8-promisecall-promisestate-wrapper-shells.
+   */
+  private static readonly CALLBACK_WRAPPER_NAMES: ReadonlySet<string> = new Set([
+    // blinko PromiseState helpers (rank-11)
+    "PromiseCall",
+    "PromiseState",
+    "PromisePageState",
+    // common safe-async / try-catch utility names
+    "safeAsync",
+    "tryAwait",
+    "tryCatch",
+    "withErrorBoundary",
+    "withTryCatch",
+    "withCatch",
+    // mobx async helpers
+    "flow",
+  ]);
+
+  /**
+   * Regex matching common safe-/try-/with-/wrap-prefixed async wrapper names.
+   * Conservative — must end with one of the wrapper suffixes so we don't catch
+   * arbitrary identifiers like `safeUser` or `withRouter`.
+   */
+  private static readonly CALLBACK_WRAPPER_NAME_REGEX =
+    /^(safe|try|with|wrap)[A-Z][a-zA-Z0-9]*(Async|Await|ErrorBoundary|Call|Catch)$/;
+
+  /**
+   * Property names commonly used to pass a callback into a wrapper class via an
+   * object literal: e.g., `new PromiseState({ function: async () => ... })`.
+   */
+  private static readonly CALLBACK_WRAPPER_PROPERTY_NAMES: ReadonlySet<string> =
+    new Set(["function", "init", "callback", "fn"]);
+
+  /**
+   * Collects the set of identifier names imported at the top of the file
+   * (default, named, namespace, side-effect-imported). Used to gate the
+   * callback-wrapper suppression on the imported-at-file-level constraint
+   * so a locally-declared function named `PromiseCall` does NOT match.
+   */
+  private collectFileImportedIdentifiers(
+    sourceFile: ts.SourceFile,
+  ): Set<string> {
+    const names = new Set<string>();
+    for (const stmt of sourceFile.statements) {
+      if (!ts.isImportDeclaration(stmt) || !stmt.importClause) continue;
+      const clause = stmt.importClause;
+      // Default import: `import Foo from 'x'`
+      if (clause.name) {
+        names.add(clause.name.text);
+      }
+      if (clause.namedBindings) {
+        if (ts.isNamespaceImport(clause.namedBindings)) {
+          // `import * as Foo from 'x'`
+          names.add(clause.namedBindings.name.text);
+        } else if (ts.isNamedImports(clause.namedBindings)) {
+          // `import { Foo, Bar as Baz } from 'x'`
+          for (const el of clause.namedBindings.elements) {
+            names.add(el.name.text);
+          }
+        }
+      }
+    }
+    return names;
+  }
+
+  /**
+   * Returns the extra `callback_wrappers: [<name>]` list configured in the
+   * project's `.nark/suppress.yaml` (cached after first call).
+   */
+  private getExtraCallbackWrappers(): string[] {
+    if (this.extraCallbackWrappers !== null) return this.extraCallbackWrappers;
+    try {
+      const cfg = loadWrapperConfigSync(this.options.projectRoot);
+      this.extraCallbackWrappers = cfg.callback_wrappers ?? [];
+    } catch {
+      this.extraCallbackWrappers = [];
+    }
+    return this.extraCallbackWrappers;
+  }
+
+  /**
+   * Returns true when `name` is recognised as a callback-wrapper shell name —
+   * matched against the built-in set, the safe/try/with/wrap-prefixed regex,
+   * or the project-level `.nark/suppress.yaml` `callback_wrappers` extension.
+   */
+  private isWrapperShellName(name: string): boolean {
+    if (ContractMatcher.CALLBACK_WRAPPER_NAMES.has(name)) return true;
+    if (ContractMatcher.CALLBACK_WRAPPER_NAME_REGEX.test(name)) return true;
+    for (const extra of this.getExtraCallbackWrappers()) {
+      if (extra === name) return true;
+    }
+    return false;
+  }
+
+  /**
+   * Extracts the wrapper-shell name from a Call/NewExpression callee. Handles
+   * three callee shapes:
+   *   - Identifier:                 PromiseCall(...)
+   *   - PropertyAccessExpression:   Result.try(...)    → returns "Result.try" first,
+   *                                                       and falls back to "try"
+   *   - NewExpression Identifier:   new PromiseState(...)
+   *
+   * For PropertyAccess, both the dotted form (`Result.tryAsync`) and the bare
+   * method name (`tryAsync`) are checked so mobx `flow.bind` etc. match too.
+   */
+  private wrapperShellNamesFromCallee(callee: ts.Expression): string[] {
+    if (ts.isIdentifier(callee)) {
+      return [callee.text];
+    }
+    if (ts.isPropertyAccessExpression(callee)) {
+      const root = callee.expression;
+      const prop = callee.name.text;
+      const rootName = ts.isIdentifier(root) ? root.text : "";
+      if (rootName) {
+        return [`${rootName}.${prop}`, prop, rootName];
+      }
+      return [prop];
+    }
+    return [];
+  }
+
+  /**
+   * Checks if a violation node is inside an async lambda that is supplied as
+   * the callback of a known callback-wrapper-shell — i.e., the try-catch lives
+   * one stack frame up in the wrapper class/function.
+   *
+   * Two recognized shapes:
+   *   (a) Arrow/function expression passed as a direct argument to a
+   *       CallExpression / NewExpression whose callee is a file-level imported
+   *       Identifier matching the wrapper-name pattern list.
+   *   (b) Arrow/function expression that is the value of a `function:` /
+   *       `init:` / `callback:` / `fn:` property of an object literal that is
+   *       itself an argument to such a Call/NewExpression.
+   *
+   * Suppression is gated on the imported-at-file-level constraint: a locally-
+   * declared function named `PromiseCall` that is NOT imported (or extended via
+   * .nark/suppress.yaml) does NOT match — prevents name-collision over-suppression.
+   *
+   * Evidence: concern-20260515-section8-promisecall-promisestate-wrapper-shells (~416
+   *           FPs across blinko, rybbit, gpt4free-ts).
+   *           concern-20260515-section8-trpc-query-wrapper-shells (~100 FPs).
+   *           Structurally analogous to isInsideReactRouterLoaderCallback().
+   */
+  private isInsideCallbackWrapperShell(
+    node: ts.Node,
+    sourceFile: ts.SourceFile,
+  ): boolean {
+    const importedNames = this.collectFileImportedIdentifiers(sourceFile);
+    // Project-level extension via .nark/suppress.yaml — the user explicitly opted
+    // these names in regardless of whether they appear as imports.
+    const extra = this.getExtraCallbackWrappers();
+
+    // Helper: given a Call/NewExpression's callee, check the wrapper-shell name
+    // list and the import-gating constraint. Returns true if this is a known
+    // wrapper-shell call we should suppress through.
+    const matchesWrapperShellCallee = (callee: ts.Expression): boolean => {
+      const candidates = this.wrapperShellNamesFromCallee(callee);
+      for (const candidate of candidates) {
+        if (this.isWrapperShellName(candidate)) {
+          if (ts.isIdentifier(callee)) {
+            if (
+              importedNames.has(callee.text) ||
+              extra.includes(callee.text)
+            ) {
+              return true;
+            }
+            // Locally-declared shadow — does not match.
+          } else {
+            // PropertyAccess (e.g., Result.try) — match by dotted name.
+            return true;
+          }
+        }
+      }
+      return false;
+    };
+
+    // Shape (c): the violation node is itself a direct argument (or transitive
+    // argument inside a property access on the result) of a wrapper-shell call —
+    // e.g., `PromiseCall(trpc.x.query(...))`. No intermediate lambda. The
+    // wrapper's body wraps the await/then in try-catch.
+    {
+      let p: ts.Node | undefined = node.parent;
+      while (p && !ts.isSourceFile(p)) {
+        if (ts.isCallExpression(p) || ts.isNewExpression(p)) {
+          if (matchesWrapperShellCallee(p.expression)) {
+            return true;
+          }
+          // Don't escape past unrelated outer calls.
+          break;
+        }
+        // Stop at function/lambda boundaries — Shape (a)/(b) below handle those.
+        if (
+          ts.isArrowFunction(p) ||
+          ts.isFunctionExpression(p) ||
+          ts.isFunctionDeclaration(p) ||
+          ts.isMethodDeclaration(p) ||
+          ts.isConstructorDeclaration(p)
+        ) {
+          break;
+        }
+        p = p.parent;
+      }
+    }
+
+    let cur: ts.Node | undefined = node;
+    while (cur) {
+      if (ts.isSourceFile(cur)) return false;
+
+      // Walk up until we hit an enclosing arrow/function expression — that's
+      // the callback whose surrounding wrapper we want to inspect.
+      if (ts.isArrowFunction(cur) || ts.isFunctionExpression(cur)) {
+        const callback = cur;
+
+        // Shape (a): callback is a direct argument to a Call/NewExpression.
+        if (
+          callback.parent &&
+          (ts.isCallExpression(callback.parent) ||
+            ts.isNewExpression(callback.parent))
+        ) {
+          if (matchesWrapperShellCallee(callback.parent.expression)) {
+            return true;
+          }
+        }
+
+        // Shape (b): callback is the value of a `function:` / `init:` /
+        // `callback:` / `fn:` property in an object literal that is itself an
+        // argument to a Call/NewExpression.
+        if (
+          callback.parent &&
+          ts.isPropertyAssignment(callback.parent) &&
+          ts.isIdentifier(callback.parent.name) &&
+          ContractMatcher.CALLBACK_WRAPPER_PROPERTY_NAMES.has(
+            callback.parent.name.text,
+          ) &&
+          callback.parent.parent &&
+          ts.isObjectLiteralExpression(callback.parent.parent) &&
+          callback.parent.parent.parent &&
+          (ts.isCallExpression(callback.parent.parent.parent) ||
+            ts.isNewExpression(callback.parent.parent.parent))
+        ) {
+          if (
+            matchesWrapperShellCallee(
+              callback.parent.parent.parent.expression,
+            )
+          ) {
+            return true;
+          }
+        }
+
+        // Found the enclosing callback but it doesn't match a wrapper shell —
+        // stop here so we don't escape to an outer function.
+        return false;
+      }
+
+      // Don't escape across function-declaration / method-declaration boundaries.
+      if (
+        ts.isFunctionDeclaration(cur) ||
+        ts.isMethodDeclaration(cur) ||
+        ts.isConstructorDeclaration(cur)
+      ) {
+        return false;
+      }
+
       cur = cur.parent;
     }
     return false;
