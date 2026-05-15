@@ -50723,5 +50723,49 @@
     "suggested_resolution": "After verifying the relevant postcondition IDs in @tanstack/react-router/contract.yaml, add a new suppression block: when @tanstack/react-router is the package AND the violation is inside an async lambda passed as the `loader:` property of a `createRoute(...)` / `createFileRoute(...)` / `createRootRoute(...)` call, suppress (router's `errorComponent` covers the throw). Apply the same project-level signal from gap-1 as additional confidence (loader errors that have explicit project-wide error boundaries are extra-safe). This is a §3 generalization, not a new §3 work item.",
     "resolution": "Added two layers of @tanstack/react-router suppression for loader-error-unhandled (contract-matcher.ts ~line 793). Layer 1: isInsideReactRouterLoaderCallback() walks up the AST to detect when the violation is inside an async lambda passed as the loader: property of createRoute() / createFileRoute() / createRootRoute() / createLazyFileRoute() / createLazyRoute() / createRootRouteWithContext() — TanStack Router catches these exceptions and routes to errorComponent. Layer 2: projectHasReactQueryGlobalErrorHandler() also applies as additional confidence (many TanStack projects share error wirings between react-query and react-router code). Estimated FP-elimination: ~34 across vendure rank-24 (cited in scanner-upgrades-todo.md line 46). Postcondition ID verified against @tanstack/react-router/contract.yaml line 131 — uses loader-error-unhandled emitted by useLoaderData hook with loader-callback detection upstream.",
     "resolved_at": "2026-05-15"
+  },
+  {
+    "id": "concern-20260515-section8-promisecall-promisestate-wrapper-shells",
+    "status": "pending",
+    "category": "false-positive",
+    "package": "@trpc/client",
+    "postcondition": "trpc-mutate-missing-try-catch",
+    "fp_reason": "Scanner walks the immediate body of a user-supplied callback and flags inner await api.x.mutate(...) / await api.x.query() as missing try-catch, but the try-catch lives in the wrapper class/function one stack frame up. Canonical evidence: rank-11 blinko (work-packages/25-pr-initiative/prs/11-POST-PR-RETRO.md, walkthrough work-packages/25-pr-initiative/prs/11-pr-blinko.md:248-270). Three wrapper shapes, all defined in `app/src/store/standard/PromiseState.ts` (verified by reading the file): (1) `PromiseCall(<promise-expr>)` — top-level helper, exported line 21-35; body is `try { ... await (new PromiseState({...})).call() ... } catch (error) { ToastPlugin.error(error.message) }`. (2) `new PromiseState({ function: async (...) => { await api.x.query() } })` — class, line 37+. The `.call()` method (line 114-150) wraps `await this.function.apply(this.context, args)` in try/catch and routes errors to toast + signout-on-Unauthorized. (3) `new PromisePageState({ function: async (...) => {...} })` — paginated variant, same shape, line 155-287. FP rate in blinko: ~170 of 179 @trpc/client violations (~95%). Same pattern shape generalises: rank-16 rybbit (fastify route closures, 66 FPs), rank-20 gpt4free-ts (BrowserPool.initOne with init-method callbacks, 180 FPs). Existing scanner has no §8-shape recogniser. Closest precedent is e5fb80c's isInsideReactRouterLoaderCallback() (today's §3 ship) which walks up the AST to detect lambdas passed as loader: config — §8 needs the same shape generalised to a pattern list of wrapper names.",
+    "violation_count": 416,
+    "source_retros": [
+      "work-packages/25-pr-initiative/prs/11-POST-PR-RETRO.md",
+      "work-packages/25-pr-initiative/prs/11-pr-blinko.md",
+      "work-packages/25-pr-initiative/prs/16-pr-rybbit.md",
+      "work-packages/25-pr-initiative/prs/20-pr-gpt4free-ts.md"
+    ],
+    "suggested_resolution": "Implement Level 2 (simple-name-import heuristic) per scanner-upgrades-todo.md line 172. Add isInsideCallbackWrapperShell() to ContractMatcher, structurally analogous to isInsideReactRouterLoaderCallback() shipped today as part of e5fb80c. Walks up from the violation node to find the enclosing arrow/function expression, then checks whether that lambda is (a) an argument to a CallExpression / NewExpression whose callee is a top-of-file imported Identifier matching the wrapper-name pattern list, OR (b) the value of a `function:` / `init:` / `callback:` / `fn:` property of an object literal that is itself an argument to such a Call/NewExpression. Pattern list: PromiseCall, PromiseState, PromisePageState, safeAsync, tryAwait, tryCatch, Result.try, Result.tryAsync, withErrorBoundary, withTryCatch, withCatch, plus regex (safe|try|with|wrap).*(Async|Await|ErrorBoundary|Call), plus mobx flow / flow.bind. Gate the suppression on the imported-at-file-level constraint to prevent name-collision over-suppression. Apply project-level extension: support `callback_wrappers: [<name>]` in .nark/suppress.yaml to extend the pattern list per-project — Level 1 free side-product. Apply suppression to trpc-mutate-missing-try-catch, trpc-query-missing-try-catch. Ground-truth fixtures: add to nark-corpus/packages/@trpc/client/fixtures/ground-truth.ts — three SHOULD_NOT_FIRE cases (PromiseCall wrap, new PromiseState({ function: }) wrap, safeAsync lambda wrap) plus one SHOULD_FIRE name-collision defense case. Add suppression telemetry to track which wrapper names fire most across corpus — informs Level 3 promotion. Defer Level 3 to a follow-up upgrade gated on whether Level-2 leaves residual FPs >100 in corpus telemetry."
+  },
+  {
+    "id": "concern-20260515-section8-trpc-query-wrapper-shells",
+    "status": "pending",
+    "category": "false-positive",
+    "package": "@trpc/client",
+    "postcondition": "trpc-query-missing-try-catch",
+    "fp_reason": "Same FP class as concern-20260515-section8-promisecall-promisestate-wrapper-shells but targeting the .query() postcondition rather than .mutate(). In rank-11 blinko, the wrapper shells (PromiseCall, PromiseState, PromisePageState) cover both vanilla-client .query() AND .mutate() — the wrapper is method-agnostic. Concrete query-side FPs in blinko: every `function: async () => api.x.list.query(...)` inside `blinkoList = new PromisePageState({...})`, `noteOnlyList = new PromisePageState({...})`, etc. The single suppression heuristic fixes both postconditions; this concern is split out so that the resolution can be tracked separately and the suppression telemetry attributes correctly.",
+    "violation_count": 100,
+    "source_retros": [
+      "work-packages/25-pr-initiative/prs/11-POST-PR-RETRO.md",
+      "work-packages/25-pr-initiative/prs/11-pr-blinko.md"
+    ],
+    "suggested_resolution": "Same as concern-20260515-section8-promisecall-promisestate-wrapper-shells — both postconditions share the same suppression heuristic. The suppression block should gate on `(detection.packageName === '@trpc/client' && (primaryPostcondition.id === 'trpc-query-missing-try-catch' || primaryPostcondition.id === 'trpc-mutate-missing-try-catch')) && isInsideCallbackWrapperShell(detection.node)`."
+  },
+  {
+    "id": "concern-20260515-section8-deferred-class-method-callback-recognizer",
+    "status": "deferred",
+    "category": "false-positive",
+    "package": "puppeteer-core",
+    "postcondition": "page-action-missing-try-catch",
+    "fp_reason": "Same §8 shape as the canonical blinko PromiseCall/PromiseState pattern but with the wrapper shape that Level-2 (simple-name-import heuristic) misses: the inner work is a *method* on a class instance, not a *lambda* passed to a wrapper construction. Evidence: rank-20 gpt4free-ts (20-pr-gpt4free-ts.md:330-352). Pattern: a per-provider `init(id, browser)` method gets registered with `new BrowserPool(size, { init: this.init.bind(this), ... })`. The pool's outer `initOne()` method wraps `await this.user.init(info.id, browser)` in try/catch. Scanner sees the inner `init` method body in isolation and flags every `await page.click(...)`, `await page.waitForSelector(...)` as missing try/catch. FP count: ~180 of 205 puppeteer violations (~88%) in gpt4free-ts alone. Level-2 misses this because the inner method is not an arrow lambda passed inline to a wrapper, it's a method on the consumer class. Requires Level-3 (multi-file class-callback recognizer).",
+    "violation_count": 180,
+    "deferred_reason": "Gated on Level-2 telemetry from concern-20260515-section8-promisecall-promisestate-wrapper-shells. Promote to pending if residual FPs in this class-method-callback shape exceed 100 in corpus telemetry after 30 days OR a second confirming retro surfaces. Per-project escape hatch (.nark/suppress.yaml callback_wrappers) ships as Level-1 alongside Level-2 — gpt4free-ts can opt in immediately by listing BrowserPool.",
+    "source_retros": [
+      "work-packages/25-pr-initiative/prs/20-pr-gpt4free-ts.md"
+    ],
+    "suggested_resolution": "Defer to Level 3 follow-up. Revisit per deferred_reason criteria."
   }
 ]
