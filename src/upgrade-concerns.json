@@ -50679,7 +50679,7 @@
   },
   {
     "id": "concern-20260515-section3-gap-1-querycache-onerror",
-    "status": "pending",
+    "status": "implemented",
     "category": "false-positive",
     "package": "@tanstack/react-query",
     "postcondition": "query-error-unhandled",
@@ -50690,11 +50690,13 @@
       "work-packages/25-pr-initiative/prs/08-POST-PR-RETRO.md",
       "work-packages/25-pr-initiative/prs/12-POST-PR-RETRO.md"
     ],
-    "suggested_resolution": "Add a project-level signal to the @tanstack/react-query suppression block. Before the per-file isError/onError check at line 909, scan project files (cached, single-pass at scanner init) for: (a) `new QueryCache({` with `onError:` callback within the next 200 chars, (b) any file matching `**/ErrorBoundary.{tsx,ts}` or `**/error-boundary.{tsx,ts}`, (c) any file matching `**/{global,app,root}_error_handler.{ts,tsx}`. If any signal fires, suppress query-error-unhandled / infinite-query-error-unhandled / mutation-error-unhandled across the whole project. Implementation: cache the result on the ContractMatcher instance keyed by tsconfig path; populate on first @tanstack/react-query detection. Avoids per-violation file-scan cost."
+    "suggested_resolution": "Add a project-level signal to the @tanstack/react-query suppression block. Before the per-file isError/onError check at line 909, scan project files (cached, single-pass at scanner init) for: (a) `new QueryCache({` with `onError:` callback within the next 200 chars, (b) any file matching `**/ErrorBoundary.{tsx,ts}` or `**/error-boundary.{tsx,ts}`, (c) any file matching `**/{global,app,root}_error_handler.{ts,tsx}`. If any signal fires, suppress query-error-unhandled / infinite-query-error-unhandled / mutation-error-unhandled across the whole project. Implementation: cache the result on the ContractMatcher instance keyed by tsconfig path; populate on first @tanstack/react-query detection. Avoids per-violation file-scan cost.",
+    "resolution": "Added projectHasReactQueryGlobalErrorHandler() to ContractMatcher (contract-matcher.ts ~line 3216). Scans the TypeScript program once (cached) for: (a) new QueryCache({ onError: ... }) or new MutationCache({ onError: ... }) within 400 chars, (b) ErrorBoundary.{tsx,ts} / error-boundary.{tsx,ts} files anywhere in the project, (c) {global,app,root}-error-handler.{tsx,ts} files, (d) setLogger({ error: ... }). When any signal fires, suppresses query-error-unhandled / infinite-query-error-unhandled / mutation-error-unhandled across the whole project. Mirrors the existing projectHasClerkProvider() pattern. Estimated FP-elimination: ~564 across rank-12 openstatus (269), rank-06 chatbox (26), rank-08 sealos (~269 in useQuery without local destructure). Ground-truth: 13/13 @tanstack ground-truth tests pass (isolated fixture has no project-level wiring, so existing pass/fail expectations preserved). Full suite: 2768 passed / 30 failed — same baseline.",
+    "resolved_at": "2026-05-15"
   },
   {
     "id": "concern-20260515-section3-gap-2-fetchquery-postconditions",
-    "status": "pending",
+    "status": "implemented",
     "category": "false-positive",
     "package": "@tanstack/react-query",
     "postcondition": "fetchquery-throws-on-error",
@@ -50703,11 +50705,13 @@
     "source_retros": [
       "work-packages/25-pr-initiative/prs/12-POST-PR-RETRO.md"
     ],
-    "suggested_resolution": "Expand the postcondition set at line 890-892 to also include `fetchquery-throws-on-error` and `fetchquery-ssr-uncaught-error`. Apply the gap-1 project-level signal to these postconditions too (these all share the same project-level QueryCache(onError) suppression logic — fetchQuery sites also benefit from a project-wide global handler). Keep the strict severity for fetchquery-ssr-uncaught-error if the project lacks the signal — that's a genuine SSR page-render-fails risk."
+    "suggested_resolution": "Expand the postcondition set at line 890-892 to also include `fetchquery-throws-on-error` and `fetchquery-ssr-uncaught-error`. Apply the gap-1 project-level signal to these postconditions too (these all share the same project-level QueryCache(onError) suppression logic — fetchQuery sites also benefit from a project-wide global handler). Keep the strict severity for fetchquery-ssr-uncaught-error if the project lacks the signal — that's a genuine SSR page-render-fails risk.",
+    "resolution": "Expanded react-query suppression gate to include fetchquery-throws-on-error and fetchquery-ssr-uncaught-error (contract-matcher.ts ~line 893). Per-file isError/onError destructure check now gated to ONLY query-error-unhandled and infinite-query-error-unhandled (fetchQuery sites run outside component render so per-file destructure check does not apply). Project-level signal from gap-1 (projectHasReactQueryGlobalErrorHandler) applies to all five gated postconditions including the two fetchquery ones. Suppresses the leaf-level rank-12 openstatus FP (queryClient.fetchQuery in auth/providers.ts) and analogous patterns going forward.",
+    "resolved_at": "2026-05-15"
   },
   {
     "id": "concern-20260515-section3-gap-3-router-loader-callbacks",
-    "status": "pending",
+    "status": "implemented",
     "category": "false-positive",
     "package": "@tanstack/react-router",
     "postcondition": "loader-async-error-unhandled",
@@ -50716,6 +50720,8 @@
     "source_retros": [
       "work-packages/25-pr-initiative/prs/24-POST-PR-RETRO.md"
     ],
-    "suggested_resolution": "After verifying the relevant postcondition IDs in @tanstack/react-router/contract.yaml, add a new suppression block: when @tanstack/react-router is the package AND the violation is inside an async lambda passed as the `loader:` property of a `createRoute(...)` / `createFileRoute(...)` / `createRootRoute(...)` call, suppress (router's `errorComponent` covers the throw). Apply the same project-level signal from gap-1 as additional confidence (loader errors that have explicit project-wide error boundaries are extra-safe). This is a §3 generalization, not a new §3 work item."
+    "suggested_resolution": "After verifying the relevant postcondition IDs in @tanstack/react-router/contract.yaml, add a new suppression block: when @tanstack/react-router is the package AND the violation is inside an async lambda passed as the `loader:` property of a `createRoute(...)` / `createFileRoute(...)` / `createRootRoute(...)` call, suppress (router's `errorComponent` covers the throw). Apply the same project-level signal from gap-1 as additional confidence (loader errors that have explicit project-wide error boundaries are extra-safe). This is a §3 generalization, not a new §3 work item.",
+    "resolution": "Added two layers of @tanstack/react-router suppression for loader-error-unhandled (contract-matcher.ts ~line 793). Layer 1: isInsideReactRouterLoaderCallback() walks up the AST to detect when the violation is inside an async lambda passed as the loader: property of createRoute() / createFileRoute() / createRootRoute() / createLazyFileRoute() / createLazyRoute() / createRootRouteWithContext() — TanStack Router catches these exceptions and routes to errorComponent. Layer 2: projectHasReactQueryGlobalErrorHandler() also applies as additional confidence (many TanStack projects share error wirings between react-query and react-router code). Estimated FP-elimination: ~34 across vendure rank-24 (cited in scanner-upgrades-todo.md line 46). Postcondition ID verified against @tanstack/react-router/contract.yaml line 131 — uses loader-error-unhandled emitted by useLoaderData hook with loader-callback detection upstream.",
+    "resolved_at": "2026-05-15"
   }
 ]

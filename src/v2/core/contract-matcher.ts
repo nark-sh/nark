@@ -38,6 +38,8 @@ export class ContractMatcher {
   private clerkMiddlewareConfigured: boolean | null = null;
   /** Cached result of ClerkProvider project-wide presence check (null = not yet checked) */
   private clerkProviderPresent: boolean | null = null;
+  /** Cached result of project-wide React Query global error handler check (null = not yet checked) */
+  private reactQueryGlobalErrorHandler: boolean | null = null;
   /** Tracks real call site evaluations per package (pass + fail) */
   private _callSitesByPackage: Map<string, number> = new Map();
   constructor(
@@ -788,6 +790,26 @@ export class ContractMatcher {
         if (tanStackTypedPostconditions.has(primaryPostcondition.id)) {
           continue;
         }
+
+        // §3 generalization: loader-error-unhandled fires on async lambdas inside
+        // `createRoute({ loader: async () => ... })` / `createFileRoute(...)` route
+        // configs. TanStack Router's route config catches loader exceptions and routes
+        // to the `errorComponent` — framework owns the catch, same shape as react-query
+        // useQuery being covered by a top-level error boundary. The project-level signal
+        // (QueryCache(onError) / ErrorBoundary file / central error handler module) is
+        // applied as additional confidence — many TanStack projects share these wirings
+        // between React Query and React Router code.
+        //
+        // Evidence: concern-20260515-section3-gap-3-router-loader-callbacks (~34 FPs at
+        //   vendure rank-24; scanner-upgrades-todo.md line 46).
+        if (primaryPostcondition.id === "loader-error-unhandled") {
+          if (this.isInsideReactRouterLoaderCallback(detection.node)) {
+            continue;
+          }
+          if (this.projectHasReactQueryGlobalErrorHandler()) {
+            continue;
+          }
+        }
       }
 
       // stripe: retry/backoff wrappers satisfy Stripe error postconditions.
@@ -874,22 +896,31 @@ export class ContractMatcher {
         continue;
       }
 
-      // @tanstack/react-query: error postconditions fire as FPs in two patterns:
+      // @tanstack/react-query: error postconditions fire as FPs in three patterns:
       //   1. Custom hook files (useXxx.ts) — wrappers that return {data, error, isError};
       //      error handling is the caller's responsibility.
       //   2. Component files where the file destructures/uses .error or isError from the
       //      hook result — React Query's idiomatic error-state pattern (not try-catch).
+      //   3. Projects with a global QueryCache/MutationCache onError handler, top-level
+      //      ErrorBoundary, or central error handler module — wiring is cross-file so the
+      //      per-file isError/onError check above does not catch it.
       //
       // Evidence: concern-2026-04-02-tanstack-react-query-query-error-unhandled-5 (18 FPs hooks),
       //           concern-2026-04-02-tanstack-react-query-infinite-query-error-unhandled-11 (3 FPs),
       //           concern-2026-04-02-tanstack-react-query-mutation-error-unhandled-18 (2 FPs),
       //           concern-2026-04-02-dashboard-tanstack-react-query-1 (25 FPs in component files:
       //           app/access/page.tsx, components/Agents/AgentCreator.tsx, etc.).
+      //           concern-20260515-section3-gap-1-querycache-onerror (~564 FPs estimate;
+      //           rank-12 openstatus 269/269 FPs, rank-06 chatbox 26/26 FPs, rank-08 sealos).
+      //           concern-20260515-section3-gap-2-fetchquery-postconditions (1 retro;
+      //           queryClient.fetchQuery in auth/providers.ts at rank-12 openstatus).
       if (
         detection.packageName === "@tanstack/react-query" &&
         (primaryPostcondition.id === "query-error-unhandled" ||
           primaryPostcondition.id === "infinite-query-error-unhandled" ||
-          primaryPostcondition.id === "mutation-error-unhandled")
+          primaryPostcondition.id === "mutation-error-unhandled" ||
+          primaryPostcondition.id === "fetchquery-throws-on-error" ||
+          primaryPostcondition.id === "fetchquery-ssr-uncaught-error")
       ) {
         const fileText = sourceFile.getFullText();
         // Custom hook files delegate error handling to callers
@@ -902,16 +933,27 @@ export class ContractMatcher {
         // Component files using React Query's error state pattern (isError, error property).
         // Only applies to query/infinite-query postconditions (useQuery error state API).
         // mutation-error-unhandled FPs are covered by the hook-file check above (useXxx pattern).
+        // fetchquery-* runs OUTSIDE component render (e.g. SSR loaders, auth callbacks) —
+        // the .error / isError per-file pattern doesn't apply to those call sites.
         // Note: we avoid ".error" (matches console.error) and "error)" (matches error handling).
         // Only match unambiguous RQ error state destructuring patterns.
+        const isComponentFilePattern =
+          primaryPostcondition.id === "query-error-unhandled" ||
+          primaryPostcondition.id === "infinite-query-error-unhandled";
         if (
-          primaryPostcondition.id !== "mutation-error-unhandled" &&
+          isComponentFilePattern &&
           (fileText.includes("isError") ||
             fileText.includes("{ error") ||
             fileText.includes("error }") ||
             fileText.includes("onError"))
         ) {
           continue; // Error handled via React Query state API, not try-catch
+        }
+        // Project-level signal — applies to ALL five gated postconditions.
+        // A global QueryCache(onError) / MutationCache(onError) / top-level ErrorBoundary /
+        // central error handler module satisfies the postcondition cross-file.
+        if (this.projectHasReactQueryGlobalErrorHandler()) {
+          continue;
         }
       }
 
@@ -3208,6 +3250,202 @@ export class ContractMatcher {
     }
 
     this.clerkProviderPresent = false;
+    return false;
+  }
+
+  /**
+   * Checks if the project wires a global error handler for React Query.
+   *
+   * Many React Query projects ship a global onError handler via:
+   *   - new QueryCache({ onError: (error) => toast(...) })
+   *   - new MutationCache({ onError: ... })
+   *   - A top-level <ErrorBoundary> wrapping the app
+   *   - A central error handler module (global-error-handler, app-error-handler, etc.)
+   *
+   * When ANY of these wirings exist, component files using useQuery / useMutation /
+   * queryClient.fetchQuery typically rely on the global handler instead of repeating
+   * isError / onError destructuring at every call site. The existing per-file heuristic
+   * (file-text contains "isError" / "{ error" / "error }" / "onError") does not catch
+   * cross-file wiring and produces false positives.
+   *
+   * Evidence:
+   *   concern-20260515-section3-gap-1-querycache-onerror (~564 FPs estimate; rank-12
+   *     openstatus 269/269 FPs, rank-06 chatbox 26/26 FPs, rank-08 sealos 299 useQuery FPs).
+   *   concern-20260515-section3-gap-2-fetchquery-postconditions (1 retro instance;
+   *     queryClient.fetchQuery in auth/providers.ts at rank-12 openstatus).
+   *
+   * Result is cached after first call since it's constant for a given project scan.
+   */
+  private projectHasReactQueryGlobalErrorHandler(): boolean {
+    if (this.reactQueryGlobalErrorHandler !== null) {
+      return this.reactQueryGlobalErrorHandler;
+    }
+
+    // Patterns that count as a global error wiring signal.
+    // Each is a quick text match — we trade precision for speed since we only need ONE hit.
+    const isErrorHandlerFile = (fileName: string): boolean => {
+      const lower = fileName.toLowerCase();
+      // ErrorBoundary.tsx, error-boundary.tsx, app-error-boundary.tsx, etc.
+      if (/(^|[\\/])error[-_]?boundary\.[jt]sx?$/.test(lower)) return true;
+      // global-error-handler.ts, app-error-handler.tsx, root_error_handler.ts, etc.
+      if (
+        /(^|[\\/])(global|app|root)[-_]error[-_]?handler\.[jt]sx?$/.test(lower)
+      ) {
+        return true;
+      }
+      return false;
+    };
+
+    const textHasGlobalSignal = (text: string): boolean => {
+      // QueryCache or MutationCache with onError callback nearby.
+      // Use a windowed substring scan to avoid runaway regex backtracking on large files.
+      const cacheCtorIdx = text.search(/new\s+(?:Query|Mutation)Cache\s*\(/);
+      if (cacheCtorIdx !== -1) {
+        const window = text.slice(cacheCtorIdx, cacheCtorIdx + 400);
+        if (/onError\s*:/.test(window)) return true;
+      }
+      // setLogger({ error: ... }) — pre-v5 global logger override
+      if (text.includes("setLogger(") && /error\s*:/.test(text)) {
+        // Only treat as a signal when the snippet is tight (limits FP risk).
+        const setLoggerIdx = text.indexOf("setLogger(");
+        const window = text.slice(setLoggerIdx, setLoggerIdx + 200);
+        if (/error\s*:/.test(window)) return true;
+      }
+      return false;
+    };
+
+    // Strategy 1: Use the TypeScript program when available (production path).
+    if (this.options.program) {
+      for (const sf of this.options.program.getSourceFiles()) {
+        if (sf.isDeclarationFile) continue;
+        if (sf.fileName.includes("node_modules")) continue;
+
+        if (isErrorHandlerFile(sf.fileName)) {
+          this.reactQueryGlobalErrorHandler = true;
+          return true;
+        }
+
+        const text = sf.getFullText();
+        if (textHasGlobalSignal(text)) {
+          this.reactQueryGlobalErrorHandler = true;
+          return true;
+        }
+      }
+      this.reactQueryGlobalErrorHandler = false;
+      return false;
+    }
+
+    // Strategy 2: Probe common locations via ts.sys.readFile.
+    const probeFiles = [
+      "lib/query-client.ts",
+      "lib/query-client.tsx",
+      "src/lib/query-client.ts",
+      "src/lib/query-client.tsx",
+      "providers/QueryClientProvider.tsx",
+      "src/providers/QueryClientProvider.tsx",
+      "app/providers.tsx",
+      "src/app/providers.tsx",
+      "components/ErrorBoundary.tsx",
+      "src/components/ErrorBoundary.tsx",
+      "app/error.tsx",
+      "src/app/error.tsx",
+    ];
+
+    for (const loc of probeFiles) {
+      const fullPath = path.resolve(this.options.projectRoot, loc);
+      if (isErrorHandlerFile(loc)) {
+        // The presence of the file itself is a signal — check it exists.
+        let content: string | undefined;
+        try {
+          content = ts.sys.readFile(fullPath);
+        } catch {
+          // not readable — skip
+        }
+        if (content !== undefined) {
+          this.reactQueryGlobalErrorHandler = true;
+          return true;
+        }
+      }
+      let content: string | undefined;
+      try {
+        content = ts.sys.readFile(fullPath);
+      } catch {
+        // not readable — skip
+      }
+      if (content && textHasGlobalSignal(content)) {
+        this.reactQueryGlobalErrorHandler = true;
+        return true;
+      }
+    }
+
+    this.reactQueryGlobalErrorHandler = false;
+    return false;
+  }
+
+  /**
+   * Checks if a violation node is inside an async lambda passed as the `loader:` property
+   * of a `createRoute(...)`, `createFileRoute(...)`, or `createRootRoute(...)` call.
+   *
+   * TanStack Router's route config catches loader exceptions and routes them to the
+   * `errorComponent`. So a loader callback throwing is framework-handled, not a true
+   * unhandled-error site.
+   *
+   * Evidence: concern-20260515-section3-gap-3-router-loader-callbacks (~34 FPs at vendure).
+   *           scanner-upgrades-todo.md line 46 ("Generalization to @tanstack/react-router").
+   */
+  private isInsideReactRouterLoaderCallback(node: ts.Node): boolean {
+    const ROUTE_FACTORY_NAMES = new Set([
+      "createRoute",
+      "createFileRoute",
+      "createRootRoute",
+      "createLazyFileRoute",
+      "createLazyRoute",
+      "createRootRouteWithContext",
+    ]);
+    let cur: ts.Node | undefined = node;
+    while (cur) {
+      // Stop walking when we hit the source file — no route factory found.
+      if (ts.isSourceFile(cur)) return false;
+
+      // Look for: { loader: <fn> } passed as argument to a route factory call.
+      if (
+        ts.isPropertyAssignment(cur) &&
+        ts.isIdentifier(cur.name) &&
+        cur.name.text === "loader" &&
+        (ts.isArrowFunction(cur.initializer) ||
+          ts.isFunctionExpression(cur.initializer))
+      ) {
+        // Walk up to confirm the enclosing object literal is a route-factory arg.
+        let parent: ts.Node | undefined = cur.parent;
+        while (parent && !ts.isSourceFile(parent)) {
+          if (ts.isCallExpression(parent)) {
+            const callee = parent.expression;
+            let calleeName = "";
+            if (ts.isIdentifier(callee)) {
+              calleeName = callee.text;
+            } else if (ts.isPropertyAccessExpression(callee)) {
+              calleeName = callee.name.text;
+            }
+            if (ROUTE_FACTORY_NAMES.has(calleeName)) {
+              return true;
+            }
+            // Also support: someRoute.update({ loader: ... }) and chained patterns
+            // by continuing to walk up — but stop at function boundaries below.
+          }
+          // Don't walk past a containing function/method declaration — loaders are
+          // always inline literals in a route-factory call.
+          if (
+            ts.isFunctionDeclaration(parent) ||
+            ts.isMethodDeclaration(parent)
+          ) {
+            return false;
+          }
+          parent = parent.parent;
+        }
+        return false;
+      }
+      cur = cur.parent;
+    }
     return false;
   }
 
