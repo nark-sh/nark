@@ -57,6 +57,11 @@ import { getNarkRunsDir } from "./lib/global-paths.js";
 import { getSuppressedFingerprints } from "./triage/suppressor.js";
 import { writeSarifOutput } from "./output/sarif-writer.js";
 import { loadNarkRc } from "./config/narkrc.js";
+import {
+  discoverTsconfig,
+  countProjectTsFiles,
+  emitLowCoverageWarningIfNeeded,
+} from "./tsconfig-discovery.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -820,6 +825,28 @@ async function main(options: any) {
     writeSarifOutput(violations, options.sarifOutput);
   }
 
+  // Low-coverage guardrail: warn loudly when the scan touched <5 files absolute
+  // or <10% of the project's TS files. Catches the "one-file false-positive"
+  // pattern where auto-discovery picks a narrow tsconfig (e.g. apps/e2e/) and
+  // nark reports a green 100/100 score after scanning almost nothing.
+  // Emitted on stderr so JSON/SARIF stdout consumers aren't affected.
+  // Skipped entirely when --terminal=false (machine-readable mode).
+  if (options.terminal !== false) {
+    try {
+      const projectDirForCoverage = path.dirname(path.resolve(tsconfigPath));
+      const totalTsFiles = countProjectTsFiles(projectDirForCoverage);
+      emitLowCoverageWarningIfNeeded({
+        projectDir: projectDirForCoverage,
+        pickedTsconfig: tsconfigPath,
+        filesAnalyzed: stats.filesAnalyzed,
+        totalTsFiles,
+        explicit: process.argv.includes("--tsconfig"),
+      });
+    } catch {
+      // Coverage check is best-effort — never fail the scan over it.
+    }
+  }
+
   // --- Terminal output: verbose vs compact ---
   if (verbose && options.terminal !== false) {
     // Full detailed output (previous default behavior)
@@ -1178,114 +1205,6 @@ async function main(options: any) {
   }
 
   process.exit(shouldFail ? 1 : 0);
-}
-
-/**
- * Auto-discover tsconfig.json in a project directory.
- * Searches common locations when the default path doesn't exist.
- *
- * Discovery strategy (concern-20260421-tsconfig-discovery-1):
- *   Depth 1: root-level tsconfig.json / tsconfig.build.json
- *   Depth 2 (P1 subdirs): src/, server/, frontend/, web/, client/, backend/, app/
- *   Depth 2+3 (monorepo globs): apps/*\/tsconfig.json, packages/*\/tsconfig.json,
- *              and their common sub-packages (apps/*\/packages/*\/tsconfig.json etc.)
- * This recovers 503+ monorepos where tsconfig lives at packages/*\/tsconfig.json
- * and ~300+ repos where tsconfig is in a common named subdirectory.
- */
-function discoverTsconfig(projectDir: string): string | null {
-  const candidates: string[] = [
-    path.join(projectDir, "tsconfig.json"),
-    path.join(projectDir, "tsconfig.build.json"),
-  ];
-
-  // P1: Common named subdirectory fallbacks (single-app repos that put source in a subdir)
-  // Ordered by frequency from bulk-scan data: frontend(102), web(50), server(42), src(36),
-  // app(34), client(31), backend(~20), website(45 — usually non-TS), docs(64 — usually non-TS)
-  const namedSubdirs = [
-    "src",
-    "server",
-    "frontend",
-    "web",
-    "client",
-    "backend",
-    "app",
-  ];
-  for (const subdir of namedSubdirs) {
-    const dir = path.join(projectDir, subdir);
-    if (fs.existsSync(dir)) {
-      candidates.push(path.join(dir, "tsconfig.json"));
-      candidates.push(path.join(dir, "tsconfig.build.json"));
-    }
-  }
-
-  // P0+P1: Monorepo wildcard patterns — depth 2 (apps/*, packages/*, libs/*)
-  // and depth 3 (apps/*/packages/*, packages/*/packages/*) for nested monorepos.
-  // Scanning evidence: 592 repos use packages/*, 229 use apps/*.
-  const monorepoRoots = ["apps", "packages", "libs"];
-  for (const monorepoRoot of monorepoRoots) {
-    const rootDir = path.join(projectDir, monorepoRoot);
-    if (!fs.existsSync(rootDir)) continue;
-    let depth2Entries: fs.Dirent[] = [];
-    try {
-      depth2Entries = fs.readdirSync(rootDir, { withFileTypes: true });
-    } catch {
-      // Permission errors — skip
-      continue;
-    }
-    for (const entry of depth2Entries) {
-      if (!entry.isDirectory()) continue;
-      const depth2Dir = path.join(rootDir, entry.name);
-      // Depth 2: apps/web/tsconfig.json, packages/core/tsconfig.json
-      candidates.push(path.join(depth2Dir, "tsconfig.json"));
-      candidates.push(path.join(depth2Dir, "tsconfig.build.json"));
-
-      // P1: named subdirs inside monorepo packages (e.g. apps/backend/src/tsconfig.json)
-      for (const subdir of namedSubdirs) {
-        const subDir = path.join(depth2Dir, subdir);
-        if (fs.existsSync(subDir)) {
-          candidates.push(path.join(subDir, "tsconfig.json"));
-        }
-      }
-
-      // Depth 3: nested monorepo pattern (packages/myapp/packages/server/tsconfig.json)
-      try {
-        const depth3Entries = fs.readdirSync(depth2Dir, {
-          withFileTypes: true,
-        });
-        for (const innerMonorepoDir of ["apps", "packages", "libs"]) {
-          const innerRootDir = path.join(depth2Dir, innerMonorepoDir);
-          if (!fs.existsSync(innerRootDir)) continue;
-          for (const inner of depth3Entries) {
-            if (!inner.isDirectory()) continue;
-            // Only descend if the directory name matches a known inner monorepo root
-          }
-          try {
-            const depth3DirEntries = fs.readdirSync(innerRootDir, {
-              withFileTypes: true,
-            });
-            for (const innerEntry of depth3DirEntries) {
-              if (!innerEntry.isDirectory()) continue;
-              candidates.push(
-                path.join(innerRootDir, innerEntry.name, "tsconfig.json"),
-              );
-            }
-          } catch {
-            // Permission errors — skip
-          }
-        }
-      } catch {
-        // Permission errors — skip
-      }
-    }
-  }
-
-  for (const candidate of candidates) {
-    if (fs.existsSync(candidate)) {
-      return candidate;
-    }
-  }
-
-  return null;
 }
 
 /**
