@@ -163,6 +163,17 @@ describe("tsconfig-discovery", () => {
       expect(result.warn).toBe(false);
       expect(result.reason).toBeNull();
     });
+
+    it("Test 6b: returns warn=false when totalTsFiles=7 and filesAnalyzed=4 (fixture-sized project, threshold-tuning regression for axios fixtures)", () => {
+      // Bumped exemption threshold from <=5 to <10 specifically to catch
+      // the axios fixtures case (7 TS files, 4 scanned).
+      const result = shouldWarnLowCoverage({
+        filesAnalyzed: 4,
+        totalTsFiles: 7,
+      });
+      expect(result.warn).toBe(false);
+      expect(result.reason).toBeNull();
+    });
   });
 
   describe("discoverTsconfig", () => {

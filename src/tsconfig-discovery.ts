@@ -345,8 +345,11 @@ export function countProjectTsFiles(projectDir: string): number {
  * Decide whether the loud low-coverage warning should fire.
  *
  * Thresholds:
- *   - totalTsFiles <= 5 → never warn. Tiny projects (single fixture, smoke
- *     test) genuinely have few files; warning here would be a false alarm.
+ *   - totalTsFiles < 10 → never warn. Tiny projects (single fixture, smoke
+ *     test, axios-fixtures-style smoke directories with 4-9 files) genuinely
+ *     have few files; warning here would be a false alarm. Threshold was
+ *     originally <=5 but bumped to <10 after seeing axios fixtures (7 TS
+ *     files, 4 scanned) trigger a spurious warning during regression check.
  *   - filesAnalyzed < 5 (absolute) → warn with reason 'absolute_low'.
  *     Almost always indicates a narrow tsconfig was picked.
  *   - filesAnalyzed / totalTsFiles < 0.1 → warn with reason 'ratio_low'.
@@ -356,7 +359,7 @@ export function shouldWarnLowCoverage(opts: {
   filesAnalyzed: number;
   totalTsFiles: number;
 }): { warn: boolean; reason: "absolute_low" | "ratio_low" | null } {
-  if (opts.totalTsFiles <= 5) return { warn: false, reason: null };
+  if (opts.totalTsFiles < 10) return { warn: false, reason: null };
   if (opts.filesAnalyzed < 5) return { warn: true, reason: "absolute_low" };
   if (opts.filesAnalyzed / opts.totalTsFiles < 0.1)
     return { warn: true, reason: "ratio_low" };
