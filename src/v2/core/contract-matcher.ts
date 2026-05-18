@@ -27,6 +27,31 @@ export interface ContractMatcherOptions {
 }
 
 /**
+ * §10: knex postconditions that get suppressed when the callsite is in a Model-layer
+ * file AND the project has a central errorHandler middleware. These are the per-callsite
+ * error-throw postconditions (the ones a try-catch around the call would address). Logic
+ * checks (zero-rows-not-checked), security checks (sql-injection-risk), lifecycle checks
+ * (not-called-on-shutdown), and migration postconditions are intentionally NOT gated —
+ * they remain meaningful regardless of project-level error handling.
+ */
+const SECTION_10_KNEX_GATED_POSTCONDITIONS = new Set([
+  "select-query-error",
+  "insert-constraint-violation",
+  "update-no-try-catch",
+  "delete-no-try-catch",
+  "delete-foreign-key-violation",
+  "first-no-try-catch",
+  "raw-no-try-catch",
+  "destroy-no-try-catch",
+  "batch-insert-no-try-catch",
+  "transaction-error",
+  "increment-no-try-catch",
+  "decrement-no-try-catch",
+  "transaction-provider-factory-no-try-catch",
+  "schema-create-table-no-try-catch",
+]);
+
+/**
  * Contract Matcher
  *
  * Converts detections to violations by matching against loaded contracts.
@@ -41,6 +66,8 @@ export class ContractMatcher {
   private clerkProviderPresent: boolean | null = null;
   /** Cached result of project-wide React Query global error handler check (null = not yet checked) */
   private reactQueryGlobalErrorHandler: boolean | null = null;
+  /** Cached result of project-wide central error handler middleware check (null = not yet checked) */
+  private centralErrorHandlerMiddleware: boolean | null = null;
   /** Tracks real call site evaluations per package (pass + fail) */
   private _callSitesByPackage: Map<string, number> = new Map();
   /**
@@ -844,6 +871,43 @@ export class ContractMatcher {
           primaryPostcondition.id === "trpc-query-missing-try-catch")
       ) {
         if (this.isInsideCallbackWrapperShell(detection.node, sourceFile)) {
+          continue;
+        }
+      }
+
+      // §10: knex Model-layer architectural pattern.
+      // Three-layer-architecture projects (Controller -> Service -> Model) intentionally
+      // let raw knex errors propagate from Model files to a central errorHandler
+      // middleware at the app boundary. The current scanner flags every knex callsite
+      // without a per-callsite try-catch, producing massive FPs in Model files.
+      //
+      // Gate: detection.packageName === "knex" AND the callsite is in a *Model.ts file
+      // (or under /models/ /model/) AND the project has a central errorHandler middleware.
+      // When BOTH conditions hold the project has explicitly opted into central error
+      // handling and the per-callsite postcondition has no remaining concern to surface.
+      //
+      // Scope: knex only for this ship. TypeORM Repository / Prisma model-class patterns
+      // are anticipated analogs deferred to a follow-up ship pending empirical
+      // verification on representative projects.
+      //
+      // Evidence: concern-20260518-section10-knex-model-layer-fps (rank-14 lightdash,
+      //   1,050 FPs in *Model.ts files; central errorHandler at
+      //   packages/backend/src/App.ts:736-768 and translation at errors.ts:29-51).
+      //
+      // Affected knex postconditions (per-callsite error-throw checks):
+      //   select-query-error, insert-constraint-violation, update-no-try-catch,
+      //   delete-no-try-catch, delete-foreign-key-violation, first-no-try-catch,
+      //   raw-no-try-catch, destroy-no-try-catch, batch-insert-no-try-catch,
+      //   transaction-error, increment-no-try-catch, decrement-no-try-catch,
+      //   transaction-provider-factory-no-try-catch, schema-create-table-no-try-catch
+      if (
+        detection.packageName === "knex" &&
+        SECTION_10_KNEX_GATED_POSTCONDITIONS.has(primaryPostcondition.id)
+      ) {
+        if (
+          this.isCallInModelLayerFile(sourceFile) &&
+          this.projectHasCentralErrorHandlerMiddleware()
+        ) {
           continue;
         }
       }
@@ -3415,6 +3479,150 @@ export class ContractMatcher {
     }
 
     this.reactQueryGlobalErrorHandler = false;
+    return false;
+  }
+
+  /**
+   * §10: detect a project-wide central error-handler middleware. When this returns true,
+   * AND the callsite is in a Model-layer file (see isCallInModelLayerFile), knex
+   * per-callsite error postconditions are suppressed because the architectural pattern
+   * routes errors to this middleware at the app boundary.
+   *
+   * Signals (any one is sufficient):
+   *   1. Express error-handler signature: `(err, req, res, next) =>` or
+   *      `function (err, req, res, next)` anywhere in source — Express identifies error
+   *      middleware by the 4-arg signature, so this text match is high-confidence.
+   *   2. Express `app.use(<name>)` paired with a function whose first param is `err` or
+   *      `error` — covered by signal 1 if the function is in the same file.
+   *   3. NestJS `@Catch()` decorator on a class — exception filters are NestJS's
+   *      analog to Express error middleware.
+   *   4. Fastify `setErrorHandler(` — already detectable per §11.C corpus state.
+   *
+   * Evidence: concern-20260518-section10-knex-model-layer-fps (rank-14 lightdash's central
+   *   errorHandler middleware at packages/backend/src/App.ts:736-768).
+   *
+   * Mirrors projectHasReactQueryGlobalErrorHandler structurally — same caching, same
+   * strategy split (TS program available vs probe locations).
+   */
+  private projectHasCentralErrorHandlerMiddleware(): boolean {
+    if (this.centralErrorHandlerMiddleware !== null) {
+      return this.centralErrorHandlerMiddleware;
+    }
+
+    const textHasMiddlewareSignal = (text: string): boolean => {
+      // Express error-handler signature. The 4-arg shape `(err, req, res, next)` is
+      // Express's specific identifier for error middleware. Allow `error` as a synonym
+      // for the first param and `_` / `_anything` for the fourth (common when next is
+      // unused). Tolerate TypeScript type annotations (`err: Error, req: Request, ...`)
+      // by allowing any non-comma non-paren content after each name.
+      if (
+        /\(\s*(?:err|error)(?:\s*:[^,)]*)?\s*,\s*(?:req|request)(?:\s*:[^,)]*)?\s*,\s*(?:res|response)(?:\s*:[^,)]*)?\s*,\s*(?:next|_\w*|_)(?:\s*:[^,)]*)?\s*\)\s*=>/.test(
+          text,
+        )
+      ) {
+        return true;
+      }
+      if (
+        /function\s+\w*\s*\(\s*(?:err|error)(?:\s*:[^,)]*)?\s*,\s*(?:req|request)(?:\s*:[^,)]*)?\s*,\s*(?:res|response)(?:\s*:[^,)]*)?\s*,\s*(?:next|_\w*|_)(?:\s*:[^,)]*)?\s*\)/.test(
+          text,
+        )
+      ) {
+        return true;
+      }
+      // Sentry's Express error-handler helper. Equivalent to registering an Express
+      // error middleware — see https://docs.sentry.io/platforms/javascript/guides/express/
+      if (/Sentry\.setupExpressErrorHandler\s*\(/.test(text)) {
+        return true;
+      }
+      // NestJS @Catch() decorator. The exception filter pattern.
+      if (/@Catch\s*\(/.test(text)) {
+        return true;
+      }
+      // Fastify setErrorHandler. Already a §11.C signal.
+      if (/\.setErrorHandler\s*\(/.test(text)) {
+        return true;
+      }
+      return false;
+    };
+
+    // Strategy 1: TypeScript program when available.
+    if (this.options.program) {
+      for (const sf of this.options.program.getSourceFiles()) {
+        if (sf.isDeclarationFile) continue;
+        if (sf.fileName.includes("node_modules")) continue;
+
+        const text = sf.getFullText();
+        if (textHasMiddlewareSignal(text)) {
+          this.centralErrorHandlerMiddleware = true;
+          return true;
+        }
+      }
+      this.centralErrorHandlerMiddleware = false;
+      return false;
+    }
+
+    // Strategy 2: probe common locations.
+    const probeFiles = [
+      "src/app.ts",
+      "src/App.ts",
+      "src/server.ts",
+      "src/index.ts",
+      "src/main.ts",
+      "src/middleware/errorHandler.ts",
+      "src/middleware/error-handler.ts",
+      "src/middlewares/errorHandler.ts",
+      "src/middlewares/error-handler.ts",
+      "src/errors.ts",
+      "src/error-handler.ts",
+      "src/errorHandler.ts",
+      "src/filters/all-exceptions.filter.ts",
+      "packages/backend/src/App.ts",
+      "packages/backend/src/app.ts",
+      "packages/backend/src/server.ts",
+    ];
+
+    for (const loc of probeFiles) {
+      const fullPath = path.resolve(this.options.projectRoot, loc);
+      let content: string | undefined;
+      try {
+        content = ts.sys.readFile(fullPath);
+      } catch {
+        // not readable — skip
+      }
+      if (content && textHasMiddlewareSignal(content)) {
+        this.centralErrorHandlerMiddleware = true;
+        return true;
+      }
+    }
+
+    this.centralErrorHandlerMiddleware = false;
+    return false;
+  }
+
+  /**
+   * §10: detect Model-layer file naming. A callsite is "in the Model layer" when its
+   * source file's basename matches `*Model.ts` (PascalCase Model suffix) OR the file
+   * path contains `/models/` or `/model/`.
+   *
+   * Lightdash naming convention: `src/models/ProjectModel/ProjectModel.ts`,
+   * `src/models/UserModel.ts`, etc.
+   *
+   * Scope note: this gate is intentionally lightdash-shaped. The TypeORM Repository
+   * pattern (rsschool's `*.repository.ts`) and Prisma model-class pattern are
+   * anticipated analogs that would extend this gate, but neither is empirically
+   * verified at this ship. See 0041-section-10-ship-decisions.md.
+   */
+  private isCallInModelLayerFile(sourceFile: ts.SourceFile): boolean {
+    const fileName = sourceFile.fileName;
+    // Path-segment Model check (PascalCase suffix). Use a regex anchored on path
+    // separators so we match `models/UserModel.ts` but NOT `models/data.ts`.
+    if (/(?:^|[\\/])[A-Za-z0-9_]*Model\.tsx?$/.test(fileName)) {
+      return true;
+    }
+    // Directory-segment match: `/models/` or `/model/` (case-sensitive on Unix).
+    if (/(?:^|[\\/])models?[\\/]/.test(fileName)) {
+      return true;
+    }
     return false;
   }
 
