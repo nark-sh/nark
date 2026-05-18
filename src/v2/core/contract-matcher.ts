@@ -968,6 +968,35 @@ export class ContractMatcher {
         }
       }
 
+      // §11.C: Fastify lifecycle hooks (addHook with onRequest/preHandler/etc.) route
+      // uncaught throws through the same setErrorHandler chain as route handlers (per
+      // fastify v5's lib/hooks.js#hookRunnerGenerator). When the project registers a
+      // setErrorHandler anywhere in source, the per-hook try-catch postcondition has no
+      // remaining concern — the framework owns the catch.
+      //
+      // Scope: addhook-async-hook-no-try-catch only. The sibling
+      // addhook-onclose-async-unhandled postcondition is NOT suppressed because onClose
+      // runs at shutdown and does NOT flow into setErrorHandler.
+      //
+      // Note: the postcondition is already specific to Fastify lifecycle hooks at the
+      // detection layer (per the fastify contract.yaml addHook entry), so this gate
+      // doesn't need an AST walker — the postcondition ID itself is the per-callsite
+      // signal. The corpus interim downgraded this clause from error to warning
+      // (nark-corpus@67271c8). This scanner-side gate goes further: full suppression
+      // when the framework-ownership signal is present.
+      //
+      // Evidence: misskey backend has 10 of these warnings with Fastify setErrorHandler
+      // configured at ClientServerService.ts:924; rybbit has more without one (the
+      // rybbit hits stay as real signals because no project-level setErrorHandler).
+      if (
+        detection.packageName === "fastify" &&
+        primaryPostcondition.id === "addhook-async-hook-no-try-catch"
+      ) {
+        if (this.projectHasCentralErrorHandlerMiddleware()) {
+          continue;
+        }
+      }
+
       // stripe: retry/backoff wrappers satisfy Stripe error postconditions.
       // When a Stripe call is inside a function argument of a retry utility (e.g., pRetry,
       // withRetry, retryWithBackoff, exponentialBackoff), the wrapper provides error handling
