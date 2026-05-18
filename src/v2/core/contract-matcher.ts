@@ -52,6 +52,45 @@ const SECTION_10_KNEX_GATED_POSTCONDITIONS = new Set([
 ]);
 
 /**
+ * §10 Phase 2: typeorm postconditions that get suppressed when the callsite is in a
+ * data-layer file (Model OR Repository naming) AND the project has a central errorHandler
+ * middleware. Same architectural pattern as the knex Phase 1 ship: Controller -> Service ->
+ * Repository -> typeorm. Per-callsite error-throw checks are gated; logic checks
+ * (update-silent-no-op, delete-silent-no-op, softdelete-silent-no-op), security checks
+ * (query-sql-injection-risk), and lifecycle checks (initialize-*, destroy-*,
+ * optimistic-locking-version-mismatch, datasource-initialization) are intentionally NOT
+ * gated — they remain meaningful regardless of project-level error handling.
+ *
+ * Evidence: rsschool-app server scan (2026-05-18) — 28 typeorm violations in
+ * `*.repository.ts` files plus 50 in `/routes/`-mounted handlers, all routed through
+ * Koa's central errorHandlerMiddleware at server/src/routes/logging.ts:13.
+ */
+const SECTION_10_TYPEORM_GATED_POSTCONDITIONS = new Set([
+  "find-query-error",
+  "save-constraint-violation",
+  "transaction-error",
+  "findone-query-failed-error",
+  "findoneby-query-failed-error",
+  "findone-or-fail-entity-not-found",
+  "findone-or-fail-query-failed",
+  "findonebyorfail-entity-not-found",
+  "insert-duplicate-key-error",
+  "insert-foreign-key-violation",
+  "update-constraint-violation",
+  "delete-foreign-key-constraint",
+  "upsert-constraint-violation",
+  "query-sql-syntax-error",
+  "softdelete-missing-delete-date-column",
+  "restore-missing-delete-date-column",
+  "remove-foreign-key-constraint",
+  "count-query-failed-error",
+  "findby-query-failed-error",
+  "findandcount-query-failed-error",
+  "increment-type-mismatch",
+  "decrement-type-mismatch",
+]);
+
+/**
  * Contract Matcher
  *
  * Converts detections to violations by matching against loaded contracts.
@@ -875,37 +914,54 @@ export class ContractMatcher {
         }
       }
 
-      // §10: knex Model-layer architectural pattern.
-      // Three-layer-architecture projects (Controller -> Service -> Model) intentionally
-      // let raw knex errors propagate from Model files to a central errorHandler
-      // middleware at the app boundary. The current scanner flags every knex callsite
-      // without a per-callsite try-catch, producing massive FPs in Model files.
+      // §10: data-layer architectural pattern (Controller -> Service -> Model/Repository).
+      // Three-layer-architecture projects intentionally let raw ORM errors propagate from
+      // data-layer files to a central errorHandler middleware at the app boundary. The
+      // scanner previously flagged every per-callsite ORM operation without try-catch,
+      // producing massive FPs in Model and Repository files.
       //
-      // Gate: detection.packageName === "knex" AND the callsite is in a *Model.ts file
-      // (or under /models/ /model/) AND the project has a central errorHandler middleware.
-      // When BOTH conditions hold the project has explicitly opted into central error
-      // handling and the per-callsite postcondition has no remaining concern to surface.
+      // Gate: detection package is knex (Phase 1) OR typeorm (Phase 2), AND the callsite
+      // is in a data-layer file (*Model.ts, *Repository.ts, *.repository.ts, or under
+      // /models/ /model/ /repositories/ /repository/), AND the project has a central
+      // errorHandler middleware. When BOTH conditions hold the project has explicitly
+      // opted into central error handling and the per-callsite postcondition has no
+      // remaining concern to surface.
       //
-      // Scope: knex only for this ship. TypeORM Repository / Prisma model-class patterns
-      // are anticipated analogs deferred to a follow-up ship pending empirical
-      // verification on representative projects.
-      //
-      // Evidence: concern-20260518-section10-knex-model-layer-fps (rank-14 lightdash,
-      //   1,050 FPs in *Model.ts files; central errorHandler at
+      // Phase 1 evidence: concern-20260518-section10-knex-model-layer-fps (rank-14
+      //   lightdash, 1,050 FPs in *Model.ts files; central errorHandler at
       //   packages/backend/src/App.ts:736-768 and translation at errors.ts:29-51).
       //
-      // Affected knex postconditions (per-callsite error-throw checks):
-      //   select-query-error, insert-constraint-violation, update-no-try-catch,
-      //   delete-no-try-catch, delete-foreign-key-violation, first-no-try-catch,
-      //   raw-no-try-catch, destroy-no-try-catch, batch-insert-no-try-catch,
-      //   transaction-error, increment-no-try-catch, decrement-no-try-catch,
-      //   transaction-provider-factory-no-try-catch, schema-create-table-no-try-catch
+      // Phase 2 evidence: rsschool-app server (2026-05-18, this commit) — 28 typeorm
+      //   violations in *.repository.ts files routed through Koa's errorHandlerMiddleware
+      //   at server/src/routes/logging.ts:13.
+      //
+      // Prisma model-class pattern is an anticipated Phase 3 analog deferred to a
+      // follow-up ship pending empirical verification.
       if (
         detection.packageName === "knex" &&
         SECTION_10_KNEX_GATED_POSTCONDITIONS.has(primaryPostcondition.id)
       ) {
         if (
-          this.isCallInModelLayerFile(sourceFile) &&
+          this.isCallInDataLayerFile(sourceFile) &&
+          this.projectHasCentralErrorHandlerMiddleware()
+        ) {
+          continue;
+        }
+      }
+
+      // §10 Phase 2: typeorm Repository-layer architectural pattern.
+      // Same gate shape as Phase 1, applied to typeorm. The 22 gated postconditions are
+      // all per-callsite error-throw checks (QueryFailedError, EntityNotFoundError,
+      // constraint violations, missing-column errors at runtime). Logic checks
+      // (*-silent-no-op), security checks (query-sql-injection-risk), and lifecycle
+      // checks (initialize-*, destroy-*, datasource-initialization,
+      // optimistic-locking-version-mismatch) are intentionally NOT gated.
+      if (
+        detection.packageName === "typeorm" &&
+        SECTION_10_TYPEORM_GATED_POSTCONDITIONS.has(primaryPostcondition.id)
+      ) {
+        if (
+          this.isCallInDataLayerFile(sourceFile) &&
           this.projectHasCentralErrorHandlerMiddleware()
         ) {
           continue;
@@ -3497,6 +3553,10 @@ export class ContractMatcher {
    *   3. NestJS `@Catch()` decorator on a class — exception filters are NestJS's
    *      analog to Express error middleware.
    *   4. Fastify `setErrorHandler(` — already detectable per §11.C corpus state.
+   *   5. Koa error-handler middleware: `try { await next() } catch` shape. Koa
+   *      middleware wrapping `await next()` in try-catch is the canonical Koa central
+   *      error handler — the function exists for the sole purpose of catching downstream
+   *      throws. Confirmed at rsschool-app server/src/routes/logging.ts:13.
    *
    * Evidence: concern-20260518-section10-knex-model-layer-fps (rank-14 lightdash's central
    *   errorHandler middleware at packages/backend/src/App.ts:736-768).
@@ -3538,8 +3598,21 @@ export class ContractMatcher {
       if (/@Catch\s*\(/.test(text)) {
         return true;
       }
-      // Fastify setErrorHandler. Already a §11.C signal.
-      if (/\.setErrorHandler\s*\(/.test(text)) {
+      // Fastify setErrorHandler. Already a §11.C signal. Tolerate TS generics
+      // (`setErrorHandler<FastifyError>(...)` per misskey's ClientServerService.ts:924).
+      if (/\.setErrorHandler\b(?:\s*<[^>]+>)?\s*\(/.test(text)) {
+        return true;
+      }
+      // Koa central error handler. The pattern is a middleware function that wraps
+      // `await next()` in try-catch. This shape is essentially exclusive to Koa: Express
+      // does not await `next()`, Fastify does not use `next()`, Connect uses `next()` but
+      // does not await it. The bounded `{0,400}` cap avoids pathological backtracking on
+      // very long try-blocks.
+      if (
+        /try\s*\{[\s\S]{0,400}?await\s+next\s*\(\s*\)[\s\S]{0,400}?\}\s*catch/.test(
+          text,
+        )
+      ) {
         return true;
       }
       return false;
@@ -3600,27 +3673,42 @@ export class ContractMatcher {
   }
 
   /**
-   * §10: detect Model-layer file naming. A callsite is "in the Model layer" when its
-   * source file's basename matches `*Model.ts` (PascalCase Model suffix) OR the file
-   * path contains `/models/` or `/model/`.
+   * §10: detect a data-layer file. A callsite is "in the data layer" when its source
+   * file's basename matches a Model OR Repository naming convention, OR the file lives
+   * under a `/models/` `/model/` `/repositories/` or `/repository/` directory.
    *
-   * Lightdash naming convention: `src/models/ProjectModel/ProjectModel.ts`,
-   * `src/models/UserModel.ts`, etc.
+   * Naming conventions covered:
+   *   - `*Model.ts` / `*Model.tsx` (PascalCase Model suffix, lightdash)
+   *   - `*Repository.ts` / `*Repository.tsx` (PascalCase Repository suffix, NestJS)
+   *   - `*.repository.ts` / `*.repository.tsx` (dotted lowercase, rsschool / NestJS CLI)
    *
-   * Scope note: this gate is intentionally lightdash-shaped. The TypeORM Repository
-   * pattern (rsschool's `*.repository.ts`) and Prisma model-class pattern are
-   * anticipated analogs that would extend this gate, but neither is empirically
-   * verified at this ship. See 0041-section-10-ship-decisions.md.
+   * Both Model-layer and Repository-layer files share the §10 architectural intent:
+   * raw ORM errors are allowed to propagate to a central errorHandler middleware at the
+   * app boundary rather than being caught per-callsite. The same gate applies to knex
+   * Model files (Phase 1) and typeorm Repository files (Phase 2).
+   *
+   * Scope note: Prisma model-class pattern is an anticipated analog that would extend
+   * this matcher further, but is not yet empirically verified.
+   * See 0041-section-10-ship-decisions.md for the layered-architecture rationale.
    */
-  private isCallInModelLayerFile(sourceFile: ts.SourceFile): boolean {
+  private isCallInDataLayerFile(sourceFile: ts.SourceFile): boolean {
     const fileName = sourceFile.fileName;
-    // Path-segment Model check (PascalCase suffix). Use a regex anchored on path
-    // separators so we match `models/UserModel.ts` but NOT `models/data.ts`.
+    // PascalCase Model suffix (lightdash). Anchored on path separators so we match
+    // `models/UserModel.ts` but NOT `models/data.ts`.
     if (/(?:^|[\\/])[A-Za-z0-9_]*Model\.tsx?$/.test(fileName)) {
       return true;
     }
-    // Directory-segment match: `/models/` or `/model/` (case-sensitive on Unix).
-    if (/(?:^|[\\/])models?[\\/]/.test(fileName)) {
+    // PascalCase Repository suffix (NestJS): `UserRepository.ts`, `PostRepository.tsx`.
+    if (/(?:^|[\\/])[A-Za-z0-9_]*Repository\.tsx?$/.test(fileName)) {
+      return true;
+    }
+    // Dotted-lowercase repository naming (rsschool, NestJS CLI):
+    // `user.repository.ts`, `task.repository.ts`. The `.repository.` segment is required.
+    if (/(?:^|[\\/])[A-Za-z0-9_-]+\.repository\.tsx?$/.test(fileName)) {
+      return true;
+    }
+    // Directory-segment match (case-sensitive on Unix).
+    if (/(?:^|[\\/])(?:models?|repositor(?:y|ies))[\\/]/.test(fileName)) {
       return true;
     }
     return false;
