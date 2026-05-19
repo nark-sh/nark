@@ -48,7 +48,11 @@ import {
   fireEnrichedTelemetryEvent,
   type TelemetryResult,
 } from "./cli/telemetry.js";
-import { createAuthCommand } from "./cli/auth.js";
+import {
+  createAuthCommand,
+  createLoginCommand,
+  createLogoutCommand,
+} from "./cli/auth.js";
 import { getToken } from "./lib/auth.js";
 import { createCiCommand } from "./cli/ci.js";
 import { generateAIPrompt } from "./ai-prompt-generator.js";
@@ -114,6 +118,8 @@ program.addCommand(createCompactCommand());
 program.addCommand(createShowCommand());
 program.addCommand(createTelemetryCommand());
 program.addCommand(createAuthCommand());
+program.addCommand(createLoginCommand());
+program.addCommand(createLogoutCommand());
 program.addCommand(createCiCommand());
 
 program
