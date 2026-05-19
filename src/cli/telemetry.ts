@@ -246,6 +246,8 @@ export function handleFirstRunNotice(): void {
           "  • violation counts by package — to reduce false positives in profiles\n" +
           "  • packages without profiles, ranked by usage — to prioritize what to build next\n" +
           "  • an anonymous device ID and a SHA256 hash of your git remote URL (not the URL itself)\n" +
+          "Nark also reports unexpected crashes to Sentry (file paths, env, and hostnames\n" +
+          "are scrubbed). Disable with NARK_SENTRY=off.\n" +
           "Run `nark telemetry status` to see exactly what is sent.\n" +
           "Run `nark telemetry off` to opt out, or set DO_NOT_TRACK=1.\n" +
           "Learn more: https://nark.sh/telemetry\n\n",
