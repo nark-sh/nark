@@ -62,6 +62,11 @@ import {
   countProjectTsFiles,
   emitLowCoverageWarningIfNeeded,
 } from "./tsconfig-discovery.js";
+import {
+  initSentry,
+  captureCliException,
+  flushSentry,
+} from "./cli/sentry.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -379,6 +384,9 @@ async function main(options: any) {
 
   // First-run telemetry notice (prints to stderr only, does not pollute JSON output)
   handleFirstRunNotice();
+
+  // Initialize Sentry crash reporting (no-op if NARK_SENTRY=off or telemetry disabled)
+  initSentry();
 
   const scanStartTime = Date.now();
   const verbose = !options.quiet;
@@ -1662,7 +1670,7 @@ function printAnalyzerDiff(
 /**
  * Handle errors
  */
-process.on("uncaughtException", (error) => {
+process.on("uncaughtException", async (error) => {
   const message = error instanceof Error ? error.message : String(error);
 
   // Friendly message for "no TypeScript files" errors
@@ -1726,5 +1734,8 @@ process.on("uncaughtException", (error) => {
   if (error instanceof Error && error.stack) {
     console.error(chalk.dim(error.stack.split("\n").slice(1).join("\n")));
   }
+  // Report unexpected errors to Sentry before exiting (no-op if NARK_SENTRY=off)
+  captureCliException(error);
+  await flushSentry();
   process.exit(2);
 });

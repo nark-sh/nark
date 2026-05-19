@@ -176,6 +176,10 @@ export function getTelemetryConfigPath(): string {
 /**
  * Check if telemetry is disabled via environment variable.
  * Supports NARK_TELEMETRY=off and the standard DO_NOT_TRACK=1.
+ *
+ * Note: NARK_SENTRY=off is a dedicated kill switch for Sentry crash reporting
+ * only (see src/cli/sentry.ts). Setting NARK_TELEMETRY=off also disables
+ * Sentry, but NARK_SENTRY=off leaves scan telemetry unaffected.
  */
 function isEnvDisabled(): boolean {
   const narkEnv = process.env["NARK_TELEMETRY"];

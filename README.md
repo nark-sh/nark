@@ -188,6 +188,23 @@ You can also set `telemetry: false` in `.nark/config.yaml` or point telemetry to
 
 Learn more: [https://nark.sh/telemetry](https://nark.sh/telemetry)
 
+### Crash reporting
+
+nark sends anonymous crash reports to Sentry when it encounters an unexpected error. This helps catch bugs that affect real users. No source code, file paths, or identifying information is included (paths are scrubbed via `beforeSend`). Only 25% of errors are sampled to minimize overhead.
+
+Crash reporting respects the same opt-out flags as telemetry, plus a dedicated kill switch:
+
+```bash
+# Disable only crash reporting (scan telemetry still flows)
+export NARK_SENTRY=off
+
+# Disable everything (telemetry + crash reporting)
+export NARK_TELEMETRY=off
+
+# Respect the standard DO_NOT_TRACK convention
+export DO_NOT_TRACK=1
+```
+
 ### Auth
 
 ```bash
