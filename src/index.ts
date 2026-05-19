@@ -915,6 +915,21 @@ async function main(options: any) {
           "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n",
         ),
       );
+      // False-positive transparency footer (verbose path).
+      // Static analysis approximates — when a Profile flags code the project already
+      // handles at a layer Nark cannot see (central middleware, retry wrapper, framework-
+      // owned catch), the reader should know the suppression path AND the report path
+      // so the Profile or scanner improves.
+      console.log(
+        chalk.dim(
+          `  Some findings may be false positives. Suppress: `,
+        ) + `// nark-ignore:<id>`,
+      );
+      console.log(
+        chalk.dim(`  Report: `) +
+          chalk.underline(`github.com/nark-sh/nark/issues`) +
+          chalk.dim(` — improves the Profile.\n`),
+      );
     } else {
       console.log(
         chalk.green(
@@ -1391,6 +1406,26 @@ function printCompactReport(opts: {
   if (totalViolations > 0) {
     console.log(chalk.dim(`  Full report: `) + `npx nark`);
   }
+
+  // False-positive transparency footer.
+  // Static analysis is an approximation. When a Profile flags something the project
+  // already handles at a layer Nark cannot see (central error middleware, retry wrapper,
+  // framework-owned catch), the reader should know the suppression path and the report
+  // path so the Profile or scanner improves over time.
+  if (totalViolations > 0) {
+    console.log("");
+    console.log(
+      chalk.dim(
+        `  Some findings may be false positives. Suppress: `,
+      ) + `// nark-ignore:<id>`,
+    );
+    console.log(
+      chalk.dim(`  Report: `) +
+        chalk.underline(`github.com/nark-sh/nark/issues`) +
+        chalk.dim(` — improves the Profile.`),
+    );
+  }
+
   console.log("");
 }
 
@@ -1736,6 +1771,21 @@ process.on("uncaughtException", async (error) => {
   }
   // Report unexpected errors to Sentry before exiting (no-op if NARK_SENTRY=off)
   captureCliException(error);
+  await flushSentry();
+  process.exit(2);
+});
+
+// Unhandled promise rejections in async scan paths. Without this, an async
+// throw inside main() that escapes commander's action handler would terminate
+// the process with a deprecation warning and never reach Sentry.
+process.on("unhandledRejection", async (reason) => {
+  const err = reason instanceof Error ? reason : new Error(String(reason));
+  console.error(chalk.red("\nUnhandled promise rejection:"));
+  console.error(err.message);
+  if (err.stack) {
+    console.error(chalk.dim(err.stack.split("\n").slice(1).join("\n")));
+  }
+  captureCliException(err);
   await flushSentry();
   process.exit(2);
 });

@@ -4,6 +4,32 @@
 
 nark scans your TypeScript codebase against a curated library of 169+ package contracts to find places where error handling is missing. Think of it as a linter, but for runtime failure modes — unhandled promise rejections, missing `.on('error')` listeners, uncaught API exceptions.
 
+## Honest about false positives
+
+Nark uses static analysis. Static analysis is an approximation — the scanner reasons
+about code without running it, so some flagged violations may be false positives if
+your project handles errors at a layer Nark cannot see yet: a central Express or
+NestJS error middleware, a React error boundary, a retry wrapper one frame up, a
+try-catch in the calling function, or a library that catches internally.
+
+What we do to keep the rate honest:
+
+- **Profiles are evidence-based.** Every postcondition cites the package's
+  documentation or source code. We do not invent rules.
+- **The scanner recognizes common framework patterns.** It understands TanStack
+  Query global handlers, TanStack Router loader callbacks, tRPC callback wrappers,
+  Fastify `setErrorHandler`, Express and Koa error middleware, NestJS exception
+  filters, and several other architectural patterns. The list grows monthly.
+- **We measure before we ship.** Every scanner upgrade is verified against real
+  codebases before release.
+
+If you see a false positive: suppress with `// nark-ignore: <postcondition-id>` next
+to the line, or open an issue at
+[github.com/nark-sh/nark/issues](https://github.com/nark-sh/nark/issues) with the
+file:line — we update the Profile or scanner from real reports. We do not claim
+the scanner is perfect. We claim it is honest about what it knows and what it does
+not.
+
 ## Quick Start
 
 ```bash
