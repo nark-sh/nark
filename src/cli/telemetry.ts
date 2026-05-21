@@ -58,6 +58,10 @@ export interface TelemetryPayload {
   fileCount?: number;
   totalCallSites?: number;
   corpusVersion?: string;
+  /** GitHub owner parsed from git remote origin URL. Only sent on the authenticated path. */
+  repoOwner?: string;
+  /** GitHub repo name parsed from git remote origin URL. Only sent on the authenticated path. */
+  repoName?: string;
   suppressionCount?: number;
   scanMode?: string;
   exitCode?: number;
@@ -134,6 +138,32 @@ function getRepoFingerprint(): string | undefined {
     }).trim();
     if (!url) return undefined;
     return createHash("sha256").update(url).digest("hex");
+  } catch {
+    return undefined;
+  }
+}
+
+/**
+ * Parse the GitHub owner + repo name from the current cwd's git remote origin URL.
+ * Handles both SSH (`git@github.com:owner/name.git`) and HTTPS
+ * (`https://github.com/owner/name.git`) shapes. Returns undefined on any failure.
+ * Never throws.
+ *
+ * Used by the authenticated telemetry path to power ORG_SCAN ScanCard issuance
+ * on the SaaS side. Sibling to getRepoFingerprint (which one-way-hashes the
+ * full URL); this helper returns the human-readable pair instead.
+ */
+function parseRepoOwnerName(): { owner: string; name: string } | undefined {
+  try {
+    const url = execSync("git remote get-url origin", {
+      encoding: "utf-8",
+      stdio: ["pipe", "pipe", "pipe"],
+    }).trim();
+    if (!url) return undefined;
+    // `[:/]` matches the SSH `:` and the HTTPS path `/` separator.
+    const m = url.match(/[:/]([^/:]+)\/([^/]+?)(?:\.git)?$/);
+    if (m && m[1] && m[2]) return { owner: m[1], name: m[2] };
+    return undefined;
   } catch {
     return undefined;
   }
@@ -341,10 +371,14 @@ export async function fireTelemetryEvent(
     }
     const fp = getRepoFingerprint();
     const did = getOrCreateDeviceId();
+    const repoOwnerName = parseRepoOwnerName();
     const enriched = {
       ...payload,
       ...(fp ? { repoFingerprint: fp } : {}),
       ...(did ? { deviceId: did } : {}),
+      ...(repoOwnerName
+        ? { repoOwner: repoOwnerName.owner, repoName: repoOwnerName.name }
+        : {}),
     };
     let errorReason: TelemetryErrorReason | undefined;
     const response = await fetch(TELEMETRY_ENDPOINT, {
@@ -573,11 +607,23 @@ export async function fireEnrichedTelemetryEvent(
     const commitSha = getCommitSha();
     const ciProvider = detectCiProvider();
     const codeSnippets = extractCodeSnippets(violations);
+    const repoOwnerName = parseRepoOwnerName();
 
+    // NOTE: Both this object and the enriched endpoint use `repoName`, but with
+    // different semantics — the existing `getRepoName()` returns the "owner/name"
+    // slug used by `/api/telemetry/scan-enriched`, whereas the new
+    // `parseRepoOwnerName()` (QT-Q5) returns the bare name used by
+    // `/api/telemetry/scan` for ORG_SCAN ScanCard issuance. We spread the new
+    // `repoOwner`/`repoName` pair FIRST so the existing slug-style `repoName`
+    // spread (below) wins on the enriched endpoint, preserving the legacy
+    // contract. `repoOwner` has no collision and is additive.
     const enriched: Record<string, unknown> = {
       ...payload,
       ...(fp ? { repoFingerprint: fp } : {}),
       ...(did ? { deviceId: did } : {}),
+      ...(repoOwnerName
+        ? { repoOwner: repoOwnerName.owner, repoName: repoOwnerName.name }
+        : {}),
       ...(repoName ? { repoName } : {}),
       ...(repoUrl ? { repoUrl } : {}),
       ...(gitAuthor ? { gitAuthor } : {}),
