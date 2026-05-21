@@ -46,6 +46,8 @@ import {
   handleFirstRunNotice,
   fireTelemetryEvent,
   fireEnrichedTelemetryEvent,
+  getTelemetryEndpoint,
+  isNarkApiUrlSet,
   type TelemetryResult,
 } from "./cli/telemetry.js";
 import {
@@ -1168,22 +1170,35 @@ async function main(options: any) {
     }
 
     // Checkpoint 4b: verbose telemetry feedback
-    if (verbose && telemetryResult) {
-      const r = telemetryResult;
-      if (r.disabled) {
+    if (verbose) {
+      // Always announce the target URL on every verbose scan
+      verboseLog(`\n[verbose] Telemetry target: ${getTelemetryEndpoint()}`);
+      // Hint the env var only when the user has NOT set it
+      if (!isNarkApiUrlSet()) {
         verboseLog(
-          `\n[verbose] Telemetry: disabled (opt out via nark telemetry off)`,
+          `[verbose] Defaulting to https://app.nark.sh. Set NARK_API_URL=http://localhost:3000 for local dev.`,
         );
-      } else if (r.error) {
-        verboseLog(`\n[verbose] Telemetry: failed to send (network error)`);
-      } else if (r.sent && r.authenticated) {
-        verboseLog(
-          `\n[verbose] Telemetry: sent to ${r.endpoint} (authenticated as ${r.email ?? "unknown"})`,
-        );
-      } else if (r.sent) {
-        verboseLog(
-          `\n[verbose] Telemetry: sent anonymously — run 'nark login' to link scans to your dashboard`,
-        );
+      }
+
+      if (telemetryResult) {
+        const r = telemetryResult;
+        if (r.disabled) {
+          verboseLog(
+            `[verbose] Telemetry: disabled (opt out via nark telemetry off)`,
+          );
+        } else if (r.error) {
+          verboseLog(
+            `[verbose] Telemetry: failed to send (${r.errorReason ?? "UNKNOWN"})`,
+          );
+        } else if (r.sent && r.authenticated) {
+          verboseLog(
+            `[verbose] Telemetry: sent to ${r.endpoint} (authenticated as ${r.email ?? "unknown"})`,
+          );
+        } else if (r.sent) {
+          verboseLog(
+            `[verbose] Telemetry: sent anonymously — run 'nark login' to link scans to your dashboard`,
+          );
+        }
       }
     }
   }

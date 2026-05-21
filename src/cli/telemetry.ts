@@ -88,6 +88,14 @@ export interface TelemetryPayload {
   }>;
 }
 
+export type TelemetryErrorReason =
+  | "DNS_FAIL"
+  | "CONNECTION_REFUSED"
+  | "HTTP_4xx"
+  | "HTTP_5xx"
+  | "TIMEOUT"
+  | "UNKNOWN";
+
 export interface TelemetryResult {
   sent: boolean;
   authenticated: boolean;
@@ -95,6 +103,7 @@ export interface TelemetryResult {
   email?: string;
   disabled?: boolean;
   error?: boolean;
+  errorReason?: TelemetryErrorReason;
 }
 
 export interface EnrichedTelemetryPayload extends TelemetryPayload {
@@ -168,6 +177,51 @@ function getOrCreateDeviceId(): string | undefined {
 
 const NARK_API_BASE = process.env["NARK_API_URL"] ?? "https://app.nark.sh";
 const TELEMETRY_ENDPOINT = `${NARK_API_BASE}/api/telemetry/scan`;
+
+/** Returns true if the user explicitly set NARK_API_URL (i.e. nark is not using the default https://app.nark.sh). */
+export function isNarkApiUrlSet(): boolean {
+  const v = process.env["NARK_API_URL"];
+  return typeof v === "string" && v.length > 0;
+}
+
+/** Returns the resolved telemetry endpoint URL (env-var-aware, evaluated once at module load). */
+export function getTelemetryEndpoint(): string {
+  return TELEMETRY_ENDPOINT;
+}
+
+/**
+ * Classify a fetch() rejection into a TelemetryErrorReason.
+ * Inspects err.name (TimeoutError/AbortError from AbortSignal.timeout) and
+ * err.cause.code (undici wraps DNS/connection errors with ENOTFOUND/EAI_AGAIN/
+ * ECONNREFUSED/ECONNRESET on the .cause property).
+ */
+function classifyFetchError(err: unknown): TelemetryErrorReason {
+  if (err && typeof err === "object" && "name" in err) {
+    const name = (err as { name: string }).name;
+    if (name === "TimeoutError" || name === "AbortError") return "TIMEOUT";
+  }
+  if (err && typeof err === "object" && "cause" in err) {
+    const cause = (err as { cause: unknown }).cause;
+    if (cause && typeof cause === "object" && "code" in cause) {
+      const code = (cause as { code: string }).code;
+      if (code === "ENOTFOUND" || code === "EAI_AGAIN") return "DNS_FAIL";
+      if (code === "ECONNREFUSED" || code === "ECONNRESET")
+        return "CONNECTION_REFUSED";
+    }
+  }
+  return "UNKNOWN";
+}
+
+/**
+ * Classify a non-ok HTTP response status into a TelemetryErrorReason.
+ * Only invoked when !response.ok, so a return of "UNKNOWN" indicates a
+ * defensive fall-through that shouldn't normally fire.
+ */
+function classifyHttpStatus(status: number): TelemetryErrorReason {
+  if (status >= 500) return "HTTP_5xx";
+  if (status >= 400) return "HTTP_4xx";
+  return "UNKNOWN";
+}
 
 export function getTelemetryConfigPath(): string {
   return path.join(os.homedir(), ".nark", "telemetry.json");
@@ -292,21 +346,32 @@ export async function fireTelemetryEvent(
       ...(fp ? { repoFingerprint: fp } : {}),
       ...(did ? { deviceId: did } : {}),
     };
-    let fetchFailed = false;
-    await fetch(TELEMETRY_ENDPOINT, {
+    let errorReason: TelemetryErrorReason | undefined;
+    const response = await fetch(TELEMETRY_ENDPOINT, {
       method: "POST",
       headers,
       body: JSON.stringify(enriched),
       signal: AbortSignal.timeout(2000),
-    }).catch(() => {
-      fetchFailed = true;
+    }).catch((err: unknown) => {
+      errorReason = classifyFetchError(err);
+      return null;
     });
-    if (fetchFailed) {
+    if (errorReason !== undefined || response === null) {
       return {
         sent: false,
         authenticated: token !== null,
         endpoint: TELEMETRY_ENDPOINT,
         error: true,
+        errorReason: errorReason ?? "UNKNOWN",
+      };
+    }
+    if (!response.ok) {
+      return {
+        sent: false,
+        authenticated: token !== null,
+        endpoint: TELEMETRY_ENDPOINT,
+        error: true,
+        errorReason: classifyHttpStatus(response.status),
       };
     }
     return {
@@ -322,6 +387,7 @@ export async function fireTelemetryEvent(
       authenticated: false,
       endpoint: TELEMETRY_ENDPOINT,
       error: true,
+      errorReason: "UNKNOWN",
     };
   }
 }
@@ -521,21 +587,32 @@ export async function fireEnrichedTelemetryEvent(
       ...(codeSnippets.length > 0 ? { codeSnippets } : {}),
     };
 
-    let fetchFailed = false;
-    await fetch(enrichedEndpoint, {
+    let errorReason: TelemetryErrorReason | undefined;
+    const response = await fetch(enrichedEndpoint, {
       method: "POST",
       headers,
       body: JSON.stringify(enriched),
       signal: AbortSignal.timeout(2000),
-    }).catch(() => {
-      fetchFailed = true;
+    }).catch((err: unknown) => {
+      errorReason = classifyFetchError(err);
+      return null;
     });
-    if (fetchFailed) {
+    if (errorReason !== undefined || response === null) {
       return {
         sent: false,
         authenticated: true,
         endpoint: enrichedEndpoint,
         error: true,
+        errorReason: errorReason ?? "UNKNOWN",
+      };
+    }
+    if (!response.ok) {
+      return {
+        sent: false,
+        authenticated: true,
+        endpoint: enrichedEndpoint,
+        error: true,
+        errorReason: classifyHttpStatus(response.status),
       };
     }
     return {
@@ -551,6 +628,7 @@ export async function fireEnrichedTelemetryEvent(
       authenticated: true,
       endpoint: enrichedEndpoint,
       error: true,
+      errorReason: "UNKNOWN",
     };
   }
 }
