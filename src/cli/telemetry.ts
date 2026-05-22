@@ -408,6 +408,27 @@ export async function fireTelemetryEvent(
         errorReason: classifyHttpStatus(response.status),
       };
     }
+    // QT-S9: Parse the response body for `holographicGranted` — the SaaS
+    // sets this field when a synchronous grantOwnerHolo just upgraded N
+    // ScanCards for this verified owner. We surface a one-line dim stderr
+    // notice so the owner sees the magic moment ("contributors who scanned
+    // your repo earlier now have a special version"). Wrapped in try/catch
+    // because telemetry must NEVER throw — a malformed response body, a
+    // missing field, or an exotic Content-Type all degrade silently.
+    try {
+      const body = await response.json().catch(() => null);
+      const granted: unknown = (body as { holographicGranted?: unknown })
+        ?.holographicGranted;
+      if (typeof granted === "number" && granted > 0) {
+        process.stderr.write(
+          chalk.dim(
+            `\n✨ ${granted} card${granted === 1 ? "" : "s"} on this repo upgraded to holographic — your contributors who scanned earlier now have a special version.\n`,
+          ),
+        );
+      }
+    } catch {
+      /* never let response parsing break telemetry */
+    }
     return {
       sent: true,
       authenticated: token !== null,
