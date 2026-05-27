@@ -214,6 +214,11 @@ program
     "--changed-files <paths...>",
     "Only report violations in these files (full program still loads for type resolution)",
   )
+  .option(
+    "--force-large-scan",
+    "Bypass the 10K-file soft limit (may OOM — pair with NODE_OPTIONS=--max-old-space-size=8192)",
+    false,
+  )
   .option("--sarif", "Output results in SARIF 2.1.0 format (stdout)")
   .option(
     "--sarif-output <path>",
@@ -574,6 +579,7 @@ async function main(options: any) {
     corpusPath: path.resolve(options.corpus),
     includeTests: options.includeTests,
     changedFiles: options.changedFiles?.map((f: string) => path.resolve(f)),
+    forceLargeScan: options.forceLargeScan,
   };
 
   if (verbose) console.log(chalk.dim("Analyzing TypeScript code..."));

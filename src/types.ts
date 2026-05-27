@@ -295,6 +295,8 @@ export interface AnalyzerConfig {
   includeTests?: boolean;
   /** Only report violations in these files (absolute paths). Full program still loads for type resolution. */
   changedFiles?: string[];
+  /** Bypass the large-scan safety check. User must opt in (--force-large-scan or NARK_FORCE_LARGE_SCAN=1). */
+  forceLargeScan?: boolean;
 }
 
 /**

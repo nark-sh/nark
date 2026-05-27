@@ -143,18 +143,39 @@ export class Analyzer {
       }
     }
 
-    // OOM guard: warn and skip if the resolved file list is enormous (> 5000 files).
-    // Bulk scan found 8 repos where Node ran out of memory on huge monorepos.
-    const OOM_FILE_LIMIT = 5000;
-    if (parsedConfig.fileNames.length > OOM_FILE_LIMIT) {
+    // Large-scan safety check. Single TypeScript programs over ~10K files can OOM
+    // Node's default ~4GB heap. The check warns and exits unless the user opts in
+    // via --force-large-scan or NARK_FORCE_LARGE_SCAN=1.
+    const LARGE_SCAN_THRESHOLD = 10000;
+    const fileCount = parsedConfig.fileNames.length;
+    const forced = config.forceLargeScan || process.env.NARK_FORCE_LARGE_SCAN === "1";
+    if (fileCount > LARGE_SCAN_THRESHOLD && !forced) {
       process.stderr.write(
-        `nark: warning: tsconfig resolves to ${parsedConfig.fileNames.length} files — ` +
-        `this exceeds the ${OOM_FILE_LIMIT}-file limit.\n` +
-        `Consider narrowing the "include" globs in tsconfig.json or passing a more specific tsconfig.\n`
+        `\nnark: large scan detected — tsconfig at ${config.tsconfigPath}\n` +
+        `      resolves to ${fileCount} TypeScript files (soft limit: ${LARGE_SCAN_THRESHOLD}).\n\n` +
+        `Why this limit exists:\n` +
+        `  A single TypeScript program over ~10K files can exhaust Node's default\n` +
+        `  ~4GB heap and crash with an out-of-memory error mid-scan. This check\n` +
+        `  surfaces that risk up front instead of failing 80% of the way through.\n\n` +
+        `To proceed anyway:\n` +
+        `  1. Bump Node's heap, then rerun with --force-large-scan:\n` +
+        `       NODE_OPTIONS=--max-old-space-size=8192 \\\n` +
+        `         npx nark --tsconfig ${config.tsconfigPath} --force-large-scan\n\n` +
+        `  2. Or scan a narrower slice — point --tsconfig at a workspace\n` +
+        `     package's tsconfig (e.g. packages/<name>/tsconfig.json) instead of\n` +
+        `     the monorepo root.\n\n` +
+        `  3. Or set NARK_FORCE_LARGE_SCAN=1 in your environment to skip this\n` +
+        `     check globally.\n\n`
       );
       throw new Error(
-        `tsconfig at ${config.tsconfigPath} resolves to ${parsedConfig.fileNames.length} files ` +
-        `(limit: ${OOM_FILE_LIMIT}). Narrow the include globs or use a more specific tsconfig.`
+        `Large scan blocked: ${fileCount} files exceeds soft limit (${LARGE_SCAN_THRESHOLD}). ` +
+        `Rerun with --force-large-scan to proceed.`
+      );
+    }
+    if (fileCount > LARGE_SCAN_THRESHOLD && forced) {
+      process.stderr.write(
+        `nark: scanning ${fileCount} files (forced past ${LARGE_SCAN_THRESHOLD}-file soft limit). ` +
+        `If Node OOMs, retry with NODE_OPTIONS=--max-old-space-size=8192.\n`
       );
     }
 
