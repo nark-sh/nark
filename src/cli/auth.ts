@@ -23,6 +23,7 @@ import {
   removeWorkspace,
   removeAllWorkspaces,
 } from "../lib/auth.js";
+import { hasRepoWorkspaceBinding } from "../lib/config.js";
 
 const POLL_INTERVAL_MS = 2000;
 const MAX_ATTEMPTS = 150; // 5 minutes
@@ -38,6 +39,105 @@ interface LoginOptions {
 interface LogoutOptions {
   org?: string;
   all?: boolean;
+}
+
+/**
+ * qt-164: post-login branch identifier — feeds `printLoginResult` and gates
+ * `writeWorkspace({ makeDefault })`.
+ *
+ *   first         — no prior default → auto-promote (also covers existing===null)
+ *   same-slug     — re-login into the current default → token refresh (dim)
+ *   multi-config  — different slug AND `.nark/config.json` ancestor exists
+ *                   → preserve default, print multi-workspace block
+ *   auto-promote  — different slug AND no binding → Vercel-style auto-promote
+ */
+export type LoginBranch =
+  | "first"
+  | "same-slug"
+  | "multi-config"
+  | "auto-promote";
+
+/**
+ * Pure decision helper (qt-164) — no side effects, no chalk, no console.
+ * Used directly by `loginAction` and unit-tested in src/cli/auth.test.ts.
+ */
+export function decideLoginBranch(
+  existing: {
+    default: string | null;
+    workspaces: Record<string, { orgName: string }>;
+  } | null,
+  newSlug: string,
+  cwd: string,
+): { branch: LoginBranch; oldDefaultName: string | null } {
+  const currentDefault = existing?.default ?? null;
+  const oldDefaultName =
+    currentDefault && existing?.workspaces[currentDefault]?.orgName
+      ? existing.workspaces[currentDefault]!.orgName
+      : currentDefault;
+
+  if (currentDefault === null) return { branch: "first", oldDefaultName };
+  if (currentDefault === newSlug)
+    return { branch: "same-slug", oldDefaultName };
+  if (hasRepoWorkspaceBinding(cwd))
+    return { branch: "multi-config", oldDefaultName };
+  return { branch: "auto-promote", oldDefaultName };
+}
+
+/**
+ * Render the four branch outputs (qt-164). Pure-ish — only `console.log`
+ * side effects. Tests spy on console.log to capture lines.
+ *
+ * Color scheme (CONTEXT.md DEC3):
+ *   first        → green "Logged in to..."
+ *   same-slug    → dim "✓ Token refreshed for ..."
+ *   multi-config → plain body, cyan accents on command names
+ *   auto-promote → green "Logged in to..." + cyan "✓ Default workspace switched to..."
+ */
+export function printLoginResult(
+  branch: LoginBranch,
+  newName: string,
+  newSlug: string,
+  email: string,
+  oldDefaultName: string | null,
+  currentDefault: string | null,
+): void {
+  if (branch === "same-slug") {
+    // Dim refresh — replaces the legacy `Logged in to ...` + `Default unchanged`
+    // pair from qt-162. Single line, no switch hint, no noise.
+    console.log(chalk.dim(`✓ Token refreshed for ${newName}.`));
+    return;
+  }
+
+  if (branch === "first") {
+    console.log(
+      `\n${chalk.green(`Logged in to ${newName} (${newSlug}) as ${email}`)}`,
+    );
+    return;
+  }
+
+  if (branch === "multi-config") {
+    // Preserve existing default. 4 informational lines + leading blank.
+    // Spaces after `To switch default:` are tuned to visually align the
+    // command columns under `To list all workspaces:`.
+    console.log(`\nLogged in to ${newName} (${newSlug}). Token saved.`);
+    console.log("");
+    console.log(
+      `Your default workspace is still ${oldDefaultName} (${currentDefault}).`,
+    );
+    console.log(`To list all workspaces: ${chalk.cyan("nark workspace")}`);
+    console.log(
+      `To switch default:      ${chalk.cyan(`nark workspace use ${newSlug}`)}`,
+    );
+    return;
+  }
+
+  // auto-promote — different slug, no binding. Vercel-style.
+  console.log(
+    `\n${chalk.green(`Logged in to ${newName} (${newSlug}) as ${email}`)}`,
+  );
+  console.log(
+    chalk.cyan(`✓ Default workspace switched to ${newName} (${newSlug}).`),
+  );
 }
 
 /**
@@ -105,32 +205,49 @@ export async function loginAction(opts: LoginOptions = {}): Promise<void> {
         continue;
       }
 
+      // qt-164: four-branch login flow.
+      //   first         → no prior default, auto-promote (Branch A)
+      //   same-slug     → re-login into current default, dim refresh (Branch B)
+      //   multi-config  → different slug + .nark/config.json binding
+      //                   → preserve default, multi-workspace block (Branch C)
+      //   auto-promote  → different slug + no binding
+      //                   → Vercel-style auto-promote (Branch D)
       const existing = readCredentialsV2();
-      const hadExistingDefault = !!existing?.default;
+      const newSlug = body.organization.slug;
+      const newName = body.organization.name;
+      const { branch, oldDefaultName } = decideLoginBranch(
+        existing,
+        newSlug,
+        process.cwd(),
+      );
+
+      // `first` and `auto-promote` both flip the default. `same-slug` is a
+      // no-op for `default` (writeWorkspace re-sets the same value if true,
+      // but we pass false here to keep the operation purely token-refresh).
+      // `multi-config` explicitly preserves the existing default.
+      const shouldMakeDefault = branch === "first" || branch === "auto-promote";
 
       writeWorkspace(
         {
           token: body.token,
           orgId: body.organization.id,
-          orgSlug: body.organization.slug,
-          orgName: body.organization.name,
+          orgSlug: newSlug,
+          orgName: newName,
           email: body.user.email,
           plan: body.organization.plan,
           loggedInAt: new Date().toISOString(),
         },
-        { makeDefault: !hadExistingDefault },
+        { makeDefault: shouldMakeDefault },
       );
 
-      console.log(
-        `\nLogged in to ${chalk.green(body.organization.name)} (${body.organization.slug}) as ${body.user.email}`,
+      printLoginResult(
+        branch,
+        newName,
+        newSlug,
+        body.user.email,
+        oldDefaultName,
+        existing?.default ?? null,
       );
-
-      // qt-162 locked decision: first-login does NOT change existing default
-      if (hadExistingDefault && existing?.default !== body.organization.slug) {
-        process.stderr.write(
-          `Default workspace unchanged. Run \`nark workspace use ${body.organization.slug}\` to switch.\n`,
-        );
-      }
       process.exit(0);
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
@@ -197,6 +314,11 @@ export function logoutAction(opts: LogoutOptions = {}): void {
 export function createAuthCommand(): Command {
   const auth = new Command("auth");
   auth.description("Authenticate with nark.sh");
+
+  // qt-164 DEC7: typo suggestion (`nark auth loginn` → "Did you mean login?")
+  auth
+    .showSuggestionAfterError(true)
+    .showHelpAfterError("(add --help for additional usage)");
 
   const login = new Command("login");
   login
