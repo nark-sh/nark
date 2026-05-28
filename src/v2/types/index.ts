@@ -554,6 +554,13 @@ export interface AnalyzerConfig {
   /** Only report violations in these files (absolute paths). Full program still loads for type resolution. */
   changedFiles?: string[];
 
+  /**
+   * Only report violations on lines added/modified by `git diff <base>..<head>`
+   * on the new side. Format: "<base>..<head>". Applied as a post-analyzer
+   * filter in the v1/v2 entry point. See ../../lib/diff-filter.ts.
+   */
+  diffSpec?: string;
+
   /** Plugins to enable (if empty, all plugins are enabled) */
   enabledPlugins?: string[];
 

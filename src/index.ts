@@ -35,6 +35,11 @@ import {
   loadBenchmark,
 } from "./reporters/index.js";
 import { ensureTsconfig } from "./tsconfig-generator.js";
+import {
+  parseDiffSpec,
+  computeDiffLines,
+  filterViolationsByDiff,
+} from "./lib/diff-filter.js";
 import type { AnalyzerConfig, Violation } from "./types.js";
 import { createSuppressionsCommand } from "./cli/suppressions.js";
 import { createInitCommand } from "./cli/init.js";
@@ -58,6 +63,10 @@ import {
 import { createWorkspaceCommand } from "./cli/workspace.js";
 import { createWhoamiCommand } from "./cli/whoami.js";
 import { resolveActiveWorkspace } from "./lib/auth.js";
+import {
+  maybePrintPreScanWorkspaceWarning,
+  shouldPrintScanUploadedFooter,
+} from "./lib/pre-scan-warning.js";
 import { createCiCommand } from "./cli/ci.js";
 import { generateAIPrompt } from "./ai-prompt-generator.js";
 import { writeScanResults, findNarkDir } from "./output/index.js";
@@ -112,7 +121,12 @@ program
   .description(
     "Contract coverage scanner — find missing error handling before production",
   )
-  .version(_pkgVersion);
+  .version(_pkgVersion)
+  // qt-164 DEC7: enable Commander's built-in Levenshtein typo suggestion
+  // (`nark workspaces` → "Did you mean workspace?") and a help-pointer footer
+  // on every error. Propagates to subcommand resolution at the program tier.
+  .showSuggestionAfterError(true)
+  .showHelpAfterError("(add --help for additional usage)");
 
 // Add suppressions subcommand
 program.addCommand(createSuppressionsCommand());
@@ -222,6 +236,10 @@ program
   .option(
     "--changed-files <paths...>",
     "Only report violations in these files (full program still loads for type resolution)",
+  )
+  .option(
+    "--diff <spec>",
+    "Only report violations on lines added/modified by `git diff <spec>` (e.g. main..HEAD). Two-dot form. Supersedes --changed-files when both are set.",
   )
   .option(
     "--force-large-scan",
@@ -415,6 +433,12 @@ async function main(options: any) {
   // Initialize Sentry crash reporting (no-op if NARK_SENTRY=off or telemetry disabled)
   initSentry();
 
+  // qt-164 DEC6: pre-scan workspace-mismatch hint. Fires when the user just
+  // logged into a different workspace (<5min ago) than the current default
+  // and has no `.nark/config.json` binding to explain why the scan stays on
+  // the default. Non-blocking, stderr only, never throws.
+  maybePrintPreScanWorkspaceWarning();
+
   const scanStartTime = Date.now();
   const verbose = !options.quiet;
 
@@ -593,6 +617,7 @@ async function main(options: any) {
     corpusPath: path.resolve(options.corpus),
     includeTests: options.includeTests,
     changedFiles: options.changedFiles?.map((f: string) => path.resolve(f)),
+    diffSpec: options.diff,
     forceLargeScan: options.forceLargeScan,
   };
 
@@ -679,6 +704,35 @@ async function main(options: any) {
     }
     return v;
   });
+
+  // Apply --diff line-level filter (post-analyzer pass).
+  // Filtered count drives exit when --diff is set: auditRecord (below) is
+  // computed from this `violations` array, and fail-threshold reads
+  // auditRecord.summary, so trimming here propagates to the exit code.
+  if (config.diffSpec) {
+    try {
+      const spec = parseDiffSpec(config.diffSpec);
+      const diffCwd =
+        findGitRepoRoot(tsconfigPath) || path.dirname(path.resolve(tsconfigPath));
+      const diffMap = computeDiffLines(spec, { cwd: diffCwd });
+      const before = violations.length;
+      violations = filterViolationsByDiff(violations, diffMap);
+      if (verbose) {
+        console.log(
+          chalk.dim(
+            `  --diff ${config.diffSpec}: ${before} → ${violations.length} violations`,
+          ),
+        );
+      }
+    } catch (err) {
+      console.error(
+        chalk.red(
+          `Error applying --diff filter: ${err instanceof Error ? err.message : String(err)}`,
+        ),
+      );
+      process.exit(2);
+    }
+  }
 
   if (verbose)
     console.log(

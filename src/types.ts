@@ -295,6 +295,14 @@ export interface AnalyzerConfig {
   includeTests?: boolean;
   /** Only report violations in these files (absolute paths). Full program still loads for type resolution. */
   changedFiles?: string[];
+  /**
+   * Only report violations on lines added/modified by `git diff <base>..<head>`
+   * on the new side. Format: "<base>..<head>" (e.g. "main..HEAD"). Applied as a
+   * post-analyzer filter. Supersedes --changed-files when both are set (since
+   * line-level is always at least as restrictive as file-level over the same
+   * change set). See lib/diff-filter.ts.
+   */
+  diffSpec?: string;
   /** Bypass the large-scan safety check. User must opt in (--force-large-scan or NARK_FORCE_LARGE_SCAN=1). */
   forceLargeScan?: boolean;
 }
