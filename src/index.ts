@@ -55,7 +55,9 @@ import {
   createLoginCommand,
   createLogoutCommand,
 } from "./cli/auth.js";
-import { getToken } from "./lib/auth.js";
+import { createWorkspaceCommand } from "./cli/workspace.js";
+import { createWhoamiCommand } from "./cli/whoami.js";
+import { resolveActiveWorkspace } from "./lib/auth.js";
 import { createCiCommand } from "./cli/ci.js";
 import { generateAIPrompt } from "./ai-prompt-generator.js";
 import { writeScanResults, findNarkDir } from "./output/index.js";
@@ -122,9 +124,16 @@ program.addCommand(createTelemetryCommand());
 program.addCommand(createAuthCommand());
 program.addCommand(createLoginCommand());
 program.addCommand(createLogoutCommand());
+program.addCommand(createWorkspaceCommand());
+program.addCommand(createWhoamiCommand());
 program.addCommand(createCiCommand());
 
 program
+  .option(
+    "--org <slug>",
+    "Resolve token for this workspace (overrides .nark/config.json and default)",
+  )
+  .option("-w, --workspace <slug>", "Alias for --org")
   .option(
     "--tsconfig <path>",
     "Path to tsconfig.json or project directory",
@@ -388,6 +397,11 @@ function verboseLog(message: string): void {
  * Main execution
  */
 async function main(options: any) {
+  // qt-162: stash the --org/--workspace flag globally so telemetry callers
+  // (which run from a different module scope) can pick it up without
+  // threading the option object through every function signature.
+  (process as any)._narkOrgFlag = options.org ?? options.workspace ?? undefined;
+
   // Handle --instructions-path: print FORAIAGENTS.md path and exit
   if (options.instructionsPath) {
     const forAiAgentsPath = path.join(__dirname, "../FORAIAGENTS.md");
@@ -1165,7 +1179,11 @@ async function main(options: any) {
     };
 
     let telemetryResult: TelemetryResult | undefined;
-    const token = getToken();
+    const resolved = resolveActiveWorkspace({
+      orgSlug: (process as any)._narkOrgFlag,
+      cwd: process.cwd(),
+    });
+    const token = resolved?.token ?? null;
     if (token !== null) {
       telemetryResult = await fireEnrichedTelemetryEvent(
         telemetryPayload,
