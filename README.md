@@ -231,15 +231,110 @@ export NARK_TELEMETRY=off
 export DO_NOT_TRACK=1
 ```
 
-### Auth
+### Authentication
+
+Nark supports logging in to **multiple workspaces** (organizations) from the
+same machine. Credentials live in `~/.nark/credentials.json`, keyed by
+organization slug, with file permissions `0600`.
 
 ```bash
-# Authenticate with the nark SaaS (stores token in ~/.nark/auth.json)
+# Log in (browser-based device flow; pick the org from the dropdown)
 nark login
 
-# Remove stored credentials
+# Pre-select an organization in the browser
+nark login --org acme
+
+# Show the active workspace + how it was resolved
+nark whoami
+
+# List all logged-in workspaces (marks default + most-recent)
+nark workspace
+
+# Switch the global default workspace
+nark workspace use acme
+
+# Bind THIS repo to a workspace (writes .nark/config.json — commit this!)
+nark workspace use --here acme
+
+# Locally rename a workspace alias
+nark workspace rename old-slug new-slug
+
+# Log out of the default workspace (auto-promotes next-most-recent)
 nark logout
+
+# Log out of a specific workspace
+nark logout --org acme
+
+# Log out of all workspaces (deletes ~/.nark/credentials.json)
+nark logout --all
 ```
+
+#### Multi-workspace flow
+
+If you belong to more than one organization (e.g. a personal org + a team
+org), log in to each:
+
+```bash
+nark login --org personal
+nark login --org acme
+```
+
+The first login becomes your default. Subsequent logins do **not** change the
+default — switch with `nark workspace use <slug>`.
+
+#### Per-repo workspace binding (`.nark/config.json`)
+
+To pin a repository to a specific workspace, commit a `.nark/config.json`:
+
+```json
+{ "workspace": "acme" }
+```
+
+This is the same pattern Vercel uses for `.vercel/project.json`. The file
+**should be committed** — it makes the workspace explicit for every
+contributor and avoids the "whose org did this scan land in?" confusion.
+
+A legacy `.narkrc.json` with a `workspace` field is also honored as a
+fallback. If both files coexist, `.nark/config.json` wins and a one-time
+warning advises removing the legacy file.
+
+#### Resolution priority
+
+When nark needs a token (for telemetry, dashboard uploads, etc.) it walks
+this chain in order — the first match wins:
+
+1. `NARK_API_KEY` environment variable
+2. `NARK_TOKEN` environment variable (deprecated; emits a one-time warning)
+3. `--org <slug>` / `-w <slug>` command-line flag
+4. `.nark/config.json` `workspace` field (CWD or parents)
+5. `.narkrc.json` `workspace` field (CWD or parents, legacy)
+6. `default` field in `~/.nark/credentials.json`
+7. Exactly one workspace in the store (silent default)
+8. Error — caller asks you to set one of the above
+
+#### Environment variables
+
+| Variable        | Status             | Notes                                                                                    |
+| --------------- | ------------------ | ---------------------------------------------------------------------------------------- |
+| `NARK_API_KEY`  | Canonical          | Set in CI for unattended runs.                                                           |
+| `NARK_TOKEN`    | Deprecated         | Still works; prints a one-time warning per process. Will be removed in nark **v2.0**.    |
+| `NARK_API_URL`  | Optional override  | Defaults to `https://app.nark.sh`. Useful for staging/self-hosted endpoints.             |
+
+#### Migrating from earlier nark versions (NARK_TOKEN)
+
+If you have an existing `~/.nark/credentials` (v1) file, nark migrates it
+automatically the first time you run any command in nark **2.1.0** or later:
+
+- The credentials are copied into a new `~/.nark/credentials.json` (v2),
+  keyed under the sentinel slug `default`.
+- A single stderr line — `Migrated nark credentials to v2 (multi-workspace).`
+  — is printed once. A `migratedAt` timestamp is written so the message
+  never reappears.
+- The legacy v1 file is removed after the new file is written.
+
+After migration, run `nark login --org <slug>` to add your team workspaces
+alongside the migrated one, then `nark workspace use <slug>` to choose your
+default.
 
 ### CI (diff-aware scanning)
 
