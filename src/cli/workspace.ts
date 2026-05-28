@@ -21,6 +21,11 @@ export function createWorkspaceCommand(): Command {
   const cmd = new Command("workspace");
   cmd.description("Manage logged-in nark workspaces");
 
+  // qt-164 DEC7: typo suggestion (`nark workspace usse` → "Did you mean use?")
+  cmd
+    .showSuggestionAfterError(true)
+    .showHelpAfterError("(add --help for additional usage)");
+
   // Default action (bare `nark workspace`) — list
   cmd.action(() => {
     const ws = listWorkspaces();

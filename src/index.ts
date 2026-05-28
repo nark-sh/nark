@@ -1279,6 +1279,17 @@ async function main(options: any) {
         }
       }
     }
+
+    // qt-164 DEC1: post-scan footer — visible in normal AND --quiet modes.
+    // Silent when telemetry is disabled/errored, or when the resolver returned
+    // no workspace (env-token users — no orgName/orgSlug to print).
+    if (shouldPrintScanUploadedFooter(telemetryResult, resolved?.workspace)) {
+      console.log(
+        chalk.cyan(
+          `✓ Scan uploaded to ${resolved!.workspace!.orgName} (${resolved!.workspace!.orgSlug})`,
+        ),
+      );
+    }
   }
 
   // Checkpoint 5: verbose time breakdown

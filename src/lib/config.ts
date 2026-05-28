@@ -88,3 +88,16 @@ export function readRepoWorkspace(cwd: string): RepoWorkspaceSource | null {
     currentDir = parent;
   }
 }
+
+/**
+ * Boolean shorthand (qt-164): does `cwd` or any ancestor declare a
+ * `.nark/config.json` (or legacy `.narkrc.json`) workspace binding?
+ *
+ * Reused by `loginAction` (auto-promote gate — different-slug + no-binding
+ * branch promotes the new slug to default) and by the pre-scan workspace
+ * mismatch warning (suppressed when a binding exists — the user has
+ * explicitly bound this repo and knows where the scan goes).
+ */
+export function hasRepoWorkspaceBinding(cwd: string): boolean {
+  return readRepoWorkspace(cwd) !== null;
+}
