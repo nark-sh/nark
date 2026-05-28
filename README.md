@@ -511,6 +511,26 @@ The contract library ([nark-corpus](https://github.com/nark-sh/nark-corpus)) inc
 - **AI:** openai, @anthropic-ai/sdk, @langchain/*
 - **And 100+ more...**
 
+## Troubleshooting
+
+### npm warnings on `npx nark`
+
+Running `npx nark` may print warnings like:
+
+```
+npm warn Unknown env config "developer"
+npm warn Unknown project config "public-hoist-pattern". This will stop working in the next major version of npm.
+```
+
+These come from your `~/.npmrc` containing pnpm-only configuration keys that npm doesn't recognize. They are not nark errors — npm is simply warning that those keys do nothing for it. The scan itself ran fine.
+
+**Fix (pick one):**
+
+- Move the pnpm-only keys to `~/.pnpmrc` (which only pnpm reads). This is the cleanest separation.
+- Prefix the unknown keys with `_` in `~/.npmrc` (e.g. `_public-hoist-pattern=...`). npm silently ignores keys starting with `_`.
+
+Do **not** use `npm --silent` or `npx --silent` to suppress them — that flag also hides real npm errors you want to see.
+
 ## License
 
 AGPL-3.0 — see [LICENSE](./LICENSE) for details. Free for local use, CI/CD, and self-hosting. SaaS providers must open-source modifications or obtain a commercial license.
