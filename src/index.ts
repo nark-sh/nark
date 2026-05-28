@@ -411,6 +411,13 @@ function verboseLog(message: string): void {
   process.stderr.write(message + "\n");
 }
 
+function toRelPath(absPath: string): string {
+  const rel = path.relative(process.cwd(), absPath);
+  if (rel === "") return "./";
+  if (rel.startsWith("..") || path.isAbsolute(rel)) return rel;
+  return `./${rel}`;
+}
+
 /**
  * Main execution
  */
@@ -574,7 +581,7 @@ async function main(options: any) {
     );
     if (totalFiles <= 20) {
       for (const [pkg, files] of corpusResult.contractFiles) {
-        for (const f of files) verboseLog(`  ${pkg}: ${f}`);
+        for (const f of files) verboseLog(`  ${pkg}: ${toRelPath(f)}`);
       }
     } else {
       for (const [pkg, files] of corpusResult.contractFiles) {
@@ -606,7 +613,7 @@ async function main(options: any) {
     for (const pkg of packageDiscovery.packages) {
       if (pkg.usedIn.length > 0) {
         verboseLog(`  ${pkg.name}: imported in ${pkg.usedIn.length} file(s)`);
-        for (const f of pkg.usedIn) verboseLog(`    ${f}`);
+        for (const f of pkg.usedIn) verboseLog(`    ${toRelPath(f)}`);
       }
     }
   }
@@ -749,7 +756,7 @@ async function main(options: any) {
     verboseLog(`\n[verbose] Analysis timing:`);
     if (slowFiles.length > 0) {
       verboseLog(`  Files taking >500ms:`);
-      for (const f of slowFiles) verboseLog(`    ${f.durationMs}ms  ${f.file}`);
+      for (const f of slowFiles) verboseLog(`    ${f.durationMs}ms  ${toRelPath(f.file)}`);
     } else {
       verboseLog(`  No files took >500ms`);
     }
@@ -1284,6 +1291,11 @@ async function main(options: any) {
     // Silent when telemetry is disabled/errored, or when the resolver returned
     // no workspace (env-token users — no orgName/orgSlug to print).
     if (shouldPrintScanUploadedFooter(telemetryResult, resolved?.workspace)) {
+      if (telemetryResult?.authenticated && telemetryResult?.email) {
+        console.log(
+          chalk.blue(`✓ Telemetry authenticated as ${telemetryResult.email}`),
+        );
+      }
       console.log(
         chalk.cyan(
           `✓ Scan uploaded to ${resolved!.workspace!.orgName} (${resolved!.workspace!.orgSlug})`,
