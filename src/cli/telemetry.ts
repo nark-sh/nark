@@ -15,7 +15,17 @@ import * as os from "os";
 import { createHash, randomUUID } from "crypto";
 import { execSync } from "child_process";
 import chalk from "chalk";
-import { getToken, getCredentials } from "../lib/auth.js";
+import { getCredentials, resolveActiveWorkspace } from "../lib/auth.js";
+
+/**
+ * Resolve a token via the qt-162 resolveActiveWorkspace chain, threading the
+ * --org/-w flag stashed by main() in src/index.ts.
+ */
+function _resolveTelemetryToken(): string | null {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const orgSlug = (process as any)._narkOrgFlag as string | undefined;
+  return resolveActiveWorkspace({ orgSlug, cwd: process.cwd() })?.token ?? null;
+}
 import type { Violation } from "../types.js";
 
 export interface TelemetryConfig {
@@ -365,7 +375,7 @@ export async function fireTelemetryEvent(
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
     };
-    const token = getToken();
+    const token = _resolveTelemetryToken();
     if (token !== null) {
       headers["Authorization"] = "Bearer " + token;
     }
@@ -607,7 +617,7 @@ export async function fireEnrichedTelemetryEvent(
       disabled: true,
     };
   try {
-    const token = getToken();
+    const token = _resolveTelemetryToken();
     if (!token)
       return {
         sent: false,
