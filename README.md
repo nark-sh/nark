@@ -336,7 +336,7 @@ After migration, run `nark login --org <slug>` to add your team workspaces
 alongside the migrated one, then `nark workspace use <slug>` to choose your
 default.
 
-### CI (diff-aware scanning)
+### CI (file-level diff-aware scanning)
 
 Scans only the files changed in the current PR/branch — ideal for GitHub Actions:
 
@@ -351,6 +351,34 @@ nark ci --baseline-commit <hash>
 nark ci --sarif
 nark ci --sarif-output results.sarif
 ```
+
+### `--diff` (line-level filtering)
+
+Filter violations to only the lines actually touched by a git diff range. Pre-existing
+violations on untouched lines of a modified file are excluded — matches the posture
+of CodeRabbit / Greptile-style PR review bots.
+
+```bash
+# Only violations introduced by your branch vs main
+nark --diff main..HEAD --tsconfig tsconfig.json
+
+# Against a specific base SHA (useful in PR CI)
+nark --diff $BASE_SHA..HEAD --tsconfig tsconfig.json
+
+# Against the PR base in GitHub Actions
+nark --diff origin/${{ github.base_ref }}..HEAD --tsconfig tsconfig.json
+```
+
+The filtered count drives the exit code — `nark --diff` exits non-zero only if a
+diff-introduced violation meets `--fail-threshold`. Pre-existing violations don't
+fail your build.
+
+Coexists with `--changed-files` (file-level). When both are passed, `--diff` wins
+because line-level is always at least as restrictive as file-level over the same
+change set.
+
+Renamed files are handled — violations on a renamed file are matched against the
+new path only.
 
 ### Triage
 
@@ -476,6 +504,8 @@ Use `--report-only` to always get `0`, or `--fail-threshold warning` to block on
 | `--fail-on-warnings` | Shorthand for `--fail-threshold warning` | false |
 | `--sarif` | Write SARIF 2.1.0 to `.nark/results.sarif` | false |
 | `--sarif-output <file>` | Write SARIF to a custom path | — |
+| `--diff <spec>` | Line-level filter — only report violations on lines touched by the diff (e.g. `main..HEAD`) | — |
+| `--changed-files <paths...>` | File-level filter — only report violations in the named files | — |
 | `--quiet, -q` | Show compact summary instead of full report | false |
 | `--verbose` | Full output (default, kept for backward compatibility) | — |
 | `--include-tests` | Include test files | false |

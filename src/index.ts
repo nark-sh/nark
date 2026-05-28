@@ -1229,7 +1229,7 @@ async function main(options: any) {
       totalCallSites,
       corpusVersion: corpusPkgVersion,
       suppressionCount,
-      scanMode: "full",
+      scanMode: config.diffSpec ? "diff" : "full",
       exitCode: telemetryExitCode,
       // concern-20260429-telemetry-suppression-insights: per-suppression signal
       ...(suppressionDetails && suppressionDetails.length > 0
