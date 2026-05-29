@@ -557,6 +557,7 @@ const MAX_CODE_LENGTH = 2000;
  */
 function extractCodeSnippets(
   violations: Violation[],
+  projectRoot?: string,
 ): Array<{ file: string; line: number; code: string; contractId: string }> {
   try {
     const snippets: Array<{
@@ -585,7 +586,7 @@ function extractCodeSnippets(
       }
       if (code) {
         snippets.push({
-          file: v.file,
+          file: toRelativeProjectPath(v.file, projectRoot),
           line: v.line,
           code,
           contractId: v.package,
@@ -599,6 +600,22 @@ function extractCodeSnippets(
 }
 
 /**
+ * Convert an absolute file path to a project-relative path with forward slashes,
+ * so the SaaS can build `github.com/<owner>/<repo>/blob/<sha>/<path>` URLs.
+ *
+ * The TS compiler emits absolute paths (sourceFile.fileName); sending those to
+ * the SaaS leaked machine-specific paths (e.g. /Users/<user>/...) into the UI
+ * and broke "View on GitHub" links. Falls back to the original path if
+ * projectRoot is missing or the file sits outside the project root.
+ */
+function toRelativeProjectPath(absFile: string, projectRoot?: string): string {
+  if (!projectRoot) return absFile;
+  const rel = path.relative(projectRoot, absFile);
+  if (!rel || rel.startsWith("..") || path.isAbsolute(rel)) return absFile;
+  return rel.split(path.sep).join("/");
+}
+
+/**
  * Fire an enriched telemetry event for authenticated users.
  * Sends to /api/telemetry/scan-enriched with Bearer auth, git metadata, and code snippets.
  * Same fire-and-forget pattern — never throws, 2-second timeout.
@@ -606,6 +623,7 @@ function extractCodeSnippets(
 export async function fireEnrichedTelemetryEvent(
   payload: TelemetryPayload,
   violations: Violation[],
+  projectRoot?: string,
 ): Promise<TelemetryResult> {
   const config = readTelemetryConfig();
   const enrichedEndpoint = `${NARK_API_BASE}/api/telemetry/scan-enriched`;
@@ -637,7 +655,7 @@ export async function fireEnrichedTelemetryEvent(
     const branch = getBranch();
     const commitSha = getCommitSha();
     const ciProvider = detectCiProvider();
-    const codeSnippets = extractCodeSnippets(violations);
+    const codeSnippets = extractCodeSnippets(violations, projectRoot);
     const repoOwnerName = parseRepoOwnerName();
 
     // NOTE: Both this object and the enriched endpoint use `repoName`, but with

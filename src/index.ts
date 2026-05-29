@@ -1249,6 +1249,7 @@ async function main(options: any) {
       telemetryResult = await fireEnrichedTelemetryEvent(
         telemetryPayload,
         violations,
+        projectRoot,
       );
     } else {
       telemetryResult = await fireTelemetryEvent(telemetryPayload);
