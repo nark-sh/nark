@@ -185,3 +185,34 @@ export function filterViolationsByDiff<V extends ViolationLike>(
   }
   return out;
 }
+
+/**
+ * Return all violations tagged `isDiffIntroduced: true|false` based on whether
+ * `(absolute file path, line number)` is present in the diff map. Unlike
+ * `filterViolationsByDiff` which DROPS non-diff violations, this preserves
+ * them all — for callers that need the full picture (e.g. PR-scan dual-mode
+ * reporting: show new + pre-existing in the same bot comment).
+ *
+ * Behavior mirrors `filterViolationsByDiff` for path/line resolution:
+ * - Violation file path normalized to absolute (against process cwd) before lookup.
+ * - File not in diffMap → `isDiffIntroduced: false`.
+ * - File in map but line not in set → `isDiffIntroduced: false`.
+ * - Missing file or line field → `isDiffIntroduced: false` (defensive, never throws).
+ * - Empty diff map → ALL violations tagged `isDiffIntroduced: false` (NOT empty array — this is the key difference from filter mode).
+ */
+export function annotateViolationsWithDiff<V extends ViolationLike>(
+  violations: V[],
+  diffMap: DiffLineMap,
+): Array<V & { isDiffIntroduced: boolean }> {
+  return violations.map((v) => {
+    const rawFile = v.file ?? v.filePath;
+    const rawLine = v.line ?? v.lineNumber;
+    if (!rawFile || typeof rawLine !== 'number') {
+      return { ...v, isDiffIntroduced: false };
+    }
+    const abs = path.isAbsolute(rawFile) ? rawFile : path.resolve(process.cwd(), rawFile);
+    const lineSet = diffMap.get(abs);
+    const isDiffIntroduced = !!(lineSet && lineSet.has(rawLine));
+    return { ...v, isDiffIntroduced };
+  });
+}

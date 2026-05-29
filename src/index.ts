@@ -39,6 +39,7 @@ import {
   parseDiffSpec,
   computeDiffLines,
   filterViolationsByDiff,
+  annotateViolationsWithDiff,
 } from "./lib/diff-filter.js";
 import type { AnalyzerConfig, Violation } from "./types.js";
 import { createSuppressionsCommand } from "./cli/suppressions.js";
@@ -240,6 +241,11 @@ program
   .option(
     "--diff <spec>",
     "Only report violations on lines added/modified by `git diff <spec>` (e.g. main..HEAD). Two-dot form. Supersedes --changed-files when both are set.",
+  )
+  .option(
+    "--diff-output <mode>",
+    "Output mode for --diff: 'filter' (default) or 'annotate'. Annotate emits all violations with per-entry isDiffIntroduced boolean.",
+    "filter",
   )
   .option(
     "--force-large-scan",
@@ -625,6 +631,7 @@ async function main(options: any) {
     includeTests: options.includeTests,
     changedFiles: options.changedFiles?.map((f: string) => path.resolve(f)),
     diffSpec: options.diff,
+    diffOutput: options.diffOutput,
     forceLargeScan: options.forceLargeScan,
   };
 
@@ -716,6 +723,12 @@ async function main(options: any) {
   // Filtered count drives exit when --diff is set: auditRecord (below) is
   // computed from this `violations` array, and fail-threshold reads
   // auditRecord.summary, so trimming here propagates to the exit code.
+  //
+  // --diff-output (qt-176):
+  //   "filter"   (default) → drop non-diff violations (current behavior).
+  //   "annotate" → keep ALL violations; tag each with isDiffIntroduced. Used
+  //                by PR dual-mode reporting so consumers can render new +
+  //                pre-existing in the same view.
   if (config.diffSpec) {
     try {
       const spec = parseDiffSpec(config.diffSpec);
@@ -723,13 +736,27 @@ async function main(options: any) {
         findGitRepoRoot(tsconfigPath) || path.dirname(path.resolve(tsconfigPath));
       const diffMap = computeDiffLines(spec, { cwd: diffCwd });
       const before = violations.length;
-      violations = filterViolationsByDiff(violations, diffMap);
-      if (verbose) {
-        console.log(
-          chalk.dim(
-            `  --diff ${config.diffSpec}: ${before} → ${violations.length} violations`,
-          ),
-        );
+      if (config.diffOutput === "annotate") {
+        violations = annotateViolationsWithDiff(violations, diffMap) as Violation[];
+        if (verbose) {
+          const newCount = violations.filter(
+            (v: any) => v.isDiffIntroduced === true,
+          ).length;
+          console.log(
+            chalk.dim(
+              `  --diff ${config.diffSpec} (annotate): ${violations.length} violations tagged (${newCount} diff-introduced)`,
+            ),
+          );
+        }
+      } else {
+        violations = filterViolationsByDiff(violations, diffMap);
+        if (verbose) {
+          console.log(
+            chalk.dim(
+              `  --diff ${config.diffSpec}: ${before} → ${violations.length} violations`,
+            ),
+          );
+        }
       }
     } catch (err) {
       console.error(

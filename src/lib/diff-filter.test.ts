@@ -13,6 +13,7 @@ import {
   parseHunkHeadersToLines,
   computeDiffLines,
   filterViolationsByDiff,
+  annotateViolationsWithDiff,
 } from './diff-filter.js';
 
 describe('diff-filter', () => {
@@ -249,6 +250,144 @@ describe('diff-filter', () => {
         { file: fileA, line: 10 }, // valid
       ];
       expect(filterViolationsByDiff(violations, map)).toEqual([{ file: fileA, line: 10 }]);
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // annotateViolationsWithDiff (qt-176): annotate mode — preserve ALL
+  // violations, tag each with isDiffIntroduced based on (file, line) lookup.
+  // Used by PR dual-mode reporting so consumers can render new + pre-existing
+  // in the same view.
+  // -------------------------------------------------------------------------
+  describe('annotateViolationsWithDiff', () => {
+    const fileA = '/repo/src/a.ts';
+    const fileB = '/repo/src/b.ts';
+    const untouched = '/repo/src/untouched.ts';
+
+    it('preserves input length (does not filter — annotates only)', () => {
+      const map = new Map([[fileA, new Set([10])]]);
+      const violations = [
+        { file: fileA, line: 10 }, // new
+        { file: fileA, line: 99 }, // pre-existing (line not in set)
+        { file: untouched, line: 1 }, // pre-existing (file not in map)
+      ];
+      const out = annotateViolationsWithDiff(violations, map);
+      expect(out).toHaveLength(3);
+    });
+
+    it('tags isDiffIntroduced=true when (file, line) is in the map', () => {
+      const map = new Map([[fileA, new Set([10, 11])]]);
+      const violations = [{ file: fileA, line: 10 }];
+      const out = annotateViolationsWithDiff(violations, map);
+      expect(out).toHaveLength(1);
+      expect(out[0].isDiffIntroduced).toBe(true);
+    });
+
+    it('tags isDiffIntroduced=false when file is in the map but line is not', () => {
+      const map = new Map([[fileA, new Set([10, 11])]]);
+      const violations = [{ file: fileA, line: 5 }];
+      const out = annotateViolationsWithDiff(violations, map);
+      expect(out).toHaveLength(1);
+      expect(out[0].isDiffIntroduced).toBe(false);
+    });
+
+    it('tags isDiffIntroduced=false when file is not in the map at all', () => {
+      const map = new Map([[fileA, new Set([10])]]);
+      const violations = [{ file: untouched, line: 10 }];
+      const out = annotateViolationsWithDiff(violations, map);
+      expect(out).toHaveLength(1);
+      expect(out[0].isDiffIntroduced).toBe(false);
+    });
+
+    it('returns all violations with isDiffIntroduced=false for an empty diff map (annotate, NOT filter)', () => {
+      const map = new Map();
+      const violations = [
+        { file: fileA, line: 10 },
+        { file: fileB, line: 20 },
+      ];
+      const out = annotateViolationsWithDiff(violations, map);
+      expect(out).toHaveLength(2);
+      expect(out[0].isDiffIntroduced).toBe(false);
+      expect(out[1].isDiffIntroduced).toBe(false);
+    });
+
+    it('tags isDiffIntroduced=false defensively when file field is missing', () => {
+      const map = new Map([[fileA, new Set([10])]]);
+      const violations = [{ line: 10 }];
+      const out = annotateViolationsWithDiff(violations, map);
+      expect(out).toHaveLength(1);
+      expect(out[0].isDiffIntroduced).toBe(false);
+    });
+
+    it('tags isDiffIntroduced=false defensively when line field is missing', () => {
+      const map = new Map([[fileA, new Set([10])]]);
+      const violations = [{ file: fileA }];
+      const out = annotateViolationsWithDiff(violations, map);
+      expect(out).toHaveLength(1);
+      expect(out[0].isDiffIntroduced).toBe(false);
+    });
+
+    it('tolerates filePath/lineNumber aliases (same as filter mode)', () => {
+      const map = new Map([[fileA, new Set([10])]]);
+      const violations = [{ filePath: fileA, lineNumber: 10 }];
+      const out = annotateViolationsWithDiff(violations, map);
+      expect(out).toHaveLength(1);
+      expect(out[0].isDiffIntroduced).toBe(true);
+    });
+
+    it('handles absolute paths directly (no cwd resolution needed)', () => {
+      const map = new Map([[fileA, new Set([10])]]);
+      const violations = [{ file: fileA, line: 10 }];
+      const out = annotateViolationsWithDiff(violations, map);
+      expect(out[0].isDiffIntroduced).toBe(true);
+    });
+
+    it('resolves relative paths against process cwd', () => {
+      const map = new Map([[fileA, new Set([10])]]);
+      const originalCwd = process.cwd();
+      try {
+        // Compute a relative path from the current cwd to fileA — this
+        // mirrors filterViolationsByDiff's path resolution semantics.
+        const rel = path.relative(process.cwd(), fileA);
+        const violations = [{ file: rel, line: 10 }];
+        const out = annotateViolationsWithDiff(violations, map);
+        expect(out).toHaveLength(1);
+        expect(out[0].isDiffIntroduced).toBe(true);
+      } finally {
+        process.chdir(originalCwd);
+      }
+    });
+
+    it('correctly partitions a mixed batch — preserves original ordering', () => {
+      const map = new Map([
+        [fileA, new Set([10])],
+        [fileB, new Set([20])],
+      ]);
+      const violations = [
+        { file: fileA, line: 10 }, // true
+        { file: fileA, line: 99 }, // false
+        { file: fileB, line: 20 }, // true
+        { file: untouched, line: 1 }, // false
+      ];
+      const out = annotateViolationsWithDiff(violations, map);
+      expect(out).toHaveLength(4);
+      expect(out.map((v) => v.isDiffIntroduced)).toEqual([true, false, true, false]);
+    });
+
+    it('preserves all other fields on each violation (additive tagging)', () => {
+      const map = new Map([[fileA, new Set([10])]]);
+      const violations = [
+        { file: fileA, line: 10, severity: 'error', message: 'oh no', extra: 'kept' },
+      ];
+      const out = annotateViolationsWithDiff(violations, map);
+      expect(out[0]).toMatchObject({
+        file: fileA,
+        line: 10,
+        severity: 'error',
+        message: 'oh no',
+        extra: 'kept',
+        isDiffIntroduced: true,
+      });
     });
   });
 });

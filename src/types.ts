@@ -303,6 +303,15 @@ export interface AnalyzerConfig {
    * change set). See lib/diff-filter.ts.
    */
   diffSpec?: string;
+  /**
+   * How to apply `diffSpec`:
+   * - "filter" (default) — drop violations not in the diff (current behavior).
+   * - "annotate" — keep ALL violations from the full scan; tag each with
+   *   `isDiffIntroduced: boolean` so consumers (e.g. PR dual-mode reporting)
+   *   can render new + pre-existing in the same view.
+   * No-op when `diffSpec` is unset. See lib/diff-filter.ts.
+   */
+  diffOutput?: 'filter' | 'annotate';
   /** Bypass the large-scan safety check. User must opt in (--force-large-scan or NARK_FORCE_LARGE_SCAN=1). */
   forceLargeScan?: boolean;
 }
