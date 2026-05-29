@@ -1293,7 +1293,7 @@ async function main(options: any) {
     if (shouldPrintScanUploadedFooter(telemetryResult, resolved?.workspace)) {
       if (telemetryResult?.authenticated && telemetryResult?.email) {
         console.log(
-          chalk.blue(`✓ Telemetry authenticated as ${telemetryResult.email}`),
+          chalk.cyan(`✓ Telemetry authenticated as ${telemetryResult.email}`),
         );
       }
       console.log(
