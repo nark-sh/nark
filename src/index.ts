@@ -91,6 +91,25 @@ const __dirname = path.dirname(__filename);
 
 let scanOutputTipPrinted = false;
 
+/**
+ * qt-178: Detects "special" output paths under /dev/ that cannot accept a
+ * sibling output.txt log file.
+ *
+ * When the user passes `--output /dev/stdout` (or /dev/stderr, /dev/null, or
+ * any /dev/fd/N), the call site MUST skip setupOutputLogging entirely —
+ * setupOutputLogging tries to fs.createWriteStream(`${dirname}/output.txt`),
+ * which on POSIX systems requires root to write under /dev/ and otherwise
+ * crashes with "Permission denied". The audit JSON for /dev/stdout is then
+ * routed via process.stdout.write inside writeAuditRecord (see reporter.ts).
+ *
+ * Returns true for any absolute path that resolves to /dev or under /dev/.
+ * Returns false for normal file paths (resolved against cwd).
+ */
+export function isSpecialOutputPath(p: string): boolean {
+  const normalized = path.resolve(p);
+  return normalized === "/dev" || normalized.startsWith("/dev/");
+}
+
 const program = new Command();
 
 // Load .nark/config.yaml from the project root (cwd at invocation time).
@@ -501,10 +520,22 @@ async function main(options: any) {
   const outputPath = options.output || generateOutputPath(tsconfigPath);
   const outputDir = path.dirname(outputPath);
 
-  // Setup output logging (capture all terminal output to output.txt)
-  const cleanupLogging = setupOutputLogging(outputDir);
+  // qt-178: when outputPath is /dev/stdout, /dev/stderr, /dev/null, or any
+  // path under /dev/, skip setupOutputLogging entirely — there is nowhere
+  // safe to create the sibling output.txt log file (POSIX requires root for
+  // /dev/* writes). The writable device path is handled directly in
+  // writeAuditRecord (process.stdout.write for /dev/stdout; fs.writeFileSync
+  // for /dev/null which the kernel discards).
+  const useStdoutJson = outputPath === "/dev/stdout";
+  const cleanupLogging = isSpecialOutputPath(outputPath)
+    ? () => {}
+    : setupOutputLogging(outputDir);
 
-  if (verbose) {
+  // qt-178: when stdout IS the JSON sink, suppress the verbose status banner
+  // so downstream consumers (e.g. `npx nark ... | jq`) parse a clean
+  // single-document JSON payload. Same gating applied to "Loading contracts"
+  // chatter below and the post-write confirmation line further down.
+  if (verbose && !useStdoutJson) {
     console.log(chalk.gray(`  tsconfig: ${tsconfigPath}`));
     console.log(chalk.gray(`  corpus: ${options.corpus}`));
 
@@ -525,7 +556,7 @@ async function main(options: any) {
   }
 
   // Load corpus
-  if (verbose) console.log(chalk.dim("Loading contracts..."));
+  if (verbose && !useStdoutJson) console.log(chalk.dim("Loading contracts..."));
   const corpusStartTime = Date.now();
   const corpusResult = await loadCorpus(options.corpus, {
     includeDrafts: options.includeDrafts,
@@ -866,7 +897,8 @@ async function main(options: any) {
 
   // Write JSON output
   writeAuditRecord(finalRecord, outputPath);
-  if (verbose) console.log(chalk.gray(`Audit record written to ${outputPath}`));
+  if (verbose && !useStdoutJson)
+    console.log(chalk.gray(`Audit record written to ${outputPath}`));
 
   // Stale suppression cleanup is intentionally NOT automatic.
   // Different corpus versions or analyzer versions produce different violations,

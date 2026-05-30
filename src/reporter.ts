@@ -169,13 +169,30 @@ function getGitBranch(): string | undefined {
 }
 
 /**
- * Writes audit record to JSON file
+ * Writes audit record to JSON file.
+ *
+ * qt-178: When outputPath === "/dev/stdout", route to process.stdout.write
+ * directly. fs.writeFileSync("/dev/stdout", ...) is unreliable on some
+ * POSIX setups (EPERM on macOS in certain shells; EPIPE when the consumer
+ * closes the pipe), AND it interleaves badly with the status console.log
+ * proxy installed by setupOutputLogging. process.stdout.write is the
+ * correct primitive for piping audit JSON to stdout for downstream
+ * consumers (e.g. `npx nark ... | jq`).
+ *
+ * /dev/null and other /dev/* paths still go through fs.writeFileSync —
+ * the kernel handles them correctly. setupOutputLogging is what crashes
+ * on those paths (it tries to create a sibling output.txt), and the
+ * call site in index.ts skips that step via isSpecialOutputPath().
  */
 export function writeAuditRecord(
   record: AuditRecord,
   outputPath: string,
 ): void {
   const json = JSON.stringify(record, null, 2);
+  if (outputPath === "/dev/stdout") {
+    process.stdout.write(json);
+    return;
+  }
   fs.writeFileSync(outputPath, json, "utf-8");
 }
 
