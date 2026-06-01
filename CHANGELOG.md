@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.4.0] — 2026-06-01
+
+### Added
+
+- **Pre-scan missing-node_modules check (qt-179).** Nark now refuses to scan a project that declares corpus-covered deps in its `package.json` but has no `node_modules/` directory in the same folder. Without installed deps the TypeScript checker returns `any` for every package call and nark cannot detect violations — silently reporting "0 violations" on an uninstalled project is the worst possible UX, so we block instead. Exit code: `1`.
+- **`NARK_ALLOW_MISSING_DEPS=1` opt-out.** Setting this env var prints the warning to stderr but continues with the scan. Use for intentional dependency-less analyses (e.g. CI matrix that scans before install).
+
 ## [Unreleased] — 2026-05-05
 
 ### Breaking Changes

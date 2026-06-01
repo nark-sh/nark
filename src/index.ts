@@ -68,6 +68,7 @@ import {
   maybePrintPreScanWorkspaceWarning,
   shouldPrintScanUploadedFooter,
 } from "./lib/pre-scan-warning.js";
+import { checkMissingNodeModules } from "./lib/missing-node-modules-check.js";
 import { createCiCommand } from "./cli/ci.js";
 import { generateAIPrompt } from "./ai-prompt-generator.js";
 import { writeScanResults, findNarkDir } from "./output/index.js";
@@ -624,6 +625,36 @@ async function main(options: any) {
       for (const [pkg, files] of corpusResult.contractFiles) {
         verboseLog(`  ${pkg}: ${files.length} file(s)`);
       }
+    }
+  }
+
+  // qt-179: Pre-scan missing-node_modules check. If the project declares
+  // corpus-covered deps but has no node_modules at the package.json's dir,
+  // the TypeScript checker will return `any` for every package call and
+  // nark will silently report "0 violations" — the worst possible UX.
+  // Block by default; allow opt-out via NARK_ALLOW_MISSING_DEPS=1.
+  const missingNm = checkMissingNodeModules({
+    tsconfigPath,
+    corpusContractNames: corpusResult.contracts.keys(),
+  });
+  if (missingNm.kind === "missing") {
+    const allowMissing = process.env.NARK_ALLOW_MISSING_DEPS === "1";
+    process.stderr.write(
+      chalk.yellow("⚠  No node_modules found.\n") +
+        "Nark uses TypeScript's type checker to identify package calls.\n" +
+        "Without installed dependencies, every call comes back as `any` and\n" +
+        "nark cannot detect violations.\n\n" +
+        chalk.yellow(
+          "Fix: run `pnpm install` (or npm/yarn/bun install), then re-run nark.\n",
+        ),
+    );
+    if (!allowMissing) {
+      process.stderr.write(
+        chalk.dim(
+          "\n(Set NARK_ALLOW_MISSING_DEPS=1 to continue anyway.)\n",
+        ),
+      );
+      process.exit(1);
     }
   }
 
