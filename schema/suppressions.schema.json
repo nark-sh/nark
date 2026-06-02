@@ -1,0 +1,48 @@
+{
+  "$ref": "#/definitions/NarkConfig",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "IgnoreRule": {
+      "additionalProperties": false,
+      "description": "A single ignore rule from config file",
+      "properties": {
+        "file": {
+          "description": "Glob pattern for files (e.g., \"src/test/**\")",
+          "type": "string"
+        },
+        "package": {
+          "description": "Package name to ignore",
+          "type": "string"
+        },
+        "postconditionId": {
+          "description": "Specific postcondition ID",
+          "type": "string"
+        },
+        "reason": {
+          "description": "Required reason for suppression",
+          "type": "string"
+        }
+      },
+      "required": [
+        "reason"
+      ],
+      "type": "object"
+    },
+    "NarkConfig": {
+      "additionalProperties": {
+        "description": "Other config options"
+      },
+      "description": "Configuration file structure (.nark/suppressions.json)",
+      "properties": {
+        "ignore": {
+          "description": "Suppression rules",
+          "items": {
+            "$ref": "#/definitions/IgnoreRule"
+          },
+          "type": "array"
+        }
+      },
+      "type": "object"
+    }
+  }
+}
