@@ -675,10 +675,29 @@ export class PackageDiscovery {
    * - "@/*" -> "@"
    * - "@/components/*" -> "@/components"
    * - "~/*" -> "~"
+   *
+   * Public entry point: clears any previous state then walks the extends
+   * chain. The recursive accumulation happens in collectPathAliases below.
    */
   private extractPathAliases(config: any, tsconfigPath: string): void {
     this.pathAliases.clear();
+    this.collectPathAliases(config, tsconfigPath);
+  }
 
+  /**
+   * qt-191: previously extractPathAliases() called clear() then recursed into
+   * itself. The recursive call wiped the outer-config's aliases on entry, so
+   * any tsconfig that defined `paths` AND extended a parent ended up with
+   * only the parent's aliases (and parents typically don't define paths).
+   * Result: `@/` alias from apps/web/tsconfig.json was wiped when nark
+   * recursed into packages/config/tsconfig/nextjs.json — and the saas's
+   * @/* imports started showing up in the "packages without contracts" gap
+   * list, confusing both the dashboard and the bot comment.
+   *
+   * Fix: separate the recursive helper so clear() only happens once at the
+   * public entry point.
+   */
+  private collectPathAliases(config: any, tsconfigPath: string): void {
     // Check current config
     const paths = config.compilerOptions?.paths;
     if (paths) {
@@ -698,7 +717,7 @@ export class PackageDiscovery {
         );
         const parentConfig = ts.readConfigFile(extendsPath, ts.sys.readFile);
         if (parentConfig.config) {
-          this.extractPathAliases(parentConfig.config, extendsPath);
+          this.collectPathAliases(parentConfig.config, extendsPath);
         }
       } catch {
         // Ignore errors loading parent config

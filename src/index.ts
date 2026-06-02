@@ -910,6 +910,23 @@ async function main(options: any) {
     }
   }
 
+  // qt-187: read corpus version from the installed corpus's package.json
+  // instead of the previous "1.0.0" hardcode. The audit JSON's corpus_version
+  // field flows directly into the saas PR bot comment + share page; the
+  // hardcode caused every scan to misreport the corpus version it was using.
+  // Resolved once here and reused below for telemetry.
+  const corpusPkgVersion = (() => {
+    try {
+      const pkgPath = path.join(options.corpus, "package.json");
+      const raw = fs.readFileSync(pkgPath, "utf-8");
+      return (
+        (JSON.parse(raw) as { version?: string }).version ?? "unknown"
+      );
+    } catch {
+      return "unknown";
+    }
+  })();
+
   // Generate audit record
   const packagesAnalyzed = Array.from(corpusResult.contracts.keys());
   const auditRecord = await generateAuditRecord(violations, {
@@ -917,7 +934,7 @@ async function main(options: any) {
     packagesAnalyzed,
     contractsApplied: stats.contractsApplied,
     filesAnalyzed: stats.filesAnalyzed,
-    corpusVersion: "1.0.0", // TODO: Read from corpus metadata
+    corpusVersion: corpusPkgVersion,
     callsitesByPackage: stats.callsitesByPackage,
   });
 
@@ -1141,16 +1158,10 @@ async function main(options: any) {
   const outputEndTime = Date.now();
 
   // Fire telemetry (fire-and-forget, never blocks)
+  // qt-187: reuse the corpusPkgVersion resolved above for the audit record.
+  // Telemetry tolerates undefined; the resolver now returns "unknown" instead
+  // of undefined when package.json can't be read, which is fine for telemetry.
   {
-    const corpusPkgVersion = (() => {
-      try {
-        const pkgPath = path.join(options.corpus, "package.json");
-        const raw = fs.readFileSync(pkgPath, "utf-8");
-        return (JSON.parse(raw) as { version?: string }).version;
-      } catch {
-        return undefined;
-      }
-    })();
     const contractIds = corpusResult.contracts
       ? Array.from((corpusResult.contracts as Map<string, any>).values())
           .map((c: any) => c.id ?? c.contractId ?? c.package ?? "")

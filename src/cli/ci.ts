@@ -420,13 +420,27 @@ async function runCi(options: {
 
   // 15. Write full audit JSON if --output provided
   if (options.output) {
+    // qt-187: read corpus version from installed package.json. Previous
+    // '1.0.0' hardcode misreported the version in CI scan output that the
+    // saas PR bot then displayed as scan context.
+    const corpusPkgVersion = (() => {
+      try {
+        const pkgPath = path.join(options.corpus, 'package.json');
+        const raw = fs.readFileSync(pkgPath, 'utf-8');
+        return (
+          (JSON.parse(raw) as { version?: string }).version ?? 'unknown'
+        );
+      } catch {
+        return 'unknown';
+      }
+    })();
     const { generateAuditRecord, writeAuditRecord } = await import('../reporter.js');
     const auditRecord = await generateAuditRecord(violations, {
       tsconfigPath,
       packagesAnalyzed: packageDiscovery.packages.map((p: any) => p.name),
       contractsApplied: corpusResult.contracts.size,
       filesAnalyzed: v2Result.filesAnalyzed,
-      corpusVersion: '1.0.0',
+      corpusVersion: corpusPkgVersion,
     });
     writeAuditRecord(auditRecord, options.output);
   }
