@@ -18,8 +18,7 @@
     "FORAIAGENTS.md"
   ],
   "scripts": {
-    "build": "tsc -p tsconfig.build.json && npm run build:schema",
-    "build:schema": "ts-json-schema-generator --path 'src/suppressions/types.ts' --type 'NarkConfig' --out schema/suppressions.schema.json --no-type-check --expose 'export'",
+    "build": "tsc -p tsconfig.build.json",
     "dev": "tsc --watch -p tsconfig.build.json",
     "clean": "rm -rf dist",
     "test": "vitest run",
@@ -40,7 +39,6 @@
   },
   "devDependencies": {
     "@types/node": "^20.11.0",
-    "ts-json-schema-generator": "^2.9.0",
     "vitest": "^3.0.0"
   },
   "engines": {
