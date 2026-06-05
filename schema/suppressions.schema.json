@@ -1,48 +1,72 @@
 {
-  "$ref": "#/definitions/NarkConfig",
-  "$schema": "http://json-schema.org/draft-07/schema#",
-  "definitions": {
-    "IgnoreRule": {
-      "additionalProperties": false,
-      "description": "A single ignore rule from config file",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://app.nark.sh/schemas/suppressions/v1.json",
+  "title": "Nark Suppressions Config (v1)",
+  "description": "Schema for .nark/suppressions.json — marks scanner violations as known false positives or accepted-risk. See https://github.com/nark-sh/nark for the canonical IgnoreRule type.",
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "Optional pointer to this schema. Including it enables IDE autocomplete + validation.",
+      "format": "uri"
+    },
+    "ignore": {
+      "type": "array",
+      "description": "List of suppression rules. Each rule must match at least one of file/package/postconditionId and carry a meaningful reason (≥ 10 chars).",
+      "items": {
+        "$ref": "#/$defs/ignoreRule"
+      }
+    }
+  },
+  "additionalProperties": true,
+  "$defs": {
+    "ignoreRule": {
+      "type": "object",
+      "title": "IgnoreRule",
+      "description": "A single suppression entry. At least one of file, package, or postconditionId is required. The reason field is required (min 10 chars) so the rule is reviewable in the diff.",
       "properties": {
         "file": {
-          "description": "Glob pattern for files (e.g., \"src/test/**\")",
-          "type": "string"
+          "type": "string",
+          "description": "Optional glob pattern matched against the violation file (relative to the project root). Examples: \"src/generated/**\", \"test/**/*.spec.ts\". Omit to apply to all files.",
+          "minLength": 1
         },
         "package": {
-          "description": "Package name to ignore",
-          "type": "string"
+          "type": "string",
+          "description": "npm package name the rule applies to. Use \"*\" to match any package. Examples: \"axios\", \"@prisma/client\", \"*\".",
+          "minLength": 1
         },
         "postconditionId": {
-          "description": "Specific postcondition ID",
-          "type": "string"
+          "type": "string",
+          "description": "Postcondition ID from the nark profile. Use \"*\" to match any postcondition for the chosen package. Examples: \"network-failure\", \"duplicate-key-error\".",
+          "minLength": 1
         },
         "reason": {
-          "description": "Required reason for suppression",
-          "type": "string"
+          "type": "string",
+          "description": "Human-readable justification for the suppression. Required, minimum 10 characters — reviewers see this in the diff when the rule is added.",
+          "minLength": 10
         }
       },
       "required": [
         "reason"
       ],
-      "type": "object"
-    },
-    "NarkConfig": {
-      "additionalProperties": {
-        "description": "Other config options"
-      },
-      "description": "Configuration file structure (.nark/suppressions.json)",
-      "properties": {
-        "ignore": {
-          "description": "Suppression rules",
-          "items": {
-            "$ref": "#/definitions/IgnoreRule"
-          },
-          "type": "array"
+      "anyOf": [
+        {
+          "required": [
+            "file"
+          ]
+        },
+        {
+          "required": [
+            "package"
+          ]
+        },
+        {
+          "required": [
+            "postconditionId"
+          ]
         }
-      },
-      "type": "object"
+      ],
+      "additionalProperties": false
     }
   }
 }
