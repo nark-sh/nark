@@ -22,6 +22,9 @@
     "dev": "tsc --watch -p tsconfig.build.json",
     "clean": "rm -rf dist",
     "test": "vitest run",
+    "typecheck": "tsc --noEmit -p tsconfig.build.json",
+    "format": "prettier --write \"src/**/*.ts\" \"*.json\" \"*.md\"",
+    "format:check": "prettier --check \"src/**/*.ts\" \"*.json\" \"*.md\"",
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
@@ -39,6 +42,7 @@
   },
   "devDependencies": {
     "@types/node": "^20.11.0",
+    "prettier": "^3.8.3",
     "vitest": "^3.0.0"
   },
   "engines": {
