@@ -212,6 +212,8 @@ nark telemetry on
 
 You can also set `telemetry: false` in `.nark/config.yaml` or point telemetry to a different endpoint with `NARK_API_URL`.
 
+If telemetry posts time out (slow network, cold dev server), bump the timeout per-scan: `nark --telemetry-timeout=10000` (ms; default 5000). Scan results are saved locally regardless of whether telemetry succeeds.
+
 Learn more: [https://nark.sh/telemetry](https://nark.sh/telemetry)
 
 ### Crash reporting
