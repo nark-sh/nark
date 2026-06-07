@@ -32,6 +32,16 @@ not.
 
 ## Quick Start
 
+### Try it in 60 seconds (no setup)
+
+```bash
+npx nark --demo
+```
+
+This runs Nark against a bundled sample project with intentional `axios`, `stripe`, and `@prisma/client` violations. The output is exactly what a real scan against your own code looks like — just with a guaranteed non-empty report.
+
+### Or build from source
+
 ```bash
 # Clone nark and the contract corpus side by side
 git clone https://github.com/nark-sh/nark.git

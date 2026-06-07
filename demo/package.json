@@ -1,0 +1,11 @@
+{
+  "name": "nark-demo-fixture",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Bundled sample project Nark scans when you pass --demo. Declares axios/stripe/@prisma/client as dependencies so Nark's package-discovery step sees them as covered — actual installation is not required; types.d.ts ships ambient stubs.",
+  "dependencies": {
+    "axios": "*",
+    "stripe": "*",
+    "@prisma/client": "*"
+  }
+}

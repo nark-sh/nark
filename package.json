@@ -15,6 +15,7 @@
     "bin/",
     "dist/",
     "schema/",
+    "demo/",
     "FORAIAGENTS.md"
   ],
   "scripts": {
