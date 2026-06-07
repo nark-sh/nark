@@ -364,6 +364,86 @@ nark ci --sarif
 nark ci --sarif-output results.sarif
 ```
 
+### Recommended GitHub Actions workflow
+
+Copy-paste starting point. Three things to know **before** you wire this in — we learned each one the hard way running Nark on our own SaaS.
+
+```yaml
+name: Nark
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  nark:
+    name: Nark scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v2
+        with: { version: 9 }
+
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+
+      - run: pnpm install
+
+      # Generate any client code Nark's TS analyzer needs to resolve types.
+      # Prisma is the common case; drop this step if your project doesn't use it.
+      - run: pnpm prisma generate
+
+      - name: Run nark
+        id: nark
+        continue-on-error: true  # SHADOW MODE — see "Rollout pattern" below
+        run: |
+          npx -y nark@latest \
+            --tsconfig path/to/your/tsconfig.json \
+            --output nark-audit.json
+        env:
+          # Default Node old-gen heap on GitHub-hosted runners is ~2 GB.
+          # Non-trivial TS programs (Next.js + Prisma + a few dozen routes)
+          # OOM under that with exit 134. Runners have 16 GB physical, so
+          # 8 GB is well within budget. Skip this only on a tiny project.
+          NODE_OPTIONS: '--max-old-space-size=8192'
+          NARK_TELEMETRY: 'false'
+
+      # Without this verify step, an OOM or crash leaves nark-audit.json
+      # missing, upload-artifact emits a warning instead of failing, and
+      # `continue-on-error: true` reports the whole job as green. We hit
+      # this 18 times in a row before we noticed. Fail loud when there's
+      # no audit JSON.
+      - name: Verify nark produced an audit
+        if: steps.nark.outcome == 'success' || steps.nark.outcome == 'failure'
+        run: |
+          test -f nark-audit.json || {
+            echo "::error::Nark did not produce nark-audit.json — scan crashed before writing output. See the Run nark step log."
+            exit 1
+          }
+
+      - name: Upload nark audit
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: nark-audit
+          path: nark-audit.json
+          retention-days: 30
+```
+
+**Three things to know:**
+
+1. **`NODE_OPTIONS: '--max-old-space-size=8192'`** — without this, mid-sized TypeScript projects OOM with `FATAL ERROR: Reached heap limit Allocation failed - JavaScript heap out of memory`. GitHub-hosted runners default Node to ~2 GB old-gen heap; raise it.
+
+2. **The "Verify nark produced an audit" step** — `continue-on-error: true` + `actions/upload-artifact@v4` are a brittle combination. When the scanner crashes, the audit JSON isn't written, the upload step emits a warning instead of failing, and the job dashboard shows green. The verify step makes silent-success impossible.
+
+3. **Rollout pattern** — start with `continue-on-error: true`. The first run on any non-Nark-aware codebase typically surfaces dozens of findings. Triage them (add to `.nark/suppressions.json` for false positives, fix the true positives), then drop `continue-on-error` to block merges. Three phases:
+
+   - Phase 1 (week 1): scanner runs, baseline is captured, merges aren't blocked.
+   - Phase 2 (weeks 1-2): walk the baseline, suppress with reason, fix what's real.
+   - Phase 3: drop `continue-on-error: true`. New violations block PRs.
+
 ### `--diff` (line-level filtering)
 
 Filter violations to only the lines actually touched by a git diff range. Pre-existing
