@@ -283,6 +283,11 @@ program
     "Full output (default — kept for backward compatibility)",
   )
   .option("-q, --quiet", "Show compact summary instead of full report")
+  .option(
+    "--telemetry-timeout <ms>",
+    "Network timeout for the anonymous-telemetry POST (default 5000ms). Scan results are saved locally regardless of telemetry success.",
+    "5000",
+  )
   .action(async (options) => {
     // This action handler is called when the main command is invoked
     // (i.e., not a subcommand like 'suppressions')
@@ -1346,14 +1351,28 @@ async function main(options: any) {
       cwd: process.cwd(),
     });
     const token = resolved?.token ?? null;
+    // qt-255 / S3-6: --telemetry-timeout <ms> overrides the default 5000ms.
+    // commander gives us the raw string; Number() returns NaN for garbage,
+    // and we fall back to the default in that case. We do NOT enforce a
+    // floor/ceiling — power users debugging telemetry in CI may want very
+    // long timeouts, and very short timeouts just short-circuit to TIMEOUT.
+    const telemetryTimeoutMs = (() => {
+      const raw = options.telemetryTimeout;
+      const n = typeof raw === "string" ? Number(raw) : Number.NaN;
+      return Number.isFinite(n) && n > 0 ? n : undefined;
+    })();
     if (token !== null) {
       telemetryResult = await fireEnrichedTelemetryEvent(
         telemetryPayload,
         violations,
         projectRoot,
+        telemetryTimeoutMs,
       );
     } else {
-      telemetryResult = await fireTelemetryEvent(telemetryPayload);
+      telemetryResult = await fireTelemetryEvent(
+        telemetryPayload,
+        telemetryTimeoutMs,
+      );
     }
 
     // Checkpoint 4b: verbose telemetry feedback
@@ -1401,6 +1420,28 @@ async function main(options: any) {
       console.log(
         chalk.cyan(
           `✓ Scan uploaded to ${resolved!.workspace!.orgName} (${resolved!.workspace!.orgSlug})`,
+        ),
+      );
+    } else if (
+      telemetryResult?.error === true &&
+      options.terminal !== false &&
+      !options.sarif &&
+      !options.sarifOutput
+    ) {
+      // qt-255 / S3-6: when telemetry fails (most commonly TIMEOUT during
+      // cold-start or slow networks), reassure the user that the scan results
+      // are still saved locally. The original failure surface was silent unless
+      // --verbose, which left users wondering whether the scan had completed.
+      // Suppressed for machine-readable modes (--no-terminal, --sarif) so we
+      // don't pollute structured output streams.
+      const reason = telemetryResult.errorReason ?? "UNKNOWN";
+      const hint =
+        reason === "TIMEOUT"
+          ? ` Bump --telemetry-timeout=10000 if your network is slow.`
+          : "";
+      process.stderr.write(
+        chalk.dim(
+          `ℹ Telemetry failed (${reason}) — scan results saved locally.${hint}\n`,
         ),
       );
     }

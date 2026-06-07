@@ -218,6 +218,20 @@ function getOrCreateDeviceId(): string | undefined {
 const NARK_API_BASE = process.env["NARK_API_URL"] ?? "https://app.nark.sh";
 const TELEMETRY_ENDPOINT = `${NARK_API_BASE}/api/telemetry/scan`;
 
+/**
+ * Default network timeout for telemetry POSTs, in ms.
+ *
+ * Bumped from 2000ms → 5000ms in qt-255 (S3-6) after the launch dry-run hit
+ * a `TIMEOUT` on the first scan against a cold local SaaS dev server. 2s was
+ * too tight for cold-start scenarios (Webpack warm-up, slow networks, etc).
+ * Callers can override via the `timeoutMs` parameter on the fire helpers, or
+ * end-users can pass `--telemetry-timeout <ms>` on the CLI.
+ *
+ * Kept as an exported const so the CLI flag's default value and the helper
+ * default stay in lockstep.
+ */
+export const DEFAULT_TELEMETRY_TIMEOUT_MS = 5000;
+
 /** Returns true if the user explicitly set NARK_API_URL (i.e. nark is not using the default https://app.nark.sh). */
 export function isNarkApiUrlSet(): boolean {
   const v = process.env["NARK_API_URL"];
@@ -362,6 +376,7 @@ export function handleFirstRunNotice(): void {
  */
 export async function fireTelemetryEvent(
   payload: TelemetryPayload,
+  timeoutMs: number = DEFAULT_TELEMETRY_TIMEOUT_MS,
 ): Promise<TelemetryResult> {
   const config = readTelemetryConfig();
   if (!config.enabled)
@@ -395,7 +410,7 @@ export async function fireTelemetryEvent(
       method: "POST",
       headers,
       body: JSON.stringify(enriched),
-      signal: AbortSignal.timeout(2000),
+      signal: AbortSignal.timeout(timeoutMs),
     }).catch((err: unknown) => {
       errorReason = classifyFetchError(err);
       return null;
@@ -624,6 +639,7 @@ export async function fireEnrichedTelemetryEvent(
   payload: TelemetryPayload,
   violations: Violation[],
   projectRoot?: string,
+  timeoutMs: number = DEFAULT_TELEMETRY_TIMEOUT_MS,
 ): Promise<TelemetryResult> {
   const config = readTelemetryConfig();
   const enrichedEndpoint = `${NARK_API_BASE}/api/telemetry/scan-enriched`;
@@ -687,7 +703,7 @@ export async function fireEnrichedTelemetryEvent(
       method: "POST",
       headers,
       body: JSON.stringify(enriched),
-      signal: AbortSignal.timeout(2000),
+      signal: AbortSignal.timeout(timeoutMs),
     }).catch((err: unknown) => {
       errorReason = classifyFetchError(err);
       return null;
