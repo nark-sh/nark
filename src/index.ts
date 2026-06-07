@@ -288,6 +288,11 @@ program
     "Network timeout for the anonymous-telemetry POST (default 5000ms). Scan results are saved locally regardless of telemetry success.",
     "5000",
   )
+  .option(
+    "--demo",
+    "Scan a bundled sample project with intentional axios/stripe/@prisma/client violations. Use this to see what Nark output looks like before pointing it at your own project. Ignores --tsconfig.",
+    false,
+  )
   .action(async (options) => {
     // This action handler is called when the main command is invoked
     // (i.e., not a subcommand like 'suppressions')
@@ -494,6 +499,46 @@ async function main(options: any) {
     console.log(chalk.bold("\nNark Contract Verification\n"));
   }
 
+  // qt-256: --demo overrides --tsconfig with a bundled sample project that
+  // ships inside the nark npm package at <pkg>/demo/. The demo has 3 TS
+  // files with intentional axios/stripe/@prisma/client violations, so a
+  // first-time user can see realistic Nark output without setting up their
+  // own project. The banner below makes the demo nature explicit so nobody
+  // confuses it for a real scan of their code.
+  if (options.demo) {
+    const demoDir = path.resolve(__dirname, "..", "demo");
+    const demoTsconfig = path.join(demoDir, "tsconfig.json");
+    if (!fs.existsSync(demoTsconfig)) {
+      console.error(
+        chalk.red(
+          `Error: --demo expected bundled demo at ${demoDir} but it was not found.`,
+        ),
+      );
+      console.error(
+        chalk.yellow(
+          "This usually means the npm package was installed without the demo/ files. Reinstall with `npm install -g nark` (or `npx nark --demo` to download fresh).",
+        ),
+      );
+      process.exit(2);
+    }
+    options.tsconfig = demoTsconfig;
+    // Force the scanner to treat the demo dir as the project root, NOT the
+    // user's cwd — otherwise package discovery walks the user's package.json
+    // and reports their deps as "uncovered" alongside the demo's.
+    options.project = demoDir;
+    process.stderr.write(
+      chalk.cyan(
+        "\n▶ Nark demo — scanning a bundled sample project with intentional violations.\n",
+      ) +
+        chalk.dim(
+          "  Source: " +
+            demoDir +
+            "\n" +
+            "  Run `npx nark` against your own project to scan your code.\n\n",
+        ),
+    );
+  }
+
   // Normalize and auto-discover tsconfig path
   let tsconfigPath = normalizeTsconfigPath(options.tsconfig);
 
@@ -638,10 +683,18 @@ async function main(options: any) {
   // the TypeScript checker will return `any` for every package call and
   // nark will silently report "0 violations" — the worst possible UX.
   // Block by default; allow opt-out via NARK_ALLOW_MISSING_DEPS=1.
-  const missingNm = checkMissingNodeModules({
-    tsconfigPath,
-    corpusContractNames: corpusResult.contracts.keys(),
-  });
+  //
+  // qt-256: --demo skips this check. The bundled demo ships ambient `.d.ts`
+  // declarations in lieu of installed deps so the user doesn't have to run
+  // `npm install` to see a scan — type resolution comes from types.d.ts and
+  // the V2 analyzer's pattern matching works against the import sources
+  // alone. Don't block the demo for not having node_modules.
+  const missingNm = options.demo
+    ? { kind: "ok" as const }
+    : checkMissingNodeModules({
+        tsconfigPath,
+        corpusContractNames: corpusResult.contracts.keys(),
+      });
   if (missingNm.kind === "missing") {
     const allowMissing = process.env.NARK_ALLOW_MISSING_DEPS === "1";
     process.stderr.write(
