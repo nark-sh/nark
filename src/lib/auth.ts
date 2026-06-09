@@ -32,6 +32,15 @@ export interface NarkWorkspace {
   email: string;
   plan: string;
   loggedInAt: string; // ISO timestamp
+  /**
+   * The NARK_API_BASE URL this workspace's token was minted against
+   * (e.g. "https://app.nark.sh" or "http://localhost:3000").
+   *
+   * Added in nark@2.5.1 (S2-1). Tokens minted before that release have this
+   * field undefined; callers should treat undefined as "endpoint unknown,
+   * legacy entry" and fall back to the runtime 401 retry path.
+   */
+  endpoint?: string;
 }
 
 export interface NarkCredentialsV2 {
@@ -318,11 +327,31 @@ export function renameWorkspace(oldSlug: string, newSlug: string): void {
 }
 
 /**
+ * Returns true if a workspace's stored endpoint is compatible with the runtime
+ * NARK_API_BASE. Legacy entries (endpoint === undefined) match any endpoint —
+ * the 401-fallback path in fireEnrichedTelemetryEvent catches mismatches that
+ * slip through. Defined endpoints require strict equality.
+ */
+export function workspaceEndpointMatches(
+  workspace: { endpoint?: string },
+  runtimeApiBase: string,
+): boolean {
+  if (workspace.endpoint === undefined) return true;
+  return workspace.endpoint === runtimeApiBase;
+}
+
+/**
  * Resolves the active workspace via the 8-step priority chain.
  * Returns null if no token source is available.
+ *
+ * When `opts.endpoint` is provided, workspace records whose stored `endpoint`
+ * is defined but does not equal it are skipped (returned as null) — used by
+ * the telemetry path to avoid sending a localhost-minted token to prod, and
+ * vice-versa (S2-1). Env-token sources (NARK_API_KEY / NARK_TOKEN) bypass the
+ * filter because they are not bound to a workspace endpoint.
  */
 export function resolveActiveWorkspace(
-  opts: { orgSlug?: string; cwd?: string } = {},
+  opts: { orgSlug?: string; cwd?: string; endpoint?: string } = {},
 ): ResolvedWorkspace | null {
   // Step 1: NARK_API_KEY (canonical)
   const apiKey = process.env.NARK_API_KEY;
@@ -348,10 +377,16 @@ export function resolveActiveWorkspace(
     return null;
   }
 
+  const accept = (ws: NarkWorkspace): boolean =>
+    opts.endpoint === undefined || workspaceEndpointMatches(ws, opts.endpoint);
+
   // Step 3: opts.orgSlug flag
   if (opts.orgSlug && v2.workspaces[opts.orgSlug]) {
     const ws = v2.workspaces[opts.orgSlug];
-    return { token: ws.token, workspace: ws, source: "flag" };
+    if (accept(ws)) {
+      return { token: ws.token, workspace: ws, source: "flag" };
+    }
+    return null;
   }
 
   // Steps 4-5: per-repo config
@@ -359,20 +394,29 @@ export function resolveActiveWorkspace(
   const repoCfg = readRepoWorkspace(cwd);
   if (repoCfg && v2.workspaces[repoCfg.slug]) {
     const ws = v2.workspaces[repoCfg.slug];
-    return { token: ws.token, workspace: ws, source: repoCfg.source };
+    if (accept(ws)) {
+      return { token: ws.token, workspace: ws, source: repoCfg.source };
+    }
+    return null;
   }
 
   // Step 6: default field
   if (v2.default && v2.workspaces[v2.default]) {
     const ws = v2.workspaces[v2.default];
-    return { token: ws.token, workspace: ws, source: "default" };
+    if (accept(ws)) {
+      return { token: ws.token, workspace: ws, source: "default" };
+    }
+    return null;
   }
 
   // Step 7: single workspace silent
   const keys = Object.keys(v2.workspaces);
   if (keys.length === 1) {
     const ws = v2.workspaces[keys[0]!]!;
-    return { token: ws.token, workspace: ws, source: "single" };
+    if (accept(ws)) {
+      return { token: ws.token, workspace: ws, source: "single" };
+    }
+    return null;
   }
 
   // Step 8: ambiguous — caller handles

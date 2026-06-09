@@ -52,7 +52,7 @@ import {
   handleFirstRunNotice,
   fireTelemetryEvent,
   fireEnrichedTelemetryEvent,
-  getTelemetryEndpoint,
+  getCurrentNarkApiBase,
   isNarkApiUrlSet,
   type TelemetryResult,
 } from "./cli/telemetry.js";
@@ -1414,9 +1414,15 @@ async function main(options: any) {
     };
 
     let telemetryResult: TelemetryResult | undefined;
+    // S2-1: scope workspace resolution to the current NARK_API_BASE so a token
+    // minted against localhost dev never leaks to prod (and vice-versa).
+    // _resolveTelemetryToken inside telemetry.ts emits the stderr notice on
+    // explicit mismatch; here we just want the filtered workspace for the
+    // "Scan uploaded to X" footer.
     const resolved = resolveActiveWorkspace({
       orgSlug: (process as any)._narkOrgFlag,
       cwd: process.cwd(),
+      endpoint: getCurrentNarkApiBase(),
     });
     const token = resolved?.token ?? null;
     // qt-255 / S3-6: --telemetry-timeout <ms> overrides the default 5000ms.
@@ -1445,8 +1451,14 @@ async function main(options: any) {
 
     // Checkpoint 4b: verbose telemetry feedback
     if (verbose) {
-      // Always announce the target URL on every verbose scan
-      verboseLog(`\n[verbose] Telemetry target: ${getTelemetryEndpoint()}`);
+      // S2-2: surface the ACTUAL endpoint chosen by the fire-helper (enriched
+      // vs anonymous), not the pre-computed anonymous path. Prior versions
+      // unconditionally printed the anonymous URL even when telemetry went
+      // to /scan-enriched, which lied to anyone diagnosing a 4xx.
+      const actualEndpoint =
+        telemetryResult?.endpoint ??
+        `${getCurrentNarkApiBase()}/api/telemetry/scan`;
+      verboseLog(`\n[verbose] Telemetry target: ${actualEndpoint}`);
       // Hint the env var only when the user has NOT set it
       if (!isNarkApiUrlSet()) {
         verboseLog(

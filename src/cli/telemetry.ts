@@ -20,11 +20,68 @@ import { getCredentials, resolveActiveWorkspace } from "../lib/auth.js";
 /**
  * Resolve a token via the qt-162 resolveActiveWorkspace chain, threading the
  * --org/-w flag stashed by main() in src/index.ts.
+ *
+ * S2-1 (nark@2.5.1): scopes the resolution to the current runtime NARK_API_BASE.
+ * Workspaces whose stored endpoint doesn't match are skipped, so a token minted
+ * against localhost dev never leaks to prod (or vice-versa). When an explicit
+ * mismatch is detected (workspace has a defined endpoint that differs from the
+ * runtime), emit the stale-token stderr notice exactly once per process so the
+ * user knows their telemetry is going anonymously. Legacy entries
+ * (endpoint=undefined) still resolve and rely on the 401-fallback safety net.
  */
 function _resolveTelemetryToken(): string | null {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const orgSlug = (process as any)._narkOrgFlag as string | undefined;
-  return resolveActiveWorkspace({ orgSlug, cwd: process.cwd() })?.token ?? null;
+  const apiBase = getCurrentNarkApiBase();
+  const filtered = resolveActiveWorkspace({
+    orgSlug,
+    cwd: process.cwd(),
+    endpoint: apiBase,
+  });
+  if (filtered?.token) return filtered.token;
+
+  // Filter rejected — check whether the rejection was due to an explicit
+  // endpoint mismatch, vs. simply not being logged in. Only emit the notice
+  // in the mismatch case.
+  const unfiltered = resolveActiveWorkspace({ orgSlug, cwd: process.cwd() });
+  const ws = unfiltered?.workspace;
+  if (ws && ws.endpoint !== undefined && ws.endpoint !== apiBase) {
+    emitStaleTokenNotice();
+  }
+  return null;
+}
+
+/**
+ * Read NARK_API_BASE fresh from the environment on every call.
+ *
+ * The module-level NARK_API_BASE const captures the value at import time —
+ * fine for prod, brittle for tests that toggle env per-case. The endpoint
+ * filter (S2-1) needs the *current* env to make a correct decision.
+ */
+export function getCurrentNarkApiBase(): string {
+  return process.env["NARK_API_URL"] ?? "https://app.nark.sh";
+}
+
+/**
+ * S2-1 stderr notice — one-time-per-process flag so a single scan doesn't
+ * emit the message twice (once from the endpoint-mismatch pre-check in
+ * _resolveTelemetryToken, once from the 401 fallback in fireEnrichedTelemetryEvent).
+ */
+let _staleTokenNoticeEmitted = false;
+function emitStaleTokenNotice(): void {
+  if (_staleTokenNoticeEmitted) return;
+  _staleTokenNoticeEmitted = true;
+  process.stderr.write(
+    "nark login expired or doesn't match this endpoint — sent anonymous telemetry instead. Re-run 'nark login' to link scans to your dashboard.\n",
+  );
+}
+
+/**
+ * Test-only reset for the stale-token notice flag.
+ * Allows the regression test to assert the notice fires per-scan in isolation.
+ */
+export function _resetStaleTokenNoticeForTests(): void {
+  _staleTokenNoticeEmitted = false;
 }
 import type { Violation } from "../types.js";
 
@@ -377,6 +434,7 @@ export function handleFirstRunNotice(): void {
 export async function fireTelemetryEvent(
   payload: TelemetryPayload,
   timeoutMs: number = DEFAULT_TELEMETRY_TIMEOUT_MS,
+  opts: { forceAnonymous?: boolean } = {},
 ): Promise<TelemetryResult> {
   const config = readTelemetryConfig();
   if (!config.enabled)
@@ -390,7 +448,9 @@ export async function fireTelemetryEvent(
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
     };
-    const token = _resolveTelemetryToken();
+    // S2-1: forceAnonymous suppresses bearer attachment so the enriched-401
+    // fallback path explicitly retries without the stale token.
+    const token = opts.forceAnonymous ? null : _resolveTelemetryToken();
     if (token !== null) {
       headers["Authorization"] = "Bearer " + token;
     }
@@ -634,6 +694,11 @@ function toRelativeProjectPath(absFile: string, projectRoot?: string): string {
  * Fire an enriched telemetry event for authenticated users.
  * Sends to /api/telemetry/scan-enriched with Bearer auth, git metadata, and code snippets.
  * Same fire-and-forget pattern — never throws, 2-second timeout.
+ *
+ * S2-1: on HTTP 401 from the enriched endpoint, falls back to an anonymous
+ * fireTelemetryEvent call and surfaces a one-line stderr notice. This catches
+ * the legacy case where a workspace was minted before nark@2.5.1 (no endpoint
+ * field) and the token turns out to be wrong for the runtime endpoint.
  */
 export async function fireEnrichedTelemetryEvent(
   payload: TelemetryPayload,
@@ -716,6 +781,20 @@ export async function fireEnrichedTelemetryEvent(
         error: true,
         errorReason: errorReason ?? "UNKNOWN",
       };
+    }
+    // S2-1: enriched endpoint 401 → token doesn't match this endpoint (or is
+    // expired/revoked). Drop the bearer, retry the same payload anonymously
+    // against /api/telemetry/scan, and surface a one-line stderr notice.
+    // We deliberately do NOT retry on other 4xx codes — those represent
+    // legitimate validation failures the user should see (HTTP_4xx error).
+    if (response.status === 401) {
+      emitStaleTokenNotice();
+      const fallback = await fireTelemetryEvent(
+        { ...payload },
+        timeoutMs,
+        { forceAnonymous: true },
+      );
+      return fallback;
     }
     if (!response.ok) {
       return {

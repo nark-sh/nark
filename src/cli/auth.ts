@@ -236,6 +236,7 @@ export async function loginAction(opts: LoginOptions = {}): Promise<void> {
           email: body.user.email,
           plan: body.organization.plan,
           loggedInAt: new Date().toISOString(),
+          endpoint: NARK_API_BASE,
         },
         { makeDefault: shouldMakeDefault },
       );
