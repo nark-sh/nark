@@ -185,6 +185,16 @@ export interface PackageContract {
   contract_version: string;
   maintainer: string;
   last_verified: string;
+  /**
+   * Relative path (from this contract.yaml's directory) to a parent profile
+   * to inherit from. Child overrides parent's fields where present; functions
+   * deep-merge by name, postconditions/preconditions/edge_cases merge by id.
+   * Use this to fork a version-specific profile (e.g. stripe-v21) when most
+   * postconditions are unchanged from the parent.
+   *
+   * Example: `extends: ../stripe/contract.yaml`
+   */
+  extends?: string;
   /** Quality/validation status (production, draft, in-development, deprecated) */
   status?: "production" | "draft" | "in-development" | "deprecated";
   deprecated?: boolean;

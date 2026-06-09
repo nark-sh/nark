@@ -7,6 +7,13 @@
  * and also exposes a flat `contracts` map containing the default profile per
  * package for legacy callers that don't care about installed versions.
  *
+ * Inheritance (added 2026-06-09): a profile can declare `extends: <relative-path>`
+ * to inherit from a parent profile and only override what changed. Child fields
+ * win where present; `functions[]` deep-merges by `function.name`, then by id
+ * within `postconditions[]` / `preconditions[]` / `edge_cases[]`. Use for
+ * version-specific forks where most postconditions are unchanged (e.g.
+ * stripe-v21 extending stripe). Use fresh-copy (no extends) for clean breaks.
+ *
  * Use `selectContractForVersion()` to resolve which profile applies to a
  * specific installed version.
  */
@@ -17,10 +24,20 @@ import { glob } from 'glob';
 import * as YAML from 'yaml';
 import AjvModule from 'ajv';
 import semver from 'semver';
-import type { PackageContract, CorpusLoadResult } from './types.js';
+import type {
+  PackageContract,
+  CorpusLoadResult,
+  FunctionContract,
+  Postcondition,
+  Precondition,
+  EdgeCase,
+  DetectionRules,
+} from './types.js';
 
 // Handle ESM/CJS interop for Ajv
 const Ajv = (AjvModule as any).default || AjvModule;
+
+const MAX_EXTENDS_DEPTH = 5;
 
 export interface LoadCorpusOptions {
   includeDrafts?: boolean;
@@ -50,7 +67,6 @@ export async function loadCorpus(
   const warnings: string[] = [];
   const skipped: { package: string; status: string; reason: string }[] = [];
   const contractFileMap = new Map<string, string[]>();
-  // Tracks the file path each loaded profile came from, for warning context.
   const profileSourcePaths = new Map<PackageContract, string>();
 
   // Find all contract.yaml files
@@ -67,7 +83,6 @@ export async function loadCorpus(
   // Load JSON Schema for validation
   const schemaPath = path.join(corpusPath, 'schema', 'contract.schema.json');
   let schema: any;
-
   try {
     const schemaContent = fs.readFileSync(schemaPath, 'utf-8');
     schema = JSON.parse(schemaContent);
@@ -75,103 +90,98 @@ export async function loadCorpus(
     errors.push(`Failed to load schema from ${schemaPath}: ${err}`);
     return { contracts: new Map(), contractsByPackageName, errors, warnings };
   }
-
   const ajv = new Ajv({ allErrors: true, strict: false });
   const validate = ajv.compile(schema);
 
-  // Load and validate each contract
+  // ── Pass 1: read every contract.yaml as raw YAML, key by absolute path ──
+  // Don't validate or filter yet — we need all parents loaded before resolving
+  // extends chains in pass 2.
+  const rawByPath = new Map<string, PackageContract>();
   for (const filePath of contractFiles) {
     try {
       const content = fs.readFileSync(filePath, 'utf-8');
-      const contract = YAML.parse(content) as PackageContract;
-
-      // Get contract status (default to 'production' if not specified)
-      const status = contract.status || 'production';
-
-      // Skip in-development contracts silently (to avoid errors during development)
-      if (status === 'in-development' && !options.includeInDevelopment) {
-        skipped.push({
-          package: contract.package || path.basename(path.dirname(filePath)),
-          status: 'in-development',
-          reason: 'Contract is in development (use --include-drafts to include)'
-        });
-        continue;
-      }
-
-      // Skip draft contracts before validation when not including drafts
-      // (avoids failing on draft contracts with schema issues)
-      if (status === 'draft' && !options.includeDrafts) {
-        skipped.push({
-          package: contract.package || path.basename(path.dirname(filePath)),
-          status: 'draft',
-          reason: 'Draft contract excluded (use --include-drafts to include)'
-        });
-        continue;
-      }
-
-      // Validate against JSON Schema
-      const valid = validate(contract);
-
-      if (!valid) {
-        // If it's in-development and validation fails, skip silently
-        if (status === 'in-development') {
-          skipped.push({
-            package: contract.package || path.basename(path.dirname(filePath)),
-            status: 'in-development',
-            reason: 'Contract validation failed (in-development)'
-          });
-          continue;
-        }
-
-        const validationErrors = validate.errors
-          ?.map((err: any) => `  ${err.instancePath} ${err.message}`)
-          .join('\n');
-        errors.push(`Invalid contract ${filePath}:\n${validationErrors}`);
-        continue;
-      }
-
-      // Filter by status
-      if (status === 'draft' && !options.includeDrafts) {
-        skipped.push({
-          package: contract.package,
-          status: 'draft',
-          reason: 'Draft contract excluded (use --include-drafts to include)'
-        });
-        continue;
-      }
-
-      if (status === 'deprecated' && !options.includeDeprecated) {
-        skipped.push({
-          package: contract.package,
-          status: 'deprecated',
-          reason: 'Deprecated contract excluded (use --include-deprecated to include)'
-        });
-        continue;
-      }
-
-      // Collect — allow multiple profiles per package, differentiated by semver range.
-      if (!contractsByPackageName.has(contract.package)) {
-        contractsByPackageName.set(contract.package, []);
-      }
-      contractsByPackageName.get(contract.package)!.push(contract);
-      profileSourcePaths.set(contract, filePath);
-
-      if (!contractFileMap.has(contract.package)) contractFileMap.set(contract.package, []);
-      contractFileMap.get(contract.package)!.push(filePath);
+      const raw = YAML.parse(content) as PackageContract;
+      rawByPath.set(path.resolve(filePath), raw);
     } catch (err) {
-      errors.push(`Failed to load contract ${filePath}: ${err}`);
+      errors.push(`Failed to read/parse ${filePath}: ${err}`);
     }
   }
 
-  // Sort profiles within each package: most-specific (narrowest range) first,
-  // then universal catch-all last. Detect overlapping ranges and warn — first
-  // profile loaded wins when ranges overlap.
+  // ── Pass 2: resolve extends chains, validate, classify ──
+  for (const filePath of rawByPath.keys()) {
+    let merged: PackageContract;
+    try {
+      merged = resolveExtendsChain(filePath, rawByPath, corpusPath);
+    } catch (err) {
+      errors.push(`${filePath}: ${(err as Error).message}`);
+      continue;
+    }
+
+    const status = merged.status || 'production';
+
+    // Status-based skip rules (apply post-merge)
+    if (status === 'in-development' && !options.includeInDevelopment) {
+      skipped.push({
+        package: merged.package || path.basename(path.dirname(filePath)),
+        status: 'in-development',
+        reason: 'Contract is in development (use --include-drafts to include)',
+      });
+      continue;
+    }
+    if (status === 'draft' && !options.includeDrafts) {
+      skipped.push({
+        package: merged.package || path.basename(path.dirname(filePath)),
+        status: 'draft',
+        reason: 'Draft contract excluded (use --include-drafts to include)',
+      });
+      continue;
+    }
+
+    // Schema validation runs against the MERGED contract — that's what
+    // ultimately gets used at scan time, so that's what must satisfy the schema.
+    const valid = validate(merged);
+    if (!valid) {
+      if (status === 'in-development') {
+        skipped.push({
+          package: merged.package || path.basename(path.dirname(filePath)),
+          status: 'in-development',
+          reason: 'Contract validation failed (in-development)',
+        });
+        continue;
+      }
+      const validationErrors = validate.errors
+        ?.map((err: any) => `  ${err.instancePath} ${err.message}`)
+        .join('\n');
+      errors.push(`Invalid contract ${filePath}:\n${validationErrors}`);
+      continue;
+    }
+
+    if (status === 'deprecated' && !options.includeDeprecated) {
+      skipped.push({
+        package: merged.package,
+        status: 'deprecated',
+        reason: 'Deprecated contract excluded (use --include-deprecated to include)',
+      });
+      continue;
+    }
+
+    if (!contractsByPackageName.has(merged.package)) {
+      contractsByPackageName.set(merged.package, []);
+    }
+    contractsByPackageName.get(merged.package)!.push(merged);
+    profileSourcePaths.set(merged, filePath);
+
+    if (!contractFileMap.has(merged.package)) contractFileMap.set(merged.package, []);
+    contractFileMap.get(merged.package)!.push(filePath);
+  }
+
+  // Sort profiles within each package: most-specific first, universal last.
+  // Warn on overlapping ranges among non-universal profiles (first loaded wins).
   for (const [packageName, profiles] of contractsByPackageName) {
     profiles.sort((a, b) => {
       const aUniversal = isUniversalSemverRange(a.semver);
       const bUniversal = isUniversalSemverRange(b.semver);
       if (aUniversal !== bUniversal) return aUniversal ? 1 : -1;
-      // Both specific or both universal: stable by range string for determinism.
       return (a.semver || '').localeCompare(b.semver || '');
     });
 
@@ -190,8 +200,7 @@ export async function loadCorpus(
     }
   }
 
-  // Build the legacy single-profile-per-package view. Pick the most-specific
-  // profile per package — i.e. the first one after the sort above.
+  // Legacy single-profile-per-package view: most-specific profile per package.
   const contracts = new Map<string, PackageContract>();
   for (const [packageName, profiles] of contractsByPackageName) {
     if (profiles.length > 0) contracts.set(packageName, profiles[0]);
@@ -206,6 +215,234 @@ export async function loadCorpus(
     contractFiles: contractFileMap,
   };
 }
+
+/**
+ * Walks the `extends:` chain from the given file path, returning the fully
+ * merged contract. Caps depth at MAX_EXTENDS_DEPTH and detects cycles.
+ *
+ * The chain is resolved root-first (deepest parent), then each child is
+ * applied on top via `mergeContracts()`.
+ *
+ * @throws Error with descriptive message on cycle, depth-cap, missing parent,
+ *   path escape, or package-name mismatch.
+ */
+function resolveExtendsChain(
+  startPath: string,
+  rawByPath: Map<string, PackageContract>,
+  corpusPath: string
+): PackageContract {
+  // Walk the chain, building [root, ..., leaf] order.
+  const chain: { path: string; contract: PackageContract }[] = [];
+  const visited = new Set<string>();
+  let currentPath = startPath;
+
+  while (true) {
+    if (chain.length >= MAX_EXTENDS_DEPTH) {
+      throw new Error(
+        `extends chain exceeds max depth (${MAX_EXTENDS_DEPTH}). ` +
+          `Chain: ${chain.map((c) => c.path).join(' → ')} → ${currentPath}`
+      );
+    }
+    if (visited.has(currentPath)) {
+      throw new Error(
+        `circular extends detected: ${[...visited, currentPath].join(' → ')}`
+      );
+    }
+    visited.add(currentPath);
+
+    const raw = rawByPath.get(currentPath);
+    if (!raw) {
+      throw new Error(`extends target not loaded: ${currentPath}`);
+    }
+    chain.unshift({ path: currentPath, contract: raw });
+
+    if (!raw.extends) break;
+
+    const parentPath = path.resolve(path.dirname(currentPath), raw.extends);
+    // Enforce that the parent lives inside corpus/packages/ — no path escape.
+    const packagesDir = path.resolve(corpusPath, 'packages');
+    if (!parentPath.startsWith(packagesDir + path.sep)) {
+      throw new Error(
+        `extends target escapes corpus packages dir: ${raw.extends} → ${parentPath}`
+      );
+    }
+    if (!rawByPath.has(parentPath)) {
+      throw new Error(`extends target not found: ${raw.extends} → ${parentPath}`);
+    }
+
+    currentPath = parentPath;
+  }
+
+  // Merge root-first.
+  let acc = chain[0].contract;
+  for (let i = 1; i < chain.length; i++) {
+    const child = chain[i].contract;
+    if (child.package && acc.package && child.package !== acc.package) {
+      throw new Error(
+        `extends package mismatch: parent declares "${acc.package}" but child "${chain[i].path}" declares "${child.package}"`
+      );
+    }
+    acc = mergeContracts(acc, child);
+  }
+  // Strip the now-resolved `extends` field from the final merged object.
+  // (Schema allows it as an optional field anyway, but it's noise post-merge.)
+  if ('extends' in acc) {
+    const { extends: _, ...rest } = acc as PackageContract & { extends?: string };
+    acc = rest as PackageContract;
+  }
+  return acc;
+}
+
+/**
+ * Deep-merge a child profile on top of a parent profile.
+ *
+ * Top-level fields: child wins where present (truthy/non-empty), else parent.
+ * `package`: child must match parent if both present (enforced by caller).
+ * `detection`: child wins wholesale if present; no deep merge.
+ * `functions[]`: deep merge by `function.name`. Within a function,
+ *   `postconditions[]` / `preconditions[]` / `edge_cases[]` merge by `id`
+ *   (child overrides parent's matching id; new ids append; unmentioned
+ *   parent ids are kept). Functions in child with new names are appended.
+ *   Child's function-level fields (description, import_path, namespace,
+ *   aliases) override parent's where present.
+ */
+export function mergeContracts(
+  parent: PackageContract,
+  child: PackageContract
+): PackageContract {
+  return {
+    package: child.package || parent.package,
+    semver: child.semver ?? parent.semver,
+    contract_version: child.contract_version ?? parent.contract_version,
+    maintainer: child.maintainer ?? parent.maintainer,
+    last_verified: child.last_verified ?? parent.last_verified,
+    status: child.status ?? parent.status,
+    deprecated: child.deprecated ?? parent.deprecated,
+    deprecated_reason: child.deprecated_reason ?? parent.deprecated_reason,
+    deprecated_date: child.deprecated_date ?? parent.deprecated_date,
+    detection: mergeDetection(parent.detection, child.detection),
+    functions: mergeFunctions(parent.functions || [], child.functions || []),
+    // Carry over any extra fields the schema may permit (evidence_quality, etc.)
+    // by spreading parent then child after the structured fields above.
+    ...passThroughExtras(parent, child),
+  } as PackageContract;
+}
+
+function passThroughExtras(parent: PackageContract, child: PackageContract): Record<string, unknown> {
+  // Fields handled explicitly above — everything else passes through with
+  // child-wins semantics.
+  const handled = new Set([
+    'package',
+    'semver',
+    'contract_version',
+    'maintainer',
+    'last_verified',
+    'status',
+    'deprecated',
+    'deprecated_reason',
+    'deprecated_date',
+    'detection',
+    'functions',
+    'extends',
+  ]);
+  const result: Record<string, unknown> = {};
+  for (const [k, v] of Object.entries(parent as unknown as Record<string, unknown>)) {
+    if (!handled.has(k) && v !== undefined) result[k] = v;
+  }
+  for (const [k, v] of Object.entries(child as unknown as Record<string, unknown>)) {
+    if (!handled.has(k) && v !== undefined) result[k] = v;
+  }
+  return result;
+}
+
+function mergeDetection(
+  parent: DetectionRules | undefined,
+  child: DetectionRules | undefined
+): DetectionRules | undefined {
+  // Child wins wholesale. No deep merge — that's a future enhancement if
+  // people need it for additive detection rules.
+  if (child !== undefined) return child;
+  return parent;
+}
+
+function mergeFunctions(
+  parentFns: FunctionContract[],
+  childFns: FunctionContract[]
+): FunctionContract[] {
+  const result: FunctionContract[] = [];
+  const childByName = new Map(childFns.map((f) => [f.name, f]));
+  const handledChildNames = new Set<string>();
+
+  for (const parentFn of parentFns) {
+    const childFn = childByName.get(parentFn.name);
+    if (!childFn) {
+      result.push(parentFn);
+      continue;
+    }
+    handledChildNames.add(parentFn.name);
+    result.push(mergeFunction(parentFn, childFn));
+  }
+
+  // New functions defined only in the child get appended.
+  for (const childFn of childFns) {
+    if (!handledChildNames.has(childFn.name)) {
+      result.push(childFn);
+    }
+  }
+
+  return result;
+}
+
+function mergeFunction(parent: FunctionContract, child: FunctionContract): FunctionContract {
+  return {
+    name: child.name,
+    import_path: child.import_path ?? parent.import_path,
+    description: child.description ?? parent.description,
+    namespace: child.namespace ?? parent.namespace,
+    aliases: child.aliases ?? parent.aliases,
+    preconditions: mergeById(parent.preconditions, child.preconditions),
+    postconditions: mergeById(parent.postconditions, child.postconditions),
+    edge_cases: mergeById(parent.edge_cases, child.edge_cases),
+  };
+}
+
+/**
+ * Merge two arrays of `{ id: string, ... }` items.
+ * - Items present in parent and not overridden by child: kept as-is.
+ * - Items present in both: child wins.
+ * - Items new in child: appended.
+ */
+function mergeById<T extends { id: string }>(
+  parentItems: T[] | undefined,
+  childItems: T[] | undefined
+): T[] | undefined {
+  if (!parentItems && !childItems) return undefined;
+  if (!parentItems) return childItems;
+  if (!childItems) return parentItems;
+
+  const result: T[] = [];
+  const childById = new Map(childItems.map((item) => [item.id, item]));
+  const handled = new Set<string>();
+
+  for (const parentItem of parentItems) {
+    const childItem = childById.get(parentItem.id);
+    if (childItem) {
+      result.push(childItem);
+      handled.add(parentItem.id);
+    } else {
+      result.push(parentItem);
+    }
+  }
+  for (const childItem of childItems) {
+    if (!handled.has(childItem.id)) {
+      result.push(childItem);
+    }
+  }
+  return result;
+}
+
+// Re-export merge helpers under names referenced by tests, if needed.
+export { mergeById as _mergeById, mergeFunctions as _mergeFunctions };
 
 /**
  * Selects the profile whose `semver:` range satisfies the installed version.
@@ -229,16 +466,11 @@ export function selectContractForVersion(
   const profiles = contractsByPackageName.get(packageName);
   if (!profiles || profiles.length === 0) return undefined;
 
-  // No usable installed version → return the most-specific profile we have.
-  // (Backward compat: when scanning without node_modules, behavior matches
-  // the pre-version-aware loader.)
   const coercedVersion = installedVersion ? semver.coerce(installedVersion)?.version : undefined;
   if (!coercedVersion) {
     return profiles[0];
   }
 
-  // First pass: specific ranges (skip universal). profiles are sorted
-  // most-specific first, so the first satisfying entry wins.
   for (const profile of profiles) {
     if (isUniversalSemverRange(profile.semver)) continue;
     if (semverRangeSatisfies(coercedVersion, profile.semver)) {
@@ -246,14 +478,9 @@ export function selectContractForVersion(
     }
   }
 
-  // Fall back to the universal catch-all if present.
-  const universal = profiles.find(p => isUniversalSemverRange(p.semver));
-  return universal;
+  return profiles.find((p) => isUniversalSemverRange(p.semver));
 }
 
-/**
- * Safe wrapper around semver.satisfies — never throws on malformed ranges.
- */
 function semverRangeSatisfies(version: string, range: string): boolean {
   try {
     return semver.satisfies(version, range, { includePrerelease: true });
@@ -262,15 +489,10 @@ function semverRangeSatisfies(version: string, range: string): boolean {
   }
 }
 
-/**
- * Returns the first pair of profiles whose semver ranges overlap, or null
- * if all ranges are mutually exclusive. Universal profiles are ignored —
- * they're documented to be catch-alls and always "overlap" with the rest.
- */
 function findOverlappingProfiles(
   profiles: PackageContract[]
 ): [PackageContract, PackageContract] | null {
-  const specific = profiles.filter(p => !isUniversalSemverRange(p.semver));
+  const specific = profiles.filter((p) => !isUniversalSemverRange(p.semver));
   for (let i = 0; i < specific.length; i++) {
     for (let j = i + 1; j < specific.length; j++) {
       if (semverRangesIntersect(specific[i].semver, specific[j].semver)) {
@@ -285,23 +507,19 @@ function semverRangesIntersect(a: string, b: string): boolean {
   try {
     return semver.intersects(a, b, { includePrerelease: true });
   } catch {
-    // Malformed range — treat as non-overlapping; the malformed profile will
-    // simply never match anything via satisfies() either.
     return false;
   }
 }
 
 /**
- * Loads a single contract file (for testing)
+ * Loads a single contract file (for testing).
+ * Does NOT resolve extends chains — use loadCorpus() for that.
  */
 export function loadContractFile(filePath: string): PackageContract {
   const content = fs.readFileSync(filePath, 'utf-8');
   return YAML.parse(content) as PackageContract;
 }
 
-/**
- * Validates a contract object against the schema
- */
 export function validateContract(
   contract: PackageContract,
   schemaPath: string
@@ -320,25 +538,17 @@ export function validateContract(
   return { valid, errors };
 }
 
-/**
- * Gets the list of packages that have contracts in the corpus
- */
 export function getAvailablePackages(corpusPath: string): string[] {
   const packagesDir = path.join(corpusPath, 'packages');
-
   if (!fs.existsSync(packagesDir)) {
     return [];
   }
-
   return fs
     .readdirSync(packagesDir, { withFileTypes: true })
-    .filter(dirent => dirent.isDirectory())
-    .map(dirent => dirent.name);
+    .filter((dirent) => dirent.isDirectory())
+    .map((dirent) => dirent.name);
 }
 
-/**
- * Finds which packages from the corpus are actually used in a TypeScript project
- */
 export function findUsedPackages(
   projectPackageJson: string,
   availableContracts: Map<string, PackageContract | PackageContract[]>
@@ -351,10 +561,13 @@ export function findUsedPackages(
     };
 
     return Array.from(availableContracts.keys()).filter(
-      packageName => packageName in dependencies
+      (packageName) => packageName in dependencies
     );
   } catch (err) {
     console.warn(`Could not read ${projectPackageJson}: ${err}`);
     return [];
   }
 }
+
+// Re-export internals used by external tooling/tests.
+export type { Postcondition, Precondition, EdgeCase };
