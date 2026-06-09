@@ -318,10 +318,22 @@ export interface AnalyzerConfig {
 
 /**
  * Result of loading the corpus
+ *
+ * `contracts` is the single-profile-per-package view used by analyzers that
+ * don't care about which installed version they are scanning against. It
+ * contains the "default" profile per package — the most-specific semver range
+ * if multiple profiles exist, otherwise the only profile.
+ *
+ * `contractsByPackageName` exposes all loaded profiles per package, sorted
+ * most-specific (narrowest range) first, then the wildcard/universal profile
+ * last. Callers that know the installed version should consult this map via
+ * `selectContractForVersion()`.
  */
 export interface CorpusLoadResult {
   contracts: Map<string, PackageContract>;
+  contractsByPackageName?: Map<string, PackageContract[]>;
   errors: string[];
+  warnings?: string[];
   skipped?: Array<{ package: string; status: string; reason: string }>;
   contractFiles?: Map<string, string[]>; // packageName -> absolute file paths loaded
 }
@@ -332,6 +344,8 @@ export interface CorpusLoadResult {
 export interface DiscoveredPackage {
   name: string;
   version: string;
+  /** Actual installed version resolved from node_modules/<pkg>/package.json. Undefined if not installed. */
+  installedVersion?: string;
   source: "package.json" | "import" | "both";
   hasContract: boolean;
   contractVersion?: string;

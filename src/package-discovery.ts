@@ -13,6 +13,7 @@ import {
   PackageDiscoveryResult,
   PackageContract,
 } from "./types.js";
+import { selectContractForVersion } from "./corpus-loader.js";
 
 /**
  * Packages that should be excluded from uncovered package reporting.
@@ -97,7 +98,17 @@ export function isNonRuntimePackage(name: string): boolean {
 export class PackageDiscovery {
   private pathAliases: Set<string> = new Set();
 
-  constructor(private corpusContracts: Map<string, PackageContract>) {}
+  /**
+   * @param corpusContracts Single-profile-per-package view. Used for backward
+   *   compat when `contractsByPackageName` is not provided.
+   * @param contractsByPackageName Multi-profile view from the loader. When
+   *   provided, `checkContracts()` uses `selectContractForVersion()` to pick
+   *   the profile whose semver range matches the installed version.
+   */
+  constructor(
+    private corpusContracts: Map<string, PackageContract>,
+    private contractsByPackageName?: Map<string, PackageContract[]>,
+  ) {}
 
   /**
    * Discover all packages used in a project
@@ -116,16 +127,26 @@ export class PackageDiscovery {
     // Step 3: Merge and dedupe
     const allPackages = this.mergePackages(packageJsonDeps, importedPackages);
 
-    // Step 4: Check which have contracts
-    const packagesWithContracts = this.checkContracts(allPackages);
+    // Step 4: Resolve actually-installed versions from node_modules so contract
+    // selection can use version-aware ranges.
+    const installedVersions = await this.resolveInstalledVersions(
+      projectRoot,
+      Array.from(allPackages.keys()),
+    );
 
-    // Step 5: Count call sites for each package using the shared TS program
+    // Step 5: Check which have contracts (version-aware if multi-profile map is set)
+    const packagesWithContracts = this.checkContracts(
+      allPackages,
+      installedVersions,
+    );
+
+    // Step 6: Count call sites for each package using the shared TS program
     const callSiteCounts = this.countCallSites(program, importedPackages);
     for (const pkg of packagesWithContracts) {
       pkg.callSiteCount = callSiteCounts.get(pkg.name) ?? 0;
     }
 
-    // Step 6: Calculate statistics
+    // Step 7: Calculate statistics
     const withContracts = packagesWithContracts.filter(
       (p) => p.hasContract,
     ).length;
@@ -137,6 +158,34 @@ export class PackageDiscovery {
       withoutContracts,
       packages: packagesWithContracts,
     };
+  }
+
+  /**
+   * Resolve actually-installed versions by reading
+   * `<projectRoot>/node_modules/<pkg>/package.json` for each package.
+   * Silently skips packages that aren't installed or unreadable.
+   */
+  private async resolveInstalledVersions(
+    projectRoot: string,
+    packageNames: string[],
+  ): Promise<Map<string, string>> {
+    const versions = new Map<string, string>();
+    for (const name of packageNames) {
+      try {
+        const pkgJsonPath = path.join(
+          projectRoot,
+          "node_modules",
+          name,
+          "package.json",
+        );
+        const raw = await fs.readFile(pkgJsonPath, "utf-8");
+        const installed = (JSON.parse(raw) as { version?: string }).version;
+        if (installed) versions.set(name, installed);
+      } catch {
+        // not installed / unreadable — skip
+      }
+    }
+    return versions;
   }
 
   /**
@@ -881,7 +930,11 @@ export class PackageDiscovery {
   }
 
   /**
-   * Check which packages have contracts in the corpus
+   * Check which packages have contracts in the corpus.
+   *
+   * If `contractsByPackageName` is available, picks the profile whose semver
+   * range satisfies the installed version. Falls back to the single-profile
+   * map otherwise.
    */
   private checkContracts(
     packages: Map<
@@ -892,15 +945,24 @@ export class PackageDiscovery {
         usedIn: string[];
       }
     >,
+    installedVersions: Map<string, string>,
   ): DiscoveredPackage[] {
     const result: DiscoveredPackage[] = [];
 
     for (const [name, { version, source, usedIn }] of packages) {
-      const contract = this.corpusContracts.get(name);
+      const installedVersion = installedVersions.get(name);
+      const contract = this.contractsByPackageName
+        ? selectContractForVersion(
+            name,
+            installedVersion,
+            this.contractsByPackageName,
+          )
+        : this.corpusContracts.get(name);
 
       result.push({
         name,
         version,
+        installedVersion,
         source,
         hasContract: contract !== undefined,
         contractVersion: contract?.contract_version,

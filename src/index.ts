@@ -10,7 +10,7 @@ import * as fs from "fs";
 import { fileURLToPath } from "url";
 import { createRequire } from "module";
 import chalk from "chalk";
-import { loadCorpus } from "./corpus-loader.js";
+import { loadCorpus, selectContractForVersion } from "./corpus-loader.js";
 import { Analyzer } from "./analyzer.js";
 import {
   PackageDiscovery,
@@ -721,7 +721,10 @@ async function main(options: any) {
   const discoveryStartTime = Date.now();
   if (options.discoverPackages !== false) {
     if (verbose) console.log(chalk.dim("Discovering packages..."));
-    const discoveryTool = new PackageDiscovery(corpusResult.contracts);
+    const discoveryTool = new PackageDiscovery(
+      corpusResult.contracts,
+      corpusResult.contractsByPackageName,
+    );
     packageDiscovery = await discoveryTool.discoverPackages(
       options.project,
       path.resolve(tsconfigPath),
@@ -732,6 +735,43 @@ async function main(options: any) {
       );
   }
   const discoveryEndTime = Date.now();
+
+  // qt-version-aware: rebuild the single-profile-per-package contracts map
+  // using the installed versions resolved during discovery. This way the
+  // analyzer (v1 + v2) sees the version-matched profile for every package
+  // (e.g. firebase-admin@14 → packages/firebase-admin-v14/, not the older
+  // packages/firebase-admin/ profile whose semver is ">=11.0.0 <14.0.0").
+  //
+  // Packages that were discovered but have no matching profile for their
+  // installed version are deliberately omitted — we never silently apply a
+  // wrong-version profile. Packages not seen by discovery (discovery
+  // disabled / failed) retain the loader's default profile.
+  if (
+    packageDiscovery &&
+    corpusResult.contractsByPackageName &&
+    corpusResult.contractsByPackageName.size > 0
+  ) {
+    const refined = new Map<string, import("./types.js").PackageContract>();
+    const discoveredNames = new Set(packageDiscovery.packages.map((p) => p.name));
+    for (const pkg of packageDiscovery.packages) {
+      if (!pkg.hasContract) continue;
+      const profile = selectContractForVersion(
+        pkg.name,
+        pkg.installedVersion,
+        corpusResult.contractsByPackageName,
+      );
+      if (profile) refined.set(pkg.name, profile);
+    }
+    // Carry over contracts for packages NOT seen by discovery (e.g. when
+    // discovery is disabled). Discovered packages are authoritative — if
+    // selection returned undefined for one, it stays undefined.
+    for (const [name, contract] of corpusResult.contracts) {
+      if (!discoveredNames.has(name) && !refined.has(name)) {
+        refined.set(name, contract);
+      }
+    }
+    corpusResult.contracts = refined;
+  }
 
   // Checkpoint 2: verbose package discovery output
   if (verbose && packageDiscovery) {
@@ -1293,8 +1333,8 @@ async function main(options: any) {
     })();
 
     // Collect installed versions for contracted packages only.
-    // Reads node_modules/<pkg>/package.json at the project root.
-    // Never throws — missing or unresolvable packages are silently skipped.
+    // Sourced from PackageDiscovery, which resolved them from
+    // node_modules/<pkg>/package.json during the discovery pass.
     const packageVersions = (() => {
       try {
         const versions: Record<string, string> = {};
@@ -1302,20 +1342,7 @@ async function main(options: any) {
           (p: any) => p.hasContract,
         );
         for (const pkg of contractedPackages) {
-          try {
-            const pkgJsonPath = path.join(
-              options.project,
-              "node_modules",
-              pkg.name,
-              "package.json",
-            );
-            const raw = fs.readFileSync(pkgJsonPath, "utf-8");
-            const installedVersion = (JSON.parse(raw) as { version?: string })
-              .version;
-            if (installedVersion) versions[pkg.name] = installedVersion;
-          } catch {
-            // package not installed or unreadable — skip
-          }
+          if (pkg.installedVersion) versions[pkg.name] = pkg.installedVersion;
         }
         return Object.keys(versions).length > 0 ? versions : undefined;
       } catch {
@@ -1336,19 +1363,7 @@ async function main(options: any) {
           .slice(0, 100);
         if (uncontracted.length === 0) return undefined;
         return uncontracted.map((pkg: any) => {
-          let version: string | undefined;
-          try {
-            const pkgJsonPath = path.join(
-              options.project,
-              "node_modules",
-              pkg.name,
-              "package.json",
-            );
-            const raw = fs.readFileSync(pkgJsonPath, "utf-8");
-            version = (JSON.parse(raw) as { version?: string }).version;
-          } catch {
-            // not installed or unreadable — omit version
-          }
+          const version: string | undefined = pkg.installedVersion;
           return {
             name: pkg.name,
             ...(version ? { version } : {}),

@@ -1,5 +1,14 @@
 /**
  * Corpus Loader - loads and validates Nark profile files
+ *
+ * Version-aware (added 2026-06-09): multiple profiles per npm package can
+ * coexist, differentiated by non-overlapping `semver:` ranges. The loader
+ * collects every profile into `contractsByPackageName` (most-specific first)
+ * and also exposes a flat `contracts` map containing the default profile per
+ * package for legacy callers that don't care about installed versions.
+ *
+ * Use `selectContractForVersion()` to resolve which profile applies to a
+ * specific installed version.
  */
 
 import * as fs from 'fs';
@@ -7,6 +16,7 @@ import * as path from 'path';
 import { glob } from 'glob';
 import * as YAML from 'yaml';
 import AjvModule from 'ajv';
+import semver from 'semver';
 import type { PackageContract, CorpusLoadResult } from './types.js';
 
 // Handle ESM/CJS interop for Ajv
@@ -19,16 +29,29 @@ export interface LoadCorpusOptions {
 }
 
 /**
+ * A `semver:` value that should match every installed version.
+ * Treated as the catch-all (lowest priority) when ordering profiles.
+ */
+function isUniversalSemverRange(range: string | undefined): boolean {
+  if (!range) return true;
+  const trimmed = range.trim();
+  return trimmed === '' || trimmed === '*' || trimmed.toLowerCase() === 'any';
+}
+
+/**
  * Loads all Nark profiles from the corpus directory
  */
 export async function loadCorpus(
   corpusPath: string,
   options: LoadCorpusOptions = {}
 ): Promise<CorpusLoadResult> {
-  const contracts = new Map<string, PackageContract>();
+  const contractsByPackageName = new Map<string, PackageContract[]>();
   const errors: string[] = [];
+  const warnings: string[] = [];
   const skipped: { package: string; status: string; reason: string }[] = [];
   const contractFileMap = new Map<string, string[]>();
+  // Tracks the file path each loaded profile came from, for warning context.
+  const profileSourcePaths = new Map<PackageContract, string>();
 
   // Find all contract.yaml files
   const contractFiles = await glob('**/contract.yaml', {
@@ -38,7 +61,7 @@ export async function loadCorpus(
 
   if (contractFiles.length === 0) {
     errors.push(`No contract files found in ${corpusPath}/packages`);
-    return { contracts, errors };
+    return { contracts: new Map(), contractsByPackageName, errors, warnings };
   }
 
   // Load JSON Schema for validation
@@ -50,7 +73,7 @@ export async function loadCorpus(
     schema = JSON.parse(schemaContent);
   } catch (err) {
     errors.push(`Failed to load schema from ${schemaPath}: ${err}`);
-    return { contracts, errors };
+    return { contracts: new Map(), contractsByPackageName, errors, warnings };
   }
 
   const ajv = new Ajv({ allErrors: true, strict: false });
@@ -126,15 +149,13 @@ export async function loadCorpus(
         continue;
       }
 
-      // Check for duplicate package names
-      if (contracts.has(contract.package)) {
-        errors.push(
-          `Duplicate contract for package "${contract.package}" found at ${filePath}`
-        );
-        continue;
+      // Collect — allow multiple profiles per package, differentiated by semver range.
+      if (!contractsByPackageName.has(contract.package)) {
+        contractsByPackageName.set(contract.package, []);
       }
+      contractsByPackageName.get(contract.package)!.push(contract);
+      profileSourcePaths.set(contract, filePath);
 
-      contracts.set(contract.package, contract);
       if (!contractFileMap.has(contract.package)) contractFileMap.set(contract.package, []);
       contractFileMap.get(contract.package)!.push(filePath);
     } catch (err) {
@@ -142,7 +163,132 @@ export async function loadCorpus(
     }
   }
 
-  return { contracts, errors, skipped, contractFiles: contractFileMap };
+  // Sort profiles within each package: most-specific (narrowest range) first,
+  // then universal catch-all last. Detect overlapping ranges and warn — first
+  // profile loaded wins when ranges overlap.
+  for (const [packageName, profiles] of contractsByPackageName) {
+    profiles.sort((a, b) => {
+      const aUniversal = isUniversalSemverRange(a.semver);
+      const bUniversal = isUniversalSemverRange(b.semver);
+      if (aUniversal !== bUniversal) return aUniversal ? 1 : -1;
+      // Both specific or both universal: stable by range string for determinism.
+      return (a.semver || '').localeCompare(b.semver || '');
+    });
+
+    if (profiles.length > 1) {
+      const overlap = findOverlappingProfiles(profiles);
+      if (overlap) {
+        const [first, second] = overlap;
+        const firstPath = profileSourcePaths.get(first) ?? '<unknown>';
+        const secondPath = profileSourcePaths.get(second) ?? '<unknown>';
+        warnings.push(
+          `Overlapping semver ranges for "${packageName}": ` +
+            `"${first.semver}" (${firstPath}) and "${second.semver}" (${secondPath}). ` +
+            `First profile loaded wins when resolving installed versions.`
+        );
+      }
+    }
+  }
+
+  // Build the legacy single-profile-per-package view. Pick the most-specific
+  // profile per package — i.e. the first one after the sort above.
+  const contracts = new Map<string, PackageContract>();
+  for (const [packageName, profiles] of contractsByPackageName) {
+    if (profiles.length > 0) contracts.set(packageName, profiles[0]);
+  }
+
+  return {
+    contracts,
+    contractsByPackageName,
+    errors,
+    warnings,
+    skipped,
+    contractFiles: contractFileMap,
+  };
+}
+
+/**
+ * Selects the profile whose `semver:` range satisfies the installed version.
+ *
+ * Priority: specific ranges win over the universal catch-all. If multiple
+ * specific ranges satisfy the installed version (overlap — should not happen
+ * with a well-maintained corpus), the most-specific one (first in the sorted
+ * array, per loader ordering) is returned.
+ *
+ * If `installedVersion` is undefined or unparseable, falls back to the first
+ * profile (most-specific by load order) so callers still get a profile rather
+ * than missing one for a known package.
+ *
+ * Returns `undefined` if no profile matches the installed version.
+ */
+export function selectContractForVersion(
+  packageName: string,
+  installedVersion: string | undefined,
+  contractsByPackageName: Map<string, PackageContract[]>
+): PackageContract | undefined {
+  const profiles = contractsByPackageName.get(packageName);
+  if (!profiles || profiles.length === 0) return undefined;
+
+  // No usable installed version → return the most-specific profile we have.
+  // (Backward compat: when scanning without node_modules, behavior matches
+  // the pre-version-aware loader.)
+  const coercedVersion = installedVersion ? semver.coerce(installedVersion)?.version : undefined;
+  if (!coercedVersion) {
+    return profiles[0];
+  }
+
+  // First pass: specific ranges (skip universal). profiles are sorted
+  // most-specific first, so the first satisfying entry wins.
+  for (const profile of profiles) {
+    if (isUniversalSemverRange(profile.semver)) continue;
+    if (semverRangeSatisfies(coercedVersion, profile.semver)) {
+      return profile;
+    }
+  }
+
+  // Fall back to the universal catch-all if present.
+  const universal = profiles.find(p => isUniversalSemverRange(p.semver));
+  return universal;
+}
+
+/**
+ * Safe wrapper around semver.satisfies — never throws on malformed ranges.
+ */
+function semverRangeSatisfies(version: string, range: string): boolean {
+  try {
+    return semver.satisfies(version, range, { includePrerelease: true });
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Returns the first pair of profiles whose semver ranges overlap, or null
+ * if all ranges are mutually exclusive. Universal profiles are ignored —
+ * they're documented to be catch-alls and always "overlap" with the rest.
+ */
+function findOverlappingProfiles(
+  profiles: PackageContract[]
+): [PackageContract, PackageContract] | null {
+  const specific = profiles.filter(p => !isUniversalSemverRange(p.semver));
+  for (let i = 0; i < specific.length; i++) {
+    for (let j = i + 1; j < specific.length; j++) {
+      if (semverRangesIntersect(specific[i].semver, specific[j].semver)) {
+        return [specific[i], specific[j]];
+      }
+    }
+  }
+  return null;
+}
+
+function semverRangesIntersect(a: string, b: string): boolean {
+  try {
+    return semver.intersects(a, b, { includePrerelease: true });
+  } catch {
+    // Malformed range — treat as non-overlapping; the malformed profile will
+    // simply never match anything via satisfies() either.
+    return false;
+  }
 }
 
 /**
@@ -195,7 +341,7 @@ export function getAvailablePackages(corpusPath: string): string[] {
  */
 export function findUsedPackages(
   projectPackageJson: string,
-  availableContracts: Map<string, PackageContract>
+  availableContracts: Map<string, PackageContract | PackageContract[]>
 ): string[] {
   try {
     const packageJson = JSON.parse(fs.readFileSync(projectPackageJson, 'utf-8'));
