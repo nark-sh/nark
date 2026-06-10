@@ -10,7 +10,7 @@ import * as fs from "fs";
 import { fileURLToPath } from "url";
 import { createRequire } from "module";
 import chalk from "chalk";
-import { loadCorpus, selectContractForVersion } from "./corpus-loader.js";
+import { loadMultipleCorpora, selectContractForVersion } from "./corpus-loader.js";
 import { Analyzer } from "./analyzer.js";
 import {
   PackageDiscovery,
@@ -175,9 +175,14 @@ program
     _narkRc?.tsconfig ?? "./tsconfig.json",
   )
   .option(
-    "--corpus <path>",
-    "Path to corpus directory (default: auto-resolves from nark-corpus package)",
-    _narkRc?.corpus ?? findDefaultCorpusPath(),
+    "--corpus <paths>",
+    "Corpus directory path, or comma-separated list of paths (highest precedence first). Default: auto-resolves nark-corpus-private-*, nark-corpus-pro, nark-corpus.",
+    (() => {
+      const fromRc = _narkRc?.corpus;
+      if (Array.isArray(fromRc)) return fromRc.join(",");
+      if (typeof fromRc === "string") return fromRc;
+      return findDefaultCorpusPaths().join(",");
+    })(),
   )
   .option(
     "--output <path>",
@@ -554,14 +559,20 @@ async function main(options: any) {
   // Ensure tsconfig exists (generate if missing, may redirect to .nark/tsconfig.json)
   tsconfigPath = ensureTsconfig(tsconfigPath);
 
-  // Validate corpus exists
-  if (!fs.existsSync(options.corpus)) {
+  // Parse corpus flag into ordered path list (highest precedence first)
+  const corpusPaths = parseCorpusFlag(options.corpus);
+
+  // Validate at least one corpus path exists
+  const existingCorpusPaths = corpusPaths.filter((p) => fs.existsSync(p));
+  if (existingCorpusPaths.length === 0) {
     console.error(
-      chalk.red(`Error: Corpus directory not found at ${options.corpus}`),
+      chalk.red(
+        `Error: No corpus directory found. Searched: ${corpusPaths.join(", ")}`,
+      ),
     );
     console.error(
       chalk.yellow(
-        "Tip: npm install nark-corpus, or use --corpus <path>, or set NARK_CORPUS_PATH",
+        "Tip: npm install nark-corpus, or use --corpus <path1>[,<path2>,...], or set NARK_CORPUS_PATHS",
       ),
     );
     process.exit(2);
@@ -588,10 +599,19 @@ async function main(options: any) {
   // chatter below and the post-write confirmation line further down.
   if (verbose && !useStdoutJson) {
     console.log(chalk.gray(`  tsconfig: ${tsconfigPath}`));
-    console.log(chalk.gray(`  corpus: ${options.corpus}`));
+    if (existingCorpusPaths.length === 1) {
+      console.log(chalk.gray(`  corpus: ${existingCorpusPaths[0]}`));
+    } else {
+      console.log(chalk.gray(`  corpus (precedence high→low):`));
+      for (const p of existingCorpusPaths) {
+        console.log(chalk.gray(`    - ${p}`));
+      }
+    }
 
-    // Show corpus source (npm package vs local)
-    if (options.corpus === findDefaultCorpusPath()) {
+    // Show corpus source (npm package vs local) for the primary (highest-precedence) path
+    const primary = existingCorpusPaths[0];
+    const defaultPaths = findDefaultCorpusPaths();
+    if (defaultPaths.includes(primary)) {
       try {
         const _require = createRequire(import.meta.url);
         _require.resolve("nark-corpus");
@@ -606,10 +626,10 @@ async function main(options: any) {
     console.log(chalk.gray(`  output: ${outputPath}\n`));
   }
 
-  // Load corpus
+  // Load corpus (single or multiple — loader auto-selects fast path for 1)
   if (verbose && !useStdoutJson) console.log(chalk.dim("Loading contracts..."));
   const corpusStartTime = Date.now();
-  const corpusResult = await loadCorpus(options.corpus, {
+  const corpusResult = await loadMultipleCorpora(existingCorpusPaths, {
     includeDrafts: options.includeDrafts,
     includeDeprecated: options.includeDeprecated,
     includeInDevelopment: options.includeDrafts, // in-development included with drafts
@@ -630,6 +650,21 @@ async function main(options: any) {
     console.log(
       chalk.green(`✓ Loaded ${corpusResult.contracts.size} package contracts`),
     );
+
+    // Show multi-corpus override warnings (high-precedence wins over low)
+    const overrideWarnings = (corpusResult.warnings ?? []).filter((w) =>
+      w.includes("overrides profile from"),
+    );
+    if (overrideWarnings.length > 0) {
+      console.log(
+        chalk.dim(
+          `  (${overrideWarnings.length} profile${overrideWarnings.length === 1 ? "" : "s"} overridden by higher-precedence corpus)`,
+        ),
+      );
+      for (const w of overrideWarnings) {
+        console.log(chalk.dim(`    • ${w}`));
+      }
+    }
 
     // Show skipped contracts (if any)
     if (corpusResult.skipped && corpusResult.skipped.length > 0) {
@@ -784,10 +819,12 @@ async function main(options: any) {
     }
   }
 
-  // Create analyzer
+  // Create analyzer. With multi-corpus, the analyzer's corpusPath is the
+  // primary (highest-precedence) corpus — used only for path-relative
+  // lookups; actual contract loading already happened via loadMultipleCorpora.
   const config: AnalyzerConfig = {
     tsconfigPath: path.resolve(tsconfigPath),
-    corpusPath: path.resolve(options.corpus),
+    corpusPath: path.resolve(existingCorpusPaths[0]),
     includeTests: options.includeTests,
     changedFiles: options.changedFiles?.map((f: string) => path.resolve(f)),
     diffSpec: options.diff,
@@ -1014,8 +1051,12 @@ async function main(options: any) {
   // hardcode caused every scan to misreport the corpus version it was using.
   // Resolved once here and reused below for telemetry.
   const corpusPkgVersion = (() => {
+    // With multi-corpus, report the primary (highest-precedence) corpus's
+    // version. This matches the pre-multi-corpus semantic and keeps the audit
+    // JSON / PR-bot comment / share-page surface backward-compatible. Multi-
+    // corpus consumers that need per-source versions can add a future field.
     try {
-      const pkgPath = path.join(options.corpus, "package.json");
+      const pkgPath = path.join(existingCorpusPaths[0], "package.json");
       const raw = fs.readFileSync(pkgPath, "utf-8");
       return (
         (JSON.parse(raw) as { version?: string }).version ?? "unknown"
@@ -1858,50 +1899,127 @@ function getCompactDescription(v: Violation): string {
 }
 
 /**
- * Finds the default corpus path by trying:
- * 1. Published npm package (nark-corpus)
- * 2. Local development paths (for contributors)
+ * Finds default corpus paths in PRECEDENCE order (highest first).
+ *
+ * Chain: customer-private > pro > public. Each is opt-in by being installed.
+ *   1. nark-corpus-private-<customer> (auto-detected in node_modules)
+ *   2. nark-corpus-pro (paid tier)
+ *   3. nark-corpus (free, public)
+ *
+ * Backwards compat: the legacy `NARK_CORPUS_PATH` env var, if set, is treated
+ * as the SOLE corpus (overrides the chain). Set NARK_CORPUS_PATHS (plural,
+ * comma-separated) for explicit multi-corpus override.
+ *
+ * Local-dev fallbacks (sibling repos) only kick in for the public corpus
+ * when no npm package is installed.
  */
-function findDefaultCorpusPath(): string {
-  // Try 1: NARK_CORPUS_PATH env var (highest priority override, for development)
+function findDefaultCorpusPaths(): string[] {
+  // Highest-priority override: NARK_CORPUS_PATHS (plural, comma-separated, ordered HIGH→LOW)
+  const envMulti = process.env.NARK_CORPUS_PATHS;
+  if (envMulti) {
+    const paths = envMulti.split(",").map((s) => s.trim()).filter(Boolean);
+    if (paths.length > 0) return paths;
+  }
+
+  // Singular legacy override: NARK_CORPUS_PATH (sole corpus, no chain)
   const envPath = process.env.NARK_CORPUS_PATH;
   if (envPath && fs.existsSync(path.join(envPath, "packages"))) {
-    return envPath;
+    return [envPath];
   }
 
-  // Try 2: Published npm package (production use)
+  const paths: string[] = [];
+  const _require = createRequire(import.meta.url);
+
+  // Try 1: any installed nark-corpus-private-* package (private customer corpus)
+  // We don't enumerate all of node_modules; we look for known well-known
+  // package names. Customers configure these via package.json dependencies.
+  // If multiple private corpora are installed, all are added (in dep order).
   try {
-    const _require = createRequire(import.meta.url);
+    const nodeModulesDir = path.join(process.cwd(), "node_modules");
+    if (fs.existsSync(nodeModulesDir)) {
+      const entries = fs.readdirSync(nodeModulesDir);
+      for (const entry of entries) {
+        if (entry.startsWith("nark-corpus-private-")) {
+          try {
+            const mod = _require(entry);
+            if (mod && typeof mod.getCorpusPath === "function") {
+              const corpusRoot = path.dirname(mod.getCorpusPath());
+              if (fs.existsSync(path.join(corpusRoot, "packages"))) {
+                paths.push(corpusRoot);
+              }
+            }
+          } catch {
+            // Package present but not importable; skip silently
+          }
+        }
+      }
+    }
+  } catch {
+    // node_modules unreadable; fine, skip
+  }
+
+  // Try 2: nark-corpus-pro (paid tier)
+  try {
+    const proMod = _require("nark-corpus-pro");
+    if (proMod && typeof proMod.getCorpusPath === "function") {
+      const corpusRoot = path.dirname(proMod.getCorpusPath());
+      if (fs.existsSync(path.join(corpusRoot, "packages"))) {
+        paths.push(corpusRoot);
+      }
+    }
+  } catch {
+    // Pro not installed; that's the default state for non-paying users
+  }
+
+  // Try 3: nark-corpus (public free tier) via npm package
+  try {
     const corpusModule = _require("nark-corpus");
-    // getCorpusPath() returns the packages/ subdirectory
-    // corpus-loader expects the parent (the corpus root containing packages/ and schema/)
     const corpusRoot = path.dirname(corpusModule.getCorpusPath());
-
     if (fs.existsSync(path.join(corpusRoot, "packages"))) {
-      return corpusRoot;
+      paths.push(corpusRoot);
     }
-  } catch (err) {
-    // Package not installed - fall through to local paths
+  } catch {
+    // Fall through to local-dev fallbacks
   }
 
-  // Try 3: Local corpus repo (development fallback)
-  const possiblePaths = [
-    path.join(process.cwd(), "../nark-corpus"),
-    path.join(process.cwd(), "../corpus"),
-    path.join(process.cwd(), "../../nark-corpus"),
-    path.join(process.cwd(), "../../corpus"),
-    path.join(__dirname, "../../nark-corpus"),
-    path.join(__dirname, "../../corpus"),
-  ];
-
-  for (const p of possiblePaths) {
-    if (fs.existsSync(path.join(p, "packages"))) {
-      return p;
+  // Try 4 (public local-dev fallback): only if no public corpus found yet
+  if (paths.length === 0 || !paths.some((p) => p.endsWith("nark-corpus"))) {
+    const possiblePaths = [
+      path.join(process.cwd(), "../nark-corpus"),
+      path.join(process.cwd(), "../corpus"),
+      path.join(process.cwd(), "../../nark-corpus"),
+      path.join(process.cwd(), "../../corpus"),
+      path.join(__dirname, "../../nark-corpus"),
+      path.join(__dirname, "../../corpus"),
+    ];
+    for (const p of possiblePaths) {
+      if (fs.existsSync(path.join(p, "packages"))) {
+        paths.push(p);
+        break;
+      }
     }
   }
 
-  // Fallback: assume sibling nark-corpus repo
-  return path.join(process.cwd(), "../nark-corpus");
+  // Final fallback if nothing found: assume sibling nark-corpus repo (legacy behavior)
+  if (paths.length === 0) {
+    paths.push(path.join(process.cwd(), "../nark-corpus"));
+  }
+
+  return paths;
+}
+
+/**
+ * Parses the --corpus CLI flag value into an ordered array of paths.
+ * Accepts comma-separated input: "private,pro,public" (highest precedence first).
+ * Single path is returned as a one-element array.
+ */
+function parseCorpusFlag(value: string | string[] | undefined): string[] {
+  if (!value) return findDefaultCorpusPaths();
+  if (Array.isArray(value)) return value.filter(Boolean);
+  return value
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
 }
 
 /**

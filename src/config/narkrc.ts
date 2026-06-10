@@ -4,7 +4,12 @@ import { parse as parseYaml } from 'yaml';
 
 export interface NarkRcConfig {
   tsconfig?: string;
-  corpus?: string;
+  /**
+   * Corpus directory path, or array of paths in PRECEDENCE order (highest first).
+   * Single string is treated as one corpus. Array form is the multi-corpus
+   * chain — e.g. `[<private>, <pro>, <public>]`.
+   */
+  corpus?: string | string[];
   exclude?: string[];
   include?: string[];
   telemetry?: boolean;

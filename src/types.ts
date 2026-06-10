@@ -346,6 +346,17 @@ export interface CorpusLoadResult {
   warnings?: string[];
   skipped?: Array<{ package: string; status: string; reason: string }>;
   contractFiles?: Map<string, string[]>; // packageName -> absolute file paths loaded
+  /**
+   * For multi-corpus loads: which corpus path the winning profile for each
+   * package came from. Useful for debugging override behavior. Undefined for
+   * single-corpus loads (which call loadCorpus directly).
+   */
+  corpusSources?: Map<string, string>;
+  /**
+   * All corpus paths searched, in precedence order (highest first).
+   * Undefined for single-corpus loads.
+   */
+  searchedPaths?: string[];
 }
 
 /**

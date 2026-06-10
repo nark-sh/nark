@@ -217,6 +217,127 @@ export async function loadCorpus(
 }
 
 /**
+ * Loads multiple corpora and merges them with precedence.
+ *
+ * @param corpusPaths Array of corpus paths in PRECEDENCE order, HIGHEST FIRST.
+ *   The canonical chain is `[private, pro, public]`:
+ *     - `private` (customer-specific nark-corpus-private-<customer>) wins over pro
+ *     - `pro` (nark-corpus-pro) wins over public
+ *     - `public` (nark-corpus) is the baseline
+ *   When the same `package` name has a profile in multiple corpora, the
+ *   higher-precedence one wins and a warning is emitted.
+ *
+ * Paths that don't exist on disk are silently skipped (they're opt-in installs).
+ * If no path yields any profiles, returns the same shape as loadCorpus with
+ * a single error.
+ *
+ * @param options Same options as `loadCorpus`. Applied per-corpus.
+ * @returns Merged `CorpusLoadResult` with `corpusSources` populated to show
+ *   which corpus path supplied each package's winning profile.
+ */
+export async function loadMultipleCorpora(
+  corpusPaths: string[],
+  options: LoadCorpusOptions = {}
+): Promise<CorpusLoadResult> {
+  if (!corpusPaths || corpusPaths.length === 0) {
+    return {
+      contracts: new Map(),
+      contractsByPackageName: new Map(),
+      errors: ['No corpus paths provided'],
+      warnings: [],
+      corpusSources: new Map(),
+      searchedPaths: [],
+    };
+  }
+
+  // Single-corpus fast path: behavior must match loadCorpus exactly.
+  if (corpusPaths.length === 1) {
+    const result = await loadCorpus(corpusPaths[0], options);
+    return {
+      ...result,
+      corpusSources: undefined,
+      searchedPaths: [corpusPaths[0]],
+    };
+  }
+
+  // Load every path that exists.
+  const perCorpus: Array<{ path: string; result: CorpusLoadResult }> = [];
+  const aggregatedErrors: string[] = [];
+  const aggregatedWarnings: string[] = [];
+  const aggregatedSkipped: NonNullable<CorpusLoadResult['skipped']> = [];
+
+  for (const corpusPath of corpusPaths) {
+    if (!fs.existsSync(path.join(corpusPath, 'packages'))) {
+      // Opt-in install missing: skip silently, but note in warnings for debug.
+      aggregatedWarnings.push(
+        `Corpus path "${corpusPath}" has no packages/ directory; skipped.`
+      );
+      continue;
+    }
+    const result = await loadCorpus(corpusPath, options);
+    perCorpus.push({ path: corpusPath, result });
+    aggregatedErrors.push(...result.errors);
+    if (result.warnings) aggregatedWarnings.push(...result.warnings);
+    if (result.skipped) aggregatedSkipped.push(...result.skipped);
+  }
+
+  if (perCorpus.length === 0) {
+    return {
+      contracts: new Map(),
+      contractsByPackageName: new Map(),
+      errors: aggregatedErrors.length > 0
+        ? aggregatedErrors
+        : [`No corpus directories found among: ${corpusPaths.join(', ')}`],
+      warnings: aggregatedWarnings,
+      corpusSources: new Map(),
+      searchedPaths: corpusPaths,
+    };
+  }
+
+  // Merge with precedence: iterate LOW → HIGH so higher-precedence sources
+  // overwrite entries written by lower-precedence ones. Track each package's
+  // source path; warn on override.
+  const mergedByPackageName = new Map<string, PackageContract[]>();
+  const mergedContractFiles = new Map<string, string[]>();
+  const corpusSources = new Map<string, string>();
+
+  for (let i = perCorpus.length - 1; i >= 0; i--) {
+    const { path: srcPath, result } = perCorpus[i];
+    const byPkg = result.contractsByPackageName ?? new Map<string, PackageContract[]>();
+    for (const [pkgName, profiles] of byPkg) {
+      const prevSource = corpusSources.get(pkgName);
+      if (prevSource && prevSource !== srcPath) {
+        aggregatedWarnings.push(
+          `Profile for "${pkgName}" in "${srcPath}" overrides profile from "${prevSource}".`
+        );
+      }
+      mergedByPackageName.set(pkgName, profiles);
+      corpusSources.set(pkgName, srcPath);
+      const files = result.contractFiles?.get(pkgName);
+      if (files) mergedContractFiles.set(pkgName, files);
+    }
+  }
+
+  // Rebuild the single-profile-per-package view: most-specific profile wins
+  // (matches loadCorpus convention).
+  const contracts = new Map<string, PackageContract>();
+  for (const [pkg, profiles] of mergedByPackageName) {
+    if (profiles.length > 0) contracts.set(pkg, profiles[0]);
+  }
+
+  return {
+    contracts,
+    contractsByPackageName: mergedByPackageName,
+    errors: aggregatedErrors,
+    warnings: aggregatedWarnings,
+    skipped: aggregatedSkipped,
+    contractFiles: mergedContractFiles,
+    corpusSources,
+    searchedPaths: corpusPaths,
+  };
+}
+
+/**
  * Walks the `extends:` chain from the given file path, returning the fully
  * merged contract. Caps depth at MAX_EXTENDS_DEPTH and detects cycles.
  *
