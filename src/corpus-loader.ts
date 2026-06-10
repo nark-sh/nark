@@ -206,6 +206,19 @@ export async function loadCorpus(
     if (profiles.length > 0) contracts.set(packageName, profiles[0]);
   }
 
+  // Three-state coverage breakdown.
+  // A profile with no explicit coverage_status is treated as "covered" (legacy
+  // default). Stubs explicitly set "no-async-contract".
+  let coveredCount = 0;
+  let noAsyncContractCount = 0;
+  for (const profile of contracts.values()) {
+    if (profile.coverage_status === 'no-async-contract') {
+      noAsyncContractCount++;
+    } else {
+      coveredCount++;
+    }
+  }
+
   return {
     contracts,
     contractsByPackageName,
@@ -213,6 +226,8 @@ export async function loadCorpus(
     warnings,
     skipped,
     contractFiles: contractFileMap,
+    coveredCount,
+    noAsyncContractCount,
   };
 }
 
@@ -325,6 +340,17 @@ export async function loadMultipleCorpora(
     if (profiles.length > 0) contracts.set(pkg, profiles[0]);
   }
 
+  // Recompute three-state coverage breakdown over the merged view.
+  let coveredCount = 0;
+  let noAsyncContractCount = 0;
+  for (const profile of contracts.values()) {
+    if (profile.coverage_status === 'no-async-contract') {
+      noAsyncContractCount++;
+    } else {
+      coveredCount++;
+    }
+  }
+
   return {
     contracts,
     contractsByPackageName: mergedByPackageName,
@@ -334,6 +360,8 @@ export async function loadMultipleCorpora(
     contractFiles: mergedContractFiles,
     corpusSources,
     searchedPaths: corpusPaths,
+    coveredCount,
+    noAsyncContractCount,
   };
 }
 

@@ -409,7 +409,7 @@ export class EventListenerAbsencePlugin implements DetectorPlugin {
         if (!creation.attachedEvents.has(required.event)) {
           // Find the postcondition ID for this missing event
           const contract = this.contracts.get(creation.packageName);
-          const funcContract = contract?.functions.find(
+          const funcContract = (contract?.functions ?? []).find(
             (f) => f.name === creation.factoryMethodName
           );
           // Prefer error-severity postconditions (missing error listener is more severe

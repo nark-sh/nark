@@ -1270,7 +1270,7 @@ export class Analyzer {
     let matchingPostcondition: Postcondition | undefined;
     let matchingFunctionName: string | undefined;
 
-    for (const func of contract.functions) {
+    for (const func of contract.functions ?? []) {
       // Check if any postcondition mentions async errors or matches the pattern
       const asyncErrorPostcondition = func.postconditions?.find(
         (pc) =>
@@ -1336,7 +1336,7 @@ export class Analyzer {
         continue;
       }
 
-      for (const func of contract.functions) {
+      for (const func of contract.functions ?? []) {
         const emptyCatchPostcondition = func.postconditions?.find(
           (pc) =>
             pc.id?.includes("empty-catch") || pc.id?.includes("silent-failure"),
@@ -1460,7 +1460,7 @@ export class Analyzer {
     const namespace = (node as any).__namespace;
 
     // Match function contract, considering namespace if present
-    const functionContract = contract.functions.find((f) => {
+    const functionContract = (contract.functions ?? []).find((f) => {
       // If the call has a namespace, match both namespace and function name
       if (namespace) {
         return f.namespace === namespace && f.name === callSite.functionName;
@@ -1523,7 +1523,7 @@ export class Analyzer {
     if (!contract) return;
 
     // Find the function contract for this hook
-    const functionContract = contract.functions.find(
+    const functionContract = (contract.functions ?? []).find(
       (f) => f.name === hookName,
     );
     if (!functionContract) return;
@@ -1830,7 +1830,7 @@ export class Analyzer {
 
           if (contract) {
             // Check if any function in this contract has a matching namespace
-            const namespacedFunction = contract.functions.find(
+            const namespacedFunction = (contract.functions ?? []).find(
               (f) => f.namespace === namespace && f.name === functionName,
             );
 
@@ -3998,7 +3998,7 @@ export class Analyzer {
     if (!contract) return;
 
     // Find the send() function contract
-    const sendContract = contract.functions.find((f) => f.name === "send");
+    const sendContract = (contract.functions ?? []).find((f) => f.name === "send");
     if (!sendContract) return;
 
     // Map command type to postcondition ID

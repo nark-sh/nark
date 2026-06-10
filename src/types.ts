@@ -200,9 +200,28 @@ export interface PackageContract {
   deprecated?: boolean;
   deprecated_reason?: string;
   deprecated_date?: string;
+  /**
+   * Profile coverage state (introduced in nark v3 / schema upgrade 2026-06-10).
+   * - "covered" (default; omitted in legacy profiles): profile has postconditions
+   *   to enforce against caller code.
+   * - "no-async-contract": package researched and confirmed to have no async
+   *   error contract worth enforcing (e.g. UI primitives, presentational libs).
+   *   Stub profiles document the research outcome.
+   */
+  coverage_status?: "covered" | "no-async-contract";
+  /** ISO date when the package was researched to determine its coverage_status. */
+  researched_at?: string;
+  /** Required for no-async-contract profiles; optional for covered. */
+  coverage_rationale?: string;
+  /** Quality level of the evidence backing this contract's claims. */
+  evidence_quality?: "stub" | "partial" | "confirmed";
   /** Detection rules for analyzer integration */
   detection?: DetectionRules;
-  functions: FunctionContract[];
+  /**
+   * Function-level postconditions to enforce. Required for covered profiles,
+   * may be empty or absent for no-async-contract stub profiles.
+   */
+  functions?: FunctionContract[];
 }
 
 /**
@@ -357,6 +376,15 @@ export interface CorpusLoadResult {
    * Undefined for single-corpus loads.
    */
   searchedPaths?: string[];
+  /**
+   * Count of profiles with coverage_status "covered" (or absent — legacy default).
+   * Three-state reporting: covered + noAsyncContractCount = total profiles.
+   */
+  coveredCount?: number;
+  /**
+   * Count of profiles with coverage_status "no-async-contract" (researched stubs).
+   */
+  noAsyncContractCount?: number;
 }
 
 /**

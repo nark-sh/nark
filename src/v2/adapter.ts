@@ -190,7 +190,7 @@ function convertViolation(
   let suggestedFix: string | undefined;
 
   if (contract) {
-    const funcContract = contract.functions.find((f) => f.name === v2.function);
+    const funcContract = (contract.functions ?? []).find((f) => f.name === v2.function);
     if (funcContract) {
       const postcondition = (funcContract.postconditions || []).find(
         (p) => p.id === v2.postconditionId

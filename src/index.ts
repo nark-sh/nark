@@ -647,9 +647,20 @@ async function main(options: any) {
   }
 
   if (verbose) {
-    console.log(
-      chalk.green(`✓ Loaded ${corpusResult.contracts.size} package contracts`),
-    );
+    const noAsync = corpusResult.noAsyncContractCount ?? 0;
+    const covered = corpusResult.coveredCount ?? corpusResult.contracts.size;
+    if (noAsync > 0) {
+      console.log(
+        chalk.green(
+          `✓ Loaded ${corpusResult.contracts.size} package contracts ` +
+            `(${covered} covered, ${noAsync} researched-no-contract)`,
+        ),
+      );
+    } else {
+      console.log(
+        chalk.green(`✓ Loaded ${corpusResult.contracts.size} package contracts`),
+      );
+    }
 
     // Show multi-corpus override warnings (high-precedence wins over low)
     const overrideWarnings = (corpusResult.warnings ?? []).filter((w) =>
