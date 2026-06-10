@@ -262,6 +262,20 @@ export class ContractMatcher {
         effectiveFunctionName = "Duration.fromObject";
       }
 
+      // next: NextResponse.redirect() is NOT the redirect() from next/navigation.
+      // NextResponse.redirect() returns a Response object — it does NOT throw NEXT_REDIRECT.
+      // Only redirect() imported from 'next/navigation' throws. Suppress when the call is
+      // a static method on NextResponse (chain[0] === 'NextResponse').
+      // Evidence: wave1-fp-harvester — 119+ FPs across cal.com, papermark, civitai.
+      if (
+        detection.packageName === "next" &&
+        detection.functionName === "redirect" &&
+        Array.isArray(detection.metadata?.chain) &&
+        (detection.metadata.chain as string[])[0] === "NextResponse"
+      ) {
+        continue;
+      }
+
       const funcContract = this.findFunctionContract(
         contract,
         effectiveFunctionName,
@@ -364,6 +378,46 @@ export class ContractMatcher {
           continue;
         }
         // Callback is async and not fully wrapped — fall through to fire violation.
+      }
+
+      // react-hook-form useForm: async-default-values-unhandled-rejection fires on ANY
+      // useForm({ defaultValues: ... }) call regardless of whether defaultValues is async.
+      // Only fire when defaultValues is actually an async function or Promise-returning
+      // expression. Sync object literals, sync function calls, and no-defaultValues calls
+      // are all safe — suppress them.
+      // Evidence: wave1-fp-harvester — 140+ FPs across cal.com (118), nango (21), civitai (1+).
+      if (
+        detection.packageName === "react-hook-form" &&
+        detection.functionName === "useForm" &&
+        primaryPostcondition.id === "async-default-values-unhandled-rejection" &&
+        ts.isCallExpression(detection.node)
+      ) {
+        const args = detection.node.arguments;
+        if (args.length === 0) {
+          continue;
+        }
+        const optionsArg = args[0];
+        if (!ts.isObjectLiteralExpression(optionsArg)) {
+          continue;
+        }
+        const defaultValuesProp = optionsArg.properties.find(
+          (p): p is ts.PropertyAssignment =>
+            ts.isPropertyAssignment(p) &&
+            ts.isIdentifier(p.name) &&
+            p.name.text === "defaultValues",
+        );
+        if (!defaultValuesProp) {
+          continue;
+        }
+        const dv = defaultValuesProp.initializer;
+        const isAsyncDefaultValues =
+          (ts.isArrowFunction(dv) || ts.isFunctionExpression(dv)) &&
+          !!dv.modifiers?.some(
+            (m) => m.kind === ts.SyntaxKind.AsyncKeyword,
+          );
+        if (!isAsyncDefaultValues) {
+          continue;
+        }
       }
 
       // react-hook-form useFormContext: suppress missing-form-provider when
@@ -1104,6 +1158,8 @@ export class ContractMatcher {
         (primaryPostcondition.id === "query-error-unhandled" ||
           primaryPostcondition.id === "infinite-query-error-unhandled" ||
           primaryPostcondition.id === "mutation-error-unhandled" ||
+          primaryPostcondition.id === "stale-query-refetch-error" ||
+          primaryPostcondition.id === "mutation-optimistic-update-rollback" ||
           primaryPostcondition.id === "fetchquery-throws-on-error" ||
           primaryPostcondition.id === "fetchquery-ssr-uncaught-error")
       ) {
@@ -1124,7 +1180,9 @@ export class ContractMatcher {
         // Only match unambiguous RQ error state destructuring patterns.
         const isComponentFilePattern =
           primaryPostcondition.id === "query-error-unhandled" ||
-          primaryPostcondition.id === "infinite-query-error-unhandled";
+          primaryPostcondition.id === "infinite-query-error-unhandled" ||
+          primaryPostcondition.id === "stale-query-refetch-error" ||
+          primaryPostcondition.id === "mutation-optimistic-update-rollback";
         if (
           isComponentFilePattern &&
           (fileText.includes("isError") ||
