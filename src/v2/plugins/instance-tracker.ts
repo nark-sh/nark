@@ -115,13 +115,15 @@ export class InstanceTrackerPlugin implements DetectorPlugin {
 
       // factory call: createClient(...)
       if (ts.isCallExpression(init)) {
-        const pkg = this.resolveFactoryCall(init, nodeCtx);
+        const pkg = this.resolveFactoryCall(init, nodeCtx)
+          ?? this.resolveCallReturnTypeViaChecker(init, nodeCtx);
         if (pkg) this.instanceMap.set(varName, pkg);
       }
 
       // await factory(): class Repo { private db = await createClient() }
       if (ts.isAwaitExpression(init) && ts.isCallExpression(init.expression)) {
-        const pkg = this.resolveFactoryCall(init.expression, nodeCtx);
+        const pkg = this.resolveFactoryCall(init.expression, nodeCtx)
+          ?? this.resolveCallReturnTypeViaChecker(init.expression, nodeCtx);
         if (pkg) this.instanceMap.set(varName, pkg);
       }
     }
@@ -270,6 +272,25 @@ export class InstanceTrackerPlugin implements DetectorPlugin {
       // Fall through to Case 3c (await trackedInstance.chainMethod()) if no factory match
     }
 
+    // Case 2c / 3e: TypeChecker return-type fallback — handles helper functions
+    // that wrap a constructor or factory but don't match any known factory name.
+    // Pattern: const app = getAppInstance() where function getAppInstance(): App
+    //
+    // Runs AFTER the cheap factory/schema/chain paths so most call sites resolve
+    // via the existing logic. Guarded by importMap (and classToPackage as fallback)
+    // to prevent matching unrelated types that happen to share a class name.
+    if (
+      ts.isCallExpression(init) ||
+      (ts.isAwaitExpression(init) && ts.isCallExpression(init.expression))
+    ) {
+      const callExpr = ts.isCallExpression(init) ? init : (init.expression as ts.CallExpression);
+      const pkg = this.resolveCallReturnTypeViaChecker(callExpr, context);
+      if (pkg) {
+        this.instanceMap.set(varName, pkg);
+        return [];
+      }
+    }
+
     // Case 3b: await factory().promise — promise-factory pattern (e.g., pdfjs-dist)
     // Pattern: const doc = await getDocument(src).promise
     // The factory returns a task object; the .promise property yields the actual instance.
@@ -367,7 +388,8 @@ export class InstanceTrackerPlugin implements DetectorPlugin {
 
     // Propagate from factory/new: this.client = createClient()
     if (ts.isCallExpression(rhs)) {
-      const pkg = this.resolveFactoryCall(rhs, context);
+      const pkg = this.resolveFactoryCall(rhs, context)
+        ?? this.resolveCallReturnTypeViaChecker(rhs, context);
       if (pkg) {
         this.instanceMap.set(varName, pkg);
         return [];
@@ -612,6 +634,90 @@ export class InstanceTrackerPlugin implements DetectorPlugin {
     }
 
     return null;
+  }
+
+  /**
+   * Resolve a CallExpression's return type via the TypeScript type checker.
+   *
+   * Last-resort fallback for helper functions that wrap a constructor or factory
+   * but don't match any known factory name pattern. Returns null unless the type
+   * is confirmed by the file's importMap (or, as fallback, by classToPackage).
+   *
+   * The importMap confirmation is the same disambiguation guard used by
+   * walkTypeAnnotations — it prevents matching identical class names from
+   * unrelated packages (e.g., Socket from socket.io vs socket.io-client).
+   *
+   * Pattern handled:
+   *   function getAppInstance(): App { return new App({...}); }
+   *   const app = getAppInstance(); // → tracks 'app' as @octokit/app
+   */
+  private resolveCallReturnTypeViaChecker(
+    callExpr: ts.CallExpression,
+    context: NodeContext
+  ): string | null {
+    const sig = context.typeChecker.getResolvedSignature(callExpr);
+    if (!sig) return null;
+    const returnType = context.typeChecker.getReturnTypeOfSignature(sig);
+    if (!returnType) return null;
+
+    // Walk the type to find a named class symbol. Handles:
+    //   - Direct types: App
+    //   - Nullable union: App | null  /  App | undefined
+    //   - Promise<App> (async helpers): unwrap to the contained type
+    const typeName = this.extractClassNameFromType(returnType, context.typeChecker);
+    if (!typeName) return null;
+
+    // Confirm via importMap first (authoritative — tells us exactly which package
+    // the type was imported from in this file).
+    const importInfo = context.importMap.get(typeName);
+    if (importInfo) return importInfo.packageName;
+
+    // Fallback: classToPackage from contract detection rules. Mirrors the same
+    // priority order used by resolveNewExpression — importMap wins, classToPackage
+    // covers cases where the type isn't a direct named import.
+    const fromClassMap = this.classToPackage.get(typeName);
+    if (fromClassMap) return fromClassMap;
+
+    return null;
+  }
+
+  /**
+   * Walk a TypeScript type to extract a class-like name symbol.
+   * Unwraps unions (App | null) and Promise<T> wrappers.
+   */
+  private extractClassNameFromType(
+    type: ts.Type,
+    typeChecker: ts.TypeChecker
+  ): string | null {
+    // Union: pick the first non-null/undefined branch with a resolvable symbol.
+    if (type.isUnion()) {
+      for (const t of type.types) {
+        if (t.flags & (ts.TypeFlags.Null | ts.TypeFlags.Undefined | ts.TypeFlags.Void)) {
+          continue;
+        }
+        const name = this.extractClassNameFromType(t, typeChecker);
+        if (name) return name;
+      }
+      return null;
+    }
+
+    const symbol = type.getSymbol();
+    if (!symbol) return null;
+    const name = symbol.getName();
+
+    // Unwrap Promise<T> from async helpers (e.g., async function makeClient(): Promise<App>)
+    if (name === 'Promise') {
+      const typeArgs = (type as ts.TypeReference).typeArguments;
+      if (typeArgs && typeArgs.length > 0) {
+        return this.extractClassNameFromType(typeArgs[0], typeChecker);
+      }
+      return null;
+    }
+
+    // Skip anonymous / builtin / non-class-like names that can never confirm via importMap.
+    if (!name || name === '__type' || name === '__object') return null;
+
+    return name;
   }
 
   /**

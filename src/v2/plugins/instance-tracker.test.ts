@@ -33,10 +33,19 @@ function findFirst<T extends ts.Node>(
 }
 
 
-/** Build a mock NodeContext with an importMap. */
+/** Build a mock NodeContext with an importMap.
+ *
+ * The fake typeChecker stubs the methods used by the resolveCallReturnTypeViaChecker
+ * fallback so unit tests that don't care about type resolution still work — the
+ * stubs return undefined, which causes the fallback to no-op.
+ */
 function mockContext(importMap: Map<string, ImportInfo>): NodeContext {
+  const fakeTypeChecker = {
+    getResolvedSignature: () => undefined,
+    getReturnTypeOfSignature: () => undefined,
+  } as unknown as ts.TypeChecker;
   return {
-    typeChecker: {} as ts.TypeChecker,
+    typeChecker: fakeTypeChecker,
     symbolTable: new Map(),
     importMap,
     controlFlow: {} as any,
