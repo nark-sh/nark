@@ -252,20 +252,37 @@ export function assertFires(
     };
   }
 
-  // If postconditionId specified, check it matches one of the violations.
-  // Supports wildcard suffix: 'ses-custom-verification-*' matches any postconditionId
-  // that starts with 'ses-custom-verification-'.
+  // If postconditionId specified, check it matches one of the violations OR
+  // one of the violation's subViolations. The matcher emits a single primary
+  // violation per call site with secondary applicable postconditions stored
+  // as subViolations[] (see contract-matcher.ts:2451-2464). Fixtures that
+  // annotate multiple postconditions on the same call site (e.g., image-size
+  // imageSizeFromFile firing file-not-found + empty-file + corrupt-image-async)
+  // need this to count a match against either the primary or any sub.
+  //
+  // Supports wildcard suffix: 'ses-custom-verification-*' matches any
+  // postconditionId that starts with 'ses-custom-verification-'.
   if (annotation.postconditionId) {
     const expectedId = annotation.postconditionId;
-    const matchesPostcondition = viols.some(v => {
+    const matchesId = (id: string): boolean => {
       if (expectedId.endsWith('*')) {
         const prefix = expectedId.slice(0, -1);
-        return v.postconditionId.startsWith(prefix);
+        return id.startsWith(prefix);
       }
-      return v.postconditionId === expectedId;
+      return id === expectedId;
+    };
+    const matchesPostcondition = viols.some(v => {
+      if (matchesId(v.postconditionId)) return true;
+      const subs = v.subViolations ?? [];
+      return subs.some(s => matchesId(s.postconditionId));
     });
     if (!matchesPostcondition) {
-      const actualIds = viols.map(v => v.postconditionId).join(', ');
+      const actualIds = viols.map(v => {
+        const subIds = (v.subViolations ?? []).map(s => s.postconditionId);
+        return subIds.length > 0
+          ? `${v.postconditionId} (+ ${subIds.join(', ')})`
+          : v.postconditionId;
+      }).join(', ');
       return {
         passed: false,
         message: [
