@@ -114,12 +114,24 @@ export interface GroundTruthResult {
 export async function runGroundTruth(
   groundTruthPath: string,
   corpusPath: string = CORPUS_PATH,
-  options: { includeDrafts?: boolean } = {}
+  options: { includeDrafts?: boolean; packageName?: string } = {}
 ): Promise<GroundTruthResult> {
   // Load corpus
   const corpusResult = await loadCorpus(corpusPath, { includeDrafts: options.includeDrafts });
   if (corpusResult.errors.length > 0) {
-    throw new Error(`Corpus load failed: ${corpusResult.errors.join(', ')}`);
+    // Only throw if the package under test has a schema error.
+    // Errors from other WIP packages are logged as warnings so parallel
+    // onboarding doesn't cause unrelated test failures.
+    const testedPkg = options.packageName;
+    const fatalErrors = testedPkg
+      ? corpusResult.errors.filter(e => e.includes(testedPkg))
+      : corpusResult.errors;
+    if (fatalErrors.length > 0) {
+      throw new Error(`Corpus load failed: ${fatalErrors.join(', ')}`);
+    }
+    for (const warning of corpusResult.errors) {
+      console.warn(`[harness] corpus warning (non-fatal): ${warning}`);
+    }
   }
   const contracts: Map<string, PackageContract> = corpusResult.contracts;
 
