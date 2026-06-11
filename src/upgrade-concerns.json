@@ -51235,5 +51235,69 @@
       "note": "Proactive \u2014 postconditions ltrim-non-string-typeerror and rtrim-non-string-typeerror added via API surface analysis"
     },
     "resolution": null
+  },
+  {
+    "id": "concern-20260611-bull-deepen-14",
+    "created_at": "2026-06-11",
+    "source": "deepen",
+    "package": "bull",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for bull Job.moveToCompleted() \u2014 postcondition move-to-completed-return-value-not-serializable added in depth pass but no scanner rule exists for non-JSON-serializable return values",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260611-bull-deepen-15",
+    "created_at": "2026-06-11",
+    "source": "deepen",
+    "package": "bull",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for bull Job.moveToCompleted() \u2014 postcondition move-to-completed-no-try-catch added in depth pass but no scanner rule exists for missing try-catch on moveToCompleted calls",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260611-bull-deepen-16",
+    "created_at": "2026-06-11",
+    "source": "deepen",
+    "package": "bull",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for bull Job.takeLock() \u2014 postcondition take-lock-false-return-unchecked added in depth pass but no scanner rule exists for unchecked return value (returns false silently when lock unavailable)",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260611-bull-deepen-17",
+    "created_at": "2026-06-11",
+    "source": "deepen",
+    "package": "bull",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for bull Queue.pause() \u2014 postcondition pause-no-try-catch added in depth pass but no scanner rule exists for missing try-catch on queue.pause() calls",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
   }
 ]
