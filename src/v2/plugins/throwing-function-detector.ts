@@ -362,12 +362,30 @@ export class ThrowingFunctionDetector implements DetectorPlugin {
     // Special case: factory method pattern — sharp(input).metadata()
     // After the while loop, current = sharp(input) (CallExpression whose expression is an Identifier).
     // Unwrap one level so that the factory call root (e.g. 'sharp') becomes the root identifier.
+    //
+    // Also unwrap type assertions and parenthesized expressions so that patterns like:
+    //   (response as any).textConverted()
+    //   (response as Response).json()
+    //   (obj).method()
+    // are handled the same as the uncast form `response.textConverted()`.
+    // TypeScript's AsExpression and ParenthesizedExpression are transparent to runtime identity.
     if (!ts.isIdentifier(current)) {
-      if (ts.isCallExpression(current) && ts.isIdentifier(current.expression)) {
-        // Factory call root: treat the factory function identifier as the root
-        current = current.expression;
-      } else {
-        return null; // Skip complex expressions
+      // Unwrap as-expressions and parenthesized expressions iteratively
+      // (they can nest: ((x as any) as unknown).method())
+      while (
+        (ts.isAsExpression(current) || ts.isParenthesizedExpression(current)) &&
+        !ts.isIdentifier(current)
+      ) {
+        current = (current as ts.AsExpression | ts.ParenthesizedExpression).expression;
+      }
+
+      if (!ts.isIdentifier(current)) {
+        if (ts.isCallExpression(current) && ts.isIdentifier(current.expression)) {
+          // Factory call root: treat the factory function identifier as the root
+          current = current.expression;
+        } else {
+          return null; // Skip complex expressions
+        }
       }
     }
 
