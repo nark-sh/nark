@@ -51043,5 +51043,85 @@
       "note": "Proactive \u2014 same underlying consumeBody() TypeError path as json-body-consumed-twice and text-body-consumed-twice already documented. Extends body-consumed detection to textConverted() call sites."
     },
     "resolution": null
+  },
+  {
+    "id": "concern-20260611-validator-deepen-6",
+    "created_at": "2026-06-11",
+    "source": "deepen",
+    "package": "validator",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for validator.isEmpty() called without ignore_whitespace: true \u2014 whitespace-only strings are NOT empty by default",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 deepen-stream-1 pass 3. isEmpty() default treats '  ' as non-empty."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260611-validator-deepen-7",
+    "created_at": "2026-06-11",
+    "source": "deepen",
+    "package": "validator",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for validator.isFloat() with unsupported locale \u2014 silent all-false (unlike isDecimal() which throws)",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 deepen-stream-1 pass 3. isFloat() silently uses undefined as decimal separator."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260611-validator-deepen-8",
+    "created_at": "2026-06-11",
+    "source": "deepen",
+    "package": "validator",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for validator.isHash() with invalid algorithm name \u2014 typo causes all validations to silently return false",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 deepen-stream-1 pass 3. lengths[algorithm] undefined creates broken regex."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260611-validator-deepen-9",
+    "created_at": "2026-06-11",
+    "source": "deepen",
+    "package": "validator",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for validator.isIn() with undefined/null values parameter \u2014 silently returns false instead of throwing",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 deepen-stream-1 pass 3. isIn() falls through to false when values is null."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260611-validator-deepen-10",
+    "created_at": "2026-06-11",
+    "source": "deepen",
+    "package": "validator",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for validator.isBoolean() strict mode where downstream uses value==='true' but isBoolean() also accepts '0' and '1'",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 deepen-stream-1 pass 3. strictBooleans includes '0' and '1'."
+    },
+    "resolution": null
   }
 ]
