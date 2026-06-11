@@ -51123,5 +51123,117 @@
       "note": "Proactive \u2014 deepen-stream-1 pass 3. strictBooleans includes '0' and '1'."
     },
     "resolution": null
+  },
+  {
+    "id": "concern-20260611-validator-deepen-11",
+    "created_at": "2026-06-11",
+    "source": "deepen",
+    "package": "validator",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for validator.isNumeric() with unsupported locale option \u2014 alpha.decimal[locale] is undefined, producing broken regex that silently produces incorrect boolean results",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 postcondition isnumeric-invalid-locale-silent-mismatch added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260611-validator-deepen-12",
+    "created_at": "2026-06-11",
+    "source": "deepen",
+    "package": "validator",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for validator.isNumeric() called with non-string input \u2014 throws TypeError on null/undefined from request params",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 postcondition isnumeric-non-string-typeerror added via API surface analysis"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260611-validator-deepen-13",
+    "created_at": "2026-06-11",
+    "source": "deepen",
+    "package": "validator",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for validator.isInt() range-check return value ignored \u2014 returns false for out-of-range but code doesn't act on it",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 postcondition isint-range-returns-false-not-throw added via API surface analysis"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260611-validator-deepen-14",
+    "created_at": "2026-06-11",
+    "source": "deepen",
+    "package": "validator",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for validator.equals() called with non-string first arg \u2014 throws TypeError on null auth tokens",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 postcondition equals-non-string-typeerror added via API surface analysis"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260611-validator-deepen-15",
+    "created_at": "2026-06-11",
+    "source": "deepen",
+    "package": "validator",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for validator.contains() return value not checked \u2014 security bypass when used as presence guard without acting on false",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 postcondition contains-unchecked-return-security-bypass added via API surface analysis"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260611-validator-deepen-16",
+    "created_at": "2026-06-11",
+    "source": "deepen",
+    "package": "validator",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for validator.isAfter() / isBefore() used without prior format validation \u2014 returns false for both invalid date AND out-of-range date, cannot distinguish parse failure",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 postconditions isafter-unparseable-date-returns-false and isbefore-unparseable-date-returns-false added via API surface analysis"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260611-validator-deepen-17",
+    "created_at": "2026-06-11",
+    "source": "deepen",
+    "package": "validator",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for validator.ltrim() / rtrim() called with non-string input \u2014 throws TypeError on null/undefined from optional form fields",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 postconditions ltrim-non-string-typeerror and rtrim-non-string-typeerror added via API surface analysis"
+    },
+    "resolution": null
   }
 ]
