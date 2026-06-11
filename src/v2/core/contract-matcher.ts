@@ -392,6 +392,20 @@ export class ContractMatcher {
         // Callback is async and not fully wrapped — fall through to fire violation.
       }
 
+      // react-hook-form trigger: trigger-result-not-awaited fires on every trigger() call
+      // regardless of whether the caller awaits the Promise. Suppress when the call is the
+      // direct operand of an AwaitExpression — those callers do await the result correctly.
+      // Evidence: react-hook-form ground-truth line 257 (await form.trigger('email')).
+      if (
+        detection.packageName === "react-hook-form" &&
+        detection.functionName === "trigger" &&
+        primaryPostcondition.id === "trigger-result-not-awaited" &&
+        ts.isCallExpression(detection.node) &&
+        ts.isAwaitExpression(detection.node.parent)
+      ) {
+        continue;
+      }
+
       // react-hook-form useForm: async-default-values-unhandled-rejection fires on ANY
       // useForm({ defaultValues: ... }) call regardless of whether defaultValues is async.
       // Only fire when defaultValues is actually an async function or Promise-returning
