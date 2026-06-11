@@ -165,6 +165,7 @@ export async function runGroundTruth(
     const promiseFactoryToPackage = new Map<string, string>();
     const instanceChainMethodToPackage = new Map<string, string>();
     const awaitablePropertyToFunctionName = new Map<string, string>();
+    const callableFactoryFunctionName = new Map<string, string>();
 
     for (const [packageName, contract] of contracts.entries()) {
       const detection = contract.detection;
@@ -178,6 +179,9 @@ export async function runGroundTruth(
         for (const [propName, funcName] of Object.entries(detection.awaitable_properties)) {
           awaitablePropertyToFunctionName.set(`${packageName}:${propName}`, funcName);
         }
+      }
+      if (detection.callable_factory_function_name) {
+        callableFactoryFunctionName.set(packageName, detection.callable_factory_function_name);
       }
     }
 
@@ -195,7 +199,7 @@ export async function runGroundTruth(
     );
 
     analyzer.registerPlugin(instanceTracker);
-    analyzer.registerPlugin(new ThrowingFunctionDetector(instanceTracker, awaitablePropertyToFunctionName));
+    analyzer.registerPlugin(new ThrowingFunctionDetector(instanceTracker, awaitablePropertyToFunctionName, callableFactoryFunctionName));
     analyzer.registerPlugin(new PropertyChainDetector(instanceTracker));
     analyzer.registerPlugin(new EventListenerDetector());
     analyzer.registerPlugin(new EventListenerAbsencePlugin(contracts));

@@ -35,13 +35,23 @@ export class ThrowingFunctionDetector implements DetectorPlugin {
    * Used to detect `await renderTask.promise` where renderTask is a tracked pdfjs-dist instance.
    */
   private awaitablePropertyToFunctionName: Map<string, string>;
+  /**
+   * Maps packageName → functionName for callable factory return values.
+   * Handles: const auth = createAppAuth(...); await auth({...})
+   * The factory return value is itself an async callable — when directly invoked,
+   * report it as a call to `functionName` for this package.
+   * Example: '@octokit/auth-app' → 'auth'
+   */
+  private callableFactoryFunctionName: Map<string, string>;
 
   constructor(
     instanceTracker?: InstanceTrackerPlugin,
     awaitablePropertyToFunctionName?: Map<string, string>,
+    callableFactoryFunctionName?: Map<string, string>,
   ) {
     this.instanceTracker = instanceTracker;
     this.awaitablePropertyToFunctionName = awaitablePropertyToFunctionName ?? new Map();
+    this.callableFactoryFunctionName = callableFactoryFunctionName ?? new Map();
   }
 
   /**
@@ -213,6 +223,7 @@ export class ThrowingFunctionDetector implements DetectorPlugin {
    * Examples:
    *   - get() // where get was imported from axios
    *   - hash() // where hash was imported from bcryptjs
+   *   - auth({type: "installation"}) // where auth = createAppAuth(...) (callable factory)
    */
   private handleDirectCall(
     identifier: ts.Identifier,
@@ -227,7 +238,34 @@ export class ThrowingFunctionDetector implements DetectorPlugin {
     // Check if this is from an import
     const importInfo = context.importMap.get(identName);
     if (!importInfo) {
-      return []; // Not from an import, skip
+      // Check instance tracker for callable factory return values.
+      // Handles: const auth = createAppAuth(...); await auth({type: "installation"})
+      // The variable 'auth' is not an import but is tracked by instanceTracker as
+      // the return value of a factory function (createAppAuth starts with 'create').
+      if (this.instanceTracker && this.callableFactoryFunctionName.size > 0) {
+        const instancePackage = this.instanceTracker.resolveIdentifier(identName);
+        if (instancePackage) {
+          const functionName = this.callableFactoryFunctionName.get(instancePackage);
+          if (functionName) {
+            return [
+              {
+                pluginName: this.name,
+                pattern: 'throwing-function',
+                node: callNode,
+                packageName: instancePackage,
+                functionName,
+                confidence: 'medium',
+                metadata: {
+                  depth: 0,
+                  callableInstance: true,
+                  localVarName: identName,
+                },
+              },
+            ];
+          }
+        }
+      }
+      return []; // Not from an import or tracked callable, skip
     }
 
     const packageName = importInfo.packageName;

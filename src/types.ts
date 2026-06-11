@@ -174,6 +174,13 @@ export interface DetectionRules {
    * Example: { "promise": "render" }
    */
   awaitable_properties?: Record<string, string>;
+  /**
+   * When a tracked factory's return value is itself a callable async function (not an instance),
+   * maps the package name to the function name to attribute violations to.
+   * Use for packages where the factory returns a direct async function (not a class instance).
+   * Example: "execute" (for a factory that returns an async execute function)
+   */
+  callable_factory_function_name?: string;
 }
 
 /**

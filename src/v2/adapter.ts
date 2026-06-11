@@ -60,6 +60,10 @@ export async function runV2Analyzer(
   // Map key: `${packageName}:${propertyName}` → functionName
   // e.g., pdfjs-dist: 'promise' property on renderTask → 'render' function
   const awaitablePropertyToFunctionName = new Map<string, string>();
+  // callableFactoryFunctionName: packages whose factory return value is itself a callable async function.
+  // When the tracked instance variable is directly invoked (not via .method), report as this function name.
+  // e.g., '@octokit/auth-app' → 'auth'  (const auth = createAppAuth(...); await auth({...}))
+  const callableFactoryFunctionName = new Map<string, string>();
 
   for (const [packageName, contract] of contracts.entries()) {
     const detection = contract.detection;
@@ -84,6 +88,9 @@ export async function runV2Analyzer(
       for (const [propName, funcName] of Object.entries(detection.awaitable_properties)) {
         awaitablePropertyToFunctionName.set(`${packageName}:${propName}`, funcName);
       }
+    }
+    if (detection.callable_factory_function_name) {
+      callableFactoryFunctionName.set(packageName, detection.callable_factory_function_name);
     }
   }
 
@@ -112,7 +119,7 @@ export async function runV2Analyzer(
 
   // Register plugins in order (InstanceTracker must come before plugins that use it)
   analyzer.registerPlugin(instanceTracker);
-  analyzer.registerPlugin(new ThrowingFunctionDetector(instanceTracker, awaitablePropertyToFunctionName));
+  analyzer.registerPlugin(new ThrowingFunctionDetector(instanceTracker, awaitablePropertyToFunctionName, callableFactoryFunctionName));
   analyzer.registerPlugin(new PropertyChainDetector(instanceTracker));
   analyzer.registerPlugin(new EventListenerDetector());
   analyzer.registerPlugin(new EventListenerAbsencePlugin(contracts));
