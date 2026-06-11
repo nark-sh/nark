@@ -1637,6 +1637,203 @@ export class ContractMatcher {
         }
       }
 
+      // ──────────────────────────────────────────────────────────────────────────
+      // @sentry/* special-case postconditions
+      // ──────────────────────────────────────────────────────────────────────────
+
+      // @sentry/* withMonitor: monitor-slug-not-configured fires when the 3rd argument
+      // (upsertMonitorConfig) is missing — regardless of whether the call is in try-catch.
+      // The check-in is silently dropped if the monitor slug doesn't exist in Sentry.
+      // This is INDEPENDENT of the monitor-callback-rethrows try-catch check.
+      // Evidence: concern-20260611-sentry-node-deepen-3
+      if (
+        detection.packageName.startsWith("@sentry/") &&
+        detection.functionName === "withMonitor" &&
+        ts.isCallExpression(detection.node)
+      ) {
+        const monitorSlugPc = postconditions.find(
+          (p) => p.id === "monitor-slug-not-configured",
+        );
+        if (monitorSlugPc && detection.node.arguments.length < 3) {
+          // Arg count < 3 — upsertMonitorConfig missing: fire monitor-slug-not-configured
+          const { line: mLine, column: mCol } = this.getLocation(
+            detection.node,
+            sourceFile,
+          );
+          const { json: mCtx, startLine: mCtxStart } = this.buildCodeContext(
+            sourceFile,
+            mLine - 1,
+          );
+          const mFingerprint = computeViolationFingerprint({
+            packageName: detection.packageName,
+            postconditionId: monitorSlugPc.id,
+            filePath: sourceFile.fileName,
+            lineNumber: mLine,
+            callExpression: detection.functionName,
+          });
+          const mSuppression = checkSuppression({
+            projectRoot: this.options.projectRoot,
+            sourceFile,
+            line: mLine,
+            column: mCol,
+            packageName: detection.packageName,
+            postconditionId: monitorSlugPc.id,
+            analyzerVersion: this.options.analyzerVersion || "2.0.0",
+            updateManifest: false,
+            fingerprint: mFingerprint,
+          });
+          violations.push({
+            file: sourceFile.fileName,
+            line: mLine,
+            column: mCol,
+            package: detection.packageName,
+            function: detection.functionName,
+            postconditionId: monitorSlugPc.id,
+            severity: monitorSlugPc.severity as "error" | "warning",
+            message: `withMonitor() called without upsertMonitorConfig (3rd argument) — if the monitor slug does not exist in Sentry, check-ins are silently ignored and no cron alert will fire.`,
+            codeContext: mCtx,
+            codeContextStartLine: mCtxStart,
+            inTryCatch: false,
+            suppressed: mSuppression.suppressed,
+            suppressionReason: mSuppression.suppressed
+              ? mSuppression.source
+              : undefined,
+            fingerprint: mFingerprint,
+            callExpression: detection.functionName,
+            business_impact: monitorSlugPc.business_impact,
+          });
+        }
+        // Fall through to standard try-catch check for monitor-callback-rethrows
+      }
+
+      // @sentry/* startSpanManual: span-manual-finish-never-called fires when the callback
+      // does not contain a try/finally that calls finish() or span.end() in all paths.
+      // Unlike span-manual-callback-rethrows (try-catch around the call), this postcondition
+      // requires a finally block INSIDE the callback to guarantee span lifecycle.
+      // Suppress when the callback has try { ... } finally { finish() } or
+      // try { ... } finally { span.end() } pattern.
+      // Evidence: concern-20260611-sentry-node-deepen-1
+      if (
+        detection.packageName.startsWith("@sentry/") &&
+        detection.functionName === "startSpanManual" &&
+        ts.isCallExpression(detection.node) &&
+        primaryPostcondition.id === "span-manual-finish-never-called"
+      ) {
+        // Find the callback argument (usually last arg, either arrow or function expression)
+        const callbackArg = detection.node.arguments
+          .slice()
+          .reverse()
+          .find(
+            (a): a is ts.ArrowFunction | ts.FunctionExpression =>
+              ts.isArrowFunction(a) || ts.isFunctionExpression(a),
+          );
+        if (callbackArg && ts.isBlock(callbackArg.body)) {
+          // Check if callback body contains a try statement with a finally block
+          // that calls finish() or span.end()
+          let hasFinishInFinally = false;
+          const checkForFinishInFinally = (node: ts.Node): void => {
+            if (hasFinishInFinally) return;
+            if (
+              ts.isTryStatement(node) &&
+              node.finallyBlock
+            ) {
+              // Walk the finally block looking for finish() or .end() calls
+              const searchFinally = (n: ts.Node): void => {
+                if (hasFinishInFinally) return;
+                if (ts.isCallExpression(n)) {
+                  // finish() — direct identifier call
+                  if (ts.isIdentifier(n.expression) && n.expression.text === "finish") {
+                    hasFinishInFinally = true;
+                    return;
+                  }
+                  // span.end() — property access ending in .end()
+                  if (
+                    ts.isPropertyAccessExpression(n.expression) &&
+                    n.expression.name.text === "end"
+                  ) {
+                    hasFinishInFinally = true;
+                    return;
+                  }
+                }
+                ts.forEachChild(n, searchFinally);
+              };
+              searchFinally(node.finallyBlock);
+              return;
+            }
+            ts.forEachChild(node, checkForFinishInFinally);
+          };
+          checkForFinishInFinally(callbackArg.body);
+          if (hasFinishInFinally) {
+            continue; // Callback has try/finally with finish() or span.end() — postcondition satisfied
+          }
+        }
+        // Callback lacks try/finally with finish/end: fall through to fire violation
+        // (bypass the standard outer try-catch check — the required pattern is INSIDE the callback)
+      }
+
+      // @sentry/* startInactiveSpan: inactive-span-end-never-called fires when the returned
+      // span does not have span.end() called in a finally block within the enclosing function.
+      // The pattern requires: const span = startInactiveSpan(...); try { ... } finally { span.end(); }
+      // Suppress when the enclosing function has a try/finally that calls .end() on any variable.
+      // Evidence: concern-20260611-sentry-node-deepen-2
+      if (
+        detection.packageName.startsWith("@sentry/") &&
+        detection.functionName === "startInactiveSpan" &&
+        ts.isCallExpression(detection.node) &&
+        primaryPostcondition.id === "inactive-span-end-never-called"
+      ) {
+        // Walk up to find the enclosing function
+        let enclosingFunc: ts.Node | undefined;
+        let curNode: ts.Node | undefined = detection.node.parent;
+        while (curNode) {
+          if (
+            ts.isFunctionDeclaration(curNode) ||
+            ts.isFunctionExpression(curNode) ||
+            ts.isArrowFunction(curNode) ||
+            ts.isMethodDeclaration(curNode)
+          ) {
+            enclosingFunc = curNode;
+            break;
+          }
+          curNode = curNode.parent;
+        }
+        const scopeNode = enclosingFunc ?? sourceFile;
+        // Check if the scope contains a try/finally that calls .end() anywhere in the finally
+        let hasEndInFinally = false;
+        const checkForEndInFinally = (node: ts.Node): void => {
+          if (hasEndInFinally) return;
+          if (
+            ts.isBlock(node) &&
+            node.parent &&
+            ts.isTryStatement(node.parent) &&
+            node.parent.finallyBlock === node
+          ) {
+            // This block is a finally clause — check for .end() call
+            const findEnd = (n: ts.Node): void => {
+              if (hasEndInFinally) return;
+              if (
+                ts.isCallExpression(n) &&
+                ts.isPropertyAccessExpression(n.expression) &&
+                n.expression.name.text === "end"
+              ) {
+                hasEndInFinally = true;
+                return;
+              }
+              ts.forEachChild(n, findEnd);
+            };
+            findEnd(node);
+            return;
+          }
+          ts.forEachChild(node, checkForEndInFinally);
+        };
+        checkForEndInFinally(scopeNode);
+        if (hasEndInFinally) {
+          continue; // try/finally { span.end() } present — postcondition satisfied
+        }
+        // No try/finally with end(): fall through to fire violation
+        // (skip standard outer try-catch check — the pattern requires finally, not catch)
+      }
+
       // Special-case: Clerk middleware postconditions require file-system inspection,
       // not try-catch analysis. auth() and clerkMiddleware() are never wrapped in try-catch
       // in a properly configured app — the check is whether middleware.ts is set up.
@@ -1680,20 +1877,32 @@ export class ContractMatcher {
               : false;
 
           if (inTryCatch) {
-            // Inside try-catch: fire warnings for incomplete error handling patterns
-            const catchClause = this.controlFlow.getEnclosingCatchClause(
-              detection.node,
-            );
-            if (catchClause) {
-              const catchViolation = this.checkCatchBlockCompleteness(
-                detection,
-                postconditions,
-                catchClause,
-                sourceFile,
+            // @sentry/* startSpanManual and startInactiveSpan: outer try-catch does NOT
+            // satisfy the postcondition. These require a finally block INSIDE the callback
+            // (startSpanManual) or around the span usage (startInactiveSpan). The checks
+            // above already verified the required pattern is absent — fall through to fire.
+            // Evidence: concern-20260611-sentry-node-deepen-1 and -2
+            const isSentryLifecyclePostcondition =
+              detection.packageName.startsWith("@sentry/") &&
+              (primaryPostcondition.id === "span-manual-finish-never-called" ||
+                primaryPostcondition.id === "inactive-span-end-never-called");
+            if (!isSentryLifecyclePostcondition) {
+              // Inside try-catch: fire warnings for incomplete error handling patterns
+              const catchClause = this.controlFlow.getEnclosingCatchClause(
+                detection.node,
               );
-              if (catchViolation) violations.push(catchViolation);
+              if (catchClause) {
+                const catchViolation = this.checkCatchBlockCompleteness(
+                  detection,
+                  postconditions,
+                  catchClause,
+                  sourceFile,
+                );
+                if (catchViolation) violations.push(catchViolation);
+              }
+              continue;
             }
-            continue;
+            // isSentryLifecyclePostcondition: fall through to fire even though inTryCatch
           }
         }
       }

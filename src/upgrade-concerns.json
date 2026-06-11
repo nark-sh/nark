@@ -50954,7 +50954,7 @@
     "source": "deepen",
     "package": "@sentry/node",
     "type": "uncovered_function",
-    "status": "in-progress",
+    "status": "implemented",
     "description": "Add detection for @sentry/node.startSpanManual() \u2014 postcondition span-manual-finish-never-called added in depth pass but no scanner rule exists. Pattern: callback body does not call finish() or span.end() in all code paths (no try/finally).",
     "evidence": {
       "repos": [],
@@ -50962,7 +50962,7 @@
       "violation_count": 0,
       "note": "Proactive \u2014 contract added via API surface analysis. Detection rule needed for span lifecycle management."
     },
-    "resolution": null
+    "resolution": "Implemented in contract-matcher.ts: when startSpanManual is detected and primary postcondition is span-manual-finish-never-called, the callback argument is inspected for a TryStatement with a finallyBlock containing either finish() call or .end() property access call. If found, the postcondition is satisfied and no violation fires. Also added isSentryLifecyclePostcondition guard to prevent outer try-catch from suppressing these lifecycle checks. 13/13 ground-truth tests pass."
   },
   {
     "id": "concern-20260611-sentry-node-deepen-2",
@@ -50970,7 +50970,7 @@
     "source": "deepen",
     "package": "@sentry/node",
     "type": "uncovered_function",
-    "status": "in-progress",
+    "status": "implemented",
     "description": "Add detection for @sentry/node.startInactiveSpan() \u2014 postcondition inactive-span-end-never-called added in depth pass but no scanner rule exists. Pattern: span returned from startInactiveSpan() but span.end() not called in a finally block.",
     "evidence": {
       "repos": [],
@@ -50978,7 +50978,7 @@
       "violation_count": 0,
       "note": "Proactive \u2014 contract added via API surface analysis. Harder to detect than startSpanManual because span is returned, not passed in callback."
     },
-    "resolution": null
+    "resolution": "Implemented in contract-matcher.ts: when startInactiveSpan is detected and primary postcondition is inactive-span-end-never-called, the enclosing function scope is walked to find any TryStatement with a finallyBlock containing a .end() property access call. If found, the postcondition is satisfied and no violation fires. Also covered by isSentryLifecyclePostcondition guard. 13/13 ground-truth tests pass."
   },
   {
     "id": "concern-20260611-sentry-node-deepen-3",
@@ -50986,7 +50986,7 @@
     "source": "deepen",
     "package": "@sentry/node",
     "type": "uncovered_function",
-    "status": "in-progress",
+    "status": "implemented",
     "description": "Add detection for @sentry/node.withMonitor() \u2014 postcondition monitor-slug-not-configured: no upsertMonitorConfig provided as 3rd argument. Pattern: withMonitor called with only 2 arguments (slug + callback).",
     "evidence": {
       "repos": [],
@@ -50994,7 +50994,7 @@
       "violation_count": 0,
       "note": "Proactive \u2014 contract added via API surface analysis. Detection: check if withMonitor() call has exactly 2 arguments (missing upsertMonitorConfig)."
     },
-    "resolution": null
+    "resolution": "Implemented in contract-matcher.ts: when withMonitor is detected, a pre-processing block fires monitor-slug-not-configured if argument count < 3, independent of try-catch context. The standard try-catch check still fires monitor-callback-rethrows via fall-through. 13/13 ground-truth tests pass."
   },
   {
     "id": "concern-20260611-sentry-node-deepen-4",
@@ -51002,7 +51002,7 @@
     "source": "deepen",
     "package": "@sentry/node",
     "type": "uncovered_function",
-    "status": "in-progress",
+    "status": "rejected",
     "description": "Add detection for @sentry/node.captureCheckIn() \u2014 postcondition checkin-completion-missing: in_progress check-in sent but completion check-in (ok/error) not guaranteed in all paths. Pattern: captureCheckIn({ status: 'in_progress' }) without try/finally containing captureCheckIn({ status: 'ok'/'error' }).",
     "evidence": {
       "repos": [],
@@ -51010,7 +51010,7 @@
       "violation_count": 0,
       "note": "Proactive \u2014 contract added via API surface analysis. Complex detection: requires data-flow analysis across the in_progress + completion check-in pair."
     },
-    "resolution": null
+    "resolution": "Rejected: requires cross-call data-flow analysis that exceeds current scanner architecture. The detection would need to track that (1) a captureCheckIn with status 'in_progress' is called, (2) extract its checkInId return value, (3) verify a matching captureCheckIn with status 'ok' or 'error' referencing the same checkInId appears in all code paths. This inter-statement data-flow is not feasible with the current single-call-site analysis model. Deferred to a future data-flow upgrade. Noted in ground-truth.ts fixture header as out of scope."
   },
   {
     "id": "concern-20260611-cross-fetch-deepen-1",
