@@ -50835,5 +50835,69 @@
       "note": "Proactive \u2014 contract added via API surface analysis. RestoreSecret is a recovery operation \u2014 failures in disaster recovery scripts must be surfaced."
     },
     "resolution": null
+  },
+  {
+    "id": "concern-20260611-svix-deepen-1",
+    "created_at": "2026-06-11",
+    "source": "deepen",
+    "package": "svix",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for svix.application.create() \u2014 postcondition added in depth pass but no scanner rule exists. Calls are made on a Svix class instance via svix.application.create(). Detection needs to track Svix constructor instances and detect .application.create() calls without try-catch.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260611-svix-deepen-2",
+    "created_at": "2026-06-11",
+    "source": "deepen",
+    "package": "svix",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for svix.endpoint.create() \u2014 postcondition added in depth pass but no scanner rule exists. Nested namespace access: svix.endpoint.create() uses 2-level property chain (svix \u2192 endpoint \u2192 create). Silent failure when called without try-catch: message.create() succeeds but delivers to zero endpoints.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260611-svix-deepen-3",
+    "created_at": "2026-06-11",
+    "source": "deepen",
+    "package": "svix",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for svix.authentication.appPortalAccess() \u2014 postcondition added in depth pass. 3-level property chain access: svix.authentication.appPortalAccess(). Visible user impact: broken portal redirect URL if error swallowed.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260611-svix-deepen-4",
+    "created_at": "2026-06-11",
+    "source": "deepen",
+    "package": "svix",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for svix.endpoint.recover() async pattern \u2014 postcondition added (async-not-polled). recover() returns RecoverOut with a background task ID that must be polled via backgroundTask.get(). Callers who await recover() without checking the returned taskId assume recovery is complete when it is only queued. Pattern: const result = await svix.endpoint.recover(...); \u2014 need to detect when result.id is not used.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed. Similar to AWS BatchDeleteObjectsCommand silent-failure pattern."
+    },
+    "resolution": null
   }
 ]
