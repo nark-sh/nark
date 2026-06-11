@@ -1789,6 +1789,31 @@ export class ContractMatcher {
         }
       }
 
+      // @aws-sdk/client-secrets-manager send(): resolve postcondition based on the command
+      // argument type. UpdateSecretVersionStageCommand, CancelRotateSecretCommand,
+      // PutResourcePolicyCommand, and RestoreSecretCommand each have unique error types;
+      // command-specific postconditions are more actionable than the generic aws-service-error.
+      //
+      // Evidence: concern-20260611-aws-sdk-client-secrets-manager-deepen-5 (UpdateSecretVersionStageCommand),
+      //           concern-20260611-aws-sdk-client-secrets-manager-deepen-6 (CancelRotateSecretCommand),
+      //           concern-20260611-aws-sdk-client-secrets-manager-deepen-7 (PutResourcePolicyCommand),
+      //           concern-20260611-aws-sdk-client-secrets-manager-deepen-8 (RestoreSecretCommand).
+      if (
+        !postconditionResolved &&
+        detection.packageName === "@aws-sdk/client-secrets-manager" &&
+        detection.functionName === "send"
+      ) {
+        const commandSpecific = this.pickSecretsManagerSendPostcondition(
+          detection,
+          postconditions,
+          contract,
+        );
+        if (commandSpecific) {
+          postcondition = commandSpecific;
+          postconditionResolved = true;
+        }
+      }
+
       // superagent chained-method postcondition selector.
       // superagent.get(url).timeout({...}) and superagent.get(url).maxResponseSize(n)
       // are method-chained calls. The entire expression `superagent.get(url).timeout({...})`
@@ -3087,6 +3112,77 @@ export class ContractMatcher {
 
     // Second: search all contract functions for "send (CommandName)" naming convention
     // The SQS contract uses names like "send (CreateQueueCommand)" rather than bare command names.
+    const functions = contract.functions || [];
+    for (const fn of functions) {
+      if (fn.name.includes(commandClassName)) {
+        const found = (fn.postconditions || []).find((p) => p.id === postconditionId);
+        if (found) return found;
+      }
+    }
+
+    // Third: fallback to currently-matched function's postconditions
+    return postconditions.find((p) => p.id === postconditionId) ?? null;
+  }
+
+  /**
+   * @aws-sdk/client-secrets-manager command → postcondition map.
+   * Maps Secrets Manager command constructor names to their primary postcondition ID.
+   *
+   * Only commands with unique error types distinct from the generic aws-service-error
+   * are listed here. Commands not listed fall through to the generic aws-service-error.
+   *
+   * Evidence: concern-20260611-aws-sdk-client-secrets-manager-deepen-5 through -8.
+   */
+  private static readonly SECRETS_MANAGER_COMMAND_POSTCONDITION_MAP: Record<string, string> = {
+    // LimitExceededException when staging labels exceed 20 limit across all secret versions.
+    UpdateSecretVersionStageCommand: "update-secret-version-stage-no-try-catch",
+    // InvalidRequestException when called on a non-rotating secret; orphaned AWSPENDING version.
+    CancelRotateSecretCommand: "cancel-rotate-secret-no-try-catch",
+    // PublicPolicyException (unique to this command) = silent security misconfiguration.
+    PutResourcePolicyCommand: "put-resource-policy-no-try-catch",
+    // InvalidRequestException when called on a non-deleted secret.
+    RestoreSecretCommand: "restore-secret-no-try-catch",
+  };
+
+  /**
+   * For @aws-sdk/client-secrets-manager send() calls, inspect the first argument to
+   * determine which Secrets Manager command is being executed, then return the matching
+   * postcondition.
+   *
+   * Pattern: await smClient.send(new UpdateSecretVersionStageCommand({...}))
+   *   → first arg is NewExpression with constructor name "UpdateSecretVersionStageCommand"
+   *   → look up in SECRETS_MANAGER_COMMAND_POSTCONDITION_MAP
+   *
+   * Evidence: concern-20260611-aws-sdk-client-secrets-manager-deepen-5 through -8.
+   */
+  private pickSecretsManagerSendPostcondition(
+    detection: Detection,
+    postconditions: Postcondition[],
+    contract: PackageContract,
+  ): Postcondition | null {
+    if (!ts.isCallExpression(detection.node)) return null;
+    const args = detection.node.arguments;
+    if (args.length === 0) return null;
+
+    const firstArg = args[0];
+    if (!ts.isNewExpression(firstArg)) return null;
+    if (!ts.isIdentifier(firstArg.expression)) return null;
+
+    const commandClassName = firstArg.expression.text;
+    const postconditionId =
+      ContractMatcher.SECRETS_MANAGER_COMMAND_POSTCONDITION_MAP[commandClassName];
+    if (!postconditionId) return null;
+
+    // First: try exact function name match (contract has functions named after command constructors)
+    const commandFuncContract = this.findFunctionContract(contract, commandClassName);
+    if (commandFuncContract) {
+      const found = (commandFuncContract.postconditions || []).find(
+        (p) => p.id === postconditionId,
+      );
+      if (found) return found;
+    }
+
+    // Second: search all contract functions for matching postcondition ID
     const functions = contract.functions || [];
     for (const fn of functions) {
       if (fn.name.includes(commandClassName)) {
