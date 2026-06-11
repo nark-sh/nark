@@ -14,6 +14,7 @@
 import { describe, it, expect } from "vitest";
 import { execSync } from "child_process";
 import * as fs from "fs";
+import * as os from "os";
 import * as path from "path";
 import { fileURLToPath } from "url";
 
@@ -52,10 +53,13 @@ describe("qt-256: demo fixture", () => {
     // from hanging on the telemetry POST timeout. --quiet keeps the output
     // small. `2>&1` folds the stderr banner into the captured stdout so
     // execSync's return covers both streams in one assertion surface.
+    // HOME is redirected to a writable tmp dir so the CLI's `~/.nark/projects/...`
+    // side artifacts land somewhere the sandbox + restricted CI envs allow.
+    const tmpHome = fs.mkdtempSync(path.join(os.tmpdir(), "nark-demo-test-"));
     const out = execSync(
       `node ${NARK_BIN} --demo --quiet --no-positive-report --report-only 2>&1`,
       {
-        env: { ...process.env, NARK_TELEMETRY: "off" },
+        env: { ...process.env, NARK_TELEMETRY: "off", HOME: tmpHome },
         encoding: "utf-8",
         stdio: ["pipe", "pipe", "pipe"],
       },
