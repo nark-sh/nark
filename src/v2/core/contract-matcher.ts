@@ -392,6 +392,31 @@ export class ContractMatcher {
         // Callback is async and not fully wrapped — fall through to fire violation.
       }
 
+      // yup cast: cast-type-error fires only when assert: true (the default).
+      // Suppress when the call explicitly passes { assert: false } — yup returns
+      // null/undefined instead of throwing in that mode.
+      // Evidence: yup README cast options ("assert?: boolean = true"); ground-truth
+      // fixture `castWithAssertFalse`.
+      if (
+        detection.packageName === "yup" &&
+        detection.functionName === "cast" &&
+        primaryPostcondition.id === "cast-type-error" &&
+        ts.isCallExpression(detection.node)
+      ) {
+        const optionsArg = detection.node.arguments[1];
+        if (optionsArg && ts.isObjectLiteralExpression(optionsArg)) {
+          const assertProp = optionsArg.properties.find(
+            (p): p is ts.PropertyAssignment =>
+              ts.isPropertyAssignment(p) &&
+              ts.isIdentifier(p.name) &&
+              p.name.text === "assert",
+          );
+          if (assertProp && assertProp.initializer.kind === ts.SyntaxKind.FalseKeyword) {
+            continue;
+          }
+        }
+      }
+
       // react-hook-form trigger: trigger-result-not-awaited fires on every trigger() call
       // regardless of whether the caller awaits the Promise. Suppress when the call is the
       // direct operand of an AwaitExpression — those callers do await the result correctly.
