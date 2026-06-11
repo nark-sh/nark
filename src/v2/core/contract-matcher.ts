@@ -276,11 +276,23 @@ export class ContractMatcher {
         continue;
       }
 
-      const funcContract = this.findFunctionContract(
+      let funcContract = this.findFunctionContract(
         contract,
         effectiveFunctionName,
         chainStr,
       );
+      // Fallback: direct call on a default import (e.g. `rp(url)` where
+      // `import rp = require('request-promise')`). The contract describes
+      // the callable default export under `name: default`. Scoped narrowly
+      // to depth=0 default imports so we never mis-route property-chain
+      // calls like `axios.junkmethod()` onto a default function block.
+      if (
+        !funcContract &&
+        detection.metadata?.depth === 0 &&
+        detection.metadata?.importKind === "default"
+      ) {
+        funcContract = this.findFunctionContract(contract, "default", chainStr);
+      }
       if (!funcContract) {
         continue;
       }

@@ -35,10 +35,48 @@ export class ImportTracker {
     ts.forEachChild(sourceFile, (node) => {
       if (ts.isImportDeclaration(node)) {
         this.processImportDeclaration(node, importMap);
+      } else if (ts.isImportEqualsDeclaration(node)) {
+        this.processImportEqualsDeclaration(node, importMap);
       }
     });
 
     return importMap;
+  }
+
+  /**
+   * Process a TypeScript `import X = require('pkg')` declaration.
+   *
+   * This is the idiomatic way to import a callable CommonJS module that
+   * lacks `esModuleInterop` defaults (e.g. `import rp = require('request-promise')`
+   * → `rp(...)`, `rp.get(...)`).
+   *
+   * Modeled as a default-style import so the LHS identifier binds to the
+   * package — the property-chain detector then resolves `rp.get` via the
+   * existing importMap → packageName path.
+   */
+  private processImportEqualsDeclaration(
+    node: ts.ImportEqualsDeclaration,
+    importMap: Map<string, ImportInfo>
+  ): void {
+    // Only handle `X = require('pkg')` (ExternalModuleReference).
+    // Skip namespace aliases like `import X = ts.SomeNamespace`.
+    const ref = node.moduleReference;
+    if (!ts.isExternalModuleReference(ref)) return;
+    if (!ref.expression || !ts.isStringLiteral(ref.expression)) return;
+
+    const rawPath = ref.expression.text;
+    const packageName = this.normalizePackageName(rawPath);
+    const importedName = node.name.text;
+
+    importMap.set(importedName, {
+      packageName,
+      importedName,
+      kind: 'default',
+      // ImportEqualsDeclaration isn't an ImportDeclaration but the field
+      // is typed as ImportDeclaration. Cast through unknown to match
+      // existing precedent at line 159 (intermediate-variable handling).
+      declaration: node as unknown as ts.ImportDeclaration,
+    });
   }
 
   /**
