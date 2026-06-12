@@ -760,7 +760,164 @@ export class ControlFlowAnalysis implements IControlFlowAnalyzer {
       }
     }
 
+    // Pattern C: node is the return value of an arrow/function callback passed to
+    // .then() of a promise chain that has .catch() further along.
+    //
+    // Example (vendure / Angular bootstrap pattern):
+    //   loadAppConfig()
+    //     .then(() => platformBrowserDynamic().bootstrapModule(AppModule))
+    //     .catch(err => console.error(err));
+    //
+    // The inner `bootstrapModule(AppModule)` call's parent is the arrow function
+    // body — not a property access or call expression — so Patterns A and B miss
+    // it. We must walk up to the enclosing arrow/function expression, verify it
+    // is the callback argument to a `.then()`, then check if that `.then()` chain
+    // has a `.catch()` handler downstream.
+    //
+    // Evidence: concern-20260611-platform-browser-dynamic-nested-then-catch.
+    // Affects any promise-returning method called as the (sole) expression of a
+    // .then() callback that is part of a `.then(...).catch(...)` chain.
+    if (this.isInsideThenCallbackWithDownstreamCatch(node)) {
+      return true;
+    }
+
     return false;
+  }
+
+  /**
+   * Pattern C helper: detect whether `node` is the propagated promise result of
+   * an arrow/function-expression callback passed to `.then()`, AND the chain
+   * containing that `.then()` has a `.catch()` (or 2-arg `.then(onF, onR)`)
+   * downstream.
+   *
+   * The propagated promise rule: a `.then(cb)` returns the promise that `cb`
+   * returns (or its awaited value). So if `cb` is an arrow that returns/awaits
+   * `inner()`, any rejection from `inner()` propagates through the outer chain.
+   * A downstream `.catch()` IS the relevant error handler for `inner()`.
+   *
+   * We accept the call as "propagated" when it appears as either:
+   *   - the implicit-return expression of a concise arrow body
+   *     `() => inner()`
+   *   - an explicit `return inner()` / `return await inner()` statement
+   *   - an `await inner()` ExpressionStatement that is the LAST statement of the
+   *     callback body (its rejection still propagates through the async function
+   *     wrapper that .then's onFulfilled produces)
+   *   - a plain `inner()` ExpressionStatement that is the LAST statement of an
+   *     async callback body (rejection propagates via the implicit promise return)
+   *
+   * Conservative: we do NOT walk through if/switch/loops — only direct
+   * top-level statements of the callback body. This avoids relaxing detection
+   * for code paths where rejection might not actually propagate.
+   */
+  private isInsideThenCallbackWithDownstreamCatch(node: ts.CallExpression): boolean {
+    // Find nearest enclosing arrow/function expression and verify our node
+    // is one of the "propagated" positions described above.
+    let current: ts.Node = node;
+    let parent: ts.Node | undefined = current.parent;
+    let isPropagated = false;
+    let enclosingFn: ts.ArrowFunction | ts.FunctionExpression | undefined;
+
+    // Walk up through expression wrappers (await, parenthesized, return) to
+    // detect propagation form, stopping at the enclosing function literal.
+    while (parent) {
+      // Concise arrow body: parent IS the arrow whose body IS our expression
+      if ((ts.isArrowFunction(parent) || ts.isFunctionExpression(parent))
+          && (parent as ts.ArrowFunction).body === current) {
+        // Concise-body arrow: `() => inner()` — implicit return propagates rejection.
+        isPropagated = true;
+        enclosingFn = parent as ts.ArrowFunction | ts.FunctionExpression;
+        break;
+      }
+
+      // Return statement: `return inner()` or `return await inner()`
+      if (ts.isReturnStatement(parent) && parent.expression === current) {
+        // Continue walking up to find the enclosing function — anything inside
+        // a return statement of the callback body propagates.
+        isPropagated = true;
+        // Don't break — we still need to find the enclosing function literal
+        // and verify it's directly the .then() callback (not nested).
+      }
+
+      // Await expression: continue walking; await of a rejection still throws
+      // in an async function, and a .then onFulfilled async return propagates.
+      if (ts.isAwaitExpression(parent) && parent.expression === current) {
+        // pass-through
+      }
+
+      // Parenthesized expression: pass-through
+      if (ts.isParenthesizedExpression(parent) && parent.expression === current) {
+        // pass-through
+      }
+
+      // ExpressionStatement that is the LAST statement of a Block which is the
+      // body of an arrow/function expression: rejection propagates via the
+      // async function's implicit promise return.
+      if (ts.isExpressionStatement(parent)) {
+        const block: ts.Node = parent.parent;
+        if (ts.isBlock(block)) {
+          // Last statement check
+          const stmts = block.statements;
+          if (stmts[stmts.length - 1] === parent) {
+            const fnNode: ts.Node | undefined = block.parent;
+            if (fnNode && (ts.isArrowFunction(fnNode) || ts.isFunctionExpression(fnNode))
+                && fnNode.body === block) {
+              isPropagated = true;
+              enclosingFn = fnNode;
+              break;
+            }
+          }
+        }
+        // ExpressionStatement that's not the last statement of a callback body —
+        // rejection does not propagate cleanly (subsequent statements may swallow).
+        // Stop walking; this isn't a propagation position.
+        return false;
+      }
+
+      // Reached a block body of an arrow/function literal — check if current
+      // is the return/last-statement we tracked above
+      if (ts.isBlock(parent)) {
+        const fnNode: ts.Node | undefined = parent.parent;
+        if (fnNode && (ts.isArrowFunction(fnNode) || ts.isFunctionExpression(fnNode))
+            && fnNode.body === parent) {
+          // We entered the block via a propagating form (return/await above);
+          // record the enclosing function and stop walking.
+          if (isPropagated) {
+            enclosingFn = fnNode;
+            break;
+          }
+          // Block body of a function literal reached without a propagation
+          // form — abort (e.g., bare expression statement that isn't the last).
+          return false;
+        }
+      }
+
+      // Stopping conditions: hitting another statement type, declaration, or
+      // a non-pass-through expression means the call is not in a propagating
+      // position. Bail out conservatively.
+      if (ts.isStatement(parent) && !ts.isReturnStatement(parent)
+          && !ts.isExpressionStatement(parent) && !ts.isBlock(parent)) {
+        return false;
+      }
+
+      current = parent;
+      parent = parent.parent;
+    }
+
+    if (!isPropagated || !enclosingFn) return false;
+
+    // Verify the enclosing function literal is the FIRST argument to a `.then()`
+    // call. (Two-arg .then(onFulfilled, onRejected) is already caught by Pattern
+    // A/B at the call site of .then itself, but we still want to recognize the
+    // propagation chain via the onFulfilled arrow.)
+    const fnParent = enclosingFn.parent;
+    if (!fnParent || !ts.isCallExpression(fnParent)) return false;
+    if (fnParent.arguments[0] !== enclosingFn) return false;
+    const callee = fnParent.expression;
+    if (!ts.isPropertyAccessExpression(callee)) return false;
+    if (callee.name.text !== 'then') return false;
+
+    // fnParent is the `.then(cb)` CallExpression. Check downstream for .catch.
+    return this.chainHasCatch(fnParent);
   }
 
   /**

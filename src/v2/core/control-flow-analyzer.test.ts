@@ -289,3 +289,108 @@ describe('ControlFlowAnalysis.catchHasRetryLogic', () => {
     expect(cfa.catchHasRetryLogic(clause)).toBe(false);
   });
 });
+
+// ────────────────────────────────────────────────────────
+// hasCatchHandler tests
+// Regression: concern-20260611-platform-browser-dynamic-nested-then-catch
+// ────────────────────────────────────────────────────────
+
+describe('ControlFlowAnalysis.hasCatchHandler', () => {
+  const cfa = new ControlFlowAnalysis();
+
+  /** Find the call to `inner()` in the parsed source — used as the target node. */
+  function findInnerCall(source: string): ts.CallExpression {
+    const sf = parse(source);
+    const calls = findAll(sf, ts.isCallExpression);
+    const inner = calls.find((c) => {
+      const expr = c.expression;
+      if (ts.isIdentifier(expr)) return expr.text === 'inner';
+      if (ts.isPropertyAccessExpression(expr)) return expr.name.text === 'inner';
+      return false;
+    });
+    if (!inner) throw new Error('test source must contain a call to inner()');
+    return inner;
+  }
+
+  // ─── Pattern A: direct chaining ──────────────────────────
+
+  it('detects direct .catch() on the call: inner().catch(...)', () => {
+    const call = findInnerCall(`inner().catch(e => console.error(e));`);
+    expect(cfa.hasCatchHandler(call)).toBe(true);
+  });
+
+  it('detects .then(fn).catch(fn) chain: inner().then(x).catch(e)', () => {
+    const call = findInnerCall(`inner().then(x => x).catch(e => console.error(e));`);
+    expect(cfa.hasCatchHandler(call)).toBe(true);
+  });
+
+  it('detects 2-arg .then: inner().then(ok, fail)', () => {
+    const call = findInnerCall(`inner().then(x => x, e => console.error(e));`);
+    expect(cfa.hasCatchHandler(call)).toBe(true);
+  });
+
+  // ─── Pattern C: nested .then(() => inner()).catch(...) ───
+  // The FP that motivated this fix: vendure/angular bootstrap pattern.
+
+  it('detects concise-body arrow .then(() => inner()).catch(...)', () => {
+    const call = findInnerCall(
+      `loadConfig().then(() => inner()).catch(err => console.error(err));`,
+    );
+    expect(cfa.hasCatchHandler(call)).toBe(true);
+  });
+
+  it('detects block-body arrow with return: .then(() => { return inner(); }).catch(...)', () => {
+    const call = findInnerCall(`
+      loadConfig().then(() => { return inner(); }).catch(err => console.error(err));
+    `);
+    expect(cfa.hasCatchHandler(call)).toBe(true);
+  });
+
+  it('detects await: .then(async () => { await inner(); }).catch(...)', () => {
+    const call = findInnerCall(`
+      loadConfig().then(async () => { await inner(); }).catch(err => console.error(err));
+    `);
+    expect(cfa.hasCatchHandler(call)).toBe(true);
+  });
+
+  it('detects function expression: .then(function() { return inner(); }).catch(...)', () => {
+    const call = findInnerCall(`
+      loadConfig().then(function () { return inner(); }).catch(err => console.error(err));
+    `);
+    expect(cfa.hasCatchHandler(call)).toBe(true);
+  });
+
+  // ─── Negative cases — must NOT report false positives ────
+
+  it('returns false for bare unprotected await: await inner()', () => {
+    const call = findInnerCall(`async function f() { await inner(); }`);
+    expect(cfa.hasCatchHandler(call)).toBe(false);
+  });
+
+  it('returns false for inner inside .then with no downstream .catch', () => {
+    const call = findInnerCall(
+      `loadConfig().then(() => inner());`,
+    );
+    expect(cfa.hasCatchHandler(call)).toBe(false);
+  });
+
+  it('returns false when inner() is NOT the last/return statement of the callback', () => {
+    // Rejection from inner() can be swallowed by the subsequent log statement
+    // (which itself does not propagate). Conservative: do not suppress.
+    const call = findInnerCall(`
+      loadConfig().then(() => {
+        inner();
+        console.log('done');
+      }).catch(err => console.error(err));
+    `);
+    expect(cfa.hasCatchHandler(call)).toBe(false);
+  });
+
+  it('returns false for top-level call inside an arrow that is not a .then callback', () => {
+    const call = findInnerCall(`
+      const f = () => inner();
+      f();
+    `);
+    expect(cfa.hasCatchHandler(call)).toBe(false);
+  });
+});
