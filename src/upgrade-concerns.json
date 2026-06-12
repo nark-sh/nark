@@ -53009,5 +53009,40 @@
       "note": "Proactive — contract added via API surface enumeration of isomorphic-git@1.38.4 index.d.ts. Detection rule needed to catch bare-await call sites in production code paths (CI scripts, setup tools, release pipelines, sync loops)."
     },
     "resolution": "Verified — scanner detects git.resetIndex() bare-await call sites via the generic contract-driven detection pipeline (contract-matcher.ts + traversal-engine.ts). No package-specific plugin or analyzer needed. Ground-truth fixture at nark-corpus-pro/packages/isomorphic-git/fixtures/ground-truth.ts exercises the function (SHOULD_FIRE + SHOULD_NOT_FIRE annotations covering bare-await and try/catch-wrapped paths). Full isomorphic-git ground-truth test suite (49 tests) passes."
+  },
+  {
+    "id": "concern-20260612-doesexist-guard-detection-1",
+    "created_at": "2026-06-12",
+    "source": "onboard",
+    "package": "@nestjs/schedule",
+    "type": "false_positive",
+    "status": "open",
+    "description": "Scanner does not recognize `if (registry.doesExist('cron'|'interval'|'timeout', name))` guards as equivalent to a try-catch wrapper. The @nestjs/schedule contract's postcondition required_handling text explicitly accepts doesExist() as an alternative to try/catch for any of the 9 SchedulerRegistry methods (getCronJob, getInterval, getTimeout, addCronJob, addInterval, addTimeout, deleteCronJob, deleteInterval, deleteTimeout). However, the analyzer's control-flow logic only checks try-catch wrapping, so doesExist-gated patterns incorrectly fire violations. This is a NestJS-idiomatic safe pattern and needs a dedicated suppression rule in contract-matcher.ts that looks for `registry.doesExist(type, name)` (or `\\!registry.doesExist(...)`) in an enclosing if-condition.",
+    "evidence": {
+      "repos": [],
+      "scan_file": "work-packages/@nestjs__schedule/realworld-validation-result.json",
+      "violation_count": 4,
+      "note": "Fixtures show 4 known FPs at proper-error-handling.ts:25, proper-error-handling.ts:65, instance-usage.ts:51, and the 'Gated' variants of get*/add*. All are gated by registry.doesExist() but fire anyway. The corresponding TPs at lines 16 and 39 (no doesExist guard) correctly fire."
+    }
+  },
+  {
+    "id": "concern-20260612-alicloud-dysmsapi-deepen-1",
+    "created_at": "2026-06-12",
+    "source": "deepen",
+    "package": "@alicloud/dysmsapi20170525",
+    "type": "inherited_contract_coverage",
+    "status": "pending",
+    "description": "The @alicloud/dysmsapi20170525 client exposes 136 async methods (68 WithOptions + 68 shorthand variants). All 130 uncovered methods inherit the IDENTICAL error contract from @alicloud/openapi-core's callApi() — ClientError / ServerError / ThrottlingError / AlibabaCloudError + ValidateError from request.validate() + network errors (ECONNREFUSED, ETIMEDOUT, ENOTFOUND). Currently the scanner only detects the 6 contracted send-* methods. Consider a generic detector that catches ANY awaited method call on a Dysmsapi20170525 instance (or any Alibaba Cloud OpenApi-derived client) missing try/catch — would cover the full surface plus future Alibaba Cloud SDK additions without per-method rules. Pattern: `import Client from '@alicloud/<service>20*'` → any `await clientInstance.<anyMethod>(...)` call inherits the throw contract.",
+    "evidence": {
+      "repos": [
+        "labring/sealos",
+        "netless-io/flat-server",
+        "nocobase/nocobase"
+      ],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — all real-world adoption observed in corpus uses the 6 contracted methods (sendSms variants). The 130 uncovered methods (template/sign/short-url management, queries, lists) have ZERO observed adoption in the 6200+ test-repo corpus as of 2026-06-12. Inherited-contract pattern means a single generic detector would close the entire @alicloud/* family in one upgrade."
+    },
+    "resolution": null
   }
 ]
