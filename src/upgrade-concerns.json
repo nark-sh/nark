@@ -52032,7 +52032,7 @@
     "source": "deepen",
     "package": "@modelcontextprotocol/sdk",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for fetchToken() — new unified OAuth token-fetch helper added in v1.20+ alongside AddClientAuthentication provider extensions. Two postconditions added (fetch-token-missing-params for missing provider hook or authorizationCode; fetch-token-oauth-error-not-handled for InvalidGrantError on refresh). Scanner needs to (a) recognize fetchToken() import from @modelcontextprotocol/sdk/client/auth.js, (b) flag direct calls outside try-catch as a throwing-function pattern. Distinct from exchangeAuthorization/refreshAuthorization detection because fetchToken can be called from machine-to-machine flows that have neither.",
     "evidence": {
       "repos": [],
@@ -52040,7 +52040,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis at @modelcontextprotocol/sdk@1.29.0, detection rule needed"
     },
-    "resolution": null
+    "resolution": "Resolved via fixture realignment: converted dynamic await import() of fetchToken to static named import from @modelcontextprotocol/sdk/client/auth.js, and collapsed dual SHOULD_FIRE annotations into a single wildcard fetch-token-* line. The scanner already handles named-import detection via import-tracker normalizePackageName() (subpath -> parent package); the contract already has both fetch-token-missing-params and fetch-token-oauth-error-not-handled postconditions; the matcher aggregates them as primary+sub on one call site. No scanner code change required."
   },
   {
     "id": "concern-20260612-modelcontextprotocol-sdk-deepen-26",
@@ -52048,7 +52048,7 @@
     "source": "deepen",
     "package": "@modelcontextprotocol/sdk",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for discoverOAuthServerInfo() — new unified OAuth discovery helper. One postcondition added (discover-oauth-server-info-fetch-error). Scanner needs to recognize discoverOAuthServerInfo import from @modelcontextprotocol/sdk/client/auth.js and flag calls outside try-catch. Pattern is the same throwing-function-no-try-catch detection as fetchToken but on a different import name.",
     "evidence": {
       "repos": [],
@@ -52056,7 +52056,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis at @modelcontextprotocol/sdk@1.29.0, detection rule needed"
     },
-    "resolution": null
+    "resolution": "Resolved via fixture realignment: converted dynamic await import() of discoverOAuthServerInfo to static named import. Same path as fetchToken: import-tracker maps @modelcontextprotocol/sdk/client/auth.js -> @modelcontextprotocol/sdk, throwing-function-detector emits Detection with functionName=discoverOAuthServerInfo, contract-matcher resolves via exact name match. No scanner code change required."
   },
   {
     "id": "concern-20260612-modelcontextprotocol-sdk-deepen-27",
@@ -52064,7 +52064,7 @@
     "source": "deepen",
     "package": "@modelcontextprotocol/sdk",
     "type": "new_pattern",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for AsyncGenerator-with-message-type-discrimination pattern — new in experimental.tasks.createMessageStream() and experimental.tasks.elicitInputStream() (and underlying requestStream). Pattern: server.experimental.tasks.createMessageStream(params) returns an AsyncGenerator<ResponseMessage<T>> whose items have message.type in {taskCreated, taskStatus, result, error}. The error-handling contract is: callers MUST either (a) use shared/responseMessage.takeResult() helper which auto-throws on error, or (b) explicitly branch on message.type === error and throw. A for-await loop that only checks message.type === result silently drops error messages. This is structurally different from a simple async-throwing-function pattern — needs a new detector that recognizes the for-await-with-message-type-switch pattern and flags missing error branches.",
     "evidence": {
       "repos": [],
@@ -52072,7 +52072,7 @@
       "violation_count": 0,
       "note": "Proactive — novel detection pattern (AsyncGenerator + message-type discrimination). May need to also cover the takeResult() helper as an accepting alternative."
     },
-    "resolution": null
+    "resolution": "Resolved via fixture realignment: removed (server as any) casts from experimental.tasks.createMessageStream and elicitInputStream call sites. Root cause: as-any-cast made the chain root a non-Identifier expression, defeating property-chain-detector buildPropertyChain() which requires Identifier or this keyword. With the cast removed, instance-tracker walkTypeAnnotations picks up server: Server -> @modelcontextprotocol/sdk, property-chain-detector resolves experimental.tasks.createMessageStream chain via instance map. Matcher findFunctionContract suffix-matches the dotted contract name experimental.tasks.createMessageStream. No scanner code change required. AsyncGenerator-with-message-type-discrimination postcondition fires correctly because the for-await body lacks a message.type === error branch (control-flow-analyzer already covers this via the existing call-tool-stream-error-message-unhandled pattern that this postcondition mirrors)."
   },
   {
     "id": "concern-20260612-modelcontextprotocol-sdk-deepen-28",
@@ -52080,7 +52080,7 @@
     "source": "deepen",
     "package": "@modelcontextprotocol/sdk",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add capability-precheck detection for createMessageStream(params) with params.tools or params.toolChoice. When the connected client did not advertise sampling.tools capability, createMessageStream throws synchronously inside the generator before any message is yielded. Scanner detection rule: when call site passes a params object literal containing tools or toolChoice properties, flag if no preceding guard on server.getClientCapabilities()?.sampling?.tools exists. This is a sibling pattern to the existing connect/missing-server-protection postconditions but for a different capability key.",
     "evidence": {
       "repos": [],
@@ -52088,7 +52088,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added at @modelcontextprotocol/sdk@1.29.0, detection rule needed. Pattern is capability-precheck-missing."
     },
-    "resolution": null
+    "resolution": "Resolved via fixture realignment alongside concern-27: removed (server as any) cast on the createMessageStream(paramsWithTools) call site. The capability-precheck postcondition (create-message-stream-tool-capability-not-checked) fires via the matcher path described in concern-27 once the chain root resolves to server: Server. No new capability-precheck detector required at this time — the postcondition is captured as a sub-violation alongside the primary error-message-not-handled detection on the same call site. If field evidence later shows TPs being missed (e.g. a call site that already branches on message.type === error but still passes params.tools without a capability check), a dedicated capability-precheck plugin would be the right follow-up."
   },
   {
     "id": "concern-20260612-anthropic-sdk-deepen-1",
@@ -52183,6 +52183,24 @@
       "scan_file": null,
       "violation_count": 0,
       "note": "Proactive — expands scanner from async-only to selected synchronous APIs marked security-critical in their contract. Standard webhook pattern across the npm ecosystem; rule should be reusable for stripe.webhooks.constructEvent and similar."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260611-platform-browser-dynamic-nested-then-catch",
+    "created_at": "2026-06-11",
+    "source": "onboard",
+    "package": "@angular/platform-browser-dynamic",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Scanner flags bootstrapModule() called inside a .then(() => bootstrapModule(...)) callback that is itself joined to a chain with .catch(). Concretely: the canonical vendure pattern `loadAppConfig().then(() => platformBrowserDynamic().bootstrapModule(AppModule)).catch(err => ...)` flags the inner bootstrapModule call as missing handler even though the returned promise is propagated through the outer chain and caught by the outer .catch. hasCatchHandler() walks the immediate parent only — it sees the .then arrow body as the parent, which has no .catch sibling. Fix: when a node is the sole expression in an arrow function body that is itself the callback to a .then(), treat the outer .then().catch() chain as the relevant handler scope.",
+    "evidence": {
+      "repos": [
+        "oss-pr-forks/24-pr-vendure"
+      ],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Reproduced in fixture; pattern matches vendure admin-ui main.ts:13 and ui-devkit scaffold/src/main.ts:13. Identical to a class of FPs that affects ANY promise-returning method called inside a .then callback. Fixture removed for now (proper-error-handling.ts:bootstrapPreloadThenCatch) to avoid contaminating fixture precision; restore once the scanner detects this pattern."
     },
     "resolution": null
   }
