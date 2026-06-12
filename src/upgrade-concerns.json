@@ -52696,7 +52696,7 @@
     "source": "deepen",
     "package": "snowflake-sdk",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "deferred",
     "description": "Add detection for snowflake-sdk Connection.connectAsync() \u2014 async session establishment. Scanner should flag connectAsync() calls without try/catch (or .catch chain). Distinct from callback-based connect() \u2014 connectAsync rejects the Promise rather than routing to a callback. Common production-startup pattern; uncaught rejection causes UnhandledPromiseRejection and the connection variable is undefined so every downstream query throws a misleading 'connection undefined' instead of the real auth/network/config error.",
     "evidence": {
       "repos": [],
@@ -52704,7 +52704,7 @@
       "violation_count": 0,
       "note": "Proactive \u2014 postconditions added via 2026-06-12 API surface deepen pass; no scanner rule yet."
     },
-    "resolution": null
+    "resolution": "Deferred (cycle 5): snowflake-sdk contract has NO detection: block - Connection instances created via snowflake.createConnection({...}) are not registered with instance-tracker.ts. Promise-returning connection.connectAsync() would route through ThrowingFunctionDetector ONLY if Connection instances were tracked. Implementation requires: (a) add detection: block with class_names=[\"Connection\"], factory_methods=[\"createConnection\"], require_instance_tracking=true; (b) verify instance-tracker propagates the type through the createConnection->Connection chain; (c) add ground-truth fixtures with await connection.connectAsync() patterns. Evidence threshold not met (proactive, repos=[], violation_count=0). Cluster with concerns -2 through -4 and -6 - same root cause: missing detection block for Connection/RowStatement/Pool classes. Recommend one focused PR adding the detection block + fixtures for all 5 instance-method concerns when a real-world snowflake-sdk usage scan provides evidence."
   },
   {
     "id": "concern-20260612-snowflake-sdk-deepen-2",
@@ -52712,7 +52712,7 @@
     "source": "deepen",
     "package": "snowflake-sdk",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "deferred",
     "description": "Add detection for snowflake-sdk Connection.fetchResult({queryId, complete}) \u2014 fetches result of a previously-issued statement by queryId. The `complete` callback's err is the only failure signal \u2014 if the callback uses rows/stmt without first checking err, the violation is silent (no exception). Same shape as the existing execute() detector but triggered by a different method name; reuse the execute callback-err-discarded pattern.",
     "evidence": {
       "repos": [],
@@ -52720,7 +52720,7 @@
       "violation_count": 0,
       "note": "Proactive \u2014 postconditions added 2026-06-12; scanner rule can likely be extended from execute() detection."
     },
-    "resolution": null
+    "resolution": "Deferred (cycle 5): same root cause as concern-20260612-snowflake-sdk-deepen-1 - Connection instances are not currently tracked by instance-tracker.ts (no detection: block in snowflake-sdk contract.yaml). Once Connection is registered as a tracked class, connection.fetchResult({queryId, complete}) reuses the existing callback-err-discarded detector (same shape as execute()). The CallbackDetector plugin in $SCANNER/src/v2/plugins/callback-detector.ts already handles complete: callback patterns when the host function call routes to a contract with the matching detection rule. Evidence threshold not met (proactive, repos=[], violation_count=0). Cluster with -1, -3, -4, -6."
   },
   {
     "id": "concern-20260612-snowflake-sdk-deepen-3",
@@ -52728,7 +52728,7 @@
     "source": "deepen",
     "package": "snowflake-sdk",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "deferred",
     "description": "Add detection for snowflake-sdk Connection.getQueryStatusThrowIfError() and Connection.getResultsFromQueryId() \u2014 both are Promise-returning methods that reject with rich Snowflake error codes (460002 ERR_GET_RESULTS_QUERY_ID_NO_DATA, 460003 ERR_GET_RESULTS_QUERY_ID_NOT_SUCCESS_STATUS). Scanner should flag awaited calls inside try-less scopes. These are the core async-execution polling APIs \u2014 missing handling silently kills async ETL jobs.",
     "evidence": {
       "repos": [],
@@ -52736,7 +52736,7 @@
       "violation_count": 0,
       "note": "Proactive \u2014 postconditions added 2026-06-12. Two distinct method names but same detection shape (await-without-try-catch); group as one rule."
     },
-    "resolution": null
+    "resolution": "Deferred (cycle 5): same root cause as concern-20260612-snowflake-sdk-deepen-1 - Connection instances not yet tracked. Both getQueryStatusThrowIfError and getResultsFromQueryId are Promise-returning, so once Connection tracking lands they route through ThrowingFunctionDetector with no additional plugin work (identical pattern to the @sentry/nextjs deepen-1 through deepen-7 resolutions from 2026-06-11 which all reused the standard ThrowingFunctionDetector once contract entries existed). Evidence threshold not met (proactive, repos=[], violation_count=0). Cluster with -1, -2, -4, -6 in one PR."
   },
   {
     "id": "concern-20260612-snowflake-sdk-deepen-4",
@@ -52744,7 +52744,7 @@
     "source": "deepen",
     "package": "snowflake-sdk",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "deferred",
     "description": "Add detection for snowflake-sdk RowStatement.cancel(callback) \u2014 callback-based cancel. Err in callback's first arg. Same callback-err-discarded shape as execute(). Lower-priority (warning severity) but worth detecting because a leaked still-running query consumes warehouse credits silently.",
     "evidence": {
       "repos": [],
@@ -52752,7 +52752,7 @@
       "violation_count": 0,
       "note": "Proactive \u2014 postconditions added 2026-06-12; reuse execute() callback-err detector."
     },
-    "resolution": null
+    "resolution": "Deferred (cycle 5): same root cause as concern-20260612-snowflake-sdk-deepen-1 - RowStatement instances (returned from connection.execute()) not tracked by instance-tracker. stmt.cancel(callback) reuses the execute() callback-err-discarded detector. Lower-priority (warning severity per the concern). Requires (a) adding RowStatement to detection.class_names; (b) registering execute() as a factory_method returning a RowStatement-typed value (similar to how pg query() returns a typed value). Evidence threshold not met (proactive, repos=[], violation_count=0). Cluster with -1, -2, -3, -6."
   },
   {
     "id": "concern-20260612-snowflake-sdk-deepen-5",
@@ -52760,7 +52760,7 @@
     "source": "deepen",
     "package": "snowflake-sdk",
     "type": "new_pattern",
-    "status": "pending",
+    "status": "deferred",
     "description": "Add detection for snowflake-sdk RowStatement.streamRows() and RowStatement.fetchRows() \u2014 return a Node.js Readable stream that emits 'error' events. NEW DETECTION SHAPE: scanner must flag Readable result of these methods being consumed WITHOUT an 'error' event listener attached. Missing error listener causes process crash (uncaughtException) OR silent data loss (partial result treated as complete). This is the highest-stakes silent-failure surface in the driver. Detection pattern: identify variable assigned from stmt.streamRows()/.fetchRows(), check that variable.on('error', ...) is called or it's piped to a downstream that handles error events.",
     "evidence": {
       "repos": [],
@@ -52768,7 +52768,7 @@
       "violation_count": 0,
       "note": "Proactive \u2014 postconditions added 2026-06-12. NEW detection shape \u2014 Node.js stream 'error' event listener check is not in the current scanner ruleset. Reusable across other streaming DB drivers (pg.query streams, mongodb cursors, etc.)."
     },
-    "resolution": null
+    "resolution": "Deferred (cycle 5): NEW detection shape - Node.js Readable stream returned from an INSTANCE METHOD call (stmt.streamRows() / stmt.fetchRows()) and consumed without an .on(\"error\", ...) listener. The existing EventListenerAbsencePlugin in $SCANNER/src/v2/plugins/event-listener-absence.ts only tracks factory_methods and class_names at the IMPORT BOUNDARY (e.g. new Client(), createClient()) - not Readable values returned from method calls on already-tracked instances. Implementation requires: (a) extending EventListenerAbsencePlugin to register method_return_listeners (new contract.yaml shape) that maps Connection.streamRows/.fetchRows -> required Readable error listener; (b) tracking the LHS of const stream = stmt.streamRows() as a Readable-typed instance; (c) walking subsequent stream.on(\"error\", ...) / stream.pipe(...) calls to satisfy the requirement; (d) ground-truth fixtures for stream with listener (clean) + stream without listener (violation) + stream.pipe(destWithErrorHandler) (clean). The deepen note flags this as REUSABLE across pg.Client.query() streams, mongodb cursor.stream(), and other DB driver streaming APIs - high leverage but a meaningful scanner upgrade that needs a focused work-package. Evidence threshold not met (proactive, repos=[], violation_count=0). Recommend filing a separate scanner-upgrade work-package at work-packages/scanner-upgrades-wave1-candidates/ when real-world FP/FN signal arrives."
   },
   {
     "id": "concern-20260612-snowflake-sdk-deepen-6",
@@ -52776,7 +52776,7 @@
     "source": "deepen",
     "package": "snowflake-sdk",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "deferred",
     "description": "Add detection for snowflake-sdk createPool() / Pool.acquire() / Pool.use() \u2014 generic-pool Pool<Connection>. acquire() returns Promise<Connection> that rejects on factory failure (auth error) or pool timeout. Scanner should flag pool.acquire() without try/catch and pool.use(async cb) without try/catch around the await. Distinguish factory-error rejection from timeout rejection in the postcondition messaging (different recovery strategies).",
     "evidence": {
       "repos": [],
@@ -52784,6 +52784,6 @@
       "violation_count": 0,
       "note": "Proactive \u2014 postconditions added 2026-06-12. Pool detection is also reusable across pg.Pool and other connection-pool packages."
     },
-    "resolution": null
+    "resolution": "Deferred (cycle 5): same root cause as concern-20260612-snowflake-sdk-deepen-1 - Pool instances (from generic-pool, returned by snowflake.createPool()) not yet tracked. pool.acquire() returns Promise<Connection> and pool.use(async cb) wraps acquire+release; once Pool is registered with detection.class_names=[\"Pool\"] + factory_methods=[\"createPool\"], both route through ThrowingFunctionDetector for the await-without-try-catch case. NOTE: deepen-stream-1 flagged this Pool detector pattern as reusable across pg.Pool, generic-pool consumers more broadly - same leverage observation as concern -5. Evidence threshold not met (proactive, repos=[], violation_count=0). Cluster with -1 through -4 in the detection-block PR."
   }
 ]
