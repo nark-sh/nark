@@ -46,7 +46,10 @@ describe('@octokit/app: ground-truth fixture', () => {
   let result: GroundTruthResult;
 
   beforeAll(async () => {
-    result = await runGroundTruth(GROUND_TRUTH_PATH, CORPUS_PRO_PATH, { includeDrafts: true });
+    result = await runGroundTruth(GROUND_TRUTH_PATH, CORPUS_PRO_PATH, {
+      includeDrafts: true,
+      packageName: '@octokit/app',
+    });
   });
 
   it('analyzer runs without errors', () => {

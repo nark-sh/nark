@@ -56,7 +56,10 @@ describe('@sentry/nextjs: ground-truth fixture', () => {
   let result: GroundTruthResult;
 
   beforeAll(async () => {
-    result = await runGroundTruth(GROUND_TRUTH_PATH, PRO_CORPUS_PATH, { includeDrafts: true });
+    result = await runGroundTruth(GROUND_TRUTH_PATH, PRO_CORPUS_PATH, {
+      includeDrafts: true,
+      packageName: '@sentry/nextjs',
+    });
   });
 
   it('analyzer runs without errors', () => {

@@ -373,8 +373,18 @@ export class InstanceTrackerPlugin implements DetectorPlugin {
   public onBinaryExpression(node: ts.BinaryExpression, context: NodeContext): Detection[] {
     if (node.operatorToken.kind !== ts.SyntaxKind.EqualsToken) return [];
     const left = node.left;
-    if (!ts.isPropertyAccessExpression(left)) return [];
-    const varName = left.name.text;
+    // Accept both:
+    //   (a) this.client = createClient()    — PropertyAccessExpression
+    //   (b) apolloServer = new ApolloServer() — Identifier (split declare-then-assign)
+    //       Evidence: concern-20260611-apollo-server-instance-tracking (erxes/erxes).
+    let varName: string;
+    if (ts.isPropertyAccessExpression(left)) {
+      varName = left.name.text;
+    } else if (ts.isIdentifier(left)) {
+      varName = left.text;
+    } else {
+      return [];
+    }
     const rhs = node.right;
 
     // Propagate from a tracked identifier: this.schema = productSchema

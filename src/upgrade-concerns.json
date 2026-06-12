@@ -52004,7 +52004,7 @@
     "source": "deepen",
     "package": "resend",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for resend.events.send() — triggers a named automation event. Returns { data, error }. Silent failure means the trigger is lost and the contact is silently dropped out of the automation funnel with no downstream signal (drip campaigns simply never fire). Scanner should detect events.send() calls without result.error check (same heuristic as emails-send detection).",
     "evidence": {
       "repos": [],
@@ -52012,7 +52012,8 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis (deepen-stream-1 pass 7). v6+ Automations product API; not seen in scan corpus yet because the Automations product is still ramping up adoption."
     },
-    "resolution": null
+    "resolution": "events.send() detected via property-chain detector + chainStr match against contract function name \"events.send\". Standard { data, error } envelope pattern. Verified by adding ground-truth fixture annotation (single-line comment required; multi-line broke parser). 30/30 resend ground-truth tests now pass.",
+    "resolved_at": "2026-06-11"
   },
   {
     "id": "concern-20260611-resend-deepen-8",
@@ -52020,7 +52021,7 @@
     "source": "deepen",
     "package": "resend",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for resend.automations.stop() — halts a running automation. Returns { data, error }. Silent failure during incident response is uniquely dangerous: the offending automation continues to fire while the operator believes it is halted. Two-part scanner concern: (a) missing result.error check, AND (b) successful response should verify data.status === 'disabled' before declaring the stop successful — a successful HTTP response with status='active' (validation_error path) is functionally a failure. The basic part (a) reuses the standard { data, error } detection; part (b) is a richer postcondition check.",
     "evidence": {
       "repos": [],
@@ -52028,7 +52029,8 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis (deepen-stream-1 pass 7). v6+ Automations control-plane operation; critical for incident response runbooks."
     },
-    "resolution": null
+    "resolution": "automations.stop() detected via property-chain detector + chainStr match against contract function name \"automations.stop\". Standard { data, error } envelope pattern. Part (a) — basic error check — works via existing isDestructuredErrorTupleProtected flow. Part (b) — data.status === \"disabled\" verification — is captured in contract postcondition required_handling but not enforced by scanner (would need value-flow tracking on the returned data shape). Documented as out-of-scope. 30/30 resend ground-truth tests pass.",
+    "resolved_at": "2026-06-11"
   },
   {
     "id": "concern-20260611-observable-error-handler-detection",
@@ -52162,7 +52164,7 @@
     "source": "deepen",
     "package": "@anthropic-ai/sdk",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "rejected",
     "description": "Add detection for messages.batches.delete() called without first verifying processing_status === 'ended' (postcondition batches-delete-without-prior-cancel). Scanner rule: flag delete() calls where the same id was not preceded in the same function body by a retrieve()/cancel() + status check. This is a programmer-error pattern (per-Anthropic docs: 'Message Batches can only be deleted once they've finished processing'), not a transient failure.",
     "evidence": {
       "repos": [],
@@ -52170,7 +52172,8 @@
       "violation_count": 0,
       "note": "Proactive — novel pattern requiring intra-function state tracking on batch IDs. More complex than simple try-catch detection — may need data-flow analysis or be marked as scanner-out-of-scope and addressed via documentation only."
     },
-    "resolution": null
+    "resolution": "Rejected: requires intra-function data-flow tracking on batch IDs (flag delete() calls not preceded by retrieve()+status check on the same id). Current V2 analyzer has no per-id state propagation across statements. Postcondition batches-delete-without-prior-cancel remains in contract.yaml as documentation for code-review and AI-assisted fix flows. Basic try-catch detection (batches-delete-no-try-catch) DOES fire correctly — verified by fixture at line 194.",
+    "resolved_at": "2026-06-11"
   },
   {
     "id": "concern-20260612-anthropic-sdk-deepen-4",
@@ -52195,7 +52198,7 @@
     "source": "deepen",
     "package": "@anthropic-ai/sdk",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "rejected",
     "description": "Add detection for for-await over batches.results() accessing item.result.message without narrowing on item.result.type (postcondition batches-results-individual-not-checked). MessageBatchIndividualResponse is a discriminated union (succeeded | errored | canceled | expired) and runtime access to .result.message is undefined for non-succeeded branches. Silent data loss: RAG ingestion pipelines miss errored/canceled documents.",
     "evidence": {
       "repos": [],
@@ -52203,7 +52206,8 @@
       "violation_count": 0,
       "note": "Proactive — discriminated-union narrowing detection. Similar pattern to existing 'no instanceof check on caught error' detector — may be implementable as a variant of that rule."
     },
-    "resolution": null
+    "resolution": "Rejected: requires discriminated-union narrowing detection (flag access to result.message without a guard on result.type). Current V2 analyzer has no type-narrowing flow analysis. Postcondition batches-results-individual-not-checked remains in contract.yaml as documentation. Basic try-catch detection on batches.results() works (line 227). Defer until scanner ships type-narrowing analyzer (separate roadmap item).",
+    "resolved_at": "2026-06-11"
   },
   {
     "id": "concern-20260612-anthropic-sdk-deepen-6",
@@ -52211,7 +52215,7 @@
     "source": "deepen",
     "package": "@anthropic-ai/sdk",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "rejected",
     "description": "Add SYNCHRONOUS-call detection for beta.webhooks.unwrap() outside try-catch (postcondition webhooks-unwrap-no-try-catch). Current V2 scanner detects awaited calls; this method is intentionally synchronous and throws three distinct error types (plain Error for missing key, WebhookVerificationError, SyntaxError from JSON.parse). Security-critical: forged webhooks pass through if errors are silently caught and 200'd back to Anthropic.",
     "evidence": {
       "repos": [],
@@ -52219,7 +52223,8 @@
       "violation_count": 0,
       "note": "Proactive — expands scanner from async-only to selected synchronous APIs marked security-critical in their contract. Standard webhook pattern across the npm ecosystem; rule should be reusable for stripe.webhooks.constructEvent and similar."
     },
-    "resolution": null
+    "resolution": "Rejected: requires sync-call detection for security-critical methods marked in contract. Current V2 analyzer only detects awaited calls. Adding sync-call detection is a cross-cutting scanner change (impacts every package). Postcondition webhooks-unwrap-no-try-catch remains in contract.yaml. Sync detection covered when fixture is also inside try-catch (line 283 SHOULD_NOT_FIRE passes). Track as scanner roadmap item: \"sync-call security postconditions\" — would also cover stripe.webhooks.constructEvent and similar.",
+    "resolved_at": "2026-06-11"
   },
   {
     "id": "concern-20260611-platform-browser-dynamic-nested-then-catch",
@@ -52246,7 +52251,7 @@
     "source": "deepen",
     "package": "uuid",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "rejected",
     "description": "Add detection for uuid.stringify() — postcondition stringify-invalid-bytes added in depth pass but no scanner rule exists. Pattern to detect: stringify(bytes) called without try-catch when bytes come from an external source (DB column, network, mock fixture). Throws TypeError('Stringified UUID is invalid') if the byte array does not encode a valid RFC 4122 UUID. Synchronous — scanner needs to handle non-awaited call sites and look for the lexical pattern stringify(X) where X is not the return value of parse() in the same scope. Common in binary DB drivers reading BINARY(16) columns that may contain non-UUID data.",
     "evidence": {
       "repos": [],
@@ -52254,7 +52259,8 @@
       "violation_count": 0,
       "note": "Proactive — postcondition added via API surface analysis at uuid@14.0.0 deepen pass 2026-06-12. Detection rule needed."
     },
-    "resolution": null
+    "resolution": "Rejected: uuid.stringify() is synchronous and throws TypeError on invalid bytes. Current V2 analyzer detects awaited calls only — sync-call detection is a cross-cutting scanner change. Postcondition stringify-invalid-bytes remains in contract.yaml as documentation. Track with concern-20260612-anthropic-sdk-deepen-6 as the same scanner roadmap item: \"sync-call detection for declared-throwing methods\".",
+    "resolved_at": "2026-06-11"
   },
   {
     "id": "concern-20260612-uuid-deepen-2",
@@ -52262,7 +52268,7 @@
     "source": "deepen",
     "package": "uuid",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "rejected",
     "description": "Add detection for uuid.v3(name, namespace, buf, offset) — postcondition v3-buffer-offset-out-of-bounds (new RangeError in uuid@14.0.0) added but no scanner rule exists. Pattern to detect: v3() called with 4 arguments (i.e., explicit buf+offset) without try-catch, particularly when the buf size or offset calculation is not statically verifiable. Throws RangeError('UUID byte range X:Y is out of buffer bounds'). Less common path than the default v3(name, namespace) call — but high impact when it does fire because the RangeError class is distinct from the existing TypeError path and code that only catches TypeError will miss it.",
     "evidence": {
       "repos": [],
@@ -52270,7 +52276,8 @@
       "violation_count": 0,
       "note": "Proactive — postcondition added via API surface analysis at uuid@14.0.0 deepen pass 2026-06-12. Triggered by bc-version-drift sweep finding new RangeError class in v14. Detection rule needed."
     },
-    "resolution": null
+    "resolution": "Rejected: uuid.v3() RangeError on 4-arg overload is a sync-call pattern. Same roadmap blocker as concern-20260612-uuid-deepen-1. Postcondition v3-buffer-offset-out-of-bounds remains in contract for AI-assisted fix flows and code-review reference.",
+    "resolved_at": "2026-06-11"
   },
   {
     "id": "concern-20260612-uuid-deepen-3",
@@ -52278,7 +52285,7 @@
     "source": "deepen",
     "package": "uuid",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "rejected",
     "description": "Add detection for uuid.v5(name, namespace, buf, offset) — postcondition v5-buffer-offset-out-of-bounds (new RangeError in uuid@14.0.0) added but no scanner rule exists. Identical detection requirements to concern-20260612-uuid-deepen-2 (v3 buf-offset) since both share the v35() internal implementation. The two concerns can share one scanner rule keyed on (function in [v3, v5] AND argument count == 4).",
     "evidence": {
       "repos": [],
@@ -52286,7 +52293,8 @@
       "violation_count": 0,
       "note": "Proactive — postcondition added via API surface analysis at uuid@14.0.0 deepen pass 2026-06-12. Triggered by bc-version-drift sweep. Detection rule needed (shared with v3 buf-offset concern)."
     },
-    "resolution": null
+    "resolution": "Rejected: uuid.v5() RangeError on 4-arg overload is identical pattern to v3 (shares v35() internal). Same roadmap blocker. Postcondition v5-buffer-offset-out-of-bounds remains in contract. When scanner adds sync-call detection, v3/v5/stringify can share one rule keyed on \"function in [v3, v5, stringify] AND argument count signals throwing path\".",
+    "resolved_at": "2026-06-11"
   },
   {
     "id": "concern-20260611-isomorphic-git-deepen-1",
@@ -52294,7 +52302,7 @@
     "source": "deepen",
     "package": "isomorphic-git",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for isomorphic-git.checkout() — postcondition checkout-no-error-handling added in deepen pass 6 but no scanner rule exists. Throws: CheckoutConflictError, CommitNotFetchedError, InternalError, NotFoundError.",
     "evidence": {
       "repos": [],
@@ -52302,7 +52310,8 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface enumeration of isomorphic-git@1.38.4 index.d.ts. Detection rule needed to catch bare-await call sites in production code paths (CI scripts, sync loops, scaffolding tools)."
     },
-    "resolution": null
+    "resolution": "isomorphic-git.checkout() detected via standard ThrowingFunctionDetector + import-tracking on \"isomorphic-git\". Contract function name match. Fixed invalid sources entries (must start with https://; replaced node_modules paths with GitHub error-class URLs). All 33 isomorphic-git ground-truth tests pass.",
+    "resolved_at": "2026-06-11"
   },
   {
     "id": "concern-20260611-isomorphic-git-deepen-2",
@@ -52310,7 +52319,7 @@
     "source": "deepen",
     "package": "isomorphic-git",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for isomorphic-git.commit() — postcondition commit-no-error-handling added in deepen pass 6 but no scanner rule exists. Throws: MissingNameError (no author/committer config), MissingParameterError, NoCommitError.",
     "evidence": {
       "repos": [],
@@ -52318,7 +52327,8 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface enumeration of isomorphic-git@1.38.4 index.d.ts. Detection rule needed to catch bare-await call sites in production code paths (CI scripts, sync loops, scaffolding tools)."
     },
-    "resolution": null
+    "resolution": "isomorphic-git.commit() detected via standard ThrowingFunctionDetector. Contract function name match. Same source URL fix applied. All 33 isomorphic-git ground-truth tests pass.",
+    "resolved_at": "2026-06-11"
   },
   {
     "id": "concern-20260611-isomorphic-git-deepen-3",
@@ -52326,7 +52336,7 @@
     "source": "deepen",
     "package": "isomorphic-git",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for isomorphic-git.add() — postcondition add-no-error-handling added in deepen pass 6 but no scanner rule exists. Throws: NotFoundError (filepath missing), MultipleGitError (parallel batch partial failure).",
     "evidence": {
       "repos": [],
@@ -52334,7 +52344,8 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface enumeration of isomorphic-git@1.38.4 index.d.ts. Detection rule needed to catch bare-await call sites in production code paths (CI scripts, sync loops, scaffolding tools)."
     },
-    "resolution": null
+    "resolution": "isomorphic-git.add() detected via standard ThrowingFunctionDetector. Contract function name match. Same source URL fix applied. All 33 isomorphic-git ground-truth tests pass.",
+    "resolved_at": "2026-06-11"
   },
   {
     "id": "concern-20260611-isomorphic-git-deepen-4",
@@ -52342,7 +52353,7 @@
     "source": "deepen",
     "package": "isomorphic-git",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for isomorphic-git.branch() — postcondition branch-no-error-handling added in deepen pass 6 but no scanner rule exists. Throws: AlreadyExistsError, InvalidRefNameError.",
     "evidence": {
       "repos": [],
@@ -52350,7 +52361,8 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface enumeration of isomorphic-git@1.38.4 index.d.ts. Detection rule needed to catch bare-await call sites in production code paths (CI scripts, sync loops, scaffolding tools)."
     },
-    "resolution": null
+    "resolution": "isomorphic-git.branch() detected via standard ThrowingFunctionDetector. Contract function name match. Same source URL fix applied. All 33 isomorphic-git ground-truth tests pass.",
+    "resolved_at": "2026-06-11"
   },
   {
     "id": "concern-20260611-isomorphic-git-deepen-5",
@@ -52358,7 +52370,7 @@
     "source": "deepen",
     "package": "isomorphic-git",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for isomorphic-git.tag() — postcondition tag-no-error-handling added in deepen pass 6 but no scanner rule exists. Throws: AlreadyExistsError (release retry), InvalidFilepathError, MissingParameterError, NotFoundError.",
     "evidence": {
       "repos": [],
@@ -52366,7 +52378,8 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface enumeration of isomorphic-git@1.38.4 index.d.ts. Detection rule needed to catch bare-await call sites in production code paths (CI scripts, sync loops, scaffolding tools)."
     },
-    "resolution": null
+    "resolution": "isomorphic-git.tag() detected via standard ThrowingFunctionDetector. Contract function name match. Same source URL fix applied. All 33 isomorphic-git ground-truth tests pass.",
+    "resolved_at": "2026-06-11"
   },
   {
     "id": "concern-20260611-isomorphic-git-deepen-6",
@@ -52374,7 +52387,7 @@
     "source": "deepen",
     "package": "isomorphic-git",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for isomorphic-git.fastForward() — postcondition fast-forward-no-error-handling added in deepen pass 6 but no scanner rule exists. Throws: FastForwardError (divergence), HttpError, EmptyServerResponseError, UserCanceledError.",
     "evidence": {
       "repos": [],
@@ -52382,7 +52395,8 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface enumeration of isomorphic-git@1.38.4 index.d.ts. Detection rule needed to catch bare-await call sites in production code paths (CI scripts, sync loops, scaffolding tools)."
     },
-    "resolution": null
+    "resolution": "isomorphic-git.fastForward() detected via standard ThrowingFunctionDetector. Contract function name match. All 33 isomorphic-git ground-truth tests pass.",
+    "resolved_at": "2026-06-11"
   },
   {
     "id": "concern-20260611-isomorphic-git-deepen-7",
@@ -52390,7 +52404,7 @@
     "source": "deepen",
     "package": "isomorphic-git",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for isomorphic-git.abortMerge() — postcondition abort-merge-no-error-handling added in deepen pass 6 but no scanner rule exists. Throws: IndexResetError (recovery-path failure).",
     "evidence": {
       "repos": [],
@@ -52398,7 +52412,8 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface enumeration of isomorphic-git@1.38.4 index.d.ts. Detection rule needed to catch bare-await call sites in production code paths (CI scripts, sync loops, scaffolding tools)."
     },
-    "resolution": null
+    "resolution": "isomorphic-git.abortMerge() detected via standard ThrowingFunctionDetector. Contract function name match. Same source URL fix applied. All 33 isomorphic-git ground-truth tests pass.",
+    "resolved_at": "2026-06-11"
   },
   {
     "id": "concern-20260611-isomorphic-git-deepen-8",
@@ -52406,7 +52421,7 @@
     "source": "deepen",
     "package": "isomorphic-git",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for isomorphic-git.getRemoteInfo() — postcondition get-remote-info-no-error-handling added in deepen pass 6 but no scanner rule exists. Throws: UrlParseError, UnknownTransportError, HttpError, SmartHttpError, RemoteCapabilityError.",
     "evidence": {
       "repos": [],
@@ -52414,7 +52429,8 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface enumeration of isomorphic-git@1.38.4 index.d.ts. Detection rule needed to catch bare-await call sites in production code paths (CI scripts, sync loops, scaffolding tools)."
     },
-    "resolution": null
+    "resolution": "isomorphic-git.getRemoteInfo() detected via standard ThrowingFunctionDetector. Contract function name match. All 33 isomorphic-git ground-truth tests pass.",
+    "resolved_at": "2026-06-11"
   },
   {
     "id": "concern-20260611-isomorphic-git-deepen-9",
@@ -52422,7 +52438,7 @@
     "source": "deepen",
     "package": "isomorphic-git",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for isomorphic-git.addRemote() — postcondition add-remote-no-error-handling added in deepen pass 6 but no scanner rule exists. Throws: AlreadyExistsError, InvalidRefNameError, MissingParameterError.",
     "evidence": {
       "repos": [],
@@ -52430,7 +52446,8 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface enumeration of isomorphic-git@1.38.4 index.d.ts. Detection rule needed to catch bare-await call sites in production code paths (CI scripts, sync loops, scaffolding tools)."
     },
-    "resolution": null
+    "resolution": "isomorphic-git.addRemote() detected via standard ThrowingFunctionDetector. Contract function name match. Same source URL fix applied. All 33 isomorphic-git ground-truth tests pass.",
+    "resolved_at": "2026-06-11"
   },
   {
     "id": "concern-20260612-octokit-app-deepen-1",
@@ -52438,7 +52455,7 @@
     "source": "deepen",
     "package": "@octokit/app",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for @octokit/app App.getInstallationUrl() — postcondition must-handle-app-metadata-fetch-error added in deepen pass 8 but no scanner rule exists. Throws: RequestError on `GET /app` failure path (401/403/5xx), plain Error('[@octokit/app] unable to fetch metadata for app') when response body is empty. Failure is cached in the App instance's installationUrlBasePromise so it propagates to every subsequent caller.",
     "evidence": {
       "repos": [],
@@ -52446,7 +52463,8 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface enumeration of @octokit/app@16.1.2 dist-types/types.d.ts (GetInstallationUrlInterface) + dist-node/index.js (getInstallationUrlFactory + getInstallationUrlBase). Detection rule needed to catch bare `await app.getInstallationUrl()` in OAuth landing controllers / install-redirect handlers."
     },
-    "resolution": null
+    "resolution": "@octokit/app App.getInstallationUrl() now detected. Three fixes shipped together: (1) added type_names: [App] to detection so class field declarations like \"private app: App;\" populate instanceMap via walkTypeAnnotations; (2) corrected invalid business_impact enum values (REVENUE_LOSS → DOWNTIME, blocked_action → service_unavailable); (3) corrected the @octokit/app ground-truth test to pass packageName so unrelated pro-corpus schema errors do not block the test. Module-level app.getInstallationUrl() was already detected (line 82). Class-instance this.app.getInstallationUrl() (line 115) now also fires correctly. 14/14 @octokit/app ground-truth tests pass.",
+    "resolved_at": "2026-06-11"
   },
   {
     "id": "concern-20260611-apollo-server-instance-tracking",
@@ -52454,7 +52472,7 @@
     "source": "onboard",
     "package": "@apollo/server",
     "type": "instance_tracking_gap",
-    "status": "pending",
+    "status": "implemented",
     "description": "Analyzer does not link ApolloServer instance methods (.start(), .stop(), .executeOperation()) back to the constructor when (a) declaration and assignment are split across statements (`let apolloServer; apolloServer = new ApolloServer(...)`) or (b) the instance flows through an async helper return value (`const apolloServer = await generateApolloServer()`). Caused 2 false negatives during real-world scan of erxes (5139★ + 3918★ combined). Pattern is common in production code that builds Apollo Server inside a factory function and returns it for shared lifecycle management.",
     "evidence": {
       "repos": [
@@ -52465,7 +52483,8 @@
       "violation_count": 0,
       "note": "Both files contain `await apolloServer.start()` with no try-catch and were missed by the scanner. cisagov/RedEye (2744★) with the conventional `const apolloServer = new ApolloServer(...)` + `await apolloServer.start()` pattern was flagged correctly. Pattern likely applies to other framework-wrapper packages (fastify factory, express() returning value through helper, etc.) — fix here is generic, not @apollo/server-specific."
     },
-    "resolution": null
+    "resolution": "instance-tracker.onBinaryExpression now also tracks Identifier targets (apolloServer = new ApolloServer(...)) in addition to PropertyAccessExpression (this.client = ...). Split-declare-then-assign pattern from erxes/erxes now resolves correctly. New ground-truth fixture at nark-corpus-pro/packages/@apollo/server/fixtures/ground-truth.ts demonstrates both conventional and split-assign patterns; new test file @apollo__server.ground-truth.test.ts asserts both fire SHOULD_FIRE correctly. 6/6 apollo ground-truth tests pass.",
+    "resolved_at": "2026-06-11"
   },
   {
     "id": "concern-20260611-sentry-nextjs-deepen-1",
@@ -52473,7 +52492,7 @@
     "source": "deepen",
     "package": "@sentry/nextjs",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Verify scanner detection for @sentry/nextjs.wrapRouteHandlerWithSentry() — postcondition 'route-handler-errors-rethrow' added in deepen pass. The function is a named export from @sentry/nextjs that re-throws callback errors via @sentry/core's handleCallbackErrors. The generic ThrowingFunctionDetectorPlugin should already pick this up via the named-import path, but a regression fixture should confirm. If detection fires when imported statically and called outside try/catch, mark this concern resolved.",
     "evidence": {
       "repos": [],
@@ -52481,7 +52500,8 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis. Source-verified that the function re-throws (handleCallbackErrors in @sentry/core); needs scanner confirmation."
     },
-    "resolution": null
+    "resolution": "@sentry/nextjs.wrapRouteHandlerWithSentry detected via existing ThrowingFunctionDetector + import-tracking. All 12 @sentry/nextjs ground-truth tests pass. Also updated test config to pass packageName so unrelated pro-corpus schema errors do not block.",
+    "resolved_at": "2026-06-11"
   },
   {
     "id": "concern-20260611-sentry-nextjs-deepen-2",
@@ -52489,7 +52509,7 @@
     "source": "deepen",
     "package": "@sentry/nextjs",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Verify scanner detection for @sentry/nextjs.wrapServerComponentWithSentry() — postcondition 'server-component-errors-rethrow' added in deepen pass. The function is a named export from @sentry/nextjs that re-throws callback errors via @sentry/core's handleCallbackErrors. The generic ThrowingFunctionDetectorPlugin should already pick this up via the named-import path, but a regression fixture should confirm. If detection fires when imported statically and called outside try/catch, mark this concern resolved.",
     "evidence": {
       "repos": [],
@@ -52497,7 +52517,8 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis. Source-verified that the function re-throws (handleCallbackErrors in @sentry/core); needs scanner confirmation."
     },
-    "resolution": null
+    "resolution": "@sentry/nextjs.wrapServerComponentWithSentry detected via standard ThrowingFunctionDetector. 12/12 sentry-nextjs tests pass.",
+    "resolved_at": "2026-06-11"
   },
   {
     "id": "concern-20260611-sentry-nextjs-deepen-3",
@@ -52505,7 +52526,7 @@
     "source": "deepen",
     "package": "@sentry/nextjs",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Verify scanner detection for @sentry/nextjs.wrapMiddlewareWithSentry() — postcondition 'middleware-errors-rethrow' added in deepen pass. The function is a named export from @sentry/nextjs that re-throws callback errors via @sentry/core's handleCallbackErrors. The generic ThrowingFunctionDetectorPlugin should already pick this up via the named-import path, but a regression fixture should confirm. If detection fires when imported statically and called outside try/catch, mark this concern resolved.",
     "evidence": {
       "repos": [],
@@ -52513,7 +52534,8 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis. Source-verified that the function re-throws (handleCallbackErrors in @sentry/core); needs scanner confirmation."
     },
-    "resolution": null
+    "resolution": "@sentry/nextjs.wrapMiddlewareWithSentry detected via standard ThrowingFunctionDetector. 12/12 sentry-nextjs tests pass.",
+    "resolved_at": "2026-06-11"
   },
   {
     "id": "concern-20260611-sentry-nextjs-deepen-4",
@@ -52521,7 +52543,7 @@
     "source": "deepen",
     "package": "@sentry/nextjs",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Verify scanner detection for @sentry/nextjs.wrapGenerationFunctionWithSentry() — postcondition 'generation-function-errors-rethrow' added in deepen pass. The function is a named export from @sentry/nextjs that re-throws callback errors via @sentry/core's handleCallbackErrors. The generic ThrowingFunctionDetectorPlugin should already pick this up via the named-import path, but a regression fixture should confirm. If detection fires when imported statically and called outside try/catch, mark this concern resolved.",
     "evidence": {
       "repos": [],
@@ -52529,7 +52551,8 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis. Source-verified that the function re-throws (handleCallbackErrors in @sentry/core); needs scanner confirmation."
     },
-    "resolution": null
+    "resolution": "@sentry/nextjs.wrapGenerationFunctionWithSentry detected via standard ThrowingFunctionDetector. 12/12 sentry-nextjs tests pass.",
+    "resolved_at": "2026-06-11"
   },
   {
     "id": "concern-20260611-sentry-nextjs-deepen-5",
@@ -52537,7 +52560,7 @@
     "source": "deepen",
     "package": "@sentry/nextjs",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Verify scanner detection for @sentry/nextjs.withServerActionInstrumentation() — postcondition 'server-action-errors-rethrow' added in deepen pass. The function is a named export from @sentry/nextjs that re-throws callback errors via @sentry/core's handleCallbackErrors. The generic ThrowingFunctionDetectorPlugin should already pick this up via the named-import path, but a regression fixture should confirm. If detection fires when imported statically and called outside try/catch, mark this concern resolved.",
     "evidence": {
       "repos": [],
@@ -52545,7 +52568,8 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis. Source-verified that the function re-throws (handleCallbackErrors in @sentry/core); needs scanner confirmation."
     },
-    "resolution": null
+    "resolution": "@sentry/nextjs.withServerActionInstrumentation detected via standard ThrowingFunctionDetector. 12/12 sentry-nextjs tests pass.",
+    "resolved_at": "2026-06-11"
   },
   {
     "id": "concern-20260611-sentry-nextjs-deepen-6",
@@ -52553,7 +52577,7 @@
     "source": "deepen",
     "package": "@sentry/nextjs",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Verify scanner detection for @sentry/nextjs.withMonitor() — postcondition 'monitor-callback-rethrows' added in deepen pass. The function is a named export from @sentry/nextjs that re-throws callback errors via @sentry/core's handleCallbackErrors. The generic ThrowingFunctionDetectorPlugin should already pick this up via the named-import path, but a regression fixture should confirm. If detection fires when imported statically and called outside try/catch, mark this concern resolved.",
     "evidence": {
       "repos": [],
@@ -52561,7 +52585,8 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis. Source-verified that the function re-throws (handleCallbackErrors in @sentry/core); needs scanner confirmation."
     },
-    "resolution": null
+    "resolution": "@sentry/nextjs.withMonitor detected via standard ThrowingFunctionDetector. 12/12 sentry-nextjs tests pass.",
+    "resolved_at": "2026-06-11"
   },
   {
     "id": "concern-20260611-sentry-nextjs-deepen-7",
@@ -52569,7 +52594,7 @@
     "source": "deepen",
     "package": "@sentry/nextjs",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Verify scanner detection for @sentry/nextjs.wrapApiHandlerWithSentryVercelCrons() — postcondition 'vercel-crons-handler-rethrows' added in deepen pass. The function is a named export from @sentry/nextjs that re-throws callback errors via @sentry/core's handleCallbackErrors. The generic ThrowingFunctionDetectorPlugin should already pick this up via the named-import path, but a regression fixture should confirm. If detection fires when imported statically and called outside try/catch, mark this concern resolved.",
     "evidence": {
       "repos": [],
@@ -52577,6 +52602,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis. Source-verified that the function re-throws (handleCallbackErrors in @sentry/core); needs scanner confirmation."
     },
-    "resolution": null
+    "resolution": "@sentry/nextjs.wrapApiHandlerWithSentryVercelCrons detected via standard ThrowingFunctionDetector. 12/12 sentry-nextjs tests pass.",
+    "resolved_at": "2026-06-11"
   }
 ]
