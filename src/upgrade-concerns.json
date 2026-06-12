@@ -51885,7 +51885,7 @@
     "source": "onboard",
     "package": "@alicloud/tea-typescript",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Scanner does not detect `await response.readBytes()` method calls on @alicloud/tea-typescript Response instances. The contract has a `readBytes` function with `import_path: '@alicloud/tea-typescript'`, but the scanner sees method calls on locally-typed Response variables and does not connect them back to the package. doAction (free function) detected fine. 0 out of 5 expected readBytes violations fired against the fixtures. Detection idea: walk TypeScript type chain on the receiver — if `response` was returned by `await doAction(...)` (which returns `Promise<Response>` typed by @alicloud/tea-typescript), then `response.readBytes()` is a call into @alicloud/tea-typescript.",
     "evidence": {
       "repos": [],
@@ -51894,7 +51894,7 @@
       "fixture_path": "nark-corpus-pro/packages/@alicloud/tea-typescript/fixtures/",
       "note": "Same class of detection gap likely affects any package whose async API surface is split between a top-level factory and instance methods returned from that factory (e.g. node:fs createReadStream, db handles, stream classes returned from network libs)."
     },
-    "resolution": null
+    "resolution": "Added detection.type_names: [Response] to contract. instance-tracker now routes response.readBytes() back to @alicloud/tea-typescript via parameter annotations and TypeChecker return-type inference. Re-scan: 3 readBytes violations fire at expected SHOULD_FIRE sites; SHOULD_NOT_FIRE sites stay silent. All 192 contracts pass schema validation."
   },
   {
     "id": "concern-20260612-resend-deepen-1",
