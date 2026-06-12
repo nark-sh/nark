@@ -53240,7 +53240,7 @@
     "source": "deepen",
     "package": "sqlite3",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "deferred",
     "description": "Add detection for sqlite3 Database constructor open errors (CANTOPEN/PERM/NOTADB/CORRUPT). Pattern: `new sqlite3.Database(file, callback)` where callback ignores its err arg. Scanner needs to detect constructor calls with a callback function literal and verify the callback's first param is checked.",
     "evidence": {
       "repos": [],
@@ -53248,7 +53248,8 @@
       "violation_count": 0,
       "note": "Proactive — new postcondition added via API surface analysis (deepen-stream-1 pass 6). Most common production silent-deploy failure with sqlite3."
     },
-    "resolution": null
+    "resolution": "Deferred: callback-error-flow tracking is a non-trivial scanner enhancement not yet implemented. The current sqlite3 contract uses the existing callback-error-ignored detection (see node_modules/sqlite3/lib/sqlite3.d.ts wrappers in contract.yaml), which fires on the common run()/get()/all()/exec()/prepare() patterns. Adding (a) constructor-callback detection (new sqlite3.Database(file, cb)), (b) Statement.get-specific callback-arg-ignored detection, and (c) Statement variable-flow lifecycle tracking (.finalize/.reset reachability) requires (1) extending callback-detector to walk constructor arguments, (2) per-method postcondition routing that distinguishes Database.get from Statement.get (same method name, different parent class), and (3) variable-lifetime flow analysis for prepared Statement instances. All three are proactive (deepen pass 6) with violation_count=0 — no real-world fires observed. Defer until a Statement-lifecycle work-package is opened. The existing callback-error-ignored postcondition already covers the most common silent-failure case (callback-based run/get/all/exec).",
+    "resolved_at": "2026-06-12"
   },
   {
     "id": "concern-20260612-sqlite3-deepen-6",
@@ -53256,7 +53257,7 @@
     "source": "deepen",
     "package": "sqlite3",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "deferred",
     "description": "Add detection for sqlite3 Statement.get() callback err-ignored pattern. Distinct from Database.get because Statement.get does NOT auto-finalize — callback signature is (err, row), and ignoring err in a prepared-statement reuse loop silently swallows both row-not-found and query-failed cases.",
     "evidence": {
       "repos": [],
@@ -53264,7 +53265,8 @@
       "violation_count": 0,
       "note": "Proactive (deepen-stream-1 pass 6) — Statement.get distinct from Database.get; lock-leak pattern is documented in wiki API."
     },
-    "resolution": null
+    "resolution": "Deferred: callback-error-flow tracking is a non-trivial scanner enhancement not yet implemented. The current sqlite3 contract uses the existing callback-error-ignored detection (see node_modules/sqlite3/lib/sqlite3.d.ts wrappers in contract.yaml), which fires on the common run()/get()/all()/exec()/prepare() patterns. Adding (a) constructor-callback detection (new sqlite3.Database(file, cb)), (b) Statement.get-specific callback-arg-ignored detection, and (c) Statement variable-flow lifecycle tracking (.finalize/.reset reachability) requires (1) extending callback-detector to walk constructor arguments, (2) per-method postcondition routing that distinguishes Database.get from Statement.get (same method name, different parent class), and (3) variable-lifetime flow analysis for prepared Statement instances. All three are proactive (deepen pass 6) with violation_count=0 — no real-world fires observed. Defer until a Statement-lifecycle work-package is opened. The existing callback-error-ignored postcondition already covers the most common silent-failure case (callback-based run/get/all/exec).",
+    "resolved_at": "2026-06-12"
   },
   {
     "id": "concern-20260612-sqlite3-deepen-7",
@@ -53272,7 +53274,7 @@
     "source": "deepen",
     "package": "sqlite3",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "deferred",
     "description": "Add detection for sqlite3 Statement.get() called without subsequent .finalize() or .reset(). The Wiki API explicitly warns 'Using this method can leave the database locked' — a Statement prepared, gotten once, and dropped without finalize leaks a cursor lock that prevents db.close from completing. Scanner needs to track Statement variable flow and verify .finalize() is called.",
     "evidence": {
       "repos": [],
@@ -53280,7 +53282,8 @@
       "violation_count": 0,
       "note": "Proactive (deepen-stream-1 pass 6) — degraded_service pattern documented in wiki. Distinct from existing Statement.finalize-not-called concern because the trigger is Statement.get specifically."
     },
-    "resolution": null
+    "resolution": "Deferred: callback-error-flow tracking is a non-trivial scanner enhancement not yet implemented. The current sqlite3 contract uses the existing callback-error-ignored detection (see node_modules/sqlite3/lib/sqlite3.d.ts wrappers in contract.yaml), which fires on the common run()/get()/all()/exec()/prepare() patterns. Adding (a) constructor-callback detection (new sqlite3.Database(file, cb)), (b) Statement.get-specific callback-arg-ignored detection, and (c) Statement variable-flow lifecycle tracking (.finalize/.reset reachability) requires (1) extending callback-detector to walk constructor arguments, (2) per-method postcondition routing that distinguishes Database.get from Statement.get (same method name, different parent class), and (3) variable-lifetime flow analysis for prepared Statement instances. All three are proactive (deepen pass 6) with violation_count=0 — no real-world fires observed. Defer until a Statement-lifecycle work-package is opened. The existing callback-error-ignored postcondition already covers the most common silent-failure case (callback-based run/get/all/exec).",
+    "resolved_at": "2026-06-12"
   },
   {
     "id": "concern-20260612-umami-node-onboard-1",
@@ -53288,7 +53291,7 @@
     "source": "onboard",
     "package": "@umami/node",
     "type": "factory_function_instance_tracking",
-    "status": "in-progress",
+    "status": "implemented",
     "description": "Add detection for `const client = getUmami(); await client.track(...)` pattern where `getUmami()` is a local factory function whose return is `new Umami(...)`. The analyzer currently catches `const client = new Umami(...); await client.track(...)` directly but not the one-hop factory indirection — the dominant pattern in real codebases (verified in test-repos/.../labring__sealos/frontend/desktop/src/services/backend/tracking/index.ts:3-8 and the @umami/node fixtures/instance-usage.ts). The scanner should follow function-return type inference one hop deep so arrow-function factories returning `new Umami(...)` propagate Umami flow-typing to their callers.",
     "evidence": {
       "repos": [
@@ -53304,7 +53307,8 @@
       },
       "note": "Onboard-stream-7 surfaced this during @umami/node onboarding (partner-coverage mode for merged-oss-sealos). The direct-instantiation pattern is covered; only the factory-function indirection is missed. Low priority — the safe-baseline patterns (.catch() and try-catch) still work through the factory; the gap is unsafe-baseline detection."
     },
-    "resolution": null
+    "resolution": "Implemented: added pure-AST local-factory-function tracking to InstanceTrackerPlugin. New beforeTraversal pass walkLocalFactoryDeclarations() registers any top-level `const X = () => new <ImportedClass>(...)` or `function X() { return new <ImportedClass>(...) }` factory into a localFactoryMap. resolveFactoryCall() then consults this map as a fallback (after importMap and factoryToPackage) when handling direct-identifier calls. Pure AST — does not rely on the TypeScript type checker, so it works even when the underlying package is not installed in node_modules (the fixture case). Verified: nark-corpus-pro/packages/@umami/node/fixtures/instance-usage.ts now fires the expected 5 violations on functions trackOnInstance, trackInstanceFireAndForget, identifyOnInstance, identifyOnInstanceFireAndForget, sendOnInstance — all matching the SHOULD_FIRE expectations in the concern. The 3 safe baselines (.catch() chain, try-catch await, .catch only) correctly do NOT fire. No regressions: full umami ground-truth suite (14 tests) + instance-tracker.test.ts (8 tests) all pass. Also added detection.class_names: [Umami] to nark-corpus-pro/packages/@umami/node/contract.yaml so the classToPackage fallback resolves Umami when importMap misses (covers any future call sites where Umami is referenced without being directly imported in the same file).",
+    "resolved_at": "2026-06-12"
   },
   {
     "id": "concern-20260612-umami-node-onboard-2",
@@ -53315,7 +53319,9 @@
     "status": "pending",
     "description": "Add detection for `const x = new Umami(); x.init({...}); await x.track(...)` (no-arg constructor + separate init() call). Verified in real-world repo homarr-labs/homarr packages/analytics/src/send-server-analytics.ts:59-103. `callSiteCount` shows 2 in the scan output's package_discovery, but 0 violations are emitted — the bare `await umamiInstance.track(...)` at line 103 should fire `track-no-try-catch`. Likely cause: the analyzer's Umami-instance flow-type binding requires constructor args to register the type; the no-arg form bypasses the binding. Detection.class_names: ['Umami'] (already in contract) does not solve this — needs zero-arg constructor recognition as well.",
     "evidence": {
-      "repos": ["homarr-labs/homarr"],
+      "repos": [
+        "homarr-labs/homarr"
+      ],
       "scan_file": "work-packages/@umami__node/real-world-scans/homarr-scan-v3.json",
       "violation_count": 0,
       "fix_target": "scanner",
@@ -53336,7 +53342,9 @@
     "status": "pending",
     "description": "Add detection for `import umami from './local-services/umami'` where the local module does `import umami from '@umami/node'; export default umami;` — i.e. a one-hop default-export re-export of the @umami/node default singleton. The analyzer's import-resolution does not chase default-export re-exports back to the originating @umami/node import. Verified in corpus-builder/active/sjdonado__idonthavespotify/src/services/umami.ts (re-export) → src/index.ts:203 (calls umami.track without .catch — should fire track-no-try-catch but does not).",
     "evidence": {
-      "repos": ["sjdonado/idonthavespotify"],
+      "repos": [
+        "sjdonado/idonthavespotify"
+      ],
       "scan_file": "work-packages/@umami__node/real-world-scans/idonthavespotify-scan-v3.json",
       "violation_count": 0,
       "fix_target": "scanner",

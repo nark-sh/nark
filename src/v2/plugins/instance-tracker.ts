@@ -34,6 +34,20 @@ export class InstanceTrackerPlugin implements DetectorPlugin {
   private classToPackage: Map<string, string>; // class name → package name
   private typeToPackage: Map<string, string>; // type name → package name
   /**
+   * Local user-defined factory functions in the current source file. Populated each
+   * file by walking top-level declarations for the pattern:
+   *   const getUmami = () => new Umami({...});
+   *   function getUmami() { return new Umami({...}); }
+   * Maps local factory name → package name (resolved via importMap of the new'd class).
+   *
+   * Concern: concern-20260612-umami-node-onboard-1 — sealos uses a local getUmami()
+   * factory that wraps `new Umami(...)`. The TypeScript-checker-based fallback
+   * (`resolveCallReturnTypeViaChecker`) fails for unresolvable types (e.g. when the
+   * package isn't installed in node_modules, common for fixtures). A pure AST pass
+   * recovers the one-hop factory indirection without any checker dependency.
+   */
+  private localFactoryMap = new Map<string, string>();
+  /**
    * Promise-factory methods: factory functions whose result has a `.promise` property.
    * Pattern: `const doc = await getDocument(src).promise`
    * When getDocument is in this map (pdfjs-dist), `doc` is tracked as pdfjs-dist.
@@ -70,6 +84,10 @@ export class InstanceTrackerPlugin implements DetectorPlugin {
   public beforeTraversal(sf: ts.SourceFile, ctx: PluginContext): void {
     this.instanceMap.clear();
     this.instanceTypeMap.clear();
+    this.localFactoryMap.clear();
+    // Pre-scan for local arrow/function factories returning `new <ImportedClass>(...)`.
+    // Concern: concern-20260612-umami-node-onboard-1
+    this.walkLocalFactoryDeclarations(sf, ctx);
     if (this.typeToPackage.size > 0) {
       // Only register type names whose package is confirmed by the file's import map.
       // This prevents mapping `Socket` → socket.io when the file imports it from socket.io-client.
@@ -90,6 +108,106 @@ export class InstanceTrackerPlugin implements DetectorPlugin {
     // These are ts.PropertyDeclaration nodes (not VariableDeclaration), so they're not
     // visited by onVariableDeclaration. We pre-scan the file to track them.
     this.walkPropertyDeclarationInitializers(sf, ctx);
+  }
+
+  /**
+   * Walk source file for local arrow/function factories that wrap `new <ImportedClass>()`.
+   *
+   * Patterns handled (one-hop only):
+   *   const getUmami = () => new Umami({...});
+   *   const getUmami = () => { return new Umami({...}); };
+   *   function getUmami() { return new Umami({...}); }
+   *
+   * The class name is resolved via the file's importMap (authoritative — same priority
+   * as resolveNewExpression). When a downstream call site does `const c = getUmami();`,
+   * resolveFactoryCall consults `localFactoryMap` and tracks `c` as the wrapped package.
+   *
+   * Why pure AST and not type checker: when a package isn't installed in node_modules
+   * (common for fixtures, monorepo workspaces with unresolved declarations), the TS
+   * checker can't resolve `Umami` to a real symbol, so resolveCallReturnTypeViaChecker
+   * returns null. The importMap, however, still works because it reads import statements
+   * directly from the AST.
+   *
+   * Concern: concern-20260612-umami-node-onboard-1
+   */
+  private walkLocalFactoryDeclarations(node: ts.Node, ctx: PluginContext): void {
+    // Pattern: const X = () => new Y(...) / function X() { return new Y(...) }
+    // Only top-level / module-level declarations are tracked to keep scope simple.
+    if (ts.isVariableDeclaration(node) && node.initializer && ts.isIdentifier(node.name)) {
+      const factoryName = node.name.text;
+      const init = node.initializer;
+      // const X = () => new Y(...)        (arrow function, expression body)
+      // const X = () => { return new Y(...) }  (arrow function, block body)
+      // const X = function () { return new Y(...) }  (function expression, block body)
+      if (ts.isArrowFunction(init) || ts.isFunctionExpression(init)) {
+        const pkg = this.extractWrappedNewExpressionPackage(init.body, ctx);
+        if (pkg) this.localFactoryMap.set(factoryName, pkg);
+      }
+    }
+    // function X() { return new Y(...) }
+    if (ts.isFunctionDeclaration(node) && node.name && node.body) {
+      const factoryName = node.name.text;
+      const pkg = this.extractWrappedNewExpressionPackage(node.body, ctx);
+      if (pkg) this.localFactoryMap.set(factoryName, pkg);
+    }
+    ts.forEachChild(node, (child) => this.walkLocalFactoryDeclarations(child, ctx));
+  }
+
+  /**
+   * Given a function body (block) or arrow expression body, return the package
+   * name if the body is (or returns) a single `new <ImportedClass>(...)` expression.
+   *
+   * Returns null if the body is more complex (multiple statements other than the
+   * return, conditional logic, returns a non-new value, etc.). Deliberately
+   * conservative — we don't try to model arbitrary function flow, only the
+   * common `() => new X(...)` factory pattern.
+   */
+  private extractWrappedNewExpressionPackage(
+    body: ts.ConciseBody,
+    ctx: PluginContext
+  ): string | null {
+    // Arrow function expression body: () => new X(...)
+    if (ts.isNewExpression(body)) {
+      return this.resolveNewExpressionFromImports(body, ctx);
+    }
+    // Block body: { return new X(...); }
+    if (ts.isBlock(body)) {
+      // Find the single return statement. Conservative: only when body is exactly
+      // `{ return new X(...); }` (one statement, a ReturnStatement with NewExpression).
+      const statements = body.statements;
+      if (statements.length !== 1) return null;
+      const stmt = statements[0];
+      if (ts.isReturnStatement(stmt) && stmt.expression && ts.isNewExpression(stmt.expression)) {
+        return this.resolveNewExpressionFromImports(stmt.expression, ctx);
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Resolve a NewExpression to a package name using ONLY the importMap and
+   * classToPackage (no type checker). Mirrors `resolveNewExpression` priority
+   * but takes a PluginContext (used during the pre-traversal pass).
+   */
+  private resolveNewExpressionFromImports(
+    expr: ts.NewExpression,
+    ctx: PluginContext
+  ): string | null {
+    if (ts.isIdentifier(expr.expression)) {
+      const className = expr.expression.text;
+      const importInfo = ctx.importMap.get(className);
+      if (importInfo) return importInfo.packageName;
+      const fromClassMap = this.classToPackage.get(className);
+      if (fromClassMap) return fromClassMap;
+    }
+    if (ts.isPropertyAccessExpression(expr.expression)) {
+      const obj = expr.expression.expression;
+      if (ts.isIdentifier(obj)) {
+        const importInfo = ctx.importMap.get(obj.text);
+        if (importInfo) return importInfo.packageName;
+      }
+    }
+    return null;
   }
 
   /**
@@ -501,6 +619,15 @@ export class InstanceTrackerPlugin implements DetectorPlugin {
       const fromFactoryMap = this.factoryToPackage.get(funcName);
       if (fromFactoryMap) {
         return fromFactoryMap;
+      }
+
+      // Fallback: check local factory map (user-defined arrow/function in this file
+      // that wraps `new <ImportedClass>(...)`). Populated by walkLocalFactoryDeclarations.
+      // Handles the sealos `const getUmami = () => new Umami({...})` pattern.
+      // Concern: concern-20260612-umami-node-onboard-1
+      const fromLocalFactory = this.localFactoryMap.get(funcName);
+      if (fromLocalFactory) {
+        return fromLocalFactory;
       }
 
       return null;
