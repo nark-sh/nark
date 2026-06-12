@@ -51700,5 +51700,85 @@
       "note": "Proactive - contract added via API surface analysis. Same detection family as the existing AWS SDK send-without-try-catch detection. SECURITY_RISK incident label because a swallowed error can lead to a weak/empty password being persisted via PutSecretValueCommand."
     },
     "resolution": null
+  },
+  {
+    "id": "concern-20260612-luxon-deepen-1",
+    "created_at": "2026-06-12",
+    "source": "deepen",
+    "package": "luxon",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for luxon.DateTime.plus() \u2014 postcondition plus-non-duration-throws added in depth pass but no scanner rule exists. Throws InvalidArgumentError 'Unknown duration argument <v> of type <t>' when passed a string ('1d', 'P1D'), undefined, null, or any non-Duration/non-number/non-object. Common SaaS pattern: dt.plus(configValue) where configValue may be a string from .env or undefined when optional.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis (luxon@3.7.2 verified empirically). Detection rule needed for plus() called with non-Duration arg outside try-catch."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260612-luxon-deepen-2",
+    "created_at": "2026-06-12",
+    "source": "deepen",
+    "package": "luxon",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for luxon.DateTime.minus() \u2014 postcondition minus-non-duration-throws added in depth pass but no scanner rule exists. Same throw profile as plus() \u2014 delegates to Duration.fromDurationLike() internally. Common in lookback windows from query strings ('7d') or optional retention config.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis (luxon@3.7.2 verified empirically). Detection rule should mirror plus() detection."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260612-luxon-deepen-3",
+    "created_at": "2026-06-12",
+    "source": "deepen",
+    "package": "luxon",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for luxon.Duration.shiftTo() \u2014 postcondition shiftto-invalid-unit added in depth pass but no scanner rule exists. Throws InvalidUnitError for unrecognized unit strings (anything not in luxon's canonical unit vocabulary). Common when displaying durations in user-selected units.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis (luxon@3.7.2 verified empirically). Detection rule can mirror startOf/endOf invalid-unit detection."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260612-luxon-deepen-4",
+    "created_at": "2026-06-12",
+    "source": "deepen",
+    "package": "luxon",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for luxon.Duration.as() \u2014 postcondition duration-as-invalid-unit added in depth pass but no scanner rule exists. Throws InvalidUnitError via shiftTo() for unrecognized units. Heavy use in billing/SLA reporting and progress indicators.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis (luxon@3.7.2 verified empirically). Detection rule mirrors shiftTo()."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260612-luxon-deepen-5",
+    "created_at": "2026-06-12",
+    "source": "deepen",
+    "package": "luxon",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for luxon.Duration.get() \u2014 postcondition duration-get-invalid-unit added in depth pass but no scanner rule exists. Throws InvalidUnitError via normalizeUnit() for unrecognized units. Particularly common in template engines where unit comes from config or column name.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis (luxon@3.7.2 verified empirically). Detection rule mirrors startOf/endOf/shiftTo invalid-unit detection."
+    },
+    "resolution": null
   }
 ]
