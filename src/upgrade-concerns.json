@@ -52865,5 +52865,21 @@
       "note": "Proactive — silent-failure mode confirmed from dist/client.js lines 1292-1346 (all five credential getters return '' when isUnset(this._credential))"
     },
     "resolution": "Deferred to scanner-upgrades backlog. The contract.yaml (v1.1.0) declares silent-empty-string-when-credential-unset as a returns: postcondition with severity: warning on getAccessKeyId, getAccessKeySecret, getSecurityToken, getBearerToken, getType. The bare-await throw path (error-credentials-unavailable, severity: error) on the same functions IS detected today and fires on `const ak = await client.getAccessKeyId()` without try-catch — the contract documentation surfaces the silent-failure risk to readers. Detecting the genuine silent-empty-string usage pattern (where the await IS wrapped in try-catch but the resulting variable is then passed to a downstream signer without a truthiness check) requires new data-flow analysis: extend ReturnValueChecker to track these getters as silent-empty-prone, add a contract-matcher exception path mirroring jsonwebtoken decode-null-return-not-checked (line 320-327), and integrate with isResultNullGuarded() at line 1858. This is a 200-400 line cross-cutting change to scanner core with regression risk across the entire warning-severity postcondition class. Out of scope for a single scanner-stream cycle. Should be filed against work-packages/25-pr-initiative/scanner-upgrades-backlog with a dedicated wave: (a) regression fixtures for current null-guard machinery, (b) extension of ReturnValueChecker to track credential-getter results, (c) contract-matcher hook for silent-empty-string-when-credential-unset postcondition pattern (generalizable to any returns:-typed postcondition, not just @alicloud)."
+  },
+  {
+    "id": "concern-20260612-tea-typescript-deepen-1",
+    "created_at": "2026-06-12",
+    "source": "deepen",
+    "package": "@alicloud/tea-typescript",
+    "type": "uncovered_pattern",
+    "status": "pending",
+    "description": "Add detection for synchronous throw from $tea.cast() at the deserialization boundary. cast() is sync: it throws Error('can not cast to Map') or Error('type of <field> is mismatch, expect <type>, but <typeof value>') directly. The throw escapes any .then().catch() chain on the preceding doAction Promise. Pattern that needs flagging: `const r = await doAction(req); const result = $tea.cast(toMap(r), new Model());` outside a try/catch — common in per-service Alibaba Cloud SDK call sites. Scanner needs to recognize synchronous cast() calls as throw-prone and require their try/catch scope to include the cast call site, not just the awaited doAction. Distinct from the existing await-without-try-catch detection because cast is sync.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — confirmed from node_modules/@alicloud/tea-typescript@1.8.0/src/tea.ts cast() function (lines 265-357 of source). Four distinct throw sites: (1) falsy obj, (2) non-object obj, (3) string-type field with wrong primitive, (4) map/array type with wrong collection shape. Postcondition added in contract.yaml as error-cast-validation-failure on function 'cast'."
+    },
+    "resolution": null
   }
 ]
