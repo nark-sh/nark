@@ -51428,5 +51428,85 @@
       }
     },
     "resolution": null
+  },
+  {
+    "id": "concern-20260611-libsql-client-deepen-10",
+    "created_at": "2026-06-11",
+    "source": "deepen",
+    "package": "@libsql/client",
+    "type": "uncovered_function",
+    "status": "in-progress",
+    "description": "Add detection for @libsql/client sync() calls — postcondition sync-wrong-client-type added in depth pass but no scanner rule exists. sync() on http/ws clients throws LibsqlError(SYNC_NOT_SUPPORTED). Detection: await_patterns for .sync() on libsql Client instances.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis (deepen pass 2026-06-11), detection rule needed"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260611-libsql-client-deepen-11",
+    "created_at": "2026-06-11",
+    "source": "deepen",
+    "package": "@libsql/client",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @libsql/client sync() network-failure and client-closed postconditions (sync-network-failure, sync-client-closed). Extends concern-20260611-libsql-client-deepen-10 — all three sync() postconditions share the same await_pattern detection on .sync() calls.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — deepen pass 2026-06-11. Companion to concern-20260611-libsql-client-deepen-10."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260612-vercel-postgres-deepen-1",
+    "created_at": "2026-06-12",
+    "source": "deepen",
+    "package": "@vercel/postgres",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @vercel/postgres sql() called as a regular function (not tagged template) — postcondition sql-incorrect-template-call. Detection: check if sql import from '@vercel/postgres' is called as a function call expression (CallExpression with sql as callee, not as tagged template TaggedTemplateExpression). Throws VercelPostgresError('incorrect_tagged_template_call') synchronously.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — deepen pass 2026-06-12. Source confirmed from dist/chunk-BZ4XJVIW.cjs sqlTemplate() check."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260612-vercel-postgres-deepen-2",
+    "created_at": "2026-06-12",
+    "source": "deepen",
+    "package": "@vercel/postgres",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @vercel/postgres global sql/db used without POSTGRES_URL validation — postcondition sql-missing-connection-string-on-first-use. Detection: check if sql or db is used as a tagged template (TaggedTemplateExpression) without POSTGRES_URL guard earlier in function scope. This is lower-priority than sql-incorrect-template-call since it's an environment config issue, not a code pattern. Consider flagging when sql`...` appears in a function where no process.env.POSTGRES_URL check or createPool() with explicit connectionString is present in the file scope.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — deepen pass 2026-06-12. Source confirmed from dist/chunk-BZ4XJVIW.cjs Proxy lazy-init pattern."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260612-vercel-postgres-deepen-3",
+    "created_at": "2026-06-12",
+    "source": "deepen",
+    "package": "@vercel/postgres",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @vercel/postgres postgresConnectionString() called with invalid type — postcondition postgresconnectionstring-invalid-type. LOW PRIORITY: TypeScript enforces this at compile time for typed callers. Only relevant for dynamically-typed code passing an arbitrary string as the type argument. Detection would require tracking whether the argument is a non-literal (dynamic) expression.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — deepen pass 2026-06-12. Low-priority programming-error guard. TypeScript type system already prevents this for normal callers."
+    },
+    "resolution": null
   }
 ]
