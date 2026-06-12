@@ -2133,6 +2133,56 @@ export class ContractMatcher {
         }
       }
 
+      // cross-fetch: option-aware postcondition routing for { timeout } init option.
+      //
+      // When fetch() is called with { timeout: N } (a node-fetch-specific extension exposed
+      // by cross-fetch on Node.js), prefer the more specific fetch-request-timeout-error
+      // postcondition over the generic network-error one. Both indicate a missing try-catch,
+      // but the timeout variant tells the developer to check error.name === 'FetchError'
+      // && error.type === 'request-timeout', which is distinct from the AbortError path.
+      //
+      // Note: this only routes the request-timeout case. The body-timeout and max-size
+      // variants would require tracking the response variable across calls (data-flow
+      // analysis) — out of scope for option-aware routing at the fetch() call site.
+      //
+      // Evidence: concern-20260612-cross-fetch-deepen-1
+      // Precedent: same shape as the ofetch timeout routing immediately above.
+      if (
+        detection.packageName === "cross-fetch" &&
+        ts.isCallExpression(detection.node) &&
+        !postconditionResolved &&
+        postcondition.id === "network-error"
+      ) {
+        const crossFetchArgs = detection.node.arguments;
+        const crossFetchOptsArg =
+          crossFetchArgs.length >= 2 ? crossFetchArgs[1] : undefined;
+        if (
+          crossFetchOptsArg &&
+          ts.isObjectLiteralExpression(crossFetchOptsArg)
+        ) {
+          let hasTimeoutOption = false;
+          for (const prop of crossFetchOptsArg.properties) {
+            if (
+              ts.isPropertyAssignment(prop) &&
+              ts.isIdentifier(prop.name) &&
+              prop.name.text === "timeout"
+            ) {
+              hasTimeoutOption = true;
+              break;
+            }
+          }
+          if (hasTimeoutOption) {
+            const timeoutSpecific = postconditions.find(
+              (p) => p.id === "fetch-request-timeout-error",
+            );
+            if (timeoutSpecific) {
+              postcondition = timeoutSpecific;
+              postconditionResolved = true;
+            }
+          }
+        }
+      }
+
       // Skip warning-only postconditions that have no `throws` — these are informational
       // return-value risks (e.g., dayjs.format ReDoS) that don't require try-catch handling.
       // Warning postconditions WITH `throws` (e.g., clerk setActive) should still fire.
