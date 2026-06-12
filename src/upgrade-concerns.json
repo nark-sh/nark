@@ -52287,5 +52287,165 @@
       "note": "Proactive — postcondition added via API surface analysis at uuid@14.0.0 deepen pass 2026-06-12. Triggered by bc-version-drift sweep. Detection rule needed (shared with v3 buf-offset concern)."
     },
     "resolution": null
+  },
+  {
+    "id": "concern-20260611-isomorphic-git-deepen-1",
+    "created_at": "2026-06-11",
+    "source": "deepen",
+    "package": "isomorphic-git",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for isomorphic-git.checkout() — postcondition checkout-no-error-handling added in deepen pass 6 but no scanner rule exists. Throws: CheckoutConflictError, CommitNotFetchedError, InternalError, NotFoundError.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface enumeration of isomorphic-git@1.38.4 index.d.ts. Detection rule needed to catch bare-await call sites in production code paths (CI scripts, sync loops, scaffolding tools)."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260611-isomorphic-git-deepen-2",
+    "created_at": "2026-06-11",
+    "source": "deepen",
+    "package": "isomorphic-git",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for isomorphic-git.commit() — postcondition commit-no-error-handling added in deepen pass 6 but no scanner rule exists. Throws: MissingNameError (no author/committer config), MissingParameterError, NoCommitError.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface enumeration of isomorphic-git@1.38.4 index.d.ts. Detection rule needed to catch bare-await call sites in production code paths (CI scripts, sync loops, scaffolding tools)."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260611-isomorphic-git-deepen-3",
+    "created_at": "2026-06-11",
+    "source": "deepen",
+    "package": "isomorphic-git",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for isomorphic-git.add() — postcondition add-no-error-handling added in deepen pass 6 but no scanner rule exists. Throws: NotFoundError (filepath missing), MultipleGitError (parallel batch partial failure).",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface enumeration of isomorphic-git@1.38.4 index.d.ts. Detection rule needed to catch bare-await call sites in production code paths (CI scripts, sync loops, scaffolding tools)."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260611-isomorphic-git-deepen-4",
+    "created_at": "2026-06-11",
+    "source": "deepen",
+    "package": "isomorphic-git",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for isomorphic-git.branch() — postcondition branch-no-error-handling added in deepen pass 6 but no scanner rule exists. Throws: AlreadyExistsError, InvalidRefNameError.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface enumeration of isomorphic-git@1.38.4 index.d.ts. Detection rule needed to catch bare-await call sites in production code paths (CI scripts, sync loops, scaffolding tools)."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260611-isomorphic-git-deepen-5",
+    "created_at": "2026-06-11",
+    "source": "deepen",
+    "package": "isomorphic-git",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for isomorphic-git.tag() — postcondition tag-no-error-handling added in deepen pass 6 but no scanner rule exists. Throws: AlreadyExistsError (release retry), InvalidFilepathError, MissingParameterError, NotFoundError.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface enumeration of isomorphic-git@1.38.4 index.d.ts. Detection rule needed to catch bare-await call sites in production code paths (CI scripts, sync loops, scaffolding tools)."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260611-isomorphic-git-deepen-6",
+    "created_at": "2026-06-11",
+    "source": "deepen",
+    "package": "isomorphic-git",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for isomorphic-git.fastForward() — postcondition fast-forward-no-error-handling added in deepen pass 6 but no scanner rule exists. Throws: FastForwardError (divergence), HttpError, EmptyServerResponseError, UserCanceledError.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface enumeration of isomorphic-git@1.38.4 index.d.ts. Detection rule needed to catch bare-await call sites in production code paths (CI scripts, sync loops, scaffolding tools)."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260611-isomorphic-git-deepen-7",
+    "created_at": "2026-06-11",
+    "source": "deepen",
+    "package": "isomorphic-git",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for isomorphic-git.abortMerge() — postcondition abort-merge-no-error-handling added in deepen pass 6 but no scanner rule exists. Throws: IndexResetError (recovery-path failure).",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface enumeration of isomorphic-git@1.38.4 index.d.ts. Detection rule needed to catch bare-await call sites in production code paths (CI scripts, sync loops, scaffolding tools)."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260611-isomorphic-git-deepen-8",
+    "created_at": "2026-06-11",
+    "source": "deepen",
+    "package": "isomorphic-git",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for isomorphic-git.getRemoteInfo() — postcondition get-remote-info-no-error-handling added in deepen pass 6 but no scanner rule exists. Throws: UrlParseError, UnknownTransportError, HttpError, SmartHttpError, RemoteCapabilityError.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface enumeration of isomorphic-git@1.38.4 index.d.ts. Detection rule needed to catch bare-await call sites in production code paths (CI scripts, sync loops, scaffolding tools)."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260611-isomorphic-git-deepen-9",
+    "created_at": "2026-06-11",
+    "source": "deepen",
+    "package": "isomorphic-git",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for isomorphic-git.addRemote() — postcondition add-remote-no-error-handling added in deepen pass 6 but no scanner rule exists. Throws: AlreadyExistsError, InvalidRefNameError, MissingParameterError.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface enumeration of isomorphic-git@1.38.4 index.d.ts. Detection rule needed to catch bare-await call sites in production code paths (CI scripts, sync loops, scaffolding tools)."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260612-octokit-app-deepen-1",
+    "created_at": "2026-06-12",
+    "source": "deepen",
+    "package": "@octokit/app",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @octokit/app App.getInstallationUrl() — postcondition must-handle-app-metadata-fetch-error added in deepen pass 8 but no scanner rule exists. Throws: RequestError on `GET /app` failure path (401/403/5xx), plain Error('[@octokit/app] unable to fetch metadata for app') when response body is empty. Failure is cached in the App instance's installationUrlBasePromise so it propagates to every subsequent caller.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface enumeration of @octokit/app@16.1.2 dist-types/types.d.ts (GetInstallationUrlInterface) + dist-node/index.js (getInstallationUrlFactory + getInstallationUrlBase). Detection rule needed to catch bare `await app.getInstallationUrl()` in OAuth landing controllers / install-redirect handlers."
+    },
+    "resolution": null
   }
 ]
