@@ -52025,5 +52025,165 @@
         "transitive_coverage_today": "rxjs profile covers firstValueFrom/lastValueFrom/toPromise paths; pure subscribe and pipe(catchError) paths are silent"
       }
     }
+  },
+  {
+    "id": "concern-20260612-modelcontextprotocol-sdk-deepen-25",
+    "created_at": "2026-06-12",
+    "source": "deepen",
+    "package": "@modelcontextprotocol/sdk",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for fetchToken() — new unified OAuth token-fetch helper added in v1.20+ alongside AddClientAuthentication provider extensions. Two postconditions added (fetch-token-missing-params for missing provider hook or authorizationCode; fetch-token-oauth-error-not-handled for InvalidGrantError on refresh). Scanner needs to (a) recognize fetchToken() import from @modelcontextprotocol/sdk/client/auth.js, (b) flag direct calls outside try-catch as a throwing-function pattern. Distinct from exchangeAuthorization/refreshAuthorization detection because fetchToken can be called from machine-to-machine flows that have neither.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis at @modelcontextprotocol/sdk@1.29.0, detection rule needed"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260612-modelcontextprotocol-sdk-deepen-26",
+    "created_at": "2026-06-12",
+    "source": "deepen",
+    "package": "@modelcontextprotocol/sdk",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for discoverOAuthServerInfo() — new unified OAuth discovery helper. One postcondition added (discover-oauth-server-info-fetch-error). Scanner needs to recognize discoverOAuthServerInfo import from @modelcontextprotocol/sdk/client/auth.js and flag calls outside try-catch. Pattern is the same throwing-function-no-try-catch detection as fetchToken but on a different import name.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis at @modelcontextprotocol/sdk@1.29.0, detection rule needed"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260612-modelcontextprotocol-sdk-deepen-27",
+    "created_at": "2026-06-12",
+    "source": "deepen",
+    "package": "@modelcontextprotocol/sdk",
+    "type": "new_pattern",
+    "status": "pending",
+    "description": "Add detection for AsyncGenerator-with-message-type-discrimination pattern — new in experimental.tasks.createMessageStream() and experimental.tasks.elicitInputStream() (and underlying requestStream). Pattern: server.experimental.tasks.createMessageStream(params) returns an AsyncGenerator<ResponseMessage<T>> whose items have message.type in {taskCreated, taskStatus, result, error}. The error-handling contract is: callers MUST either (a) use shared/responseMessage.takeResult() helper which auto-throws on error, or (b) explicitly branch on message.type === error and throw. A for-await loop that only checks message.type === result silently drops error messages. This is structurally different from a simple async-throwing-function pattern — needs a new detector that recognizes the for-await-with-message-type-switch pattern and flags missing error branches.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — novel detection pattern (AsyncGenerator + message-type discrimination). May need to also cover the takeResult() helper as an accepting alternative."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260612-modelcontextprotocol-sdk-deepen-28",
+    "created_at": "2026-06-12",
+    "source": "deepen",
+    "package": "@modelcontextprotocol/sdk",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add capability-precheck detection for createMessageStream(params) with params.tools or params.toolChoice. When the connected client did not advertise sampling.tools capability, createMessageStream throws synchronously inside the generator before any message is yielded. Scanner detection rule: when call site passes a params object literal containing tools or toolChoice properties, flag if no preceding guard on server.getClientCapabilities()?.sampling?.tools exists. This is a sibling pattern to the existing connect/missing-server-protection postconditions but for a different capability key.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added at @modelcontextprotocol/sdk@1.29.0, detection rule needed. Pattern is capability-precheck-missing."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260612-anthropic-sdk-deepen-1",
+    "created_at": "2026-06-12",
+    "source": "deepen",
+    "package": "@anthropic-ai/sdk",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for messages.batches.cancel() called without try-catch. Postcondition batches-cancel-no-try-catch added to contract. Scanner rule: any await client.messages.batches.cancel(<id>) outside a try block (or unhandled .catch()) should fire. Common cleanup path that hits NotFoundError (404) in bulk-cancel loops — silent loop-killer.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis. Likely caught by existing 'await without try-catch' detector; verify scope.member chain detection works for messages.batches.cancel (3-level deep)."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260612-anthropic-sdk-deepen-2",
+    "created_at": "2026-06-12",
+    "source": "deepen",
+    "package": "@anthropic-ai/sdk",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for messages.batches.delete() called without try-catch. Postcondition batches-delete-no-try-catch added. Scanner rule: any await client.messages.batches.delete(<id>) outside try-catch should fire, especially in deletion-worker loops where a single 400 (in-progress batch) kills GDPR/CCPA compliance jobs.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis. Verify 3-level member-access chain detection."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260612-anthropic-sdk-deepen-3",
+    "created_at": "2026-06-12",
+    "source": "deepen",
+    "package": "@anthropic-ai/sdk",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for messages.batches.delete() called without first verifying processing_status === 'ended' (postcondition batches-delete-without-prior-cancel). Scanner rule: flag delete() calls where the same id was not preceded in the same function body by a retrieve()/cancel() + status check. This is a programmer-error pattern (per-Anthropic docs: 'Message Batches can only be deleted once they've finished processing'), not a transient failure.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — novel pattern requiring intra-function state tracking on batch IDs. More complex than simple try-catch detection — may need data-flow analysis or be marked as scanner-out-of-scope and addressed via documentation only."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260612-anthropic-sdk-deepen-4",
+    "created_at": "2026-06-12",
+    "source": "deepen",
+    "package": "@anthropic-ai/sdk",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for messages.batches.results() awaited without try-catch (postcondition batches-results-no-try-catch). TWO call sites need detection: (a) the initial await on results() can throw APIError; (b) the for-await iteration over the JSONLDecoder can throw on connection drop. Both need separate try-catch blocks. Scanner rule should fire when either is unwrapped.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — two-stage error surface (fetch + stream). Existing scanner likely catches the await but may miss the for-await iteration unwrapping."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260612-anthropic-sdk-deepen-5",
+    "created_at": "2026-06-12",
+    "source": "deepen",
+    "package": "@anthropic-ai/sdk",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for for-await over batches.results() accessing item.result.message without narrowing on item.result.type (postcondition batches-results-individual-not-checked). MessageBatchIndividualResponse is a discriminated union (succeeded | errored | canceled | expired) and runtime access to .result.message is undefined for non-succeeded branches. Silent data loss: RAG ingestion pipelines miss errored/canceled documents.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — discriminated-union narrowing detection. Similar pattern to existing 'no instanceof check on caught error' detector — may be implementable as a variant of that rule."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260612-anthropic-sdk-deepen-6",
+    "created_at": "2026-06-12",
+    "source": "deepen",
+    "package": "@anthropic-ai/sdk",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add SYNCHRONOUS-call detection for beta.webhooks.unwrap() outside try-catch (postcondition webhooks-unwrap-no-try-catch). Current V2 scanner detects awaited calls; this method is intentionally synchronous and throws three distinct error types (plain Error for missing key, WebhookVerificationError, SyntaxError from JSON.parse). Security-critical: forged webhooks pass through if errors are silently caught and 200'd back to Anthropic.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — expands scanner from async-only to selected synchronous APIs marked security-critical in their contract. Standard webhook pattern across the npm ecosystem; rule should be reusable for stripe.webhooks.constructEvent and similar."
+    },
+    "resolution": null
   }
 ]
