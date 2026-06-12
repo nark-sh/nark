@@ -52203,5 +52203,53 @@
       "note": "Reproduced in fixture; pattern matches vendure admin-ui main.ts:13 and ui-devkit scaffold/src/main.ts:13. Identical to a class of FPs that affects ANY promise-returning method called inside a .then callback. Fixture removed for now (proper-error-handling.ts:bootstrapPreloadThenCatch) to avoid contaminating fixture precision; restore once the scanner detects this pattern."
     },
     "resolution": null
+  },
+  {
+    "id": "concern-20260612-uuid-deepen-1",
+    "created_at": "2026-06-12",
+    "source": "deepen",
+    "package": "uuid",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for uuid.stringify() — postcondition stringify-invalid-bytes added in depth pass but no scanner rule exists. Pattern to detect: stringify(bytes) called without try-catch when bytes come from an external source (DB column, network, mock fixture). Throws TypeError('Stringified UUID is invalid') if the byte array does not encode a valid RFC 4122 UUID. Synchronous — scanner needs to handle non-awaited call sites and look for the lexical pattern stringify(X) where X is not the return value of parse() in the same scope. Common in binary DB drivers reading BINARY(16) columns that may contain non-UUID data.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — postcondition added via API surface analysis at uuid@14.0.0 deepen pass 2026-06-12. Detection rule needed."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260612-uuid-deepen-2",
+    "created_at": "2026-06-12",
+    "source": "deepen",
+    "package": "uuid",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for uuid.v3(name, namespace, buf, offset) — postcondition v3-buffer-offset-out-of-bounds (new RangeError in uuid@14.0.0) added but no scanner rule exists. Pattern to detect: v3() called with 4 arguments (i.e., explicit buf+offset) without try-catch, particularly when the buf size or offset calculation is not statically verifiable. Throws RangeError('UUID byte range X:Y is out of buffer bounds'). Less common path than the default v3(name, namespace) call — but high impact when it does fire because the RangeError class is distinct from the existing TypeError path and code that only catches TypeError will miss it.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — postcondition added via API surface analysis at uuid@14.0.0 deepen pass 2026-06-12. Triggered by bc-version-drift sweep finding new RangeError class in v14. Detection rule needed."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260612-uuid-deepen-3",
+    "created_at": "2026-06-12",
+    "source": "deepen",
+    "package": "uuid",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for uuid.v5(name, namespace, buf, offset) — postcondition v5-buffer-offset-out-of-bounds (new RangeError in uuid@14.0.0) added but no scanner rule exists. Identical detection requirements to concern-20260612-uuid-deepen-2 (v3 buf-offset) since both share the v35() internal implementation. The two concerns can share one scanner rule keyed on (function in [v3, v5] AND argument count == 4).",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — postcondition added via API surface analysis at uuid@14.0.0 deepen pass 2026-06-12. Triggered by bc-version-drift sweep. Detection rule needed (shared with v3 buf-offset concern)."
+    },
+    "resolution": null
   }
 ]
