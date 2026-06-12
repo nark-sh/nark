@@ -52800,7 +52800,7 @@
       "violation_count": 0,
       "note": "Proactive. Contract added via API surface analysis, detection rule may already exist via shared postcondition id must-handle-exit-prompt-error."
     },
-    "resolution": "Auto-satisfied by existing contract-driven detector. The scanner matches by postcondition ID and import source, not by function name list — editor() inherits must-handle-exit-prompt-error and must-handle-abort-prompt-error from the shared @inquirer/core createPrompt wrapper. Ground-truth fixture at nark-corpus-pro/packages/@inquirer/prompts/fixtures/ground-truth.ts:51 already contains a SHOULD_FIRE annotation for editor() without try/catch, and all 15 tests in src/v2/fixtures/@inquirer__prompts.ground-truth.test.ts pass. No scanner code change required."
+    "resolution": "Auto-satisfied by existing contract-driven detector. The scanner matches by postcondition ID and import source, not by function name list \u2014 editor() inherits must-handle-exit-prompt-error and must-handle-abort-prompt-error from the shared @inquirer/core createPrompt wrapper. Ground-truth fixture at nark-corpus-pro/packages/@inquirer/prompts/fixtures/ground-truth.ts:51 already contains a SHOULD_FIRE annotation for editor() without try/catch, and all 15 tests in src/v2/fixtures/@inquirer__prompts.ground-truth.test.ts pass. No scanner code change required."
   },
   {
     "id": "concern-20260612-inquirer-prompts-deepen-2",
@@ -52833,5 +52833,37 @@
       "note": "New synchronous throw pattern. Distinct from the Promise-rejection postconditions already detected. Postcondition id: must-handle-validation-error-no-selectable-choices."
     },
     "resolution": "Deferred (not rejected on merit). Implementing detection for synchronous throws from inside useMemo bounds requires a new detector class distinct from the existing await + try/catch reachability pipeline. The ground-truth fixture at nark-corpus-pro/packages/@inquirer/prompts/fixtures/ground-truth.ts:68-84 already documents this PENDING DETECTOR pattern with no SHOULD_FIRE annotation, deliberately deferring implementation. Evidence is zero real-world repos (proactive only). Per the depth-over-breadth feedback rule and bc-fp-harvester verification policy, a new architectural detector should be motivated by FP-harvester corpus evidence or a design-partner request rather than reactively from deepen output with zero call-site evidence. Postcondition remains in contract.yaml so the pattern is documented for future implementation; detector tracked as scanner-upgrade backlog. Re-open when evidence arrives."
+  },
+  {
+    "id": "concern-20260612-alicloud-openapi-client-deepen-1",
+    "created_at": "2026-06-12",
+    "source": "deepen",
+    "package": "@alicloud/openapi-client",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for InvalidCredentials throw path on all 6 network methods (callApi, execute, doRequest, doRPCRequest, doROARequest, doROARequestWithForm). Source confirms each method throws $tea.newError({code: 'InvalidCredentials'}) when this._credential is unset and authType requires auth. Scanner needs to flag bare-await on these methods without try-catch as a distinct InvalidCredentials risk separate from the existing 4xx/5xx and retries-exhausted patterns.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 postcondition added via API surface analysis (dist/client.js lines ~364, ~562, ~761, ~987, ~1295)"
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260612-alicloud-openapi-client-deepen-2",
+    "created_at": "2026-06-12",
+    "source": "deepen",
+    "package": "@alicloud/openapi-client",
+    "type": "uncovered_pattern",
+    "status": "pending",
+    "description": "Add detection for silent-empty-string return on credential getter methods (getAccessKeyId, getAccessKeySecret, getSecurityToken, getBearerToken, getType). When this._credential is unset, these methods return '' silently rather than throwing. Code that does `const ak = await client.getAccessKeyId(); doStuff(ak)` without a `\\!ak` truthiness check downstream produces InvalidSignature errors at request-time with no clear root-cause trail. Scanner needs heuristic to flag credential-getter results used without truthiness check.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 silent-failure mode confirmed from dist/client.js lines 1292-1346 (all five credential getters return '' when isUnset(this._credential))"
+    },
+    "resolution": null
   }
 ]
