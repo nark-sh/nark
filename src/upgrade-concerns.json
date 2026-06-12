@@ -53593,7 +53593,7 @@
     "source": "deepen",
     "package": "drizzle-orm",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for db.query.<table>.findFirst() — relational query API; resolves to T | undefined when no row matches. Postcondition findfirst-driver-error (try-catch around the awaited call) is the primary scanner-detectable surface. The deeper findfirst-undefined-on-missing-row postcondition requires data-flow analysis of the result var (was it null-checked before property access?) which is a future analyzer capability.",
     "evidence": {
       "repos": [],
@@ -53601,7 +53601,7 @@
       "violation_count": 0,
       "note": "Proactive — postcondition added in deepen pass 8 (2026-06-12). Fixture at nark-corpus/packages/drizzle-orm/fixtures/ground-truth.ts findFirstNoCatch vs findFirstWithCatch."
     },
-    "resolution": null
+    "resolution": "Scanner already detects db.query.<table>.findFirst() via PropertyChainDetector. Original ground-truth fixture used `declare const dbWithSchema: typeof db & {...}` which the InstanceTracker cannot resolve back to drizzle-orm (no factory call, no type annotation match for DrizzleDB/PgDatabase). Updated fixture to call db.query.users.findFirst() directly on the tracked db instance with a @ts-ignore for the missing relational-schema typing. Postcondition findfirst-undefined-on-missing-row fires (more salient than findfirst-driver-error — the contract orders it first because the undefined-row bug is the more common production failure). Test passes."
   },
   {
     "id": "concern-20260612-drizzle-orm-deepen-2",
@@ -53609,7 +53609,7 @@
     "source": "deepen",
     "package": "drizzle-orm",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for db.query.<table>.findMany() — relational query API; resolves to T[] (empty array on no match). The findmany-driver-error postcondition requires try-catch around the awaited call. The findmany-empty-array-on-stale-filter postcondition would require checking that result.length is inspected before downstream aggregation — this is a control-flow/data-flow analysis future capability.",
     "evidence": {
       "repos": [],
@@ -53617,7 +53617,7 @@
       "violation_count": 0,
       "note": "Proactive — postcondition added in deepen pass 8 (2026-06-12). Fixture at nark-corpus/packages/drizzle-orm/fixtures/ground-truth.ts findManyNoCatch vs findManyWithCatch."
     },
-    "resolution": null
+    "resolution": "Scanner already detects db.query.<table>.findMany() via PropertyChainDetector. Same fixture issue as deepen-1 — declare const dbWithSchema shim was not tracked by InstanceTracker. Updated fixture to call db.query.users.findMany() directly. Postcondition findmany-driver-error fires. Test passes."
   },
   {
     "id": "concern-20260612-drizzle-orm-deepen-3",
@@ -53625,7 +53625,7 @@
     "source": "deepen",
     "package": "drizzle-orm",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for db.batch() — D1/LibSQL/Neon atomic batched statements. Postcondition batch-statement-failure-rolls-back-all requires try-catch around the awaited call. The batch-unsupported-on-non-batchable-driver postcondition requires detecting batch() on a db typed as a non-batchable driver — type-aware which the scanner already partially supports via type_names detection. Consider extending type detection to flag batch() on DrizzleDB/PgDatabase types without the batch method.",
     "evidence": {
       "repos": [],
@@ -53633,6 +53633,6 @@
       "violation_count": 0,
       "note": "Proactive — postcondition added in deepen pass 8 (2026-06-12). Fixture at nark-corpus/packages/drizzle-orm/fixtures/ground-truth.ts batchNoCatch vs batchWithCatch."
     },
-    "resolution": null
+    "resolution": "Scanner already detects db.batch() via ThrowingFunctionDetector (depth-1 chain on a tracked drizzle-orm instance). Same fixture issue as deepen-1/2 — declare const dbBatchable shim was not tracked. Updated fixture to call db.batch() directly. Postcondition batch-statement-failure-rolls-back-all fires. Test passes."
   }
 ]
