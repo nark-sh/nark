@@ -8,11 +8,16 @@
  * Postcondition IDs from nark-corpus-pro/packages/@alicloud/tea-typescript/contract.yaml:
  *   error-transport-failure        (doAction throws on network/timeout/TLS)
  *   error-body-stream-failure      (readBytes throws on mid-body stream error)
+ *   error-cast-validation-failure  (cast throws sync on type-mismatch / non-Map input)
  *
  * Key behaviors under test:
  *   - await $tea.doAction(...) / doAction(...) without try/catch → SHOULD_FIRE
  *   - await $tea.doAction(...) inside try/catch or with .catch() chain → SHOULD_NOT_FIRE
  *   - Canonical openapi-client retry-loop pattern → SHOULD_NOT_FIRE
+ *   - $tea.cast(...) outside try/catch → SHOULD_FIRE (sync throw, isInTryCatch gate)
+ *   - $tea.cast(...) inside try/catch with doAction → SHOULD_NOT_FIRE (canonical pattern)
+ *   - $tea.cast(...) after .catch() chain on doAction → SHOULD_FIRE (.catch on awaited
+ *     Promise does NOT protect the subsequent sync cast call site)
  *
  * NOTE: readBytes() is contracted but the scanner does not yet detect method
  * calls on Response instances (upgrade-concerns

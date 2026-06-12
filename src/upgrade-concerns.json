@@ -52872,7 +52872,7 @@
     "source": "deepen",
     "package": "@alicloud/tea-typescript",
     "type": "uncovered_pattern",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for synchronous throw from $tea.cast() at the deserialization boundary. cast() is sync: it throws Error('can not cast to Map') or Error('type of <field> is mismatch, expect <type>, but <typeof value>') directly. The throw escapes any .then().catch() chain on the preceding doAction Promise. Pattern that needs flagging: `const r = await doAction(req); const result = $tea.cast(toMap(r), new Model());` outside a try/catch — common in per-service Alibaba Cloud SDK call sites. Scanner needs to recognize synchronous cast() calls as throw-prone and require their try/catch scope to include the cast call site, not just the awaited doAction. Distinct from the existing await-without-try-catch detection because cast is sync.",
     "evidence": {
       "repos": [],
@@ -52880,6 +52880,6 @@
       "violation_count": 0,
       "note": "Proactive — confirmed from node_modules/@alicloud/tea-typescript@1.8.0/src/tea.ts cast() function (lines 265-357 of source). Four distinct throw sites: (1) falsy obj, (2) non-object obj, (3) string-type field with wrong primitive, (4) map/array type with wrong collection shape. Postcondition added in contract.yaml as error-cast-validation-failure on function 'cast'."
     },
-    "resolution": null
+    "resolution": "No scanner code change required — the existing detection pipeline already handles synchronous cast() calls correctly. ThrowingFunctionDetector.handlePropertyAccessCall resolves $tea.cast as packageName='@alicloud/tea-typescript', functionName='cast' via the namespace import. The contract has no require_await_detection flag so sync calls are not filtered. contract-matcher.ts gates firing on isInTryCatch(detection.node) which is structural and identical for sync vs async throwing calls. Verified by adding SHOULD_FIRE / SHOULD_NOT_FIRE annotations to the three cast() functions in nark-corpus-pro/packages/@alicloud/tea-typescript/fixtures/ground-truth.ts: bareCastAfterDoAction (inside try/catch → SHOULD_NOT_FIRE), castOutsideTryBlock (outside try → SHOULD_FIRE error-cast-validation-failure), castWithCatchChainOnDoAction (.catch() chain does not protect sync cast → SHOULD_FIRE error-cast-validation-failure). All 13 ground-truth tests for @alicloud/tea-typescript pass (was 10 — gained 3 cast-specific cases). Concern's premise that sync detection needed new code was incorrect — the scanner architecture already covers it; only the regression-test annotations were missing."
   }
 ]
