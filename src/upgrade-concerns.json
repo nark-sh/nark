@@ -51999,6 +51999,38 @@
     "implemented_at": "2026-06-11"
   },
   {
+    "id": "concern-20260611-resend-deepen-7",
+    "created_at": "2026-06-11",
+    "source": "deepen",
+    "package": "resend",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for resend.events.send() — triggers a named automation event. Returns { data, error }. Silent failure means the trigger is lost and the contact is silently dropped out of the automation funnel with no downstream signal (drip campaigns simply never fire). Scanner should detect events.send() calls without result.error check (same heuristic as emails-send detection).",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis (deepen-stream-1 pass 7). v6+ Automations product API; not seen in scan corpus yet because the Automations product is still ramping up adoption."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260611-resend-deepen-8",
+    "created_at": "2026-06-11",
+    "source": "deepen",
+    "package": "resend",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for resend.automations.stop() — halts a running automation. Returns { data, error }. Silent failure during incident response is uniquely dangerous: the offending automation continues to fire while the operator believes it is halted. Two-part scanner concern: (a) missing result.error check, AND (b) successful response should verify data.status === 'disabled' before declaring the stop successful — a successful HTTP response with status='active' (validation_error path) is functionally a failure. The basic part (a) reuses the standard { data, error } detection; part (b) is a richer postcondition check.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis (deepen-stream-1 pass 7). v6+ Automations control-plane operation; critical for incident response runbooks."
+    },
+    "resolution": null
+  },
+  {
     "id": "concern-20260611-observable-error-handler-detection",
     "created_at": "2026-06-11",
     "source": "onboarding-skip",
