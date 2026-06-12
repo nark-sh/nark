@@ -53031,7 +53031,7 @@
     "source": "deepen",
     "package": "@alicloud/dysmsapi20170525",
     "type": "inherited_contract_coverage",
-    "status": "pending",
+    "status": "rejected",
     "description": "The @alicloud/dysmsapi20170525 client exposes 136 async methods (68 WithOptions + 68 shorthand variants). All 130 uncovered methods inherit the IDENTICAL error contract from @alicloud/openapi-core's callApi() — ClientError / ServerError / ThrottlingError / AlibabaCloudError + ValidateError from request.validate() + network errors (ECONNREFUSED, ETIMEDOUT, ENOTFOUND). Currently the scanner only detects the 6 contracted send-* methods. Consider a generic detector that catches ANY awaited method call on a Dysmsapi20170525 instance (or any Alibaba Cloud OpenApi-derived client) missing try/catch — would cover the full surface plus future Alibaba Cloud SDK additions without per-method rules. Pattern: `import Client from '@alicloud/<service>20*'` → any `await clientInstance.<anyMethod>(...)` call inherits the throw contract.",
     "evidence": {
       "repos": [
@@ -53043,6 +53043,6 @@
       "violation_count": 0,
       "note": "Proactive — all real-world adoption observed in corpus uses the 6 contracted methods (sendSms variants). The 130 uncovered methods (template/sign/short-url management, queries, lists) have ZERO observed adoption in the 6200+ test-repo corpus as of 2026-06-12. Inherited-contract pattern means a single generic detector would close the entire @alicloud/* family in one upgrade."
     },
-    "resolution": null
+    "resolution": "Rejected: insufficient empirical evidence for a generic-detector scanner upgrade. The concern proposes a major architectural change (detect ANY awaited method on a Dysmsapi20170525 instance), but violation_count is 0 across the 6200+ test-repo corpus, and all observed real-world adoption uses the 6 already-contracted send-* methods (sendSms, sendSmsWithOptions, sendBatchSms, sendBatchSmsWithOptions, sendCardSms, sendCardSmsWithOptions). Per scanner-upgrade rejection rules (< 3 violations + evidence-based scanner upgrades only) and the depth-over-breadth memo (empirical FPs from real scans are the only justification for scanner upgrades), the cost/benefit does not favor a generic detector when (a) no real adoption exists for the other 130 methods, (b) generic await-detection has high FP risk on validation helpers / getters / sync-wrapped utilities, and (c) the inherited-contract pattern is already captured in @alicloud/openapi-client contract for direct callers. If future corpus scans surface real violations on uncovered Dysmsapi methods, file specific per-method concerns then. The inherited-contract observation has been preserved here for traceability."
   }
 ]
