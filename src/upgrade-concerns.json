@@ -53281,5 +53281,160 @@
       "note": "Proactive (deepen-stream-1 pass 6) — degraded_service pattern documented in wiki. Distinct from existing Statement.finalize-not-called concern because the trigger is Statement.get specifically."
     },
     "resolution": null
+  },
+  {
+    "id": "concern-20260612-umami-node-onboard-1",
+    "created_at": "2026-06-12",
+    "source": "onboard",
+    "package": "@umami/node",
+    "type": "factory_function_instance_tracking",
+    "status": "in-progress",
+    "description": "Add detection for `const client = getUmami(); await client.track(...)` pattern where `getUmami()` is a local factory function whose return is `new Umami(...)`. The analyzer currently catches `const client = new Umami(...); await client.track(...)` directly but not the one-hop factory indirection — the dominant pattern in real codebases (verified in test-repos/.../labring__sealos/frontend/desktop/src/services/backend/tracking/index.ts:3-8 and the @umami/node fixtures/instance-usage.ts). The scanner should follow function-return type inference one hop deep so arrow-function factories returning `new Umami(...)` propagate Umami flow-typing to their callers.",
+    "evidence": {
+      "repos": [
+        "labring/sealos"
+      ],
+      "scan_file": null,
+      "violation_count": 0,
+      "fix_target": "scanner",
+      "details": {
+        "demonstration_fixture": "nark-corpus-pro/packages/@umami/node/fixtures/instance-usage.ts (functions trackOnInstance, trackInstanceFireAndForget, identifyOnInstance, identifyOnInstanceFireAndForget, sendOnInstance — all should fire but do not)",
+        "demonstration_callsite": "test-repos/@alicloud-captcha20230305/labring__sealos/frontend/desktop/src/services/backend/tracking/index.ts:13-23 (trackSignUp uses getUmami() factory then .track().catch() — correct here, but the unsafe variant would also be missed)",
+        "ground_truth_pattern_that_works": "nark-corpus-pro/packages/@umami/node/fixtures/ground-truth.ts:96-103 (direct `const client = new Umami(...); await client.track(...)` does fire correctly)"
+      },
+      "note": "Onboard-stream-7 surfaced this during @umami/node onboarding (partner-coverage mode for merged-oss-sealos). The direct-instantiation pattern is covered; only the factory-function indirection is missed. Low priority — the safe-baseline patterns (.catch() and try-catch) still work through the factory; the gap is unsafe-baseline detection."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260612-umami-node-onboard-2",
+    "created_at": "2026-06-12",
+    "source": "onboard",
+    "package": "@umami/node",
+    "type": "no_arg_constructor_then_init_tracking",
+    "status": "pending",
+    "description": "Add detection for `const x = new Umami(); x.init({...}); await x.track(...)` (no-arg constructor + separate init() call). Verified in real-world repo homarr-labs/homarr packages/analytics/src/send-server-analytics.ts:59-103. `callSiteCount` shows 2 in the scan output's package_discovery, but 0 violations are emitted — the bare `await umamiInstance.track(...)` at line 103 should fire `track-no-try-catch`. Likely cause: the analyzer's Umami-instance flow-type binding requires constructor args to register the type; the no-arg form bypasses the binding. Detection.class_names: ['Umami'] (already in contract) does not solve this — needs zero-arg constructor recognition as well.",
+    "evidence": {
+      "repos": ["homarr-labs/homarr"],
+      "scan_file": "work-packages/@umami__node/real-world-scans/homarr-scan-v3.json",
+      "violation_count": 0,
+      "fix_target": "scanner",
+      "details": {
+        "demonstration_callsite": "corpus-builder/active/homarr-labs__homarr/packages/analytics/src/send-server-analytics.ts:103 (await umamiInstance.track('server-analytics-v2', analyticsData) — outside try-catch, fetch rejection escapes)",
+        "scan_evidence": "package_discovery.packages.@umami/node.callSiteCount=2 but callsites_by_package={} and violations_by_package={}"
+      },
+      "note": "Onboard-stream-7 surfaced this during @umami/node real-world Phase 7/8 scan. Distinct from concern-1 (which is the factory-function indirection). Both block real-world @umami/node violations from reaching users."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260612-umami-node-onboard-3",
+    "created_at": "2026-06-12",
+    "source": "onboard",
+    "package": "@umami/node",
+    "type": "default_export_reexport_indirection",
+    "status": "pending",
+    "description": "Add detection for `import umami from './local-services/umami'` where the local module does `import umami from '@umami/node'; export default umami;` — i.e. a one-hop default-export re-export of the @umami/node default singleton. The analyzer's import-resolution does not chase default-export re-exports back to the originating @umami/node import. Verified in corpus-builder/active/sjdonado__idonthavespotify/src/services/umami.ts (re-export) → src/index.ts:203 (calls umami.track without .catch — should fire track-no-try-catch but does not).",
+    "evidence": {
+      "repos": ["sjdonado/idonthavespotify"],
+      "scan_file": "work-packages/@umami__node/real-world-scans/idonthavespotify-scan-v3.json",
+      "violation_count": 0,
+      "fix_target": "scanner",
+      "details": {
+        "demonstration_reexport_module": "corpus-builder/active/sjdonado__idonthavespotify/src/services/umami.ts (imports umami default from @umami/node, exports it as default)",
+        "demonstration_callsite": "corpus-builder/active/sjdonado__idonthavespotify/src/index.ts:203 (umami.track({...}) — fire-and-forget, no .catch, should fire violation)",
+        "general_pattern": "This is a generic scanner gap that affects ANY package whose canonical usage is `import x from '<pkg>'` and then re-exported through a local config/wrapper module. @umami/node is one instance; the gap is broader."
+      },
+      "note": "Onboard-stream-7 surfaced this during @umami/node real-world Phase 7/8 scan. Not @umami/node-specific — broader scanner gap. Likely affects axios-default, posthog-default, openai-default, anthropic-default, etc. when wrapped in user-side singleton modules."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260612-bigquery-deepen-1",
+    "created_at": "2026-06-12",
+    "source": "deepen",
+    "package": "@google-cloud/bigquery",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for bigquery.createQueryJob() — synchronous-throw inside async (missing query string, invalid destination) AND ApiError rejections (rate limit, 409 duplicate jobId). Scanner needs to detect await on createQueryJob() that lacks try-catch.",
+    "evidence": {
+      "repos": [
+        "growthbook"
+      ],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — postcondition added via API surface analysis; growthbook BigQuery.ts:81 uses pattern but is wrapped in caller-level handler."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260612-bigquery-deepen-2",
+    "created_at": "2026-06-12",
+    "source": "deepen",
+    "package": "@google-cloud/bigquery",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for job.cancel() — surface as Job class method that throws on 404/403/location-mismatch. Real-world TP: growthbook BigQuery.ts:67 calls await job.cancel() without try-catch.",
+    "evidence": {
+      "repos": [
+        "growthbook"
+      ],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — confirmed TP in growthbook integrations/BigQuery.ts:67. Scanner should detect Job.cancel() method on the Job class returned by createQueryJob/createLoadJob/etc."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260612-bigquery-deepen-3",
+    "created_at": "2026-06-12",
+    "source": "deepen",
+    "package": "@google-cloud/bigquery",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for table.load() — async method that creates a load job internally and waits for completion. Errors surface from job execution (schema mismatch, source-not-found, quota). Distinct from streaming insert path.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — common GCS-to-BigQuery ingestion path. Schema-mismatch is silent data loss when unhandled."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260612-bigquery-deepen-4",
+    "created_at": "2026-06-12",
+    "source": "deepen",
+    "package": "@google-cloud/bigquery",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for table.setMetadata() — async method that mutates table schema/labels. ETag 412 conflicts and 400 invalid-schema-change errors. Real-world: nango data-ingestion/lib/index.ts:133.",
+    "evidence": {
+      "repos": [
+        "nango"
+      ],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — nango wraps the call (correct); inline callers in dashboards/admin tools commonly miss the 412 ETag race."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260612-bigquery-deepen-5",
+    "created_at": "2026-06-12",
+    "source": "deepen",
+    "package": "@google-cloud/bigquery",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for dataset.exists() / table.exists() — async ServiceObject method that returns Promise<[boolean]> on 404 BUT REJECTS on 403/5xx. Common misuse: `if (!exists) create()` misses the error path. Real-world: nango data-ingestion/lib/index.ts:108, 116.",
+    "evidence": {
+      "repos": [
+        "nango"
+      ],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — ServiceObject.exists() inherited from @google-cloud/common. Same pattern applies to Dataset, Table, Model, Routine. Scanner detection should target the exists() method on any class with class_names matching the BigQuery class hierarchy."
+    },
+    "resolution": null
   }
 ]
