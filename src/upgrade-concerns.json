@@ -53114,5 +53114,172 @@
       "note": "Proactive — newer createUpload API. Requires control-object lifecycle tracking; non-trivial scanner enhancement."
     },
     "resolution": "Deferred: control-object lifecycle tracking is the highest-effort of the four concerns. Requires (a) factory-destructure of createUpload (the concern -2/-3 blocker), (b) tracking that the Promise resolution flows into a typed control object, (c) recognizing controls.done() as a chained-await method whose Promise rejects with the upload-effect error union (UploadThingError | UploadAbortedError | UploadPausedError). Zero corpus evidence (newer createUpload API, narrow adoption). Per scanner-upgrade rules (evidence-based + <3 violations threshold), defer until real-world adoption surfaces the FP/FN pattern. The contract postcondition keeps the surface documented; the fixture carries // VIOLATION markers so a future detector can ground-truth against it."
+  },
+  {
+    "id": "concern-20260612-isomorphic-git-deepen-9",
+    "created_at": "2026-06-12",
+    "source": "deepen",
+    "package": "isomorphic-git",
+    "type": "uncovered_function",
+    "status": "implemented",
+    "description": "Add detection for isomorphic-git.addNote() — postcondition add-note-no-error-handling added in pass 5 (deepen-stream-2, 2026-06-12) but no scanner rule exists yet. Detection hint: AlreadyExistsError + MissingNameError detection on chained note-management calls.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis of isomorphic-git@1.38.4. Function is auto-detected by ThrowingFunctionDetector when called as `git.addNote()` because it's an exported async function — this concern documents the postcondition for traceability/regression-gate, not a detection gap. Promote to detection-gap status only if scan corpus shows the postcondition silently missing real-world violations."
+    },
+    "resolution": "Postconditions for git.addNote() were added to nark-corpus-pro/packages/isomorphic-git/contract.yaml in deepen-stream pass 5. Scanner detects these calls via generic property-chain detection (no per-package plugin needed). Verified by running src/v2/fixtures/isomorphic-git.ground-truth.test.ts: all 63 tests pass, including the 7 new SHOULD_FIRE annotations for the deepen-pass-5 functions. No scanner code changes required — the contract+fixture additions are sufficient.",
+    "implemented_at": "2026-06-12"
+  },
+  {
+    "id": "concern-20260612-isomorphic-git-deepen-10",
+    "created_at": "2026-06-12",
+    "source": "deepen",
+    "package": "isomorphic-git",
+    "type": "uncovered_function",
+    "status": "implemented",
+    "description": "Add detection for isomorphic-git.deleteRef() — postcondition delete-ref-no-error-handling added in pass 5 (deepen-stream-2, 2026-06-12) but no scanner rule exists yet. Detection hint: lock-contention error detection on packed-refs rewrite path.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis of isomorphic-git@1.38.4. Function is auto-detected by ThrowingFunctionDetector when called as `git.deleteRef()` because it's an exported async function — this concern documents the postcondition for traceability/regression-gate, not a detection gap. Promote to detection-gap status only if scan corpus shows the postcondition silently missing real-world violations."
+    },
+    "resolution": "Postconditions for git.deleteRef() were added to nark-corpus-pro/packages/isomorphic-git/contract.yaml in deepen-stream pass 5. Scanner detects these calls via generic property-chain detection (no per-package plugin needed). Verified by running src/v2/fixtures/isomorphic-git.ground-truth.test.ts: all 63 tests pass, including the 7 new SHOULD_FIRE annotations for the deepen-pass-5 functions. No scanner code changes required — the contract+fixture additions are sufficient.",
+    "implemented_at": "2026-06-12"
+  },
+  {
+    "id": "concern-20260612-isomorphic-git-deepen-11",
+    "created_at": "2026-06-12",
+    "source": "deepen",
+    "package": "isomorphic-git",
+    "type": "uncovered_function",
+    "status": "implemented",
+    "description": "Add detection for isomorphic-git.deleteRemote() — postcondition delete-remote-no-error-handling added in pass 5 (deepen-stream-2, 2026-06-12) but no scanner rule exists yet. Detection hint: config-write contention detection with silent-no-op-on-missing-remote awareness.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis of isomorphic-git@1.38.4. Function is auto-detected by ThrowingFunctionDetector when called as `git.deleteRemote()` because it's an exported async function — this concern documents the postcondition for traceability/regression-gate, not a detection gap. Promote to detection-gap status only if scan corpus shows the postcondition silently missing real-world violations."
+    },
+    "resolution": "Postconditions for git.deleteRemote() were added to nark-corpus-pro/packages/isomorphic-git/contract.yaml in deepen-stream pass 5. Scanner detects these calls via generic property-chain detection (no per-package plugin needed). Verified by running src/v2/fixtures/isomorphic-git.ground-truth.test.ts: all 63 tests pass, including the 7 new SHOULD_FIRE annotations for the deepen-pass-5 functions. No scanner code changes required — the contract+fixture additions are sufficient.",
+    "implemented_at": "2026-06-12"
+  },
+  {
+    "id": "concern-20260612-isomorphic-git-deepen-12",
+    "created_at": "2026-06-12",
+    "source": "deepen",
+    "package": "isomorphic-git",
+    "type": "uncovered_function",
+    "status": "implemented",
+    "description": "Add detection for isomorphic-git.deleteTag() — postcondition delete-tag-no-error-handling added in pass 5 (deepen-stream-2, 2026-06-12) but no scanner rule exists yet. Detection hint: packed-refs lock detection (mirrors deleteRef pattern).",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis of isomorphic-git@1.38.4. Function is auto-detected by ThrowingFunctionDetector when called as `git.deleteTag()` because it's an exported async function — this concern documents the postcondition for traceability/regression-gate, not a detection gap. Promote to detection-gap status only if scan corpus shows the postcondition silently missing real-world violations."
+    },
+    "resolution": "Postconditions for git.deleteTag() were added to nark-corpus-pro/packages/isomorphic-git/contract.yaml in deepen-stream pass 5. Scanner detects these calls via generic property-chain detection (no per-package plugin needed). Verified by running src/v2/fixtures/isomorphic-git.ground-truth.test.ts: all 63 tests pass, including the 7 new SHOULD_FIRE annotations for the deepen-pass-5 functions. No scanner code changes required — the contract+fixture additions are sufficient.",
+    "implemented_at": "2026-06-12"
+  },
+  {
+    "id": "concern-20260612-isomorphic-git-deepen-13",
+    "created_at": "2026-06-12",
+    "source": "deepen",
+    "package": "isomorphic-git",
+    "type": "uncovered_function",
+    "status": "implemented",
+    "description": "Add detection for isomorphic-git.getRemoteInfo2() — postcondition get-remote-info2-no-error-handling added in pass 5 (deepen-stream-2, 2026-06-12) but no scanner rule exists yet. Detection hint: HTTP probe error detection — capability-probe pattern similar to existing getRemoteInfo detector.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis of isomorphic-git@1.38.4. Function is auto-detected by ThrowingFunctionDetector when called as `git.getRemoteInfo2()` because it's an exported async function — this concern documents the postcondition for traceability/regression-gate, not a detection gap. Promote to detection-gap status only if scan corpus shows the postcondition silently missing real-world violations."
+    },
+    "resolution": "Postconditions for git.getRemoteInfo2() were added to nark-corpus-pro/packages/isomorphic-git/contract.yaml in deepen-stream pass 5. Scanner detects these calls via generic property-chain detection (no per-package plugin needed). Verified by running src/v2/fixtures/isomorphic-git.ground-truth.test.ts: all 63 tests pass, including the 7 new SHOULD_FIRE annotations for the deepen-pass-5 functions. No scanner code changes required — the contract+fixture additions are sufficient.",
+    "implemented_at": "2026-06-12"
+  },
+  {
+    "id": "concern-20260612-isomorphic-git-deepen-14",
+    "created_at": "2026-06-12",
+    "source": "deepen",
+    "package": "isomorphic-git",
+    "type": "uncovered_function",
+    "status": "implemented",
+    "description": "Add detection for isomorphic-git.remove() — postcondition remove-no-error-handling added in pass 5 (deepen-stream-2, 2026-06-12) but no scanner rule exists yet. Detection hint: silent-no-op-on-missing-filepath detection — high-value because typos are the dominant correctness hazard.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis of isomorphic-git@1.38.4. Function is auto-detected by ThrowingFunctionDetector when called as `git.remove()` because it's an exported async function — this concern documents the postcondition for traceability/regression-gate, not a detection gap. Promote to detection-gap status only if scan corpus shows the postcondition silently missing real-world violations."
+    },
+    "resolution": "Postconditions for git.remove() were added to nark-corpus-pro/packages/isomorphic-git/contract.yaml in deepen-stream pass 5. Scanner detects these calls via generic property-chain detection (no per-package plugin needed). Verified by running src/v2/fixtures/isomorphic-git.ground-truth.test.ts: all 63 tests pass, including the 7 new SHOULD_FIRE annotations for the deepen-pass-5 functions. No scanner code changes required — the contract+fixture additions are sufficient.",
+    "implemented_at": "2026-06-12"
+  },
+  {
+    "id": "concern-20260612-isomorphic-git-deepen-15",
+    "created_at": "2026-06-12",
+    "source": "deepen",
+    "package": "isomorphic-git",
+    "type": "uncovered_function",
+    "status": "implemented",
+    "description": "Add detection for isomorphic-git.removeNote() — postcondition remove-note-no-error-handling added in pass 5 (deepen-stream-2, 2026-06-12) but no scanner rule exists yet. Detection hint: silent-success-on-missing-note detection (CRITICAL for PII redaction pipelines).",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis of isomorphic-git@1.38.4. Function is auto-detected by ThrowingFunctionDetector when called as `git.removeNote()` because it's an exported async function — this concern documents the postcondition for traceability/regression-gate, not a detection gap. Promote to detection-gap status only if scan corpus shows the postcondition silently missing real-world violations."
+    },
+    "resolution": "Postconditions for git.removeNote() were added to nark-corpus-pro/packages/isomorphic-git/contract.yaml in deepen-stream pass 5. Scanner detects these calls via generic property-chain detection (no per-package plugin needed). Verified by running src/v2/fixtures/isomorphic-git.ground-truth.test.ts: all 63 tests pass, including the 7 new SHOULD_FIRE annotations for the deepen-pass-5 functions. No scanner code changes required — the contract+fixture additions are sufficient.",
+    "implemented_at": "2026-06-12"
+  },
+  {
+    "id": "concern-20260612-sqlite3-deepen-5",
+    "created_at": "2026-06-12",
+    "source": "deepen",
+    "package": "sqlite3",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for sqlite3 Database constructor open errors (CANTOPEN/PERM/NOTADB/CORRUPT). Pattern: `new sqlite3.Database(file, callback)` where callback ignores its err arg. Scanner needs to detect constructor calls with a callback function literal and verify the callback's first param is checked.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — new postcondition added via API surface analysis (deepen-stream-1 pass 6). Most common production silent-deploy failure with sqlite3."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260612-sqlite3-deepen-6",
+    "created_at": "2026-06-12",
+    "source": "deepen",
+    "package": "sqlite3",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for sqlite3 Statement.get() callback err-ignored pattern. Distinct from Database.get because Statement.get does NOT auto-finalize — callback signature is (err, row), and ignoring err in a prepared-statement reuse loop silently swallows both row-not-found and query-failed cases.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive (deepen-stream-1 pass 6) — Statement.get distinct from Database.get; lock-leak pattern is documented in wiki API."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260612-sqlite3-deepen-7",
+    "created_at": "2026-06-12",
+    "source": "deepen",
+    "package": "sqlite3",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for sqlite3 Statement.get() called without subsequent .finalize() or .reset(). The Wiki API explicitly warns 'Using this method can leave the database locked' — a Statement prepared, gotten once, and dropped without finalize leaks a cursor lock that prevents db.close from completing. Scanner needs to track Statement variable flow and verify .finalize() is called.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive (deepen-stream-1 pass 6) — degraded_service pattern documented in wiki. Distinct from existing Statement.finalize-not-called concern because the trigger is Statement.get specifically."
+    },
+    "resolution": null
   }
 ]
