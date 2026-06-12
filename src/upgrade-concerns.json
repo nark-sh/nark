@@ -53444,5 +53444,53 @@
       "note": "Proactive — ServiceObject.exists() inherited from @google-cloud/common. Same pattern applies to Dataset, Table, Model, Routine. Scanner detection should target the exists() method on any class with class_names matching the BigQuery class hierarchy."
     },
     "resolution": null
+  },
+  {
+    "id": "concern-20260612-hapi-hapi-deepen-1",
+    "created_at": "2026-06-12",
+    "source": "deepen",
+    "package": "@hapi/hapi",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @hapi/hapi server.inject() - postcondition inject-handler-throws-boom-error added in depth pass (handler rethrow via custom.error in lib/server.js:351-352). Scanner must flag await server.inject(...) without try-catch the same way it flags server.start(). Pattern shape: method-call on Server (hapi.server() return) that returns Promise.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive - contract added via API surface analysis from @hapi/hapi@21.4.9 lib/types/server/server.d.ts and lib/server.js. inject() is the dominant async test/integration surface for hapi (50+ files in test-repos use the pattern). Handler errors rethrow as Boom with .data partial response, per official API.md."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260612-hapi-hapi-deepen-2",
+    "created_at": "2026-06-12",
+    "source": "deepen",
+    "package": "@hapi/hapi",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @hapi/hapi server.inject() options.credentials deprecation (inject-deprecated-credentials-option). Hoek.assert(!options.credentials, ...) in lib/server.js fires synchronously inside the async body when legacy hapi 16 code passes credentials. Scanner upgrade idea: data-flow analysis on the inject() options literal - if a property named 'credentials' is set, emit a violation.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive - narrowly-scoped scanner rule. Source: lib/server.js line 328. Risk: false positives on non-hapi inject() calls. Mitigation: scope to import @hapi/hapi binding."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260612-hapi-hapi-deepen-3",
+    "created_at": "2026-06-12",
+    "source": "deepen",
+    "package": "@hapi/hapi",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @hapi/hapi server.inject() auth options shape (inject-auth-options-malformed). Hoek.assert validates options.auth is object, has .credentials, has .strategy - all three fire BEFORE request lifecycle. Scanner upgrade idea: shape-check on the inject() auth literal when present (must be ObjectLiteral with strategy + credentials properties).",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive - source: lib/server.js lines 332-337."
+    },
+    "resolution": null
   }
 ]
