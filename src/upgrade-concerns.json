@@ -51572,5 +51572,53 @@
       "note": "Security postcondition resolve-settings-default-mode-not-filtered (incident_label=SECURITY_RISK). Requires data-flow analysis from resolveSettings() return value through any aliases to the .permissions.defaultMode access site. Sources: sdk.d.ts line 2546-2550 explicitly documents this trust filter requirement."
     },
     "resolution": "Rejected per the bc-scanner-upgrade rejection criteria (insufficient evidence — zero real-world repos, zero violations) AND because implementation would require a substantial new scanner capability: data-flow analysis tracking the resolveSettings() return value through any aliases to the .permissions.defaultMode property access, verifying it passes through filterEscalatingDefaultMode() first. This is not a postcondition gap — it's a fundamentally new flow-sensitive detector class. The contract postcondition (resolve-settings-default-mode-not-filtered) and the fixture annotation (line 167) remain in place as documentation of the intended detection. Tracked as a future scanner capability — when corpus evidence of real-world bypass appears (any production repo reading defaultMode directly), reopen as a high-priority scanner-architecture concern. Precedent: prior @anthropic-ai/claude-agent-sdk deepen concerns (concern-20260417-claude-agent-sdk-deepen-1 through -7) were uniformly rejected on the same zero-evidence basis."
+  },
+  {
+    "id": "concern-20260612-cross-fetch-deepen-1",
+    "created_at": "2026-06-12",
+    "source": "deepen",
+    "package": "cross-fetch",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for fetch() with node-fetch { timeout: N } init option that throws FetchError type='request-timeout' on slow upstream — postcondition fetch-request-timeout-error added in depth pass but no scanner rule exists. Detect: await fetch(url, { timeout: <number> }) without surrounding try-catch.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis. Node-fetch-specific init option distinct from AbortController abort path. Evidence: node-fetch/lib/index.js line 1494 reject(new FetchError('network timeout at: ${url}', 'request-timeout'))."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260612-cross-fetch-deepen-2",
+    "created_at": "2026-06-12",
+    "source": "deepen",
+    "package": "cross-fetch",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for response.json/.text/.buffer reading a body fetched with { timeout: N } init option that may throw FetchError type='body-timeout' during slow body read — postcondition fetch-body-timeout-error added in depth pass but no scanner rule exists. Detect: body method called on a response from fetch(url, { timeout: N }) without try-catch on the body call.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis. body-timeout fires during body read, distinct timer from request-timeout. Evidence: node-fetch/lib/index.js line 388 reject(new FetchError('Response timeout while trying to fetch ${url} (over ${timeout}ms)', 'body-timeout'))."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260612-cross-fetch-deepen-3",
+    "created_at": "2026-06-12",
+    "source": "deepen",
+    "package": "cross-fetch",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for fetch() with node-fetch { size: N } init option that throws FetchError type='max-size' on oversized response body — postcondition fetch-max-size-error added in depth pass but no scanner rule exists. Detect: body method (json/text/buffer) called on a response from fetch(url, { size: <number> }) without try-catch around the body method.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis. SSRF/OOM guardrail — likely uncommon in corpus but security-sensitive. Evidence: node-fetch/lib/index.js line 411 reject(new FetchError('content size at ${url} over limit: ${size}', 'max-size'))."
+    },
+    "resolution": null
   }
 ]
