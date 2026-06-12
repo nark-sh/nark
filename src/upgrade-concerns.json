@@ -52792,7 +52792,7 @@
     "source": "deepen",
     "package": "@inquirer/prompts",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for editor() postcondition added in depth pass. editor() shares the same ExitPromptError/AbortPromptError contract as other prompts (createPrompt wrapper in @inquirer/core). Scanner should treat editor() identically to confirm/select/checkbox/input/password/search/expand/number. If existing detector matches by ExitPromptError reachability, this concern may already be auto-satisfied; verify by running ground-truth.ts after detector update.",
     "evidence": {
       "repos": [],
@@ -52800,7 +52800,7 @@
       "violation_count": 0,
       "note": "Proactive. Contract added via API surface analysis, detection rule may already exist via shared postcondition id must-handle-exit-prompt-error."
     },
-    "resolution": null
+    "resolution": "Auto-satisfied by existing contract-driven detector. The scanner matches by postcondition ID and import source, not by function name list — editor() inherits must-handle-exit-prompt-error and must-handle-abort-prompt-error from the shared @inquirer/core createPrompt wrapper. Ground-truth fixture at nark-corpus-pro/packages/@inquirer/prompts/fixtures/ground-truth.ts:51 already contains a SHOULD_FIRE annotation for editor() without try/catch, and all 15 tests in src/v2/fixtures/@inquirer__prompts.ground-truth.test.ts pass. No scanner code change required."
   },
   {
     "id": "concern-20260612-inquirer-prompts-deepen-2",
@@ -52808,7 +52808,7 @@
     "source": "deepen",
     "package": "@inquirer/prompts",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for rawlist() shared ExitPromptError/AbortPromptError contract from other prompts. Should also be picked up by existing must-handle-exit-prompt-error detector via postcondition id reuse.",
     "evidence": {
       "repos": [],
@@ -52816,7 +52816,7 @@
       "violation_count": 0,
       "note": "Proactive. Same shared-id reuse as editor() concern above."
     },
-    "resolution": null
+    "resolution": "Auto-satisfied by existing contract-driven detector. Same shared-postcondition-ID mechanism as concern-20260612-inquirer-prompts-deepen-1: rawlist() inherits must-handle-exit-prompt-error and must-handle-abort-prompt-error via the @inquirer/core createPrompt wrapper. Ground-truth fixture line 57 contains a SHOULD_FIRE annotation for rawlist() without try/catch and the corresponding test in src/v2/fixtures/@inquirer__prompts.ground-truth.test.ts passes. No scanner code change required."
   },
   {
     "id": "concern-20260612-inquirer-prompts-deepen-3",
@@ -52824,7 +52824,7 @@
     "source": "deepen",
     "package": "@inquirer/prompts",
     "type": "new_pattern",
-    "status": "pending",
+    "status": "rejected",
     "description": "Add detection for rawlist() synchronous ValidationError throw. When choices array contains only Separators (or is empty after filtering), packages/rawlist/src/index.ts line 69 throws ValidationError synchronously from inside useMemo bounds. This is NOT a Promise rejection. It surfaces as a synchronous throw at the call site. Detector pattern: rawlist({ choices: dynamicArray }) without ValidationError handling in surrounding try/catch AND without a pre-call non-Separator filter check. Likely requires a new postcondition class beyond the standard ExitPromptError rejection-detection pipeline since this is a synchronous throw.",
     "evidence": {
       "repos": [],
@@ -52832,6 +52832,6 @@
       "violation_count": 0,
       "note": "New synchronous throw pattern. Distinct from the Promise-rejection postconditions already detected. Postcondition id: must-handle-validation-error-no-selectable-choices."
     },
-    "resolution": null
+    "resolution": "Deferred (not rejected on merit). Implementing detection for synchronous throws from inside useMemo bounds requires a new detector class distinct from the existing await + try/catch reachability pipeline. The ground-truth fixture at nark-corpus-pro/packages/@inquirer/prompts/fixtures/ground-truth.ts:68-84 already documents this PENDING DETECTOR pattern with no SHOULD_FIRE annotation, deliberately deferring implementation. Evidence is zero real-world repos (proactive only). Per the depth-over-breadth feedback rule and bc-fp-harvester verification policy, a new architectural detector should be motivated by FP-harvester corpus evidence or a design-partner request rather than reactively from deepen output with zero call-site evidence. Postcondition remains in contract.yaml so the pattern is documented for future implementation; detector tracked as scanner-upgrade backlog. Re-open when evidence arrives."
   }
 ]
