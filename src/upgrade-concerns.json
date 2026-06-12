@@ -52604,5 +52604,85 @@
     },
     "resolution": "@sentry/nextjs.wrapApiHandlerWithSentryVercelCrons detected via standard ThrowingFunctionDetector. 12/12 sentry-nextjs tests pass.",
     "resolved_at": "2026-06-11"
+  },
+  {
+    "id": "concern-20260612-octokit-auth-app-deepen-1",
+    "created_at": "2026-06-12",
+    "source": "deepen",
+    "package": "@octokit/auth-app",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for auth-jwt-signing-error: distinguish JWT signing failures (auth({ type: 'app' })) from generic auth-request-error. JWT errors are plain Error (not RequestError/HttpError); they occur before any HTTP call. Detector should fire on await auth({ type: 'app' }) without surrounding try-catch AND emit auth-jwt-signing-error postcondition instead of (or in addition to) auth-request-error when the type literal is 'app'.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — added in bc-deepen-contract pass 2026-06-12. Postcondition cites dist-src/get-app-authentication.js try/catch around githubAppJwt() that throws the env-newline Error when privateKey === '-----BEGIN RSA PRIVATE KEY-----'. Fixture: packages/@octokit/auth-app/fixtures/ground-truth.ts line 74 (currently PENDING_SHOULD_FIRE)."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260612-octokit-auth-app-deepen-2",
+    "created_at": "2026-06-12",
+    "source": "deepen",
+    "package": "@octokit/auth-app",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for auth-installation-id-missing-error: auth({ type: 'installation' }) without an installationId throws synchronously inside the async function (dist-src/get-installation-authentication.js line 6) BEFORE any HTTP. Detector should fire on auth({ type: 'installation', ... }) calls where installationId is not present in either the createAppAuth() factory options OR the per-call options object. Pattern: factory(createAppAuth) options omit installationId AND auth({ type: 'installation' }) call also omits it OR passes installationId from a value typed `number | undefined`.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — added in bc-deepen-contract pass 2026-06-12. Fixture: packages/@octokit/auth-app/fixtures/ground-truth.ts line 96 (currently PENDING_SHOULD_FIRE)."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260612-octokit-auth-app-deepen-3",
+    "created_at": "2026-06-12",
+    "source": "deepen",
+    "package": "@octokit/auth-app",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for auth-oauth-user-error: auth({ type: 'oauth-user', code }) delegates to @octokit/auth-oauth-app and can throw an Error with code 'bad_verification_code' / 'redirect_uri_mismatch' / 'incorrect_client_credentials' OR a RequestError. The recovery semantics are DIFFERENT from installation auth (must restart OAuth flow, not retry). Detector should fire on auth({ type: 'oauth-user' }) without try-catch, ideally with a hint that the catch block should redirect to /authorize rather than display the error.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — added in bc-deepen-contract pass 2026-06-12. Fixture: packages/@octokit/auth-app/fixtures/ground-truth.ts line 119 (currently PENDING_SHOULD_FIRE)."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260612-octokit-auth-app-deepen-4",
+    "created_at": "2026-06-12",
+    "source": "deepen",
+    "package": "@octokit/auth-app",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for auth-invalid-type-error: auth({ type: <non-literal-string> }) where type is a dynamic value (variable / property access) instead of a literal. Source: dist-src/auth.js default switch branch throws 'Invalid auth type: <type>'. Detector should fire warning-severity on auth({ type: <expression> }) where the expression is not a string literal AND there is no surrounding try-catch. This is low-priority — TypeScript catches it for typed callers — but appears in plain-JS callsites and dynamic-config integrations.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — added in bc-deepen-contract pass 2026-06-12. Fixture: packages/@octokit/auth-app/fixtures/ground-truth.ts line 140 (currently PENDING_SHOULD_FIRE). Severity: warning, not error — this is a programming-error class, not a runtime/network class."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260612-octokit-auth-app-deepen-5",
+    "created_at": "2026-06-12",
+    "source": "deepen",
+    "package": "@octokit/auth-app",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for hook-request-error: direct auth.hook(request, route, parameters) calls outside the Octokit hook chain. The scanner currently treats auth as a callable factory (via callable_factory_function_name: 'auth') but does NOT track auth.hook as a separate throwing method. Detector should fire on await auth.hook(...) without try-catch — same shape as auth-request-error postcondition but with the post-retry rewritten message hint. Note: auth.hook is also called by Octokit internally; the detector should only fire on USER code calls, not internal framework calls.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — added in bc-deepen-contract pass 2026-06-12. Fixture: packages/@octokit/auth-app/fixtures/ground-truth.ts line 162 (currently PENDING_SHOULD_FIRE). Implementation hint: extend instance-tracker to register auth.hook as a method on the auth callable returned by createAppAuth(), similar to how axios.create() instances track .get/.post methods."
+    },
+    "resolution": null
   }
 ]
