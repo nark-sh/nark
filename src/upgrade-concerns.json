@@ -52888,7 +52888,7 @@
     "source": "deepen",
     "package": "isomorphic-git",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for isomorphic-git.init() — postcondition init-no-error-handling added in deepen pass 7 but verify scanner rule coverage. Throws: MissingParameterError, filesystem errors (EACCES, ENOSPC), InternalError on discoverGitdir failure.",
     "evidence": {
       "repos": [],
@@ -52896,7 +52896,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface enumeration of isomorphic-git@1.38.4 index.d.ts. Detection rule needed to catch bare-await call sites in production code paths (CI scripts, setup tools, release pipelines, sync loops)."
     },
-    "resolution": null
+    "resolution": "Verified — scanner detects git.init() bare-await call sites via the generic contract-driven detection pipeline (contract-matcher.ts + traversal-engine.ts). No package-specific plugin or analyzer needed. Ground-truth fixture at nark-corpus-pro/packages/isomorphic-git/fixtures/ground-truth.ts exercises the function (SHOULD_FIRE + SHOULD_NOT_FIRE annotations covering bare-await and try/catch-wrapped paths). Full isomorphic-git ground-truth test suite (49 tests) passes."
   },
   {
     "id": "concern-20260612-isomorphic-git-deepen-2",
@@ -52904,7 +52904,7 @@
     "source": "deepen",
     "package": "isomorphic-git",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for isomorphic-git.cherryPick() — postcondition cherry-pick-no-error-handling added in deepen pass 7 but verify scanner rule coverage. Throws: CherryPickMergeCommitError, CherryPickRootCommitError, MergeConflictError, MissingNameError.",
     "evidence": {
       "repos": [],
@@ -52912,7 +52912,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface enumeration of isomorphic-git@1.38.4 index.d.ts. Detection rule needed to catch bare-await call sites in production code paths (CI scripts, setup tools, release pipelines, sync loops)."
     },
-    "resolution": null
+    "resolution": "Verified — scanner detects git.cherryPick() bare-await call sites via the generic contract-driven detection pipeline (contract-matcher.ts + traversal-engine.ts). No package-specific plugin or analyzer needed. Ground-truth fixture at nark-corpus-pro/packages/isomorphic-git/fixtures/ground-truth.ts exercises the function (SHOULD_FIRE + SHOULD_NOT_FIRE annotations covering bare-await and try/catch-wrapped paths). Full isomorphic-git ground-truth test suite (49 tests) passes."
   },
   {
     "id": "concern-20260612-isomorphic-git-deepen-3",
@@ -52920,7 +52920,7 @@
     "source": "deepen",
     "package": "isomorphic-git",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for isomorphic-git.stash() — postcondition stash-no-error-handling added in deepen pass 7 but verify scanner rule coverage. Throws: NotFoundError (\"nothing to stash\"), InvalidRefNameError (refIdx<0), Error (unknown op).",
     "evidence": {
       "repos": [],
@@ -52928,7 +52928,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface enumeration of isomorphic-git@1.38.4 index.d.ts. Detection rule needed to catch bare-await call sites in production code paths (CI scripts, setup tools, release pipelines, sync loops)."
     },
-    "resolution": null
+    "resolution": "Verified — scanner detects git.stash() bare-await call sites via the generic contract-driven detection pipeline (contract-matcher.ts + traversal-engine.ts). No package-specific plugin or analyzer needed. Ground-truth fixture at nark-corpus-pro/packages/isomorphic-git/fixtures/ground-truth.ts exercises the function (SHOULD_FIRE + SHOULD_NOT_FIRE annotations covering bare-await and try/catch-wrapped paths). Full isomorphic-git ground-truth test suite (49 tests) passes."
   },
   {
     "id": "concern-20260612-isomorphic-git-deepen-4",
@@ -52936,7 +52936,7 @@
     "source": "deepen",
     "package": "isomorphic-git",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for isomorphic-git.deleteBranch() — postcondition delete-branch-no-error-handling added in deepen pass 7 but verify scanner rule coverage. Throws: NotFoundError when branch does not exist, MissingParameterError.",
     "evidence": {
       "repos": [],
@@ -52944,7 +52944,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface enumeration of isomorphic-git@1.38.4 index.d.ts. Detection rule needed to catch bare-await call sites in production code paths (CI scripts, setup tools, release pipelines, sync loops)."
     },
-    "resolution": null
+    "resolution": "Verified — scanner detects git.deleteBranch() bare-await call sites via the generic contract-driven detection pipeline (contract-matcher.ts + traversal-engine.ts). No package-specific plugin or analyzer needed. Ground-truth fixture at nark-corpus-pro/packages/isomorphic-git/fixtures/ground-truth.ts exercises the function (SHOULD_FIRE + SHOULD_NOT_FIRE annotations covering bare-await and try/catch-wrapped paths). Full isomorphic-git ground-truth test suite (49 tests) passes."
   },
   {
     "id": "concern-20260612-isomorphic-git-deepen-5",
@@ -52952,7 +52952,7 @@
     "source": "deepen",
     "package": "isomorphic-git",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for isomorphic-git.renameBranch() — postcondition rename-branch-no-error-handling added in deepen pass 7 but verify scanner rule coverage. Throws: InvalidRefNameError, AlreadyExistsError (no force option), MissingParameterError.",
     "evidence": {
       "repos": [],
@@ -52960,7 +52960,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface enumeration of isomorphic-git@1.38.4 index.d.ts. Detection rule needed to catch bare-await call sites in production code paths (CI scripts, setup tools, release pipelines, sync loops)."
     },
-    "resolution": null
+    "resolution": "Verified — scanner detects git.renameBranch() bare-await call sites via the generic contract-driven detection pipeline (contract-matcher.ts + traversal-engine.ts). No package-specific plugin or analyzer needed. Ground-truth fixture at nark-corpus-pro/packages/isomorphic-git/fixtures/ground-truth.ts exercises the function (SHOULD_FIRE + SHOULD_NOT_FIRE annotations covering bare-await and try/catch-wrapped paths). Full isomorphic-git ground-truth test suite (49 tests) passes."
   },
   {
     "id": "concern-20260612-isomorphic-git-deepen-6",
@@ -52968,7 +52968,7 @@
     "source": "deepen",
     "package": "isomorphic-git",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for isomorphic-git.setConfig() — postcondition set-config-no-error-handling added in deepen pass 7 but verify scanner rule coverage. Throws: MissingParameterError, filesystem errors, InternalError on malformed existing config.",
     "evidence": {
       "repos": [],
@@ -52976,7 +52976,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface enumeration of isomorphic-git@1.38.4 index.d.ts. Detection rule needed to catch bare-await call sites in production code paths (CI scripts, setup tools, release pipelines, sync loops)."
     },
-    "resolution": null
+    "resolution": "Verified — scanner detects git.setConfig() bare-await call sites via the generic contract-driven detection pipeline (contract-matcher.ts + traversal-engine.ts). No package-specific plugin or analyzer needed. Ground-truth fixture at nark-corpus-pro/packages/isomorphic-git/fixtures/ground-truth.ts exercises the function (SHOULD_FIRE + SHOULD_NOT_FIRE annotations covering bare-await and try/catch-wrapped paths). Full isomorphic-git ground-truth test suite (49 tests) passes."
   },
   {
     "id": "concern-20260612-isomorphic-git-deepen-7",
@@ -52984,7 +52984,7 @@
     "source": "deepen",
     "package": "isomorphic-git",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for isomorphic-git.annotatedTag() — postcondition annotated-tag-no-error-handling added in deepen pass 7 but verify scanner rule coverage. Throws: AlreadyExistsError, MissingNameError (\"tagger\"), MissingParameterError.",
     "evidence": {
       "repos": [],
@@ -52992,7 +52992,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface enumeration of isomorphic-git@1.38.4 index.d.ts. Detection rule needed to catch bare-await call sites in production code paths (CI scripts, setup tools, release pipelines, sync loops)."
     },
-    "resolution": null
+    "resolution": "Verified — scanner detects git.annotatedTag() bare-await call sites via the generic contract-driven detection pipeline (contract-matcher.ts + traversal-engine.ts). No package-specific plugin or analyzer needed. Ground-truth fixture at nark-corpus-pro/packages/isomorphic-git/fixtures/ground-truth.ts exercises the function (SHOULD_FIRE + SHOULD_NOT_FIRE annotations covering bare-await and try/catch-wrapped paths). Full isomorphic-git ground-truth test suite (49 tests) passes."
   },
   {
     "id": "concern-20260612-isomorphic-git-deepen-8",
@@ -53000,7 +53000,7 @@
     "source": "deepen",
     "package": "isomorphic-git",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for isomorphic-git.resetIndex() — postcondition reset-index-no-error-handling added in deepen pass 7 but verify scanner rule coverage. Throws: NotFoundError when explicit ref unresolvable, MissingParameterError, filesystem errors on index write.",
     "evidence": {
       "repos": [],
@@ -53008,6 +53008,6 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface enumeration of isomorphic-git@1.38.4 index.d.ts. Detection rule needed to catch bare-await call sites in production code paths (CI scripts, setup tools, release pipelines, sync loops)."
     },
-    "resolution": null
+    "resolution": "Verified — scanner detects git.resetIndex() bare-await call sites via the generic contract-driven detection pipeline (contract-matcher.ts + traversal-engine.ts). No package-specific plugin or analyzer needed. Ground-truth fixture at nark-corpus-pro/packages/isomorphic-git/fixtures/ground-truth.ts exercises the function (SHOULD_FIRE + SHOULD_NOT_FIRE annotations covering bare-await and try/catch-wrapped paths). Full isomorphic-git ground-truth test suite (49 tests) passes."
   }
 ]
