@@ -3391,6 +3391,9 @@ export class ContractMatcher {
    * are listed here. Commands not listed fall through to the generic aws-service-error.
    *
    * Evidence: concern-20260611-aws-sdk-client-secrets-manager-deepen-5 through -8.
+   * Evidence: concern-20260612-aws-sdk-client-secrets-manager-deepen-1 through -5 (Phase 2
+   *   deepen pass — DescribeSecretCommand, ReplicateSecretToRegionsCommand,
+   *   ValidateResourcePolicyCommand, TagResourceCommand, GetRandomPasswordCommand added).
    */
   private static readonly SECRETS_MANAGER_COMMAND_POSTCONDITION_MAP: Record<string, string> = {
     // LimitExceededException when staging labels exceed 20 limit across all secret versions.
@@ -3401,6 +3404,25 @@ export class ContractMatcher {
     PutResourcePolicyCommand: "put-resource-policy-no-try-catch",
     // InvalidRequestException when called on a non-deleted secret.
     RestoreSecretCommand: "restore-secret-no-try-catch",
+    // ResourceNotFoundException / InvalidParameterException / InternalServiceError per
+    // dist-types/commands/DescribeSecretCommand.d.ts @throws.
+    DescribeSecretCommand: "describe-secret-no-try-catch",
+    // Silent partial-failure response — response.ReplicationStatus[] contains per-region
+    // Status === 'Failed' even when the Promise resolves with HTTP 200. Same family as the
+    // BatchGetSecretValueCommand response.Errors[] silent-failure pattern.
+    ReplicateSecretToRegionsCommand: "replicate-secret-per-region-failure-unchecked",
+    // Silent security risk — response.PolicyValidationPassed boolean must be checked before
+    // applying the same policy via PutResourcePolicyCommand. Failure to check = invalid policy
+    // applied silently.
+    ValidateResourcePolicyCommand: "validate-resource-policy-passed-flag-unchecked",
+    // ResourceNotFoundException / LimitExceededException (per-secret tag quota of 50) /
+    // InvalidRequestException / InvalidParameterException per dist-types/commands/TagResourceCommand.d.ts.
+    // Compliance tagging pipelines fail silently and break IAM tag-condition access control.
+    TagResourceCommand: "tag-resource-no-try-catch",
+    // InvalidParameterException / InvalidRequestException / InternalServiceError per
+    // dist-types/commands/GetRandomPasswordCommand.d.ts. Failures inside rotation Lambdas
+    // can lead to a weak/empty password persisted via PutSecretValueCommand (SECURITY_RISK).
+    GetRandomPasswordCommand: "get-random-password-no-try-catch",
   };
 
   /**
