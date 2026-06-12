@@ -52466,5 +52466,117 @@
       "note": "Both files contain `await apolloServer.start()` with no try-catch and were missed by the scanner. cisagov/RedEye (2744★) with the conventional `const apolloServer = new ApolloServer(...)` + `await apolloServer.start()` pattern was flagged correctly. Pattern likely applies to other framework-wrapper packages (fastify factory, express() returning value through helper, etc.) — fix here is generic, not @apollo/server-specific."
     },
     "resolution": null
+  },
+  {
+    "id": "concern-20260611-sentry-nextjs-deepen-1",
+    "created_at": "2026-06-11",
+    "source": "deepen",
+    "package": "@sentry/nextjs",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Verify scanner detection for @sentry/nextjs.wrapRouteHandlerWithSentry() — postcondition 'route-handler-errors-rethrow' added in deepen pass. The function is a named export from @sentry/nextjs that re-throws callback errors via @sentry/core's handleCallbackErrors. The generic ThrowingFunctionDetectorPlugin should already pick this up via the named-import path, but a regression fixture should confirm. If detection fires when imported statically and called outside try/catch, mark this concern resolved.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis. Source-verified that the function re-throws (handleCallbackErrors in @sentry/core); needs scanner confirmation."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260611-sentry-nextjs-deepen-2",
+    "created_at": "2026-06-11",
+    "source": "deepen",
+    "package": "@sentry/nextjs",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Verify scanner detection for @sentry/nextjs.wrapServerComponentWithSentry() — postcondition 'server-component-errors-rethrow' added in deepen pass. The function is a named export from @sentry/nextjs that re-throws callback errors via @sentry/core's handleCallbackErrors. The generic ThrowingFunctionDetectorPlugin should already pick this up via the named-import path, but a regression fixture should confirm. If detection fires when imported statically and called outside try/catch, mark this concern resolved.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis. Source-verified that the function re-throws (handleCallbackErrors in @sentry/core); needs scanner confirmation."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260611-sentry-nextjs-deepen-3",
+    "created_at": "2026-06-11",
+    "source": "deepen",
+    "package": "@sentry/nextjs",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Verify scanner detection for @sentry/nextjs.wrapMiddlewareWithSentry() — postcondition 'middleware-errors-rethrow' added in deepen pass. The function is a named export from @sentry/nextjs that re-throws callback errors via @sentry/core's handleCallbackErrors. The generic ThrowingFunctionDetectorPlugin should already pick this up via the named-import path, but a regression fixture should confirm. If detection fires when imported statically and called outside try/catch, mark this concern resolved.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis. Source-verified that the function re-throws (handleCallbackErrors in @sentry/core); needs scanner confirmation."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260611-sentry-nextjs-deepen-4",
+    "created_at": "2026-06-11",
+    "source": "deepen",
+    "package": "@sentry/nextjs",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Verify scanner detection for @sentry/nextjs.wrapGenerationFunctionWithSentry() — postcondition 'generation-function-errors-rethrow' added in deepen pass. The function is a named export from @sentry/nextjs that re-throws callback errors via @sentry/core's handleCallbackErrors. The generic ThrowingFunctionDetectorPlugin should already pick this up via the named-import path, but a regression fixture should confirm. If detection fires when imported statically and called outside try/catch, mark this concern resolved.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis. Source-verified that the function re-throws (handleCallbackErrors in @sentry/core); needs scanner confirmation."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260611-sentry-nextjs-deepen-5",
+    "created_at": "2026-06-11",
+    "source": "deepen",
+    "package": "@sentry/nextjs",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Verify scanner detection for @sentry/nextjs.withServerActionInstrumentation() — postcondition 'server-action-errors-rethrow' added in deepen pass. The function is a named export from @sentry/nextjs that re-throws callback errors via @sentry/core's handleCallbackErrors. The generic ThrowingFunctionDetectorPlugin should already pick this up via the named-import path, but a regression fixture should confirm. If detection fires when imported statically and called outside try/catch, mark this concern resolved.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis. Source-verified that the function re-throws (handleCallbackErrors in @sentry/core); needs scanner confirmation."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260611-sentry-nextjs-deepen-6",
+    "created_at": "2026-06-11",
+    "source": "deepen",
+    "package": "@sentry/nextjs",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Verify scanner detection for @sentry/nextjs.withMonitor() — postcondition 'monitor-callback-rethrows' added in deepen pass. The function is a named export from @sentry/nextjs that re-throws callback errors via @sentry/core's handleCallbackErrors. The generic ThrowingFunctionDetectorPlugin should already pick this up via the named-import path, but a regression fixture should confirm. If detection fires when imported statically and called outside try/catch, mark this concern resolved.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis. Source-verified that the function re-throws (handleCallbackErrors in @sentry/core); needs scanner confirmation."
+    },
+    "resolution": null
+  },
+  {
+    "id": "concern-20260611-sentry-nextjs-deepen-7",
+    "created_at": "2026-06-11",
+    "source": "deepen",
+    "package": "@sentry/nextjs",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Verify scanner detection for @sentry/nextjs.wrapApiHandlerWithSentryVercelCrons() — postcondition 'vercel-crons-handler-rethrows' added in deepen pass. The function is a named export from @sentry/nextjs that re-throws callback errors via @sentry/core's handleCallbackErrors. The generic ThrowingFunctionDetectorPlugin should already pick this up via the named-import path, but a regression fixture should confirm. If detection fires when imported statically and called outside try/catch, mark this concern resolved.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis. Source-verified that the function re-throws (handleCallbackErrors in @sentry/core); needs scanner confirmation."
+    },
+    "resolution": null
   }
 ]
