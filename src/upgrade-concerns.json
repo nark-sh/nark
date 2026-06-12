@@ -51780,5 +51780,69 @@
       "note": "Proactive — contract added via API surface analysis (luxon@3.7.2 verified empirically). Detection rule mirrors startOf/endOf/shiftTo invalid-unit detection."
     },
     "resolution": "Verified empirically: scanner already detects Duration.get(invalid-unit) via existing property-chain-detector + contract dotted-name function entry (Duration.get). Local scan confirms duration-get-invalid-unit fires at line 497. No scanner code change needed."
+  },
+  {
+    "id": "concern-20260612-sqlite3-deepen-1",
+    "created_at": "2026-06-12",
+    "source": "deepen",
+    "package": "sqlite3",
+    "type": "uncovered_function",
+    "status": "rejected",
+    "description": "Add detection for Statement.finalize-not-called — prepared statement created via db.prepare() goes out of scope without stmt.finalize() being called. #1 cause of SQLITE_BUSY on db.close. Detection: instance-track Statement returned by db.prepare(), flag if no .finalize() in same scope before scope exit.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis, callback-based pattern requires lifecycle detection rule."
+    },
+    "resolution": "Rejected: 0 evidence repos, 0 violation_count. Detecting Statement.finalize-not-called requires data-flow analysis to track db.prepare() → stmt.finalize() pairs across scope. Same complexity class as rejected concern-20260417-sqlite3-deepen-2 (close-unfinalised-statements). Deferred until production FP evidence accumulates via bc-fp-harvester or dashboard feedback. Postcondition stays in contract.yaml as documentation; scanner detection deferred."
+  },
+  {
+    "id": "concern-20260612-sqlite3-deepen-2",
+    "created_at": "2026-06-12",
+    "source": "deepen",
+    "package": "sqlite3",
+    "type": "uncovered_function",
+    "status": "rejected",
+    "description": "Add detection for Statement.finalize-callback-error-ignored — stmt.finalize(callback) where callback does not check err. Pattern: callback's first parameter (typed Error) used only via console.log or discarded. Detection: callback-error-check pattern (same family as concern-20260417-sqlite3-deepen-1).",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis."
+    },
+    "resolution": "Rejected: 0 evidence repos, 0 violation_count. Statement.finalize-callback-error-ignored detection requires distinguishing Statement instance methods from Database methods via InstanceTracker, AND callback err-arg checking. Without production evidence the complexity/value ratio is too high. Defer until corpus harvest surfaces the pattern. Postcondition stays in contract.yaml."
+  },
+  {
+    "id": "concern-20260612-sqlite3-deepen-3",
+    "created_at": "2026-06-12",
+    "source": "deepen",
+    "package": "sqlite3",
+    "type": "uncovered_function",
+    "status": "rejected",
+    "description": "Add detection for Statement.run-callback-error-ignored — stmt.run([params], callback) where callback does not check err. Distinct from Database.run because Statement is reused, so swallowed errors compound across iterations. Detection: callback-error-check on Statement instance methods (where Statement = result of db.prepare()).",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis. Requires distinguishing Statement.run from Database.run via InstanceTracker."
+    },
+    "resolution": "Rejected: 0 evidence repos, 0 violation_count. Statement.run-callback-error-ignored is structurally identical to deepen-2 (Statement-instance-method + callback-err-check). Same defer rationale: needs InstanceTracker integration that distinguishes Statement.run from Database.run, no production FPs reported. Postcondition stays in contract.yaml."
+  },
+  {
+    "id": "concern-20260612-sqlite3-deepen-4",
+    "created_at": "2026-06-12",
+    "source": "deepen",
+    "package": "sqlite3",
+    "type": "uncovered_function",
+    "status": "rejected",
+    "description": "Add detection for Database.map-callback-error-ignored — db.map(sql, callback) where callback does not check err. Silent failure mode: query error returns empty {} which is indistinguishable from 'query returned no rows'. Detection: same callback-error-check pattern as db.each.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis."
+    },
+    "resolution": "Rejected: 0 evidence repos, 0 violation_count. Database.map-callback-error-ignored uses the same callback-err-check pattern as db.each (rejected as concern-20260417-sqlite3-deepen-1). That earlier concern noted scanner over-fires on err-checked callbacks. Defer until contract-matcher gets the xml2js-style err-check suppression rule (precondition for deepen-3 and deepen-4 from April). Postcondition stays in contract.yaml."
   }
 ]
