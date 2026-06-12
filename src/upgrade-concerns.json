@@ -51451,7 +51451,7 @@
     "source": "deepen",
     "package": "@libsql/client",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for @libsql/client sync() network-failure and client-closed postconditions (sync-network-failure, sync-client-closed). Extends concern-20260611-libsql-client-deepen-10 — all three sync() postconditions share the same await_pattern detection on .sync() calls.",
     "evidence": {
       "repos": [],
@@ -51459,7 +51459,7 @@
       "violation_count": 0,
       "note": "Proactive — deepen pass 2026-06-11. Companion to concern-20260611-libsql-client-deepen-10."
     },
-    "resolution": null
+    "resolution": "Already detected via existing await_pattern on .sync() through ThrowingFunctionDetector. The three sync() postconditions (sync-wrong-client-type, sync-network-failure, sync-client-closed) fire as primary + subViolations on the same call site. Verified: @libsql/client ground-truth test suite (23/23 passing) confirms detection at fixture line 378 (await db.sync() without try-catch) fires sync-wrong-client-type as primary with the other two carried as subViolations per ContractMatcher.matchDetections build at contract-matcher.ts:2727. No scanner code change needed."
   },
   {
     "id": "concern-20260612-vercel-postgres-deepen-1",
@@ -51467,7 +51467,7 @@
     "source": "deepen",
     "package": "@vercel/postgres",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "rejected",
     "description": "Add detection for @vercel/postgres sql() called as a regular function (not tagged template) — postcondition sql-incorrect-template-call. Detection: check if sql import from '@vercel/postgres' is called as a function call expression (CallExpression with sql as callee, not as tagged template TaggedTemplateExpression). Throws VercelPostgresError('incorrect_tagged_template_call') synchronously.",
     "evidence": {
       "repos": [],
@@ -51475,7 +51475,7 @@
       "violation_count": 0,
       "note": "Proactive — deepen pass 2026-06-12. Source confirmed from dist/chunk-BZ4XJVIW.cjs sqlTemplate() check."
     },
-    "resolution": null
+    "resolution": "Rejected: insufficient evidence (violation_count=0, repos=[]). The postcondition sql-incorrect-template-call is contracted but no real-world occurrences exist to validate detection logic. The @vercel/postgres package is deprecated (per contract comment, migrated to Neon Dec 2024). Implementing distinct CallExpression-vs-TaggedTemplateExpression routing for sql() would require: (1) wiring a new vercel/postgres ground-truth test in the harness (currently uses @expect-violation syntax not consumed by parseAnnotations), (2) ensuring no regression on the existing sql-query-no-error-handling path. Defer until either real FP/missed-detection evidence emerges or @vercel/postgres usage is observed at threshold in test-repos corpus."
   },
   {
     "id": "concern-20260612-vercel-postgres-deepen-2",
@@ -51483,7 +51483,7 @@
     "source": "deepen",
     "package": "@vercel/postgres",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "rejected",
     "description": "Add detection for @vercel/postgres global sql/db used without POSTGRES_URL validation — postcondition sql-missing-connection-string-on-first-use. Detection: check if sql or db is used as a tagged template (TaggedTemplateExpression) without POSTGRES_URL guard earlier in function scope. This is lower-priority than sql-incorrect-template-call since it's an environment config issue, not a code pattern. Consider flagging when sql`...` appears in a function where no process.env.POSTGRES_URL check or createPool() with explicit connectionString is present in the file scope.",
     "evidence": {
       "repos": [],
@@ -51491,7 +51491,7 @@
       "violation_count": 0,
       "note": "Proactive — deepen pass 2026-06-12. Source confirmed from dist/chunk-BZ4XJVIW.cjs Proxy lazy-init pattern."
     },
-    "resolution": null
+    "resolution": "Rejected: low signal, environment-config heuristic. Per concern description: \"Consider flagging when sql`...` appears in a function where no process.env.POSTGRES_URL check or createPool() with explicit connectionString is present.\" This is whole-file scope analysis with high false-positive rate — most callers rely on Vercel runtime env injection rather than runtime POSTGRES_URL checks. Implementing this would regress on all correctly-configured Vercel deployments. Package is deprecated; no real-world FP evidence (violation_count=0)."
   },
   {
     "id": "concern-20260612-vercel-postgres-deepen-3",
@@ -51499,7 +51499,7 @@
     "source": "deepen",
     "package": "@vercel/postgres",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "rejected",
     "description": "Add detection for @vercel/postgres postgresConnectionString() called with invalid type — postcondition postgresconnectionstring-invalid-type. LOW PRIORITY: TypeScript enforces this at compile time for typed callers. Only relevant for dynamically-typed code passing an arbitrary string as the type argument. Detection would require tracking whether the argument is a non-literal (dynamic) expression.",
     "evidence": {
       "repos": [],
@@ -51507,6 +51507,6 @@
       "violation_count": 0,
       "note": "Proactive — deepen pass 2026-06-12. Low-priority programming-error guard. TypeScript type system already prevents this for normal callers."
     },
-    "resolution": null
+    "resolution": "Rejected: per concern description, this is a LOW PRIORITY programming-error guard already enforced by TypeScript at compile time. Detection would require static analysis to identify non-literal type arguments — high implementation cost for a guard the type system already provides for typed callers. No real-world evidence (violation_count=0). The postcondition remains documented in contract.yaml as guidance."
   }
 ]
