@@ -52447,5 +52447,24 @@
       "note": "Proactive — contract added via API surface enumeration of @octokit/app@16.1.2 dist-types/types.d.ts (GetInstallationUrlInterface) + dist-node/index.js (getInstallationUrlFactory + getInstallationUrlBase). Detection rule needed to catch bare `await app.getInstallationUrl()` in OAuth landing controllers / install-redirect handlers."
     },
     "resolution": null
+  },
+  {
+    "id": "concern-20260611-apollo-server-instance-tracking",
+    "created_at": "2026-06-11",
+    "source": "onboard",
+    "package": "@apollo/server",
+    "type": "instance_tracking_gap",
+    "status": "pending",
+    "description": "Analyzer does not link ApolloServer instance methods (.start(), .stop(), .executeOperation()) back to the constructor when (a) declaration and assignment are split across statements (`let apolloServer; apolloServer = new ApolloServer(...)`) or (b) the instance flows through an async helper return value (`const apolloServer = await generateApolloServer()`). Caused 2 false negatives during real-world scan of erxes (5139★ + 3918★ combined). Pattern is common in production code that builds Apollo Server inside a factory function and returns it for shared lifecycle management.",
+    "evidence": {
+      "repos": [
+        "erxes/erxes (backend/core-api/src/apollo/apolloServer.ts:51)",
+        "erxes/erxes (backend/erxes-api-shared/src/utils/start-plugin.ts:285)"
+      ],
+      "scan_file": "work-packages/@apollo__server/real-world-scans/erxes-core-api-scan.json",
+      "violation_count": 0,
+      "note": "Both files contain `await apolloServer.start()` with no try-catch and were missed by the scanner. cisagov/RedEye (2744★) with the conventional `const apolloServer = new ApolloServer(...)` + `await apolloServer.start()` pattern was flagged correctly. Pattern likely applies to other framework-wrapper packages (fastify factory, express() returning value through helper, etc.) — fix here is generic, not @apollo/server-specific."
+    },
+    "resolution": null
   }
 ]
