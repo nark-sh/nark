@@ -53575,7 +53575,7 @@
     "source": "onboard",
     "package": "cache-manager",
     "type": "detection_gap",
-    "status": "pending",
+    "status": "rejected",
     "description": "Function-parameter type-only instance tracking does not fire for cache-manager when (a) contract declares both factory_methods: [\"createCache\"] and type_names: [\"Cache\"], AND (b) the same source file also declares a top-level `const cache: Cache = createCache()` instance. The top-level factory-tracked instance appears to dominate; function-param `cm: Cache` is added to instanceMap but downstream detection does not fire `await cm.mdel(...)`. Compare: @nestjs/cache-manager profile uses ONLY type_names + import_source (no factory_methods) and its function-param fixture (line 146 of @nestjs ground-truth.ts) fires correctly. Scanner upgrade idea: ensure instance tracking via type annotation continues to register when a separate factory-tracked instance exists in the same file; the two should compose, not race.",
     "evidence": {
       "repos": [],
@@ -53583,6 +53583,8 @@
       "violation_count": 0,
       "note": "Reproduced 2026-06-12 in nark-dev/nark-corpus-pro/packages/cache-manager/fixtures/ground-truth.ts line 165 (purgeViaFnParam). The 7 SHOULD_FIRE assertions for the top-level instance all pass; only the function-param assertion did not fire. Marked SHOULD_NOT_FIRE in the fixture as a known limitation. The dominant real-world pattern (NestJS service field via @Inject) is covered."
     },
-    "resolution": null
+    "resolution": "Deferred to scanner-upgrades backlog. Empirically verified 2026-06-12 (cycle 88): scanning packages/cache-manager/fixtures/ with --corpus nark-corpus-pro,nark-corpus produces 19 violations across all dominant patterns (cache-set-bare-await, cache-mset-bare-await, cache-del-bare-await, cache-mdel-bare-await, cache-clear-bare-await, cache-wrap-bare-await, cache-disconnect-bare-await) on ground-truth.ts, instance-usage.ts, and missing-error-handling.ts. The reported gap is the function-parameter pattern at ground-truth.ts:166 (purgeViaFnParam(cm: Cache, ...)) which is intentionally marked SHOULD_NOT_FIRE in the fixture. Composing factory_methods + type_names tracking when both apply (top-level factory-tracked instance AND function-param type-annotated instance in the same file) requires reworking how instance-tracker reconciles multiple binding sources without dominance — a non-trivial change that risks regressions in other packages that rely on single-binding tracking. The dominant real-world pattern (NestJS service field via @Inject, top-level const cache = createCache()) is covered. Evidence is 0 repos / 0 violations (self-reported via deepen/onboard agent). Deferred. Ground-truth fixture documents the limitation for future regression targeting.",
+    "resolved_at": "2026-06-12",
+    "resolved_by": "bc-scanner-stream-cycle-88"
   }
 ]
