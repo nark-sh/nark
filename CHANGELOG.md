@@ -1,5 +1,11 @@
 # Changelog
 
+## [3.0.2] — 2026-06-14
+
+### Added
+
+- Telemetry payload now forwards `nonCoverableBreakdown` (the per-reason buckets of path-alias / node-builtin / types-only / workspace / marker / dev-only packages) when present. This lets dashboards mirror the CLI's classification without re-deriving it. The field is optional and absent when nothing is non-coverable, so older telemetry consumers are unaffected.
+
 ## [2.4.0] — 2026-06-01
 
 ### Added

@@ -1483,6 +1483,13 @@ async function main(options: any) {
         : {}),
       ...(packageVersions ? { packageVersions } : {}),
       ...(uncoveredPackages ? { uncoveredPackages } : {}),
+      // qt-181: forward the per-reason non-coverable breakdown so dashboards
+      // can mirror the CLI's classification 1:1 instead of re-deriving it (the
+      // SaaS has no node_modules / package.json access at render time).
+      ...(packageDiscovery?.nonCoverableBreakdown &&
+      Object.keys(packageDiscovery.nonCoverableBreakdown).length > 0
+        ? { nonCoverableBreakdown: packageDiscovery.nonCoverableBreakdown }
+        : {}),
     };
 
     let telemetryResult: TelemetryResult | undefined;
