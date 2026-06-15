@@ -406,7 +406,8 @@ export type NonCoverableReason =
   | "node-builtin" // import like `node:crypto` — Node built-in with new-style scheme
   | "workspace" // pnpm/yarn workspace package (version "workspace:*")
   | "marker" // Next.js / framework marker like `server-only`, `client-only`
-  | "dev-only"; // listed only in devDependencies — not runtime
+  | "dev-only" // listed only in devDependencies — not runtime
+  | "types-only"; // @types/* — DefinitelyTyped declarations, no runtime code
 
 /**
  * A package discovered in the project

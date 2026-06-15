@@ -473,11 +473,12 @@ export function printPackageDiscoveryReport(
     const labels: Record<string, string> = {
       "path-alias": "Path aliases",
       "node-builtin": "Node built-ins",
+      "types-only": "Type declarations",
       workspace: "Workspace",
       marker: "Markers",
       "dev-only": "DevDependencies",
     };
-    const order = ["path-alias", "node-builtin", "workspace", "marker", "dev-only"];
+    const order = ["path-alias", "node-builtin", "types-only", "workspace", "marker", "dev-only"];
     const nonCoverableTotal = Object.values(
       discovery.nonCoverableBreakdown,
     ).reduce((sum, list) => sum + (list?.length ?? 0), 0);

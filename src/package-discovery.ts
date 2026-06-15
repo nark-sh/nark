@@ -220,9 +220,10 @@ export class PackageDiscovery {
    * Rules (first match wins):
    * 1. `@/...` — tsconfig path alias (user-defined, not an npm package).
    * 2. `node:...` — Node built-in with new-style import scheme.
-   * 3. Framework marker (`server-only`, `client-only`).
-   * 4. Workspace package (target package.json declares it as `workspace:*`).
-   * 5. Dev-only dependency (in devDependencies AND NOT in dependencies).
+   * 3. `@types/...` — DefinitelyTyped declarations; no runtime code to contract.
+   * 4. Framework marker (`server-only`, `client-only`).
+   * 5. Workspace package (target package.json declares it as `workspace:*`).
+   * 6. Dev-only dependency (in devDependencies AND NOT in dependencies).
    *
    * Notes:
    * - Names that appear in BOTH dependencies and devDependencies are runtime.
@@ -238,6 +239,7 @@ export class PackageDiscovery {
   ): NonCoverableReason | null {
     if (name.startsWith("@/")) return "path-alias";
     if (name.startsWith("node:")) return "node-builtin";
+    if (name.startsWith("@types/")) return "types-only";
     if (FRAMEWORK_MARKERS.has(name)) return "marker";
     if (hints.workspaceDeps.has(name)) return "workspace";
     if (hints.devDeps.has(name) && !hints.runtimeDeps.has(name)) {
@@ -1171,11 +1173,12 @@ export class PackageDiscovery {
       const labels: Record<string, string> = {
         "path-alias": "Path aliases",
         "node-builtin": "Node built-ins",
+        "types-only": "Type declarations",
         workspace: "Workspace",
         marker: "Markers",
         "dev-only": "DevDependencies",
       };
-      const order = ["path-alias", "node-builtin", "workspace", "marker", "dev-only"];
+      const order = ["path-alias", "node-builtin", "types-only", "workspace", "marker", "dev-only"];
       const nonCoverableTotal = Object.values(
         discovery.nonCoverableBreakdown,
       ).reduce((sum, list) => sum + (list?.length ?? 0), 0);
