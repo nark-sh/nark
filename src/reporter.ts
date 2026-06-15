@@ -428,29 +428,34 @@ export function printPackageDiscoveryReport(
 
   if (discovery.withContracts > 0) {
     console.log(`\n  ${chalk.green("✓")} Packages with contracts:`);
-    for (const pkg of discovery.packages.filter((p) => p.hasContract)) {
+    for (const pkg of discovery.packages.filter(
+      (p) => p.hasContract && !p.nonCoverableReason,
+    )) {
       console.log(
         `    ${pkg.name}@${pkg.version} ${chalk.dim(`(contract v${pkg.contractVersion})`)}`,
       );
     }
   }
 
-  if (discovery.withoutContracts > 0 && discovery.withoutContracts <= 20) {
+  // Uncovered list excludes non-coverable packages — those get their own
+  // breakdown below so the user can see exactly what was filtered and why.
+  const uncoveredCoverable = discovery.packages.filter(
+    (p) => !p.hasContract && !p.nonCoverableReason,
+  );
+  if (uncoveredCoverable.length > 0 && uncoveredCoverable.length <= 20) {
     console.log(`\n  ${chalk.yellow("⚠")} Packages without contracts:`);
-    for (const pkg of discovery.packages.filter((p) => !p.hasContract)) {
+    for (const pkg of uncoveredCoverable) {
       const usageInfo =
         pkg.usedIn.length > 0
           ? chalk.dim(` (used in ${pkg.usedIn.length} files)`)
           : "";
       console.log(`    ${pkg.name}@${pkg.version}${usageInfo}`);
     }
-  } else if (discovery.withoutContracts > 20) {
+  } else if (uncoveredCoverable.length > 20) {
     console.log(
       `\n  ${chalk.yellow("⚠")} Packages without contracts (showing top 20):`,
     );
-    for (const pkg of discovery.packages
-      .filter((p) => !p.hasContract)
-      .slice(0, 20)) {
+    for (const pkg of uncoveredCoverable.slice(0, 20)) {
       const usageInfo =
         pkg.usedIn.length > 0
           ? chalk.dim(` (used in ${pkg.usedIn.length} files)`)
@@ -458,8 +463,36 @@ export function printPackageDiscoveryReport(
       console.log(`    ${pkg.name}@${pkg.version}${usageInfo}`);
     }
     console.log(
-      `    ${chalk.dim(`... and ${discovery.withoutContracts - 20} more`)}`,
+      `    ${chalk.dim(`... and ${uncoveredCoverable.length - 20} more`)}`,
     );
+  }
+
+  // Non-coverable breakdown — shown so users can see what was filtered out of
+  // the coverage % denominator and why.
+  if (discovery.nonCoverableBreakdown) {
+    const labels: Record<string, string> = {
+      "path-alias": "Path aliases",
+      "node-builtin": "Node built-ins",
+      workspace: "Workspace",
+      marker: "Markers",
+      "dev-only": "DevDependencies",
+    };
+    const order = ["path-alias", "node-builtin", "workspace", "marker", "dev-only"];
+    const nonCoverableTotal = Object.values(
+      discovery.nonCoverableBreakdown,
+    ).reduce((sum, list) => sum + (list?.length ?? 0), 0);
+    if (nonCoverableTotal > 0) {
+      console.log(
+        `\n  ${chalk.dim("Non-coverable packages (excluded from coverage):")}`,
+      );
+      for (const key of order) {
+        const names = discovery.nonCoverableBreakdown[key as keyof typeof discovery.nonCoverableBreakdown];
+        if (!names || names.length === 0) continue;
+        console.log(
+          chalk.dim(`    ${labels[key]}: `) + chalk.dim(names.join(", ")),
+        );
+      }
+    }
   }
 
   console.log("");

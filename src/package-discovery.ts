@@ -10,10 +10,31 @@ import * as path from "path";
 import * as ts from "typescript";
 import {
   DiscoveredPackage,
+  NonCoverableReason,
   PackageDiscoveryResult,
   PackageContract,
 } from "./types.js";
 import { selectContractForVersion } from "./corpus-loader.js";
+
+/**
+ * Framework markers that are imported as if they were packages but produce
+ * no runtime side effects and have no async error contract (Next.js uses these
+ * to enforce server/client boundaries at build time).
+ */
+const FRAMEWORK_MARKERS = new Set(["server-only", "client-only"]);
+
+/**
+ * Hints sourced from the *target's* package.json. Used to classify discovered
+ * packages as workspace deps or dev-only deps (non-coverable).
+ */
+interface PackageJsonHints {
+  /** Package names declared in `dependencies` (any workspace). Runtime deps. */
+  runtimeDeps: Set<string>;
+  /** Package names declared in `devDependencies` (any workspace). */
+  devDeps: Set<string>;
+  /** Package names whose version spec starts with `workspace:` */
+  workspaceDeps: Set<string>;
+}
 
 /**
  * Packages that should be excluded from uncovered package reporting.
@@ -117,8 +138,9 @@ export class PackageDiscovery {
     projectRoot: string,
     tsconfigPath: string,
   ): Promise<PackageDiscoveryResult> {
-    // Step 1: Read package.json dependencies
-    const packageJsonDeps = await this.readPackageJson(projectRoot);
+    // Step 1: Read package.json dependencies (also collects classification hints)
+    const { deps: packageJsonDeps, hints } =
+      await this.readPackageJson(projectRoot);
 
     // Step 2: Scan source files for actual imports (returns both import map and program)
     const { imports: importedPackages, program } =
@@ -146,18 +168,82 @@ export class PackageDiscovery {
       pkg.callSiteCount = callSiteCounts.get(pkg.name) ?? 0;
     }
 
-    // Step 7: Calculate statistics
-    const withContracts = packagesWithContracts.filter(
-      (p) => p.hasContract,
-    ).length;
-    const withoutContracts = packagesWithContracts.length - withContracts;
+    // Step 7: Classify non-coverable packages (path aliases, node: builtins,
+    // workspace deps, dev-only deps, framework markers). These remain in
+    // `packages` but are excluded from coverage counters so the percentage
+    // reflects real npm runtime packages only.
+    for (const pkg of packagesWithContracts) {
+      const reason = this.classifyNonCoverable(pkg.name, hints);
+      if (reason) {
+        pkg.nonCoverableReason = reason;
+        // A non-coverable package should not claim contract coverage even if
+        // the loader happens to have a profile with a colliding name.
+        pkg.hasContract = false;
+        pkg.contractVersion = undefined;
+      }
+    }
+
+    // Step 8: Build per-reason breakdown and coverage counts.
+    const nonCoverableBreakdown: Partial<Record<NonCoverableReason, string[]>> =
+      {};
+    const coverable: DiscoveredPackage[] = [];
+    for (const pkg of packagesWithContracts) {
+      if (pkg.nonCoverableReason) {
+        const bucket = (nonCoverableBreakdown[pkg.nonCoverableReason] ??= []);
+        bucket.push(pkg.name);
+      } else {
+        coverable.push(pkg);
+      }
+    }
+    for (const reason of Object.keys(nonCoverableBreakdown) as NonCoverableReason[]) {
+      nonCoverableBreakdown[reason]!.sort();
+    }
+
+    const withContracts = coverable.filter((p) => p.hasContract).length;
+    const withoutContracts = coverable.length - withContracts;
 
     return {
-      total: packagesWithContracts.length,
+      total: coverable.length,
       withContracts,
       withoutContracts,
       packages: packagesWithContracts,
+      ...(Object.keys(nonCoverableBreakdown).length > 0
+        ? { nonCoverableBreakdown }
+        : {}),
     };
+  }
+
+  /**
+   * Classify a discovered import as non-coverable, returning the reason, or
+   * null if it's a real coverable npm runtime package.
+   *
+   * Rules (first match wins):
+   * 1. `@/...` — tsconfig path alias (user-defined, not an npm package).
+   * 2. `node:...` — Node built-in with new-style import scheme.
+   * 3. Framework marker (`server-only`, `client-only`).
+   * 4. Workspace package (target package.json declares it as `workspace:*`).
+   * 5. Dev-only dependency (in devDependencies AND NOT in dependencies).
+   *
+   * Notes:
+   * - Names that appear in BOTH dependencies and devDependencies are runtime.
+   * - Path aliases other than `@/` (e.g. `~/foo`, `app/foo`) are out of scope
+   *   here — the existing tsconfig-driven `extractPathAliases` handles them
+   *   when paths are declared in the scanned tsconfig. The `@/` rule is the
+   *   safety net for monorepos where the root tsconfig has no `paths` but
+   *   sub-app tsconfigs do.
+   */
+  private classifyNonCoverable(
+    name: string,
+    hints: PackageJsonHints,
+  ): NonCoverableReason | null {
+    if (name.startsWith("@/")) return "path-alias";
+    if (name.startsWith("node:")) return "node-builtin";
+    if (FRAMEWORK_MARKERS.has(name)) return "marker";
+    if (hints.workspaceDeps.has(name)) return "workspace";
+    if (hints.devDeps.has(name) && !hints.runtimeDeps.has(name)) {
+      return "dev-only";
+    }
+    return null;
   }
 
   /**
@@ -189,21 +275,50 @@ export class PackageDiscovery {
   }
 
   /**
-   * Read dependencies from package.json
+   * Read dependencies from package.json. Also collects classification hints
+   * (runtimeDeps / devDeps / workspaceDeps) used downstream to tag
+   * non-coverable packages.
+   *
+   * Returns:
+   *   - `deps`: legacy single-version map used by the merge step.
+   *   - `hints`: per-name classification info for the non-coverable filter.
+   *
+   * Hints are aggregated across the root package.json AND any workspace
+   * package.json files we can find. A name appearing as a runtime dep in
+   * ANY workspace makes it a runtime dep for classification purposes (so we
+   * never accidentally tag a real runtime package as dev-only just because
+   * a different workspace listed it in devDependencies).
    */
-  private async readPackageJson(
-    projectRoot: string,
-  ): Promise<Map<string, { version: string }>> {
+  private async readPackageJson(projectRoot: string): Promise<{
+    deps: Map<string, { version: string }>;
+    hints: PackageJsonHints;
+  }> {
     const packages = new Map<string, { version: string }>();
+    const hints: PackageJsonHints = {
+      runtimeDeps: new Set(),
+      devDeps: new Set(),
+      workspaceDeps: new Set(),
+    };
 
     const addDeps = (packageJson: any) => {
-      const deps = {
-        ...packageJson.dependencies,
-        ...packageJson.devDependencies,
-      };
-      for (const [name, version] of Object.entries(deps)) {
+      const runtime = packageJson.dependencies ?? {};
+      const dev = packageJson.devDependencies ?? {};
+      for (const [name, version] of Object.entries(runtime)) {
         if (!packages.has(name)) {
           packages.set(name, { version: version as string });
+        }
+        hints.runtimeDeps.add(name);
+        if (typeof version === "string" && version.startsWith("workspace:")) {
+          hints.workspaceDeps.add(name);
+        }
+      }
+      for (const [name, version] of Object.entries(dev)) {
+        if (!packages.has(name)) {
+          packages.set(name, { version: version as string });
+        }
+        hints.devDeps.add(name);
+        if (typeof version === "string" && version.startsWith("workspace:")) {
+          hints.workspaceDeps.add(name);
         }
       }
     };
@@ -214,9 +329,20 @@ export class PackageDiscovery {
       const packageJson = JSON.parse(content);
       addDeps(packageJson);
 
-      // For monorepos: if root has workspaces or very few deps, also scan
-      // common workspace locations to collect per-package dependencies.
-      if (packages.size < 5 || packageJson.workspaces) {
+      // For monorepos: if root has workspaces (yarn/npm), pnpm-workspace.yaml
+      // (pnpm), or very few deps, also scan common workspace locations to
+      // collect per-package dependencies. Without the pnpm probe, a pnpm
+      // monorepo with deps only in apps/web/package.json (and a dev-only root)
+      // would silently miss every workspace dep — causing the non-coverable
+      // classifier to mis-tag workspace packages as runtime gaps.
+      let hasPnpmWorkspace = false;
+      try {
+        await fs.access(path.join(projectRoot, "pnpm-workspace.yaml"));
+        hasPnpmWorkspace = true;
+      } catch {
+        // not a pnpm workspace — fine
+      }
+      if (packages.size < 5 || packageJson.workspaces || hasPnpmWorkspace) {
         const workspaceDirs = ["packages", "apps", "services", "libs"];
         for (const wsDir of workspaceDirs) {
           try {
@@ -245,9 +371,10 @@ export class PackageDiscovery {
     } catch {
       // No package.json found — this is expected when scanning a non-project directory.
       // Silently continue; we'll still discover packages from import statements.
+      // hints stay empty, which falls back to skipping the devDep filter cleanly.
     }
 
-    return packages;
+    return { deps: packages, hints };
   }
 
   /**
@@ -1010,7 +1137,9 @@ export class PackageDiscovery {
 
     if (discovery.withContracts > 0) {
       lines.push("✓ Packages with contracts:");
-      for (const pkg of discovery.packages.filter((p) => p.hasContract)) {
+      for (const pkg of discovery.packages.filter(
+        (p) => p.hasContract && !p.nonCoverableReason,
+      )) {
         lines.push(
           `  ${pkg.name}@${pkg.version} (contract v${pkg.contractVersion})`,
         );
@@ -1018,23 +1147,47 @@ export class PackageDiscovery {
       lines.push("");
     }
 
-    if (discovery.withoutContracts > 0 && discovery.withoutContracts <= 20) {
+    const uncoveredCoverable = discovery.packages.filter(
+      (p) => !p.hasContract && !p.nonCoverableReason,
+    );
+    if (uncoveredCoverable.length > 0 && uncoveredCoverable.length <= 20) {
       lines.push("⚠ Packages without contracts:");
-      for (const pkg of discovery.packages.filter((p) => !p.hasContract)) {
+      for (const pkg of uncoveredCoverable) {
         lines.push(`  ${pkg.name}@${pkg.version}`);
       }
       lines.push("");
-    } else if (discovery.withoutContracts > 20) {
+    } else if (uncoveredCoverable.length > 20) {
       lines.push(
-        `⚠ ${discovery.withoutContracts} packages without contracts (showing top 20):`,
+        `⚠ ${uncoveredCoverable.length} packages without contracts (showing top 20):`,
       );
-      for (const pkg of discovery.packages
-        .filter((p) => !p.hasContract)
-        .slice(0, 20)) {
+      for (const pkg of uncoveredCoverable.slice(0, 20)) {
         lines.push(`  ${pkg.name}@${pkg.version}`);
       }
-      lines.push(`  ... and ${discovery.withoutContracts - 20} more`);
+      lines.push(`  ... and ${uncoveredCoverable.length - 20} more`);
       lines.push("");
+    }
+
+    if (discovery.nonCoverableBreakdown) {
+      const labels: Record<string, string> = {
+        "path-alias": "Path aliases",
+        "node-builtin": "Node built-ins",
+        workspace: "Workspace",
+        marker: "Markers",
+        "dev-only": "DevDependencies",
+      };
+      const order = ["path-alias", "node-builtin", "workspace", "marker", "dev-only"];
+      const nonCoverableTotal = Object.values(
+        discovery.nonCoverableBreakdown,
+      ).reduce((sum, list) => sum + (list?.length ?? 0), 0);
+      if (nonCoverableTotal > 0) {
+        lines.push("Non-coverable packages (excluded from coverage):");
+        for (const key of order) {
+          const names = discovery.nonCoverableBreakdown[key as NonCoverableReason];
+          if (!names || names.length === 0) continue;
+          lines.push(`  ${labels[key]}: ${names.join(", ")}`);
+        }
+        lines.push("");
+      }
     }
 
     return lines.join("\n");

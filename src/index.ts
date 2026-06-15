@@ -1423,7 +1423,12 @@ async function main(options: any) {
     const uncoveredPackages = (() => {
       try {
         const uncontracted = (packageDiscovery?.packages ?? [])
-          .filter((p: any) => !p.hasContract && !isNonRuntimePackage(p.name))
+          .filter(
+            (p: any) =>
+              !p.hasContract &&
+              !p.nonCoverableReason &&
+              !isNonRuntimePackage(p.name),
+          )
           .sort(
             (a: any, b: any) => (b.callSiteCount ?? 0) - (a.callSiteCount ?? 0),
           )
@@ -1773,7 +1778,11 @@ function printCompactReport(opts: {
   if (packageDiscovery) {
     const uncovered = packageDiscovery.packages
       .filter(
-        (p) => !p.hasContract && !isNonRuntimePackage(p.name) && p.callSiteCount > 0,
+        (p) =>
+          !p.hasContract &&
+          !p.nonCoverableReason &&
+          !isNonRuntimePackage(p.name) &&
+          p.callSiteCount > 0,
       )
       .sort((a, b) => b.callSiteCount - a.callSiteCount);
 

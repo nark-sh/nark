@@ -395,6 +395,20 @@ export interface CorpusLoadResult {
 }
 
 /**
+ * Why a discovered "package" is not coverable by any nark profile.
+ *
+ * Non-coverable imports are tracked but excluded from coverage % numerator
+ * AND denominator so the percentage reflects actually-coverable npm runtime
+ * packages, not tsconfig path aliases, Node built-ins, etc.
+ */
+export type NonCoverableReason =
+  | "path-alias" // import like `@/lib/foo` — user-defined tsconfig alias
+  | "node-builtin" // import like `node:crypto` — Node built-in with new-style scheme
+  | "workspace" // pnpm/yarn workspace package (version "workspace:*")
+  | "marker" // Next.js / framework marker like `server-only`, `client-only`
+  | "dev-only"; // listed only in devDependencies — not runtime
+
+/**
  * A package discovered in the project
  */
 export interface DiscoveredPackage {
@@ -407,16 +421,43 @@ export interface DiscoveredPackage {
   contractVersion?: string;
   usedIn: string[]; // Files where the package is imported
   callSiteCount: number; // Number of call expressions using this package
+  /**
+   * If set, this import is NOT a real coverable npm runtime package. It is
+   * still surfaced in discovery so the user can see what was filtered, but
+   * it is excluded from the coverage % numerator/denominator.
+   */
+  nonCoverableReason?: NonCoverableReason;
 }
 
 /**
  * Result of package discovery scan
  */
 export interface PackageDiscoveryResult {
+  /**
+   * Total *coverable* packages discovered (excludes non-coverable like path
+   * aliases, Node built-ins, workspace deps, dev-only deps, framework markers).
+   * This is the denominator of the coverage %.
+   */
   total: number;
+  /**
+   * Coverable packages with a matching contract — the numerator of coverage %.
+   */
   withContracts: number;
+  /**
+   * Coverable packages with no matching contract.
+   */
   withoutContracts: number;
+  /**
+   * All discovered packages — coverable AND non-coverable. Use `nonCoverableReason`
+   * to distinguish. Non-coverable entries are excluded from `total`/`withContracts`/
+   * `withoutContracts` but are present here so the report can show a breakdown.
+   */
   packages: DiscoveredPackage[];
+  /**
+   * Per-reason buckets of non-coverable imports. Sorted alphabetically within
+   * each bucket. Empty buckets are omitted.
+   */
+  nonCoverableBreakdown?: Partial<Record<NonCoverableReason, string[]>>;
 }
 
 /**
