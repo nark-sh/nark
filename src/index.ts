@@ -1077,12 +1077,29 @@ async function main(options: any) {
     }
   })();
 
+  // Compute the *applied* contract set: contracts whose package was actually
+  // discovered in the target codebase. This is the intersection of loaded
+  // contracts and discovered packages. When discovery is disabled, fall back
+  // to the full loaded set (legacy semantics).
+  //
+  // Used as the source of truth for both the user-visible "Contracts applied"
+  // count and the telemetry `contractIds` field so the report and the payload
+  // stay internally consistent. Previously these reflected the loaded count
+  // (e.g. 640 in a multi-corpus scan) even though only the discovered subset
+  // was actually exercised against the target code (e.g. 51).
+  const appliedContractIds = packageDiscovery
+    ? packageDiscovery.packages
+        .filter((p) => p.hasContract)
+        .map((p) => p.name)
+    : Array.from(corpusResult.contracts.keys());
+  const appliedContractCount = appliedContractIds.length;
+
   // Generate audit record
   const packagesAnalyzed = Array.from(corpusResult.contracts.keys());
   const auditRecord = await generateAuditRecord(violations, {
     tsconfigPath: options.tsconfig,
     packagesAnalyzed,
-    contractsApplied: stats.contractsApplied,
+    contractsApplied: appliedContractCount,
     filesAnalyzed: stats.filesAnalyzed,
     corpusVersion: corpusPkgVersion,
     callsitesByPackage: stats.callsitesByPackage,
@@ -1312,11 +1329,9 @@ async function main(options: any) {
   // Telemetry tolerates undefined; the resolver now returns "unknown" instead
   // of undefined when package.json can't be read, which is fine for telemetry.
   {
-    const contractIds = corpusResult.contracts
-      ? Array.from((corpusResult.contracts as Map<string, any>).values())
-          .map((c: any) => c.id ?? c.contractId ?? c.package ?? "")
-          .filter(Boolean)
-      : [];
+    // Use the applied set (discovered ∩ loaded), not the full loaded set.
+    // Filter out any empty strings defensively.
+    const contractIds = appliedContractIds.filter(Boolean);
     const packageNames =
       packageDiscovery?.packages?.map((p: any) => p.name) ?? [];
     const violationCountsByContract: Record<string, number> = {};
