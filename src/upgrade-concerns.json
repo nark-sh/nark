@@ -53737,7 +53737,7 @@
     "source": "onboard",
     "package": "minio",
     "type": "detection_gap",
-    "status": "queued",
+    "status": "rejected",
     "description": "minio.Client field on a class (private minioClient!: Client) is not picked up by InstanceTrackerPlugin when accessed via `this.minioClient.<method>()` from a class private/instance method. Real-world miss observed in diia-open-source/be-gateway-service `src/services/minioStorage.ts:72` where `await this.minioClient.bucketExists(this.bucketName)` was expected to fire minio-bucketexists-no-try-catch but did not. The same file at line 48 (putObject) correctly fires (or would, but is wrapped in try-catch). Hypothesis: the definite-assignment `!:` field declaration form is not threaded through instance tracking, or the `this.<field>` resolution path is missing for fields whose type annotation is a registered class_names entry. Affects all packages using Client-class fields with instance methods (minio, @aws-sdk/*, @prisma/*, mongo, etc).",
     "evidence": {
       "repos": [
@@ -53754,6 +53754,8 @@
         "expected_postcondition": "minio-bucketexists-no-try-catch"
       }
     },
-    "fixture_required": "A minimal repro fixture: class with `private client!: Client` field initialized in constructor + a private async method calling `await this.client.someMethod()` outside try-catch. Should produce a violation when this.client is resolvable to a minio.Client via type annotation."
+    "fixture_required": "A minimal repro fixture: class with `private client!: Client` field initialized in constructor + a private async method calling `await this.client.someMethod()` outside try-catch. Should produce a violation when this.client is resolvable to a minio.Client via type annotation.",
+    "resolved_at": "2026-06-15",
+    "resolution": "Rejected — gap does not exist in current scanner. Investigation: (1) Added a regression fixture to nark-corpus-pro/packages/minio/fixtures/ground-truth.ts mirroring the exact be-gateway-service pattern (class with `private minioClient!: Client` field, assigned in constructor via `this.minioClient = new Client(...)`, called as `await this.minioClient.bucketExists(bucket)` from both public and private async methods). (2) All 4 new test cases pass: 3 SHOULD_FIRE on bare-await calls (bucketExists, putObject in private method) and 1 SHOULD_NOT_FIRE on try-catch-wrapped call. (3) Full 22-test suite for minio passes. The detection path that handles this pattern: InstanceTrackerPlugin.beforeTraversal calls walkTypeAnnotations on every PropertyDeclaration with a type annotation; `Client` is in contract.detection.type_names and is confirmed via the file's importMap (import { Client } from 'minio'); the PropertyChainDetector's `this.member.method()` branch then resolves `minioClient` via instanceTracker.resolveIdentifier(). (4) Root-cause of the original be-gateway-scan miss: the scan file (work-packages/minio/real-world-scans/be-gateway-scan.json) shows `contracts_applied: 0`, meaning package discovery applied zero contracts during that scan — almost certainly because the test repo had no node_modules installed (TypeScript checker resolves every package call as `any`, package discovery fails, no contracts get applied). This is an environment / install issue, not a scanner detection gap. Regression fixture retained as guard against future regressions to walkTypeAnnotations / PropertyDeclaration handling."
   }
 ]
