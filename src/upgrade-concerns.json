@@ -53757,5 +53757,30 @@
     "fixture_required": "A minimal repro fixture: class with `private client!: Client` field initialized in constructor + a private async method calling `await this.client.someMethod()` outside try-catch. Should produce a violation when this.client is resolvable to a minio.Client via type annotation.",
     "resolved_at": "2026-06-15",
     "resolution": "Rejected — gap does not exist in current scanner. Investigation: (1) Added a regression fixture to nark-corpus-pro/packages/minio/fixtures/ground-truth.ts mirroring the exact be-gateway-service pattern (class with `private minioClient!: Client` field, assigned in constructor via `this.minioClient = new Client(...)`, called as `await this.minioClient.bucketExists(bucket)` from both public and private async methods). (2) All 4 new test cases pass: 3 SHOULD_FIRE on bare-await calls (bucketExists, putObject in private method) and 1 SHOULD_NOT_FIRE on try-catch-wrapped call. (3) Full 22-test suite for minio passes. The detection path that handles this pattern: InstanceTrackerPlugin.beforeTraversal calls walkTypeAnnotations on every PropertyDeclaration with a type annotation; `Client` is in contract.detection.type_names and is confirmed via the file's importMap (import { Client } from 'minio'); the PropertyChainDetector's `this.member.method()` branch then resolves `minioClient` via instanceTracker.resolveIdentifier(). (4) Root-cause of the original be-gateway-scan miss: the scan file (work-packages/minio/real-world-scans/be-gateway-scan.json) shows `contracts_applied: 0`, meaning package discovery applied zero contracts during that scan — almost certainly because the test repo had no node_modules installed (TypeScript checker resolves every package call as `any`, package discovery fails, no contracts get applied). This is an environment / install issue, not a scanner detection gap. Regression fixture retained as guard against future regressions to walkTypeAnnotations / PropertyDeclaration handling."
+  },
+  {
+    "id": "concern-20260615-tencentcloud-action-method-wildcard",
+    "created_at": "2026-06-15",
+    "source": "onboard",
+    "package": "tencentcloud-sdk-nodejs",
+    "type": "detection_gap",
+    "status": "pending",
+    "description": "tencentcloud-sdk-nodejs has 255+ sub-product Client classes (cvm, vpc, tmt, cos, sms, ocr, ...) each extending AbstractClient. Sub-product Clients expose action-specific methods (DescribeZones, TextTranslateBatch, DescribeInstances, ...) that internally call this.request(action, req). The contract documents 3 top-level methods (request, requestOctetStream, getCredential) because those are the only methods named in official docs. The analyzer matches function calls by literal name, so the dominant real-world callsite pattern (subclass extends X Client; super.MethodName(req).then(...)) is missed entirely. Same issue affects @alicloud sub-products and similar API-generator-based SDKs. Fix: wildcard / catch-all detection on any async method called on a class instance imported from tencentcloud-sdk-nodejs/tencentcloud/services/**/v*/**_client paths.",
+    "evidence": {
+      "repos": [
+        "solidSpoon/DashPlayer"
+      ],
+      "scan_file": "work-packages/tencentcloud-sdk-nodejs/real-world-scans/DashPlayer-scan.json",
+      "violation_count": 0,
+      "expected_violation_count": 1,
+      "fix_target": "scanner",
+      "details": {
+        "observed_callsite": "src/backend/infrastructure/translate/clients/TencentClient.ts:55-57",
+        "observed_pattern": "await super.TextTranslateBatch(param).then((resp) => resp.TargetTextList)",
+        "contract_function_name": "request",
+        "contract_postcondition_id": "error-network-or-api",
+        "pattern": "subclass-of-client-from-deep-import-calls-action-method-without-try-catch"
+      }
+    }
   }
 ]
