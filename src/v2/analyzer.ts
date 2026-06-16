@@ -145,34 +145,49 @@ export class UniversalAnalyzer {
             `Skipping missing files and scanning ${this.program.getSourceFiles().length} available files.\n`
           );
         }
-        return;
-      }
-
-      throw new Error(`Error parsing tsconfig.json: ${errors}`);
-    }
-
-    // Create TypeScript program
-    try {
-      this.program = ts.createProgram({
-        rootNames: parsedConfig.fileNames,
-        options: parsedConfig.options,
-      });
-    } catch (error: unknown) {
-      throw new Error(`Failed to create TypeScript program: ${error instanceof Error ? error.message : String(error)}`);
-    }
-
-    const fileNotFoundDiagnostics = ts.getPreEmitDiagnostics(this.program)
-      .filter(d => d.code === 6053);
-    if (fileNotFoundDiagnostics.length > 0) {
-      if (typeof process !== 'undefined' && process.stderr) {
-        process.stderr.write(
-          `Warning: ${fileNotFoundDiagnostics.length} file(s) listed in tsconfig not found on disk (codegen or missing build output). ` +
-          `Skipping missing files and scanning ${this.program.getSourceFiles().length} available files.\n`
-        );
+        // NOTE: Fall through to the shared contract-matcher init below — do NOT
+        // return here. Returning early skipped ContractMatcher creation, which
+        // meant every scan that hit the synthetic-tsconfig fallback path
+        // produced 0 violations even when detections fired correctly.
+        // Evidence: concern-20260615-missing-deps-named-import-resolution
+        // (modern-tar onboard Phase 8 reproduction: a Vite/Vue tsconfig
+        // extending `@vue/tsconfig/tsconfig.dom.json` triggers this fallback
+        // when node_modules is absent under NARK_ALLOW_MISSING_DEPS=1; the
+        // unpackTar detection was created but never matched against the
+        // contract because contractMatcher was undefined).
+      } else {
+        throw new Error(`Error parsing tsconfig.json: ${errors}`);
       }
     }
 
-    // Create contract matcher if contracts are provided
+    // Create the program for the normal (non-fallback) path.
+    // The fallback path above already populated this.program — only run this
+    // when we didn't take the fallback branch.
+    if (!this.program) {
+      try {
+        this.program = ts.createProgram({
+          rootNames: parsedConfig.fileNames,
+          options: parsedConfig.options,
+        });
+      } catch (error: unknown) {
+        throw new Error(`Failed to create TypeScript program: ${error instanceof Error ? error.message : String(error)}`);
+      }
+
+      const fileNotFoundDiagnostics = ts.getPreEmitDiagnostics(this.program)
+        .filter(d => d.code === 6053);
+      if (fileNotFoundDiagnostics.length > 0) {
+        if (typeof process !== 'undefined' && process.stderr) {
+          process.stderr.write(
+            `Warning: ${fileNotFoundDiagnostics.length} file(s) listed in tsconfig not found on disk (codegen or missing build output). ` +
+            `Skipping missing files and scanning ${this.program.getSourceFiles().length} available files.\n`
+          );
+        }
+      }
+    }
+
+    // Create contract matcher if contracts are provided.
+    // This runs for BOTH the normal path and the synthetic-tsconfig fallback
+    // path above — previously the fallback returned early and skipped this.
     if (this.contracts.size > 0) {
       this.contractMatcher = new ContractMatcher(this.contracts, {
         projectRoot: path.dirname(path.resolve(this.config.tsConfigPath)),

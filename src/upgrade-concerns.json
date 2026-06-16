@@ -53790,7 +53790,7 @@
     "source": "onboard",
     "package": "modern-tar",
     "type": "detection_gap",
-    "status": "pending",
+    "status": "implemented",
     "description": "When NARK_ALLOW_MISSING_DEPS=1 is set and node_modules is absent, bare named imports do not get routed through the contract matcher. ThrowingFunctionDetector.handleDirectCall at throwing-function-detector.ts:239 relies on context.importMap.get(identName), which appears to require a resolvable .d.ts to populate the binding. Result: real bare-import call sites (e.g. await unpackTar(buffer)) silently skip detection. The package-discovery layer DID detect modern-tar in the file (logs show \"modern-tar: imported in 1 file(s)\"), so the gap is in name-to-package binding during analysis, not in package discovery.",
     "evidence": {
       "repos": [
@@ -53806,6 +53806,37 @@
         "missed_postcondition": "unpack-malformed-archive",
         "context": "pnpm install was denied; tsconfig.app.json used; 13 files analyzed but bare named imports from modern-tar produced 0 detections",
         "hypothesis": "importMap is built by walking ts.SourceFile imports + resolving each via typeChecker. When deps are missing, typeChecker returns undefined symbols; the named-import entry is either skipped or its packageName falls back to undefined. Need to fall back to the literal import specifier text (e.g. \"modern-tar\") when symbol resolution fails, mirroring the symbol?.name ?? identifier.text pattern at line 236."
+      }
+    },
+    "resolution": "The concern's hypothesis was wrong — the importMap binding works fine; the actual bug was in UniversalAnalyzer.initialize() (src/v2/analyzer.ts). The sxzz_typescript-go-playground tsconfig.app.json extends `@vue/tsconfig/tsconfig.dom.json`, which doesn't resolve when node_modules is absent. This triggered the synthetic-tsconfig fallback branch at lines 95-149. That branch created `this.program` correctly but then `return`ed early at line 148, skipping the ContractMatcher creation step at lines 175-182. Result: detections fired correctly (verified empirically — the throwing-function-detector produced `modern-tar | unpackTar | throwing-function | confidence: high` for the call site), but `this.contractMatcher` was undefined so `analyzeFile()` skipped matching at the `if (this.contractMatcher)` guard. Every scan that hit the missing-extends fallback produced 0 violations regardless of detector output. Fix: restructured initialize() so the fallback branch falls through to the shared ContractMatcher creation step instead of returning early. Added regression test src/v2/analyzer-tsconfig-fallback.test.ts with two cases (fallback path + normal path) — both verify `contractMatcher` is set post-initialize. Empirical verification: scanning sxzz_typescript-go-playground/tsconfig.app.json with NARK_ALLOW_MISSING_DEPS=1 now correctly fires the unpack-malformed-archive violation at src/core.ts:18."
+  },
+  {
+    "id": "concern-20260615-nestjs-axios-observable-handling-1",
+    "created_at": "2026-06-15",
+    "source": "onboard",
+    "package": "@nestjs/axios",
+    "type": "new_pattern",
+    "status": "pending",
+    "description": "@nestjs/axios HttpService methods (get/post/put/patch/delete/head/request/postForm/putForm/patchForm) return Observable<AxiosResponse>, not Promise. Underlying axios errors propagate via subscriber.error(err). Callers MUST satisfy the contract using ONE of three RxJS-aware patterns: (1) await firstValueFrom(...) inside a try/catch — currently DETECTED correctly; (2) .pipe(catchError(...)) on the Observable chain — currently NOT recognized as satisfying the postcondition, producing 2 FPs in ground-truth fixture (lines 139, 147); (3) .subscribe({ next, error }) with non-null error handler — currently NOT recognized, producing 1 FP in ground-truth fixture (line 159). The scanner correctly detects all 10 SHOULD_FIRE cases (bare firstValueFrom without try/catch across get/post/put/patch/delete/head/request/postForm/putForm/patchForm) and 4 SHOULD_NOT_FIRE try/catch cases. Need to extend the V2 analyzer to recognize .pipe(catchError(...)) and .subscribe({error: nonNull}) as satisfying postconditions whose throws clause says 'AxiosError emitted via the Observable error channel'.",
+    "evidence": {
+      "repos": [
+        "OpenAPITools/openapi-generator-cli",
+        "daytonaio/daytona"
+      ],
+      "scan_file": "nark-dev/nark-corpus-pro/packages/@nestjs/axios/fixtures/ground-truth.ts",
+      "violation_count": 13,
+      "expected_violation_count": 10,
+      "fix_target": "scanner",
+      "details": {
+        "ground_truth_pass_rate": "16/19 (84%)",
+        "fp_pattern_1": "httpService.get(url).pipe(map(...), catchError(...)) is flagged as get-error-4xx-5xx",
+        "fp_pattern_2": "httpService.post(url, body).pipe(map(...), catchError(...)) is flagged as post-error-4xx-5xx",
+        "fp_pattern_3": "httpService.post(url, body).subscribe({ next, error }) is flagged as post-error-4xx-5xx",
+        "tp_pattern": "await firstValueFrom(httpService.X(...)) without try/catch is correctly flagged",
+        "tn_pattern": "await firstValueFrom(httpService.X(...)) inside try/catch is correctly not flagged",
+        "proposed_fix": "When a contract postcondition's 'throws' field contains 'Observable error channel' or contract.detection.instance_chain_methods covers the verb, walk the call expression's parents: (a) if wrapped in a .pipe() whose arguments include catchError, suppress the violation; (b) if the call is followed by .subscribe({...}) and the argument object has a non-null 'error' property, suppress the violation. These check the RxJS error-handling channel just as try/catch around firstValueFrom checks the Promise rejection channel.",
+        "fixture_file": "nark-dev/nark-corpus-pro/packages/@nestjs/axios/fixtures/ground-truth.ts",
+        "test_file": "nark-dev/nark/src/v2/fixtures/@nestjs__axios.ground-truth.test.ts"
       }
     }
   }
