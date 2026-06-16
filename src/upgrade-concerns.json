@@ -53764,7 +53764,7 @@
     "source": "onboard",
     "package": "tencentcloud-sdk-nodejs",
     "type": "detection_gap",
-    "status": "in-progress",
+    "status": "rejected",
     "description": "tencentcloud-sdk-nodejs has 255+ sub-product Client classes (cvm, vpc, tmt, cos, sms, ocr, ...) each extending AbstractClient. Sub-product Clients expose action-specific methods (DescribeZones, TextTranslateBatch, DescribeInstances, ...) that internally call this.request(action, req). The contract documents 3 top-level methods (request, requestOctetStream, getCredential) because those are the only methods named in official docs. The analyzer matches function calls by literal name, so the dominant real-world callsite pattern (subclass extends X Client; super.MethodName(req).then(...)) is missed entirely. Same issue affects @alicloud sub-products and similar API-generator-based SDKs. Fix: wildcard / catch-all detection on any async method called on a class instance imported from tencentcloud-sdk-nodejs/tencentcloud/services/**/v*/**_client paths.",
     "evidence": {
       "repos": [
@@ -53781,7 +53781,8 @@
         "contract_postcondition_id": "error-network-or-api",
         "pattern": "subclass-of-client-from-deep-import-calls-action-method-without-try-catch"
       }
-    }
+    },
+    "resolution": "Deferred (not rejected on merit). The concern describes a real cross-package scanner gap: auto-generated SDK clients (tencentcloud-sdk-nodejs, @alicloud/*, similar API-generator SDKs) expose dozens of action-specific methods (TextTranslateBatch, DescribeZones, ...) on sub-Client subclasses, all internally routed to a contracted request() postcondition. Current analyzer cannot bind these action methods because (a) no class-extends tracking via HeritageClause exists in InstanceTracker, (b) no super.X() / this.X() handling exists inside subclass methods, and (c) no wildcard / catch-all mode exists in the contract schema. Implementation would require a new schema field (e.g. subclass_action_method_wildcard with deep-import-path regex + target function name), heritage-clause walking in InstanceTracker, and a new detector for super/this calls inside subclasses of contracted base classes. That is a substantial scanner architecture change (new plugin, schema migration, regression risk across 191 contracts). The evidence in this concern (1 repo, 1 expected violation) is below the skill threshold for an immediate scanner upgrade. Action taken: (1) added defensive regression fixture at nark-corpus-pro/packages/tencentcloud-sdk-nodejs/fixtures/subclass-wildcard-deferred.ts with @expect-violation annotations so the future implementation has a concrete test target, (2) deferred to a batched scanner-upgrade design once bc-fp-harvester surfaces the @alicloud and AWS SDK v2-style equivalents (>=3 distinct packages, >=3 distinct repos) so the schema + plugin design can be informed by the full cross-package surface, not just tencentcloud. Re-open as a new concern (or roll up into a batch backlog item) when threshold is met."
   },
   {
     "id": "concern-20260615-missing-deps-named-import-resolution",
