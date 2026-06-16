@@ -53886,5 +53886,28 @@
       "regression_check": "Baseline (without edit): 13 failing tests in cross-fetch + luxon fixtures. With edit: same 13 failing tests. No regressions introduced. minio (closest analog using class_names + instance_chain_methods) continues to pass 22/22."
     },
     "resolution": "Landed inline in this onboarding. Ground-truth tests for @langchain/langgraph go from 7/15 → 15/15 with the edit. Regression check: same baseline failure set on cross-fetch + luxon, no new failures; minio and @angular/router continue to pass."
+  },
+  {
+    "id": "concern-20260616-return-passthrough-not-recognized",
+    "created_at": "2026-06-16",
+    "source": "onboard-batch",
+    "package": "_scanner",
+    "type": "fp_pattern",
+    "status": "open",
+    "description": "Scanner does not treat `return X(...)` (where X is a contracted throwing function returning Promise) as ownership-pass to the caller. Helper functions that proxy a throwing call via direct return are flagged as violations even though the rejection is intentionally surfaced to the helper's caller. Generic pattern, not exponential-backoff-specific — affects any contract whose required_handling allows return-passthrough.",
+    "evidence": {
+      "repos": [
+        "tiddly-gittly/TidGi-Desktop"
+      ],
+      "scan_file": "work-packages/exponential-backoff/real-world-scans/tidgi-scan.json",
+      "violation_count": 1,
+      "fix_target": "scanner",
+      "details": {
+        "example_site": "src/services/externalAPI/retryUtility.ts:106",
+        "example_pattern": "return backOff(function_, { numOfAttempts: ... });",
+        "package_affected": "exponential-backoff",
+        "precision_impact": "Bumped exponential-backoff real-world precision from 100% to 91.7% (1 FP of 12)"
+      }
+    }
   }
 ]
