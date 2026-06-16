@@ -53730,5 +53730,30 @@
       "note": "Proactive — contract added via API surface analysis. serve() is a BuildContext instance method. Key failure modes: port-in-use (OS error), TLS half-config (missing keyfile or certfile), and lifecycle violations (serve on disposed context or twice on same context)."
     },
     "resolution": "Same detection block wires up BuildContext.serve() detection. Re-scan confirms gt_serve_no_catch at line 165 fires serve-port-in-use as primary with serve-tls-misconfiguration and serve-lifecycle-errors as subViolations (2 subViols total). gt_serve_partial_tls at line 183 also fires but with the wrong primary (serve-port-in-use instead of serve-tls-misconfiguration) — this is a separate postcondition-prioritization issue, not a detection-gap issue. Tracking that as future work; the function is now detected."
+  },
+  {
+    "id": "concern-20260615-minio-class-private-method-instance-tracking",
+    "created_at": "2026-06-15",
+    "source": "onboard",
+    "package": "minio",
+    "type": "detection_gap",
+    "status": "queued",
+    "description": "minio.Client field on a class (private minioClient!: Client) is not picked up by InstanceTrackerPlugin when accessed via `this.minioClient.<method>()` from a class private/instance method. Real-world miss observed in diia-open-source/be-gateway-service `src/services/minioStorage.ts:72` where `await this.minioClient.bucketExists(this.bucketName)` was expected to fire minio-bucketexists-no-try-catch but did not. The same file at line 48 (putObject) correctly fires (or would, but is wrapped in try-catch). Hypothesis: the definite-assignment `!:` field declaration form is not threaded through instance tracking, or the `this.<field>` resolution path is missing for fields whose type annotation is a registered class_names entry. Affects all packages using Client-class fields with instance methods (minio, @aws-sdk/*, @prisma/*, mongo, etc).",
+    "evidence": {
+      "repos": [
+        "diia-open-source/be-gateway-service"
+      ],
+      "scan_file": "work-packages/minio/real-world-scans/be-gateway-scan.json",
+      "violation_count": 0,
+      "expected_violation_count": 1,
+      "fix_target": "scanner",
+      "details": {
+        "file": "src/services/minioStorage.ts",
+        "line": 72,
+        "pattern": "private minioClient!: Client; ... await this.minioClient.bucketExists(...)",
+        "expected_postcondition": "minio-bucketexists-no-try-catch"
+      }
+    },
+    "fixture_required": "A minimal repro fixture: class with `private client!: Client` field initialized in constructor + a private async method calling `await this.client.someMethod()` outside try-catch. Should produce a violation when this.client is resolvable to a minio.Client via type annotation."
   }
 ]
