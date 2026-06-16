@@ -737,7 +737,14 @@ export class InstanceTrackerPlugin implements DetectorPlugin {
     expr: ts.CallExpression,
     context: NodeContext
   ): string | null {
-    // Walk through the call/property-access chain to find the root identifier
+    // Walk through the call/property-access chain to find the root identifier OR
+    // root NewExpression. Builder-style APIs like LangGraph's StateGraph route
+    // through:
+    //   new StateGraph(State).addNode(...).addEdge(...).compile()
+    // — the root of the chain is `new StateGraph(State)` (a NewExpression), not
+    // a plain identifier. We extend the chain walk to accept a NewExpression
+    // root and resolve its class to a package via importMap / classToPackage.
+    // Concern: bc-npm-package-onboard @langchain/langgraph 2026-06-15
     let current: ts.Expression = expr.expression;
 
     while (true) {
@@ -745,9 +752,27 @@ export class InstanceTrackerPlugin implements DetectorPlugin {
         current = current.expression;
       } else if (ts.isCallExpression(current)) {
         current = current.expression;
+      } else if (ts.isParenthesizedExpression(current)) {
+        current = current.expression;
       } else {
         break;
       }
+    }
+
+    // Root is a NewExpression — resolve its class via importMap / classToPackage.
+    // This catches builder-pattern chains rooted at `new X(...)` rather than at an identifier.
+    if (ts.isNewExpression(current)) {
+      // resolveNewExpression uses an internal PluginContext shape; the NodeContext
+      // passed here exposes the same importMap surface we need. Inline the lookup
+      // to avoid coupling to that wider context.
+      if (ts.isIdentifier(current.expression)) {
+        const className = current.expression.text;
+        const importInfo = context.importMap.get(className);
+        if (importInfo) return importInfo.packageName;
+        const fromClassMap = this.classToPackage.get(className);
+        if (fromClassMap) return fromClassMap;
+      }
+      return null;
     }
 
     if (!ts.isIdentifier(current)) {

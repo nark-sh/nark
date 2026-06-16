@@ -53839,5 +53839,52 @@
         "test_file": "nark-dev/nark/src/v2/fixtures/@nestjs__axios.ground-truth.test.ts"
       }
     }
+  },
+  {
+    "id": "concern-20260615-langgraph-stream-iteration-detector",
+    "created_at": "2026-06-15",
+    "source": "onboard",
+    "package": "@langchain/langgraph",
+    "type": "new_pattern",
+    "status": "pending",
+    "description": "Stream iteration consumer detection. The @langchain/langgraph contract codifies a 'stream-iteration-no-try-catch' postcondition: when `const stream = await graph.stream(...)` is wrapped in try-catch but the subsequent `for await (const chunk of stream)` consumer loop is NOT inside that same try, mid-stream errors (GraphRecursionError after N supersteps, NodeTimeoutError, LLM rate-limit errors thrown by a node mid-graph) surface during iteration and are uncaught. The analyzer currently fires on the `await graph.stream(...)` call site itself (when bare) but does NOT detect the pattern of `for await (... of trackedStreamVar)` outside try. To support this postcondition, the V2 analyzer needs to (a) track that `streamVar` returned from `graph.stream()` is a tracked-package awaitable stream, and (b) emit a violation when the `ForOfStatement` with await is not enclosed in a try-catch. The same gap likely affects @langchain/openai's stream-iteration-error postcondition (already filed as a known scanner limitation in that contract).",
+    "evidence": {
+      "repos": [
+        "langchain-ai/openwork (correct pattern: outer try wraps stream + consumer)",
+        "firecrawl/open-agent-builder (lib/workflow/langgraph.ts:1091 wraps with wrapStreamWithInterruptHandling — interrupt-only)"
+      ],
+      "scan_file": "nark-dev/nark-corpus-pro/packages/@langchain/langgraph/fixtures/ground-truth.ts",
+      "violation_count": 0,
+      "expected_violation_count": 1,
+      "fix_target": "scanner",
+      "details": {
+        "missed_callsite": "ground-truth.ts:gtStreamIterationOutsideTry (for-await consumer outside try)",
+        "ground_truth_annotation": "currently SHOULD_NOT_FIRE pending scanner support; flip to SHOULD_FIRE once detector lands",
+        "proposed_fix": "Extend the InstanceTrackerPlugin or add a new ForAwaitConsumerDetector plugin: when `const stream = await trackedVar.stream(...)` resolves to a contracted package's stream method, record `stream` as a stream-iterating instance. Then walk ForOfStatement nodes with `awaitModifier`: when the iterable identifier is a recorded stream-iterating instance AND the ForOfStatement is not enclosed in a TryStatement, emit a violation pointing at the corresponding postcondition (e.g. stream-iteration-no-try-catch). Requires a per-contract opt-in flag (e.g. detection.stream_methods: ['stream']) so we only fire on packages where the stream iteration is the canonical error vector. Reuses the existing try-catch enclosure check from ContractMatcher.",
+        "related_contracts": [
+          "@langchain/openai (ChatOpenAI.stream stream-iteration-error)",
+          "@langchain/langgraph (CompiledStateGraph.stream stream-iteration-no-try-catch)"
+        ]
+      }
+    }
+  },
+  {
+    "id": "concern-20260615-instance-tracker-newexpression-chain-root",
+    "created_at": "2026-06-15",
+    "source": "onboard",
+    "package": "@langchain/langgraph",
+    "type": "implemented",
+    "status": "resolved",
+    "description": "InstanceTrackerPlugin.resolveSchemaChainFactory() walks call/property chains to find the root identifier and resolve it to a package via importMap. Builder-style APIs that route through `new ClassName(...).method().method().compile()` have a NewExpression at the chain root, not an identifier — previously the loop exited with current = NewExpression and returned null, so the chained instance was untracked. Extended the chain walker to accept NewExpression as a root and resolve via importMap / classToPackage. Unblocks @langchain/langgraph (`new StateGraph(...).addNode(...).compile()` → tracked as @langchain/langgraph), and likely benefits other builder-pattern APIs in the corpus (any package whose primary usage is `new X(...).chain().chain().build()`). Also added ParenthesizedExpression unwrapping in the same loop.",
+    "evidence": {
+      "fix_target": "scanner",
+      "files_modified": [
+        "nark-dev/nark/src/v2/plugins/instance-tracker.ts (resolveSchemaChainFactory: accept NewExpression at chain root + unwrap ParenthesizedExpression)"
+      ],
+      "fixture_file": "nark-dev/nark-corpus-pro/packages/@langchain/langgraph/fixtures/ground-truth.ts",
+      "test_file": "nark-dev/nark/src/v2/fixtures/@langchain__langgraph.ground-truth.test.ts",
+      "regression_check": "Baseline (without edit): 13 failing tests in cross-fetch + luxon fixtures. With edit: same 13 failing tests. No regressions introduced. minio (closest analog using class_names + instance_chain_methods) continues to pass 22/22."
+    },
+    "resolution": "Landed inline in this onboarding. Ground-truth tests for @langchain/langgraph go from 7/15 → 15/15 with the edit. Regression check: same baseline failure set on cross-fetch + luxon, no new failures; minio and @angular/router continue to pass."
   }
 ]
