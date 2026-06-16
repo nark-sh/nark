@@ -53764,7 +53764,7 @@
     "source": "onboard",
     "package": "tencentcloud-sdk-nodejs",
     "type": "detection_gap",
-    "status": "pending",
+    "status": "in-progress",
     "description": "tencentcloud-sdk-nodejs has 255+ sub-product Client classes (cvm, vpc, tmt, cos, sms, ocr, ...) each extending AbstractClient. Sub-product Clients expose action-specific methods (DescribeZones, TextTranslateBatch, DescribeInstances, ...) that internally call this.request(action, req). The contract documents 3 top-level methods (request, requestOctetStream, getCredential) because those are the only methods named in official docs. The analyzer matches function calls by literal name, so the dominant real-world callsite pattern (subclass extends X Client; super.MethodName(req).then(...)) is missed entirely. Same issue affects @alicloud sub-products and similar API-generator-based SDKs. Fix: wildcard / catch-all detection on any async method called on a class instance imported from tencentcloud-sdk-nodejs/tencentcloud/services/**/v*/**_client paths.",
     "evidence": {
       "repos": [
@@ -53780,6 +53780,31 @@
         "contract_function_name": "request",
         "contract_postcondition_id": "error-network-or-api",
         "pattern": "subclass-of-client-from-deep-import-calls-action-method-without-try-catch"
+      }
+    }
+  },
+  {
+    "id": "concern-20260615-missing-deps-named-import-resolution",
+    "created_at": "2026-06-15",
+    "source": "onboard",
+    "package": "modern-tar",
+    "type": "detection_gap",
+    "status": "pending",
+    "description": "When NARK_ALLOW_MISSING_DEPS=1 is set and node_modules is absent, bare named imports do not get routed through the contract matcher. ThrowingFunctionDetector.handleDirectCall at throwing-function-detector.ts:239 relies on context.importMap.get(identName), which appears to require a resolvable .d.ts to populate the binding. Result: real bare-import call sites (e.g. await unpackTar(buffer)) silently skip detection. The package-discovery layer DID detect modern-tar in the file (logs show \"modern-tar: imported in 1 file(s)\"), so the gap is in name-to-package binding during analysis, not in package discovery.",
+    "evidence": {
+      "repos": [
+        "sxzz/typescript-go-playground"
+      ],
+      "scan_file": "work-packages/modern-tar/real-world-scans/sxzz__typescript-go-playground-scan.json",
+      "violation_count": 0,
+      "expected_violation_count": 1,
+      "fix_target": "scanner",
+      "details": {
+        "missed_callsite": "test-repos/sxzz_typescript-go-playground/src/core.ts:18",
+        "missed_code": "const [wasmFile] = await unpackTar(tarStream, { strip: 1, ... })",
+        "missed_postcondition": "unpack-malformed-archive",
+        "context": "pnpm install was denied; tsconfig.app.json used; 13 files analyzed but bare named imports from modern-tar produced 0 detections",
+        "hypothesis": "importMap is built by walking ts.SourceFile imports + resolving each via typeChecker. When deps are missing, typeChecker returns undefined symbols; the named-import entry is either skipped or its packageName falls back to undefined. Need to fall back to the literal import specifier text (e.g. \"modern-tar\") when symbol resolution fails, mirroring the symbol?.name ?? identifier.text pattern at line 236."
       }
     }
   }
