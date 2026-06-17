@@ -53909,5 +53909,31 @@
         "precision_impact": "Bumped exponential-backoff real-world precision from 100% to 91.7% (1 FP of 12)"
       }
     }
+  },
+  {
+    "id": "concern-2026-06-16-react-query-queryfn-suppression",
+    "created_at": "2026-06-17T01:36:02.554Z",
+    "package": "_scanner",
+    "type": "fp_pattern",
+    "status": "open",
+    "description": "Scanner flags throwing contracted function calls inside React Query / TanStack Query / SWR queryFn bodies even though the surrounding library auto-catches the throw and exposes it via isError/error. Generic pattern — affects every async throw contract (graphql-request, axios, prisma, fetch wrappers, etc). queryFn signature: `queryFn: () => contractedThrowingCall()` or `queryFn: async () => contractedThrowingCall()`.",
+    "evidence": {
+      "repos": [
+        "pezzolabs/pezzo"
+      ],
+      "scan_file": "work-packages/graphql-request/real-world-scans/pezzolabs__pezzo-scan.json",
+      "violation_count": 6,
+      "fix_target": "scanner",
+      "details": {
+        "example_sites": [
+          "apps/console/src/lib/hooks/useCurrentOrgMembership.tsx:15",
+          "apps/console/src/lib/hooks/useOrganizations.tsx:8",
+          "apps/console/src/lib/hooks/useEnvironments.ts:12"
+        ],
+        "example_pattern": "useQuery({ queryKey: [...], queryFn: () => gqlClient.request(QUERY, vars) })",
+        "package_affected": "graphql-request (but generic to all throw-contract packages)",
+        "precision_impact": "graphql-request real-world precision: 1/7 = 14% on pezzo+nhost — would be 100% (1/1) if queryFn-body suppression applied. Same FP class likely on @apollo/client, axios, openai, etc."
+      }
+    }
   }
 ]
