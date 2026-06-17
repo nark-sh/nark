@@ -53977,5 +53977,32 @@
       "real_code": "const lockPromise = lockfile.lock(resourcePath, {...}); try { releaseLock = await lockPromise } catch (err) {...}"
     },
     "resolution": "Pending: Detector should follow variable bindings — if the lock() call is assigned to a variable, only flag if no later await on that variable is wrapped in try-catch. Generalizes to any await_pattern detector."
+  },
+  "2815": {
+    "id": "concern-20260616-prom-client-return-passthrough-reinforcement",
+    "created_at": "2026-06-16",
+    "source": "onboard-batch",
+    "package": "prom-client",
+    "type": "fp_pattern",
+    "status": "open",
+    "description": "Reinforces concern-20260616-return-passthrough-not-recognized. Two additional FPs found during prom-client onboarding (huggingface/chat-ui:78, Unleash/unleash metrics-translator.ts:244). Both are the same `return registry.metrics()` wrapper pattern — method returns the library Promise directly to caller, caller handles try/catch. Scanner cannot trace inter-procedurally. Drops prom-client real-world precision from 80% to 67% (4 TP / 2 FP across 5 repos). All four TPs are the canonical antipattern (bare await in Express handler with no try/catch).",
+    "evidence": {
+      "repos": [
+        "huggingface/chat-ui",
+        "Unleash/unleash"
+      ],
+      "scan_file": "work-packages/prom-client/real-world-scans/",
+      "violation_count": 2,
+      "fix_target": "scanner",
+      "details": {
+        "example_sites": [
+          "corpus-builder/active/huggingface__chat-ui/src/lib/server/metrics.ts:78",
+          "corpus-builder/active/Unleash__unleash/src/lib/features/metrics/impact/metrics-translator.ts:244"
+        ],
+        "example_pattern": "return this.register.metrics();",
+        "package_affected": "prom-client",
+        "precision_impact": "Drops real-world precision from 80% (4/5) to 67% (4/6)."
+      }
+    }
   }
 }
