@@ -270,4 +270,295 @@ describe("checkMissingNodeModules", () => {
 
     expect(result.kind).toBe("ok");
   });
+
+  // ─── Workspace-aware ancestor walk (spec Part A) ───────────────────────────
+
+  it("returns ok when node_modules is at workspace root (pnpm-workspace.yaml)", () => {
+    // packages/core has pkg.json declaring axios but no node_modules.
+    // workspace root has pnpm-workspace.yaml and node_modules — deps are
+    // hoisted there. The check should walk past the member pkg.json.
+    const root = setup();
+    writeFile(
+      path.join(root, "pnpm-workspace.yaml"),
+      'packages:\n  - "packages/*"\n',
+    );
+    writeFile(
+      path.join(root, "package.json"),
+      JSON.stringify({ name: "monorepo", private: true }),
+    );
+    fs.mkdirSync(path.join(root, "node_modules"));
+
+    const memberDir = path.join(root, "packages", "core");
+    fs.mkdirSync(memberDir, { recursive: true });
+    writeFile(
+      path.join(memberDir, "package.json"),
+      JSON.stringify({ dependencies: { axios: "^1.0.0" } }),
+    );
+    writeFile(path.join(memberDir, "tsconfig.json"), "{}");
+
+    const result = checkMissingNodeModules({
+      tsconfigPath: path.join(memberDir, "tsconfig.json"),
+      corpusContractNames: ["axios"],
+    });
+
+    expect(result.kind).toBe("ok");
+    if (result.kind === "ok") {
+      expect(result.resolvedNodeModules).toBeDefined();
+      expect(fs.realpathSync(result.resolvedNodeModules!)).toBe(
+        fs.realpathSync(path.join(root, "node_modules")),
+      );
+    }
+  });
+
+  it("returns ok when node_modules is at workspace root (lerna.json)", () => {
+    const root = setup();
+    writeFile(
+      path.join(root, "lerna.json"),
+      JSON.stringify({ packages: ["packages/*"] }),
+    );
+    writeFile(
+      path.join(root, "package.json"),
+      JSON.stringify({ name: "monorepo", private: true }),
+    );
+    fs.mkdirSync(path.join(root, "node_modules"));
+
+    const memberDir = path.join(root, "packages", "app");
+    fs.mkdirSync(memberDir, { recursive: true });
+    writeFile(
+      path.join(memberDir, "package.json"),
+      JSON.stringify({ dependencies: { stripe: "^14.0.0" } }),
+    );
+    writeFile(path.join(memberDir, "tsconfig.json"), "{}");
+
+    const result = checkMissingNodeModules({
+      tsconfigPath: path.join(memberDir, "tsconfig.json"),
+      corpusContractNames: ["stripe"],
+    });
+
+    expect(result.kind).toBe("ok");
+  });
+
+  it("returns ok when node_modules is at workspace root (npm/yarn workspaces field, array form)", () => {
+    const root = setup();
+    writeFile(
+      path.join(root, "package.json"),
+      JSON.stringify({
+        name: "monorepo",
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+    );
+    fs.mkdirSync(path.join(root, "node_modules"));
+
+    const memberDir = path.join(root, "packages", "web");
+    fs.mkdirSync(memberDir, { recursive: true });
+    writeFile(
+      path.join(memberDir, "package.json"),
+      JSON.stringify({ dependencies: { axios: "^1.0.0" } }),
+    );
+    writeFile(path.join(memberDir, "tsconfig.json"), "{}");
+
+    const result = checkMissingNodeModules({
+      tsconfigPath: path.join(memberDir, "tsconfig.json"),
+      corpusContractNames: ["axios"],
+    });
+
+    expect(result.kind).toBe("ok");
+  });
+
+  it("returns ok when node_modules is at workspace root (workspaces field, object form)", () => {
+    const root = setup();
+    writeFile(
+      path.join(root, "package.json"),
+      JSON.stringify({
+        name: "monorepo",
+        private: true,
+        workspaces: { packages: ["packages/*"], nohoist: ["**/foo"] },
+      }),
+    );
+    fs.mkdirSync(path.join(root, "node_modules"));
+
+    const memberDir = path.join(root, "packages", "web");
+    fs.mkdirSync(memberDir, { recursive: true });
+    writeFile(
+      path.join(memberDir, "package.json"),
+      JSON.stringify({ dependencies: { axios: "^1.0.0" } }),
+    );
+    writeFile(path.join(memberDir, "tsconfig.json"), "{}");
+
+    const result = checkMissingNodeModules({
+      tsconfigPath: path.join(memberDir, "tsconfig.json"),
+      corpusContractNames: ["axios"],
+    });
+
+    expect(result.kind).toBe("ok");
+  });
+
+  it("returns missing with workspaceRoot when no node_modules at workspace root either", () => {
+    // Member pkg.json declares axios; workspace marker present at root;
+    // NO node_modules anywhere.
+    const root = setup();
+    writeFile(
+      path.join(root, "pnpm-workspace.yaml"),
+      'packages:\n  - "packages/*"\n',
+    );
+    writeFile(
+      path.join(root, "package.json"),
+      JSON.stringify({ name: "monorepo", private: true }),
+    );
+
+    const memberDir = path.join(root, "packages", "core");
+    fs.mkdirSync(memberDir, { recursive: true });
+    writeFile(
+      path.join(memberDir, "package.json"),
+      JSON.stringify({ dependencies: { axios: "^1.0.0" } }),
+    );
+    writeFile(path.join(memberDir, "tsconfig.json"), "{}");
+
+    const result = checkMissingNodeModules({
+      tsconfigPath: path.join(memberDir, "tsconfig.json"),
+      corpusContractNames: ["axios"],
+    });
+
+    expect(result.kind).toBe("missing");
+    if (result.kind === "missing") {
+      expect(result.matchingDeps).toEqual(["axios"]);
+      expect(result.workspaceMarkerType).toBe("pnpm-workspace.yaml");
+      expect(result.workspaceRoot).not.toBeNull();
+      expect(fs.realpathSync(result.workspaceRoot!)).toBe(
+        fs.realpathSync(root),
+      );
+      // searchedPaths should include both the member and the workspace root.
+      expect(result.searchedPaths.length).toBeGreaterThanOrEqual(2);
+      const realSearched = result.searchedPaths.map((p) =>
+        fs.realpathSync(path.dirname(p)),
+      );
+      expect(realSearched).toContain(fs.realpathSync(memberDir));
+      expect(realSearched).toContain(fs.realpathSync(root));
+    }
+  });
+
+  it("returns missing with workspaceRoot=null when no workspace marker is present", () => {
+    // Single-package repo: pkg.json + missing node_modules.
+    const root = setup();
+    writeFile(
+      path.join(root, "package.json"),
+      JSON.stringify({ dependencies: { axios: "^1.0.0" } }),
+    );
+    writeFile(path.join(root, "tsconfig.json"), "{}");
+
+    const result = checkMissingNodeModules({
+      tsconfigPath: path.join(root, "tsconfig.json"),
+      corpusContractNames: ["axios"],
+    });
+
+    expect(result.kind).toBe("missing");
+    if (result.kind === "missing") {
+      expect(result.workspaceRoot).toBeNull();
+      expect(result.workspaceMarkerType).toBeNull();
+      expect(result.searchedPaths.length).toBeGreaterThan(0);
+      // The first searched path is the package.json dir's node_modules.
+      expect(fs.realpathSync(path.dirname(result.searchedPaths[0]))).toBe(
+        fs.realpathSync(root),
+      );
+    }
+  });
+
+  it("returns ok when an intermediate dir has node_modules (no workspace marker)", () => {
+    // Project layout:
+    //   root/  (no pkg.json, no marker)
+    //   root/app/  pkg.json + node_modules
+    //   root/app/src/  tsconfig.json
+    const root = setup();
+    const appDir = path.join(root, "app");
+    fs.mkdirSync(appDir);
+    writeFile(
+      path.join(appDir, "package.json"),
+      JSON.stringify({ dependencies: { axios: "^1.0.0" } }),
+    );
+    fs.mkdirSync(path.join(appDir, "node_modules"));
+    const srcDir = path.join(appDir, "src");
+    fs.mkdirSync(srcDir);
+    writeFile(path.join(srcDir, "tsconfig.json"), "{}");
+
+    const result = checkMissingNodeModules({
+      tsconfigPath: path.join(srcDir, "tsconfig.json"),
+      corpusContractNames: ["axios"],
+    });
+
+    expect(result.kind).toBe("ok");
+  });
+
+  it("stops walking at the workspace marker (does NOT pick up a node_modules above it)", () => {
+    // Layout designed to prove the walk-bound:
+    //   root/node_modules   ← we should NOT see this
+    //   root/mono/pnpm-workspace.yaml  ← marker — walk stops here
+    //   root/mono/package.json  ← workspace root pkg.json
+    //   root/mono/packages/core/package.json  declares axios
+    //   root/mono/packages/core/tsconfig.json
+    // Since no node_modules under root/mono and the marker stops the walk,
+    // we should report missing — not silently pick up root/node_modules.
+    const root = setup();
+    fs.mkdirSync(path.join(root, "node_modules"));
+
+    const monoDir = path.join(root, "mono");
+    fs.mkdirSync(monoDir);
+    writeFile(
+      path.join(monoDir, "pnpm-workspace.yaml"),
+      'packages:\n  - "packages/*"\n',
+    );
+    writeFile(
+      path.join(monoDir, "package.json"),
+      JSON.stringify({ name: "monorepo", private: true }),
+    );
+
+    const memberDir = path.join(monoDir, "packages", "core");
+    fs.mkdirSync(memberDir, { recursive: true });
+    writeFile(
+      path.join(memberDir, "package.json"),
+      JSON.stringify({ dependencies: { axios: "^1.0.0" } }),
+    );
+    writeFile(path.join(memberDir, "tsconfig.json"), "{}");
+
+    const result = checkMissingNodeModules({
+      tsconfigPath: path.join(memberDir, "tsconfig.json"),
+      corpusContractNames: ["axios"],
+    });
+
+    expect(result.kind).toBe("missing");
+    if (result.kind === "missing") {
+      expect(result.workspaceMarkerType).toBe("pnpm-workspace.yaml");
+      // None of the searched paths should be the root/node_modules above the marker.
+      // searchedPaths contains paths-as-strings (some won't exist on disk);
+      // compare via the parent-dir realpath, which always exists.
+      const realParentDirs = result.searchedPaths.map((p) =>
+        fs.realpathSync(path.dirname(p)),
+      );
+      expect(realParentDirs).not.toContain(fs.realpathSync(root));
+    }
+  });
+
+  it("bounds the walk at MAX_ANCESTOR_LEVELS when no workspace marker is found", () => {
+    // Layout: a deep nested tsconfig, with pkg.json at depth 0 and
+    // node_modules at depth 0. The walk should still find it because
+    // MAX_ANCESTOR_LEVELS=4 and tsconfig is at depth 3 (parent of parent of parent).
+    const root = setup();
+    writeFile(
+      path.join(root, "package.json"),
+      JSON.stringify({ dependencies: { axios: "^1.0.0" } }),
+    );
+    fs.mkdirSync(path.join(root, "node_modules"));
+
+    // tsconfig at depth 3 — within bound.
+    const deep = path.join(root, "a", "b", "c");
+    fs.mkdirSync(deep, { recursive: true });
+    writeFile(path.join(deep, "tsconfig.json"), "{}");
+
+    const result = checkMissingNodeModules({
+      tsconfigPath: path.join(deep, "tsconfig.json"),
+      corpusContractNames: ["axios"],
+    });
+
+    expect(result.kind).toBe("ok");
+  });
 });

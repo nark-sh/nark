@@ -69,6 +69,15 @@ import {
   shouldPrintScanUploadedFooter,
 } from "./lib/pre-scan-warning.js";
 import { checkMissingNodeModules } from "./lib/missing-node-modules-check.js";
+import {
+  findRepoRoot,
+  readNarkConfig,
+  writeNarkConfig,
+} from "./lib/nark-config.js";
+import {
+  selectPickerCandidates,
+  promptPicker,
+} from "./lib/tsconfig-picker.js";
 import { createCiCommand } from "./cli/ci.js";
 import { generateAIPrompt } from "./ai-prompt-generator.js";
 import { writeScanResults, findNarkDir } from "./output/index.js";
@@ -173,6 +182,10 @@ program
     "--tsconfig <path>",
     "Path to tsconfig.json or project directory",
     _narkRc?.tsconfig ?? "./tsconfig.json",
+  )
+  .option(
+    "--node-modules <path>",
+    "Path to node_modules directory. Use when nark can't auto-detect it (e.g. nonstandard workspace layouts). Bypasses the pre-scan missing-deps check.",
   )
   .option(
     "--corpus <paths>",
@@ -544,15 +557,112 @@ async function main(options: any) {
     );
   }
 
-  // Normalize and auto-discover tsconfig path
+  // Did the user pass `--tsconfig` explicitly? Used by the Part B picker
+  // flow to decide whether to honor a saved .nark/config.json entry or run
+  // discovery. We inspect argv directly because the option's default value
+  // is `_narkRc?.tsconfig ?? "./tsconfig.json"` — Commander can't tell us
+  // whether that came from a flag or from the fallback.
+  const tsconfigExplicit =
+    process.argv.includes("--tsconfig") ||
+    process.argv.some((a) => a.startsWith("--tsconfig="));
+
+  // Spec: .planning/research/nark-cli-discovery-ux.md (Part B).
+  // Discovery precedence (lowest → highest):
+  //   1. Saved .nark/config.json `tsconfig` field
+  //   2. Env var NARK_TSCONFIG (not implemented in this pass — TODO)
+  //   3. CLI flag --tsconfig
+  // When no explicit flag is set, attempt to read a saved choice; if none,
+  // fall through to picker-or-auto-discovery below.
+  const discoveryProjectDir = path.resolve(options.project ?? process.cwd());
+  const discoveryRepoRoot = findRepoRoot(discoveryProjectDir);
+  let savedConfigUsed = false;
+
   let tsconfigPath = normalizeTsconfigPath(options.tsconfig);
 
-  // If the default tsconfig doesn't exist, try auto-discovery
-  if (!fs.existsSync(tsconfigPath)) {
-    const discovered = discoverTsconfig(path.dirname(tsconfigPath));
-    if (discovered) {
-      tsconfigPath = discovered;
-      if (verbose) console.log(chalk.dim(`  Auto-discovered: ${tsconfigPath}`));
+  if (!tsconfigExplicit && !options.demo) {
+    const savedConfig = readNarkConfig(discoveryRepoRoot);
+    if (savedConfig?.tsconfig) {
+      const savedAbs = path.isAbsolute(savedConfig.tsconfig)
+        ? savedConfig.tsconfig
+        : path.join(discoveryRepoRoot, savedConfig.tsconfig);
+      if (fs.existsSync(savedAbs)) {
+        tsconfigPath = savedAbs;
+        savedConfigUsed = true;
+        if (verbose) {
+          console.log(
+            chalk.dim(
+              `  Using tsconfig from .nark/config.json: ${path.relative(discoveryRepoRoot, savedAbs) || savedAbs}`,
+            ),
+          );
+        }
+      }
+    }
+  }
+
+  // If the default tsconfig doesn't exist (and we didn't already resolve via
+  // saved config), try the multi-candidate picker or fall through to silent
+  // auto-discovery.
+  if (!savedConfigUsed && !fs.existsSync(tsconfigPath)) {
+    const isInteractive =
+      !tsconfigExplicit &&
+      process.stdin.isTTY === true &&
+      process.stdout.isTTY === true &&
+      !process.env.CI &&
+      process.env.NARK_NO_PICKER !== "1";
+
+    const pickerCandidates = !tsconfigExplicit
+      ? selectPickerCandidates(discoveryProjectDir)
+      : null;
+
+    if (pickerCandidates && pickerCandidates.length >= 2 && isInteractive) {
+      const picked = await promptPicker(pickerCandidates, discoveryProjectDir, {
+        input: process.stdin,
+        output: process.stderr,
+      });
+      if (picked) {
+        tsconfigPath = picked.path;
+        // Persist the choice so the next run uses it silently.
+        try {
+          writeNarkConfig(discoveryRepoRoot, {
+            tsconfig:
+              path.relative(discoveryRepoRoot, picked.path) || picked.path,
+            savedAt: new Date().toISOString(),
+            savedFrom: "interactive-picker",
+          });
+          process.stderr.write(
+            chalk.dim(
+              `Saved tsconfig choice to ${path.relative(process.cwd(), path.join(discoveryRepoRoot, ".nark", "config.json")) || ".nark/config.json"}\n`,
+            ),
+          );
+        } catch (err) {
+          // Non-fatal — picker still proceeds, we just couldn't persist.
+          process.stderr.write(
+            chalk.dim(
+              `(could not save tsconfig choice: ${err instanceof Error ? err.message : String(err)})\n`,
+            ),
+          );
+        }
+      }
+    } else if (pickerCandidates && pickerCandidates.length >= 2) {
+      // Non-interactive multi-candidate case: announce the auto-pick.
+      const auto = pickerCandidates[0];
+      tsconfigPath = auto.path;
+      if (verbose) {
+        process.stderr.write(
+          chalk.dim(
+            `Using ${path.relative(discoveryProjectDir, auto.path) || auto.path} (auto-selected from ${pickerCandidates.length} candidates — pass --tsconfig to override).\n`,
+          ),
+        );
+      }
+    } else {
+      // Single candidate or no candidates — fall through to the existing
+      // discovery that picks the highest-scoring tsconfig.
+      const discovered = discoverTsconfig(path.dirname(tsconfigPath));
+      if (discovered) {
+        tsconfigPath = discovered;
+        if (verbose)
+          console.log(chalk.dim(`  Auto-discovered: ${tsconfigPath}`));
+      }
     }
   }
 
@@ -728,36 +838,73 @@ async function main(options: any) {
   // corpus-covered deps but has no node_modules at the package.json's dir,
   // the TypeScript checker will return `any` for every package call and
   // nark will silently report "0 violations" — the worst possible UX.
-  // Block by default; allow opt-out via NARK_ALLOW_MISSING_DEPS=1.
+  // Block by default; allow opt-out via NARK_ALLOW_MISSING_DEPS=1 or
+  // --node-modules <path>.
   //
   // qt-256: --demo skips this check. The bundled demo ships ambient `.d.ts`
   // declarations in lieu of installed deps so the user doesn't have to run
   // `npm install` to see a scan — type resolution comes from types.d.ts and
   // the V2 analyzer's pattern matching works against the import sources
   // alone. Don't block the demo for not having node_modules.
+  //
+  // Spec for the workspace-aware walk + error message: .planning/research/
+  // nark-cli-discovery-ux.md (Part A).
+  const explicitNodeModules =
+    typeof options.nodeModules === "string" && options.nodeModules.length > 0
+      ? path.resolve(options.nodeModules)
+      : null;
   const missingNm = options.demo
     ? { kind: "ok" as const }
-    : checkMissingNodeModules({
-        tsconfigPath,
-        corpusContractNames: corpusResult.contracts.keys(),
-      });
+    : explicitNodeModules
+      ? { kind: "ok" as const, resolvedNodeModules: explicitNodeModules }
+      : checkMissingNodeModules({
+          tsconfigPath,
+          corpusContractNames: corpusResult.contracts.keys(),
+        });
   if (missingNm.kind === "missing") {
     const allowMissing = process.env.NARK_ALLOW_MISSING_DEPS === "1";
-    process.stderr.write(
-      chalk.yellow("⚠  No node_modules found.\n") +
-        "Nark uses TypeScript's type checker to identify package calls.\n" +
-        "Without installed dependencies, every call comes back as `any` and\n" +
-        "nark cannot detect violations.\n\n" +
-        chalk.yellow(
-          "Fix: run `pnpm install` (or npm/yarn/bun install), then re-run nark.\n",
-        ),
-    );
+    const cwd = process.cwd();
+    const rel = (p: string) => {
+      const r = path.relative(cwd, p);
+      return r === "" ? "./" : r.startsWith("..") || path.isAbsolute(r) ? r : r;
+    };
+
+    let msg = chalk.yellow("⚠  No node_modules found.\n\n");
+    msg +=
+      "Nark uses TypeScript's type checker to identify package calls.\n" +
+      "Without installed dependencies, every call comes back as `any` and\n" +
+      "nark cannot detect violations.\n\n";
+
+    msg += chalk.bold("Searched:\n");
+    for (const p of missingNm.searchedPaths) {
+      const isWorkspaceRoot =
+        missingNm.workspaceRoot !== null &&
+        path.dirname(p) === missingNm.workspaceRoot;
+      const suffix = isWorkspaceRoot
+        ? chalk.dim(
+            `   ← workspace root (${missingNm.workspaceMarkerType ?? "marker"})`,
+          )
+        : "";
+      msg += `  ${chalk.red("✗")} ${rel(p)}${suffix}\n`;
+    }
+    msg += "\n";
+
+    const installDir =
+      missingNm.workspaceRoot ?? missingNm.packageJsonDir;
+    const installManager =
+      missingNm.workspaceMarkerType === "pnpm-workspace.yaml"
+        ? "pnpm"
+        : missingNm.workspaceMarkerType === "lerna.json"
+          ? "npx lerna bootstrap || npm"
+          : "npm";
+
+    msg += chalk.bold("Fix one of:\n");
+    msg += `  1. cd ${rel(installDir)} && ${installManager} install\n`;
+    msg += `  2. nark --tsconfig <path> --node-modules ${rel(installDir)}/node_modules\n`;
+    msg += `  3. ${chalk.dim("NARK_ALLOW_MISSING_DEPS=1 nark ... ")}${chalk.dim("(warning: imports resolve as `any`)")}\n`;
+
+    process.stderr.write(msg);
     if (!allowMissing) {
-      process.stderr.write(
-        chalk.dim(
-          "\n(Set NARK_ALLOW_MISSING_DEPS=1 to continue anyway.)\n",
-        ),
-      );
       process.exit(1);
     }
   }
