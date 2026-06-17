@@ -1,0 +1,59 @@
+name: Socket score history
+
+# Records the Socket.dev supply-chain score for nark every day and
+# commits the result to status/history.json. The status page at
+# https://nark.sh/status reads that file and renders a rolling
+# timeline. The committed history is itself the proof that we are
+# not hand-editing the numbers — every entry traces back to a
+# public workflow run.
+
+on:
+  schedule:
+    - cron: "0 6 * * *"  # daily at 06:00 UTC
+  workflow_dispatch:
+
+env:
+  PKG_NAME: nark
+  PKG_ECOSYSTEM: npm
+
+permissions:
+  contents: write   # required to commit the updated history.json
+
+jobs:
+  record:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install Socket CLI
+        run: npm install --global @socketsecurity/cli
+
+      - name: Fetch current score
+        env:
+          SOCKET_SECURITY_API_KEY: ${{ secrets.SOCKET_SECURITY_API_KEY }}
+        run: |
+          socket package score "$PKG_ECOSYSTEM" "$PKG_NAME" --json > raw-score.json
+          echo "--- raw-score.json (first 4KB) ---"
+          head -c 4096 raw-score.json
+          echo
+
+      - name: Append to history.json
+        run: node record-score.mjs
+
+      - name: Commit updated history
+        run: |
+          if git diff --quiet status/history.json; then
+            echo "No changes to history.json — skipping commit."
+            exit 0
+          fi
+          git config user.name "nark-bot"
+          git config user.email "bot@nark.sh"
+          git add status/history.json
+          git commit -m "Record Socket score for ${PKG_NAME} ($(date -u +%Y-%m-%d))"
+          git push
