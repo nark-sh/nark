@@ -1513,6 +1513,18 @@ export class ContractMatcher {
         if (isReturnDelegate) continue;
       }
 
+      // redux-persist persistor.flush() / .purge() and top-level getStoredState() /
+      // purgeStoredState() — bare `return persistor.flush()` (no await) delegates
+      // rejection handling to the caller. The contract's required_handling on every
+      // postcondition explicitly lists "return the promise" as a valid strategy.
+      // See nark-corpus-pro/packages/redux-persist/contract.yaml.
+      if (detection.packageName === "redux-persist") {
+        const callParent = detection.node.parent;
+        if (callParent && ts.isReturnStatement(callParent)) {
+          continue;
+        }
+      }
+
       // jsonwebtoken jwt.decode() security postconditions:
       //
       // decode-used-for-authentication: jwt.decode() does NOT verify the token signature —
