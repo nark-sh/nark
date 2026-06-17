@@ -1,0 +1,58 @@
+name: OpenSSF Scorecard
+
+# Scorecard is a third-party project-health audit run by the OSSF.
+# Re-running it gives anyone the same score we publish — that's the
+# point. Results upload to scorecard.dev and to GitHub code scanning.
+
+on:
+  # Re-score weekly so the badge stays fresh as practices improve.
+  schedule:
+    - cron: "0 6 * * 1"
+  # Re-score on pushes to main so the badge tracks the latest state.
+  push:
+    branches: [main]
+  # Allow ad-hoc runs from the Actions tab.
+  workflow_dispatch:
+
+permissions: read-all
+
+jobs:
+  analysis:
+    name: Scorecard analysis
+    runs-on: ubuntu-latest
+    permissions:
+      # Required for uploading SARIF results to GitHub code scanning.
+      security-events: write
+      # Required to write the publishing OIDC token used by scorecard.dev.
+      id-token: write
+      # Required to read the repo contents.
+      contents: read
+      # Required to read repository metadata.
+      actions: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Run analysis
+        uses: ossf/scorecard-action@v2.4.0
+        with:
+          results_file: results.sarif
+          results_format: sarif
+          # publish_results: true makes the score visible at
+          # scorecard.dev so anyone can re-derive it.
+          publish_results: true
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: SARIF file
+          path: results.sarif
+          retention-days: 30
+
+      - name: Upload to code scanning
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: results.sarif
