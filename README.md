@@ -1,8 +1,28 @@
 # nark
 
-**Contract coverage scanner for npm packages — find missing error handling before production.**
+**Profile coverage scanner for npm packages — find missing error handling before production.**
 
-nark scans your TypeScript codebase against a curated library of 169+ package contracts to find places where error handling is missing. Think of it as a linter, but for runtime failure modes — unhandled promise rejections, missing `.on('error')` listeners, uncaught API exceptions.
+nark scans your TypeScript codebase against a curated library of 169+ package profiles to find places where error handling is missing. Think of it as a linter, but for runtime failure modes — unhandled promise rejections, missing `.on('error')` listeners, uncaught API exceptions.
+
+[![npm version](https://img.shields.io/npm/v/nark.svg)](https://www.npmjs.com/package/nark)
+[![Socket Badge](https://socket.dev/api/badge/npm/package/nark)](https://socket.dev/npm/package/nark)
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/nark-sh/nark/badge)](https://scorecard.dev/viewer/?uri=github.com/nark-sh/nark)
+[![Status](https://img.shields.io/badge/status-page-8364EF)](https://nark.sh/status)
+[![License: AGPL v3](https://img.shields.io/badge/license-AGPL%20v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
+
+## Verify this yourself
+
+We try to replace "trust me" with "here, verify." Every claim below points at something you can re-check on your own machine or from a third-party page we do not control:
+
+- **Source you can read.** Repo at https://github.com/nark-sh/nark — AGPL-3.0, no closed-source binary.
+- **Provenance attestation.** Published with `npm publish --provenance` via [npm Trusted Publishing](https://docs.npmjs.com/trusted-publishers/). The green Provenance badge on the [npm page](https://www.npmjs.com/package/nark) cryptographically links the published tarball to the exact git commit and CI run. Verify any installed copy with `npm audit signatures`.
+- **Third-party supply-chain score.** Continuously scored by [Socket](https://socket.dev/npm/package/nark). We don't submit anything — Socket scans every published version automatically.
+- **Third-party project-health score.** [OpenSSF Scorecard](https://scorecard.dev/viewer/?uri=github.com/nark-sh/nark) re-runs weekly against the public repo. Anyone can re-derive the score from scratch.
+- **Score history.** Daily-updated Socket score timeline at https://nark.sh/status — every entry is committed to a public workflow log.
+- **What ships in the tarball.** Run `npm pack --dry-run nark` — you'll see only `bin/`, `dist/`, `schema/`, `demo/`, `FORAIAGENTS.md`. Nothing else.
+- **No install scripts.** `npm install nark --ignore-scripts` produces an identical install. nark runs zero code on your machine at install time.
+- **Telemetry, in full detail.** Schema, endpoint, and the three opt-out paths documented at https://nark.sh/telemetry. See [Telemetry](#telemetry) below.
+- **Responsible disclosure.** [SECURITY.md](./SECURITY.md) — 48h acknowledgement, security@nark.sh.
 
 ## Honest about false positives
 

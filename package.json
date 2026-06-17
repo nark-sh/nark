@@ -52,6 +52,14 @@
     "node": ">=18"
   },
   "license": "AGPL-3.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nark-sh/nark.git"
+  },
+  "homepage": "https://nark.sh",
+  "bugs": {
+    "url": "https://github.com/nark-sh/nark/issues"
+  },
   "keywords": [
     "nark",
     "typescript",
