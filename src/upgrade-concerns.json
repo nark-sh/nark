@@ -55505,5 +55505,53 @@
       "note": "Proactive \u2014 6 production repos iterate getStateHistory (debug/admin routes); postcondition getStateHistory-iteration-no-try-catch added in deepen pass 2026-06-18."
     },
     "resolution": null
+  },
+  "2908": {
+    "id": "concern-20260618-ky-deepen-1",
+    "description": "Add detection for ky body-shortcut chain \u2014 .json() / .text() / .blob() / .arrayBuffer() / .formData() / .bytes() chained off ky.<verb>() must require enclosing try-catch even though the verb call's await is on the chained body method. Postconditions added in pass 11 (deepen-stream-2) cover inherited-http-error, inherited-network-error, inherited-timeout-error for each of the six body shortcuts. Scanner currently flags chained .json() correctly when the call site uses await ky.get(...).json(); verify behavior for the five other body methods (.text/.blob/.arrayBuffer/.formData/.bytes) matches.",
+    "created_at": "2026-06-18",
+    "source": "deepen",
+    "package": "ky",
+    "type": "uncovered_function",
+    "status": "pending",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis (ky ResponsePromise body shortcuts), detection rule needed"
+    },
+    "resolution": null
+  },
+  "2909": {
+    "id": "concern-20260618-ky-deepen-2",
+    "description": "Add detection for ky .json(schema) SchemaValidationError path. The Standard Schema validator path (e.g. .json(z.object({...}))) throws SchemaValidationError, which does NOT extend KyError. A generic `catch (e) { if (isKyError(e)) ... }` will silently swallow validation failures. Scanner should flag schema-validation-error postcondition when .json() is called with a single argument that looks like a schema (Zod/StandardSchema) and no SchemaValidationError-aware catch is present.",
+    "created_at": "2026-06-18",
+    "source": "deepen",
+    "package": "ky",
+    "type": "uncovered_function",
+    "status": "pending",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis (ky ResponsePromise body shortcuts), detection rule needed"
+    },
+    "resolution": null
+  },
+  "2910": {
+    "id": "concern-20260618-ky-deepen-3",
+    "description": "Add edge-case detection for ky .bytes() runtime-support warning. .bytes() requires Response.prototype.bytes() \u2014 Node 22+ or modern browsers. Older runtimes throw TypeError at call time. Scanner should optionally surface a low-severity warning when .bytes() is used in a project whose engines.node is <22, suggesting .arrayBuffer() as portable alternative.",
+    "created_at": "2026-06-18",
+    "source": "deepen",
+    "package": "ky",
+    "type": "uncovered_function",
+    "status": "pending",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis (ky ResponsePromise body shortcuts), detection rule needed"
+    },
+    "resolution": null
   }
 }
