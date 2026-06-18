@@ -8,6 +8,11 @@
  *   invoke-no-try-catch
  *   stream-connection-no-try-catch
  *   stream-iteration-no-try-catch
+ *   stream-events-connection-no-try-catch
+ *   stream-events-iteration-no-try-catch
+ *   update-state-no-try-catch
+ *   get-state-no-try-catch
+ *   get-state-history-iteration-no-try-catch
  *
  * Key behaviors under test:
  *   - await graph.invoke(input, opts)                  no try-catch       → SHOULD_FIRE
