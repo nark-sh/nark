@@ -55777,5 +55777,53 @@
       "note": "Proactive \u2014 error throw confirmed in node_modules/helmet/index.cjs lines 58-60 (else-if \\!rawDirectiveValue branch)."
     },
     "resolution": null
+  },
+  "2925": {
+    "id": "concern-20260618-modelcontextprotocol-sdk-deepen-29",
+    "created_at": "2026-06-18",
+    "source": "deepen",
+    "package": "@modelcontextprotocol/sdk",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for takeResult() unhandled rejection. takeResult(stream) is a sync helper exported from @modelcontextprotocol/sdk/shared/responseMessage.js that returns Promise<T>. Three throw paths: (1) 'error' ResponseMessage embeds an McpError that throw o.error surfaces, (2) generator terminates without yielding 'result' \u2192 throws Error('No result in stream.'), (3) iteration-level errors from source stream propagate. Heuristic: detect `await takeResult(...)` (or assignment with implicit await) outside try-block / Promise.catch / Promise return chain.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis (takeResult is canonical experimental.tasks.*Stream consumer helper, async throws on terminal error or premature termination); detection rule needed"
+    },
+    "resolution": null
+  },
+  "2926": {
+    "id": "concern-20260618-modelcontextprotocol-sdk-deepen-30",
+    "created_at": "2026-06-18",
+    "source": "deepen",
+    "package": "@modelcontextprotocol/sdk",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for toArrayAsync() iteration-error unhandled rejection PLUS missing array-error inspection. toArrayAsync(stream) collects all messages and returns Promise<ResponseMessage[]>. Does NOT throw on 'error' ResponseMessages \u2014 they land in the array. DOES propagate transport-level iteration errors (StreamableHTTP session drop, Stdio pipe close, parse errors on malformed server messages). Two distinct gaps: (1) `await toArrayAsync(...)` outside try-block; (2) result is used (.find / index access / property access) without scanning for any entry with `.type === 'error'`. Second pattern is silent-failure \u2014 code treats array as success when it contains errors.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis; dual gap pattern (try-catch + post-call inspection); detection rule needed"
+    },
+    "resolution": null
+  },
+  "2927": {
+    "id": "concern-20260618-modelcontextprotocol-sdk-deepen-31",
+    "created_at": "2026-06-18",
+    "source": "deepen",
+    "package": "@modelcontextprotocol/sdk",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for experimental.tasks.requestStream() silent-error-drop. Identical AsyncGenerator iteration contract to callToolStream/createMessageStream/elicitInputStream \u2014 for-await loop that only checks message.type === 'result' silently drops 'error' messages. Detection should follow the same AsyncGenerator-message-type-discrimination pattern queued in concern-20260612-modelcontextprotocol-sdk-deepen-27 \u2014 the rule should generalize across the experimental.tasks.*Stream() family. Property path: client.experimental.tasks.requestStream (Client method).",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis; same AsyncGenerator pattern as concerns 25-28; generalize detection rule"
+    },
+    "resolution": null
   }
 }
