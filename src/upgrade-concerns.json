@@ -55217,5 +55217,53 @@
       "note": "Proactive \u2014 postcondition added via API surface analysis from lib/core.js lines 758-763. Argument-validation detection rule. Priority MED."
     },
     "resolution": null
+  },
+  "2890": {
+    "id": "concern-20260618-archiver-deepen-1",
+    "created_at": "2026-06-18",
+    "source": "deepen",
+    "package": "archiver",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for archiver.append() called with data.type === 'directory' on JsonArchive - postcondition append-directory-entry-unsupported added in deepen pass 7 but no scanner rule exists. Need to detect: archive instances created via archiver('json') or new JsonArchive() that call .append(..., { type: 'directory' }) without DIRECTORYNOTSUPPORTED error event handling.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive - postcondition added via API surface analysis from lib/core.js lines 535-541. Real-world adoption of JSON format is low (~1% of archiver usage); priority LOW."
+    },
+    "resolution": null
+  },
+  "2891": {
+    "id": "concern-20260618-archiver-deepen-2",
+    "created_at": "2026-06-18",
+    "source": "deepen",
+    "package": "archiver",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for archiver.symlink() called with empty/non-string filepath - postcondition symlink-missing-filepath added in deepen pass 7 but no scanner rule exists. Need to detect: literal '' as first arg, or arg with type inferred to be non-string. Scanner should flag SYMLINKFILEPATHREQUIRED risk when symlink() called without runtime arg validation.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive - postcondition added via API surface analysis from lib/core.js lines 754-757. Argument-validation detection rule. Priority MED - symlinks used in tar archive workflows."
+    },
+    "resolution": null
+  },
+  "2892": {
+    "id": "concern-20260618-archiver-deepen-3",
+    "created_at": "2026-06-18",
+    "source": "deepen",
+    "package": "archiver",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for archiver.symlink() called with empty/non-string target - postcondition symlink-missing-target added in deepen pass 7 but no scanner rule exists. Need to detect: literal '' as second arg, or missing second arg. Pairs with concern-20260618-archiver-deepen-2 - both are argument-validation rules.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive - postcondition added via API surface analysis from lib/core.js lines 758-763. Argument-validation detection rule. Priority MED."
+    },
+    "resolution": null
   }
 }
