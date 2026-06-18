@@ -54429,5 +54429,73 @@
       "note": "Proactive — postcondition for createTarDecoder added via API surface analysis (modern-tar@0.7.6). Ground-truth currently passing; this concern is for documentation and to ensure detection is intentional rather than accidental."
     },
     "resolution": null
+  },
+  "2841": {
+    "id": "concern-20260618-graphql-deepen-1",
+    "created_at": "2026-06-18",
+    "source": "deepen",
+    "package": "graphql",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for graphql.execute() with abortSignal arg — postcondition execute-abort-signal-rejection requires recognizing that AbortedGraphQLExecutionError must be caught when an AbortSignal is passed via args.abortSignal. Detection should: (a) recognize `execute({ ... abortSignal: <expr> })` call shape, (b) flag awaited calls without try/catch OR .catch where catch body checks for AbortedGraphQLExecutionError. v17+ only (abortSignal arg introduced in v17).",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis. Detection rule needed for AbortedGraphQLExecutionError discriminated catch.",
+      "package_version_target": "graphql@^17.0.0"
+    },
+    "resolution": null
+  },
+  "2842": {
+    "id": "concern-20260618-graphql-deepen-2",
+    "created_at": "2026-06-18",
+    "source": "deepen",
+    "package": "graphql",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for graphql.experimentalExecuteIncrementally() — new v17 async function returning ExecutionResult | ExperimentalIncrementalExecutionResults. Detection rule needed for: (a) experimental-incremental-result-not-discriminated — fire when the awaited result's `data`/`errors` is accessed without first checking `'initialResult' in result` (or equivalent discrimination), (b) experimental-incremental-abort-signal-rejection — fire when abortSignal arg is passed but no try/catch wraps the await (analogous to execute). Both postconditions are first-of-kind for incremental delivery in nark — no prior pattern.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis. Two distinct postconditions per function need separate detectors.",
+      "package_version_target": "graphql@^17.0.0"
+    },
+    "resolution": null
+  },
+  "2843": {
+    "id": "concern-20260618-graphql-deepen-3",
+    "created_at": "2026-06-18",
+    "source": "deepen",
+    "package": "graphql",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for graphql.legacyExecuteIncrementally() — same discrimination and abort-signal postconditions as experimentalExecuteIncrementally, with legacy payload shape. The two functions can share a single detector parameterized by call-name (experimental/legacy) — both return the same discriminated-union top-level shape (ExecutionResult | { initialResult, subsequentResults }), only the per-payload identifier (`id` vs `path`) differs. Postcondition IDs: legacy-incremental-result-not-discriminated, legacy-incremental-abort-signal-rejection.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — companion to concern-20260618-graphql-deepen-2. Detector should be shared, parameterized by function name.",
+      "package_version_target": "graphql@^17.0.0"
+    },
+    "resolution": null
+  },
+  "2844": {
+    "id": "concern-20260618-graphql-deepen-4",
+    "created_at": "2026-06-18",
+    "source": "deepen",
+    "package": "graphql",
+    "type": "new_pattern",
+    "status": "pending",
+    "description": "Add a 'discriminated union return type' detection pattern. The execute/incremental functions return PromiseOrValue<A | B> where treating the result as A when it's actually B is a silent failure (no thrown error, data simply dropped). Pattern: caller awaits the function, then accesses a property unique to one branch (e.g. `result.data` when the result is the incremental shape with no top-level data). The scanner should recognize the `'initialResult' in result` and `Symbol.asyncIterator in result` discrimination patterns as branch guards. This pattern is reusable for other discriminated-union APIs (e.g. subscribe also returns AsyncGenerator | ExecutionResult).",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — cross-cutting detection improvement enabling both experimental + legacy incremental delivery contracts (plus subscribe-result-not-checked which already exists but currently has limited discrimination recognition).",
+      "package_version_target": "graphql@^17.0.0"
+    },
+    "resolution": null
   }
 }
