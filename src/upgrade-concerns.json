@@ -54833,5 +54833,229 @@
       "note": "Proactive \u2014 postcondition added in deepen pass 5 for webhooks.createWebhookEndpoint; no scanner detection rule exists yet."
     },
     "resolution": null
+  },
+  "2866": {
+    "id": "concern-20260618-nangohq-node-deepen-1",
+    "created_at": "2026-06-18",
+    "source": "deepen",
+    "package": "@nangohq/node",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for nango.createIntegration() \u2014 postcondition create-integration-bare-await added in depth pass 2026-06-18 (deepen-stream-2 pass 6) but no scanner rule exists. The class_names/type_names Nango detection should already match bare-await pattern via the existing instance-tracking rule; this concern tracks verification that the new postcondition IDs flow through.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis (dist/index.d.ts inspection of @nangohq/node@0.70.7). Detection rule needed if existing Nango class-name handler does not auto-emit this postcondition for createIntegration() calls."
+    },
+    "resolution": null
+  },
+  "2867": {
+    "id": "concern-20260618-nangohq-node-deepen-2",
+    "created_at": "2026-06-18",
+    "source": "deepen",
+    "package": "@nangohq/node",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for nango.updateIntegration() \u2014 postcondition update-integration-bare-await added in depth pass 2026-06-18 (deepen-stream-2 pass 6) but no scanner rule exists. The class_names/type_names Nango detection should already match bare-await pattern via the existing instance-tracking rule; this concern tracks verification that the new postcondition IDs flow through.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis (dist/index.d.ts inspection of @nangohq/node@0.70.7). Detection rule needed if existing Nango class-name handler does not auto-emit this postcondition for updateIntegration() calls."
+    },
+    "resolution": null
+  },
+  "2868": {
+    "id": "concern-20260618-nangohq-node-deepen-3",
+    "created_at": "2026-06-18",
+    "source": "deepen",
+    "package": "@nangohq/node",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for nango.deleteIntegration() \u2014 postcondition delete-integration-bare-await added in depth pass 2026-06-18 (deepen-stream-2 pass 6) but no scanner rule exists. The class_names/type_names Nango detection should already match bare-await pattern via the existing instance-tracking rule; this concern tracks verification that the new postcondition IDs flow through.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis (dist/index.d.ts inspection of @nangohq/node@0.70.7). Detection rule needed if existing Nango class-name handler does not auto-emit this postcondition for deleteIntegration() calls."
+    },
+    "resolution": null
+  },
+  "2869": {
+    "id": "concern-20260618-nangohq-node-deepen-4",
+    "created_at": "2026-06-18",
+    "source": "deepen",
+    "package": "@nangohq/node",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for nango.getToken() \u2014 postcondition get-token-bare-await added in depth pass 2026-06-18 (deepen-stream-2 pass 6) but no scanner rule exists. The class_names/type_names Nango detection should already match bare-await pattern via the existing instance-tracking rule; this concern tracks verification that the new postcondition IDs flow through.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis (dist/index.d.ts inspection of @nangohq/node@0.70.7). Detection rule needed if existing Nango class-name handler does not auto-emit this postcondition for getToken() calls."
+    },
+    "resolution": null
+  },
+  "2870": {
+    "id": "concern-20260618-nangohq-node-deepen-5",
+    "created_at": "2026-06-18",
+    "source": "deepen",
+    "package": "@nangohq/node",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for nango.getRawTokenResponse() \u2014 postcondition get-raw-token-response-bare-await added in depth pass 2026-06-18 (deepen-stream-2 pass 6) but no scanner rule exists. The class_names/type_names Nango detection should already match bare-await pattern via the existing instance-tracking rule; this concern tracks verification that the new postcondition IDs flow through.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis (dist/index.d.ts inspection of @nangohq/node@0.70.7). Detection rule needed if existing Nango class-name handler does not auto-emit this postcondition for getRawTokenResponse() calls."
+    },
+    "resolution": null
+  },
+  "2871": {
+    "id": "concern-20260618-nangohq-node-deepen-6",
+    "created_at": "2026-06-18",
+    "source": "deepen",
+    "package": "@nangohq/node",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for nango.pruneRecords() \u2014 postcondition prune-records-bare-await added in depth pass 2026-06-18 (deepen-stream-2 pass 6) but no scanner rule exists. The class_names/type_names Nango detection should already match bare-await pattern via the existing instance-tracking rule; this concern tracks verification that the new postcondition IDs flow through.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis (dist/index.d.ts inspection of @nangohq/node@0.70.7). Detection rule needed if existing Nango class-name handler does not auto-emit this postcondition for pruneRecords() calls."
+    },
+    "resolution": null
+  },
+  "2872": {
+    "id": "concern-20260618-nangohq-node-deepen-7",
+    "created_at": "2026-06-18",
+    "source": "deepen",
+    "package": "@nangohq/node",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for nango.startSync() \u2014 postcondition start-sync-bare-await added in depth pass 2026-06-18 (deepen-stream-2 pass 6) but no scanner rule exists. The class_names/type_names Nango detection should already match bare-await pattern via the existing instance-tracking rule; this concern tracks verification that the new postcondition IDs flow through.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis (dist/index.d.ts inspection of @nangohq/node@0.70.7). Detection rule needed if existing Nango class-name handler does not auto-emit this postcondition for startSync() calls."
+    },
+    "resolution": null
+  },
+  "2873": {
+    "id": "concern-20260618-nangohq-node-deepen-8",
+    "created_at": "2026-06-18",
+    "source": "deepen",
+    "package": "@nangohq/node",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for nango.pauseSync() \u2014 postcondition pause-sync-bare-await added in depth pass 2026-06-18 (deepen-stream-2 pass 6) but no scanner rule exists. The class_names/type_names Nango detection should already match bare-await pattern via the existing instance-tracking rule; this concern tracks verification that the new postcondition IDs flow through.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis (dist/index.d.ts inspection of @nangohq/node@0.70.7). Detection rule needed if existing Nango class-name handler does not auto-emit this postcondition for pauseSync() calls."
+    },
+    "resolution": null
+  },
+  "2874": {
+    "id": "concern-20260618-nangohq-node-deepen-9",
+    "created_at": "2026-06-18",
+    "source": "deepen",
+    "package": "@nangohq/node",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for nango.updateSyncConnectionFrequency() \u2014 postcondition update-sync-frequency-bare-await added in depth pass 2026-06-18 (deepen-stream-2 pass 6) but no scanner rule exists. The class_names/type_names Nango detection should already match bare-await pattern via the existing instance-tracking rule; this concern tracks verification that the new postcondition IDs flow through.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis (dist/index.d.ts inspection of @nangohq/node@0.70.7). Detection rule needed if existing Nango class-name handler does not auto-emit this postcondition for updateSyncConnectionFrequency() calls."
+    },
+    "resolution": null
+  },
+  "2875": {
+    "id": "concern-20260618-nangohq-node-deepen-10",
+    "created_at": "2026-06-18",
+    "source": "deepen",
+    "package": "@nangohq/node",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for nango.waitForConnection() \u2014 postcondition wait-for-connection-bare-await added in depth pass 2026-06-18 (deepen-stream-2 pass 6) but no scanner rule exists. The class_names/type_names Nango detection should already match bare-await pattern via the existing instance-tracking rule; this concern tracks verification that the new postcondition IDs flow through.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis (dist/index.d.ts inspection of @nangohq/node@0.70.7). Detection rule needed if existing Nango class-name handler does not auto-emit this postcondition for waitForConnection() calls."
+    },
+    "resolution": null
+  },
+  "2876": {
+    "id": "concern-20260618-nangohq-node-deepen-11",
+    "created_at": "2026-06-18",
+    "source": "deepen",
+    "package": "@nangohq/node",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for nango.createSyncVariant() \u2014 postcondition create-sync-variant-bare-await added in depth pass 2026-06-18 (deepen-stream-2 pass 6) but no scanner rule exists. The class_names/type_names Nango detection should already match bare-await pattern via the existing instance-tracking rule; this concern tracks verification that the new postcondition IDs flow through.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis (dist/index.d.ts inspection of @nangohq/node@0.70.7). Detection rule needed if existing Nango class-name handler does not auto-emit this postcondition for createSyncVariant() calls."
+    },
+    "resolution": null
+  },
+  "2877": {
+    "id": "concern-20260618-nangohq-node-deepen-12",
+    "created_at": "2026-06-18",
+    "source": "deepen",
+    "package": "@nangohq/node",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for nango.deleteSyncVariant() \u2014 postcondition delete-sync-variant-bare-await added in depth pass 2026-06-18 (deepen-stream-2 pass 6) but no scanner rule exists. The class_names/type_names Nango detection should already match bare-await pattern via the existing instance-tracking rule; this concern tracks verification that the new postcondition IDs flow through.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis (dist/index.d.ts inspection of @nangohq/node@0.70.7). Detection rule needed if existing Nango class-name handler does not auto-emit this postcondition for deleteSyncVariant() calls."
+    },
+    "resolution": null
+  },
+  "2878": {
+    "id": "concern-20260618-nangohq-node-deepen-13",
+    "created_at": "2026-06-18",
+    "source": "deepen",
+    "package": "@nangohq/node",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for nango.getAsyncActionResult() \u2014 postcondition get-async-action-result-bare-await added in depth pass 2026-06-18 (deepen-stream-2 pass 6) but no scanner rule exists. The class_names/type_names Nango detection should already match bare-await pattern via the existing instance-tracking rule; this concern tracks verification that the new postcondition IDs flow through.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis (dist/index.d.ts inspection of @nangohq/node@0.70.7). Detection rule needed if existing Nango class-name handler does not auto-emit this postcondition for getAsyncActionResult() calls."
+    },
+    "resolution": null
+  },
+  "2879": {
+    "id": "concern-20260618-nangohq-node-deepen-14",
+    "created_at": "2026-06-18",
+    "source": "deepen",
+    "package": "@nangohq/node",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for nango.createReconnectSession() \u2014 postcondition create-reconnect-session-bare-await added in depth pass 2026-06-18 (deepen-stream-2 pass 6) but no scanner rule exists. The class_names/type_names Nango detection should already match bare-await pattern via the existing instance-tracking rule; this concern tracks verification that the new postcondition IDs flow through.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis (dist/index.d.ts inspection of @nangohq/node@0.70.7). Detection rule needed if existing Nango class-name handler does not auto-emit this postcondition for createReconnectSession() calls."
+    },
+    "resolution": null
   }
 }
