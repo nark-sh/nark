@@ -54497,5 +54497,37 @@
       "package_version_target": "graphql@^17.0.0"
     },
     "resolution": null
+  },
+  "2845": {
+    "id": "concern-20260618-ethers-deepen-1",
+    "created_at": "2026-06-18",
+    "source": "deepen",
+    "package": "ethers",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Detect missing try-catch around await signer.populateTransaction(tx). Throws UNSUPPORTED_OPERATION when signer has no provider, INVALID_ARGUMENT on chainId mismatch and mixed-fee fields, UNSUPPORTED_OPERATION when network does not support requested fee model. Critical pre-signing pipeline used by relayer/MEV/cold-wallet flows; un-handled rejection kills worker mid-batch.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — Signer.populateTransaction contract added via API surface analysis (ethers@6.17.0). Source evidence at lib.esm/providers/abstract-signer.js populateTransaction(); 4 postconditions: populatetransaction-no-provider, -chainid-mismatch, -mixed-fee-fields, -network-fee-model-unsupported. Detection rule needed."
+    },
+    "resolution": null
+  },
+  "2846": {
+    "id": "concern-20260618-ethers-deepen-2",
+    "created_at": "2026-06-18",
+    "source": "deepen",
+    "package": "ethers",
+    "type": "scanner_method_resolution",
+    "status": "pending",
+    "description": "Scanner needs to resolve Signer.populateTransaction() called on subclasses (Wallet, JsonRpcSigner, NonceManager, BrowserProvider-returned signers, HDNodeWallet). All inherit from AbstractSigner; the canonical call sites are wallet.populateTransaction(), (await provider.getSigner()).populateTransaction(), and signer.populateTransaction(). Detector must follow chained method-resolution back to the AbstractSigner contract entry.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Sibling concern for the new Signer.populateTransaction contract. Existing chained-call resolver should cover most cases; verify with ground-truth fixture."
+    },
+    "resolution": null
   }
 }
