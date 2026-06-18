@@ -54077,5 +54077,165 @@
       "expected_violation_count": 1,
       "fix_target": "scanner"
     }
+  },
+  "2819": {
+    "id": "concern-20260618-bedrock-deepen-1",
+    "created_at": "2026-06-18",
+    "source": "deepen",
+    "package": "@aws-sdk/client-bedrock-runtime",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for InvokeModelWithResponseStreamCommand stream-error chunk events (postcondition bedrock-invoke-model-stream-errors-not-checked). Parallel to bedrock-converse-stream-errors-not-checked. The response.body iterable can carry 6 silent-failure error fields: internalServerException, modelStreamErrorException, modelTimeoutException, serviceUnavailableException, throttlingException, validationException. Scanner needs to detect for-await-of loops over response.body that skip these per-chunk checks.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed. Sister postcondition bedrock-converse-stream-errors-not-checked already exists and is also pending scanner detection."
+    },
+    "resolution": null
+  },
+  "2820": {
+    "id": "concern-20260618-bedrock-deepen-2",
+    "created_at": "2026-06-18",
+    "source": "deepen",
+    "package": "@aws-sdk/client-bedrock-runtime",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for InvokeGuardrailChecksCommand (postcondition bedrock-invoke-guardrail-checks-no-try-catch). Detect bedrockClient.send(new InvokeGuardrailChecksCommand(...)) without enclosing try-catch. Same detection pattern as ApplyGuardrailCommand (sister postcondition already covered).",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. Command added in SDK v3.100+. Detection should reuse same property-chain matcher used by sibling commands."
+    },
+    "resolution": null
+  },
+  "2821": {
+    "id": "concern-20260618-bedrock-deepen-3",
+    "created_at": "2026-06-18",
+    "source": "deepen",
+    "package": "@aws-sdk/client-bedrock-runtime",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for InvokeModelWithBidirectionalStreamCommand (postcondition bedrock-invoke-bidirectional-stream-no-try-catch). 8-minute voice/audio bidirectional stream \u2014 same property-chain detection as siblings. Used by Nova Sonic and similar speech-to-speech models.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. Command added late 2025 in SDK v3.10xx. Detection should reuse property-chain matcher."
+    },
+    "resolution": null
+  },
+  "2822": {
+    "id": "concern-20260618-bedrock-deepen-4",
+    "created_at": "2026-06-18",
+    "source": "deepen",
+    "package": "@aws-sdk/client-bedrock-runtime",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for CountTokensCommand (postcondition bedrock-count-tokens-no-try-catch). Detect bedrockClient.send(new CountTokensCommand(...)) without enclosing try-catch. Same property-chain detection as siblings. Used on cost-control paths.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. Command added in SDK v3.1000+. Severity warning (vs error) reflects cost-control intent rather than data loss."
+    },
+    "resolution": null
+  },
+  "2823": {
+    "id": "concern-20260618-firecrawl-js-deepen-1",
+    "created_at": "2026-06-18",
+    "source": "deepen",
+    "package": "@mendable/firecrawl-js",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for Firecrawl.cancelCrawl()/cancelBatchScrape() \u2014 bare await without try/catch. Cleanup-path errors silently leak running jobs and API credits. Postcondition added in deepen pass 2026-06-18 but no scanner rule exists.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed for v2 cancel methods"
+    },
+    "resolution": null
+  },
+  "2824": {
+    "id": "concern-20260618-firecrawl-js-deepen-2",
+    "created_at": "2026-06-18",
+    "source": "deepen",
+    "package": "@mendable/firecrawl-js",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for Firecrawl.crawl()/batchScrape() convenience-waiters \u2014 DUAL error surface (SdkError + plain Error on timeout). Scanner should flag bare awaits AND surface the timeout-Error case when callers pass a timeout option without a try/catch.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Waiters have two distinct throw types \u2014 SdkError and a plain Error with 'did not complete within N seconds' message. instanceof SdkError catches won't handle the timeout."
+    },
+    "resolution": null
+  },
+  "2825": {
+    "id": "concern-20260618-firecrawl-js-deepen-3",
+    "created_at": "2026-06-18",
+    "source": "deepen",
+    "package": "@mendable/firecrawl-js",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for Firecrawl.getCrawlErrors()/getBatchScrapeErrors() \u2014 bare await without try/catch. Used in post-job inspection / dashboards; silent throws here mean observability stops.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis"
+    },
+    "resolution": null
+  },
+  "2826": {
+    "id": "concern-20260618-firecrawl-js-deepen-4",
+    "created_at": "2026-06-18",
+    "source": "deepen",
+    "package": "@mendable/firecrawl-js",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for Firecrawl.getBatchScrapeStatus() \u2014 bare await without try/catch. Mirrors existing getCrawlStatus rule (polling loops); the same FP-safe detection should apply.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Detection rule for getCrawlStatus likely already exists \u2014 extend to cover getBatchScrapeStatus identically"
+    },
+    "resolution": null
+  },
+  "2827": {
+    "id": "concern-20260618-firecrawl-js-deepen-5",
+    "created_at": "2026-06-18",
+    "source": "deepen",
+    "package": "@mendable/firecrawl-js",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for Firecrawl.getExtractStatus()/extract() \u2014 bare await without try/catch. Extract jobs consume LLM credits \u2014 unhandled throw mid-extract wastes user money.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Note: extract() waiter does NOT throw on timeout (it returns partial status) \u2014 scanner should NOT flag missing timeout handling for extract(), only for crawl()/batchScrape()."
+    },
+    "resolution": null
+  },
+  "2828": {
+    "id": "concern-20260618-firecrawl-js-deepen-6",
+    "created_at": "2026-06-18",
+    "source": "deepen",
+    "package": "@mendable/firecrawl-js",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for Firecrawl.getConcurrency()/getCreditUsage()/getQueueStatus() \u2014 bare await without try/catch. Usage/billing observability calls; silent throws degrade dashboards and break pre-flight gates.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Three usage-tier methods follow the same SdkError pattern \u2014 single rule can cover all three"
+    },
+    "resolution": null
   }
 }
