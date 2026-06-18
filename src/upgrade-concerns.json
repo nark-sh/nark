@@ -55553,5 +55553,229 @@
       "note": "Proactive \u2014 contract added via API surface analysis (ky ResponsePromise body shortcuts), detection rule needed"
     },
     "resolution": null
+  },
+  "2911": {
+    "id": "concern-20260618-minio-deepen-1",
+    "created_at": "2026-06-18",
+    "source": "deepen",
+    "package": "minio",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for minio.Client.presignedUrl() \u2014 postcondition minio-presignedurl-no-try-catch added in pass 11 but no scanner rule exists. The existing minio scanner rule pattern (member-call no-try-catch on the Client instance) should generalize via PropertyChainDetector once the postcondition id is referenced in fixture annotations.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis (deepen pass 11), detection rule needed"
+    },
+    "resolution": null
+  },
+  "2912": {
+    "id": "concern-20260618-minio-deepen-2",
+    "created_at": "2026-06-18",
+    "source": "deepen",
+    "package": "minio",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for minio.Client.presignedPostPolicy() \u2014 postcondition minio-presignedpostpolicy-no-try-catch added in pass 11 but no scanner rule exists. The existing minio scanner rule pattern (member-call no-try-catch on the Client instance) should generalize via PropertyChainDetector once the postcondition id is referenced in fixture annotations.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis (deepen pass 11), detection rule needed"
+    },
+    "resolution": null
+  },
+  "2913": {
+    "id": "concern-20260618-minio-deepen-3",
+    "created_at": "2026-06-18",
+    "source": "deepen",
+    "package": "minio",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for minio.Client.getPartialObject() \u2014 postcondition minio-getpartialobject-no-try-catch added in pass 11 but no scanner rule exists. The existing minio scanner rule pattern (member-call no-try-catch on the Client instance) should generalize via PropertyChainDetector once the postcondition id is referenced in fixture annotations.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis (deepen pass 11), detection rule needed"
+    },
+    "resolution": null
+  },
+  "2914": {
+    "id": "concern-20260618-minio-deepen-4",
+    "created_at": "2026-06-18",
+    "source": "deepen",
+    "package": "minio",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for minio.Client.composeObject() \u2014 postcondition minio-composeobject-no-try-catch added in pass 11 but no scanner rule exists. The existing minio scanner rule pattern (member-call no-try-catch on the Client instance) should generalize via PropertyChainDetector once the postcondition id is referenced in fixture annotations.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis (deepen pass 11), detection rule needed"
+    },
+    "resolution": null
+  },
+  "2915": {
+    "id": "concern-20260618-minio-deepen-5",
+    "created_at": "2026-06-18",
+    "source": "deepen",
+    "package": "minio",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for minio.Client.removeIncompleteUpload() \u2014 postcondition minio-removeincompleteupload-no-try-catch added in pass 11 but no scanner rule exists. The existing minio scanner rule pattern (member-call no-try-catch on the Client instance) should generalize via PropertyChainDetector once the postcondition id is referenced in fixture annotations.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis (deepen pass 11), detection rule needed"
+    },
+    "resolution": null
+  },
+  "2916": {
+    "id": "concern-20260618-minio-deepen-6",
+    "created_at": "2026-06-18",
+    "source": "deepen",
+    "package": "minio",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for minio.Client.setBucketEncryption() \u2014 postcondition minio-setbucketencryption-no-try-catch added in pass 11 but no scanner rule exists. The existing minio scanner rule pattern (member-call no-try-catch on the Client instance) should generalize via PropertyChainDetector once the postcondition id is referenced in fixture annotations.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis (deepen pass 11), detection rule needed"
+    },
+    "resolution": null
+  },
+  "2917": {
+    "id": "concern-20260618-minio-deepen-7",
+    "created_at": "2026-06-18",
+    "source": "deepen",
+    "package": "minio",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for minio.Client.setBucketVersioning() \u2014 postcondition minio-setbucketversioning-no-try-catch added in pass 11 but no scanner rule exists. The existing minio scanner rule pattern (member-call no-try-catch on the Client instance) should generalize via PropertyChainDetector once the postcondition id is referenced in fixture annotations.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis (deepen pass 11), detection rule needed"
+    },
+    "resolution": null
+  },
+  "2918": {
+    "id": "concern-20260618-minio-deepen-8",
+    "created_at": "2026-06-18",
+    "source": "deepen",
+    "package": "minio",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for minio.Client.setBucketLifecycle() \u2014 postcondition minio-setbucketlifecycle-no-try-catch added in pass 11 but no scanner rule exists. The existing minio scanner rule pattern (member-call no-try-catch on the Client instance) should generalize via PropertyChainDetector once the postcondition id is referenced in fixture annotations.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis (deepen pass 11), detection rule needed"
+    },
+    "resolution": null
+  },
+  "2919": {
+    "id": "concern-20260618-helmet-deepen-1",
+    "created_at": "2026-06-18",
+    "source": "deepen",
+    "package": "helmet",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for helmet-passed-as-middleware-not-factory. helmet 8.x throws synchronously when its first argument is an IncomingMessage (detecting app.use(helmet) instead of app.use(helmet())). Scanner currently misses this \u2014 a bare identifier passed to app.use() looks identical to any other middleware reference. Heuristic: detect identifiers named exactly 'helmet' passed to app.use() / router.use() without a CallExpression wrapper.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 error class confirmed in node_modules/helmet/index.cjs lines 515-516; postcondition added via API surface analysis."
+    },
+    "resolution": null
+  },
+  "2920": {
+    "id": "concern-20260618-helmet-deepen-2",
+    "created_at": "2026-06-18",
+    "source": "deepen",
+    "package": "helmet",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for helmet-duplicate-option-pair. helmet() factory throws when both modern and legacy alias are specified for the same header (8 pairs: strictTransportSecurity/hsts, xContentTypeOptions/noSniff, xDnsPrefetchControl/dnsPrefetchControl, xDownloadOptions/ieNoOpen, xFrameOptions/frameguard, xPermittedCrossDomainPolicies/permittedCrossDomainPolicies, xPoweredBy/hidePoweredBy, xXssProtection/xssFilter). Heuristic: when scanning helmet() argument object, check for any of the 8 documented conflict pairs and emit the specific postcondition.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 error throw confirmed in node_modules/helmet/index.cjs lines 384-385, 399-400, 415-416, 430-431, 446-447, 461-462, 476-477, 492-493."
+    },
+    "resolution": null
+  },
+  "2921": {
+    "id": "concern-20260618-helmet-deepen-3",
+    "created_at": "2026-06-18",
+    "source": "deepen",
+    "package": "helmet",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for csp-invalid-directive-value-chars. contentSecurityPolicy() throws when a directive value contains ';' or ',' (helmet 8.x added this check at factory time AND at request time for function-typed values). Heuristic: when scanning the directives object literal, check string-literal entries for ';' or ',' chars and emit the specific postcondition. Higher-precision than the generic csp-invalid-directive-name fallback.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 error throw confirmed in node_modules/helmet/index.cjs lines 22-25, 100 (assertDirectiveValueIsValid)."
+    },
+    "resolution": null
+  },
+  "2922": {
+    "id": "concern-20260618-helmet-deepen-4",
+    "created_at": "2026-06-18",
+    "source": "deepen",
+    "package": "helmet",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for csp-unquoted-special-keyword. contentSecurityPolicy() throws when a directive value contains an unquoted CSP keyword (none, self, strict-dynamic, report-sample, inline-speculation-rules, unsafe-inline, unsafe-eval, unsafe-hashes, wasm-unsafe-eval) or unquoted nonce-/sha256-/sha384-/sha512- prefix. Heuristic: scan directives object string-literal entries against the SHOULD_BE_QUOTED set. This is the most common CSP misconfiguration that helmet 8.x catches \u2014 worth a dedicated detector.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 error throw confirmed in node_modules/helmet/index.cjs lines 26-30 (SHOULD_BE_QUOTED set + assertDirectiveValueEntryIsValid)."
+    },
+    "resolution": null
+  },
+  "2923": {
+    "id": "concern-20260618-helmet-deepen-5",
+    "created_at": "2026-06-18",
+    "source": "deepen",
+    "package": "helmet",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for csp-dangerously-disable-on-non-default-src. contentSecurityPolicy() throws when the dangerouslyDisableDefaultSrc symbol is passed as the value of any directive other than default-src. Heuristic: detect contentSecurityPolicy.dangerouslyDisableDefaultSrc symbol reference in directive value position, then check whether the directive name (post-dashification) is exactly 'default-src'. If not, emit the specific postcondition.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 error throw confirmed in node_modules/helmet/index.cjs lines 61-67."
+    },
+    "resolution": null
+  },
+  "2924": {
+    "id": "concern-20260618-helmet-deepen-6",
+    "created_at": "2026-06-18",
+    "source": "deepen",
+    "package": "helmet",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for csp-falsy-directive-value. contentSecurityPolicy() throws when a directive value is falsy but not null, not a string, not an iterable, and not the dangerouslyDisableDefaultSrc symbol (e.g. undefined, 0, ''). Common source: env-var-driven directives without absence check. Heuristic: detect undefined / empty-string / non-string falsy literals in directive value position. Lower precision but valuable because the resulting runtime error message is generic ('invalid directive value').",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 error throw confirmed in node_modules/helmet/index.cjs lines 58-60 (else-if \\!rawDirectiveValue branch)."
+    },
+    "resolution": null
   }
 }
