@@ -55265,5 +55265,101 @@
       "note": "Proactive - postcondition added via API surface analysis from lib/core.js lines 758-763. Argument-validation detection rule. Priority MED."
     },
     "resolution": null
+  },
+  "2893": {
+    "id": "concern-20260618-rate-limiter-flexible-deepen-1",
+    "created_at": "2026-06-18",
+    "source": "deepen",
+    "package": "rate-limiter-flexible",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for RateLimiterUnion.consume() rejection shape \u2014 postcondition union-consume-rejects-on-mixed-store-or-limit added in deepen pass 8 (2026-06-18) but scanner currently emits the base consume postcondition for union calls. Need detector that recognizes RateLimiterUnion type and emits union-consume-rejects-on-mixed-store-or-limit so the per-limiter keyed-rejection-map guidance reaches the user.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  "2894": {
+    "id": "concern-20260618-rate-limiter-flexible-deepen-2",
+    "created_at": "2026-06-18",
+    "source": "deepen",
+    "package": "rate-limiter-flexible",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for RateLimiterQueue.removeTokens() \u2014 postcondition remove-tokens-rejects-with-queue-error added in deepen pass 8 (2026-06-18) but no scanner rule exists. Need to detect bare-await on .removeTokens() against RateLimiterQueue instances and emit a RateLimiterQueueError-aware violation (four distinct error messages: tokens-exceeds-max / queue-full / deadline-expired / store-failure).",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  "2895": {
+    "id": "concern-20260618-rate-limiter-flexible-deepen-3",
+    "created_at": "2026-06-18",
+    "source": "deepen",
+    "package": "rate-limiter-flexible",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for RateLimiterQueue.getTokensRemaining() \u2014 postcondition get-tokens-remaining-rejects-on-store-error added in deepen pass 8 (2026-06-18) but no scanner rule exists. Delegates to inner .get() rejection; detection should flag bare-await on the wrapper just as it does for inner .get().",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  "2896": {
+    "id": "concern-20260618-rate-limiter-flexible-deepen-4",
+    "created_at": "2026-06-18",
+    "source": "deepen",
+    "package": "rate-limiter-flexible",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for RateLimiterMongo.createIndexes() \u2014 postcondition create-indexes-rejects-on-mongo-error added in deepen pass 8 (2026-06-18) but no scanner rule exists. Detector should flag bare-await on .createIndexes() against RateLimiterMongo instances. Note FP path: the auto-call inside _initCollection() already has .catch(console.error) and should be skipped.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  "2897": {
+    "id": "concern-20260618-rate-limiter-flexible-deepen-5",
+    "created_at": "2026-06-18",
+    "source": "deepen",
+    "package": "rate-limiter-flexible",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for RateLimiterValkeyGlide.close() \u2014 postcondition close-rejects-on-valkey-error added in deepen pass 8 (2026-06-18) but no scanner rule exists. Shutdown-path violation. Detector should flag bare-await on .close() against RateLimiterValkeyGlide instances but recommend log-only handling (NOT rethrow) per required_handling guidance.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  "2898": {
+    "id": "concern-20260618-rate-limiter-flexible-deepen-6",
+    "created_at": "2026-06-18",
+    "source": "deepen",
+    "package": "rate-limiter-flexible",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for BurstyRateLimiter.consume() \u2014 postcondition bursty-consume-rejects-on-store-or-limit added in deepen pass 8 (2026-06-18) but scanner currently emits the base consume postcondition for bursty calls. Need detector that recognizes BurstyRateLimiter type and emits bursty-consume-rejects-on-store-or-limit so two-tier failure semantics reach the user.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
   }
 }
