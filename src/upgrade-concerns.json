@@ -55361,5 +55361,149 @@
       "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
     },
     "resolution": null
+  },
+  "2899": {
+    "created_at": "2026-06-18",
+    "source": "deepen",
+    "package": "botbuilder",
+    "type": "uncovered_function",
+    "status": "pending",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis in bc-deepen-contract pass 10 (2026-06-18). botbuilder@4.23.3 TeamsInfo batch-send and operation-poll surface. No scanner rule exists yet for these methods."
+    },
+    "resolution": null,
+    "id": "concern-20260618-botbuilder-deepen-1",
+    "description": "Add detection for TeamsInfo.sendMessageToListOfUsers() \u2014 postconditions send-to-list-of-users-missing-required-field-error and send-to-list-of-users-connector-rejection added in deepen pass 10 (2026-06-18). Detector should treat unawaited or uncaught batch send calls as silent fan-out drops. Pattern: static call on imported TeamsInfo class; Promise<BatchOperationResponse> return shape."
+  },
+  "2900": {
+    "created_at": "2026-06-18",
+    "source": "deepen",
+    "package": "botbuilder",
+    "type": "uncovered_function",
+    "status": "pending",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis in bc-deepen-contract pass 10 (2026-06-18). botbuilder@4.23.3 TeamsInfo batch-send and operation-poll surface. No scanner rule exists yet for these methods."
+    },
+    "resolution": null,
+    "id": "concern-20260618-botbuilder-deepen-2",
+    "description": "Add detection for TeamsInfo.sendMessageToAllUsersInTenant() \u2014 postconditions send-to-tenant-missing-required-field-error and send-to-tenant-connector-rejection added 2026-06-18. Detector pattern identical to sendMessageToListOfUsers (static method, batch enqueue, BatchOperationResponse). High-blast-radius: a tenant-wide broadcast silently swallowed is a compliance incident."
+  },
+  "2901": {
+    "created_at": "2026-06-18",
+    "source": "deepen",
+    "package": "botbuilder",
+    "type": "uncovered_function",
+    "status": "pending",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis in bc-deepen-contract pass 10 (2026-06-18). botbuilder@4.23.3 TeamsInfo batch-send and operation-poll surface. No scanner rule exists yet for these methods."
+    },
+    "resolution": null,
+    "id": "concern-20260618-botbuilder-deepen-3",
+    "description": "Add detection for TeamsInfo.sendMeetingNotification() \u2014 postconditions send-meeting-notification-missing-meeting-id-error and send-meeting-notification-connector-rejection added 2026-06-18. Notable: this method has partial-success semantics in the resolved response body \u2014 detector should ideally flag callers that await but never inspect response.recipientsFailureInfo (advanced check; primary detection is the missing try/catch around the await)."
+  },
+  "2902": {
+    "created_at": "2026-06-18",
+    "source": "deepen",
+    "package": "botbuilder",
+    "type": "uncovered_function",
+    "status": "pending",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis in bc-deepen-contract pass 10 (2026-06-18). botbuilder@4.23.3 TeamsInfo batch-send and operation-poll surface. No scanner rule exists yet for these methods."
+    },
+    "resolution": null,
+    "id": "concern-20260618-botbuilder-deepen-4",
+    "description": "Add detection for TeamsInfo.getOperationState() \u2014 postconditions get-operation-state-missing-id-error and get-operation-state-connector-rejection added 2026-06-18. Standard polling pattern: caller MUST handle 404 (state GC'd by Microsoft after 14 days) as terminal-unknown distinct from a permanent failure."
+  },
+  "2903": {
+    "created_at": "2026-06-18",
+    "source": "deepen",
+    "package": "botbuilder",
+    "type": "uncovered_function",
+    "status": "pending",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis in bc-deepen-contract pass 10 (2026-06-18). botbuilder@4.23.3 TeamsInfo batch-send and operation-poll surface. No scanner rule exists yet for these methods."
+    },
+    "resolution": null,
+    "id": "concern-20260618-botbuilder-deepen-5",
+    "description": "Add detection for TeamsInfo.cancelOperation() \u2014 postconditions cancel-operation-missing-id-error and cancel-operation-connector-rejection added 2026-06-18. Critical for kill-switch flows: a silently-swallowed cancel error means a compliance kill never fired. Detector should treat .cancelOperation() as high-severity (compliance / audit surface)."
+  },
+  "2904": {
+    "id": "concern-20260618-langgraph-deepen-1",
+    "created_at": "2026-06-18",
+    "source": "deepen",
+    "package": "@langchain/langgraph",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for graph.streamEvents() \u2014 two-error-point pattern (connection + iteration), parallel to graph.stream() but a separate method name. Scanner must detect (a) await graph.streamEvents() without surrounding try-catch and (b) for-await-of consumer of streamEvents() result outside try-catch.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 24 production repos call streamEvents in corpus-builder active set; postconditions streamEvents-connection-no-try-catch and streamEvents-iteration-no-try-catch added in deepen pass 2026-06-18 (deepen-stream-1)."
+    },
+    "resolution": null
+  },
+  "2905": {
+    "id": "concern-20260618-langgraph-deepen-2",
+    "created_at": "2026-06-18",
+    "source": "deepen",
+    "package": "@langchain/langgraph",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for graph.updateState() \u2014 single-point throw (Promise-returning). Throws GraphValueError(MISSING_CHECKPOINTER) and InvalidUpdateError. Detection: await graph.updateState(config, values, asNode?) without try-catch / .catch().",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 14 production repos call updateState (predominantly HITL flows in Next.js routes); postcondition updateState-no-try-catch added in deepen pass 2026-06-18."
+    },
+    "resolution": null
+  },
+  "2906": {
+    "id": "concern-20260618-langgraph-deepen-3",
+    "created_at": "2026-06-18",
+    "source": "deepen",
+    "package": "@langchain/langgraph",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for graph.getState() \u2014 single-point throw (Promise-returning). Throws GraphValueError(MISSING_CHECKPOINTER) when checkpointer is absent. Detection: await graph.getState(config, options?) without try-catch / .catch(). Severity: warning (read path, less destructive than updateState).",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 1 production repo observed in corpus-builder active set but blast radius is high (read path for HITL UIs); postcondition getState-no-try-catch added in deepen pass 2026-06-18."
+    },
+    "resolution": null
+  },
+  "2907": {
+    "id": "concern-20260618-langgraph-deepen-4",
+    "created_at": "2026-06-18",
+    "source": "deepen",
+    "package": "@langchain/langgraph",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for graph.getStateHistory() iteration \u2014 SYNCHRONOUS call returning AsyncIterableIterator (NOT a Promise). The only error-handling site is the for-await-of consumer loop. Throws plain Error(\"No checkpointer set\") \u2014 NOT GraphValueError, NOT lc_error_code MISSING_CHECKPOINTER. Detection: for-await-of consumer of graph.getStateHistory(...) result outside try-catch. NOTE: this is shape-distinct from invoke/stream/streamEvents because there is no await on the call site.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 6 production repos iterate getStateHistory (debug/admin routes); postcondition getStateHistory-iteration-no-try-catch added in deepen pass 2026-06-18."
+    },
+    "resolution": null
   }
 }
