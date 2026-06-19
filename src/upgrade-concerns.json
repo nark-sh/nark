@@ -57183,5 +57183,37 @@
       "note": "Proactive - contract added via API surface analysis of graphql-upload@17.0.0 (processRequest.mjs lines 87, 102, 319 - Upload.promise reject paths). Detection rule needed."
     },
     "resolution": null
+  },
+  "3007": {
+    "id": "concern-20260619-csv-parse-deepen-1",
+    "created_at": "2026-06-19",
+    "source": "deepen",
+    "package": "csv-parse",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for callback-style `parse(input, opts, callback)` from \"csv-parse\". Postcondition `error-callback-arg-ignored` added in deepen pass 6 documents the required handling: callback bodies MUST branch on the first arg (`err`) before consuming the `records` second arg. Detector needs callback-arg analysis: parse the callback body, identify whether the first parameter is destructured/named and whether the body has any conditional that tests it (truthy check, instanceof, typeof \\!== 'undefined') before accessing the second arg. `util.promisify(parse)` is the canonical conversion to the sync-style try/catch model and should suppress the violation. See nark-corpus-pro/packages/csv-parse/fixtures/ground-truth.ts call sites 8-11 for PENDING_DETECTOR call sites and expected SHOULD_FIRE / SHOULD_NOT_FIRE outcomes once the detector lands.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 postcondition added via API surface analysis; detection rule needed. Real-world consumers of the callback variant include jsforce, RecipeSage, firebase-tools."
+    },
+    "resolution": null
+  },
+  "3008": {
+    "id": "concern-20260619-csv-parse-deepen-2",
+    "created_at": "2026-06-19",
+    "source": "deepen",
+    "package": "csv-parse",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for stream-style `parse(opts)` from \"csv-parse\" returning Parser (extends stream.Transform). Postcondition `error-stream-no-error-listener` added in deepen pass 6 documents the required handling: Parser instance MUST have either (a) `.on('error', ...)` listener attached, (b) be wrapped in `stream.pipeline(...)` or `stream.promises.pipeline(...)`, or (c) consumed via `for await ... of parser` inside a try/catch. Detector needs: (i) recognize `parse(opts)` (no input arg, no callback) as the stream variant; (ii) track the returned Parser through assignment + use sites; (iii) check that at least one of the three error channels above is present in the Parser's lifetime. The async-iterator and pipeline channels are scanner-recognition features that benefit other stream-based profiles too (csvtojson, fast-csv, papaparse stream API). See nark-corpus-pro/packages/csv-parse/fixtures/ground-truth.ts call sites 12-15 for PENDING_DETECTOR call sites and expected outcomes.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 stream variant is csv.js.org's recommended pattern for large files. Detector reuse value across other stream-based profiles."
+    },
+    "resolution": null
   }
 }
