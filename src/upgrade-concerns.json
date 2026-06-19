@@ -56223,5 +56223,101 @@
       "note": "Proactive — contract added via API surface analysis (bc-deepen-contract pass 15, 2026-06-18). Ground-truth fixture at packages/@clickhouse/client/fixtures/ground-truth.ts (resultsetTextBareExport)."
     },
     "resolution": null
+  },
+  "2950": {
+    "id": "concern-20260618-nestjs-axios-deepen-1",
+    "created_at": "2026-06-18",
+    "source": "deepen",
+    "package": "@nestjs/axios",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for HttpService.axiosRef.<verb>(...) call pattern. axiosRef is a getter returning the underlying AxiosInstance — chained verb calls (axiosRef.get/post/put/patch/delete/head/request) return native axios Promises (NOT Observables) and require try/catch around await. This is a categorically different error contract from the Observable-returning HttpService verb methods. Postconditions axiosref-call-error-4xx-5xx, axiosref-call-network-failure, and axiosref-bypasses-observable-error-channel were added to the contract this pass; scanner needs to track the .axiosRef.<verb>( chain pattern on HttpService instances and check for try/catch around the await of the returned Promise.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis (Phase 1 enumeration of @nestjs/axios HttpService class). axiosRef is documented in NestJS official docs as the escape hatch for native axios Promise consumers."
+    },
+    "resolution": null
+  },
+  "2951": {
+    "id": "concern-20260618-nestjs-axios-deepen-2",
+    "created_at": "2026-06-18",
+    "source": "deepen",
+    "package": "@nestjs/axios",
+    "type": "new_pattern",
+    "status": "pending",
+    "description": "Distinguish bare axiosRef access (sync configuration like httpService.axiosRef.interceptors.request.use(...)) from awaited axiosRef.<verb>(...) calls. Bare reads SHOULD NOT fire — only chained verb invocations should trigger the postcondition check. Avoids FPs for interceptor setup, baseURL reads, defaults configuration, etc.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Edge case axiosref-getter-itself-is-sync — paired with concern-1 above. Both should land in the same scanner upgrade."
+    },
+    "resolution": null
+  },
+  "2952": {
+    "id": "concern-20260618-canvas-deepen-1",
+    "created_at": "2026-06-18",
+    "source": "deepen",
+    "package": "canvas",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for canvas.createPNGStream() unhandled 'error' event. The PNGStream is a Readable that emits 'error' on libpng / Cairo encode failure; pipe() without an 'error' listener crashes the process. Detect: instance.createPNGStream() return value piped or consumed without (a) being passed to stream/promises.pipeline inside try-catch, (b) a .on('error', ...) call on the stream, or (c) being passed to stream.pipeline(src, dst, cb).",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis (deepen-stream-2 pass 16). Pattern requires Readable-stream lifecycle detection: unhandled 'error' event after createPNGStream() return."
+    },
+    "resolution": null
+  },
+  "2953": {
+    "id": "concern-20260618-canvas-deepen-2",
+    "created_at": "2026-06-18",
+    "source": "deepen",
+    "package": "canvas",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for canvas.createJPEGStream() unhandled 'error' event. Same stream-lifecycle pattern as createPNGStream. Distinct concern because the no-JPEG-support precondition error (synchronous throw from constructor when canvas.streamJPEGSync is undefined) also needs flagging when the createJPEGStream() call site is outside any try-catch.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis. JPEG-support absence is a deployment-time failure mode common in minimal Linux containers."
+    },
+    "resolution": null
+  },
+  "2954": {
+    "id": "concern-20260618-canvas-deepen-3",
+    "created_at": "2026-06-18",
+    "source": "deepen",
+    "package": "canvas",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for canvas.createPDFStream() unhandled 'error' event. Same stream-lifecycle pattern. PDF-specific failure modes: font embedding errors when textDrawingMode='glyph', Cairo PDF backend memory pressure on multi-page docs. Distinguish stream errors from sync constructor throws.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis. PDF generation is the slowest path in most export pipelines; an unhandled stream error is high-impact."
+    },
+    "resolution": null
+  },
+  "2955": {
+    "id": "concern-20260618-canvas-deepen-4",
+    "created_at": "2026-06-18",
+    "source": "deepen",
+    "package": "canvas",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for canvas.toBuffer(callback, ...) async overload where the callback discards or ignores the err argument. Pattern: `canvas.toBuffer((_, buf) => ...)` or `canvas.toBuffer((err, buf) => useBuf(buf))` without an `if (err)` guard. This is a callback-discard FP/silent-failure detector — distinct from sync toBuffer (already detected as throws-uncaught) and from awaited-promise patterns.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis. The async overload is preferred in high-throughput HTTP servers (sync blocks the event loop); silent errors here corrupt downstream writes."
+    },
+    "resolution": null
   }
 }
