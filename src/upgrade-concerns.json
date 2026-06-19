@@ -54220,7 +54220,7 @@
     "source": "deepen",
     "package": "@mendable/firecrawl-js",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for Firecrawl.getExtractStatus()/extract() — bare await without try/catch. Extract jobs consume LLM credits — unhandled throw mid-extract wastes user money.",
     "evidence": {
       "repos": [],
@@ -54228,7 +54228,9 @@
       "violation_count": 0,
       "note": "Note: extract() waiter does NOT throw on timeout (it returns partial status) — scanner should NOT flag missing timeout handling for extract(), only for crawl()/batchScrape()."
     },
-    "resolution": null
+    "resolution": "Auto-resolved by existing PropertyChainDetector + Firecrawl class registration. Both getExtractStatus() and extract() fire SHOULD_FIRE/SHOULD_NOT_FIRE annotations correctly. Ground-truth test passes 42/42. Scanner-stream cycle 10.",
+    "verified_at": "2026-06-19T01:10:00.000Z",
+    "verified_by": "scanner-stream-cycle-10"
   },
   "2828": {
     "id": "concern-20260618-firecrawl-js-deepen-6",
@@ -54236,7 +54238,7 @@
     "source": "deepen",
     "package": "@mendable/firecrawl-js",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for Firecrawl.getConcurrency()/getCreditUsage()/getQueueStatus() — bare await without try/catch. Usage/billing observability calls; silent throws degrade dashboards and break pre-flight gates.",
     "evidence": {
       "repos": [],
@@ -54244,7 +54246,9 @@
       "violation_count": 0,
       "note": "Three usage-tier methods follow the same SdkError pattern — single rule can cover all three"
     },
-    "resolution": null
+    "resolution": "Auto-resolved by existing PropertyChainDetector + Firecrawl class registration. All three usage-tier methods (getConcurrency, getCreditUsage, getQueueStatus) fire SHOULD_FIRE/SHOULD_NOT_FIRE annotations correctly. Ground-truth test passes 42/42. Scanner-stream cycle 10.",
+    "verified_at": "2026-06-19T01:10:00.000Z",
+    "verified_by": "scanner-stream-cycle-10"
   },
   "2829": {
     "id": "concern-20260618-orb-billing-deepen-1",
