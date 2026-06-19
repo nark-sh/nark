@@ -54184,7 +54184,7 @@
     "source": "deepen",
     "package": "@mendable/firecrawl-js",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for Firecrawl.getCrawlErrors()/getBatchScrapeErrors() — bare await without try/catch. Used in post-job inspection / dashboards; silent throws here mean observability stops.",
     "evidence": {
       "repos": [],
@@ -54192,7 +54192,9 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis"
     },
-    "resolution": null
+    "resolution": "Auto-resolved by existing PropertyChainDetector + Firecrawl class registration. Both getCrawlErrors() and getBatchScrapeErrors() fire SHOULD_FIRE/SHOULD_NOT_FIRE annotations correctly. Ground-truth test passes 42/42. Scanner-stream cycle 10.",
+    "verified_at": "2026-06-19T01:10:00.000Z",
+    "verified_by": "scanner-stream-cycle-10"
   },
   "2826": {
     "id": "concern-20260618-firecrawl-js-deepen-4",
@@ -54200,7 +54202,7 @@
     "source": "deepen",
     "package": "@mendable/firecrawl-js",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for Firecrawl.getBatchScrapeStatus() — bare await without try/catch. Mirrors existing getCrawlStatus rule (polling loops); the same FP-safe detection should apply.",
     "evidence": {
       "repos": [],
@@ -54208,7 +54210,9 @@
       "violation_count": 0,
       "note": "Detection rule for getCrawlStatus likely already exists — extend to cover getBatchScrapeStatus identically"
     },
-    "resolution": null
+    "resolution": "Auto-resolved by existing PropertyChainDetector + Firecrawl class registration. getBatchScrapeStatus SHOULD_FIRE/SHOULD_NOT_FIRE annotations verified. Ground-truth test passes 42/42. Scanner-stream cycle 10.",
+    "verified_at": "2026-06-19T01:10:00.000Z",
+    "verified_by": "scanner-stream-cycle-10"
   },
   "2827": {
     "id": "concern-20260618-firecrawl-js-deepen-5",
