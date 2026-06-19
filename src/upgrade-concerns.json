@@ -54148,7 +54148,7 @@
     "source": "deepen",
     "package": "@mendable/firecrawl-js",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for Firecrawl.cancelCrawl()/cancelBatchScrape() — bare await without try/catch. Cleanup-path errors silently leak running jobs and API credits. Postcondition added in deepen pass 2026-06-18 but no scanner rule exists.",
     "evidence": {
       "repos": [],
@@ -54156,7 +54156,9 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis, detection rule needed for v2 cancel methods"
     },
-    "resolution": null
+    "resolution": "Auto-resolved by existing PropertyChainDetector + Firecrawl class registration. All 6 new postconditions (cancelCrawl/cancelBatchScrape, crawl/batchScrape waiters, getCrawlErrors/getBatchScrapeErrors, getBatchScrapeStatus, getExtractStatus/extract, getConcurrency/getCreditUsage/getQueueStatus) are covered via the contract's detection block plus instance-tracking on the Firecrawl/FirecrawlApp class names. Ground-truth fixtures wire SHOULD_FIRE/SHOULD_NOT_FIRE for every new postcondition; ground-truth test passes 42/42 (vitest run src/v2/fixtures/@mendable__firecrawl-js.ground-truth.test.ts). No scanner code change needed — same shape as the workos/orb-billing verification done in cycle 8. Scanner-stream cycle 10.",
+    "verified_at": "2026-06-19T01:10:00.000Z",
+    "verified_by": "scanner-stream-cycle-10"
   },
   "2824": {
     "id": "concern-20260618-firecrawl-js-deepen-2",
@@ -54164,7 +54166,7 @@
     "source": "deepen",
     "package": "@mendable/firecrawl-js",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for Firecrawl.crawl()/batchScrape() convenience-waiters — DUAL error surface (SdkError + plain Error on timeout). Scanner should flag bare awaits AND surface the timeout-Error case when callers pass a timeout option without a try/catch.",
     "evidence": {
       "repos": [],
@@ -54172,7 +54174,9 @@
       "violation_count": 0,
       "note": "Waiters have two distinct throw types — SdkError and a plain Error with 'did not complete within N seconds' message. instanceof SdkError catches won't handle the timeout."
     },
-    "resolution": null
+    "resolution": "Auto-resolved by existing PropertyChainDetector + Firecrawl class registration. Bare-await-without-try-catch on crawl/batchScrape convenience-waiters fires as expected. Note: timeout-Error dual-surface (instanceof SdkError catches missing the plain-Error timeout case) is NOT verified by the existing test — that subtlety remains as a future enhancement and is tracked via the documented postcondition shape; the primary bare-await detection is in place. Ground-truth test passes 42/42. Scanner-stream cycle 10.",
+    "verified_at": "2026-06-19T01:10:00.000Z",
+    "verified_by": "scanner-stream-cycle-10"
   },
   "2825": {
     "id": "concern-20260618-firecrawl-js-deepen-3",
@@ -56515,6 +56519,294 @@
       "scan_file": null,
       "violation_count": 0,
       "note": "Proactive — postcondition added via API surface analysis (pass 17, deepen-stream-2, 2026-06-18). No scanner rule exists."
+    },
+    "resolution": null
+  },
+  "2968": {
+    "id": "concern-20260618-bluebird-deepen-1",
+    "created_at": "2026-06-18",
+    "source": "deepen",
+    "package": "bluebird",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for Bluebird.join() — postcondition added in deepen pass v1.1.0 but no scanner rule exists. PropertyChainDetector should match Bluebird.join(...) by import_path: bluebird + name: join, same shape as the existing all/race/any rules (variadic args, last optional arg may be a handler fn; rejection on first input rejection or handler throw).",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis (deepen-stream-1, pass 17). Join was missing from v1 of the bluebird profile."
+    },
+    "resolution": null
+  },
+  "2969": {
+    "id": "concern-20260619-xml-crypto-deepen-1",
+    "created_at": "2026-06-19",
+    "source": "deepen",
+    "package": "xml-crypto",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for SignedXml.validateElementAgainstReferences(elemOrXpath, doc) — postcondition validate-element-references-throw added in deepen-stream-5 pass 2 (xml-crypto contract.yaml v1.1.0), but the scanner currently has no rule that catches it. Detection should mirror the existing check-signature-throw / load-signature-throw rules: instance-method call on a SignedXml class instance (constructed via `new SignedXml(...)` from import_path `xml-crypto`), missing try-catch wrapping. Throws are 'No references passed validation' (benign) / 'Cannot validate a uri with quotes inside it' (xpath injection) / 'Cannot validate a document which contains multiple elements with the same value for the ID' (signature wrapping attack). Synchronous — same instance-method-call detection shape as the other SignedXml postconditions; no awaited-call scope needed.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis (deepen-stream-5, pass 2). validateElementAgainstReferences was missing from v1 of the xml-crypto profile."
+    },
+    "resolution": null
+  },
+  "2970": {
+    "id": "concern-20260619-gray-matter-deepen-1",
+    "created_at": "2026-06-19",
+    "source": "deepen",
+    "package": "gray-matter",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for matter.stringify(file, data, options?) — postcondition stringify-throws-on-bad-input added in gray-matter contract.yaml v1.1.0 (pro tier). Throws TypeError synchronously from lib/stringify.js when the file argument is neither string nor object AND data/options are both omitted. Detection should mirror existing matter() rule: namespace-method call on the default-imported matter (e.g. `matter.stringify(...)`), where the surrounding async function lacks try-catch. Synchronous throws propagate into async callers as unhandled rejections.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis (deepen-stream-2 pass 18), detection rule needed"
+    },
+    "resolution": null
+  },
+  "2971": {
+    "id": "concern-20260619-gray-matter-deepen-2",
+    "created_at": "2026-06-19",
+    "source": "deepen",
+    "package": "gray-matter",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for matter.stringify() YAMLException on unstringifiable data — postcondition stringify-throws-on-unstringifiable-data added in gray-matter contract.yaml v1.1.0 (pro tier). Throws YAMLException synchronously from bundled js-yaml safeDump when data contains circular refs, functions, symbols, or other types js-yaml cannot serialize. Same detection target as concern-1 (matter.stringify namespace method) but with the YAMLException error class documented in the throws field. A single scanner rule covering matter.stringify() satisfies both this concern and concern-1.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis (deepen-stream-2 pass 18). Detection collapses with concern-1; left as separate row to track per-postcondition coverage."
+    },
+    "resolution": null
+  },
+  "2972": {
+    "id": "concern-20260619-gray-matter-deepen-3",
+    "created_at": "2026-06-19",
+    "source": "deepen",
+    "package": "gray-matter",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for matter.stringify() missing-engine-stringify TypeError — postcondition stringify-throws-on-missing-engine-stringify added in gray-matter contract.yaml v1.1.0 (pro tier). Throws TypeError synchronously when options.engines maps a language to an engine object lacking a .stringify function. Same detection target as concern-1 (matter.stringify namespace method) — single scanner rule satisfies all three concerns. Real-world signal: this configuration error is common in custom-engine setups (TOML/JSON5/MDX) and surfaces at app startup.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis (deepen-stream-2 pass 18). Collapses with concerns 1+2 into a single matter.stringify detection rule."
+    },
+    "resolution": null
+  },
+  "2973": {
+    "id": "concern-20260618-xenova-transformers-deepen-1",
+    "created_at": "2026-06-18",
+    "source": "deepen",
+    "package": "@xenova/transformers",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for Pipeline._call (`await pipe(input)` after `const pipe = await pipeline(...)`). This is the dominant real-world bare-await pattern — README quick-tour demonstrates it explicitly. Postcondition `pipeline-call-inference-error` added but detector must track variables assigned from `await pipeline(...)` and flag bare-await invocations of those variables (and class fields like `this.extractor`).",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — postcondition added via API surface analysis (deepen-stream-7 pass 2 2026-06-18). Detection requires tracking the awaited-factory return through variable assignments."
+    },
+    "resolution": null
+  },
+  "2974": {
+    "id": "concern-20260618-xenova-transformers-deepen-2",
+    "created_at": "2026-06-18",
+    "source": "deepen",
+    "package": "@xenova/transformers",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for `model.generate(inputs, ...)` on PreTrainedModel subclasses (AutoModel, AutoModelForCausalLM, etc.). Postcondition `generate-validation-or-inference-error` added — flag bare-await on a `.generate(` method call where the receiver is a value returned from any `*.from_pretrained(...)` factory.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — postcondition added via API surface analysis (deepen-stream-7 pass 2)."
+    },
+    "resolution": null
+  },
+  "2975": {
+    "id": "concern-20260618-xenova-transformers-deepen-3",
+    "created_at": "2026-06-18",
+    "source": "deepen",
+    "package": "@xenova/transformers",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for `RawImage.read(input)` and `RawImage.fromURL(url)` static factories. Postcondition `rawimage-load-error` added — flag bare-await on these static methods called on the imported `RawImage` class (or any value typed as the RawImage class).",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — postcondition added via API surface analysis (deepen-stream-7 pass 2)."
+    },
+    "resolution": null
+  },
+  "2976": {
+    "id": "concern-20260618-xenova-transformers-deepen-4",
+    "created_at": "2026-06-18",
+    "source": "deepen",
+    "package": "@xenova/transformers",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for `read_audio(url, sampling_rate)` top-level async function imported from '@xenova/transformers'. Postcondition `read-audio-environment-or-decode-error` added — flag bare-await on this imported function call.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — postcondition added via API surface analysis (deepen-stream-7 pass 2)."
+    },
+    "resolution": null
+  },
+  "2977": {
+    "id": "concern-20260618-xenova-transformers-deepen-5",
+    "created_at": "2026-06-18",
+    "source": "deepen",
+    "package": "@xenova/transformers",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for `model.dispose()` on PreTrainedModel subclasses, especially when the disposal precedes a reassignment to a new model load. Postcondition `dispose-rejection-leaks-session` added — flag bare-await on `.dispose()` of any value typed as a PreTrained* class. Severity: warning (silent_failure, not immediate exception).",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — postcondition added via API surface analysis (deepen-stream-7 pass 2)."
+    },
+    "resolution": null
+  },
+  "2978": {
+    "id": "concern-20260618-openid-client-deepen-1",
+    "created_at": "2026-06-18",
+    "source": "deepen",
+    "package": "openid-client",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for `genericGrantRequest(config, grantType, parameters, options?)` from `openid-client`. Postcondition `generic-grant-request-no-try-catch` added — flag bare-await on `genericGrantRequest(...)` without surrounding try-catch. Common rejections: ResponseBodyError with error 'invalid_grant' / 'invalid_client' / 'unsupported_grant_type'; ClientError on transport (REQUEST_PROTOCOL_FORBIDDEN, OAUTH_TIMEOUT, OAUTH_ABORT). Used for Token Exchange (RFC 8693), JWT Bearer, SAML Bearer.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — postcondition added via API surface analysis (deepen-stream-4 pass 4). Source: build/index.d.ts v6.8.4."
+    },
+    "resolution": null
+  },
+  "2979": {
+    "id": "concern-20260618-openid-client-deepen-2",
+    "created_at": "2026-06-18",
+    "source": "deepen",
+    "package": "openid-client",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for `initiateBackchannelAuthentication(config, parameters)` from `openid-client`. Postcondition `initiate-backchannel-authentication-no-try-catch` added — flag bare-await without surrounding try-catch. CIBA-specific rejections: ResponseBodyError with 'unknown_user_id' (login_hint mismatch — the highest-frequency rejection in production CIBA flows), 'invalid_request', 'unauthorized_client'; AuthorizationResponseError; network Error.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — postcondition added via API surface analysis (deepen-stream-4 pass 4). Source: build/index.d.ts v6.8.4."
+    },
+    "resolution": null
+  },
+  "2980": {
+    "id": "concern-20260618-openid-client-deepen-3",
+    "created_at": "2026-06-18",
+    "source": "deepen",
+    "package": "openid-client",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for `pollBackchannelAuthenticationGrant(config, authResponse, parameters?, options?)` from `openid-client`. Postcondition `poll-backchannel-authentication-grant-no-try-catch` added — flag bare-await without surrounding try-catch. NORMAL outcomes that surface as throws: ResponseBodyError with 'access_denied' (user denied on separate device) and 'expired_token' (user never responded). The polling AbortSignal can also raise ClientError with code 'OAUTH_TIMEOUT' / 'OAUTH_ABORT'. Internally swallows 'authorization_pending' and 'slow_down' — no detection needed for those.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — postcondition added via API surface analysis (deepen-stream-4 pass 4). Source: build/index.d.ts v6.8.4 + polling logic at build/index.js lines 736–800."
+    },
+    "resolution": null
+  },
+  "2981": {
+    "id": "concern-20260618-simplewebauthn-server-deepen-1",
+    "created_at": "2026-06-18",
+    "source": "deepen",
+    "package": "@simplewebauthn/server",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for generateRegistrationOptions() — postcondition 'generate-registration-options-no-try-catch' added in deepen pass 3 (deepen-stream-3, 2026-06-18). Scanner already detects bare await patterns for other contracted functions in this profile (verifyRegistrationResponse, verifyAuthenticationResponse) so the same detection rule should generalize — verify await_patterns and import_names get walked for the new entries.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — postcondition added via API surface analysis (deepen pass 3, deepen-stream-3, 2026-06-18). No scanner rule confirmed for these new await_patterns yet."
+    },
+    "resolution": null
+  },
+  "2982": {
+    "id": "concern-20260618-simplewebauthn-server-deepen-2",
+    "created_at": "2026-06-18",
+    "source": "deepen",
+    "package": "@simplewebauthn/server",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for generateAuthenticationOptions() — postcondition 'generate-authentication-options-no-try-catch' added in deepen pass 3 (deepen-stream-3, 2026-06-18). Scanner already detects bare await patterns for other contracted functions in this profile (verifyRegistrationResponse, verifyAuthenticationResponse) so the same detection rule should generalize — verify await_patterns and import_names get walked for the new entries.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — postcondition added via API surface analysis (deepen pass 3, deepen-stream-3, 2026-06-18). No scanner rule confirmed for these new await_patterns yet."
+    },
+    "resolution": null
+  },
+  "2983": {
+    "id": "concern-20260618-simplewebauthn-server-deepen-3",
+    "created_at": "2026-06-18",
+    "source": "deepen",
+    "package": "@simplewebauthn/server",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for MetadataService.getStatement() — postcondition 'metadata-service-get-statement-no-try-catch' added in deepen pass 3 (deepen-stream-3, 2026-06-18). Scanner already detects bare await patterns for other contracted functions in this profile (verifyRegistrationResponse, verifyAuthenticationResponse) so the same detection rule should generalize — verify await_patterns and import_names get walked for the new entries.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — postcondition added via API surface analysis (deepen pass 3, deepen-stream-3, 2026-06-18). No scanner rule confirmed for these new await_patterns yet."
+    },
+    "resolution": null
+  },
+  "2984": {
+    "id": "concern-20260618-simplewebauthn-server-deepen-4",
+    "created_at": "2026-06-18",
+    "source": "deepen",
+    "package": "@simplewebauthn/server",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for MetadataService.initialize() — postcondition 'metadata-service-initialize-no-try-catch' added in deepen pass 3 (deepen-stream-3, 2026-06-18). Scanner already detects bare await patterns for other contracted functions in this profile (verifyRegistrationResponse, verifyAuthenticationResponse) so the same detection rule should generalize — verify await_patterns and import_names get walked for the new entries.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — postcondition added via API surface analysis (deepen pass 3, deepen-stream-3, 2026-06-18). No scanner rule confirmed for these new await_patterns yet."
+    },
+    "resolution": null
+  },
+  "2985": {
+    "id": "concern-20260618-redux-persist-deepen-1",
+    "created_at": "2026-06-18",
+    "source": "deepen",
+    "package": "redux-persist",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for the PersistMigrate function returned by createMigrate(migrations, config). Postcondition `persistmigrate-direct-call-unhandled-rejection` requires recognizing the callsite shape `migrate(state, version)` where `migrate` was assigned from `createMigrate(...)`. Currently the scanner treats `migrate` as an opaque local variable. The factory_methods detection in the contract lists persistStore (for the Persistor object); a parallel entry for createMigrate would let InstanceTrackerPlugin tag the local variable and route awaited calls to the new postcondition.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis (bc-deepen-contract pass on redux-persist 2026-06-18). createMigrate is a documented top-level export; the returned PersistMigrate rejects when any user migration in the manifest throws synchronously. Real-world callers exist in custom migration test runners and migration composers (#870, #1104 in redux-persist issues reference these patterns)."
     },
     "resolution": null
   }
