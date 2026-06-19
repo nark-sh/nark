@@ -57003,5 +57003,149 @@
       "note": "Proactive — postconditions added in soap deepen pass 5 (deepen-stream-4, 2026-06-19); detection rule needed."
     },
     "resolution": null
+  },
+  "2997": {
+    "id": "concern-20260619-ssh2-deepen-1",
+    "created_at": "2026-06-19",
+    "source": "deepen",
+    "package": "ssh2",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detector for ssh2.Client.exec() callback first-statement err-guard. Postcondition exec-callback-error-ignored added in 2026-06-19 deepen pass but no scanner rule exists. Detector should walk exec() call sites, find the callback argument (last function param), and check if the first statement of the callback body is `if (err)` / `if (typeof err !== \"undefined\")` / equivalent err-guard pattern. FP avoidance is critical — the 2026-06-17 attempt produced 4 FPs / 4 real callbacks.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis on 2026-06-19, detection rule needed. Existing contract note (line 74-78) flags FP risk on naive first-statement detection — the implementation must use an AST walker that recognises `if (err)` / `if (typeof err !== 'undefined')` / destructured guard / err-rethrow-via-arrow forms, not regex/string match."
+    },
+    "resolution": null
+  },
+  "2998": {
+    "id": "concern-20260619-ssh2-deepen-2",
+    "created_at": "2026-06-19",
+    "source": "deepen",
+    "package": "ssh2",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detector for ssh2.Client.shell() callback first-statement err-guard. Postcondition shell-callback-error-ignored. Same shape as exec() detector (Concern -1) — share AST walker across both.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis on 2026-06-19, detection rule needed. Existing contract note (line 74-78) flags FP risk on naive first-statement detection — the implementation must use an AST walker that recognises `if (err)` / `if (typeof err !== 'undefined')` / destructured guard / err-rethrow-via-arrow forms, not regex/string match."
+    },
+    "resolution": null
+  },
+  "2999": {
+    "id": "concern-20260619-ssh2-deepen-3",
+    "created_at": "2026-06-19",
+    "source": "deepen",
+    "package": "ssh2",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detector for ssh2.Client.sftp() callback first-statement err-guard. Postcondition sftp-callback-error-ignored. Same shape as exec() detector but the second callback arg is `sftp: SFTPWrapper` not `stream: Channel`.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis on 2026-06-19, detection rule needed. Existing contract note (line 74-78) flags FP risk on naive first-statement detection — the implementation must use an AST walker that recognises `if (err)` / `if (typeof err !== 'undefined')` / destructured guard / err-rethrow-via-arrow forms, not regex/string match."
+    },
+    "resolution": null
+  },
+  "3000": {
+    "id": "concern-20260619-ssh2-deepen-4",
+    "created_at": "2026-06-19",
+    "source": "deepen",
+    "package": "ssh2",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detector for ssh2.Client.forwardOut() callback first-statement err-guard. Postcondition forward-out-callback-error-ignored.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis on 2026-06-19, detection rule needed. Existing contract note (line 74-78) flags FP risk on naive first-statement detection — the implementation must use an AST walker that recognises `if (err)` / `if (typeof err !== 'undefined')` / destructured guard / err-rethrow-via-arrow forms, not regex/string match."
+    },
+    "resolution": null
+  },
+  "3001": {
+    "id": "concern-20260619-ssh2-deepen-5",
+    "created_at": "2026-06-19",
+    "source": "deepen",
+    "package": "ssh2",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detector for ssh2.Client.forwardIn() callback first-statement err-guard. Postcondition forward-in-callback-error-ignored. Note: forwardIn callback is OPTIONAL — only flag when a callback IS passed and the callback body skips the err check. If no callback is passed at all, separate concern (silent bind failure unobservable).",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis on 2026-06-19, detection rule needed. Existing contract note (line 74-78) flags FP risk on naive first-statement detection — the implementation must use an AST walker that recognises `if (err)` / `if (typeof err !== 'undefined')` / destructured guard / err-rethrow-via-arrow forms, not regex/string match."
+    },
+    "resolution": null
+  },
+  "3002": {
+    "id": "concern-20260619-ssh2-deepen-6",
+    "created_at": "2026-06-19",
+    "source": "deepen",
+    "package": "ssh2",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detector for ssh2.SFTPWrapper.on('error') registration. Postcondition sftp-wrapper-missing-error-listener. Detector should track the `sftp` variable name bound in the sftp() callback and require `.on('error', ...)` to be called on it before any other SFTP-op call.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis on 2026-06-19, detection rule needed. Existing contract note (line 74-78) flags FP risk on naive first-statement detection — the implementation must use an AST walker that recognises `if (err)` / `if (typeof err !== 'undefined')` / destructured guard / err-rethrow-via-arrow forms, not regex/string match."
+    },
+    "resolution": null
+  },
+  "3003": {
+    "id": "concern-20260619-ssh2-deepen-7",
+    "created_at": "2026-06-19",
+    "source": "deepen",
+    "package": "ssh2",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detector for ssh2 Channel.on('error') registration on streams returned from exec/shell/forwardOut. Postcondition channel-missing-error-listener. Detector should track the `stream` variable bound in the callback (second arg) and require `.on('error', ...)` before any `.pipe()` / `.on('data')` call.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis on 2026-06-19, detection rule needed. Existing contract note (line 74-78) flags FP risk on naive first-statement detection — the implementation must use an AST walker that recognises `if (err)` / `if (typeof err !== 'undefined')` / destructured guard / err-rethrow-via-arrow forms, not regex/string match."
+    },
+    "resolution": null
+  },
+  "3004": {
+    "id": "concern-20260619-ssh2-deepen-8",
+    "created_at": "2026-06-19",
+    "source": "deepen",
+    "package": "ssh2",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detector for any SFTPWrapper method callback (fastGet/fastPut/readdir/stat/lstat/open/close/read/write/unlink/rename/mkdir/rmdir/chown/chmod/readlink/symlink/realpath/ext_openssh_* variants) first-statement err-guard. Postcondition sftp-wrapper-method-callback-error-ignored. Highest data-loss exposure of all ssh2 callback err-checks — covers ~25 methods. Single shared detector across all SFTPWrapper methods.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis on 2026-06-19, detection rule needed. Existing contract note (line 74-78) flags FP risk on naive first-statement detection — the implementation must use an AST walker that recognises `if (err)` / `if (typeof err !== 'undefined')` / destructured guard / err-rethrow-via-arrow forms, not regex/string match."
+    },
+    "resolution": null
+  },
+  "3005": {
+    "id": "concern-20260619-prom-client-deepen-1",
+    "created_at": "2026-06-19",
+    "source": "deepen",
+    "package": "prom-client",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for direct .get() calls on prom-client metric instances (Counter, Gauge, Histogram, Summary). Pattern: await <metric>.get() where <metric> is bound from new Counter({...}) / new Gauge({...}) / new Histogram({...}) / new Summary({...}). Rejection is only possible when the constructor config included a collect: callback that throws or returns a rejecting Promise — a metric without collect cannot reject. Detection should ideally check the binding's constructor args for a collect: property to suppress FPs on the common no-collect case.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — postcondition get-rejects-on-collect-callback-error added in prom-client deepen pass 4 (deepen-stream-5, 2026-06-19). The four metric classes share identical impls (lib/counter.js:109-122, lib/gauge.js:108-113, lib/histogram.js:102-106, lib/summary.js:51-55) — all await this.collect() when set. Real-world direct callers are uncommon (corpus search at deepen time found zero unhandled call sites; vitest fixtures only); fixture coverage is added defensively for future scanner rule landing."
+    },
+    "resolution": null
   }
 }

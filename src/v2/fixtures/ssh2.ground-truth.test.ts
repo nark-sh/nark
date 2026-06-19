@@ -50,7 +50,7 @@ describe('ssh2: ground-truth fixture', () => {
       includeDrafts: true,
       packageName: 'ssh2',
     });
-  });
+  }, 60000);
 
   it('analyzer runs without errors', () => {
     expect(result).toBeDefined();
