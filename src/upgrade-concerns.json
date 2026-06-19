@@ -56130,7 +56130,7 @@
     "source": "deepen",
     "package": "undici",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for pipeline() returned Duplex used without registering an 'error' event listener. Postcondition pipeline-missing-error-listener was added in deepen pass. Unlike request/fetch/stream which return Promises, pipeline() returns a Duplex synchronously and dispatches network errors via the 'error' event. Scanner must look for: import { pipeline } from 'undici' → const x = pipeline(...) → check whether x.on('error', ...) or x.addEventListener('error', ...) is called before the Duplex is used / consumed.",
     "evidence": {
       "repos": [],
@@ -56138,7 +56138,10 @@
       "violation_count": 0,
       "note": "Proactive — this is the EVENT-EMITTER detection pattern (already used for WebSocket and Dispatcher), now extended to a returned-Duplex. Scanner detection here is structurally similar to required_event_listeners for WebSocket but applies to a function-call return value rather than a constructor."
     },
-    "resolution": null
+    "resolution": {
+      "implemented_at": "2026-06-19",
+      "verified_by": "scanner-stream cycle 13 — ground-truth test pass"
+    }
   },
   "2943": {
     "id": "concern-20260618-undici-deepen-5",
@@ -56146,7 +56149,7 @@
     "source": "deepen",
     "package": "undici",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for Dispatcher.destroy() called without try-catch. Postcondition dispatcher-destroy-no-try-catch was added in deepen pass. destroy() is commonly called inside finally blocks in shutdown handlers where another error is in flight — failing to handle the destroy rejection masks the original error. Detection: await x.destroy() where x is a Client/Pool/Agent/Dispatcher and no try-catch wraps the await.",
     "evidence": {
       "repos": [],
@@ -56154,7 +56157,10 @@
       "violation_count": 0,
       "note": "Proactive — destroy() is the emergency-shutdown counterpart to close() which the scanner already detects. Extend the dispatcher-close-already-destroyed detection to also fire on destroy() without try-catch."
     },
-    "resolution": null
+    "resolution": {
+      "implemented_at": "2026-06-19",
+      "verified_by": "scanner-stream cycle 13 — ground-truth test pass"
+    }
   },
   "2944": {
     "id": "concern-20260618-undici-deepen-6",
@@ -56210,7 +56216,7 @@
     "source": "deepen",
     "package": "undici",
     "type": "fixture_alignment",
-    "status": "pending",
+    "status": "implemented",
     "description": "Wire new undici fixtures (responseBlobNoCatch / responseBytesNoCatch / responseFormDataNoCatch / pipelineNoErrorListener / dispatcherDestroyNoCatch / eventSourceBadUrl / eventSourceNoErrorListener and their corresponding @expect-clean cases) into ground-truth test suite. The fixtures use @expect-violation / @expect-clean annotations matching the new postcondition ids added in this pass.",
     "evidence": {
       "repos": [],
@@ -56218,7 +56224,10 @@
       "violation_count": 0,
       "note": "Fixtures created 2026-06-18 by deepen-stream-3 pass 1. Until the corresponding scanner detection rules (concerns 1-7) are implemented, the @expect-violation cases will not fire — fixtures serve as TODO anchors for the upcoming detection upgrades."
     },
-    "resolution": null
+    "resolution": {
+      "implemented_at": "2026-06-19",
+      "verified_by": "scanner-stream cycle 13 — ground-truth test pass"
+    }
   },
   "2948": {
     "id": "concern-20260618-clickhouse-client-deepen-1",
@@ -56706,7 +56715,7 @@
     "source": "deepen",
     "package": "openid-client",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for `genericGrantRequest(config, grantType, parameters, options?)` from `openid-client`. Postcondition `generic-grant-request-no-try-catch` added — flag bare-await on `genericGrantRequest(...)` without surrounding try-catch. Common rejections: ResponseBodyError with error 'invalid_grant' / 'invalid_client' / 'unsupported_grant_type'; ClientError on transport (REQUEST_PROTOCOL_FORBIDDEN, OAUTH_TIMEOUT, OAUTH_ABORT). Used for Token Exchange (RFC 8693), JWT Bearer, SAML Bearer.",
     "evidence": {
       "repos": [],
@@ -56714,7 +56723,10 @@
       "violation_count": 0,
       "note": "Proactive — postcondition added via API surface analysis (deepen-stream-4 pass 4). Source: build/index.d.ts v6.8.4."
     },
-    "resolution": null
+    "resolution": {
+      "implemented_at": "2026-06-19",
+      "verified_by": "scanner-stream cycle 13 — ground-truth test pass"
+    }
   },
   "2979": {
     "id": "concern-20260618-openid-client-deepen-2",
@@ -56722,7 +56734,7 @@
     "source": "deepen",
     "package": "openid-client",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for `initiateBackchannelAuthentication(config, parameters)` from `openid-client`. Postcondition `initiate-backchannel-authentication-no-try-catch` added — flag bare-await without surrounding try-catch. CIBA-specific rejections: ResponseBodyError with 'unknown_user_id' (login_hint mismatch — the highest-frequency rejection in production CIBA flows), 'invalid_request', 'unauthorized_client'; AuthorizationResponseError; network Error.",
     "evidence": {
       "repos": [],
@@ -56730,7 +56742,10 @@
       "violation_count": 0,
       "note": "Proactive — postcondition added via API surface analysis (deepen-stream-4 pass 4). Source: build/index.d.ts v6.8.4."
     },
-    "resolution": null
+    "resolution": {
+      "implemented_at": "2026-06-19",
+      "verified_by": "scanner-stream cycle 13 — ground-truth test pass"
+    }
   },
   "2980": {
     "id": "concern-20260618-openid-client-deepen-3",
@@ -56738,7 +56753,7 @@
     "source": "deepen",
     "package": "openid-client",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for `pollBackchannelAuthenticationGrant(config, authResponse, parameters?, options?)` from `openid-client`. Postcondition `poll-backchannel-authentication-grant-no-try-catch` added — flag bare-await without surrounding try-catch. NORMAL outcomes that surface as throws: ResponseBodyError with 'access_denied' (user denied on separate device) and 'expired_token' (user never responded). The polling AbortSignal can also raise ClientError with code 'OAUTH_TIMEOUT' / 'OAUTH_ABORT'. Internally swallows 'authorization_pending' and 'slow_down' — no detection needed for those.",
     "evidence": {
       "repos": [],
@@ -56746,7 +56761,10 @@
       "violation_count": 0,
       "note": "Proactive — postcondition added via API surface analysis (deepen-stream-4 pass 4). Source: build/index.d.ts v6.8.4 + polling logic at build/index.js lines 736–800."
     },
-    "resolution": null
+    "resolution": {
+      "implemented_at": "2026-06-19",
+      "verified_by": "scanner-stream cycle 13 — ground-truth test pass"
+    }
   },
   "2981": {
     "id": "concern-20260618-simplewebauthn-server-deepen-1",
