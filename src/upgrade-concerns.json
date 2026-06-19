@@ -55346,7 +55346,7 @@
     "source": "deepen",
     "package": "rate-limiter-flexible",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for RateLimiterQueue.removeTokens() — postcondition remove-tokens-rejects-with-queue-error added in deepen pass 8 (2026-06-18) but no scanner rule exists. Need to detect bare-await on .removeTokens() against RateLimiterQueue instances and emit a RateLimiterQueueError-aware violation (four distinct error messages: tokens-exceeds-max / queue-full / deadline-expired / store-failure).",
     "evidence": {
       "repos": [],
@@ -55354,7 +55354,9 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis, detection rule needed"
     },
-    "resolution": null
+    "resolution": "Verified via vitest src/v2/fixtures/rate-limiter-flexible.ground-truth.test.ts (34/34 pass). Line 271 SHOULD_FIRE remove-tokens-rejects-with-queue-error passes — bare-await on RateLimiterQueue.removeTokens() detected via existing class-instance tracking (RateLimiterQueue registered in detection.class_names) + ContractMatcher emission of the new postcondition_id.",
+    "verified_at": "2026-06-19",
+    "verified_by": "scanner-stream-cycle-11"
   },
   "2895": {
     "id": "concern-20260618-rate-limiter-flexible-deepen-3",
@@ -55362,7 +55364,7 @@
     "source": "deepen",
     "package": "rate-limiter-flexible",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for RateLimiterQueue.getTokensRemaining() — postcondition get-tokens-remaining-rejects-on-store-error added in deepen pass 8 (2026-06-18) but no scanner rule exists. Delegates to inner .get() rejection; detection should flag bare-await on the wrapper just as it does for inner .get().",
     "evidence": {
       "repos": [],
@@ -55370,7 +55372,9 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis, detection rule needed"
     },
-    "resolution": null
+    "resolution": "Verified via vitest src/v2/fixtures/rate-limiter-flexible.ground-truth.test.ts (34/34 pass). Line 297 SHOULD_FIRE get-tokens-remaining-rejects-on-store-error passes — bare-await on RateLimiterQueue.getTokensRemaining() detected via existing class-instance tracking.",
+    "verified_at": "2026-06-19",
+    "verified_by": "scanner-stream-cycle-11"
   },
   "2896": {
     "id": "concern-20260618-rate-limiter-flexible-deepen-4",
@@ -55378,7 +55382,7 @@
     "source": "deepen",
     "package": "rate-limiter-flexible",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for RateLimiterMongo.createIndexes() — postcondition create-indexes-rejects-on-mongo-error added in deepen pass 8 (2026-06-18) but no scanner rule exists. Detector should flag bare-await on .createIndexes() against RateLimiterMongo instances. Note FP path: the auto-call inside _initCollection() already has .catch(console.error) and should be skipped.",
     "evidence": {
       "repos": [],
@@ -55386,7 +55390,9 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis, detection rule needed"
     },
-    "resolution": null
+    "resolution": "Verified via vitest src/v2/fixtures/rate-limiter-flexible.ground-truth.test.ts (34/34 pass). Line 316 SHOULD_FIRE create-indexes-rejects-on-mongo-error passes — bare-await on RateLimiterMongo.createIndexes() detected via existing class-instance tracking.",
+    "verified_at": "2026-06-19",
+    "verified_by": "scanner-stream-cycle-11"
   },
   "2897": {
     "id": "concern-20260618-rate-limiter-flexible-deepen-5",
@@ -55394,7 +55400,7 @@
     "source": "deepen",
     "package": "rate-limiter-flexible",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for RateLimiterValkeyGlide.close() — postcondition close-rejects-on-valkey-error added in deepen pass 8 (2026-06-18) but no scanner rule exists. Shutdown-path violation. Detector should flag bare-await on .close() against RateLimiterValkeyGlide instances but recommend log-only handling (NOT rethrow) per required_handling guidance.",
     "evidence": {
       "repos": [],
@@ -55402,7 +55408,9 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis, detection rule needed"
     },
-    "resolution": null
+    "resolution": "Verified via vitest src/v2/fixtures/rate-limiter-flexible.ground-truth.test.ts (34/34 pass). Line 335 SHOULD_FIRE close-rejects-on-valkey-error passes — bare-await on RateLimiterValkeyGlide.close() detected via existing class-instance tracking.",
+    "verified_at": "2026-06-19",
+    "verified_by": "scanner-stream-cycle-11"
   },
   "2898": {
     "id": "concern-20260618-rate-limiter-flexible-deepen-6",
@@ -55558,7 +55566,7 @@
     "source": "deepen",
     "package": "@langchain/langgraph",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for graph.getStateHistory() iteration — SYNCHRONOUS call returning AsyncIterableIterator (NOT a Promise). The only error-handling site is the for-await-of consumer loop. Throws plain Error(\"No checkpointer set\") — NOT GraphValueError, NOT lc_error_code MISSING_CHECKPOINTER. Detection: for-await-of consumer of graph.getStateHistory(...) result outside try-catch. NOTE: this is shape-distinct from invoke/stream/streamEvents because there is no await on the call site.",
     "evidence": {
       "repos": [],
@@ -55566,7 +55574,9 @@
       "violation_count": 0,
       "note": "Proactive — 6 production repos iterate getStateHistory (debug/admin routes); postcondition getStateHistory-iteration-no-try-catch added in deepen pass 2026-06-18."
     },
-    "resolution": null
+    "resolution": "Verified via vitest src/v2/fixtures/@langchain__langgraph.ground-truth.test.ts (23/23 pass). Line 370 SHOULD_FIRE for get-state-history-iteration-no-try-catch passes — for-await-of consumer of synchronous-call-returning-AsyncIterableIterator IS detected by the existing PropertyChainDetector + for-await-of consumer detector. The shape-distinct pattern (no await on call site) auto-resolves through the same iteration-point mechanism getStateHistory shares with stream/streamEvents consumers.",
+    "verified_at": "2026-06-19",
+    "verified_by": "scanner-stream-cycle-11"
   },
   "2908": {
     "id": "concern-20260618-ky-deepen-1",
@@ -56815,6 +56825,102 @@
       "scan_file": null,
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis (bc-deepen-contract pass on redux-persist 2026-06-18). createMigrate is a documented top-level export; the returned PersistMigrate rejects when any user migration in the manifest throws synchronously. Real-world callers exist in custom migration test runners and migration composers (#870, #1104 in redux-persist issues reference these patterns)."
+    },
+    "resolution": null
+  },
+  "2986": {
+    "id": "concern-20260619-webflow-api-deepen-1",
+    "created_at": "2026-06-19",
+    "source": "deepen",
+    "package": "webflow-api",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection rule for `client.sites.publish(...)` that flags missing try-catch with the new `site-publish-error` postcondition (1-publish-per-minute rate-limit semantics). Generic api-error already covers awaited dispatch; this concern is about emitting site-publish-error specifically (severity-aware messaging — 429 here means queue-busy, not token rate-limit). Current detection.await_patterns already includes `.sites.publish(`.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — added via bc-deepen-contract pass 3 on webflow-api (2026-06-19). Sources: README + reference.md 'Rate limit: 1 publish per minute' note."
+    },
+    "resolution": null
+  },
+  "2987": {
+    "id": "concern-20260619-webflow-api-deepen-2",
+    "created_at": "2026-06-19",
+    "source": "deepen",
+    "package": "webflow-api",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add stage-2 detection for `client.assets.create(...)` — the SDK initiates upload via stage 1 (caught by api-error / asset-upload-init-error), but stage 2 is a separate fetch(uploadUrl, { method: 'POST', body: formData }) whose failure is INVISIBLE to the SDK call. Scanner should ideally recognize the sequence `upload = await webflow.assets.create(...); fetch(upload.uploadUrl, ...)` and require `response.ok` check + orphan cleanup. Cross-package concern (involves global fetch), so this is a P2 enhancement, not a baseline rule.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — added via bc-deepen-contract pass 3 on webflow-api (2026-06-19). Reference: reference.md 'first step in uploading an asset'; AssetUpload response includes uploadUrl + uploadDetails for separate S3 POST."
+    },
+    "resolution": null
+  },
+  "2988": {
+    "id": "concern-20260619-webflow-api-deepen-3",
+    "created_at": "2026-06-19",
+    "source": "deepen",
+    "package": "webflow-api",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add ConflictError-specific routing for `client.webhooks.create(...)`. Generic api-error catches the unhandled await, but the documented 75-per-triggerType limit means ConflictError requires a specific recovery branch (list-and-dedupe). The contract now has `webhook-registration-error` postcondition; scanner could enrich the violation message when a try-catch exists but does not branch on `instanceof Webflow.ConflictError`.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — added via bc-deepen-contract pass 3 on webflow-api (2026-06-19). Reference: reference.md 'Limit of 75 registrations per triggerType, per site.'"
+    },
+    "resolution": null
+  },
+  "2989": {
+    "id": "concern-20260619-webflow-api-deepen-4",
+    "created_at": "2026-06-19",
+    "source": "deepen",
+    "package": "webflow-api",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for `client.workspaces.auditLogs.getWorkspaceAuditLogs(...)` — sub-resource dispatch (3 levels deep) requires the InstanceTrackerPlugin to walk past `.workspaces.auditLogs.` correctly. Current contract added `.workspaces.auditLogs.getWorkspaceAuditLogs(` to await_patterns; verify the scanner's substring match handles the deeper chain without false-negative on resource-method dispatch. Routes to the new `audit-log-fetch-error` postcondition with severity:warning.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — added via bc-deepen-contract pass 3 on webflow-api (2026-06-19). Reference: api/resources/workspaces/resources/auditLogs/client/Client.d.ts in v3.3.4."
+    },
+    "resolution": null
+  },
+  "2990": {
+    "id": "concern-20260619-cosmiconfig-deepen-1",
+    "created_at": "2026-06-19",
+    "source": "deepen",
+    "package": "cosmiconfig",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add factory-of-binding tracking so the scanner can distinguish `cosmiconfig()` explorer instances (async, current target — search/load return Promises) from `cosmiconfigSync()` instances (sync, NEW target — search/load throw synchronously). The same method names (`search` / `load`) are exposed by both, so without tracking which factory the binding came from, the scanner either over-flags (false positives on sync calls in CLI startup paths that legitimately handle sync throws via try-catch but don't await) or under-flags (misses the new search-sync postcondition). Recommended detection shape: walk the binding's RHS expression chain; if it's `cosmiconfigSync(...)` (or returns the result of such a call), tag the explorer with `factory: 'sync'` and route method calls (`.search()`, `.load()`) through sync-rule processing. The new search-sync postcondition needs sync-throw detection (caller MUST wrap call site in try-catch — no `.catch()` chain works because there is no Promise).",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — postcondition added via API surface analysis. Real-world cosmiconfigSync usage common in CLI tools (e.g. stylelint, postcss, prettier all use both async and sync factories conditionally)."
+    },
+    "resolution": null
+  },
+  "2991": {
+    "id": "concern-20260619-cosmiconfig-deepen-2",
+    "created_at": "2026-06-19",
+    "source": "deepen",
+    "package": "cosmiconfig",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Companion to concern-20260619-cosmiconfig-deepen-1 — same factory-of-binding tracking is required for `explorerSync.load(path)`. The sync load() method throws synchronously on missing file (ENOENT), unreadable file (EACCES), or parse error (loader Error with .filepath set since v9). Unlike sync search() (which silently retries fs errors while walking the directory tree), sync load() throws on EVERY failure mode — there is no null short-circuit. Detection should require try-catch around the sync call expression (no `await`); the existing async-load postcondition's `await` requirement does not apply to the sync surface. Until this lands, the new load-sync-throws-on-missing-or-malformed-file postcondition documents the contract obligation but is not actively detected.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — postcondition added via API surface analysis. The README's canonical sync usage example IS try-catch-wrapped, so well-behaved callers already satisfy the contract."
     },
     "resolution": null
   }
