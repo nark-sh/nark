@@ -55889,5 +55889,117 @@
       "note": "Proactive — contract added via API surface analysis (waitUntil* waiters and BatchGet* response.failures[]), detection rule needed"
     },
     "resolution": null
+  },
+  "2932": {
+    "id": "concern-20260618-clerk-nextjs-v7-deepen-1",
+    "created_at": "2026-06-18",
+    "source": "deepen",
+    "package": "@clerk/nextjs-v7",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for v7 useAuth().getToken() called outside useEffect/event handler in Server Components — v7 throws ClerkRuntimeError (code: clerk_runtime_not_browser). Postcondition `get-token-ssr-not-handled` added in deepen pass; scanner needs SSR-context detection.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis (v7.0.0 breaking changes), detection rule needed"
+    },
+    "resolution": null
+  },
+  "2933": {
+    "id": "concern-20260618-clerk-nextjs-v7-deepen-2",
+    "created_at": "2026-06-18",
+    "source": "deepen",
+    "package": "@clerk/nextjs-v7",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for v7 useAuth().getToken() result null-checked without try-catch — v7 throws ClerkOfflineError instead of returning null on network failures. Postcondition `get-token-offline-not-handled` added in deepen pass; scanner needs `if (token === null)` pattern detection without surrounding catch for ClerkOfflineError.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis (v7.0.0 breaking changes), detection rule needed"
+    },
+    "resolution": null
+  },
+  "2934": {
+    "id": "concern-20260618-clerk-nextjs-v7-deepen-3",
+    "created_at": "2026-06-18",
+    "source": "deepen",
+    "package": "@clerk/nextjs-v7",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for v7 auth.protect() called inside a server action ('use server' file or inline directive) where downstream caller hard-codes `response.status === 404` — v7 returns 401 instead of 404. Postcondition `protect-server-action-status-code-changed` added in deepen pass; scanner needs server-action context + 404-comparison detection.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis (v7.0.0 breaking changes), detection rule needed"
+    },
+    "resolution": null
+  },
+  "2935": {
+    "id": "concern-20260618-clerk-nextjs-v7-deepen-4",
+    "created_at": "2026-06-18",
+    "source": "deepen",
+    "package": "@clerk/nextjs-v7",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for v7 useUser()/useAuth() called with deprecated `initialAuthState` option — v7 removes the option silently. Postcondition `use-user-initial-auth-state-removed` added in deepen pass; scanner needs hook-options-key detection.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis (v7.0.0 breaking changes), detection rule needed"
+    },
+    "resolution": null
+  },
+  "2936": {
+    "id": "concern-20260618-clerk-nextjs-v7-deepen-5",
+    "created_at": "2026-06-18",
+    "source": "deepen",
+    "package": "@clerk/nextjs-v7",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for v7 currentUser() called without explicit `treatPendingAsSignedOut: false` where downstream code accesses pending-state user metadata — v7 default returns null for pending users. Postcondition `current-user-pending-session-default-changed` added in deepen pass; scanner needs option-omission detection plus downstream metadata-access tracking.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis (v7.0.0 breaking changes), detection rule needed"
+    },
+    "resolution": null
+  },
+  "2937": {
+    "id": "concern-20260618-fastify-deepen-1",
+    "created_at": "2026-06-18",
+    "source": "deepen",
+    "package": "fastify",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for fastify.setNotFoundHandler() — postconditions added in deepen pass 15 (called-after-start, already-set, handler-throws-routes-via-error-handler) but no scanner rule exists for setNotFoundHandler-specific patterns yet.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — three postconditions added via API surface analysis (fastify@5.8.5). All three errors are synchronous (called-after-start, already-set) or hook-error-handler routing (handler-throws). Scanner should treat setNotFoundHandler() like setErrorHandler() detection — registered before listen/ready; check for duplicate call within scope; treat unwrapped async I/O inside handler as suspect."
+    },
+    "resolution": null
+  },
+  "2938": {
+    "id": "concern-20260618-fastify-deepen-2",
+    "created_at": "2026-06-18",
+    "source": "deepen",
+    "package": "fastify",
+    "type": "fixture_alignment",
+    "status": "pending",
+    "description": "Wire new fastify fixtures (notfound-handler-missing-error-handling.ts, notfound-handler-proper-error-handling.ts) into ground-truth test suite. The fixtures use @expect-violation / @expect-clean annotations matching the three new setnotfoundhandler-* postcondition ids.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Fixtures created 2026-06-18 by deepen-stream-2 pass 15. Validation script in scanner test suite must pick up new files. Currently the scanner has no detection rule for setNotFoundHandler so violations will not fire until concern-20260618-fastify-deepen-1 is implemented; until then these fixtures serve as a TODO-anchor for the detection upgrade."
+    },
+    "resolution": null
   }
 }
