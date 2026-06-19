@@ -56923,5 +56923,53 @@
       "note": "Proactive — postcondition added via API surface analysis. The README's canonical sync usage example IS try-catch-wrapped, so well-behaved callers already satisfy the contract."
     },
     "resolution": null
+  },
+  "2992": {
+    "id": "concern-20260619-bcryptjs-deepen-1",
+    "created_at": "2026-06-19",
+    "source": "deepen",
+    "package": "bcryptjs",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for bcrypt.getRounds(hash) — synchronous throwing function. Throws Error('Illegal arguments: ' + typeof hash) when hash is not a string (source: bcryptjs@3.0.3 index.js:296-300). Common production path: callers compute the cost factor of a stored hash to decide whether to rehash on login; if the user record was not found the hash is undefined and getRounds throws synchronously, surfacing into the login handler. Detection shape: require try-catch around any direct call to `bcrypt.getRounds(...)` or `getRounds(...)` (named import). Cannot rely on `await` — function is sync. Also surface the silent-NaN edge case via a separate weak-warning rule: a comparison like `getRounds(h) < N` where the result is not first checked for NaN may silently never rehash weak hashes (this is a security-degradation pattern, not a throw, so a separate rule from the main type-error rule).",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — postcondition added via API surface analysis at pass 18 (2026-06-19). getRounds is the canonical signal for transparent password upgrade flows in production auth (e.g. NextAuth, Auth.js, Lucia)."
+    },
+    "resolution": null
+  },
+  "2993": {
+    "id": "concern-20260619-bcryptjs-deepen-2",
+    "created_at": "2026-06-19",
+    "source": "deepen",
+    "package": "bcryptjs",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for bcrypt.getSalt(hash) — synchronous throwing function with TWO distinct throw modes. Throws Error('Illegal arguments: ' + typeof hash) when hash is not a string, AND throws Error('Illegal hash length: ' + length + ' != 60') when hash is a string but length !== 60 (source: bcryptjs@3.0.3 index.js:308-314). The illegal-length throw is the production-relevant one: bcrypt hashes stored in a VARCHAR column narrower than 60 (a common schema mistake — VARCHAR(40) was inherited from older MD5-style auth tables) silently truncate on write but THROW on read. The compareSync silent-false-on-bad-hash bug and the getSalt illegal-length throw share a root cause but have opposite UX (silent vs explicit) — both need detection. Detection shape: require try-catch around any direct call to `bcrypt.getSalt(...)`. Single rule covers both type-error and illegal-length throws since the syntactic position is identical.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — postcondition added via API surface analysis at pass 18 (2026-06-19). getSalt is rarely called in modern code (compare() is preferred) but the illegal-length throw is a high-signal indicator of database-schema drift."
+    },
+    "resolution": null
+  },
+  "2994": {
+    "id": "concern-20260619-bcryptjs-deepen-3",
+    "created_at": "2026-06-19",
+    "source": "deepen",
+    "package": "bcryptjs",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for bcrypt.truncates(password) — synchronous throwing function used as preflight check before hash/hashSync. Throws Error('Illegal arguments: ' + typeof password) if password is not a string (source: bcryptjs@3.0.3 index.js:322-326). The throw itself is mostly self-resolving (callers either validate the input first or wrap the call); the bigger contract concern is the SECONDARY rule: a call to `bcrypt.truncates(pw)` whose result is discarded or only logged, followed by `bcrypt.hash(pw, ...)` on the same password, is a no-op preflight — the function exists specifically to make the caller decide whether to reject the password, not to bypass the truncation. Detection shape: (1) basic — require try-catch around any direct `truncates(...)` call (covers the throw); (2) advanced (future) — flag the `truncates(pw); ... hash(pw)` pattern where the result of truncates is not branched on.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — postcondition added via API surface analysis at pass 18 (2026-06-19). The advanced detection (preflight-without-branch) is a UX/security pattern, not a throw — file as a separate priority once the basic rule lands."
+    },
+    "resolution": null
   }
 }
