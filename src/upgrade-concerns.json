@@ -54840,7 +54840,7 @@
     "source": "deepen",
     "package": "@nangohq/node",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for nango.createIntegration() — postcondition create-integration-bare-await added in depth pass 2026-06-18 (deepen-stream-2 pass 6) but no scanner rule exists. The class_names/type_names Nango detection should already match bare-await pattern via the existing instance-tracking rule; this concern tracks verification that the new postcondition IDs flow through.",
     "evidence": {
       "repos": [],
@@ -54848,7 +54848,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis (dist/index.d.ts inspection of @nangohq/node@0.70.7). Detection rule needed if existing Nango class-name handler does not auto-emit this postcondition for createIntegration() calls."
     },
-    "resolution": null
+    "resolution": "Auto-resolved by existing Nango class detection (detection.class_names: [Nango]). Ground-truth fixtures wire up SHOULD_FIRE for all 14 new postconditions; vitest run src/v2/fixtures/@nangohq__node.ground-truth.test.ts passes 43/43. The new functions (createIntegration/updateIntegration/deleteIntegration/getToken/getRawTokenResponse/pruneRecords/startSync/pauseSync/updateSyncConnectionFrequency/waitForConnection/createSyncVariant/deleteSyncVariant/getAsyncActionResult/createReconnectSession) are detected via existing instance-tracking — no scanner code change needed. Scanner-stream cycle 7."
   },
   "2867": {
     "id": "concern-20260618-nangohq-node-deepen-2",
@@ -54856,7 +54856,7 @@
     "source": "deepen",
     "package": "@nangohq/node",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for nango.updateIntegration() — postcondition update-integration-bare-await added in depth pass 2026-06-18 (deepen-stream-2 pass 6) but no scanner rule exists. The class_names/type_names Nango detection should already match bare-await pattern via the existing instance-tracking rule; this concern tracks verification that the new postcondition IDs flow through.",
     "evidence": {
       "repos": [],
@@ -54864,7 +54864,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis (dist/index.d.ts inspection of @nangohq/node@0.70.7). Detection rule needed if existing Nango class-name handler does not auto-emit this postcondition for updateIntegration() calls."
     },
-    "resolution": null
+    "resolution": "Auto-resolved by existing Nango class detection (detection.class_names: [Nango]). Ground-truth fixtures wire up SHOULD_FIRE for all 14 new postconditions; vitest run src/v2/fixtures/@nangohq__node.ground-truth.test.ts passes 43/43. The new functions (createIntegration/updateIntegration/deleteIntegration/getToken/getRawTokenResponse/pruneRecords/startSync/pauseSync/updateSyncConnectionFrequency/waitForConnection/createSyncVariant/deleteSyncVariant/getAsyncActionResult/createReconnectSession) are detected via existing instance-tracking — no scanner code change needed. Scanner-stream cycle 7."
   },
   "2868": {
     "id": "concern-20260618-nangohq-node-deepen-3",
@@ -54872,7 +54872,7 @@
     "source": "deepen",
     "package": "@nangohq/node",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for nango.deleteIntegration() — postcondition delete-integration-bare-await added in depth pass 2026-06-18 (deepen-stream-2 pass 6) but no scanner rule exists. The class_names/type_names Nango detection should already match bare-await pattern via the existing instance-tracking rule; this concern tracks verification that the new postcondition IDs flow through.",
     "evidence": {
       "repos": [],
@@ -54880,7 +54880,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis (dist/index.d.ts inspection of @nangohq/node@0.70.7). Detection rule needed if existing Nango class-name handler does not auto-emit this postcondition for deleteIntegration() calls."
     },
-    "resolution": null
+    "resolution": "Auto-resolved by existing Nango class detection (detection.class_names: [Nango]). Ground-truth fixtures wire up SHOULD_FIRE for all 14 new postconditions; vitest run src/v2/fixtures/@nangohq__node.ground-truth.test.ts passes 43/43. The new functions (createIntegration/updateIntegration/deleteIntegration/getToken/getRawTokenResponse/pruneRecords/startSync/pauseSync/updateSyncConnectionFrequency/waitForConnection/createSyncVariant/deleteSyncVariant/getAsyncActionResult/createReconnectSession) are detected via existing instance-tracking — no scanner code change needed. Scanner-stream cycle 7."
   },
   "2869": {
     "id": "concern-20260618-nangohq-node-deepen-4",
@@ -54888,7 +54888,7 @@
     "source": "deepen",
     "package": "@nangohq/node",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for nango.getToken() — postcondition get-token-bare-await added in depth pass 2026-06-18 (deepen-stream-2 pass 6) but no scanner rule exists. The class_names/type_names Nango detection should already match bare-await pattern via the existing instance-tracking rule; this concern tracks verification that the new postcondition IDs flow through.",
     "evidence": {
       "repos": [],
@@ -54896,7 +54896,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis (dist/index.d.ts inspection of @nangohq/node@0.70.7). Detection rule needed if existing Nango class-name handler does not auto-emit this postcondition for getToken() calls."
     },
-    "resolution": null
+    "resolution": "Auto-resolved by existing Nango class detection (detection.class_names: [Nango]). Ground-truth fixtures wire up SHOULD_FIRE for all 14 new postconditions; vitest run src/v2/fixtures/@nangohq__node.ground-truth.test.ts passes 43/43. The new functions (createIntegration/updateIntegration/deleteIntegration/getToken/getRawTokenResponse/pruneRecords/startSync/pauseSync/updateSyncConnectionFrequency/waitForConnection/createSyncVariant/deleteSyncVariant/getAsyncActionResult/createReconnectSession) are detected via existing instance-tracking — no scanner code change needed. Scanner-stream cycle 7."
   },
   "2870": {
     "id": "concern-20260618-nangohq-node-deepen-5",
@@ -54904,7 +54904,7 @@
     "source": "deepen",
     "package": "@nangohq/node",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for nango.getRawTokenResponse() — postcondition get-raw-token-response-bare-await added in depth pass 2026-06-18 (deepen-stream-2 pass 6) but no scanner rule exists. The class_names/type_names Nango detection should already match bare-await pattern via the existing instance-tracking rule; this concern tracks verification that the new postcondition IDs flow through.",
     "evidence": {
       "repos": [],
@@ -54912,7 +54912,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis (dist/index.d.ts inspection of @nangohq/node@0.70.7). Detection rule needed if existing Nango class-name handler does not auto-emit this postcondition for getRawTokenResponse() calls."
     },
-    "resolution": null
+    "resolution": "Auto-resolved by existing Nango class detection (detection.class_names: [Nango]). Ground-truth fixtures wire up SHOULD_FIRE for all 14 new postconditions; vitest run src/v2/fixtures/@nangohq__node.ground-truth.test.ts passes 43/43. The new functions (createIntegration/updateIntegration/deleteIntegration/getToken/getRawTokenResponse/pruneRecords/startSync/pauseSync/updateSyncConnectionFrequency/waitForConnection/createSyncVariant/deleteSyncVariant/getAsyncActionResult/createReconnectSession) are detected via existing instance-tracking — no scanner code change needed. Scanner-stream cycle 7."
   },
   "2871": {
     "id": "concern-20260618-nangohq-node-deepen-6",
@@ -54920,7 +54920,7 @@
     "source": "deepen",
     "package": "@nangohq/node",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for nango.pruneRecords() — postcondition prune-records-bare-await added in depth pass 2026-06-18 (deepen-stream-2 pass 6) but no scanner rule exists. The class_names/type_names Nango detection should already match bare-await pattern via the existing instance-tracking rule; this concern tracks verification that the new postcondition IDs flow through.",
     "evidence": {
       "repos": [],
@@ -54928,7 +54928,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis (dist/index.d.ts inspection of @nangohq/node@0.70.7). Detection rule needed if existing Nango class-name handler does not auto-emit this postcondition for pruneRecords() calls."
     },
-    "resolution": null
+    "resolution": "Auto-resolved by existing Nango class detection (detection.class_names: [Nango]). Ground-truth fixtures wire up SHOULD_FIRE for all 14 new postconditions; vitest run src/v2/fixtures/@nangohq__node.ground-truth.test.ts passes 43/43. The new functions (createIntegration/updateIntegration/deleteIntegration/getToken/getRawTokenResponse/pruneRecords/startSync/pauseSync/updateSyncConnectionFrequency/waitForConnection/createSyncVariant/deleteSyncVariant/getAsyncActionResult/createReconnectSession) are detected via existing instance-tracking — no scanner code change needed. Scanner-stream cycle 7."
   },
   "2872": {
     "id": "concern-20260618-nangohq-node-deepen-7",
@@ -54936,7 +54936,7 @@
     "source": "deepen",
     "package": "@nangohq/node",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for nango.startSync() — postcondition start-sync-bare-await added in depth pass 2026-06-18 (deepen-stream-2 pass 6) but no scanner rule exists. The class_names/type_names Nango detection should already match bare-await pattern via the existing instance-tracking rule; this concern tracks verification that the new postcondition IDs flow through.",
     "evidence": {
       "repos": [],
@@ -54944,7 +54944,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis (dist/index.d.ts inspection of @nangohq/node@0.70.7). Detection rule needed if existing Nango class-name handler does not auto-emit this postcondition for startSync() calls."
     },
-    "resolution": null
+    "resolution": "Auto-resolved by existing Nango class detection (detection.class_names: [Nango]). Ground-truth fixtures wire up SHOULD_FIRE for all 14 new postconditions; vitest run src/v2/fixtures/@nangohq__node.ground-truth.test.ts passes 43/43. The new functions (createIntegration/updateIntegration/deleteIntegration/getToken/getRawTokenResponse/pruneRecords/startSync/pauseSync/updateSyncConnectionFrequency/waitForConnection/createSyncVariant/deleteSyncVariant/getAsyncActionResult/createReconnectSession) are detected via existing instance-tracking — no scanner code change needed. Scanner-stream cycle 7."
   },
   "2873": {
     "id": "concern-20260618-nangohq-node-deepen-8",
@@ -54952,7 +54952,7 @@
     "source": "deepen",
     "package": "@nangohq/node",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for nango.pauseSync() — postcondition pause-sync-bare-await added in depth pass 2026-06-18 (deepen-stream-2 pass 6) but no scanner rule exists. The class_names/type_names Nango detection should already match bare-await pattern via the existing instance-tracking rule; this concern tracks verification that the new postcondition IDs flow through.",
     "evidence": {
       "repos": [],
@@ -54960,7 +54960,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis (dist/index.d.ts inspection of @nangohq/node@0.70.7). Detection rule needed if existing Nango class-name handler does not auto-emit this postcondition for pauseSync() calls."
     },
-    "resolution": null
+    "resolution": "Auto-resolved by existing Nango class detection (detection.class_names: [Nango]). Ground-truth fixtures wire up SHOULD_FIRE for all 14 new postconditions; vitest run src/v2/fixtures/@nangohq__node.ground-truth.test.ts passes 43/43. The new functions (createIntegration/updateIntegration/deleteIntegration/getToken/getRawTokenResponse/pruneRecords/startSync/pauseSync/updateSyncConnectionFrequency/waitForConnection/createSyncVariant/deleteSyncVariant/getAsyncActionResult/createReconnectSession) are detected via existing instance-tracking — no scanner code change needed. Scanner-stream cycle 7."
   },
   "2874": {
     "id": "concern-20260618-nangohq-node-deepen-9",
@@ -54968,7 +54968,7 @@
     "source": "deepen",
     "package": "@nangohq/node",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for nango.updateSyncConnectionFrequency() — postcondition update-sync-frequency-bare-await added in depth pass 2026-06-18 (deepen-stream-2 pass 6) but no scanner rule exists. The class_names/type_names Nango detection should already match bare-await pattern via the existing instance-tracking rule; this concern tracks verification that the new postcondition IDs flow through.",
     "evidence": {
       "repos": [],
@@ -54976,7 +54976,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis (dist/index.d.ts inspection of @nangohq/node@0.70.7). Detection rule needed if existing Nango class-name handler does not auto-emit this postcondition for updateSyncConnectionFrequency() calls."
     },
-    "resolution": null
+    "resolution": "Auto-resolved by existing Nango class detection (detection.class_names: [Nango]). Ground-truth fixtures wire up SHOULD_FIRE for all 14 new postconditions; vitest run src/v2/fixtures/@nangohq__node.ground-truth.test.ts passes 43/43. The new functions (createIntegration/updateIntegration/deleteIntegration/getToken/getRawTokenResponse/pruneRecords/startSync/pauseSync/updateSyncConnectionFrequency/waitForConnection/createSyncVariant/deleteSyncVariant/getAsyncActionResult/createReconnectSession) are detected via existing instance-tracking — no scanner code change needed. Scanner-stream cycle 7."
   },
   "2875": {
     "id": "concern-20260618-nangohq-node-deepen-10",
@@ -54984,7 +54984,7 @@
     "source": "deepen",
     "package": "@nangohq/node",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for nango.waitForConnection() — postcondition wait-for-connection-bare-await added in depth pass 2026-06-18 (deepen-stream-2 pass 6) but no scanner rule exists. The class_names/type_names Nango detection should already match bare-await pattern via the existing instance-tracking rule; this concern tracks verification that the new postcondition IDs flow through.",
     "evidence": {
       "repos": [],
@@ -54992,7 +54992,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis (dist/index.d.ts inspection of @nangohq/node@0.70.7). Detection rule needed if existing Nango class-name handler does not auto-emit this postcondition for waitForConnection() calls."
     },
-    "resolution": null
+    "resolution": "Auto-resolved by existing Nango class detection (detection.class_names: [Nango]). Ground-truth fixtures wire up SHOULD_FIRE for all 14 new postconditions; vitest run src/v2/fixtures/@nangohq__node.ground-truth.test.ts passes 43/43. The new functions (createIntegration/updateIntegration/deleteIntegration/getToken/getRawTokenResponse/pruneRecords/startSync/pauseSync/updateSyncConnectionFrequency/waitForConnection/createSyncVariant/deleteSyncVariant/getAsyncActionResult/createReconnectSession) are detected via existing instance-tracking — no scanner code change needed. Scanner-stream cycle 7."
   },
   "2876": {
     "id": "concern-20260618-nangohq-node-deepen-11",
@@ -55000,7 +55000,7 @@
     "source": "deepen",
     "package": "@nangohq/node",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for nango.createSyncVariant() — postcondition create-sync-variant-bare-await added in depth pass 2026-06-18 (deepen-stream-2 pass 6) but no scanner rule exists. The class_names/type_names Nango detection should already match bare-await pattern via the existing instance-tracking rule; this concern tracks verification that the new postcondition IDs flow through.",
     "evidence": {
       "repos": [],
@@ -55008,7 +55008,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis (dist/index.d.ts inspection of @nangohq/node@0.70.7). Detection rule needed if existing Nango class-name handler does not auto-emit this postcondition for createSyncVariant() calls."
     },
-    "resolution": null
+    "resolution": "Auto-resolved by existing Nango class detection (detection.class_names: [Nango]). Ground-truth fixtures wire up SHOULD_FIRE for all 14 new postconditions; vitest run src/v2/fixtures/@nangohq__node.ground-truth.test.ts passes 43/43. The new functions (createIntegration/updateIntegration/deleteIntegration/getToken/getRawTokenResponse/pruneRecords/startSync/pauseSync/updateSyncConnectionFrequency/waitForConnection/createSyncVariant/deleteSyncVariant/getAsyncActionResult/createReconnectSession) are detected via existing instance-tracking — no scanner code change needed. Scanner-stream cycle 7."
   },
   "2877": {
     "id": "concern-20260618-nangohq-node-deepen-12",
@@ -55016,7 +55016,7 @@
     "source": "deepen",
     "package": "@nangohq/node",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for nango.deleteSyncVariant() — postcondition delete-sync-variant-bare-await added in depth pass 2026-06-18 (deepen-stream-2 pass 6) but no scanner rule exists. The class_names/type_names Nango detection should already match bare-await pattern via the existing instance-tracking rule; this concern tracks verification that the new postcondition IDs flow through.",
     "evidence": {
       "repos": [],
@@ -55024,7 +55024,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis (dist/index.d.ts inspection of @nangohq/node@0.70.7). Detection rule needed if existing Nango class-name handler does not auto-emit this postcondition for deleteSyncVariant() calls."
     },
-    "resolution": null
+    "resolution": "Auto-resolved by existing Nango class detection (detection.class_names: [Nango]). Ground-truth fixtures wire up SHOULD_FIRE for all 14 new postconditions; vitest run src/v2/fixtures/@nangohq__node.ground-truth.test.ts passes 43/43. The new functions (createIntegration/updateIntegration/deleteIntegration/getToken/getRawTokenResponse/pruneRecords/startSync/pauseSync/updateSyncConnectionFrequency/waitForConnection/createSyncVariant/deleteSyncVariant/getAsyncActionResult/createReconnectSession) are detected via existing instance-tracking — no scanner code change needed. Scanner-stream cycle 7."
   },
   "2878": {
     "id": "concern-20260618-nangohq-node-deepen-13",
@@ -55032,7 +55032,7 @@
     "source": "deepen",
     "package": "@nangohq/node",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for nango.getAsyncActionResult() — postcondition get-async-action-result-bare-await added in depth pass 2026-06-18 (deepen-stream-2 pass 6) but no scanner rule exists. The class_names/type_names Nango detection should already match bare-await pattern via the existing instance-tracking rule; this concern tracks verification that the new postcondition IDs flow through.",
     "evidence": {
       "repos": [],
@@ -55040,7 +55040,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis (dist/index.d.ts inspection of @nangohq/node@0.70.7). Detection rule needed if existing Nango class-name handler does not auto-emit this postcondition for getAsyncActionResult() calls."
     },
-    "resolution": null
+    "resolution": "Auto-resolved by existing Nango class detection (detection.class_names: [Nango]). Ground-truth fixtures wire up SHOULD_FIRE for all 14 new postconditions; vitest run src/v2/fixtures/@nangohq__node.ground-truth.test.ts passes 43/43. The new functions (createIntegration/updateIntegration/deleteIntegration/getToken/getRawTokenResponse/pruneRecords/startSync/pauseSync/updateSyncConnectionFrequency/waitForConnection/createSyncVariant/deleteSyncVariant/getAsyncActionResult/createReconnectSession) are detected via existing instance-tracking — no scanner code change needed. Scanner-stream cycle 7."
   },
   "2879": {
     "id": "concern-20260618-nangohq-node-deepen-14",
@@ -55048,7 +55048,7 @@
     "source": "deepen",
     "package": "@nangohq/node",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for nango.createReconnectSession() — postcondition create-reconnect-session-bare-await added in depth pass 2026-06-18 (deepen-stream-2 pass 6) but no scanner rule exists. The class_names/type_names Nango detection should already match bare-await pattern via the existing instance-tracking rule; this concern tracks verification that the new postcondition IDs flow through.",
     "evidence": {
       "repos": [],
@@ -55056,7 +55056,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis (dist/index.d.ts inspection of @nangohq/node@0.70.7). Detection rule needed if existing Nango class-name handler does not auto-emit this postcondition for createReconnectSession() calls."
     },
-    "resolution": null
+    "resolution": "Auto-resolved by existing Nango class detection (detection.class_names: [Nango]). Ground-truth fixtures wire up SHOULD_FIRE for all 14 new postconditions; vitest run src/v2/fixtures/@nangohq__node.ground-truth.test.ts passes 43/43. The new functions (createIntegration/updateIntegration/deleteIntegration/getToken/getRawTokenResponse/pruneRecords/startSync/pauseSync/updateSyncConnectionFrequency/waitForConnection/createSyncVariant/deleteSyncVariant/getAsyncActionResult/createReconnectSession) are detected via existing instance-tracking — no scanner code change needed. Scanner-stream cycle 7."
   },
   "2880": {
     "id": "concern-20260618-exceljs-deepen-1",
@@ -55560,7 +55560,7 @@
     "source": "deepen",
     "package": "minio",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for minio.Client.presignedUrl() — postcondition minio-presignedurl-no-try-catch added in pass 11 but no scanner rule exists. The existing minio scanner rule pattern (member-call no-try-catch on the Client instance) should generalize via PropertyChainDetector once the postcondition id is referenced in fixture annotations.",
     "evidence": {
       "repos": [],
@@ -55568,7 +55568,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis (deepen pass 11), detection rule needed"
     },
-    "resolution": null
+    "resolution": "Auto-resolved by existing PropertyChainDetector + minio Client class registration. Ground-truth fixtures already wire up SHOULD_FIRE/SHOULD_NOT_FIRE for all 8 new postconditions; vitest run src/v2/fixtures/minio.ground-truth.test.ts passes 38/38. The new functions (presignedUrl, presignedPostPolicy, getPartialObject, composeObject, removeIncompleteUpload, setBucketEncryption, setBucketVersioning, setBucketLifecycle) are detected via existing class-instance tracking — no scanner code change needed. Test verification was blocked until concern-resolution-2026-06-18 fixed botbuilder/contract.yaml schema-validation errors (user_experience/incident_label enums). Scanner-stream cycle 7."
   },
   "2912": {
     "id": "concern-20260618-minio-deepen-2",
@@ -55576,7 +55576,7 @@
     "source": "deepen",
     "package": "minio",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for minio.Client.presignedPostPolicy() — postcondition minio-presignedpostpolicy-no-try-catch added in pass 11 but no scanner rule exists. The existing minio scanner rule pattern (member-call no-try-catch on the Client instance) should generalize via PropertyChainDetector once the postcondition id is referenced in fixture annotations.",
     "evidence": {
       "repos": [],
@@ -55584,7 +55584,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis (deepen pass 11), detection rule needed"
     },
-    "resolution": null
+    "resolution": "Auto-resolved by existing PropertyChainDetector + minio Client class registration. Ground-truth fixtures already wire up SHOULD_FIRE/SHOULD_NOT_FIRE for all 8 new postconditions; vitest run src/v2/fixtures/minio.ground-truth.test.ts passes 38/38. The new functions (presignedUrl, presignedPostPolicy, getPartialObject, composeObject, removeIncompleteUpload, setBucketEncryption, setBucketVersioning, setBucketLifecycle) are detected via existing class-instance tracking — no scanner code change needed. Test verification was blocked until concern-resolution-2026-06-18 fixed botbuilder/contract.yaml schema-validation errors (user_experience/incident_label enums). Scanner-stream cycle 7."
   },
   "2913": {
     "id": "concern-20260618-minio-deepen-3",
@@ -55592,7 +55592,7 @@
     "source": "deepen",
     "package": "minio",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for minio.Client.getPartialObject() — postcondition minio-getpartialobject-no-try-catch added in pass 11 but no scanner rule exists. The existing minio scanner rule pattern (member-call no-try-catch on the Client instance) should generalize via PropertyChainDetector once the postcondition id is referenced in fixture annotations.",
     "evidence": {
       "repos": [],
@@ -55600,7 +55600,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis (deepen pass 11), detection rule needed"
     },
-    "resolution": null
+    "resolution": "Auto-resolved by existing PropertyChainDetector + minio Client class registration. Ground-truth fixtures already wire up SHOULD_FIRE/SHOULD_NOT_FIRE for all 8 new postconditions; vitest run src/v2/fixtures/minio.ground-truth.test.ts passes 38/38. The new functions (presignedUrl, presignedPostPolicy, getPartialObject, composeObject, removeIncompleteUpload, setBucketEncryption, setBucketVersioning, setBucketLifecycle) are detected via existing class-instance tracking — no scanner code change needed. Test verification was blocked until concern-resolution-2026-06-18 fixed botbuilder/contract.yaml schema-validation errors (user_experience/incident_label enums). Scanner-stream cycle 7."
   },
   "2914": {
     "id": "concern-20260618-minio-deepen-4",
@@ -55608,7 +55608,7 @@
     "source": "deepen",
     "package": "minio",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for minio.Client.composeObject() — postcondition minio-composeobject-no-try-catch added in pass 11 but no scanner rule exists. The existing minio scanner rule pattern (member-call no-try-catch on the Client instance) should generalize via PropertyChainDetector once the postcondition id is referenced in fixture annotations.",
     "evidence": {
       "repos": [],
@@ -55616,7 +55616,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis (deepen pass 11), detection rule needed"
     },
-    "resolution": null
+    "resolution": "Auto-resolved by existing PropertyChainDetector + minio Client class registration. Ground-truth fixtures already wire up SHOULD_FIRE/SHOULD_NOT_FIRE for all 8 new postconditions; vitest run src/v2/fixtures/minio.ground-truth.test.ts passes 38/38. The new functions (presignedUrl, presignedPostPolicy, getPartialObject, composeObject, removeIncompleteUpload, setBucketEncryption, setBucketVersioning, setBucketLifecycle) are detected via existing class-instance tracking — no scanner code change needed. Test verification was blocked until concern-resolution-2026-06-18 fixed botbuilder/contract.yaml schema-validation errors (user_experience/incident_label enums). Scanner-stream cycle 7."
   },
   "2915": {
     "id": "concern-20260618-minio-deepen-5",
@@ -55624,7 +55624,7 @@
     "source": "deepen",
     "package": "minio",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for minio.Client.removeIncompleteUpload() — postcondition minio-removeincompleteupload-no-try-catch added in pass 11 but no scanner rule exists. The existing minio scanner rule pattern (member-call no-try-catch on the Client instance) should generalize via PropertyChainDetector once the postcondition id is referenced in fixture annotations.",
     "evidence": {
       "repos": [],
@@ -55632,7 +55632,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis (deepen pass 11), detection rule needed"
     },
-    "resolution": null
+    "resolution": "Auto-resolved by existing PropertyChainDetector + minio Client class registration. Ground-truth fixtures already wire up SHOULD_FIRE/SHOULD_NOT_FIRE for all 8 new postconditions; vitest run src/v2/fixtures/minio.ground-truth.test.ts passes 38/38. The new functions (presignedUrl, presignedPostPolicy, getPartialObject, composeObject, removeIncompleteUpload, setBucketEncryption, setBucketVersioning, setBucketLifecycle) are detected via existing class-instance tracking — no scanner code change needed. Test verification was blocked until concern-resolution-2026-06-18 fixed botbuilder/contract.yaml schema-validation errors (user_experience/incident_label enums). Scanner-stream cycle 7."
   },
   "2916": {
     "id": "concern-20260618-minio-deepen-6",
@@ -55640,7 +55640,7 @@
     "source": "deepen",
     "package": "minio",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for minio.Client.setBucketEncryption() — postcondition minio-setbucketencryption-no-try-catch added in pass 11 but no scanner rule exists. The existing minio scanner rule pattern (member-call no-try-catch on the Client instance) should generalize via PropertyChainDetector once the postcondition id is referenced in fixture annotations.",
     "evidence": {
       "repos": [],
@@ -55648,7 +55648,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis (deepen pass 11), detection rule needed"
     },
-    "resolution": null
+    "resolution": "Auto-resolved by existing PropertyChainDetector + minio Client class registration. Ground-truth fixtures already wire up SHOULD_FIRE/SHOULD_NOT_FIRE for all 8 new postconditions; vitest run src/v2/fixtures/minio.ground-truth.test.ts passes 38/38. The new functions (presignedUrl, presignedPostPolicy, getPartialObject, composeObject, removeIncompleteUpload, setBucketEncryption, setBucketVersioning, setBucketLifecycle) are detected via existing class-instance tracking — no scanner code change needed. Test verification was blocked until concern-resolution-2026-06-18 fixed botbuilder/contract.yaml schema-validation errors (user_experience/incident_label enums). Scanner-stream cycle 7."
   },
   "2917": {
     "id": "concern-20260618-minio-deepen-7",
@@ -55656,7 +55656,7 @@
     "source": "deepen",
     "package": "minio",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for minio.Client.setBucketVersioning() — postcondition minio-setbucketversioning-no-try-catch added in pass 11 but no scanner rule exists. The existing minio scanner rule pattern (member-call no-try-catch on the Client instance) should generalize via PropertyChainDetector once the postcondition id is referenced in fixture annotations.",
     "evidence": {
       "repos": [],
@@ -55664,7 +55664,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis (deepen pass 11), detection rule needed"
     },
-    "resolution": null
+    "resolution": "Auto-resolved by existing PropertyChainDetector + minio Client class registration. Ground-truth fixtures already wire up SHOULD_FIRE/SHOULD_NOT_FIRE for all 8 new postconditions; vitest run src/v2/fixtures/minio.ground-truth.test.ts passes 38/38. The new functions (presignedUrl, presignedPostPolicy, getPartialObject, composeObject, removeIncompleteUpload, setBucketEncryption, setBucketVersioning, setBucketLifecycle) are detected via existing class-instance tracking — no scanner code change needed. Test verification was blocked until concern-resolution-2026-06-18 fixed botbuilder/contract.yaml schema-validation errors (user_experience/incident_label enums). Scanner-stream cycle 7."
   },
   "2918": {
     "id": "concern-20260618-minio-deepen-8",
@@ -55672,7 +55672,7 @@
     "source": "deepen",
     "package": "minio",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for minio.Client.setBucketLifecycle() — postcondition minio-setbucketlifecycle-no-try-catch added in pass 11 but no scanner rule exists. The existing minio scanner rule pattern (member-call no-try-catch on the Client instance) should generalize via PropertyChainDetector once the postcondition id is referenced in fixture annotations.",
     "evidence": {
       "repos": [],
@@ -55680,7 +55680,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis (deepen pass 11), detection rule needed"
     },
-    "resolution": null
+    "resolution": "Auto-resolved by existing PropertyChainDetector + minio Client class registration. Ground-truth fixtures already wire up SHOULD_FIRE/SHOULD_NOT_FIRE for all 8 new postconditions; vitest run src/v2/fixtures/minio.ground-truth.test.ts passes 38/38. The new functions (presignedUrl, presignedPostPolicy, getPartialObject, composeObject, removeIncompleteUpload, setBucketEncryption, setBucketVersioning, setBucketLifecycle) are detected via existing class-instance tracking — no scanner code change needed. Test verification was blocked until concern-resolution-2026-06-18 fixed botbuilder/contract.yaml schema-validation errors (user_experience/incident_label enums). Scanner-stream cycle 7."
   },
   "2919": {
     "id": "concern-20260618-helmet-deepen-1",
@@ -55999,6 +55999,182 @@
       "scan_file": null,
       "violation_count": 0,
       "note": "Fixtures created 2026-06-18 by deepen-stream-2 pass 15. Validation script in scanner test suite must pick up new files. Currently the scanner has no detection rule for setNotFoundHandler so violations will not fire until concern-20260618-fastify-deepen-1 is implemented; until then these fixtures serve as a TODO-anchor for the detection upgrade."
+    },
+    "resolution": null
+  },
+  "2939": {
+    "id": "concern-20260618-undici-deepen-1",
+    "created_at": "2026-06-18",
+    "source": "deepen",
+    "package": "undici",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for response.blob() called without try-catch. Postcondition response-blob-no-try-catch was added in deepen pass but the scanner currently only detects response.text()/json()/arrayBuffer() — blob() shares the same body-consumer code path and same error model. Detection rule: callee=blob, parent-class hint via fetch() Response object, missing try-catch wrap.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis (undici@8.5.0 types/fetch.d.ts BodyMixin.blob). Scanner needs the response.blob() method added to the body-consumer detection set alongside text/json/arrayBuffer."
+    },
+    "resolution": null
+  },
+  "2940": {
+    "id": "concern-20260618-undici-deepen-2",
+    "created_at": "2026-06-18",
+    "source": "deepen",
+    "package": "undici",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for response.bytes() called without try-catch. Postcondition response-bytes-no-try-catch was added in deepen pass; bytes() is the modern preferred body-consumer method (Fetch spec 2024) but the scanner does not yet detect it. Same code path as arrayBuffer().",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — codebases migrating from arrayBuffer() to bytes() will lose detection coverage unless scanner is upgraded. Add bytes to the body-consumer detection set."
+    },
+    "resolution": null
+  },
+  "2941": {
+    "id": "concern-20260618-undici-deepen-3",
+    "created_at": "2026-06-18",
+    "source": "deepen",
+    "package": "undici",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for response.formData() called without try-catch. Postcondition response-formdata-no-try-catch was added in deepen pass. formData() is the highest-risk body-consumer because it can throw three distinct TypeErrors: network errors, multipart-parse errors, and unsupported Content-Type. The Content-Type TypeError is unique to formData() — scanner should fire even on otherwise well-handled flows if Content-Type is not validated before calling .formData().",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — webhook handlers and form-submission proxies frequently call .formData() on responses without Content-Type validation. Detection should distinguish from generic body-consumer (text/blob/bytes) because the failure mode is broader."
+    },
+    "resolution": null
+  },
+  "2942": {
+    "id": "concern-20260618-undici-deepen-4",
+    "created_at": "2026-06-18",
+    "source": "deepen",
+    "package": "undici",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for pipeline() returned Duplex used without registering an 'error' event listener. Postcondition pipeline-missing-error-listener was added in deepen pass. Unlike request/fetch/stream which return Promises, pipeline() returns a Duplex synchronously and dispatches network errors via the 'error' event. Scanner must look for: import { pipeline } from 'undici' → const x = pipeline(...) → check whether x.on('error', ...) or x.addEventListener('error', ...) is called before the Duplex is used / consumed.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — this is the EVENT-EMITTER detection pattern (already used for WebSocket and Dispatcher), now extended to a returned-Duplex. Scanner detection here is structurally similar to required_event_listeners for WebSocket but applies to a function-call return value rather than a constructor."
+    },
+    "resolution": null
+  },
+  "2943": {
+    "id": "concern-20260618-undici-deepen-5",
+    "created_at": "2026-06-18",
+    "source": "deepen",
+    "package": "undici",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for Dispatcher.destroy() called without try-catch. Postcondition dispatcher-destroy-no-try-catch was added in deepen pass. destroy() is commonly called inside finally blocks in shutdown handlers where another error is in flight — failing to handle the destroy rejection masks the original error. Detection: await x.destroy() where x is a Client/Pool/Agent/Dispatcher and no try-catch wraps the await.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — destroy() is the emergency-shutdown counterpart to close() which the scanner already detects. Extend the dispatcher-close-already-destroyed detection to also fire on destroy() without try-catch."
+    },
+    "resolution": null
+  },
+  "2944": {
+    "id": "concern-20260618-undici-deepen-6",
+    "created_at": "2026-06-18",
+    "source": "deepen",
+    "package": "undici",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for new EventSource(url) where url is dynamic (not a string literal) without try-catch around the constructor. Postcondition eventsource-constructor-syntax-error was added in deepen pass. Constructor throws DOMException SyntaxError synchronously on invalid URLs. Pattern mirrors WebSocket constructor detection (websocket-constructor-syntax-error) which is already implemented.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — extend the existing WebSocket constructor detection to also recognize EventSource. Both throw DOMException SyntaxError on invalid URLs. Both have similar detection requirements (dynamic URL + missing try-catch)."
+    },
+    "resolution": null
+  },
+  "2945": {
+    "id": "concern-20260618-undici-deepen-7",
+    "created_at": "2026-06-18",
+    "source": "deepen",
+    "package": "undici",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for new EventSource() without 'error' event listener registered. Postcondition eventsource-connection-error-not-handled was added in deepen pass. EventSource is uniquely dangerous because it RETRIES INDEFINITELY on connection errors — missing an error listener means SSE consumers silently hang with no observability. Detection mirrors WebSocket required_event_listeners ('error') but for the EventSource constructor.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — extend the existing detection.required_event_listeners machinery (already declared in undici contract.yaml for WebSocket) to also apply to EventSource constructor. Both share the W3C event-target error model."
+    },
+    "resolution": null
+  },
+  "2946": {
+    "id": "concern-20260618-undici-deepen-8",
+    "created_at": "2026-06-18",
+    "source": "deepen",
+    "package": "undici",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for response.formData() when Content-Type was not validated before calling. Postcondition response-formdata-unsupported-content-type was added in deepen pass. Even when formData() is wrapped in try-catch, the more useful detection is: did the developer check response.headers.get('content-type') against multipart/form-data or application/x-www-form-urlencoded before calling .formData()? If not, the TypeError will mask the actual upstream HTTP error.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — this is a WARNING-severity detection (not ERROR) because try-catch suppresses the crash but the developer still loses the actual root-cause signal. Detection should check for response.headers.get('content-type') or response.ok checks preceding the formData() call."
+    },
+    "resolution": null
+  },
+  "2947": {
+    "id": "concern-20260618-undici-deepen-9",
+    "created_at": "2026-06-18",
+    "source": "deepen",
+    "package": "undici",
+    "type": "fixture_alignment",
+    "status": "pending",
+    "description": "Wire new undici fixtures (responseBlobNoCatch / responseBytesNoCatch / responseFormDataNoCatch / pipelineNoErrorListener / dispatcherDestroyNoCatch / eventSourceBadUrl / eventSourceNoErrorListener and their corresponding @expect-clean cases) into ground-truth test suite. The fixtures use @expect-violation / @expect-clean annotations matching the new postcondition ids added in this pass.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Fixtures created 2026-06-18 by deepen-stream-3 pass 1. Until the corresponding scanner detection rules (concerns 1-7) are implemented, the @expect-violation cases will not fire — fixtures serve as TODO anchors for the upcoming detection upgrades."
+    },
+    "resolution": null
+  },
+  "2948": {
+    "id": "concern-20260618-clickhouse-client-deepen-1",
+    "created_at": "2026-06-18",
+    "source": "deepen",
+    "package": "@clickhouse/client",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for ResultSet.json() consumption error — `await rs.json()` (where rs came from await client.query(...)) can reject with stream consumption errors, decompression failures, late-arriving ClickHouseError exception tags, or JSON parse errors. Real-world pattern: chained `await (await client.query(...)).json()` (umami/civitai metrics base) where only the outer await catches the inner query() rejection but NOT the json() rejection. Scanner needs to recognize ResultSet-returned chains and require try-catch around the consumption call.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis (bc-deepen-contract pass 15, 2026-06-18). Ground-truth fixture exists at packages/@clickhouse/client/fixtures/ground-truth.ts (resultsetJsonBareConsume, resultsetJsonChainedBareConsume)."
+    },
+    "resolution": null
+  },
+  "2949": {
+    "id": "concern-20260618-clickhouse-client-deepen-2",
+    "created_at": "2026-06-18",
+    "source": "deepen",
+    "package": "@clickhouse/client",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for ResultSet.text() consumption error — `await rs.text()` for raw formats (CSV, TSV, Parquet) can reject with the same failure modes as json(). Failure mid-stream produces truncated text that downstream consumers (S3 export, data warehouse ingestion) cannot detect as corrupt. Scanner needs to recognize text() as an independent rejection point distinct from the query() call that produced the ResultSet.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis (bc-deepen-contract pass 15, 2026-06-18). Ground-truth fixture at packages/@clickhouse/client/fixtures/ground-truth.ts (resultsetTextBareExport)."
     },
     "resolution": null
   }
