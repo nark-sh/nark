@@ -56319,5 +56319,101 @@
       "note": "Proactive — contract added via API surface analysis. The async overload is preferred in high-throughput HTTP servers (sync blocks the event loop); silent errors here corrupt downstream writes."
     },
     "resolution": null
+  },
+  "2956": {
+    "id": "concern-20260618-nestjs-cache-manager-deepen-1",
+    "created_at": "2026-06-18",
+    "source": "deepen",
+    "package": "@nestjs/cache-manager",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Detect nonBlocking-mode silent write failures for @nestjs/cache-manager. When CacheModule is configured with `nonBlocking: true`, the upstream cache-manager library fires write Promises (set/mset/del/mdel/clear/wrap internal-set) WITHOUT awaiting them, swallowing rejections. The try/catch-around-await contract for set/mset/del/mdel/clear/wrap does NOT detect this mode. Scanner would need to (1) trace CacheModule.register({nonBlocking: true}) at module declaration site OR (2) inspect cache.on('set', {error}) / cache.on('del', {error}) listener registration to confirm error-event observability. Both are non-trivial scanner upgrades. Filed for future work; edge case currently documented in profile only.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — edge_case added to contract during depth pass; detection not currently implemented."
+    },
+    "resolution": null
+  },
+  "2957": {
+    "id": "concern-20260618-nestjs-cache-manager-deepen-2",
+    "created_at": "2026-06-18",
+    "source": "deepen",
+    "package": "@nestjs/cache-manager",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Detect missing error-event listener registration for @nestjs/cache-manager read methods (get/mget/ttl). These methods CORRECTLY swallow backend store errors by design (emit via cache.on('get', {error}), resolve undefined). The profile intentionally omits them from the await-pattern check. However, if a consumer relies on the cache for read-side data freshness, they SHOULD register cache.on('get'/'mget'/'ttl', {error}) listeners to observe backend failures. Detection would require recognizing the EventEmitter listener pattern at module init time — a different scanner capability than the await-pattern check. Filed for future work; edge case currently documented in profile only.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — edge_case added to contract during depth pass; detection not currently implemented."
+    },
+    "resolution": null
+  },
+  "2958": {
+    "id": "concern-20260618-formidable-deepen-1",
+    "created_at": "2026-06-18",
+    "source": "deepen",
+    "package": "formidable",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Improve AI fix prompt for formidable plugin-failed (code 1017). Scanner already detects bare `await form.parse(req)`; deepen pass adds dedicated postcondition formidable-plugin-failed for callers wiring custom plugins via form.use(). Fix prompt should branch on .code === 1017 and surface .idx to identify which plugin failed.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive - postcondition added via API surface analysis."
+    },
+    "resolution": null
+  },
+  "2959": {
+    "id": "concern-20260618-formidable-deepen-2",
+    "created_at": "2026-06-18",
+    "source": "deepen",
+    "package": "formidable",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add fix-prompt branches for formidable smallerThanMinFileSize (1008), unknownTransferEncoding (1014), filenameNotString (1005). All three flow through existing parse() rejection - scanner detects, but remediation guidance should mention these codes so the catch handler branches correctly per business context (image minimums, security-relevant header validation).",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive - additional FormidableError codes within existing parse() error surface."
+    },
+    "resolution": null
+  },
+  "2960": {
+    "id": "concern-20260618-csvtojson-deepen-1",
+    "created_at": "2026-06-18",
+    "source": "deepen",
+    "package": "csvtojson",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for csvtojson Converter.subscribe(onNext, onError?, onCompleted?) — postcondition error-subscribe-no-error-handler added in deepen pass but no scanner rule exists. Pattern: csv(...).from{File,String,Stream}(...).subscribe(onNext) — when called without an `onError` second argument AND the awaited Converter has no try/catch, parse failures (CSVError) and source-stream errors are silently swallowed. onCompleted never fires. Detection needs to inspect subscribe() argument count (>= 2 required for clean) or check that the enclosing scope wraps in try/catch. Real-world risk: per-row transforms commit partial data; consumer treats aborted run as success. README canonical example at https://github.com/Keyang/node-csvtojson/blob/master/readme.md#convert-to-csv-lines uses subscribe without onError.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis (csvtojson v2/Converter.d.ts line 9, v2/Result.js processError). Ground-truth fixtures exist in nark-corpus-pro/packages/csvtojson/fixtures/ground-truth.ts (subscribeMissingOnErrorAndCatch, subscribeWithOnError, subscribeFromFileMissingOnError, subscribeFromStreamMissingOnError) — currently annotation-less pending detector. Once detector lands, re-add SHOULD_FIRE / SHOULD_NOT_FIRE annotations and re-run csvtojson.ground-truth.test.ts."
+    },
+    "resolution": null
+  },
+  "2961": {
+    "id": "concern-20260618-nestjs-microservices-deepen-1",
+    "created_at": "2026-06-18",
+    "source": "deepen",
+    "package": "@nestjs/microservices",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for INestMicroservice.close() — distinct from ClientProxy.close(). NestMicroservice.close() drives lifecycle hooks (OnModuleDestroy / BeforeApplicationShutdown / OnApplicationShutdown via super.close()) and propagates transport-shutdown errors. Called as `await app.close()` in main.ts SIGTERM/SIGINT handlers and Kubernetes preStop endpoints. Detection: existing await_pattern `.close(` plus type_names already includes INestMicroservice — scanner should fire the new `nestjs-microservices-app-close-rejection` postcondition when the receiver chain resolves to INestMicroservice, separate from the existing client-side `nestjs-microservices-close-rejection` postcondition which targets ClientProxy receivers. May require receiver-type disambiguation in PropertyChainDetectorPlugin to avoid double-firing when both postconditions match the same chain.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — postcondition added via deepen-stream-7 (2026-06-18); detection rule must distinguish ClientProxy.close() (broker disconnect) from INestMicroservice.close() (lifecycle-driven graceful shutdown). Currently both postconditions share the same await_pattern and detection.type_names list. The scanner may fire either or both; downstream FP triage should confirm whether disambiguation is required."
+    },
+    "resolution": null
   }
 }
