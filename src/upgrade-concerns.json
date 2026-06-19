@@ -56971,5 +56971,37 @@
       "note": "Proactive — postcondition added via API surface analysis at pass 18 (2026-06-19). The advanced detection (preflight-without-branch) is a UX/security pattern, not a throw — file as a separate priority once the basic rule lands."
     },
     "resolution": null
+  },
+  "2995": {
+    "id": "concern-20260619-soap-deepen-1",
+    "created_at": "2026-06-19",
+    "source": "deepen",
+    "package": "soap",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for dynamic SOAP client method invocations (client.<MethodName>Async). Pattern: `await <ident>.<Name>Async(...)` where <ident> is bound from `await soap.createClientAsync(...)`. Must guard against try/catch absence — surfaces SOAP Fault, HTTP error, network error, and parse failure.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — postconditions added in soap deepen pass 5 (deepen-stream-4, 2026-06-19); detection rule needed. Detection complicated by dynamic method names — name must match suffix `Async` and receiver must be variable-bound from createClientAsync."
+    },
+    "resolution": null
+  },
+  "2996": {
+    "id": "concern-20260619-soap-deepen-2",
+    "created_at": "2026-06-19",
+    "source": "deepen",
+    "package": "soap",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for soap server.processRequest(xml) — serverless SOAP entry point. Pattern: `await <ident>.processRequest(...)` where <ident> is bound from `await soap.createServerless(...)`. Rejects on malformed XML, missing WSDL bindings, or auth config errors.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — postconditions added in soap deepen pass 5 (deepen-stream-4, 2026-06-19); detection rule needed."
+    },
+    "resolution": null
   }
 }
