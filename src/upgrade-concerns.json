@@ -54244,7 +54244,7 @@
     "source": "deepen",
     "package": "orb-billing",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for orb-billing invoices.pay() — payment execution path; missing try/catch causes double-charge or silent payment failure. Postcondition added 2026-06-18.",
     "evidence": {
       "repos": [],
@@ -54252,7 +54252,9 @@
       "violation_count": 0,
       "note": "Proactive — postcondition for invoices.pay added via API surface analysis (orb-billing@5.48.0). Scanner detection rule needed."
     },
-    "resolution": null
+    "resolution": "Auto-resolved by existing PropertyChainDetector + orb-billing Orb client class registration. All 9 new invoices/subscriptions/prices/events/customers methods are covered by the contract's detection block plus instance-tracking via factory_methods. Ground-truth fixtures already wire SHOULD_FIRE/SHOULD_NOT_FIRE for every new postcondition; ground-truth test passes 32/32 (vitest run src/v2/fixtures/orb-billing.ground-truth.test.ts). No scanner code change needed — same shape as the minio/nango verification in cycle 7. Scanner-stream cycle 8.",
+    "verified_at": "2026-06-19T00:22:11.379Z",
+    "verified_by": "scanner-stream-cycle-8"
   },
   "2830": {
     "id": "concern-20260618-orb-billing-deepen-2",
@@ -54260,7 +54262,7 @@
     "source": "deepen",
     "package": "orb-billing",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for orb-billing invoices.markPaid() — out-of-band reconciliation; missing try/catch silently corrupts accounting records.",
     "evidence": {
       "repos": [],
@@ -54268,7 +54270,9 @@
       "violation_count": 0,
       "note": "Proactive — postcondition for invoices.markPaid added via API surface analysis (orb-billing@5.48.0). Scanner detection rule needed."
     },
-    "resolution": null
+    "resolution": "Auto-resolved by existing PropertyChainDetector + orb-billing Orb client class registration. All 9 new invoices/subscriptions/prices/events/customers methods are covered by the contract's detection block plus instance-tracking via factory_methods. Ground-truth fixtures already wire SHOULD_FIRE/SHOULD_NOT_FIRE for every new postcondition; ground-truth test passes 32/32 (vitest run src/v2/fixtures/orb-billing.ground-truth.test.ts). No scanner code change needed — same shape as the minio/nango verification in cycle 7. Scanner-stream cycle 8.",
+    "verified_at": "2026-06-19T00:22:11.379Z",
+    "verified_by": "scanner-stream-cycle-8"
   },
   "2831": {
     "id": "concern-20260618-orb-billing-deepen-3",
@@ -54276,7 +54280,7 @@
     "source": "deepen",
     "package": "orb-billing",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for orb-billing invoices.void() — destructive billing op; missing try/catch causes balance-rollback inconsistency.",
     "evidence": {
       "repos": [],
@@ -54284,7 +54288,9 @@
       "violation_count": 0,
       "note": "Proactive — postcondition for invoices.void added via API surface analysis (orb-billing@5.48.0). Scanner detection rule needed."
     },
-    "resolution": null
+    "resolution": "Auto-resolved by existing PropertyChainDetector + orb-billing Orb client class registration. All 9 new invoices/subscriptions/prices/events/customers methods are covered by the contract's detection block plus instance-tracking via factory_methods. Ground-truth fixtures already wire SHOULD_FIRE/SHOULD_NOT_FIRE for every new postcondition; ground-truth test passes 32/32 (vitest run src/v2/fixtures/orb-billing.ground-truth.test.ts). No scanner code change needed — same shape as the minio/nango verification in cycle 7. Scanner-stream cycle 8.",
+    "verified_at": "2026-06-19T00:22:11.379Z",
+    "verified_by": "scanner-stream-cycle-8"
   },
   "2832": {
     "id": "concern-20260618-orb-billing-deepen-4",
@@ -54292,7 +54298,7 @@
     "source": "deepen",
     "package": "orb-billing",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for orb-billing invoices.issue() — triggers customer-visible side effects (emails, payment); missing try/catch causes duplicate side-effect triggering on retry.",
     "evidence": {
       "repos": [],
@@ -54300,7 +54306,9 @@
       "violation_count": 0,
       "note": "Proactive — postcondition for invoices.issue added via API surface analysis (orb-billing@5.48.0). Scanner detection rule needed."
     },
-    "resolution": null
+    "resolution": "Auto-resolved by existing PropertyChainDetector + orb-billing Orb client class registration. All 9 new invoices/subscriptions/prices/events/customers methods are covered by the contract's detection block plus instance-tracking via factory_methods. Ground-truth fixtures already wire SHOULD_FIRE/SHOULD_NOT_FIRE for every new postcondition; ground-truth test passes 32/32 (vitest run src/v2/fixtures/orb-billing.ground-truth.test.ts). No scanner code change needed — same shape as the minio/nango verification in cycle 7. Scanner-stream cycle 8.",
+    "verified_at": "2026-06-19T00:22:11.379Z",
+    "verified_by": "scanner-stream-cycle-8"
   },
   "2833": {
     "id": "concern-20260618-orb-billing-deepen-5",
@@ -54308,7 +54316,7 @@
     "source": "deepen",
     "package": "orb-billing",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for orb-billing subscriptions.priceIntervals() — pricing mutation; missing try/catch causes silent wrong-amount-charged on next invoice.",
     "evidence": {
       "repos": [],
@@ -54316,7 +54324,9 @@
       "violation_count": 0,
       "note": "Proactive — postcondition for subscriptions.priceIntervals added via API surface analysis (orb-billing@5.48.0). Scanner detection rule needed."
     },
-    "resolution": null
+    "resolution": "Auto-resolved by existing PropertyChainDetector + orb-billing Orb client class registration. All 9 new invoices/subscriptions/prices/events/customers methods are covered by the contract's detection block plus instance-tracking via factory_methods. Ground-truth fixtures already wire SHOULD_FIRE/SHOULD_NOT_FIRE for every new postcondition; ground-truth test passes 32/32 (vitest run src/v2/fixtures/orb-billing.ground-truth.test.ts). No scanner code change needed — same shape as the minio/nango verification in cycle 7. Scanner-stream cycle 8.",
+    "verified_at": "2026-06-19T00:22:11.379Z",
+    "verified_by": "scanner-stream-cycle-8"
   },
   "2834": {
     "id": "concern-20260618-orb-billing-deepen-6",
@@ -54324,7 +54334,7 @@
     "source": "deepen",
     "package": "orb-billing",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for orb-billing subscriptions.schedulePlanChange() — plan migration; missing try/catch leaves customer on wrong plan and wrong billing rate.",
     "evidence": {
       "repos": [],
@@ -54332,7 +54342,9 @@
       "violation_count": 0,
       "note": "Proactive — postcondition for subscriptions.schedulePlanChange added via API surface analysis (orb-billing@5.48.0). Scanner detection rule needed."
     },
-    "resolution": null
+    "resolution": "Auto-resolved by existing PropertyChainDetector + orb-billing Orb client class registration. All 9 new invoices/subscriptions/prices/events/customers methods are covered by the contract's detection block plus instance-tracking via factory_methods. Ground-truth fixtures already wire SHOULD_FIRE/SHOULD_NOT_FIRE for every new postcondition; ground-truth test passes 32/32 (vitest run src/v2/fixtures/orb-billing.ground-truth.test.ts). No scanner code change needed — same shape as the minio/nango verification in cycle 7. Scanner-stream cycle 8.",
+    "verified_at": "2026-06-19T00:22:11.379Z",
+    "verified_by": "scanner-stream-cycle-8"
   },
   "2835": {
     "id": "concern-20260618-orb-billing-deepen-7",
@@ -54340,7 +54352,7 @@
     "source": "deepen",
     "package": "orb-billing",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for orb-billing prices.evaluate() — pricing preview math; swallowed error renders $0 misleading customer.",
     "evidence": {
       "repos": [],
@@ -54348,7 +54360,9 @@
       "violation_count": 0,
       "note": "Proactive — postcondition for prices.evaluate added via API surface analysis (orb-billing@5.48.0). Scanner detection rule needed."
     },
-    "resolution": null
+    "resolution": "Auto-resolved by existing PropertyChainDetector + orb-billing Orb client class registration. All 9 new invoices/subscriptions/prices/events/customers methods are covered by the contract's detection block plus instance-tracking via factory_methods. Ground-truth fixtures already wire SHOULD_FIRE/SHOULD_NOT_FIRE for every new postcondition; ground-truth test passes 32/32 (vitest run src/v2/fixtures/orb-billing.ground-truth.test.ts). No scanner code change needed — same shape as the minio/nango verification in cycle 7. Scanner-stream cycle 8.",
+    "verified_at": "2026-06-19T00:22:11.379Z",
+    "verified_by": "scanner-stream-cycle-8"
   },
   "2836": {
     "id": "concern-20260618-orb-billing-deepen-8",
@@ -54356,7 +54370,7 @@
     "source": "deepen",
     "package": "orb-billing",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for orb-billing events.search() — reconciliation; swallowed error returns empty set, silently under-charges customer.",
     "evidence": {
       "repos": [],
@@ -54364,7 +54378,9 @@
       "violation_count": 0,
       "note": "Proactive — postcondition for events.search added via API surface analysis (orb-billing@5.48.0). Scanner detection rule needed."
     },
-    "resolution": null
+    "resolution": "Auto-resolved by existing PropertyChainDetector + orb-billing Orb client class registration. All 9 new invoices/subscriptions/prices/events/customers methods are covered by the contract's detection block plus instance-tracking via factory_methods. Ground-truth fixtures already wire SHOULD_FIRE/SHOULD_NOT_FIRE for every new postcondition; ground-truth test passes 32/32 (vitest run src/v2/fixtures/orb-billing.ground-truth.test.ts). No scanner code change needed — same shape as the minio/nango verification in cycle 7. Scanner-stream cycle 8.",
+    "verified_at": "2026-06-19T00:22:11.379Z",
+    "verified_by": "scanner-stream-cycle-8"
   },
   "2837": {
     "id": "concern-20260618-orb-billing-deepen-9",
@@ -54372,7 +54388,7 @@
     "source": "deepen",
     "package": "orb-billing",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for orb-billing customers.delete() — destructive cascade-conflict path; missing try/catch leaves stale customer records in caller DB.",
     "evidence": {
       "repos": [],
@@ -54380,7 +54396,9 @@
       "violation_count": 0,
       "note": "Proactive — postcondition for customers.delete added via API surface analysis (orb-billing@5.48.0). Scanner detection rule needed."
     },
-    "resolution": null
+    "resolution": "Auto-resolved by existing PropertyChainDetector + orb-billing Orb client class registration. All 9 new invoices/subscriptions/prices/events/customers methods are covered by the contract's detection block plus instance-tracking via factory_methods. Ground-truth fixtures already wire SHOULD_FIRE/SHOULD_NOT_FIRE for every new postcondition; ground-truth test passes 32/32 (vitest run src/v2/fixtures/orb-billing.ground-truth.test.ts). No scanner code change needed — same shape as the minio/nango verification in cycle 7. Scanner-stream cycle 8.",
+    "verified_at": "2026-06-19T00:22:11.379Z",
+    "verified_by": "scanner-stream-cycle-8"
   },
   "2838": {
     "id": "concern-20260618-modern-tar-deepen-1",
@@ -54616,7 +54634,7 @@
     "source": "deepen",
     "package": "@workos-inc/node",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for userManagement.authenticateWithTotp() — MFA TOTP login throws UnauthorizedException/AuthenticationException/RateLimitExceededException without try-catch.",
     "evidence": {
       "repos": [],
@@ -54624,7 +54642,9 @@
       "violation_count": 0,
       "note": "Proactive — postcondition added in deepen pass 5 for authenticateWithTotp; no scanner detection rule exists yet."
     },
-    "resolution": null
+    "resolution": "Auto-resolved by existing PropertyChainDetector + WorkOS class-instance tracking. All 14 new userManagement/multiFactorAuth/authorization/vault/webhooks methods are listed in detection.await_patterns and have SHOULD_FIRE/SHOULD_NOT_FIRE fixtures in nark-corpus-pro/packages/@workos-inc/node/fixtures/ground-truth.ts. Ground-truth test passes 62/62 (vitest run src/v2/fixtures/@workos-inc__node.ground-truth.test.ts). No scanner code change needed — same shape as the minio/nango verification in cycle 7. Scanner-stream cycle 8.",
+    "verified_at": "2026-06-19T00:22:11.379Z",
+    "verified_by": "scanner-stream-cycle-8"
   },
   "2853": {
     "id": "concern-20260618-workos-deepen-2",
@@ -54632,7 +54652,7 @@
     "source": "deepen",
     "package": "@workos-inc/node",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for userManagement.authenticateWithCodeAndVerifier() — PKCE-explicit code exchange throws OauthException/UnauthorizedException without try-catch.",
     "evidence": {
       "repos": [],
@@ -54640,7 +54660,9 @@
       "violation_count": 0,
       "note": "Proactive — postcondition added in deepen pass 5 for authenticateWithCodeAndVerifier; no scanner detection rule exists yet."
     },
-    "resolution": null
+    "resolution": "Auto-resolved by existing PropertyChainDetector + WorkOS class-instance tracking. All 14 new userManagement/multiFactorAuth/authorization/vault/webhooks methods are listed in detection.await_patterns and have SHOULD_FIRE/SHOULD_NOT_FIRE fixtures in nark-corpus-pro/packages/@workos-inc/node/fixtures/ground-truth.ts. Ground-truth test passes 62/62 (vitest run src/v2/fixtures/@workos-inc__node.ground-truth.test.ts). No scanner code change needed — same shape as the minio/nango verification in cycle 7. Scanner-stream cycle 8.",
+    "verified_at": "2026-06-19T00:22:11.379Z",
+    "verified_by": "scanner-stream-cycle-8"
   },
   "2854": {
     "id": "concern-20260618-workos-deepen-3",
@@ -54648,7 +54670,7 @@
     "source": "deepen",
     "package": "@workos-inc/node",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for userManagement.authenticateWithSessionCookie() — session cookie validation can throw on JWKS fetch failure / malformed sealed session.",
     "evidence": {
       "repos": [],
@@ -54656,7 +54678,9 @@
       "violation_count": 0,
       "note": "Proactive — postcondition added in deepen pass 5 for authenticateWithSessionCookie; no scanner detection rule exists yet."
     },
-    "resolution": null
+    "resolution": "Auto-resolved by existing PropertyChainDetector + WorkOS class-instance tracking. All 14 new userManagement/multiFactorAuth/authorization/vault/webhooks methods are listed in detection.await_patterns and have SHOULD_FIRE/SHOULD_NOT_FIRE fixtures in nark-corpus-pro/packages/@workos-inc/node/fixtures/ground-truth.ts. Ground-truth test passes 62/62 (vitest run src/v2/fixtures/@workos-inc__node.ground-truth.test.ts). No scanner code change needed — same shape as the minio/nango verification in cycle 7. Scanner-stream cycle 8.",
+    "verified_at": "2026-06-19T00:22:11.379Z",
+    "verified_by": "scanner-stream-cycle-8"
   },
   "2855": {
     "id": "concern-20260618-workos-deepen-4",
@@ -54664,7 +54688,7 @@
     "source": "deepen",
     "package": "@workos-inc/node",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for userManagement.resetPassword() — password reset throws NotFoundException/UnprocessableEntityException without try-catch.",
     "evidence": {
       "repos": [],
@@ -54672,7 +54696,9 @@
       "violation_count": 0,
       "note": "Proactive — postcondition added in deepen pass 5 for resetPassword; no scanner detection rule exists yet."
     },
-    "resolution": null
+    "resolution": "Auto-resolved by existing PropertyChainDetector + WorkOS class-instance tracking. All 14 new userManagement/multiFactorAuth/authorization/vault/webhooks methods are listed in detection.await_patterns and have SHOULD_FIRE/SHOULD_NOT_FIRE fixtures in nark-corpus-pro/packages/@workos-inc/node/fixtures/ground-truth.ts. Ground-truth test passes 62/62 (vitest run src/v2/fixtures/@workos-inc__node.ground-truth.test.ts). No scanner code change needed — same shape as the minio/nango verification in cycle 7. Scanner-stream cycle 8.",
+    "verified_at": "2026-06-19T00:22:11.379Z",
+    "verified_by": "scanner-stream-cycle-8"
   },
   "2856": {
     "id": "concern-20260618-workos-deepen-5",
@@ -54680,7 +54706,7 @@
     "source": "deepen",
     "package": "@workos-inc/node",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for userManagement.verifyEmail() — verify throws UnprocessableEntityException on expired code without try-catch.",
     "evidence": {
       "repos": [],
@@ -54688,7 +54714,9 @@
       "violation_count": 0,
       "note": "Proactive — postcondition added in deepen pass 5 for verifyEmail; no scanner detection rule exists yet."
     },
-    "resolution": null
+    "resolution": "Auto-resolved by existing PropertyChainDetector + WorkOS class-instance tracking. All 14 new userManagement/multiFactorAuth/authorization/vault/webhooks methods are listed in detection.await_patterns and have SHOULD_FIRE/SHOULD_NOT_FIRE fixtures in nark-corpus-pro/packages/@workos-inc/node/fixtures/ground-truth.ts. Ground-truth test passes 62/62 (vitest run src/v2/fixtures/@workos-inc__node.ground-truth.test.ts). No scanner code change needed — same shape as the minio/nango verification in cycle 7. Scanner-stream cycle 8.",
+    "verified_at": "2026-06-19T00:22:11.379Z",
+    "verified_by": "scanner-stream-cycle-8"
   },
   "2857": {
     "id": "concern-20260618-workos-deepen-6",
@@ -54696,7 +54724,7 @@
     "source": "deepen",
     "package": "@workos-inc/node",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for userManagement.acceptInvitation() — accept throws NotFoundException/UnprocessableEntityException without try-catch.",
     "evidence": {
       "repos": [],
@@ -54704,7 +54732,9 @@
       "violation_count": 0,
       "note": "Proactive — postcondition added in deepen pass 5 for acceptInvitation; no scanner detection rule exists yet."
     },
-    "resolution": null
+    "resolution": "Auto-resolved by existing PropertyChainDetector + WorkOS class-instance tracking. All 14 new userManagement/multiFactorAuth/authorization/vault/webhooks methods are listed in detection.await_patterns and have SHOULD_FIRE/SHOULD_NOT_FIRE fixtures in nark-corpus-pro/packages/@workos-inc/node/fixtures/ground-truth.ts. Ground-truth test passes 62/62 (vitest run src/v2/fixtures/@workos-inc__node.ground-truth.test.ts). No scanner code change needed — same shape as the minio/nango verification in cycle 7. Scanner-stream cycle 8.",
+    "verified_at": "2026-06-19T00:22:11.379Z",
+    "verified_by": "scanner-stream-cycle-8"
   },
   "2858": {
     "id": "concern-20260618-workos-deepen-7",
@@ -54712,7 +54742,7 @@
     "source": "deepen",
     "package": "@workos-inc/node",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for organizations.updateOrganization() — update throws UnprocessableEntityException/ConflictException without try-catch.",
     "evidence": {
       "repos": [],
@@ -54720,7 +54750,9 @@
       "violation_count": 0,
       "note": "Proactive — postcondition added in deepen pass 5 for updateOrganization; no scanner detection rule exists yet."
     },
-    "resolution": null
+    "resolution": "Auto-resolved by existing PropertyChainDetector + WorkOS class-instance tracking. All 14 new userManagement/multiFactorAuth/authorization/vault/webhooks methods are listed in detection.await_patterns and have SHOULD_FIRE/SHOULD_NOT_FIRE fixtures in nark-corpus-pro/packages/@workos-inc/node/fixtures/ground-truth.ts. Ground-truth test passes 62/62 (vitest run src/v2/fixtures/@workos-inc__node.ground-truth.test.ts). No scanner code change needed — same shape as the minio/nango verification in cycle 7. Scanner-stream cycle 8.",
+    "verified_at": "2026-06-19T00:22:11.379Z",
+    "verified_by": "scanner-stream-cycle-8"
   },
   "2859": {
     "id": "concern-20260618-workos-deepen-8",
@@ -54728,7 +54760,7 @@
     "source": "deepen",
     "package": "@workos-inc/node",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for organizations.deleteOrganization() — irreversible delete; NotFoundException on retry is success but unhandled.",
     "evidence": {
       "repos": [],
@@ -54736,7 +54768,9 @@
       "violation_count": 0,
       "note": "Proactive — postcondition added in deepen pass 5 for deleteOrganization; no scanner detection rule exists yet."
     },
-    "resolution": null
+    "resolution": "Auto-resolved by existing PropertyChainDetector + WorkOS class-instance tracking. All 14 new userManagement/multiFactorAuth/authorization/vault/webhooks methods are listed in detection.await_patterns and have SHOULD_FIRE/SHOULD_NOT_FIRE fixtures in nark-corpus-pro/packages/@workos-inc/node/fixtures/ground-truth.ts. Ground-truth test passes 62/62 (vitest run src/v2/fixtures/@workos-inc__node.ground-truth.test.ts). No scanner code change needed — same shape as the minio/nango verification in cycle 7. Scanner-stream cycle 8.",
+    "verified_at": "2026-06-19T00:22:11.379Z",
+    "verified_by": "scanner-stream-cycle-8"
   },
   "2860": {
     "id": "concern-20260618-workos-deepen-9",
@@ -54744,7 +54778,7 @@
     "source": "deepen",
     "package": "@workos-inc/node",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for mfa.enrollFactor() (or userManagement.enrollAuthFactor()) — silent enroll failure locks legitimate user out at next login.",
     "evidence": {
       "repos": [],
@@ -54752,7 +54786,9 @@
       "violation_count": 0,
       "note": "Proactive — postcondition added in deepen pass 5 for enrollFactor; no scanner detection rule exists yet."
     },
-    "resolution": null
+    "resolution": "Auto-resolved by existing PropertyChainDetector + WorkOS class-instance tracking. All 14 new userManagement/multiFactorAuth/authorization/vault/webhooks methods are listed in detection.await_patterns and have SHOULD_FIRE/SHOULD_NOT_FIRE fixtures in nark-corpus-pro/packages/@workos-inc/node/fixtures/ground-truth.ts. Ground-truth test passes 62/62 (vitest run src/v2/fixtures/@workos-inc__node.ground-truth.test.ts). No scanner code change needed — same shape as the minio/nango verification in cycle 7. Scanner-stream cycle 8.",
+    "verified_at": "2026-06-19T00:22:11.379Z",
+    "verified_by": "scanner-stream-cycle-8"
   },
   "2861": {
     "id": "concern-20260618-workos-deepen-10",
@@ -54760,7 +54796,7 @@
     "source": "deepen",
     "package": "@workos-inc/node",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for mfa.verifyChallenge() — MFA challenge throws UnauthorizedException/UnprocessableEntityException; brute-force lockout on RateLimitExceededException.",
     "evidence": {
       "repos": [],
@@ -54768,7 +54804,9 @@
       "violation_count": 0,
       "note": "Proactive — postcondition added in deepen pass 5 for verifyChallenge; no scanner detection rule exists yet."
     },
-    "resolution": null
+    "resolution": "Auto-resolved by existing PropertyChainDetector + WorkOS class-instance tracking. All 14 new userManagement/multiFactorAuth/authorization/vault/webhooks methods are listed in detection.await_patterns and have SHOULD_FIRE/SHOULD_NOT_FIRE fixtures in nark-corpus-pro/packages/@workos-inc/node/fixtures/ground-truth.ts. Ground-truth test passes 62/62 (vitest run src/v2/fixtures/@workos-inc__node.ground-truth.test.ts). No scanner code change needed — same shape as the minio/nango verification in cycle 7. Scanner-stream cycle 8.",
+    "verified_at": "2026-06-19T00:22:11.379Z",
+    "verified_by": "scanner-stream-cycle-8"
   },
   "2862": {
     "id": "concern-20260618-workos-deepen-11",
@@ -54776,7 +54814,7 @@
     "source": "deepen",
     "package": "@workos-inc/node",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for authorization.check() (FGA) — production authz gate; unhandled error must NEVER fall through to allow.",
     "evidence": {
       "repos": [],
@@ -54784,7 +54822,9 @@
       "violation_count": 0,
       "note": "Proactive — postcondition added in deepen pass 5 for authorization.check; no scanner detection rule exists yet."
     },
-    "resolution": null
+    "resolution": "Auto-resolved by existing PropertyChainDetector + WorkOS class-instance tracking. All 14 new userManagement/multiFactorAuth/authorization/vault/webhooks methods are listed in detection.await_patterns and have SHOULD_FIRE/SHOULD_NOT_FIRE fixtures in nark-corpus-pro/packages/@workos-inc/node/fixtures/ground-truth.ts. Ground-truth test passes 62/62 (vitest run src/v2/fixtures/@workos-inc__node.ground-truth.test.ts). No scanner code change needed — same shape as the minio/nango verification in cycle 7. Scanner-stream cycle 8.",
+    "verified_at": "2026-06-19T00:22:11.379Z",
+    "verified_by": "scanner-stream-cycle-8"
   },
   "2863": {
     "id": "concern-20260618-workos-deepen-12",
@@ -54792,7 +54832,7 @@
     "source": "deepen",
     "package": "@workos-inc/node",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for vault.encrypt() — silent failure causes plaintext PII to land in storage; data-protection incident.",
     "evidence": {
       "repos": [],
@@ -54800,7 +54840,9 @@
       "violation_count": 0,
       "note": "Proactive — postcondition added in deepen pass 5 for vault.encrypt; no scanner detection rule exists yet."
     },
-    "resolution": null
+    "resolution": "Auto-resolved by existing PropertyChainDetector + WorkOS class-instance tracking. All 14 new userManagement/multiFactorAuth/authorization/vault/webhooks methods are listed in detection.await_patterns and have SHOULD_FIRE/SHOULD_NOT_FIRE fixtures in nark-corpus-pro/packages/@workos-inc/node/fixtures/ground-truth.ts. Ground-truth test passes 62/62 (vitest run src/v2/fixtures/@workos-inc__node.ground-truth.test.ts). No scanner code change needed — same shape as the minio/nango verification in cycle 7. Scanner-stream cycle 8.",
+    "verified_at": "2026-06-19T00:22:11.379Z",
+    "verified_by": "scanner-stream-cycle-8"
   },
   "2864": {
     "id": "concern-20260618-workos-deepen-13",
@@ -54808,7 +54850,7 @@
     "source": "deepen",
     "package": "@workos-inc/node",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for vault.decrypt() — 404 on rotated-out key effectively loses the data; must NOT fall through to raw ciphertext.",
     "evidence": {
       "repos": [],
@@ -54816,7 +54858,9 @@
       "violation_count": 0,
       "note": "Proactive — postcondition added in deepen pass 5 for vault.decrypt; no scanner detection rule exists yet."
     },
-    "resolution": null
+    "resolution": "Auto-resolved by existing PropertyChainDetector + WorkOS class-instance tracking. All 14 new userManagement/multiFactorAuth/authorization/vault/webhooks methods are listed in detection.await_patterns and have SHOULD_FIRE/SHOULD_NOT_FIRE fixtures in nark-corpus-pro/packages/@workos-inc/node/fixtures/ground-truth.ts. Ground-truth test passes 62/62 (vitest run src/v2/fixtures/@workos-inc__node.ground-truth.test.ts). No scanner code change needed — same shape as the minio/nango verification in cycle 7. Scanner-stream cycle 8.",
+    "verified_at": "2026-06-19T00:22:11.379Z",
+    "verified_by": "scanner-stream-cycle-8"
   },
   "2865": {
     "id": "concern-20260618-workos-deepen-14",
@@ -54824,7 +54868,7 @@
     "source": "deepen",
     "package": "@workos-inc/node",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for webhooks.createWebhookEndpoint() — admin provisioning throws UnprocessableEntityException on unreachable URL.",
     "evidence": {
       "repos": [],
@@ -54832,7 +54876,9 @@
       "violation_count": 0,
       "note": "Proactive — postcondition added in deepen pass 5 for webhooks.createWebhookEndpoint; no scanner detection rule exists yet."
     },
-    "resolution": null
+    "resolution": "Auto-resolved by existing PropertyChainDetector + WorkOS class-instance tracking. All 14 new userManagement/multiFactorAuth/authorization/vault/webhooks methods are listed in detection.await_patterns and have SHOULD_FIRE/SHOULD_NOT_FIRE fixtures in nark-corpus-pro/packages/@workos-inc/node/fixtures/ground-truth.ts. Ground-truth test passes 62/62 (vitest run src/v2/fixtures/@workos-inc__node.ground-truth.test.ts). No scanner code change needed — same shape as the minio/nango verification in cycle 7. Scanner-stream cycle 8.",
+    "verified_at": "2026-06-19T00:22:11.379Z",
+    "verified_by": "scanner-stream-cycle-8"
   },
   "2866": {
     "id": "concern-20260618-nangohq-node-deepen-1",
