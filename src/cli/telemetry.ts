@@ -89,6 +89,14 @@ export interface TelemetryConfig {
   enabled: boolean;
   notified: boolean;
   deviceId?: string;
+  /**
+   * qt-188: persisted flag for the first-run `AI fix: nark --instructions-path`
+   * compact-report hint. True once the hint has been shown on this HOME — the
+   * hint is then suppressed on every subsequent default-mode scan. --verbose
+   * bypasses the gate entirely (verbose users opted into noise) and never
+   * writes this flag.
+   */
+  aiHintShown?: boolean;
 }
 
 /**
@@ -392,6 +400,68 @@ export function writeTelemetryConfig(config: TelemetryConfig): void {
   const dir = path.dirname(configPath);
   fs.mkdirSync(dir, { recursive: true });
   fs.writeFileSync(configPath, JSON.stringify(config, null, 2), "utf-8");
+}
+
+/**
+ * qt-188: read the persisted `aiHintShown` flag directly from the on-disk
+ * telemetry config, bypassing `readTelemetryConfig`'s env-disabled short
+ * circuit. AI-hint suppression is independent of telemetry consent — a user
+ * with `NARK_TELEMETRY=off` still doesn't want the same first-run AI hint
+ * printed on every scan. The flag lives on the existing
+ * `~/.nark/telemetry.json` file (no new state file) because that file is
+ * already the per-machine state file, already has a `notified` first-run
+ * precedent, and is already read on every scan.
+ *
+ * Returns false on any file/parse error (no-op safe). False means "the
+ * hint has not been shown yet on this HOME, so show it this once."
+ */
+export function readAiHintShown(): boolean {
+  try {
+    const configPath = getTelemetryConfigPath();
+    if (!fs.existsSync(configPath)) return false;
+    const raw = fs.readFileSync(configPath, "utf-8");
+    const parsed = JSON.parse(raw);
+    return (
+      typeof parsed === "object" &&
+      parsed !== null &&
+      parsed.aiHintShown === true
+    );
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * qt-188: persist `aiHintShown: true` to `~/.nark/telemetry.json` while
+ * preserving any existing fields on the file (deviceId, notified, enabled,
+ * etc.). Like `readAiHintShown`, bypasses the env-disabled short circuit
+ * because AI-hint suppression is independent of telemetry consent.
+ *
+ * No-op safe on filesystem errors (matches the existing try/catch shape in
+ * `getOrCreateDeviceId` above) — failure to persist means the hint will
+ * appear once more on the next scan, which is acceptable degraded behavior.
+ */
+export function markAiHintShown(): void {
+  try {
+    const configPath = getTelemetryConfigPath();
+    const dir = path.dirname(configPath);
+    let existing: Record<string, unknown> = {};
+    try {
+      if (fs.existsSync(configPath)) {
+        const parsed = JSON.parse(fs.readFileSync(configPath, "utf-8"));
+        if (typeof parsed === "object" && parsed !== null) {
+          existing = parsed as Record<string, unknown>;
+        }
+      }
+    } catch {
+      /* ignore parse errors — fall through with empty existing */
+    }
+    const next = { ...existing, aiHintShown: true };
+    fs.mkdirSync(dir, { recursive: true });
+    fs.writeFileSync(configPath, JSON.stringify(next, null, 2), "utf-8");
+  } catch {
+    /* never let persistence break the scanner */
+  }
 }
 
 /**

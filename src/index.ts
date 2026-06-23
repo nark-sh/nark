@@ -55,6 +55,8 @@ import {
   fireEnrichedTelemetryEvent,
   getCurrentNarkApiBase,
   isNarkApiUrlSet,
+  readAiHintShown,
+  markAiHintShown,
   type TelemetryResult,
 } from "./cli/telemetry.js";
 import {
@@ -1517,6 +1519,7 @@ async function main(options: any) {
       d3HtmlPath,
       aiPromptPath,
       finalRecord,
+      verbose,
     });
 
     // qt-185: one-line Results pointer for default mode. The verbose branch
@@ -1931,6 +1934,12 @@ function printCompactReport(opts: {
   d3HtmlPath: string;
   aiPromptPath: string | null;
   finalRecord: any;
+  // qt-188: thread the caller's `verbose` predicate so the AI-fix hint
+  // first-run gate at the bottom of this renderer can bypass when --verbose
+  // is set. The compact renderer is normally only reached in non-verbose
+  // mode, but the field is explicit so a future refactor can't accidentally
+  // gate it twice or get the polarity wrong.
+  verbose: boolean;
 }): void {
   const {
     narkVersion,
@@ -1942,6 +1951,7 @@ function printCompactReport(opts: {
     packageDiscovery,
     d3HtmlPath,
     aiPromptPath,
+    verbose,
   } = opts;
 
   const errorCount = violations.filter((v) => v.severity === "error").length;
@@ -2105,8 +2115,18 @@ function printCompactReport(opts: {
       chalk.underline(`file://${d3HtmlPathDisplayed}`) +
       chalk.dim(`  (Cmd+click to open)`),
   );
+  // qt-188: first-run gate. Hint prints on the first violation-bearing scan
+  // on a new HOME, then is persisted in ~/.nark/telemetry.json as
+  // aiHintShown=true and suppressed on every subsequent scan. --verbose
+  // bypasses the gate so opt-in users always see it (mirrors the
+  // handleFirstRunNotice() pattern in cli/telemetry.ts). The persistence
+  // write only happens in non-verbose mode so --verbose runs don't
+  // pollute the gate for the next default-mode user on the same HOME.
   if (aiPromptPath && totalViolations > 0) {
-    console.log(chalk.dim(`  AI fix:      `) + `nark --instructions-path`);
+    if (verbose || !readAiHintShown()) {
+      console.log(chalk.dim(`  AI fix:      `) + `nark --instructions-path`);
+      if (!verbose) markAiHintShown();
+    }
   }
   if (totalViolations > 0) {
     console.log(chalk.dim(`  Full report: `) + `npx nark`);
