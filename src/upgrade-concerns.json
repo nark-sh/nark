@@ -57654,5 +57654,197 @@
       "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
     },
     "resolution": null
+  },
+  "3036": {
+    "id": "concern-20260623-sentry-nextjs-deepen-1",
+    "created_at": "2026-06-23",
+    "source": "deepen",
+    "package": "@sentry/nextjs",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @sentry/nextjs wrapGetServerSidePropsWithSentry() \u2014 postcondition get-server-side-props-rethrows added in deepen pass 5. Scanner must flag the awaited result of wrapGetServerSidePropsWithSentry(fn, route) being called outside try-catch. The wrapper applies withErrorInstrumentation (catches, captures, re-throws) so caller-side error contract is identical to wrapApiHandlerWithSentry.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  "3037": {
+    "id": "concern-20260623-sentry-nextjs-deepen-2",
+    "created_at": "2026-06-23",
+    "source": "deepen",
+    "package": "@sentry/nextjs",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @sentry/nextjs wrapGetStaticPropsWithSentry() \u2014 postcondition get-static-props-rethrows added in deepen pass 5. Scanner must flag awaited result called outside try-catch. Wrapper chains withErrorInstrumentation + callDataFetcherTraced from common/utils/wrapperUtils.js \u2014 both catch and re-throw.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  "3038": {
+    "id": "concern-20260623-sentry-nextjs-deepen-3",
+    "created_at": "2026-06-23",
+    "source": "deepen",
+    "package": "@sentry/nextjs",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @sentry/nextjs wrapGetInitialPropsWithSentry() \u2014 postcondition get-initial-props-rethrows added in deepen pass 5. Scanner must flag awaited result called outside try-catch. Wrapper uses withErrorInstrumentation from common/utils/wrapperUtils.js \u2014 catches, captures, re-throws.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  "3039": {
+    "id": "concern-20260623-sentry-nextjs-deepen-4",
+    "created_at": "2026-06-23",
+    "source": "deepen",
+    "package": "@sentry/nextjs",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @sentry/nextjs wrapAppGetInitialPropsWithSentry() \u2014 postcondition app-get-initial-props-rethrows added in deepen pass 5. Scanner must flag awaited result called outside try-catch. Critical: blast radius is whole-app (_app wraps every page), so severity escalated to error vs. other GIP wrappers. Wrapper uses withErrorInstrumentation \u2014 re-throws.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  "3040": {
+    "id": "concern-20260623-sentry-nextjs-deepen-5",
+    "created_at": "2026-06-23",
+    "source": "deepen",
+    "package": "@sentry/nextjs",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @sentry/nextjs wrapDocumentGetInitialPropsWithSentry() \u2014 postcondition document-get-initial-props-rethrows added in deepen pass 5. Scanner must flag awaited result called outside try-catch. _document controls the SSR HTML envelope so an un-caught throw breaks the HTML response for every server-rendered page. Wrapper uses withErrorInstrumentation \u2014 re-throws.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  "3041": {
+    "id": "concern-20260623-sentry-nextjs-deepen-6",
+    "created_at": "2026-06-23",
+    "source": "deepen",
+    "package": "@sentry/nextjs",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @sentry/nextjs wrapErrorGetInitialPropsWithSentry() \u2014 postcondition error-get-initial-props-rethrows added in deepen pass 5. Scanner must flag awaited result called outside try-catch. This is the LAST error boundary in Pages Router \u2014 if _error itself throws (and is un-caught), Next.js falls back to a bare 500 with no debugging context. Wrapper uses withErrorInstrumentation \u2014 re-throws.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  "3042": {
+    "id": "concern-20260623-sentry-nextjs-deepen-7",
+    "created_at": "2026-06-23",
+    "source": "deepen",
+    "package": "@sentry/nextjs",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @sentry/nextjs wrapPageComponentWithSentry() \u2014 postcondition page-component-rethrows added in deepen pass 5. Scanner must flag the wrapped page component when its render output is consumed outside a try-catch or React error boundary. Both class and functional component branches in the wrapper source do `try { render() } catch (e) { captureException(e); throw e; }`. Detection may need a React-aware mode since render-time throws are typically caught by React error boundaries, not try-catch.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  "3043": {
+    "id": "concern-20260623-aws-sdk-client-ecr-deepen-stream4-1",
+    "created_at": "2026-06-23",
+    "source": "deepen",
+    "package": "@aws-sdk/client-ecr",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @aws-sdk/client-ecr ecr.createPullThroughCacheRule() \u2014 postcondition added in depth pass requires distinguishing PullThroughCacheRuleAlreadyExistsException as idempotent success vs SecretNotFoundException/UnableToAccessSecretException/UnableToDecryptSecretValueException as distinct fix paths; no scanner rule exists yet",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis for ecr.createPullThroughCacheRule(); detection rule needed to match postcondition id ecr-create-pull-through-cache-rule-no-try-catch"
+    },
+    "resolution": null
+  },
+  "3044": {
+    "id": "concern-20260623-aws-sdk-client-ecr-deepen-stream4-2",
+    "created_at": "2026-06-23",
+    "source": "deepen",
+    "package": "@aws-sdk/client-ecr",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @aws-sdk/client-ecr ecr.startImageScan() \u2014 postcondition added in depth pass requires distinguishing ImageArchivedException (needs storage-class restore) vs UnsupportedImageTypeException (benign skip for Helm OCI/SBOM artifacts); no scanner rule exists yet",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis for ecr.startImageScan(); detection rule needed to match postcondition id ecr-start-image-scan-no-try-catch"
+    },
+    "resolution": null
+  },
+  "3045": {
+    "id": "concern-20260623-aws-sdk-client-ecr-deepen-stream4-3",
+    "created_at": "2026-06-23",
+    "source": "deepen",
+    "package": "@aws-sdk/client-ecr",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @aws-sdk/client-ecr ecr.updateImageStorageClass() \u2014 postcondition added in depth pass requires accumulating per-image ImageStorageClassUpdateNotSupportedException failures across batch flows; no scanner rule exists yet",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis for ecr.updateImageStorageClass(); detection rule needed to match postcondition id ecr-update-image-storage-class-no-try-catch"
+    },
+    "resolution": null
+  },
+  "3046": {
+    "id": "concern-20260623-aws-sdk-client-ecr-deepen-stream4-4",
+    "created_at": "2026-06-23",
+    "source": "deepen",
+    "package": "@aws-sdk/client-ecr",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @aws-sdk/client-ecr ecr.createRepositoryCreationTemplate() \u2014 postcondition added in depth pass requires whitelisting TemplateAlreadyExistsException as idempotent IaC re-apply success while failing loudly on ValidationException; no scanner rule exists yet",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis for ecr.createRepositoryCreationTemplate(); detection rule needed to match postcondition id ecr-create-repository-creation-template-no-try-catch"
+    },
+    "resolution": null
+  },
+  "3047": {
+    "id": "concern-20260623-aws-sdk-client-ecr-deepen-stream4-5",
+    "created_at": "2026-06-23",
+    "source": "deepen",
+    "package": "@aws-sdk/client-ecr",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @aws-sdk/client-ecr ecr.registerPullTimeUpdateExclusion() \u2014 postcondition added in depth pass requires whitelisting ExclusionAlreadyExistsException as idempotent re-pin success; no scanner rule exists yet",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis for ecr.registerPullTimeUpdateExclusion(); detection rule needed to match postcondition id ecr-register-pull-time-update-exclusion-no-try-catch"
+    },
+    "resolution": null
   }
 }
