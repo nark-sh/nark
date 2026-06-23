@@ -58988,5 +58988,69 @@
       "note": "Proactive \u2014 ground-truth test confirms scanner conflates the two: line 148 expected document-deleteone-middleware-error-no-try-catch but scanner returned connection-error-no-try-catch. Document instances come from Model.findOne/findById/findOneAndUpdate(new:true)/new Model()."
     },
     "resolution": null
+  },
+  "3117": {
+    "id": "concern-20260623-ioredis-deepen-1",
+    "created_at": "2026-06-23",
+    "source": "deepen",
+    "package": "ioredis",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Detect tx.exec() / pipeline.exec() results-not-checked pattern. ioredis transactions and pipelines return [error, result] tuple arrays, but the outer Promise resolves successfully even when individual commands inside the transaction failed. Currently the scanner only checks for try-catch around exec() (covers the connection-error case). Need a flow analysis pass that detects: (1) `const results = await tx.exec()` followed by NO iteration over results checking the [err, _] tuples, and (2) `const results = await tx.exec()` followed by null check missing when WATCH was used earlier in the chain. The null-check case is harder (requires tracking whether .watch() was called on the chain). Postconditions added in pass 15: exec-results-not-checked, exec-null-return-not-checked. Existing detection for exec-unhandled-promise-rejection (the connection-error case) already works via ThrowingFunctionDetector.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 pattern source: https://github.com/redis/ioredis#pipelining; flow-analysis fixture needed."
+    },
+    "resolution": null
+  },
+  "3118": {
+    "id": "concern-20260623-ioredis-deepen-2",
+    "created_at": "2026-06-23",
+    "source": "deepen",
+    "package": "ioredis",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Detect exists() return value used as truthy/falsy coercion (`if (await redis.exists(a, b, c))`) instead of compared to a specific count. exists() returns NUMBER not boolean \u2014 multi-key probes have 4 possible numeric returns (0, 1, 2, 3) but if-truthy treats 1 and 3 the same way, hiding the partial-presence case. Postcondition: exists-return-coerced-to-boolean-without-zero-check. Detection requires AST inspection of the awaited expression's parent: `if (<await exists>)`, `<await exists> ? a : b`, `!(<await exists>)` should all flag; `(<await exists>) === N` should not. Already added to ioredis await_patterns so ThrowingFunctionDetector picks up the no-try-catch case (exists-unhandled-promise-rejection).",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 pattern source: https://redis.io/commands/exists/. Warning-severity postcondition \u2014 false positives acceptable above a frequency threshold."
+    },
+    "resolution": null
+  },
+  "3119": {
+    "id": "concern-20260623-ioredis-deepen-3",
+    "created_at": "2026-06-23",
+    "source": "deepen",
+    "package": "ioredis",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Detect getex() called with a non-validated TTL argument (negative, NaN, zero). Common bug: `redis.getex(key, 'EX', expiresAt - Date.now())` where expiresAt is already in the past produces a negative TTL, which Redis rejects with 'ERR invalid expire time in 'getex' command'. Postcondition: getex-invalid-ttl-arguments. Detection is hard (requires tracking computed-value provenance). Lower-priority \u2014 the basic no-try-catch case (getex-unhandled-promise-rejection) is covered by ThrowingFunctionDetector via the .getex( await_pattern added in pass 15.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 pattern source: https://redis.io/commands/getex/. Requires data-flow analysis on TTL argument."
+    },
+    "resolution": null
+  },
+  "3120": {
+    "id": "concern-20260623-ioredis-deepen-4",
+    "created_at": "2026-06-23",
+    "source": "deepen",
+    "package": "ioredis",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Detect getdel() return-value conflation pattern \u2014 application treats null return (key never set or already consumed) the same way as a thrown rejection (connection error or pre-6.2 server). Postcondition: getdel-null-return-not-distinguished-from-error. Detection: when `const x = await redis.getdel(...)` is followed by `if (!x) ...` without a separate catch arm that logs differently, flag the conflation. Lower-priority warning-severity \u2014 frequently a stylistic choice. Already added to await_patterns so the primary error case (getdel-unhandled-promise-rejection) is detected via ThrowingFunctionDetector.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 pattern source: https://redis.io/commands/getdel/. Logging/metric pattern \u2014 requires flow + observability heuristics."
+    },
+    "resolution": null
   }
 }
