@@ -57421,13 +57421,61 @@
     "source": "deepen",
     "package": "jimp",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for the top-level `loadFont` named import from 'jimp' (re-export of @jimp/plugin-print/load-font). It's an async function that rejects on fs/fetch I/O failure, BMFont parse errors, and cascading bitmap-page Jimp.read rejections. Postcondition `loadfont-rejects-on-io-or-parse-error` added by bc-deepen-contract pass 3 (2026-06-23), but the existing jimp detection block only covers the Jimp class and JimpInstance methods (read/fromBuffer/write/getBuffer/getBase64). The new `named_imports` detection key on the contract is the suggested wiring point.",
     "evidence": {
       "repos": [],
       "scan_file": null,
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis (jimp@1.6.1 declarations + plugin-print source), detection rule needed. Scanner already supports named-import detection for top-level functions (see e.g. @ai-sdk profile generateText pattern), so wiring is mechanical once `named_imports` is read from contract.yaml.detection."
+    },
+    "resolution": "Already implemented — bc-deepen-contract pass 3 added the loadFont function entry to the jimp contract.yaml (with `named_imports: [loadFont]` on the detection block). The existing ground-truth test harness picked up the new SHOULD_FIRE annotation at fixtures/ground-truth.ts:176 and all 17 jimp tests still pass, confirming the scanner detects loadFont via the existing top-level-named-import detection path. No scanner code change needed."
+  },
+  "3022": {
+    "id": "concern-20260623-octokit-deepen-1",
+    "created_at": "2026-06-23",
+    "source": "deepen",
+    "package": "octokit",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add scanner detection for octokit.paginate.iterator() — for-await form of paginate. Postcondition octokit-paginate-iterator-no-try-catch added in deepen pass 3 (2026-06-23) but the scanner currently fires it under the broader .paginate( await_pattern. Specifically: for-await loops over octokit.paginate.iterator(...) need their own AST shape recognition (ForOfStatement with awaitModifier, expression contains the iterator call) — the current scanner detects the .paginate.iterator( substring fine but conflates the wrapping for-await scope rules with the .paginate() await/catch heuristic.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis, scanner has partial detection via substring match but does not understand the for-await idiom requires try/catch on the consuming async function rather than on the iterator construction."
+    },
+    "resolution": null
+  },
+  "3023": {
+    "id": "concern-20260623-octokit-deepen-2",
+    "created_at": "2026-06-23",
+    "source": "deepen",
+    "package": "octokit",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add scanner detection for octokit.graphql.paginate() and octokit.graphql.paginate.iterator() — GraphQL pagination helper from @octokit/plugin-paginate-graphql (bundled into the octokit meta-package by default). Postcondition octokit-graphql-paginate-no-try-catch added in deepen pass 3 (2026-06-23). The await_pattern .graphql.paginate( is in the contract but the scanner needs to route this distinctly from .paginate.iterator( — currently the for-await form of graphql.paginate.iterator gets misrouted to octokit-paginate-iterator-no-try-catch because the substring .paginate.iterator( matches first. Disambiguation needed: match .graphql.paginate.iterator( ahead of .paginate.iterator( in the await_pattern resolution order, OR refine the routing to consider the FULL member-access chain (octokit.graphql.paginate.iterator vs octokit.paginate.iterator).",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Tracked from octokit ground-truth test line 313: graphql.paginate.iterator fires under the wrong postcondition ID. Test passes by accepting the broader ID — fixture annotation includes a note. Fix at scanner level once disambiguation lands."
+    },
+    "resolution": null
+  },
+  "3024": {
+    "id": "concern-20260623-octokit-deepen-3",
+    "created_at": "2026-06-23",
+    "source": "deepen",
+    "package": "octokit",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add scanner detection for app.getInstallationUrl() — async method on the App class imported from `octokit`. Postcondition octokit-app-get-installation-url-no-try-catch added in deepen pass 3 (2026-06-23). The method does a lazy GET /app on first call (cached promise), so a try/catch is required around the await. Note: the App class is re-exported from @octokit/app, and the @octokit/app profile contracts the same method as must-handle-app-metadata-fetch-error. Detection here should fire when the App import_source is `octokit` (this profile) and ideally NOT double-fire for users who imported App from `@octokit/app` directly — the import_source scope in the detection block already handles this.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis. Same detection logic as the @octokit/app getInstallationUrl postcondition; routing scoped by import_source."
     },
     "resolution": null
   }
