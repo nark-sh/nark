@@ -58700,5 +58700,53 @@
       "note": "Proactive \u2014 contract added via API surface analysis of ai@6.0.209, detection rule needed."
     },
     "resolution": null
+  },
+  "3099": {
+    "id": "concern-20260623-kubernetes-client-node-deepen-stream4-pass12-1",
+    "created_at": "2026-06-23",
+    "source": "deepen",
+    "package": "@kubernetes/client-node",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @kubernetes/client-node Watch / Log / Exec / Attach / PortForward / Cp / Health / Metrics constructors. These are not constructed via kc.makeApiClient() (they are direct `new k8s.Watch(kc)` / `new k8s.Log(kc)`) so the existing makeApiClient instance-tracking rule does not recognize them. Without recognition, bare-await on watch.watch / log.log / exec.exec / attach.attach / portForward / cpFromPod / health.readyz / metrics.getNodeMetrics is missed by the scanner. The new postconditions added in deepen-stream-4 pass 12 (watch-watch-bare-await, log-log-bare-await, exec-exec-bare-await, attach-attach-bare-await, portforward-bare-await, cp-from-pod-bare-await, health-readyz-bare-await, metrics-getnodemetrics-bare-await) need a detector that tracks direct constructor instances of these eight classes.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface re-enumeration (pass 12). Detection rule needed for direct `new Watch(kc)` / `new Log(kc)` / etc. construction pattern, distinct from the makeApiClient instance pattern that the *Api class postconditions rely on."
+    },
+    "resolution": null
+  },
+  "3100": {
+    "id": "concern-20260623-kubernetes-client-node-deepen-stream4-pass12-2",
+    "created_at": "2026-06-23",
+    "source": "deepen",
+    "package": "@kubernetes/client-node",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @kubernetes/client-node module-level topNodes / topPods functions (not class methods). New postconditions top-nodes-bare-await rely on detecting bare-await on the imported namespace-level functions `await k8s.topNodes(api)` / `await topNodes(api)`. These are distinct from the *Api class methods because they are top-level exports from the package, not instance methods. Detector needs to recognize the function-name pattern from the import_path '@kubernetes/client-node'.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 surfaces the kubectl-top equivalent path used in dashboards."
+    },
+    "resolution": null
+  },
+  "3101": {
+    "id": "concern-20260623-kubernetes-client-node-deepen-stream4-pass12-3",
+    "created_at": "2026-06-23",
+    "source": "deepen",
+    "package": "@kubernetes/client-node",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @kubernetes/client-node makeInformer() factory return value. New postcondition informer-start-bare-await tracks bare-await on `informer.start()` where informer is the return value of `k8s.makeInformer(kc, path, listFn)`. The scanner needs to flow-track the return value of makeInformer as an Informer<T> instance whose .start() method is a contracted entry point.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 informer.start is lifecycle-critical for operators built on the watch+cache pattern."
+    },
+    "resolution": null
   }
 }
