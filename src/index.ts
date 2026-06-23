@@ -7,6 +7,7 @@
 import { Command } from "commander";
 import * as path from "path";
 import * as fs from "fs";
+import * as os from "os";
 import { fileURLToPath } from "url";
 import { createRequire } from "module";
 import chalk from "chalk";
@@ -81,7 +82,7 @@ import {
 import { createCiCommand } from "./cli/ci.js";
 import { generateAIPrompt } from "./ai-prompt-generator.js";
 import { writeScanResults, findNarkDir } from "./output/index.js";
-import { getNarkRunsDir } from "./lib/global-paths.js";
+import { getNarkRunsDir, displayProjectId } from "./lib/global-paths.js";
 import { getSuppressedFingerprints } from "./triage/suppressor.js";
 import { writeSarifOutput } from "./output/sarif-writer.js";
 import { loadNarkRc } from "./config/narkrc.js";
@@ -1502,6 +1503,42 @@ async function main(options: any) {
       aiPromptPath,
       finalRecord,
     });
+
+    // qt-185: one-line Results pointer for default mode. The verbose branch
+    // (line ~1404 `if (verbose && options.terminal !== false)`) keeps the
+    // original 5-path `Reports written to:` block + `Scan results saved to`
+    // / `Violation details:` / `For AI agent instructions:` lines — this is
+    // the consolidation for the default surface only. Uses `~/` in place of
+    // os.homedir() and the displayProjectId() short form in place of the
+    // 80-char encoded path, both for readability in marketing screenshots.
+    // The on-disk directory name (encodeProjectPath) is unchanged.
+    //
+    // Variables in scope:
+    // - `projectRoot` (line 1366): the absolute project root used by
+    //   writeScanResults — same logic as generateOutputPath's projectRoot
+    //   so the displayProjectId() output matches the on-disk encoded form.
+    // - `outputDir` (line 729): `<runs-dir>/<runDir>` — path.basename gives
+    //   us the runDir leaf. The plan referenced runDir/outputDir from
+    //   generateOutputPath's scope, but those are not visible here in main();
+    //   deriving from outputDir reaches the same value.
+    {
+      const runDir = path.basename(outputDir);
+      const shortDisplayDir = path.join(
+        os.homedir(),
+        ".nark",
+        "projects",
+        displayProjectId(projectRoot),
+        "runs",
+        runDir,
+      );
+      const displayPath =
+        shortDisplayDir.replace(os.homedir(), "~") + path.sep;
+      console.log(
+        chalk.gray(
+          `Results: ${displayPath}  (open index.html for the interactive view)`,
+        ),
+      );
+    }
   }
 
   const outputEndTime = Date.now();

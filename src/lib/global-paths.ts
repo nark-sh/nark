@@ -13,6 +13,7 @@
  * (already global, handled elsewhere).
  */
 
+import * as crypto from 'crypto';
 import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
@@ -68,4 +69,32 @@ export function getNarkInitConfig(projectRoot: string): string {
 
 export function getNarkSuppressionsManifest(projectRoot: string): string {
   return ensureParent(path.join(getNarkProjectDir(projectRoot), 'suppressions.json'));
+}
+
+/**
+ * Short readable form of a project id for DISPLAY ONLY.
+ * Returns "<basename>-<6char-hex>" where the hex is the first 6 chars of
+ * sha1(absolute project path). On-disk naming continues to use
+ * encodeProjectPath() — this is purely a presentation helper introduced by
+ * qt-185 to keep the post-scan Results line readable in marketing
+ * screenshots.
+ *
+ * Example:
+ *   input:  '/Users/calebgates/WebstormProjects/behavioral-contracts/nark-dev/nark-corpus'
+ *   output: 'nark-corpus-8c27717' (6 hex chars after the basename)
+ *
+ * Why sha1 (not the path hash itself or a random suffix):
+ * - Deterministic — same project always shows the same display id.
+ * - Cheap — already in node:crypto.
+ * - 6 hex chars = ~16M slots, more than enough for one user's project tree.
+ * - Collisions are cosmetic only; on-disk paths stay uniquely encoded.
+ *
+ * Relative inputs are resolved to absolute first (same convention as
+ * encodeProjectPath).
+ */
+export function displayProjectId(projectRoot: string): string {
+  const abs = path.resolve(projectRoot);
+  const basename = path.basename(abs);
+  const hash = crypto.createHash('sha1').update(abs).digest('hex').slice(0, 6);
+  return `${basename}-${hash}`;
 }
