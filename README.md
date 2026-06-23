@@ -1,8 +1,23 @@
+<p align="center">
+  <!-- Logo: aardvark mark + NARK wordmark, transparent PNG or SVG.
+       Target: ~120px tall on retina (so export at 240px or use SVG).
+       Source: lift the brand mark from the nark.sh hero. -->
+  <img src="./docs/images/nark-logo.svg" alt="nark" height="100">
+</p>
+
 # nark
 
 **Profile coverage scanner for npm packages — find missing error handling before production.**
 
 nark scans your TypeScript codebase against a curated library of 169+ package profiles to find places where error handling is missing. Think of it as a linter, but for runtime failure modes — unhandled promise rejections, missing `.on('error')` listeners, uncaught API exceptions.
+
+<p align="center">
+  <!-- Violation output: screenshot of `npx nark --demo` showing 3-5 violations
+       with severity badge, file:line, postcondition id, and fix hint.
+       Target: 1440px wide @ 2x retina (so export at ~2880px). Crop to the
+       violation block — do NOT include the install spinner / npm warnings. -->
+  <img src="./docs/images/demo-violations.png" alt="Example nark output: three violations against axios, stripe, and @prisma/client" width="720">
+</p>
 
 [![npm version](https://img.shields.io/npm/v/nark.svg)](https://www.npmjs.com/package/nark)
 [![Socket Badge](https://socket.dev/api/badge/npm/package/nark)](https://socket.dev/npm/package/nark)
@@ -59,6 +74,18 @@ npx nark --demo
 ```
 
 This runs Nark against a bundled sample project with intentional `axios`, `stripe`, and `@prisma/client` violations. The output is exactly what a real scan against your own code looks like — just with a guaranteed non-empty report.
+
+Run with `--verbose` to see the full Verification Report with code snippets and per-violation fix guidance:
+
+<p align="center">
+  <img src="./docs/images/demo-summary.png" alt="Verbose mode: full Nark Verification Report with per-violation code snippets, sources, and fix guidance" width="720">
+</p>
+
+The verbose Analysis Report summarizes coverage, health metrics, and recommendations:
+
+<p align="center">
+  <img src="./docs/images/demo-analysis-report.png" alt="Verbose mode Analysis Report: coverage summary, repository health metrics, violations by package, and recommendations" width="720">
+</p>
 
 ### Or build from source
 
@@ -218,6 +245,27 @@ nark show deployment
 ### Telemetry
 
 nark collects anonymous usage data to help prioritize development. Telemetry is **enabled by default** and can be disabled at any time. A notice is shown on first run.
+
+<details>
+<summary><strong>Optional: hosted dashboard at app.nark.sh</strong></summary>
+
+<p>
+If telemetry is on and you've run <code>nark login</code>, your scans show up in
+a hosted dashboard at <a href="https://app.nark.sh">app.nark.sh</a> with trend
+lines, per-package rollups, and PR-level diff views. The dashboard is
+<em>entirely optional</em> — nark runs the same scans locally either way, and
+all results are always written to <code>.nark/</code> in your project. The
+dashboard is sugar on top, not a dependency.
+</p>
+
+<p align="center">
+  <!-- Dashboard screenshot: violations-over-time view from app.nark.sh.
+       Target: 2880px wide @ 2x (display 1200px). Use a demo org with
+       fake repo names — don't show a real customer's data. -->
+  <img src="./docs/images/dashboard-trends.png" alt="Optional nark dashboard at app.nark.sh showing violation trends" width="720">
+</p>
+
+</details>
 
 **What is collected:** nark version, OS/arch, Node.js version, npm package names detected (public package names only), contract IDs matched, violation counts per contract, scan duration, CI mode flag, and an optional SHA256 hash of your git remote URL.
 
