@@ -58748,5 +58748,101 @@
       "note": "Proactive \u2014 informer.start is lifecycle-critical for operators built on the watch+cache pattern."
     },
     "resolution": null
+  },
+  "3102": {
+    "id": "concern-20260623-upstash-redis-deepen-stream3-pass13-xadd",
+    "created_at": "2026-06-23",
+    "source": "deepen",
+    "package": "@upstash/redis",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @upstash/redis xadd() bare-await on Redis stream entries. New postcondition wrongtype-or-network-error tracks bare-await on `redis.xadd(stream, '*', entries)`. Streams API added in @upstash/redis v1.34+; xadd is the canonical event-source write entry and WRONGTYPE errors on non-stream keys are silent-failure prone.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via deepen drift pass 13 for v1.38 surface; detection rule needed"
+    },
+    "resolution": null
+  },
+  "3103": {
+    "id": "concern-20260623-upstash-redis-deepen-stream3-pass13-xgroup",
+    "created_at": "2026-06-23",
+    "source": "deepen",
+    "package": "@upstash/redis",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @upstash/redis xgroup() bare-await. New postcondition busygroup-or-nogroup-error tracks bare-await on `redis.xgroup(stream, { type: 'CREATE', ... })`. BUSYGROUP and NOGROUP are the canonical consumer-group lifecycle failure modes; without try-catch the entire consumer init crashes.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via deepen drift pass 13"
+    },
+    "resolution": null
+  },
+  "3104": {
+    "id": "concern-20260623-upstash-redis-deepen-stream3-pass13-xreadgroup",
+    "created_at": "2026-06-23",
+    "source": "deepen",
+    "package": "@upstash/redis",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @upstash/redis xreadgroup() bare-await. New postcondition nogroup-error tracks bare-await on `redis.xreadgroup(group, consumer, stream, '>')`. NOGROUP on cold start silently halts every consumer if not caught and the queue depth on the stream grows without bound.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via deepen drift pass 13"
+    },
+    "resolution": null
+  },
+  "3105": {
+    "id": "concern-20260623-upstash-redis-deepen-stream3-pass13-copy-result",
+    "created_at": "2026-06-23",
+    "source": "deepen",
+    "package": "@upstash/redis",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @upstash/redis copy() result-not-checked silent-failure pattern. New postcondition copy-result-not-checked tracks `await redis.copy(src, dst)` where the returned 'COPIED' | 'NOT_COPIED' string union is not branched on. Similar shape to other result-not-checked scanner rules (resend.send, sendgrid.send return-value-ignored).",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 silent-failure pattern; detection requires return-value-ignored rule"
+    },
+    "resolution": null
+  },
+  "3106": {
+    "id": "concern-20260623-upstash-redis-deepen-stream3-pass13-copy-network",
+    "created_at": "2026-06-23",
+    "source": "deepen",
+    "package": "@upstash/redis",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @upstash/redis copy() bare-await network/WRONGTYPE error. New postcondition wrongtype-or-network-error on copy().",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via deepen drift pass 13"
+    },
+    "resolution": null
+  },
+  "3107": {
+    "id": "concern-20260623-upstash-redis-deepen-stream3-pass13-flushdb",
+    "created_at": "2026-06-23",
+    "source": "deepen",
+    "package": "@upstash/redis",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @upstash/redis flushdb() bare-await. New postcondition destructive-no-try-catch tracks bare-await on `redis.flushdb()`. Destructive whole-db wipe with no audit trail when uncaught \u2014 turns config typos into P0 outages.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 destructive admin op; detection needed for production-safety guardrail"
+    },
+    "resolution": null
   }
 }
