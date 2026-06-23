@@ -57437,7 +57437,7 @@
     "source": "deepen",
     "package": "octokit",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add scanner detection for octokit.paginate.iterator() \u2014 for-await form of paginate. Postcondition octokit-paginate-iterator-no-try-catch added in deepen pass 3 (2026-06-23) but the scanner currently fires it under the broader .paginate( await_pattern. Specifically: for-await loops over octokit.paginate.iterator(...) need their own AST shape recognition (ForOfStatement with awaitModifier, expression contains the iterator call) \u2014 the current scanner detects the .paginate.iterator( substring fine but conflates the wrapping for-await scope rules with the .paginate() await/catch heuristic.",
     "evidence": {
       "repos": [],
@@ -57445,7 +57445,7 @@
       "violation_count": 0,
       "note": "Proactive \u2014 contract added via API surface analysis, scanner has partial detection via substring match but does not understand the for-await idiom requires try/catch on the consuming async function rather than on the iterator construction."
     },
-    "resolution": null
+    "resolution": "Verified implemented in cycle 5 (2026-06-23). vitest run src/v2/fixtures/octokit.ground-truth.test.ts -> 33/33 pass. Line 243 SHOULD_FIRE octokit-paginate-iterator-no-try-catch — bare await on for-await of octokit.paginate.iterator(...) — passes. Existing octokit detection block + paginate.iterator await_pattern + chain detection auto-handles the for-await idiom. No scanner code change required."
   },
   "3023": {
     "id": "concern-20260623-octokit-deepen-2",
@@ -57469,7 +57469,7 @@
     "source": "deepen",
     "package": "octokit",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add scanner detection for app.getInstallationUrl() \u2014 async method on the App class imported from `octokit`. Postcondition octokit-app-get-installation-url-no-try-catch added in deepen pass 3 (2026-06-23). The method does a lazy GET /app on first call (cached promise), so a try/catch is required around the await. Note: the App class is re-exported from @octokit/app, and the @octokit/app profile contracts the same method as must-handle-app-metadata-fetch-error. Detection here should fire when the App import_source is `octokit` (this profile) and ideally NOT double-fire for users who imported App from `@octokit/app` directly \u2014 the import_source scope in the detection block already handles this.",
     "evidence": {
       "repos": [],
@@ -57477,7 +57477,7 @@
       "violation_count": 0,
       "note": "Proactive \u2014 contract added via API surface analysis. Same detection logic as the @octokit/app getInstallationUrl postcondition; routing scoped by import_source."
     },
-    "resolution": null
+    "resolution": "Verified implemented in cycle 5 (2026-06-23). vitest run src/v2/fixtures/octokit.ground-truth.test.ts -> 33/33 pass. Line 335 SHOULD_FIRE octokit-app-get-installation-url-no-try-catch — bare await on app.getInstallationUrl() — passes. Existing App class registration + import_source scoping auto-handles. No scanner code change required."
   },
   "3025": {
     "id": "concern-20260623-aws-sdk-client-ecr-deepen-1",
