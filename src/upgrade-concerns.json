@@ -58444,5 +58444,69 @@
       "note": "Proactive - contract added via API surface analysis during deepen-stream-3 pass 10 (2026-06-23) against sinon@22.0.0. Severity: error. Detection requires TypeScript-aware flow analysis (or a simpler heuristic: check if the argument identifier was declared with explicit `| undefined` / `| null` annotation, or assigned from a function returning nullish). FP rate may be moderate if non-typed JS is common in the corpus - restrict initially to TS-typed callsites where the argument's type union includes undefined/null. Same shape as other null-arg-throw detectors (e.g. fs.readFileSync(undefined) family)."
     },
     "resolution": null
+  },
+  "3083": {
+    "id": "concern-20260623-prisma-deepen-stream2-pass13-1",
+    "created_at": "2026-06-23",
+    "source": "deepen",
+    "package": "@prisma/client",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for prisma.<model>.aggregate({ _sum/_min/_max/_avg: { field: true } }) where the returned aggregate field is used in arithmetic or comparison without a null-check. Prisma's aggregate returns null for _sum/_min/_max/_avg fields when zero rows match the where clause, NOT 0 or undefined. Static analysis cannot determine match-count, so any aggregate-field property access that doesn't traverse a null-narrowing branch is a likely runtime crash. Detection shape: `<expr>.<_sum|_min|_max|_avg>.<field>` where <expr> is the result of an aggregate() call AND there is no preceding null check (?., ??, if-narrowing, optional chaining) AND the property is consumed in arithmetic (`+`, `-`, `*`, `/`), comparison (`>`, `<`, `===`), or non-nullish-coalescing assignment. Postcondition: aggregate-null-when-no-rows.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive - contract added via API surface analysis during deepen-stream-2 pass 13 (2026-06-23) against @prisma/client@7.8.0. Severity: error. This is one of Prisma's highest-impact silent-failure patterns: revenue dashboards, financial sums, and analytics queries routinely consume `_sum.amount` directly. _count is the only aggregate field that returns 0 (not null) on no-rows - all others return null. Detection should be conservative (only flag aggregate->property->arithmetic chains) to keep FP rate manageable. High value: this pattern silently corrupts financial calculations (PAYMENT_RISK incident label)."
+    },
+    "resolution": null
+  },
+  "3084": {
+    "id": "concern-20260623-prisma-deepen-stream2-pass13-2",
+    "created_at": "2026-06-23",
+    "source": "deepen",
+    "package": "@prisma/client",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for prisma.$queryRawUnsafe(...) and prisma.$executeRawUnsafe(...) calls where the first argument is NOT a string literal or no-substitution template literal. These methods are documented as 'unsafe' - the SQL string bypasses Prisma's parameterization. The recommended safe form is to pass user-supplied values via the second-arg array (`...params`), keeping the SQL string a literal. Detection shape: `<prisma>.$queryRawUnsafe(<expr>, ...)` or `<prisma>.$executeRawUnsafe(<expr>, ...)` where <expr> is NOT a StringLiteral or TemplateLiteral with no expressions. Severity should be error - this is a SQL injection vector. Postcondition: queryrawunsafe-sql-injection / executerawunsafe-sql-injection.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive - contract added via API surface analysis during deepen-stream-2 pass 13 (2026-06-23) against @prisma/client@7.8.0. Severity: error. SECURITY_RISK / critical incident cost. This is a security-relevant gap previously deferred in v1.1.0 deepen pass. Detection is mechanical: type-check the first argument. If it's a binary-plus expression, template literal with substitutions, or any non-literal identifier reference, flag it. The recommended fix is to convert all interpolated values into positional params. Note: a TemplateLiteral with no substitutions is safe (equivalent to a string literal)."
+    },
+    "resolution": null
+  },
+  "3085": {
+    "id": "concern-20260623-prisma-deepen-stream2-pass13-3",
+    "created_at": "2026-06-23",
+    "source": "deepen",
+    "package": "@prisma/client",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for prisma.<model>.createManyAndReturn(...) and prisma.<model>.updateManyAndReturn(...) calls inside code that may target MySQL, MongoDB, or SQL Server. Both methods are PostgreSQL/CockroachDB/SQLite only - they throw at runtime on unsupported providers because those engines don't support RETURNING. Detection is non-trivial without schema introspection. Initial heuristic: flag every <model>.createManyAndReturn() / <model>.updateManyAndReturn() call site and require it be inside a try/catch that catches PrismaClientValidationError or runtime errors. Long-term: read the provider from prisma/schema.prisma if available. Postcondition: createmanyandreturn-unsupported-provider / updatemanyandreturn-unsupported-provider.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive - contract added via API surface analysis during deepen-stream-2 pass 13 (2026-06-23) against @prisma/client@7.8.0. Severity: error. These methods are newer additions (v5.14.0 for createManyAndReturn, v6.2.0 for updateManyAndReturn) and adoption is growing. Their try/catch-less use is a likely portability bug for anyone deploying on MySQL or SQL Server. Pair with auto-detection of schema provider when available (Phase 2 enhancement)."
+    },
+    "resolution": null
+  },
+  "3086": {
+    "id": "concern-20260623-prisma-deepen-stream2-pass13-4",
+    "created_at": "2026-06-23",
+    "source": "deepen",
+    "package": "@prisma/client",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for prisma.<model>.findMany() where the result array is indexed (`result[0]`, `result[N]`) or non-empty-mapped (`result[0].field`, `result.find(...).field`) without an explicit empty-array guard (`if (result.length === 0)`, `if (!result.length)`, optional chaining). findMany returns [] silently on no-match - indexing an empty array yields undefined, and `.field` of undefined throws TypeError. Detection shape: `<prisma>.<model>.findMany(...)` -> assigned to <id> -> later `<id>[N].<prop>` access without preceding length-check. Postcondition: findmany-empty-array-not-checked.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive - contract added via API surface analysis during deepen-stream-2 pass 13 (2026-06-23) against @prisma/client@7.8.0. Severity: warning. SILENT_FAILURE pattern - the empty array yields undefined which crashes downstream, often manifesting as a blank UI rather than a visible exception. FP rate could be high if the codebase consistently calls findMany with conditions that always return rows - restrict to findMany where the where clause references variables (vs. static SQL-style WHERE 1=1)."
+    },
+    "resolution": null
   }
 }
