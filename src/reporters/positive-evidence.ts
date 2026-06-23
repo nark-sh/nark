@@ -232,6 +232,29 @@ function generateInsights(
   const yellow = '\x1b[33m';
   const reset = '\x1b[0m';
 
+  // qt-187: INSIGHTS must only reference packages with call sites in the
+  // analyzed file set. Packages found only in a parent workspace's
+  // package.json (orphan deps walked up by package discovery) have
+  // callSiteCount === 0 and must not appear here — "3 packages have zero
+  // violations (@sentry/node, ajv, typescript)" while none of those are
+  // imported is exactly the CodeRabbit failure mode the CLI polish work is
+  // designed to prevent. The filter lives at the rendering layer only;
+  // package-discovery, the JSON audit record, and the Package Breakdown
+  // table are intentionally left untouched (other consumers may still want
+  // the full "uncovered from package.json" view).
+  const enhancedForFilter = audit as EnhancedAuditRecord;
+  const importedPackageNames = new Set<string>(
+    enhancedForFilter.package_discovery
+      ? enhancedForFilter.package_discovery.packages
+          .filter((p) => (p.callSiteCount ?? 0) > 0)
+          .map((p) => p.name)
+      : []
+  );
+  // When package_discovery is absent (older audit records, tests bypassing
+  // discovery), fall back to permissive behavior — no filter applied — so
+  // we never silently regress legacy paths.
+  const filterActive = !!enhancedForFilter.package_discovery;
+
   // Perfect score insight
   if (health.errorHandlingCompliance === 100) {
     insights.push(`${green}✓${reset} Perfect score! All ${health.checksPerformed} call sites follow best practices.`);
@@ -243,7 +266,11 @@ function generateInsights(
   }
 
   // Passing packages insight
-  const passingPackages = getPassingPackages(breakdown);
+  // qt-187: intersect with importedPackageNames so orphan deps don't appear.
+  const passingPackagesAll = getPassingPackages(breakdown);
+  const passingPackages = filterActive
+    ? passingPackagesAll.filter((p) => importedPackageNames.has(p.packageName))
+    : passingPackagesAll;
   if (passingPackages.length > 0) {
     const topPassing = passingPackages.slice(0, 3).map(p => p.packageName).join(', ');
     insights.push(`${green}✓${reset} ${passingPackages.length} packages have zero violations (${topPassing}${passingPackages.length > 3 ? ', ...' : ''}).`);
@@ -262,7 +289,17 @@ function generateInsights(
   // Package coverage insight
   const enhanced = audit as EnhancedAuditRecord;
   if (enhanced.package_discovery) {
-    const uncoveredCount = enhanced.package_discovery.withoutContracts;
+    // qt-187: derive uncoveredCount from the call-site-filtered view so
+    // orphan deps (callSiteCount === 0) don't get reported as "missing
+    // contract opportunities" — they have zero call sites to cover. The
+    // discovery layer's `withoutContracts` field still reflects the full
+    // package.json-derived view for JSON-audit consumers.
+    const uncoveredCount = enhanced.package_discovery.packages.filter(
+      (p) =>
+        (p.callSiteCount ?? 0) > 0 &&
+        !p.hasContract &&
+        !p.nonCoverableReason
+    ).length;
     if (uncoveredCount > 0) {
       insights.push(`${yellow}!${reset} ${uncoveredCount} packages don't have contracts yet - coverage opportunity for future scans.`);
     }
