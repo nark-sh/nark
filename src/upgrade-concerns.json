@@ -56464,7 +56464,7 @@
     "source": "deepen",
     "package": "e2b",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for e2b Template.build() \u2014 Long-running build call \u2014 scanner currently has no detection rule for the Template static-class chain. Need pattern: `await Template.build(...)` without try/catch.",
     "evidence": {
       "repos": [],
@@ -56472,7 +56472,9 @@
       "violation_count": 0,
       "note": "Proactive \u2014 postcondition added via API surface analysis (pass 17, deepen-stream-2, 2026-06-18). No scanner rule exists."
     },
-    "resolution": null
+    "resolution": "Cycle 7 verified-only. Wired e2b ground-truth test driver src/v2/fixtures/e2b.ground-truth.test.ts. Fixed fixture annotation format in nark-corpus-pro/packages/e2b/fixtures/ground-truth.ts (added \"\u2014 bare await without try/catch\" reason after SHOULD_FIRE postcondition id; em-dash separator is required by harness parseAnnotations). Line 82 `await Template.build(...)` fires `template-build-no-error-handling` correctly via existing throwing-function-detector chained-static-call resolution. No scanner code change.",
+    "resolved_at": "2026-06-23",
+    "resolved_by": "scanner-stream cycle 7"
   },
   "2963": {
     "id": "concern-20260618-e2b-deepen-volume-create",
@@ -56496,7 +56498,7 @@
     "source": "deepen",
     "package": "e2b",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for e2b sandbox.git.push() \u2014 3-level property chain `sandbox.git.push()` \u2014 confirm scanner walks .git.push correctly with extension methods that aren't on the Sandbox surface itself.",
     "evidence": {
       "repos": [],
@@ -56504,7 +56506,9 @@
       "violation_count": 0,
       "note": "Proactive \u2014 postcondition added via API surface analysis (pass 17, deepen-stream-2, 2026-06-18). No scanner rule exists."
     },
-    "resolution": null
+    "resolution": "Cycle 7 verified-only. Line 92 `await s.git.push(...)` (3-level property chain on Sandbox instance) fires `git-push-no-error-handling` correctly via existing property-chain-detector + InstanceTrackerPlugin binding of s \u2190 await Sandbox.create(). No scanner code change. Required fixture-format fix (em-dash reason) to expose annotation to harness parser.",
+    "resolved_at": "2026-06-23",
+    "resolved_by": "scanner-stream cycle 7"
   },
   "2965": {
     "id": "concern-20260618-e2b-deepen-files-remove",
@@ -56512,7 +56516,7 @@
     "source": "deepen",
     "package": "e2b",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for e2b sandbox.files.remove() \u2014 3-level property chain `sandbox.files.remove()` \u2014 confirm scanner flags bare-await without try/catch.",
     "evidence": {
       "repos": [],
@@ -56520,7 +56524,9 @@
       "violation_count": 0,
       "note": "Proactive \u2014 postcondition added via API surface analysis (pass 17, deepen-stream-2, 2026-06-18). No scanner rule exists."
     },
-    "resolution": null
+    "resolution": "Cycle 7 verified-only. Line 97 `await s.files.remove(...)` (3-level property chain on Sandbox instance) fires `files-remove-no-error-handling` correctly via existing property-chain-detector + InstanceTrackerPlugin. No scanner code change. Required fixture-format fix (em-dash reason).",
+    "resolved_at": "2026-06-23",
+    "resolved_by": "scanner-stream cycle 7"
   },
   "2966": {
     "id": "concern-20260618-e2b-deepen-commands-kill",
@@ -56544,7 +56550,7 @@
     "source": "deepen",
     "package": "e2b",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for e2b sandbox.kill() \u2014 Instance method on Sandbox \u2014 scanner needs to flag `await sandbox.kill()` without try/catch AND without chained `.catch(() => undefined)`. Detection should recognize the fire-and-forget idiom as valid.",
     "evidence": {
       "repos": [],
@@ -56552,7 +56558,9 @@
       "violation_count": 0,
       "note": "Proactive \u2014 postcondition added via API surface analysis (pass 17, deepen-stream-2, 2026-06-18). No scanner rule exists."
     },
-    "resolution": null
+    "resolution": "Cycle 7 verified-only. Line 107 `await s.kill()` (instance-method on Sandbox) fires `sandbox-kill-no-error-handling` correctly via existing throwing-function-detector + InstanceTrackerPlugin. No scanner code change. Required fixture-format fix (em-dash reason).",
+    "resolved_at": "2026-06-23",
+    "resolved_by": "scanner-stream cycle 7"
   },
   "2968": {
     "id": "concern-20260618-bluebird-deepen-1",
