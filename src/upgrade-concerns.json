@@ -58154,5 +58154,149 @@
       "note": "Proactive \u2014 deepen-stream-4 pass 8 (2026-06-23). Severity: warning (consider promoting to error once detector lands \u2014 this is a security-defining callback). Failure-path recommendation: tear down the Client connection on err, not just log."
     },
     "resolution": null
+  },
+  "3065": {
+    "id": "concern-20260623-typescript-deepen-1",
+    "created_at": "2026-06-23",
+    "source": "deepen",
+    "package": "typescript",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for ts.transform(source, [transformer], options) where the call is not wrapped in try/catch. Custom TransformerFactory functions propagate uncaught exceptions through the transformation loop in transformNodes() with no internal catch. ts-jest, ts-loader, and custom build pipelines are common callers \u2014 a buggy transformer aborts the whole transform. Postcondition: transform-custom-transformer-throws.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  "3066": {
+    "id": "concern-20260623-typescript-deepen-2",
+    "created_at": "2026-06-23",
+    "source": "deepen",
+    "package": "typescript",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for ts.transform() result where result.dispose() is not called. The TransformationResult retains transformation context (resolver, host, factory closures, emit metadata) \u2014 undisposed results in batch pipelines drive memory growth proportional to (source size \u00d7 transform count). Postcondition: transform-result-not-disposed.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 memory-leak pattern, requires dispose-call-presence rule"
+    },
+    "resolution": null
+  },
+  "3067": {
+    "id": "concern-20260623-typescript-deepen-3",
+    "created_at": "2026-06-23",
+    "source": "deepen",
+    "package": "typescript",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for ts.transform() context.onSubstituteNode or context.onEmitNode assignment INSIDE the returned visitor function (after initialization). transformNodes() throws Debug.assert('Cannot modify transformation hooks after initialization has completed.') when these setters fire post-init. Detection: a transformer factory whose returned visitor mutates context hooks. Postcondition: transform-hooks-set-after-init-throws.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 structural bug pattern, requires control-flow analysis (assignment inside returned arrow/function)"
+    },
+    "resolution": null
+  },
+  "3068": {
+    "id": "concern-20260623-typescript-deepen-4",
+    "created_at": "2026-06-23",
+    "source": "deepen",
+    "package": "typescript",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for ts.findConfigFile() result used without null/undefined check. findConfigFile returns undefined when no tsconfig is found in any ancestor \u2014 passing the result to ts.readConfigFile(), ts.sys.readFile(), or path.dirname() crashes with TypeError. The non-null assertion (configPath!) is the common workaround that suppresses the TS warning while the runtime crash is identical. Postcondition: findconfigfile-undefined-result-not-checked.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 silent-undefined-return pattern, similar to fs.existsSync false-on-missing"
+    },
+    "resolution": null
+  },
+  "3069": {
+    "id": "concern-20260623-typescript-deepen-5",
+    "created_at": "2026-06-23",
+    "source": "deepen",
+    "package": "typescript",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for ts.getParsedCommandLineOfConfigFile() result used without undefined check. The function returns undefined when host.readFile fails or returns non-string. Callers who access parsed.options or parsed.fileNames without guarding against undefined crash silently. Postcondition: getparsedcommandline-undefined-not-checked.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 matches existing silent-undefined-return pattern in findConfigFile"
+    },
+    "resolution": null
+  },
+  "3070": {
+    "id": "concern-20260623-typescript-deepen-6",
+    "created_at": "2026-06-23",
+    "source": "deepen",
+    "package": "typescript",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for ts.getParsedCommandLineOfConfigFile() ParseConfigFileHost spread from ts.sys without explicit onUnRecoverableConfigFileDiagnostic. ts.sys is a System (not a ParseConfigFileHost) \u2014 it does NOT include the required onUnRecoverableConfigFileDiagnostic method. When the read path fires, calling undefined as a function raises TypeError. Detection: object literal with spread ts.sys passed as ParseConfigFileHost arg without overriding onUnRecoverableConfigFileDiagnostic. Postcondition: getparsedcommandline-host-missing-callback.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 structural-bug pattern, requires interface-completeness check on object literal spreads"
+    },
+    "resolution": null
+  },
+  "3071": {
+    "id": "concern-20260623-typescript-deepen-7",
+    "created_at": "2026-06-23",
+    "source": "deepen",
+    "package": "typescript",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for ts.convertCompilerOptionsFromJson() result.errors not checked. Follows the same 'errors in result, not throws' pattern as parseJsonConfigFileContent and readConfigFile. Callers who destructure { options } without inspecting errors silently use partial / default compiler options when the JSON has typos or wrong-type values. Postcondition: convertcompileroptions-errors-not-checked.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 matches existing diagnostic-array-not-checked pattern across tsconfig parse pipeline"
+    },
+    "resolution": null
+  },
+  "3072": {
+    "id": "concern-20260623-p-queue-deepen-1",
+    "created_at": "2026-06-23",
+    "source": "deepen",
+    "package": "p-queue",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for p-queue queue.onRateLimit() \u2014 postcondition added in depth pass 9 but no scanner rule exists. Hazards: (a) onratelimit-no-intervalcap-never-resolves \u2014 silent infinite-wait when queue lacks intervalCap; (b) onratelimit-resolves-immediately-misses-transition \u2014 fast-path early-return when already rate-limited.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. Detection requires recognizing queue.onRateLimit() call and (for hazard a) checking that the receiver PQueue was constructed with intervalCap option. Behavioral pattern \u2014 may require runtime/static analysis hybrid."
+    },
+    "resolution": null
+  },
+  "3073": {
+    "id": "concern-20260623-p-queue-deepen-2",
+    "created_at": "2026-06-23",
+    "source": "deepen",
+    "package": "p-queue",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for p-queue queue.onRateLimitCleared() \u2014 postcondition added in depth pass 9 but no scanner rule exists. Hazards: (a) onratelimitcleared-paused-queue-hangs \u2014 silent deadlock when queue.pause() called before the await; (b) onratelimitcleared-resolves-immediately-when-not-rate-limited \u2014 fast-path early-return defeats backpressure.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis. Detection requires recognizing queue.onRateLimitCleared() call and tracking pause()/start() lifecycle on the receiver. Same family as the existing onidle-paused-queue-hangs concern."
+    },
+    "resolution": null
   }
 }
