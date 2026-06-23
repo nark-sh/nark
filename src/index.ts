@@ -502,6 +502,14 @@ async function main(options: any) {
 
   const scanStartTime = Date.now();
   const verbose = !options.quiet;
+  // qt-183: explicit-flag predicate for `[verbose]`-prefixed log sites + the
+  // PII-revealing scan-uploaded footer. We deliberately do NOT reuse the
+  // `verbose` local above — that one (`!options.quiet`) governs the broader
+  // human-readable surface (banners, dim status lines, progress feedback) and
+  // flipping its default is Task 2 of the 2026-06-23 CLI polish handoff.
+  // Until that lands, the explicit `--verbose` flag is the only thing that
+  // unlocks the telemetry trace and the workspace footer.
+  const verboseFlag = options.verbose === true;
 
   // Read nark version from package.json
   const narkVersion = (() => {
@@ -815,7 +823,7 @@ async function main(options: any) {
   }
 
   // Checkpoint 1: verbose corpus output
-  if (verbose && corpusResult.contractFiles) {
+  if (verboseFlag && corpusResult.contractFiles) {
     const totalFiles = Array.from(corpusResult.contractFiles.values()).reduce(
       (sum, files) => sum + files.length,
       0,
@@ -967,7 +975,7 @@ async function main(options: any) {
   }
 
   // Checkpoint 2: verbose package discovery output
-  if (verbose && packageDiscovery) {
+  if (verboseFlag && packageDiscovery) {
     verboseLog(`\n[verbose] Package discovery:`);
     for (const pkg of packageDiscovery.packages) {
       if (pkg.usedIn.length > 0) {
@@ -1131,7 +1139,7 @@ async function main(options: any) {
     );
 
   // Checkpoint 3: verbose analysis timing output
-  if (verbose && v2Result) {
+  if (verboseFlag && v2Result) {
     const slowFiles = v2Result.fileDurations
       .filter((f) => f.durationMs > 500)
       .sort((a, b) => b.durationMs - a.durationMs);
@@ -1676,7 +1684,7 @@ async function main(options: any) {
     }
 
     // Checkpoint 4b: verbose telemetry feedback
-    if (verbose) {
+    if (verboseFlag) {
       // S2-2: surface the ACTUAL endpoint chosen by the fire-helper (enriched
       // vs anonymous), not the pre-computed anonymous path. Prior versions
       // unconditionally printed the anonymous URL even when telemetry went
@@ -1717,17 +1725,28 @@ async function main(options: any) {
     // qt-164 DEC1: post-scan footer — visible in normal AND --quiet modes.
     // Silent when telemetry is disabled/errored, or when the resolver returned
     // no workspace (env-token users — no orgName/orgSlug to print).
+    //
+    // qt-183: only the verbose flag unlocks the PII strings (email +
+    // workspace name + org slug). Default mode prints one neutral
+    // confirmation line so users still know the upload succeeded — silent
+    // success would be more confusing than the noise of a marketing-safe
+    // footer. Surrounding `shouldPrintScanUploadedFooter` predicate is
+    // unchanged because cli/auth.test.ts asserts against it.
     if (shouldPrintScanUploadedFooter(telemetryResult, resolved?.workspace)) {
-      if (telemetryResult?.authenticated && telemetryResult?.email) {
+      if (verboseFlag) {
+        if (telemetryResult?.authenticated && telemetryResult?.email) {
+          console.log(
+            chalk.cyan(`✓ Telemetry authenticated as ${telemetryResult.email}`),
+          );
+        }
         console.log(
-          chalk.cyan(`✓ Telemetry authenticated as ${telemetryResult.email}`),
+          chalk.cyan(
+            `✓ Scan uploaded to ${resolved!.workspace!.orgName} (${resolved!.workspace!.orgSlug})`,
+          ),
         );
+      } else {
+        console.log(chalk.dim(`✓ Scan uploaded.`));
       }
-      console.log(
-        chalk.cyan(
-          `✓ Scan uploaded to ${resolved!.workspace!.orgName} (${resolved!.workspace!.orgSlug})`,
-        ),
-      );
     } else if (
       telemetryResult?.error === true &&
       options.terminal !== false &&
@@ -1754,7 +1773,7 @@ async function main(options: any) {
   }
 
   // Checkpoint 5: verbose time breakdown
-  if (verbose) {
+  if (verboseFlag) {
     const totalTime = Date.now() - scanStartTime;
     verboseLog(`\n[verbose] Time breakdown:`);
     verboseLog(`  Contract loading:     ${corpusEndTime - corpusStartTime}ms`);
