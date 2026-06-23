@@ -75,17 +75,254 @@ npx nark --demo
 
 This runs Nark against a bundled sample project with intentional `axios`, `stripe`, and `@prisma/client` violations. The output is exactly what a real scan against your own code looks like — just with a guaranteed non-empty report.
 
-Run with `--verbose` to see the full Verification Report with code snippets and per-violation fix guidance:
+Run with `--verbose` to see per-violation detail (code snippets, sources, and fix guidance) plus repository health metrics:
 
-<p align="center">
-  <img src="./docs/images/demo-summary.png" alt="Verbose mode: full Nark Verification Report with per-violation code snippets, sources, and fix guidance" width="720">
-</p>
+<details>
+<summary><strong>Show verbose Verification Report</strong> (per-violation detail with code snippets)</summary>
 
-The verbose Analysis Report summarizes coverage, health metrics, and recommendations:
+```
+Nark Verification Report
+────────────────────────────────────────────────────────────────────────────────
 
-<p align="center">
-  <img src="./docs/images/demo-analysis-report.png" alt="Verbose mode Analysis Report: coverage summary, repository health metrics, violations by package, and recommendations" width="720">
-</p>
+Summary:
+  Files analyzed: 3
+  Contracts applied: 3
+  Timestamp: 2026-06-23T23:18:02.014Z
+  Git commit: c170802b (dirty)
+  Git branch: main
+
+Package Discovery & Coverage
+────────────────────────────────────────────────────────────────────────────────
+
+  Total packages: 3
+  Packages with contracts: 3 (100.0%)
+  Packages without contracts: 0
+
+  ✓ Packages with contracts:
+    @prisma/client@* (contract v1.1.0)
+    axios@* (contract v1.0.0)
+    stripe@* (contract v1.0.0)
+
+Violations by Package
+────────────────────────────────────────────────────────────────────────────────
+
+@prisma/client (2 violations)
+  Errors: 2 | Warnings: 0 | Info: 0
+
+  ✗ nark-dev/nark/demo/src/users.ts:18:22
+    No try-catch block found. PrismaClientKnownRequestError with code 'P2002' - this will crash the application.
+    Package: @prisma/client.create()
+    Contract: unique-constraint-violation
+
+      14 | // throws Prisma's P2002 unique-constraint error. The caller sees a generic
+      15 | // rejection and a 500 — the user sees "something went wrong" instead of
+      16 | // "this email is already registered."
+      17 | export async function createUser(email: string, name: string) {
+    > 18 |   const user = await prisma.user.create({ data: { email, name } });
+      19 |   return user;
+      20 | }
+      21 | 
+      22 | // Looks up a user by email.
+    Also fix in same handler:
+      ↳ Also missing: PrismaClientKnownRequestError with code 'P2003'
+      ↳ Also missing: PrismaClientValidationError
+      ↳ Also missing: PrismaClientInitializationError or PrismaClientRustPanicError
+    Fix: Caller MUST catch P2002 errors and handle duplicate key violations gracefully. Extract conflicting field from error.meta.target. DO NOT retry without changing the unique field value.
+    Docs: https://www.prisma.io/docs/reference/api-reference/error-reference#p2002
+
+  ✗ nark-dev/nark/demo/src/users.ts:28:22
+    No error handling found. null — required handling missing.
+    Package: @prisma/client.findUnique()
+    Contract: record-not-found
+
+      24 | // reject on connection-pool exhaustion, statement-timeout, or a transient
+      25 | // network blip to the database. Without handling, a slow query during
+      26 | // peak traffic crashes the request instead of returning a graceful 503.
+      27 | export async function getUserByEmail(email: string) {
+    > 28 |   const user = await prisma.user.findUnique({ where: { email } });
+      29 |   return user;
+      30 | }
+      31 | 
+    Also fix in same handler:
+      ↳ Also missing: PrismaClientInitializationError
+    Fix: Caller MUST check if result is null before accessing properties. Code that assumes findUnique always returns a record will crash.
+    Docs: https://www.prisma.io/docs/concepts/components/prisma-client/crud#findunique
+
+axios (3 violations)
+  Errors: 2 | Warnings: 1 | Info: 0
+
+  ✗ nark-dev/nark/demo/src/api-client.ts:17:26
+    No try-catch block found. AxiosError with error.response containing the error response - this will crash the application.
+    Package: axios.get()
+    Contract: error-4xx-5xx
+
+      13 | // VIOLATION (axios.error-4xx-5xx): no try/catch — a 404 or a network blip
+      14 | // rejects the promise, the caller sees an unhandled rejection, and depending
+      15 | // on the Node version the process may exit.
+      16 | export async function fetchUserProfile(userId: string) {
+    > 17 |   const response = await axios.get(`${API_BASE}/users/${userId}`);
+      18 |   return response.data;
+      19 | }
+      20 | 
+      21 | // Submits a comment to the upstream service.
+    Also fix in same handler:
+      ↳ Also missing: AxiosError with error.response.status === 429
+      ↳ Also missing: AxiosError with error.request populated but error.response === undefined
+      ↳ Also missing: AxiosError with both error.request === undefined and error.response === undefined
+    Fix: Caller MUST catch AxiosError and check error.response.status to distinguish between client errors (4xx) and server errors (5xx).
+    Docs: https://axios-http.com/docs/handling_errors
+
+  ✗ nark-dev/nark/demo/src/api-client.ts:26:26
+    No try-catch block found. AxiosError with error.response - this will crash the application.
+    Package: axios.post()
+    Contract: error-4xx-5xx
+
+      22 | // VIOLATION (axios.error-4xx-5xx): same shape as above, but on a POST —
+      23 | // even more dangerous because retrying naively could double-post the
+      24 | // comment without an idempotency key.
+      25 | export async function postComment(userId: string, text: string) {
+    > 26 |   const response = await axios.post(`${API_BASE}/comments`, { userId, text });
+      27 |   return response.data;
+      28 | }
+      29 | 
+      30 | // Fetches search results.
+    Also fix in same handler:
+      ↳ Also missing: AxiosError with error.response.status === 429
+      ↳ Also missing: AxiosError with error.response === undefined
+    Fix: Caller MUST catch AxiosError and inspect error.response.status
+    Docs: https://axios-http.com/docs/handling_errors
+
+  ⚠ nark-dev/nark/demo/src/api-client.ts:36:28
+    Rate limit response (429) is not explicitly handled. Consider implementing retry logic with exponential backoff.
+    Package: axios.get()
+    Contract: rate-limited-429
+
+      32 | // only logs and re-throws. A 429 from a rate-limited API should trigger a
+      33 | // backoff/retry; here it just bubbles up as a generic "request failed."
+      34 | export async function searchPosts(query: string) {
+      35 |   try {
+    > 36 |     const response = await axios.get(`${API_BASE}/search`, {
+      37 |       params: { q: query },
+      38 |     });
+      39 |     return response.data;
+      40 |   } catch (error) {
+    Fix: Caller MUST either: 1. Implement exponential backoff retry logic with the Retry-After header, OR 2. Explicitly handle 429 as a terminal error and surface to the user, OR 3. Use a request queue that respects rate limits. Silently catching and ignoring 429 without retry logic is a violation.
+    Docs: https://axios-http.com/docs/handling_errors
+
+stripe (2 violations)
+  Errors: 2 | Warnings: 0 | Info: 0
+
+  ✗ nark-dev/nark/demo/src/payments.ts:23:24
+    No try-catch block found. StripeCardError with error.type === 'card_error' - this will crash the application.
+    Package: stripe.create()
+    Contract: card-error
+
+      19 |   amount: number,
+      20 |   currency: string,
+      21 |   source: string,
+      22 | ) {
+    > 23 |   const charge = await stripe.charges.create({ amount, currency, source });
+      24 |   return charge.id;
+      25 | }
+      26 | 
+      27 | // Creates a new Stripe customer record at signup time.
+    Also fix in same handler:
+      ↳ Also missing: StripeRateLimitError with error.type === 'rate_limit_error'
+      ↳ Also missing: StripeAuthenticationError with error.type === 'authentication_error'
+      ↳ Also missing: Error with no error.type (connection error)
+    Fix: Caller MUST catch StripeCardError and handle gracefully. Display user-friendly message based on error.decline_code. DO NOT retry card_error without user intervention.
+    Docs: https://stripe.com/docs/error-handling
+
+  ✗ nark-dev/nark/demo/src/payments.ts:32:26
+    No try-catch block found. StripeCardError with error.type === 'card_error' - this will crash the application.
+    Package: stripe.create()
+    Contract: card-error
+
+      28 | // VIOLATION (stripe.error-4xx-5xx): no try/catch on the customer.create.
+      29 | // A duplicate-email collision or a transient 502 from Stripe will throw
+      30 | // and the signup flow will appear to silently fail.
+      31 | export async function registerCustomer(email: string) {
+    > 32 |   const customer = await stripe.customers.create({ email });
+      33 |   return customer.id;
+      34 | }
+      35 | 
+    Also fix in same handler:
+      ↳ Also missing: StripeRateLimitError with error.type === 'rate_limit_error'
+      ↳ Also missing: StripeAuthenticationError with error.type === 'authentication_error'
+      ↳ Also missing: Error with no error.type (connection error)
+    Fix: Caller MUST catch StripeCardError and handle gracefully. Display user-friendly message based on error.decline_code. DO NOT retry card_error without user intervention.
+    Docs: https://stripe.com/docs/error-handling
+
+────────────────────────────────────────────────────────────────────────────────
+
+Overall Summary:
+  Total violations: 7
+  Errors: 6
+  Warnings: 1
+  Info: 0
+
+✗ FAILED
+
+
+
+╔═══════════════════════════════════════════════════════════════════════════════╗
+```
+
+</details>
+
+<details>
+<summary><strong>Show verbose Analysis Report</strong> (coverage summary, health metrics, recommendations)</summary>
+
+```
+║                         Nark Analysis Report                                  ║
+╚═══════════════════════════════════════════════════════════════════════════════╝
+
+Repository: demo
+Analyzed: 6/23/2026, 7:18:02 PM
+Git Commit: c170802b
+Git Branch: main
+
+✅ CODE HEALTH SCORE: 0/100
+
+📊 COVERAGE SUMMARY
+────────────────────────────────────────────────────────────────────────────────
+  • Files Analyzed: 3
+  • Call Sites Evaluated: 7
+  • Contracts Applied: 3
+  • Violations Found: 7 !
+  • Checks Passed: 0 ✓
+
+📈 REPOSITORY HEALTH METRICS
+────────────────────────────────────────────────────────────────────────────────
+  • Error Handling Compliance: 0%
+  • Package Coverage: 100%
+  • Code Maturity: LOW
+  • Risk Level: HIGH
+
+
+✗ VIOLATIONS BY PACKAGE
+────────────────────────────────────────────────────────────────────────────────
+  ✗ axios                           3 violations in 3 call sites  (2 errors, 1 warnings)
+  ✗ @prisma/client                  2 violations in 2 call sites  (2 errors)
+  ✗ stripe                          2 violations in 2 call sites  (2 errors)
+
+  3 packages with contracts checked
+  0 fully compliant ✓
+  3 with violations ✗
+
+🎯 RECOMMENDATIONS
+────────────────────────────────────────────────────────────────────────────────
+  1. Fix 7 remaining violations to achieve 100% compliance
+  2. Run scan after fixes to verify improvements
+  3. Add to CI to prevent future violations
+
+════════════════════════════════════════════════════════════════════════════════
+  Report generated by Nark v3.2.0
+  Next scan: Enable CI integration for continuous monitoring
+════════════════════════════════════════════════════════════════════════════════
+```
+
+</details>
 
 ### Or build from source
 
