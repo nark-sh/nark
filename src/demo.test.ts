@@ -1,5 +1,10 @@
 /**
  * Tests — qt-256: --demo flag bundles a sample project.
+ * qt-186: extended regression coverage so the demo can never silently
+ *         regress to "0 violations" or "demo files not in the pack manifest"
+ *         again. The original `\d+ violations?` regex matched "0 violations"
+ *         and the `if (!fs.existsSync(NARK_BIN)) return` early-out silently
+ *         skipped CI runs from a fresh clone — both removed here.
  *
  * These are integration smoke tests, not unit tests. The --demo flag's whole
  * value is "you see real Nark output without setting anything up," so the
@@ -42,12 +47,18 @@ describe("qt-256: demo fixture", () => {
     expect(pkg.files).toContain("demo/");
   });
 
-  it("`node dist/index.js --demo` finds violations in all three demo packages", () => {
-    // Smoke-test depends on a built dist/. If a contributor is running the
-    // suite from a fresh clone with no build, skip rather than fail — the
-    // build is the prerequisite, not the test target.
+  it("finds ≥3 violations across all three demo packages", () => {
+    // qt-186: replaced the original `if (!fs.existsSync(NARK_BIN)) return;`
+    // silent skip. The skip was added as a fresh-clone contributor
+    // convenience, but it's what masked the 0-violations regression that
+    // motivated qt-186 — the test passed because it never ran. The
+    // prepublishOnly + CI build hooks guarantee dist/ exists; the only
+    // env where this throw fires is `npm test` from a fresh clone with no
+    // prior build, which is one-time contributor friction we accept.
     if (!fs.existsSync(NARK_BIN)) {
-      return;
+      throw new Error(
+        `Expected built CLI at ${NARK_BIN}. Run \`npm run build\` before \`npm test\`.`,
+      );
     }
     // NARK_TELEMETRY=off keeps the test offline-clean and stops the test
     // from hanging on the telemetry POST timeout. --quiet keeps the output
@@ -77,7 +88,44 @@ describe("qt-256: demo fixture", () => {
     expect(out).toMatch(/stripe[\s\S]*payments\.ts/);
     expect(out).toMatch(/@prisma\/client[\s\S]*users\.ts/);
 
-    // Non-zero violation count gives the demo its whole purpose.
-    expect(out).toMatch(/\d+ violations?/);
+    // qt-186: parsed violation count must be ≥3 (one per demo file).
+    // The original regex `/\d+ violations?/` matched `0 violations` and
+    // silently accepted the regression. Parse the integer and assert the
+    // floor so a profile-drift or wiring regression that drops the demo to
+    // 0 violations again fails the suite.
+    const m = out.match(/(\d+)\s+violations?/);
+    expect(
+      m,
+      "expected output to contain '<N> violations' or '<N> violation'",
+    ).not.toBeNull();
+    const count = Number(m![1]);
+    expect(
+      count,
+      `expected ≥3 violations, got ${count}. Full output:\n${out}`,
+    ).toBeGreaterThanOrEqual(3);
+  }, 30_000);
+
+  it("npm pack --dry-run includes demo source files and types.d.ts", () => {
+    // qt-186: lock the package manifest so a stray `.npmignore` or a
+    // misconfigured `prepublishOnly` step that nukes the demo/ files can't
+    // ship without a test failure. The plan's H1 hypothesis (types.d.ts
+    // missing from pack) is refuted today — but it's cheap to lock the
+    // manifest so the regression vector closes for good.
+    //
+    // npm pack writes the file manifest to stderr (the package metadata
+    // table); `2>&1` folds it into stdout for assertion. 30s timeout
+    // because the pack can be slow on a cold cache (prepublishOnly runs
+    // `npm run build` which is ~1-2s).
+    const out = execSync("npm pack --dry-run 2>&1", {
+      cwd: REPO_ROOT,
+      encoding: "utf-8",
+      stdio: ["pipe", "pipe", "pipe"],
+    });
+    expect(out).toContain("demo/types.d.ts");
+    expect(out).toContain("demo/tsconfig.json");
+    expect(out).toContain("demo/package.json");
+    expect(out).toContain("demo/src/api-client.ts");
+    expect(out).toContain("demo/src/payments.ts");
+    expect(out).toContain("demo/src/users.ts");
   }, 30_000);
 });
