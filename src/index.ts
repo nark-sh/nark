@@ -2095,24 +2095,17 @@ function printCompactReport(opts: {
   }
 
   // Report link.
-  // qt-186: tilde-substitute the absolute d3HtmlPath so the line shows
-  // `file://~/.nark/...` instead of `file:///Users/<name>/.nark/...`. This
-  // keeps the line PII-clean for marketing screenshots. Note: terminals will
-  // NOT expand `~` inside file:// URLs at Cmd+click time, so the link becomes
-  // non-clickable in tilde-substituted form. Accepted trade-off: the
-  // qt-185 Results line below the compact report gives the user the
-  // path they can paste anyway, and `--verbose` mode prints the absolute
-  // file:// form in the 5-path block (line ~1424). Marketing screenshot
-  // cleanliness wins over Cmd+click affordance in default mode.
-  const reportLinkHome = os.homedir();
-  const d3HtmlPathDisplayed =
-    d3HtmlPath === reportLinkHome ||
-    d3HtmlPath.startsWith(reportLinkHome + path.sep)
-      ? "~" + d3HtmlPath.slice(reportLinkHome.length)
-      : d3HtmlPath;
+  // Always render absolute file:// URL so Cmd+click works in iTerm / Terminal.app.
+  // Earlier (qt-186) we tildified this to keep marketing screenshots PII-clean,
+  // but `~` does NOT expand inside file:// URLs — terminals treat the tilde as
+  // a literal character, so the link became non-clickable. Clickability is the
+  // user benefit; privacy in summary output is owned by the `Results: ~/...`
+  // short-form line printed below the compact report. Marketing readers who
+  // want to crop/blur this line for a screenshot can do so; the broken-link
+  // footnote was worse than the visible path.
   console.log(
     chalk.dim(`  Full report: `) +
-      chalk.underline(`file://${d3HtmlPathDisplayed}`) +
+      chalk.underline(`file://${d3HtmlPath}`) +
       chalk.dim(`  (Cmd+click to open)`),
   );
   // qt-188: first-run gate. Hint prints on the first violation-bearing scan
@@ -2127,9 +2120,6 @@ function printCompactReport(opts: {
       console.log(chalk.dim(`  AI fix:      `) + `nark --instructions-path`);
       if (!verbose) markAiHintShown();
     }
-  }
-  if (totalViolations > 0) {
-    console.log(chalk.dim(`  Full report: `) + `npx nark`);
   }
 
   // False-positive transparency footer.
