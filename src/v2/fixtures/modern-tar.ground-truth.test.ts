@@ -5,13 +5,21 @@
  * nark-corpus-pro/packages/modern-tar/fixtures/ground-truth.ts becomes one test case.
  *
  * Postcondition IDs from nark-corpus-pro/packages/modern-tar/contract.yaml:
- *   unpack-malformed-archive  (unpackTar() — promise rejects on malformed input)
- *   pack-unsupported-content  (packTar()   — promise rejects with TypeError)
+ *   unpack-malformed-archive             (unpackTar() — promise rejects on malformed input)
+ *   pack-unsupported-content             (packTar()   — promise rejects with TypeError)
+ *   fs-unpack-malicious-archive          (modern-tar/fs unpackTar via pipeline)
+ *   fs-pack-stream-error                 (modern-tar/fs packTar via pipeline)
+ *   decoder-iteration-malformed-archive  (createTarDecoder for-await)
+ *   packer-writer-no-error-handling      (createTarPacker controller.add().getWriter() writer.write/close)
+ *   packer-stream-consumption-no-error-handling (createTarPacker readable consumed via pipeTo/pipeline)
+ *   gzip-decoder-malformed-data          (createGzipDecoder reader.read / for-await)
  *
  * Key behaviors under test:
  *   - await unpackTar(buffer)  without try-catch → SHOULD_FIRE
  *   - await packTar(entries)   without try-catch → SHOULD_FIRE
- *   - either of the above inside try-catch       → SHOULD_NOT_FIRE
+ *   - await writer.write/close on createTarPacker without try-catch → SHOULD_FIRE
+ *   - await reader.read / for-await on createGzipDecoder without try-catch → SHOULD_FIRE
+ *   - any of the above inside try-catch → SHOULD_NOT_FIRE
  */
 
 import { describe, it, expect, beforeAll } from 'vitest';

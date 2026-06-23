@@ -57878,5 +57878,21 @@
       "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed. Source evidence: dist/index.esm.mjs lines 462-477 (useController.onChange returns _registerProps.current.onChange), lines 2082-2152 (async onChange awaits _runSchema), line 1800 (_runSchema awaits user-provided resolver without try-catch). PR: https://github.com/react-hook-form/react-hook-form/pull/13518"
     },
     "resolution": null
+  },
+  "3050": {
+    "id": "concern-20260623-react-hook-form-deepen-1",
+    "created_at": "2026-06-23",
+    "source": "deepen",
+    "package": "react-hook-form",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for useController.field.onChange / register().onChange \u2014 Promise-returning handler (restored in v7.79.0 PR #13518) that rejects when a custom resolver or form-level validate throws. Postcondition controller-onchange-resolver-rejection was added in deepen-stream-3 pass 6 (2026-06-23) but no scanner rule exists. Detect: `await field.onChange(...)` or `register('x').onChange(event)` await without try-catch where useForm/Controller's resolver is set.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed. Source evidence: dist/index.esm.mjs lines 462-477 (useController.onChange returns _registerProps.current.onChange), lines 2082-2152 (async onChange awaits _runSchema), line 1800 (_runSchema awaits user-provided resolver without try-catch). PR: https://github.com/react-hook-form/react-hook-form/pull/13518"
+    },
+    "resolution": null
   }
 }
