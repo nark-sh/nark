@@ -77,8 +77,12 @@ This runs Nark against a bundled sample project with intentional `axios`, `strip
 
 Run with `--verbose` to see per-violation detail (code snippets, sources, and fix guidance) plus repository health metrics:
 
+<p align="center">
+  <img src="./docs/images/demo-summary.png" alt="Preview: verbose Verification Report with per-violation code snippets, sources, and fix guidance" width="720">
+</p>
+
 <details>
-<summary><strong>Show verbose Verification Report</strong> (per-violation detail with code snippets)</summary>
+<summary><strong>Show verbose Verification Report as searchable text</strong> (per-violation detail with code snippets)</summary>
 
 ```
 Nark Verification Report
@@ -270,8 +274,12 @@ Overall Summary:
 
 </details>
 
+<p align="center">
+  <img src="./docs/images/demo-analysis-report.png" alt="Preview: verbose Analysis Report with coverage summary, repository health metrics, violations by package, and recommendations" width="720">
+</p>
+
 <details>
-<summary><strong>Show verbose Analysis Report</strong> (coverage summary, health metrics, recommendations)</summary>
+<summary><strong>Show verbose Analysis Report as searchable text</strong> (coverage summary, health metrics, recommendations)</summary>
 
 ```
 ║                         Nark Analysis Report                                  ║
@@ -493,13 +501,6 @@ lines, per-package rollups, and PR-level diff views. The dashboard is
 <em>entirely optional</em> — nark runs the same scans locally either way, and
 all results are always written to <code>.nark/</code> in your project. The
 dashboard is sugar on top, not a dependency.
-</p>
-
-<p align="center">
-  <!-- Dashboard screenshot: violations-over-time view from app.nark.sh.
-       Target: 2880px wide @ 2x (display 1200px). Use a demo org with
-       fake repo names — don't show a real customer's data. -->
-  <img src="./docs/images/dashboard-trends.png" alt="Optional nark dashboard at app.nark.sh showing violation trends" width="720">
 </p>
 
 </details>
