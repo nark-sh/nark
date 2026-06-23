@@ -56557,7 +56557,7 @@
     "source": "deepen",
     "package": "bluebird",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for Bluebird.join() — postcondition added in deepen pass v1.1.0 but no scanner rule exists. PropertyChainDetector should match Bluebird.join(...) by import_path: bluebird + name: join, same shape as the existing all/race/any rules (variadic args, last optional arg may be a handler fn; rejection on first input rejection or handler throw).",
     "evidence": {
       "repos": [],
@@ -56565,7 +56565,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis (deepen-stream-1, pass 17). Join was missing from v1 of the bluebird profile."
     },
-    "resolution": null
+    "resolution": "Verified implemented (cycle 4, 2026-06-23): npx vitest run src/v2/fixtures/bluebird.ground-truth.test.ts → 17/17 pass. The bluebird.ground-truth fixture (line 153) has SHOULD_FIRE: join-unhandled-rejection on `await Bluebird.join(...)` and the existing PropertyChainDetector + import-tracker already routes the call through the contract's join postcondition. No scanner code change required — the existing rule applied to the new postcondition automatically."
   },
   "2969": {
     "id": "concern-20260619-xml-crypto-deepen-1",
@@ -56670,7 +56670,7 @@
     "source": "deepen",
     "package": "@xenova/transformers",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for `RawImage.read(input)` and `RawImage.fromURL(url)` static factories. Postcondition `rawimage-load-error` added — flag bare-await on these static methods called on the imported `RawImage` class (or any value typed as the RawImage class).",
     "evidence": {
       "repos": [],
@@ -56678,7 +56678,7 @@
       "violation_count": 0,
       "note": "Proactive — postcondition added via API surface analysis (deepen-stream-7 pass 2)."
     },
-    "resolution": null
+    "resolution": "Implemented (cycle 4, 2026-06-23): added `aliases: [fromURL]` to the RawImage.read contract entry in nark-corpus-pro/packages/@xenova/transformers/contract.yaml. The bare alias 'fromURL' routes detection through the existing alias-match path in contract-matcher.ts (line 3692) — scoped to the @xenova/transformers package contract so it does not over-match other packages. Fixture line 192 (RawImage.read) and line 198 (RawImage.fromURL) both SHOULD_FIRE rawimage-load-error and both now pass (previously line 198 failed because functionName='fromURL' had no match in this contract)."
   },
   "2976": {
     "id": "concern-20260618-xenova-transformers-deepen-4",
@@ -56686,7 +56686,7 @@
     "source": "deepen",
     "package": "@xenova/transformers",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for `read_audio(url, sampling_rate)` top-level async function imported from '@xenova/transformers'. Postcondition `read-audio-environment-or-decode-error` added — flag bare-await on this imported function call.",
     "evidence": {
       "repos": [],
@@ -56694,7 +56694,7 @@
       "violation_count": 0,
       "note": "Proactive — postcondition added via API surface analysis (deepen-stream-7 pass 2)."
     },
-    "resolution": null
+    "resolution": "Verified implemented (cycle 4, 2026-06-23): npx vitest run src/v2/fixtures/@xenova__transformers.ground-truth.test.ts → line 226 passes. Fixture line 226 SHOULD_FIRE: read-audio-environment-or-decode-error on `await read_audio(url, 16000)` fires correctly via existing import-tracker for top-level async function `read_audio` imported from @xenova/transformers. No scanner code change required."
   },
   "2977": {
     "id": "concern-20260618-xenova-transformers-deepen-5",
@@ -56775,7 +56775,7 @@
     "source": "deepen",
     "package": "@simplewebauthn/server",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for generateRegistrationOptions() — postcondition 'generate-registration-options-no-try-catch' added in deepen pass 3 (deepen-stream-3, 2026-06-18). Scanner already detects bare await patterns for other contracted functions in this profile (verifyRegistrationResponse, verifyAuthenticationResponse) so the same detection rule should generalize — verify await_patterns and import_names get walked for the new entries.",
     "evidence": {
       "repos": [],
@@ -56783,7 +56783,7 @@
       "violation_count": 0,
       "note": "Proactive — postcondition added via API surface analysis (deepen pass 3, deepen-stream-3, 2026-06-18). No scanner rule confirmed for these new await_patterns yet."
     },
-    "resolution": null
+    "resolution": "Verified implemented (cycle 4, 2026-06-23): npx vitest run src/v2/fixtures/@simplewebauthn__server.ground-truth.test.ts → 20/20 pass. Fixture line 129 SHOULD_FIRE: generate-registration-options-no-try-catch fires correctly via the existing direct-import bare-await detection rule. No scanner code change required."
   },
   "2982": {
     "id": "concern-20260618-simplewebauthn-server-deepen-2",
@@ -56791,7 +56791,7 @@
     "source": "deepen",
     "package": "@simplewebauthn/server",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for generateAuthenticationOptions() — postcondition 'generate-authentication-options-no-try-catch' added in deepen pass 3 (deepen-stream-3, 2026-06-18). Scanner already detects bare await patterns for other contracted functions in this profile (verifyRegistrationResponse, verifyAuthenticationResponse) so the same detection rule should generalize — verify await_patterns and import_names get walked for the new entries.",
     "evidence": {
       "repos": [],
@@ -56799,7 +56799,7 @@
       "violation_count": 0,
       "note": "Proactive — postcondition added via API surface analysis (deepen pass 3, deepen-stream-3, 2026-06-18). No scanner rule confirmed for these new await_patterns yet."
     },
-    "resolution": null
+    "resolution": "Verified implemented (cycle 4, 2026-06-23): npx vitest run src/v2/fixtures/@simplewebauthn__server.ground-truth.test.ts → 20/20 pass. Fixture line 169 SHOULD_FIRE: generate-authentication-options-no-try-catch fires correctly via the existing direct-import bare-await detection rule. No scanner code change required."
   },
   "2983": {
     "id": "concern-20260618-simplewebauthn-server-deepen-3",
@@ -56807,7 +56807,7 @@
     "source": "deepen",
     "package": "@simplewebauthn/server",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for MetadataService.getStatement() — postcondition 'metadata-service-get-statement-no-try-catch' added in deepen pass 3 (deepen-stream-3, 2026-06-18). Scanner already detects bare await patterns for other contracted functions in this profile (verifyRegistrationResponse, verifyAuthenticationResponse) so the same detection rule should generalize — verify await_patterns and import_names get walked for the new entries.",
     "evidence": {
       "repos": [],
@@ -56815,7 +56815,7 @@
       "violation_count": 0,
       "note": "Proactive — postcondition added via API surface analysis (deepen pass 3, deepen-stream-3, 2026-06-18). No scanner rule confirmed for these new await_patterns yet."
     },
-    "resolution": null
+    "resolution": "Verified implemented (cycle 4, 2026-06-23): npx vitest run src/v2/fixtures/@simplewebauthn__server.ground-truth.test.ts → 20/20 pass. Fixture line 203 SHOULD_FIRE: metadata-service-get-statement-no-try-catch fires correctly via existing class-instance method-call detection on MetadataService.getStatement(). No scanner code change required."
   },
   "2984": {
     "id": "concern-20260618-simplewebauthn-server-deepen-4",
@@ -56823,7 +56823,7 @@
     "source": "deepen",
     "package": "@simplewebauthn/server",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for MetadataService.initialize() — postcondition 'metadata-service-initialize-no-try-catch' added in deepen pass 3 (deepen-stream-3, 2026-06-18). Scanner already detects bare await patterns for other contracted functions in this profile (verifyRegistrationResponse, verifyAuthenticationResponse) so the same detection rule should generalize — verify await_patterns and import_names get walked for the new entries.",
     "evidence": {
       "repos": [],
@@ -56831,7 +56831,7 @@
       "violation_count": 0,
       "note": "Proactive — postcondition added via API surface analysis (deepen pass 3, deepen-stream-3, 2026-06-18). No scanner rule confirmed for these new await_patterns yet."
     },
-    "resolution": null
+    "resolution": "Verified implemented (cycle 4, 2026-06-23): npx vitest run src/v2/fixtures/@simplewebauthn__server.ground-truth.test.ts → 20/20 pass. Fixture line 233 SHOULD_FIRE: metadata-service-initialize-no-try-catch fires correctly via existing class-instance method-call detection on MetadataService.initialize(). No scanner code change required."
   },
   "2985": {
     "id": "concern-20260618-redux-persist-deepen-1",
@@ -57476,6 +57476,118 @@
       "scan_file": null,
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis. Same detection logic as the @octokit/app getInstallationUrl postcondition; routing scoped by import_source."
+    },
+    "resolution": null
+  },
+  "3025": {
+    "id": "concern-20260623-aws-sdk-client-ecr-deepen-1",
+    "created_at": "2026-06-23",
+    "source": "deepen",
+    "package": "@aws-sdk/client-ecr",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for ecr.createRepository() — Detect ecr.createRepository() awaited without try-catch; flag missing handling of RepositoryAlreadyExistsException (idempotency hazard) and TooManyTagsException. Postcondition: ecr-create-repository-no-try-catch",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  "3026": {
+    "id": "concern-20260623-aws-sdk-client-ecr-deepen-2",
+    "created_at": "2026-06-23",
+    "source": "deepen",
+    "package": "@aws-sdk/client-ecr",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for ecr.deleteRepository() — Detect ecr.deleteRepository() awaited without try-catch; flag missing handling of RepositoryNotEmptyException (force-flag teardown hazard) and RepositoryNotFoundException (idempotent cleanup race). Postcondition: ecr-delete-repository-no-try-catch",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  "3027": {
+    "id": "concern-20260623-aws-sdk-client-ecr-deepen-3",
+    "created_at": "2026-06-23",
+    "source": "deepen",
+    "package": "@aws-sdk/client-ecr",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for ecr.putImage() — Detect ecr.putImage() awaited without try-catch; flag missing handling of ImageAlreadyExistsException (re-push idempotency), ImageTagAlreadyExistsException (tag-immutability), LayersNotFoundException (workflow ordering). Postcondition: ecr-put-image-no-try-catch",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  "3028": {
+    "id": "concern-20260623-aws-sdk-client-ecr-deepen-4",
+    "created_at": "2026-06-23",
+    "source": "deepen",
+    "package": "@aws-sdk/client-ecr",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for ecr.initiateLayerUpload() — Detect ecr.initiateLayerUpload() awaited without try-catch; also flag callsites that ignore the returned partSize and hardcode chunk size. Postcondition: ecr-initiate-layer-upload-no-try-catch",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  "3029": {
+    "id": "concern-20260623-aws-sdk-client-ecr-deepen-5",
+    "created_at": "2026-06-23",
+    "source": "deepen",
+    "package": "@aws-sdk/client-ecr",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for ecr.uploadLayerPart() — Detect ecr.uploadLayerPart() awaited without try-catch; flag naive retry loops that retry UploadNotFoundException instead of restarting the upload. Postcondition: ecr-upload-layer-part-no-try-catch",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  "3030": {
+    "id": "concern-20260623-aws-sdk-client-ecr-deepen-6",
+    "created_at": "2026-06-23",
+    "source": "deepen",
+    "package": "@aws-sdk/client-ecr",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for ecr.completeLayerUpload() — Detect ecr.completeLayerUpload() awaited without try-catch; flag callsites that treat LayerAlreadyExistsException as a failure instead of idempotent success. Postcondition: ecr-complete-layer-upload-no-try-catch",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  "3031": {
+    "id": "concern-20260623-aws-sdk-client-ecr-deepen-7",
+    "created_at": "2026-06-23",
+    "source": "deepen",
+    "package": "@aws-sdk/client-ecr",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for ecr.putLifecyclePolicy() — Detect ecr.putLifecyclePolicy() awaited without try-catch; flag swallowed ValidationException which leaves the repo on the previous policy (silent IaC drift). Postcondition: ecr-put-lifecycle-policy-no-try-catch",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis, detection rule needed"
     },
     "resolution": null
   }
