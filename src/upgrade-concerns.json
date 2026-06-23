@@ -57334,5 +57334,101 @@
       "note": "Proactive — class-level invariant of HttpService (makeObservable wrapper)."
     },
     "resolution": null
+  },
+  "3016": {
+    "id": "concern-20260623-ssh2-deepen-9",
+    "created_at": "2026-06-23",
+    "source": "deepen",
+    "package": "ssh2",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detector for ssh2.Server.on('error') listener registration. Postcondition server-missing-error-listener (severity: warning) — Server extends net.Server and unhandled 'error' (EADDRINUSE / EACCES / EMFILE / transport faults) crashes the Node daemon process. Detection shape: for each `new Server(...)` instance, verify .on('error', ...) is registered before .listen(). Same EventListenerAbsencePlugin shape as the existing Client postcondition.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — postcondition added by deepen pass 2026-06-23 (deepen-stream-4); detector rule not yet implemented."
+    },
+    "resolution": null
+  },
+  "3017": {
+    "id": "concern-20260623-ssh2-deepen-10",
+    "created_at": "2026-06-23",
+    "source": "deepen",
+    "package": "ssh2",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detector for ssh2 Connection (server-side per-client) .on('error') listener registration. Postcondition connection-missing-error-listener (severity: warning) — inside a Server connection listener, the `client` argument is a Connection EventEmitter that must have .on('error') registered alongside .on('authentication') / .on('session') etc. A missing error listener means one misbehaving client kills the whole daemon. Detection shape: walk Server constructor's connectionListener callback body for `client.on('error', ...)`.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — postcondition added by deepen pass 2026-06-23 (deepen-stream-4); detector rule not yet implemented."
+    },
+    "resolution": null
+  },
+  "3018": {
+    "id": "concern-20260623-ssh2-deepen-11",
+    "created_at": "2026-06-23",
+    "source": "deepen",
+    "package": "ssh2",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detector for ssh2 BaseAgent.getIdentities() / OpenSSHAgent.getIdentities() / CygwinAgent.getIdentities() / PageantAgent.getIdentities() / AgentProtocol.getIdentities() callback first-statement err-guard. Postcondition agent-get-identities-callback-error-ignored (severity: warning) — first statement of the getIdentities callback must branch on err. Same callback-first-statement detector shape as the existing exec/shell/sftp concerns.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — postcondition added by deepen pass 2026-06-23 (deepen-stream-4); detector rule not yet implemented."
+    },
+    "resolution": null
+  },
+  "3019": {
+    "id": "concern-20260623-ssh2-deepen-12",
+    "created_at": "2026-06-23",
+    "source": "deepen",
+    "package": "ssh2",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detector for ssh2 BaseAgent.sign() / OpenSSHAgent.sign() / AgentProtocol.sign() callback first-statement err-guard. Postcondition agent-sign-callback-error-ignored (severity: warning) — signing failure with `err` ignored sends undefined signature to wire and surfaces as a misleading 'Permission denied (publickey)' to users. Same callback-first-statement detector shape.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — postcondition added by deepen pass 2026-06-23 (deepen-stream-4); detector rule not yet implemented."
+    },
+    "resolution": null
+  },
+  "3020": {
+    "id": "concern-20260623-ssh2-deepen-13",
+    "created_at": "2026-06-23",
+    "source": "deepen",
+    "package": "ssh2",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detector for ssh2 AgentProtocol.on('error') listener registration. Postcondition agent-protocol-missing-error-listener (severity: warning) — AgentProtocol extends Duplex; long-lived agent client/server endpoints (cloud-KMS bridges, hardware-token signers) without .on('error') crash on socket disconnect. Same EventListenerAbsencePlugin shape as Channel/SFTPWrapper.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — postcondition added by deepen pass 2026-06-23 (deepen-stream-4); detector rule not yet implemented."
+    },
+    "resolution": null
+  },
+  "3021": {
+    "id": "concern-20260623-jimp-deepen-1",
+    "created_at": "2026-06-23",
+    "source": "deepen",
+    "package": "jimp",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for the top-level `loadFont` named import from 'jimp' (re-export of @jimp/plugin-print/load-font). It's an async function that rejects on fs/fetch I/O failure, BMFont parse errors, and cascading bitmap-page Jimp.read rejections. Postcondition `loadfont-rejects-on-io-or-parse-error` added by bc-deepen-contract pass 3 (2026-06-23), but the existing jimp detection block only covers the Jimp class and JimpInstance methods (read/fromBuffer/write/getBuffer/getBase64). The new `named_imports` detection key on the contract is the suggested wiring point.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis (jimp@1.6.1 declarations + plugin-print source), detection rule needed. Scanner already supports named-import detection for top-level functions (see e.g. @ai-sdk profile generateText pattern), so wiring is mechanical once `named_imports` is read from contract.yaml.detection."
+    },
+    "resolution": null
   }
 }
