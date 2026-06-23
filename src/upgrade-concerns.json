@@ -57215,5 +57215,69 @@
       "note": "Proactive \u2014 stream variant is csv.js.org's recommended pattern for large files. Detector reuse value across other stream-based profiles."
     },
     "resolution": null
+  },
+  "3009": {
+    "id": "concern-20260623-tencentcloud-sdk-nodejs-deepen-1",
+    "created_at": "2026-06-23",
+    "source": "deepen",
+    "package": "tencentcloud-sdk-nodejs",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for STSCredential.getCredential() \u2014 postcondition sts-assume-role-failure added in deepen pass but no scanner rule exists. Detection: async call on STSCredential instance (imported from tencentcloud-sdk-nodejs/tencentcloud/common/credential) without try/catch.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis; STSCredential.getCredential wraps STS errors in plain Error"
+    },
+    "resolution": null
+  },
+  "3010": {
+    "id": "concern-20260623-tencentcloud-sdk-nodejs-deepen-2",
+    "created_at": "2026-06-23",
+    "source": "deepen",
+    "package": "tencentcloud-sdk-nodejs",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for OIDCRoleArnCredential.getCredential() \u2014 postcondition oidc-init-or-assume-role-failure added in deepen pass but no scanner rule exists. Detection: async call on OIDCRoleArnCredential instance without try/catch (TKE env-var missing or STS AssumeRoleWithWebIdentity failure).",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis"
+    },
+    "resolution": null
+  },
+  "3011": {
+    "id": "concern-20260623-tencentcloud-sdk-nodejs-deepen-3",
+    "created_at": "2026-06-23",
+    "source": "deepen",
+    "package": "tencentcloud-sdk-nodejs",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for CvmRoleCredential.getCredential() \u2014 postcondition cvm-metadata-fetch-failure added in deepen pass. Detection: async call on CvmRoleCredential instance without try/catch (off-CVM hosts will trip metadata fetch errors).",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis"
+    },
+    "resolution": null
+  },
+  "3012": {
+    "id": "concern-20260623-tencentcloud-sdk-nodejs-deepen-4",
+    "created_at": "2026-06-23",
+    "source": "deepen",
+    "package": "tencentcloud-sdk-nodejs",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for SSEResponseModel async iteration \u2014 postcondition sse-stream-iteration-error added in deepen pass. Detection: `for await (const _ of sseInstance)` where sseInstance is SSEResponseModel without surrounding try/catch.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis; SSE async iterators are a rare scanner shape"
+    },
+    "resolution": null
   }
 }
