@@ -58042,5 +58042,117 @@
       "note": "Proactive \u2014 postcondition id: pluginbuild-resolve-service-stopped. Distinct from concern-1 because it covers the .catch() / try-catch detection axis, while concern-1 covers the result.errors-check axis."
     },
     "resolution": null
+  },
+  "3058": {
+    "id": "concern-20260623-ssh2-deepen-14",
+    "created_at": "2026-06-23",
+    "source": "deepen",
+    "package": "ssh2",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for Client.unforwardIn(addr, port, callback) where the callback body does not start with `if (err)` guard. Silent unbind failure leaves remote port still bound \u2014 pair operation to forwardIn. Detection: track Client instances; for any unforwardIn call site, check that the callback's first executable statement is an err-branch.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 postcondition added in deepen-stream-4 pass 8 (2026-06-23). Severity: warning. Symmetric to forward-in-callback-error-ignored. Fixture: nark-corpus-pro/packages/ssh2/fixtures/ground-truth.ts (unforwardInWithErrGuard)."
+    },
+    "resolution": null
+  },
+  "3059": {
+    "id": "concern-20260623-ssh2-deepen-15",
+    "created_at": "2026-06-23",
+    "source": "deepen",
+    "package": "ssh2",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for Client.subsys(subsystem, callback) where the callback body does not start with `if (err)` guard. Same shape as exec \u2014 channel-open failure leaves stream undefined; common in netconf and custom-IoT-protocol use. README example shows the canonical err-throw pattern; production code that skips it gets TypeError masking the real 'subsystem unsupported' cause.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 deepen-stream-4 pass 8 (2026-06-23). Severity: warning. Same detector axis as exec/shell/forwardOut callback-err-check."
+    },
+    "resolution": null
+  },
+  "3060": {
+    "id": "concern-20260623-ssh2-deepen-16",
+    "created_at": "2026-06-23",
+    "source": "deepen",
+    "package": "ssh2",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for Client.rekey(callback) where the callback is supplied and the callback body does not start with `if (err)` guard. Security-sensitive: failed rekey may indicate downgrade-attack or server misbehavior. Detection: when rekey is called WITH a callback argument, verify the callback's first executable statement is an err-branch.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 deepen-stream-4 pass 8 (2026-06-23). Severity: warning. Note: rekey is also callable WITHOUT a callback (() form) \u2014 in that case this rule does not fire."
+    },
+    "resolution": null
+  },
+  "3061": {
+    "id": "concern-20260623-ssh2-deepen-17",
+    "created_at": "2026-06-23",
+    "source": "deepen",
+    "package": "ssh2",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for Client.openssh_forwardOutStreamLocal(socketPath, callback) where the callback body does not start with `if (err)` guard. Unix-domain-socket forwarding (Docker socket / systemd socket / X11 socket). Same TypeError exposure as forwardOut; canonical Docker-over-SSH failure mode.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 deepen-stream-4 pass 8 (2026-06-23). Severity: warning. Same detector axis as forwardOut callback-err-check."
+    },
+    "resolution": null
+  },
+  "3062": {
+    "id": "concern-20260623-ssh2-deepen-18",
+    "created_at": "2026-06-23",
+    "source": "deepen",
+    "package": "ssh2",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for Client.openssh_forwardInStreamLocal(socketPath, callback) where the callback body does not start with `if (err)` guard. Silent bind failure leaves reverse Unix-socket tunnel non-functional with no error signal. Most common err: stale socket file at the remote path from a prior session.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 deepen-stream-4 pass 8 (2026-06-23). Severity: warning. Symmetric to forward-in callback-err-check."
+    },
+    "resolution": null
+  },
+  "3063": {
+    "id": "concern-20260623-ssh2-deepen-19",
+    "created_at": "2026-06-23",
+    "source": "deepen",
+    "package": "ssh2",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for Client.openssh_unforwardInStreamLocal(socketPath, callback) where the callback body does not start with `if (err)` guard. Stale-socket-file accumulation is the dominant production failure mode for tools that repeatedly bind/unbind without checking err.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 deepen-stream-4 pass 8 (2026-06-23). Severity: warning. Pair to openssh_forwardInStreamLocal."
+    },
+    "resolution": null
+  },
+  "3064": {
+    "id": "concern-20260623-ssh2-deepen-20",
+    "created_at": "2026-06-23",
+    "source": "deepen",
+    "package": "ssh2",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for Client.openssh_noMoreSessions(callback) where the callback body does not start with `if (err)` guard. SECURITY-SENSITIVE: this call establishes a session-lockdown invariant. Silently swallowed err means the invariant did NOT take effect and new sessions remain openable. Bastion/audit-compliance tooling depends on the lockdown holding.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 deepen-stream-4 pass 8 (2026-06-23). Severity: warning (consider promoting to error once detector lands \u2014 this is a security-defining callback). Failure-path recommendation: tear down the Client connection on err, not just log."
+    },
+    "resolution": null
   }
 }
