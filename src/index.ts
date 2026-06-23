@@ -580,13 +580,28 @@ async function main(options: any) {
     // user's cwd — otherwise package discovery walks the user's package.json
     // and reports their deps as "uncovered" alongside the demo's.
     options.project = demoDir;
+    // qt-186: substitute the demo dir for the banner so the Source line never
+    // leaks `/Users/<name>/...`. Strategy:
+    //   1. If demoDir is under HOME (typical for `npx nark --demo` where the
+    //      package lives under `~/.npm/_npx/...`), use the `~/...` form.
+    //      Matches the qt-185 Results-line approach.
+    //   2. Otherwise (dev workspace, global install at `/usr/local/...`),
+    //      collapse to the package-relative `nark/demo` literal — the user
+    //      doesn't care about the install root, only that they're scanning
+    //      the bundled demo. This keeps the line PII-clean in marketing
+    //      screenshots regardless of where nark was installed from.
+    const home = os.homedir();
+    const demoDirDisplayed =
+      demoDir === home || demoDir.startsWith(home + path.sep)
+        ? "~" + demoDir.slice(home.length)
+        : "nark/demo";
     process.stderr.write(
       chalk.cyan(
         "\n▶ Nark demo — scanning a bundled sample project with intentional violations.\n",
       ) +
         chalk.dim(
           "  Source: " +
-            demoDir +
+            demoDirDisplayed +
             "\n" +
             "  Run `npx nark` against your own project to scan your code.\n\n",
         ),
@@ -2069,10 +2084,25 @@ function printCompactReport(opts: {
     }
   }
 
-  // Report link
+  // Report link.
+  // qt-186: tilde-substitute the absolute d3HtmlPath so the line shows
+  // `file://~/.nark/...` instead of `file:///Users/<name>/.nark/...`. This
+  // keeps the line PII-clean for marketing screenshots. Note: terminals will
+  // NOT expand `~` inside file:// URLs at Cmd+click time, so the link becomes
+  // non-clickable in tilde-substituted form. Accepted trade-off: the
+  // qt-185 Results line below the compact report gives the user the
+  // path they can paste anyway, and `--verbose` mode prints the absolute
+  // file:// form in the 5-path block (line ~1424). Marketing screenshot
+  // cleanliness wins over Cmd+click affordance in default mode.
+  const reportLinkHome = os.homedir();
+  const d3HtmlPathDisplayed =
+    d3HtmlPath === reportLinkHome ||
+    d3HtmlPath.startsWith(reportLinkHome + path.sep)
+      ? "~" + d3HtmlPath.slice(reportLinkHome.length)
+      : d3HtmlPath;
   console.log(
     chalk.dim(`  Full report: `) +
-      chalk.underline(`file://${d3HtmlPath}`) +
+      chalk.underline(`file://${d3HtmlPathDisplayed}`) +
       chalk.dim(`  (Cmd+click to open)`),
   );
   if (aiPromptPath && totalViolations > 0) {
