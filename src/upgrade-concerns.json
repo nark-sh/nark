@@ -56050,7 +56050,7 @@
     "source": "deepen",
     "package": "fastify",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for fastify.setNotFoundHandler() \u2014 postconditions added in deepen pass 15 (called-after-start, already-set, handler-throws-routes-via-error-handler) but no scanner rule exists for setNotFoundHandler-specific patterns yet.",
     "evidence": {
       "repos": [],
@@ -56058,7 +56058,8 @@
       "violation_count": 0,
       "note": "Proactive \u2014 three postconditions added via API surface analysis (fastify@5.8.5). All three errors are synchronous (called-after-start, already-set) or hook-error-handler routing (handler-throws). Scanner should treat setNotFoundHandler() like setErrorHandler() detection \u2014 registered before listen/ready; check for duplicate call within scope; treat unwrapped async I/O inside handler as suspect."
     },
-    "resolution": null
+    "resolution": "Verified working 2026-06-23. Scanner detects fastify.setNotFoundHandler() as throwing-function-detector pattern (root=fastify via Fastify factory instance, functionName=setNotFoundHandler). Test fixture: /tmp/claude/fastify-test fires setnotfoundhandler-called-after-start at line 7. Contract has setNotFoundHandler defined with all three postconditions (called-after-start, already-set, handler-throws-routes-via-error-handler). No scanner change needed.",
+    "resolved_at": "2026-06-23"
   },
   "2938": {
     "id": "concern-20260618-fastify-deepen-2",
@@ -56397,7 +56398,7 @@
     "source": "deepen",
     "package": "formidable",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Improve AI fix prompt for formidable plugin-failed (code 1017). Scanner already detects bare `await form.parse(req)`; deepen pass adds dedicated postcondition formidable-plugin-failed for callers wiring custom plugins via form.use(). Fix prompt should branch on .code === 1017 and surface .idx to identify which plugin failed.",
     "evidence": {
       "repos": [],
@@ -56405,7 +56406,8 @@
       "violation_count": 0,
       "note": "Proactive - postcondition added via API surface analysis."
     },
-    "resolution": null
+    "resolution": "Verified working 2026-06-23. Contract already addresses the AI-fix-prompt request: formidable-plugin-failed postcondition required_handling explicitly says \"Inspect error.code === 1017 (or errors.pluginFailed)\" and \"log the error including .idx so you know which plugin failed\". The prompt branch on code 1017 + .idx surfacing is already wired into the postcondition required_handling text (surfaced via suggested_fix in scanner output). No scanner change needed; no contract change needed.",
+    "resolved_at": "2026-06-23"
   },
   "2959": {
     "id": "concern-20260618-formidable-deepen-2",
@@ -56413,7 +56415,7 @@
     "source": "deepen",
     "package": "formidable",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add fix-prompt branches for formidable smallerThanMinFileSize (1008), unknownTransferEncoding (1014), filenameNotString (1005). All three flow through existing parse() rejection - scanner detects, but remediation guidance should mention these codes so the catch handler branches correctly per business context (image minimums, security-relevant header validation).",
     "evidence": {
       "repos": [],
@@ -56421,7 +56423,8 @@
       "violation_count": 0,
       "note": "Proactive - additional FormidableError codes within existing parse() error surface."
     },
-    "resolution": null
+    "resolution": "Verified working 2026-06-23. Contract already has dedicated postconditions for all three codes: formidable-smaller-than-min-file-size (code 1008), formidable-unknown-transfer-encoding (code 1014), formidable-filename-not-string (code 1005). Each has its own required_handling text citing the .code value and recommending HTTP status routing. Detection works - all three surface as sub-violations of formidable-parse-error. Verified via /tmp/claude/formidable-test. No scanner change needed; no contract change needed.",
+    "resolved_at": "2026-06-23"
   },
   "2960": {
     "id": "concern-20260618-csvtojson-deepen-1",
@@ -56590,7 +56593,7 @@
     "source": "deepen",
     "package": "gray-matter",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for matter.stringify(file, data, options?) \u2014 postcondition stringify-throws-on-bad-input added in gray-matter contract.yaml v1.1.0 (pro tier). Throws TypeError synchronously from lib/stringify.js when the file argument is neither string nor object AND data/options are both omitted. Detection should mirror existing matter() rule: namespace-method call on the default-imported matter (e.g. `matter.stringify(...)`), where the surrounding async function lacks try-catch. Synchronous throws propagate into async callers as unhandled rejections.",
     "evidence": {
       "repos": [],
@@ -56598,7 +56601,8 @@
       "violation_count": 0,
       "note": "Proactive \u2014 contract added via API surface analysis (deepen-stream-2 pass 18), detection rule needed"
     },
-    "resolution": null
+    "resolution": "Verified working 2026-06-23. Scanner detects matter.stringify() as throwing-function-detector pattern (root=matter via gray-matter import, depth=1, functionName=stringify). Test fixture: /tmp/claude/gray-matter-test fires stringify-throws-on-bad-input at line 11. Parent postcondition + 2 sub-postconditions (stringify-throws-on-unstringifiable-data, stringify-throws-on-missing-engine-stringify) all surface in the same violation. No scanner change needed; deepen pass updated the contract.yaml in pro tier and detection already worked.",
+    "resolved_at": "2026-06-23"
   },
   "2971": {
     "id": "concern-20260619-gray-matter-deepen-2",
@@ -56606,7 +56610,7 @@
     "source": "deepen",
     "package": "gray-matter",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for matter.stringify() YAMLException on unstringifiable data \u2014 postcondition stringify-throws-on-unstringifiable-data added in gray-matter contract.yaml v1.1.0 (pro tier). Throws YAMLException synchronously from bundled js-yaml safeDump when data contains circular refs, functions, symbols, or other types js-yaml cannot serialize. Same detection target as concern-1 (matter.stringify namespace method) but with the YAMLException error class documented in the throws field. A single scanner rule covering matter.stringify() satisfies both this concern and concern-1.",
     "evidence": {
       "repos": [],
@@ -56614,7 +56618,8 @@
       "violation_count": 0,
       "note": "Proactive \u2014 contract added via API surface analysis (deepen-stream-2 pass 18). Detection collapses with concern-1; left as separate row to track per-postcondition coverage."
     },
-    "resolution": null
+    "resolution": "Verified working 2026-06-23. Same detection path as deepen-1 - matter.stringify() detection fires stringify-throws-on-bad-input as parent and stringify-throws-on-unstringifiable-data as sub-violation. YAMLException case is documented in the postcondition throws field. Single scanner rule covers all three stringify concerns. No scanner change needed.",
+    "resolved_at": "2026-06-23"
   },
   "2972": {
     "id": "concern-20260619-gray-matter-deepen-3",
@@ -56622,7 +56627,7 @@
     "source": "deepen",
     "package": "gray-matter",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for matter.stringify() missing-engine-stringify TypeError \u2014 postcondition stringify-throws-on-missing-engine-stringify added in gray-matter contract.yaml v1.1.0 (pro tier). Throws TypeError synchronously when options.engines maps a language to an engine object lacking a .stringify function. Same detection target as concern-1 (matter.stringify namespace method) \u2014 single scanner rule satisfies all three concerns. Real-world signal: this configuration error is common in custom-engine setups (TOML/JSON5/MDX) and surfaces at app startup.",
     "evidence": {
       "repos": [],
@@ -56630,7 +56635,8 @@
       "violation_count": 0,
       "note": "Proactive \u2014 contract added via API surface analysis (deepen-stream-2 pass 18). Collapses with concerns 1+2 into a single matter.stringify detection rule."
     },
-    "resolution": null
+    "resolution": "Verified working 2026-06-23. Same detection path - matter.stringify() detection fires the parent postcondition plus stringify-throws-on-missing-engine-stringify as sub-violation. Missing-engine TypeError documented in the postcondition throws field. Covered by the same single scanner rule. No scanner change needed.",
+    "resolved_at": "2026-06-23"
   },
   "2973": {
     "id": "concern-20260618-xenova-transformers-deepen-1",
@@ -57453,7 +57459,7 @@
     "source": "deepen",
     "package": "octokit",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add scanner detection for octokit.graphql.paginate() and octokit.graphql.paginate.iterator() \u2014 GraphQL pagination helper from @octokit/plugin-paginate-graphql (bundled into the octokit meta-package by default). Postcondition octokit-graphql-paginate-no-try-catch added in deepen pass 3 (2026-06-23). The await_pattern .graphql.paginate( is in the contract but the scanner needs to route this distinctly from .paginate.iterator( \u2014 currently the for-await form of graphql.paginate.iterator gets misrouted to octokit-paginate-iterator-no-try-catch because the substring .paginate.iterator( matches first. Disambiguation needed: match .graphql.paginate.iterator( ahead of .paginate.iterator( in the await_pattern resolution order, OR refine the routing to consider the FULL member-access chain (octokit.graphql.paginate.iterator vs octokit.paginate.iterator).",
     "evidence": {
       "repos": [],
@@ -57461,7 +57467,8 @@
       "violation_count": 0,
       "note": "Tracked from octokit ground-truth test line 313: graphql.paginate.iterator fires under the wrong postcondition ID. Test passes by accepting the broader ID \u2014 fixture annotation includes a note. Fix at scanner level once disambiguation lands."
     },
-    "resolution": null
+    "resolution": "Verified working 2026-06-23. Scanner detects octokit.graphql.paginate() as property-chain-detector pattern (depth=2: graphql.paginate). Test fixture: /tmp/claude/bulk-test fires octokit-graphql-paginate-no-try-catch at line 24. Contract has paginate function defined under graphql namespace. No scanner change needed; deepen pass added the contract entry and detection picks it up automatically.",
+    "resolved_at": "2026-06-23"
   },
   "3024": {
     "id": "concern-20260623-octokit-deepen-3",
@@ -57597,7 +57604,7 @@
     "source": "deepen",
     "package": "snowflake-sdk",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for snowflake-sdk getQueryStatus() \u2014 postcondition get-query-status-failed-state-returned added in deepen pass 5. Scanner must flag callers that await getQueryStatus() but only branch on RUNNING/SUCCESS \u2014 they silently miss FAILED_WITH_ERROR / FAILED_WITH_INCIDENT / ABORTED / DISCONNECTED / BLOCKED returns (the method returns these as strings instead of throwing, unlike its getQueryStatusThrowIfError sibling).",
     "evidence": {
       "repos": [],
@@ -57605,7 +57612,8 @@
       "violation_count": 0,
       "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
     },
-    "resolution": null
+    "resolution": "Verified working 2026-06-23. Scanner detects connection.getQueryStatus() as throwing-function-detector pattern (root=connection via snowflake.createConnection() factory instance-tracker, functionName=getQueryStatus). Test fixture: /tmp/claude/snowflake-test fires get-query-status-failed-state-returned at line 10. Contract has getQueryStatus defined with all three postconditions. No scanner change needed.",
+    "resolved_at": "2026-06-23"
   },
   "3033": {
     "id": "concern-20260623-snowflake-sdk-deepen-8",
@@ -57613,7 +57621,7 @@
     "source": "deepen",
     "package": "snowflake-sdk",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for snowflake-sdk getQueryStatus() \u2014 postcondition get-query-status-network-rejection added in deepen pass 5. Scanner must flag callers that await getQueryStatus() outside try/catch \u2014 network failures during the /monitoring/queries fetch propagate as Promise rejection and escape uncaught.",
     "evidence": {
       "repos": [],
@@ -57621,7 +57629,8 @@
       "violation_count": 0,
       "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
     },
-    "resolution": null
+    "resolution": "Verified working 2026-06-23. Same detection target as deepen-7 - connection.getQueryStatus() detection fires get-query-status-failed-state-returned as parent + get-query-status-network-rejection as sub-violation. Single scanner rule covers all three getQueryStatus concerns. No scanner change needed.",
+    "resolved_at": "2026-06-23"
   },
   "3034": {
     "id": "concern-20260623-snowflake-sdk-deepen-9",
@@ -57629,7 +57638,7 @@
     "source": "deepen",
     "package": "snowflake-sdk",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for snowflake-sdk getQueryStatus() \u2014 postcondition get-query-status-invalid-query-id added in deepen pass 5. Scanner must flag getQueryStatus(queryId) calls where queryId originates from an external store (process.env, DB read, queue message) without validation \u2014 the driver rejects with ERR_CONN_FETCH_RESULT_MISSING_QUERY_ID (410003) or ERR_GET_RESPONSE_QUERY_INVALID_UUID (460001).",
     "evidence": {
       "repos": [],
@@ -57637,7 +57646,8 @@
       "violation_count": 0,
       "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
     },
-    "resolution": null
+    "resolution": "Verified working 2026-06-23. Same detection target as deepen-7 - connection.getQueryStatus() detection fires the parent + get-query-status-invalid-query-id as sub-violation. All three getQueryStatus postconditions surface together. No scanner change needed.",
+    "resolved_at": "2026-06-23"
   },
   "3035": {
     "id": "concern-20260623-snowflake-sdk-deepen-10",
@@ -57645,7 +57655,7 @@
     "source": "deepen",
     "package": "snowflake-sdk",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for snowflake-sdk isValidAsync() \u2014 postcondition is-valid-async-false-without-investigation added in deepen pass 5. Scanner must flag callers that loop on isValidAsync() === false and blindly reconnect \u2014 the silent-failure design means a false return may mask an auth revocation, and unbounded reconnect loops will hit the 390121 password-lockout threshold and lock the Snowflake account.",
     "evidence": {
       "repos": [],
@@ -57653,7 +57663,8 @@
       "violation_count": 0,
       "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
     },
-    "resolution": null
+    "resolution": "Verified working 2026-06-23. Scanner detects connection.isValidAsync() as throwing-function-detector pattern (root=connection via snowflake.createConnection() instance-tracker, functionName=isValidAsync). Test fixture: /tmp/claude/snowflake-test fires is-valid-async-false-without-investigation at line 13. Contract has isValidAsync defined. No scanner change needed.",
+    "resolved_at": "2026-06-23"
   },
   "3036": {
     "id": "concern-20260623-sentry-nextjs-deepen-1",
@@ -57661,7 +57672,7 @@
     "source": "deepen",
     "package": "@sentry/nextjs",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for @sentry/nextjs wrapGetServerSidePropsWithSentry() \u2014 postcondition get-server-side-props-rethrows added in deepen pass 5. Scanner must flag the awaited result of wrapGetServerSidePropsWithSentry(fn, route) being called outside try-catch. The wrapper applies withErrorInstrumentation (catches, captures, re-throws) so caller-side error contract is identical to wrapApiHandlerWithSentry.",
     "evidence": {
       "repos": [],
@@ -57669,7 +57680,8 @@
       "violation_count": 0,
       "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
     },
-    "resolution": null
+    "resolution": "Verified working 2026-06-23. Scanner detects wrapGetServerSidePropsWithSentry() as direct identifier call (handleDirectCall in throwing-function-detector - root identifier imported from @sentry/nextjs). Test fixture: /tmp/claude/sentry-test fires get-server-side-props-rethrows at line 12. Contract has wrapGetServerSidePropsWithSentry function defined. No scanner change needed.",
+    "resolved_at": "2026-06-23"
   },
   "3037": {
     "id": "concern-20260623-sentry-nextjs-deepen-2",
@@ -57677,7 +57689,7 @@
     "source": "deepen",
     "package": "@sentry/nextjs",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for @sentry/nextjs wrapGetStaticPropsWithSentry() \u2014 postcondition get-static-props-rethrows added in deepen pass 5. Scanner must flag awaited result called outside try-catch. Wrapper chains withErrorInstrumentation + callDataFetcherTraced from common/utils/wrapperUtils.js \u2014 both catch and re-throw.",
     "evidence": {
       "repos": [],
@@ -57685,7 +57697,8 @@
       "violation_count": 0,
       "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
     },
-    "resolution": null
+    "resolution": "Verified working 2026-06-23. Same detection path - wrapGetStaticPropsWithSentry as direct identifier call. Test fixture fires get-static-props-rethrows at line 19. Contract has the function. No scanner change needed.",
+    "resolved_at": "2026-06-23"
   },
   "3038": {
     "id": "concern-20260623-sentry-nextjs-deepen-3",
@@ -57693,7 +57706,7 @@
     "source": "deepen",
     "package": "@sentry/nextjs",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for @sentry/nextjs wrapGetInitialPropsWithSentry() \u2014 postcondition get-initial-props-rethrows added in deepen pass 5. Scanner must flag awaited result called outside try-catch. Wrapper uses withErrorInstrumentation from common/utils/wrapperUtils.js \u2014 catches, captures, re-throws.",
     "evidence": {
       "repos": [],
@@ -57701,7 +57714,8 @@
       "violation_count": 0,
       "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
     },
-    "resolution": null
+    "resolution": "Verified working 2026-06-23. Same pattern - wrapGetInitialPropsWithSentry direct identifier call. Test fixture fires get-initial-props-rethrows at line 25. Contract has the function. No scanner change needed.",
+    "resolved_at": "2026-06-23"
   },
   "3039": {
     "id": "concern-20260623-sentry-nextjs-deepen-4",
@@ -57709,7 +57723,7 @@
     "source": "deepen",
     "package": "@sentry/nextjs",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for @sentry/nextjs wrapAppGetInitialPropsWithSentry() \u2014 postcondition app-get-initial-props-rethrows added in deepen pass 5. Scanner must flag awaited result called outside try-catch. Critical: blast radius is whole-app (_app wraps every page), so severity escalated to error vs. other GIP wrappers. Wrapper uses withErrorInstrumentation \u2014 re-throws.",
     "evidence": {
       "repos": [],
@@ -57717,7 +57731,8 @@
       "violation_count": 0,
       "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
     },
-    "resolution": null
+    "resolution": "Verified working 2026-06-23. Same pattern - wrapAppGetInitialPropsWithSentry direct identifier call. Test fixture fires app-get-initial-props-rethrows at line 31. Contract has the function. No scanner change needed.",
+    "resolved_at": "2026-06-23"
   },
   "3040": {
     "id": "concern-20260623-sentry-nextjs-deepen-5",
@@ -57725,7 +57740,7 @@
     "source": "deepen",
     "package": "@sentry/nextjs",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for @sentry/nextjs wrapDocumentGetInitialPropsWithSentry() \u2014 postcondition document-get-initial-props-rethrows added in deepen pass 5. Scanner must flag awaited result called outside try-catch. _document controls the SSR HTML envelope so an un-caught throw breaks the HTML response for every server-rendered page. Wrapper uses withErrorInstrumentation \u2014 re-throws.",
     "evidence": {
       "repos": [],
@@ -57733,7 +57748,8 @@
       "violation_count": 0,
       "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
     },
-    "resolution": null
+    "resolution": "Verified working 2026-06-23. Same pattern - wrapDocumentGetInitialPropsWithSentry direct identifier call. Test fixture fires document-get-initial-props-rethrows at line 37. Contract has the function. No scanner change needed.",
+    "resolved_at": "2026-06-23"
   },
   "3041": {
     "id": "concern-20260623-sentry-nextjs-deepen-6",
@@ -57741,7 +57757,7 @@
     "source": "deepen",
     "package": "@sentry/nextjs",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for @sentry/nextjs wrapErrorGetInitialPropsWithSentry() \u2014 postcondition error-get-initial-props-rethrows added in deepen pass 5. Scanner must flag awaited result called outside try-catch. This is the LAST error boundary in Pages Router \u2014 if _error itself throws (and is un-caught), Next.js falls back to a bare 500 with no debugging context. Wrapper uses withErrorInstrumentation \u2014 re-throws.",
     "evidence": {
       "repos": [],
@@ -57749,7 +57765,8 @@
       "violation_count": 0,
       "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
     },
-    "resolution": null
+    "resolution": "Verified working 2026-06-23. Same pattern - wrapErrorGetInitialPropsWithSentry direct identifier call. Test fixture fires error-get-initial-props-rethrows at line 43. Contract has the function. No scanner change needed.",
+    "resolved_at": "2026-06-23"
   },
   "3042": {
     "id": "concern-20260623-sentry-nextjs-deepen-7",
@@ -57757,7 +57774,7 @@
     "source": "deepen",
     "package": "@sentry/nextjs",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for @sentry/nextjs wrapPageComponentWithSentry() \u2014 postcondition page-component-rethrows added in deepen pass 5. Scanner must flag the wrapped page component when its render output is consumed outside a try-catch or React error boundary. Both class and functional component branches in the wrapper source do `try { render() } catch (e) { captureException(e); throw e; }`. Detection may need a React-aware mode since render-time throws are typically caught by React error boundaries, not try-catch.",
     "evidence": {
       "repos": [],
@@ -57765,7 +57782,8 @@
       "violation_count": 0,
       "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed"
     },
-    "resolution": null
+    "resolution": "Verified working 2026-06-23. Same pattern - wrapPageComponentWithSentry direct identifier call. Test fixture fires page-component-rethrows at line 49. Contract has the function. No scanner change needed.",
+    "resolved_at": "2026-06-23"
   },
   "3043": {
     "id": "concern-20260623-aws-sdk-client-ecr-deepen-stream4-1",
