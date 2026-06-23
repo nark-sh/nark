@@ -298,7 +298,7 @@ program
   )
   .option(
     "--verbose",
-    "Full output (default — kept for backward compatibility)",
+    "Show telemetry details, timing breakdown, and full report paths.",
   )
   .option("-q, --quiet", "Show compact summary instead of full report")
   .option(
@@ -501,14 +501,41 @@ async function main(options: any) {
   maybePrintPreScanWorkspaceWarning();
 
   const scanStartTime = Date.now();
-  const verbose = !options.quiet;
+  // qt-184: the broader `verbose` local now defaults to OFF. Previously it
+  // was `!options.quiet`, which made the Nark Contract Verification banner +
+  // every `chalk.dim("...")` status line print on every run unless the user
+  // passed --quiet. That was the CodeRabbit failure mode in miniature —
+  // devs see the same noise every run and learn to ignore everything,
+  // including actual violations. New default is lean (matches Stripe /
+  // Vercel / `gh` CLI conventions): no banner, no progress chatter,
+  // just the scan result + one dim footer pointing at --verbose.
+  //
+  // `--quiet` and `--verbose` are independent axes after qt-184:
+  //   • default (neither flag):  verbose=false → no banner, compact report,
+  //                               hint printed
+  //   • `--verbose` alone:        verbose=true  → banner + full report,
+  //                               [verbose] trace via verboseFlag,
+  //                               hint suppressed
+  //   • `--quiet` alone:          verbose=false → no banner, compact report,
+  //                               hint printed
+  //   • `--quiet --verbose`:      verbose=false → no banner, compact report,
+  //                               [verbose] trace STILL emits via verboseFlag,
+  //                               hint suppressed
+  //
+  // The `&& !options.quiet` clause encodes the "quiet still suppresses the
+  // broader visible surface" must-have from the qt-184 plan: a user who
+  // explicitly asked for a compact report shouldn't get a banner just
+  // because they also enabled the telemetry trace. The trace itself still
+  // lands because it's gated on the narrower `verboseFlag` predicate
+  // below — proving the two flags are independent.
+  const verbose = options.verbose === true && !options.quiet;
   // qt-183: explicit-flag predicate for `[verbose]`-prefixed log sites + the
-  // PII-revealing scan-uploaded footer. We deliberately do NOT reuse the
-  // `verbose` local above — that one (`!options.quiet`) governs the broader
-  // human-readable surface (banners, dim status lines, progress feedback) and
-  // flipping its default is Task 2 of the 2026-06-23 CLI polish handoff.
-  // Until that lands, the explicit `--verbose` flag is the only thing that
-  // unlocks the telemetry trace and the workspace footer.
+  // PII-revealing scan-uploaded footer. After qt-184 this is INTENTIONALLY
+  // narrower than the broader `verbose` local above — verboseFlag ignores
+  // --quiet, so `--quiet --verbose` still emits the trace. Keeping the two
+  // predicates separate also ensures any future refactor that re-broadens
+  // `verbose` cannot silently re-leak the telemetry trace / PII footer
+  // behind the broader predicate.
   const verboseFlag = options.verbose === true;
 
   // Read nark version from package.json
@@ -1785,6 +1812,23 @@ async function main(options: any) {
     );
     verboseLog(`  Output generation:    ${outputEndTime - outputStartTime}ms`);
     verboseLog(`  Total:                ${totalTime}ms`);
+  }
+
+  // qt-184: dim hint line pointing users to --verbose for diagnostics.
+  // Printed only when --verbose is OFF — no point advertising a flag that's
+  // already on. Placed AFTER the verbose time breakdown so the verbose
+  // branch produces nothing extra, and BEFORE cleanupLogging so the line
+  // definitely lands on stdout (cleanupLogging may detach the output stream).
+  // Gated on `verboseFlag` (the explicit-flag predicate) rather than the
+  // broader `verbose` local — they are equivalent today, but tying the hint
+  // to verboseFlag makes the dependency on the user's explicit --verbose
+  // opt-in survive any future refactor that re-broadens `verbose`.
+  if (!verboseFlag) {
+    console.log(
+      chalk.dim(
+        "\nRun with --verbose for telemetry details, timing breakdown, and full report paths.",
+      ),
+    );
   }
 
   // Cleanup logging

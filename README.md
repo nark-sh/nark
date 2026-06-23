@@ -619,7 +619,7 @@ Use `--report-only` to always get `0`, or `--fail-threshold warning` to block on
 | `--diff <spec>` | Line-level filter — only report violations on lines touched by the diff (e.g. `main..HEAD`) | — |
 | `--changed-files <paths...>` | File-level filter — only report violations in the named files | — |
 | `--quiet, -q` | Show compact summary instead of full report | false |
-| `--verbose` | Full output (default, kept for backward compatibility) | — |
+| `--verbose` | Show telemetry details, timing breakdown, and full report paths. | false |
 | `--include-tests` | Include test files | false |
 | `--include-drafts` | Include draft contracts | false |
 | `--show-suppressions` | Show suppressed violations | false |
