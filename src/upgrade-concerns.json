@@ -58380,5 +58380,69 @@
       "note": "Proactive - deepen-stream-4 pass 10 (2026-06-23). Server-side UNIX-domain-socket forward push from a custom SSH daemon to a connected client (reverse direction of Client.openssh_forwardOutStreamLocal). Severity: warning. Real-world use: Docker-socket-forwarding daemons, systemd socket-activation bridges, IPC-tunnel test harnesses. SECURITY-SENSITIVE - Docker socket access bypasses host security layers, silent push failures here surface as 'why isnt Docker-socket forwarding working' that wastes hours on client-side debugging. Detection shape identical to existing Client.openssh_forwardOutStreamLocal callback-first-statement detector - reuse same AST walker on `<Connection>.openssh_forwardOutStreamLocal(...)`."
     },
     "resolution": null
+  },
+  "3079": {
+    "id": "concern-20260623-sinon-deepen-stream3-pass10-1",
+    "created_at": "2026-06-23",
+    "source": "deepen",
+    "package": "sinon",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for sandbox.define(object, property, value) where the property already exists as an own property on object - sinon throws TypeError: Cannot define the already existing property. Detection shape: `<sandbox>.define(<obj>, <propKey>, <val>)` where the scanner can statically determine that <obj>[<propKey>] is already defined in the same lexical scope (e.g. immediately after const obj = { existingMethod: ... }; sandbox.define(obj, 'existingMethod', ...)). Postcondition: define-existing-property-throws.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive - contract added via API surface analysis during deepen-stream-3 pass 10 (2026-06-23) against sinon@22.0.0. New sandbox method since sinon@7+ (define vs replace distinction enforced at TypeError-throw level). Severity: error. Detection should reuse the existing property-chain matcher used for sandbox.replace() and look for a same-scope object literal defining the property key. Realistic FP rate is low because sandbox.define is rarely used (most tests use replace or stub); when it IS used, the existence-check guard is documented practice."
+    },
+    "resolution": null
+  },
+  "3080": {
+    "id": "concern-20260623-sinon-deepen-stream3-pass10-2",
+    "created_at": "2026-06-23",
+    "source": "deepen",
+    "package": "sinon",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for bare sandbox.verify() call that is not wrapped in try/finally with a sandbox.restore() in the finally block. The Sinon-canonical pattern is sandbox.verifyAndRestore() (which handles the try/finally internally) - bare sandbox.verify() followed by sandbox.restore() on the next line skips restore when verify throws ExpectationError, polluting subsequent tests. Detection shape: `<sandbox>.verify()` call expression where the containing statement is NOT inside a try block whose finally block contains `<sandbox>.restore()`. Postcondition: verify-unmet-expectation-throws.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive - contract added via API surface analysis during deepen-stream-3 pass 10 (2026-06-23) against sinon@22.0.0. Severity: error. Detection requires a control-flow check: locate the try block ancestor of the verify() call, then check the corresponding finally clause for a restore() on the same sandbox identifier. Same control-flow shape needed for several other test-cleanup contracts (mock.verify(), spy.restore(), etc.) - this concern is the canonical starting point for a verify-then-restore detector family. Often a true-positive - even experienced sinon users miss the try/finally requirement on bare verify(), as evidenced by stale issues in sinonjs/sinon (e.g. #1673 family)."
+    },
+    "resolution": null
+  },
+  "3081": {
+    "id": "concern-20260623-sinon-deepen-stream3-pass10-3",
+    "created_at": "2026-06-23",
+    "source": "deepen",
+    "package": "sinon",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for sandbox.verifyAndRestore() inside a try/catch where the catch block is empty or swallows the error without re-throw or recorder call. Swallowed ExpectationError means failing mock contracts pass CI undetected - the verifiable production behavior is no longer verified. Detection shape: `try { <sandbox>.verifyAndRestore(); } catch { /* empty */ }` or `catch (e) { /* no use of e, no throw */ }`. Postcondition: verify-and-restore-expectation-throws.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive - contract added via API surface analysis during deepen-stream-3 pass 10 (2026-06-23) against sinon@22.0.0. Severity: error. Detection requires recognizing an empty catch block (no statements) or a catch block whose only statements are non-rethrow no-ops (console.log without throw, ignored variables). Same shape as a general 'swallowed error' detector, but scoped to verifyAndRestore calls. This is a SILENT_FAILURE - silently swallowed ExpectationErrors will let broken mock contracts pass CI for months."
+    },
+    "resolution": null
+  },
+  "3082": {
+    "id": "concern-20260623-sinon-deepen-stream3-pass10-4",
+    "created_at": "2026-06-23",
+    "source": "deepen",
+    "package": "sinon",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for sinon.restoreObject(value) where value's static type includes undefined or null (e.g. `let target: { method: () => string } | undefined; sinon.restoreObject(target);`) and the call is not guarded by a truthy check OR wrapped in try/catch. sinon throws `Error: Trying to restore object but received <stringified-falsy>` on falsy input. Detection shape: `sinon.restoreObject(<expr>)` where TypeScript flow analysis determines <expr>'s type is possibly nullish AND the call is not inside an `if (<expr>) { ... }` guard or try/catch block. Postcondition: restore-object-falsy-input-throws.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive - contract added via API surface analysis during deepen-stream-3 pass 10 (2026-06-23) against sinon@22.0.0. Severity: error. Detection requires TypeScript-aware flow analysis (or a simpler heuristic: check if the argument identifier was declared with explicit `| undefined` / `| null` annotation, or assigned from a function returning nullish). FP rate may be moderate if non-typed JS is common in the corpus - restrict initially to TS-typed callsites where the argument's type union includes undefined/null. Same shape as other null-arg-throw detectors (e.g. fs.readFileSync(undefined) family)."
+    },
+    "resolution": null
   }
 }
