@@ -57445,7 +57445,7 @@
       "violation_count": 0,
       "note": "Proactive \u2014 contract added via API surface analysis, scanner has partial detection via substring match but does not understand the for-await idiom requires try/catch on the consuming async function rather than on the iterator construction."
     },
-    "resolution": "Verified implemented in cycle 5 (2026-06-23). vitest run src/v2/fixtures/octokit.ground-truth.test.ts -> 33/33 pass. Line 243 SHOULD_FIRE octokit-paginate-iterator-no-try-catch — bare await on for-await of octokit.paginate.iterator(...) — passes. Existing octokit detection block + paginate.iterator await_pattern + chain detection auto-handles the for-await idiom. No scanner code change required."
+    "resolution": "Verified implemented in cycle 5 (2026-06-23). vitest run src/v2/fixtures/octokit.ground-truth.test.ts -> 33/33 pass. Line 243 SHOULD_FIRE octokit-paginate-iterator-no-try-catch \u2014 bare await on for-await of octokit.paginate.iterator(...) \u2014 passes. Existing octokit detection block + paginate.iterator await_pattern + chain detection auto-handles the for-await idiom. No scanner code change required."
   },
   "3023": {
     "id": "concern-20260623-octokit-deepen-2",
@@ -57477,7 +57477,7 @@
       "violation_count": 0,
       "note": "Proactive \u2014 contract added via API surface analysis. Same detection logic as the @octokit/app getInstallationUrl postcondition; routing scoped by import_source."
     },
-    "resolution": "Verified implemented in cycle 5 (2026-06-23). vitest run src/v2/fixtures/octokit.ground-truth.test.ts -> 33/33 pass. Line 335 SHOULD_FIRE octokit-app-get-installation-url-no-try-catch — bare await on app.getInstallationUrl() — passes. Existing App class registration + import_source scoping auto-handles. No scanner code change required."
+    "resolution": "Verified implemented in cycle 5 (2026-06-23). vitest run src/v2/fixtures/octokit.ground-truth.test.ts -> 33/33 pass. Line 335 SHOULD_FIRE octokit-app-get-installation-url-no-try-catch \u2014 bare await on app.getInstallationUrl() \u2014 passes. Existing App class registration + import_source scoping auto-handles. No scanner code change required."
   },
   "3025": {
     "id": "concern-20260623-aws-sdk-client-ecr-deepen-1",
@@ -57844,6 +57844,38 @@
       "scan_file": null,
       "violation_count": 0,
       "note": "Proactive \u2014 contract added via API surface analysis for ecr.registerPullTimeUpdateExclusion(); detection rule needed to match postcondition id ecr-register-pull-time-update-exclusion-no-try-catch"
+    },
+    "resolution": null
+  },
+  "3048": {
+    "id": "concern-20260623-yup-deepen-stream2-1",
+    "created_at": "2026-06-23",
+    "source": "deepen",
+    "package": "yup",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for yup schema['~standard'].validate() \u2014 Standard Schema interface added in yup v1.x; postcondition standard-validate-infrastructure-error-rethrows added in deepen pass but no scanner rule exists yet",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis for yup ~standard.validate(); detection rule needed to match postcondition id standard-validate-infrastructure-error-rethrows. Integration libraries (react-hook-form standardResolver, tRPC, conform, TanStack Form) call this method on yup schemas; non-ValidationError from async test() functions is re-thrown (index.js line 1206/2581)"
+    },
+    "resolution": null
+  },
+  "3049": {
+    "id": "concern-20260623-react-hook-form-deepen-1",
+    "created_at": "2026-06-23",
+    "source": "deepen",
+    "package": "react-hook-form",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for useController.field.onChange / register().onChange \u2014 Promise-returning handler (restored in v7.79.0 PR #13518) that rejects when a custom resolver or form-level validate throws. Postcondition controller-onchange-resolver-rejection was added in deepen-stream-3 pass 6 (2026-06-23) but no scanner rule exists. Detect: `await field.onChange(...)` or `register('x').onChange(event)` await without try-catch where useForm/Controller's resolver is set.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis, detection rule needed. Source evidence: dist/index.esm.mjs lines 462-477 (useController.onChange returns _registerProps.current.onChange), lines 2082-2152 (async onChange awaits _runSchema), line 1800 (_runSchema awaits user-provided resolver without try-catch). PR: https://github.com/react-hook-form/react-hook-form/pull/13518"
     },
     "resolution": null
   }
