@@ -58924,5 +58924,69 @@
       "note": "Proactive \u2014 Phase 14 re-enumeration found 5 stream methods missed by original Promise-only enumeration. Detection rule needed for paginator.streamify-returned stream surface (event-based error delivery, not Promise rejection)."
     },
     "resolution": null
+  },
+  "3113": {
+    "id": "concern-20260623-mongoose-deepen-1",
+    "created_at": "2026-06-23",
+    "source": "deepen",
+    "package": "mongoose",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for Connection.bulkWrite() \u2014 postcondition connection-bulkwrite-mongoose-bulkwrite-error-no-try-catch added in pass 17 (mongoose 8.x+). Requires Connection-instance tracking (mongoose.connect() return value, mongoose.createConnection(), or named Connection-typed params). Method shape: conn.bulkWrite([{namespace, insertOne|updateOne|...}]) returns Promise<ClientBulkWriteResult>. Throws MongooseBulkWriteError when throwOnValidationError:true (default 8.x+).",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis against mongoose@9.7.2; current scanner does not track Connection instances, only Model instances via mongoose.model()"
+    },
+    "resolution": null
+  },
+  "3114": {
+    "id": "concern-20260623-mongoose-deepen-2",
+    "created_at": "2026-06-23",
+    "source": "deepen",
+    "package": "mongoose",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for Connection.destroy() \u2014 postcondition connection-destroy-pending-writes-discarded added in pass 17 (mongoose 8.x+). Requires Connection-instance tracking. Force-shutdown variant of close() \u2014 silently discards pending writes. Shape: conn.destroy(force?: boolean) returns Promise<void>.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 mongoose 8.x+ API; scanner currently has no Connection-instance tracker"
+    },
+    "resolution": null
+  },
+  "3115": {
+    "id": "concern-20260623-mongoose-deepen-3",
+    "created_at": "2026-06-23",
+    "source": "deepen",
+    "package": "mongoose",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for Connection.createCollections() \u2014 postcondition createcollections-create-collections-error-no-try-catch added in pass 17 (mongoose 8.x+). Plural variant with continueOnError throws CreateCollectionsError aggregating per-collection failures. Requires Connection-instance tracking. Shape: conn.createCollections(continueOnError?: boolean) returns Promise<Record<string, Error | Collection>>.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 mongoose 8.x+ API; needs Connection-instance tracker"
+    },
+    "resolution": null
+  },
+  "3116": {
+    "id": "concern-20260623-mongoose-deepen-4",
+    "created_at": "2026-06-23",
+    "source": "deepen",
+    "package": "mongoose",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Differentiate Document.deleteOne() (instance method on a hydrated doc) from Model.deleteOne() (static filter-based) \u2014 postcondition document-deleteone-middleware-error-no-try-catch added in pass 17. Currently the scanner detects user.deleteOne() (where user is a Document instance from User.findOne()) but matches it to Model.deleteOne's connection-error-no-try-catch postcondition. Need to discriminate by checking whether the receiver is a Document (HydratedDocument<T>) or the Model class itself. Document.deleteOne() runs pre/post('deleteOne', { document: true, query: false }) middleware which can throw; Model.deleteOne(filter) does not.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 ground-truth test confirms scanner conflates the two: line 148 expected document-deleteone-middleware-error-no-try-catch but scanner returned connection-error-no-try-catch. Document instances come from Model.findOne/findById/findOneAndUpdate(new:true)/new Model()."
+    },
+    "resolution": null
   }
 }
