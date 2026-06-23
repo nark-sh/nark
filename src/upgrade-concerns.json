@@ -58508,5 +58508,197 @@
       "note": "Proactive - contract added via API surface analysis during deepen-stream-2 pass 13 (2026-06-23) against @prisma/client@7.8.0. Severity: warning. SILENT_FAILURE pattern - the empty array yields undefined which crashes downstream, often manifesting as a blank UI rather than a visible exception. FP rate could be high if the codebase consistently calls findMany with conditions that always return rows - restrict to findMany where the where clause references variables (vs. static SQL-style WHERE 1=1)."
     },
     "resolution": null
+  },
+  "3087": {
+    "id": "concern-20260623-supabase-supabase-js-deepen-stream3-pass11-1",
+    "created_at": "2026-06-23",
+    "source": "deepen",
+    "package": "@supabase/supabase-js",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @supabase/supabase-js signInWithOtp() \u2014 postconditions signin-otp-rate-limit / signin-otp-signup-disabled / signin-otp-network-error added in deepen pass 11 but no scanner rule exists. Detect supabase.auth.signInWithOtp({...}) calls where { error } from the response is not checked. Should flag missing error.code branching.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface enumeration against supabase-js@2.108.2 in deepen pass 11."
+    },
+    "resolution": null
+  },
+  "3088": {
+    "id": "concern-20260623-supabase-supabase-js-deepen-stream3-pass11-2",
+    "created_at": "2026-06-23",
+    "source": "deepen",
+    "package": "@supabase/supabase-js",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @supabase/supabase-js verifyOtp() \u2014 postconditions verify-otp-token-expired / verify-otp-invalid-code added in deepen pass 11 but no scanner rule exists. Detect supabase.auth.verifyOtp({...}) calls where { error } is not checked.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface enumeration against supabase-js@2.108.2 in deepen pass 11."
+    },
+    "resolution": null
+  },
+  "3089": {
+    "id": "concern-20260623-supabase-supabase-js-deepen-stream3-pass11-3",
+    "created_at": "2026-06-23",
+    "source": "deepen",
+    "package": "@supabase/supabase-js",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @supabase/supabase-js getUser() \u2014 postconditions get-user-session-expired / get-user-network-error added in deepen pass 11 but no scanner rule exists. Detect supabase.auth.getUser() calls where { error } is not checked. SECURITY CRITICAL \u2014 used for server-side auth validation; missing check = silent unauthenticated access. Distinguishing AuthRetryableFetchError from 401 is also required.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface enumeration against supabase-js@2.108.2 in deepen pass 11."
+    },
+    "resolution": null
+  },
+  "3090": {
+    "id": "concern-20260623-supabase-supabase-js-deepen-stream3-pass11-4",
+    "created_at": "2026-06-23",
+    "source": "deepen",
+    "package": "@supabase/supabase-js",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @supabase/supabase-js updateUser() \u2014 postconditions update-user-weak-password / update-user-reauthentication-needed / update-user-same-password added in deepen pass 11 but no scanner rule exists. Detect supabase.auth.updateUser({...}) calls where { error.code } is not checked. weak_password and reauthentication_needed must both be branched.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface enumeration against supabase-js@2.108.2 in deepen pass 11."
+    },
+    "resolution": null
+  },
+  "3091": {
+    "id": "concern-20260623-supabase-supabase-js-deepen-stream3-pass11-5",
+    "created_at": "2026-06-23",
+    "source": "deepen",
+    "package": "@supabase/supabase-js",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @supabase/supabase-js refreshSession() \u2014 postconditions refresh-session-token-revoked / refresh-session-network-error added in deepen pass 11 but no scanner rule exists. Detect supabase.auth.refreshSession() calls where { error } is not checked. Need to distinguish revoked-token (hard signout) from network error (retry-safe).",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface enumeration against supabase-js@2.108.2 in deepen pass 11."
+    },
+    "resolution": null
+  },
+  "3092": {
+    "id": "concern-20260623-supabase-supabase-js-deepen-stream3-pass11-6",
+    "created_at": "2026-06-23",
+    "source": "deepen",
+    "package": "@supabase/supabase-js",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @supabase/supabase-js exchangeCodeForSession() \u2014 postconditions exchange-code-pkce-verifier-missing / exchange-code-expired added in deepen pass 11 but no scanner rule exists. Detect supabase.auth.exchangeCodeForSession(code) calls where { error } is not checked in OAuth/PKCE callback handlers.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface enumeration against supabase-js@2.108.2 in deepen pass 11."
+    },
+    "resolution": null
+  },
+  "3093": {
+    "id": "concern-20260623-supabase-supabase-js-deepen-stream3-pass11-7",
+    "created_at": "2026-06-23",
+    "source": "deepen",
+    "package": "@supabase/supabase-js",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @supabase/supabase-js storage.download() \u2014 postconditions storage-download-not-found / storage-download-unauthorized added in deepen pass 11 but no scanner rule exists. Detect supabase.storage.from(bucket).download(path) calls where { error } is not checked. Need to recognize the .from(bucket).download(path) builder chain. SECURITY \u2014 must not leak the difference between 404 and 403 to end users.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface enumeration against supabase-js@2.108.2 in deepen pass 11."
+    },
+    "resolution": null
+  },
+  "3094": {
+    "id": "concern-20260623-supabase-supabase-js-deepen-stream3-pass11-8",
+    "created_at": "2026-06-23",
+    "source": "deepen",
+    "package": "@supabase/supabase-js",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @supabase/supabase-js storage.createSignedUrl() \u2014 postconditions storage-signed-url-not-found / storage-signed-url-unauthorized added in deepen pass 11 but no scanner rule exists. Detect supabase.storage.from(bucket).createSignedUrl(path, expiresIn) calls where { error } is not checked before returning the signedUrl to a caller.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface enumeration against supabase-js@2.108.2 in deepen pass 11."
+    },
+    "resolution": null
+  },
+  "3095": {
+    "id": "concern-20260623-ai-deepen-stream2-pass14-1",
+    "created_at": "2026-06-23",
+    "source": "deepen",
+    "package": "ai",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for ai.ToolLoopAgent.generate() \u2014 postcondition(s) agent-api-error / agent-invalid-argument / agent-no-output-generated / agent-missing-tool-results / agent-retry-exhausted added in 2026-06-23 deepen pass but no scanner rule exists. ToolLoopAgent.generate() is a new v6 entry point; delegates to generateText but propagates additional InvalidArgumentError from callOptionsSchema enforcement (ai@6.0.0 changelog 48f842a). Method-call detection on Agent instances needs validation similar to OpenAI client instance detection.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis of ai@6.0.209, detection rule needed."
+    },
+    "resolution": null
+  },
+  "3096": {
+    "id": "concern-20260623-ai-deepen-stream2-pass14-2",
+    "created_at": "2026-06-23",
+    "source": "deepen",
+    "package": "ai",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for ai.ToolLoopAgent.stream() \u2014 postcondition(s) agent-api-error / agent-invalid-argument / agent-missing-tool-results / agent-retry-exhausted added in 2026-06-23 deepen pass but no scanner rule exists. ToolLoopAgent.stream() delegates to streamText; same instance-detection upgrade needed as ToolLoopAgent.generate.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis of ai@6.0.209, detection rule needed."
+    },
+    "resolution": null
+  },
+  "3097": {
+    "id": "concern-20260623-ai-deepen-stream2-pass14-3",
+    "created_at": "2026-06-23",
+    "source": "deepen",
+    "package": "ai",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for ai.validateUIMessages() \u2014 postcondition(s) validate-ui-messages-type-validation added in 2026-06-23 deepen pass but no scanner rule exists. validateUIMessages throws TypeValidationError on schema drift. Detection: top-level import + await call without enclosing try-catch. Used in persistence-layer code paths.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis of ai@6.0.209, detection rule needed."
+    },
+    "resolution": null
+  },
+  "3098": {
+    "id": "concern-20260623-ai-deepen-stream2-pass14-4",
+    "created_at": "2026-06-23",
+    "source": "deepen",
+    "package": "ai",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for ai.createUIMessageStream() \u2014 postcondition(s) create-ui-message-stream-error-leak / create-ui-message-stream-execute-throw added in 2026-06-23 deepen pass but no scanner rule exists. createUIMessageStream requires explicit onError handler that returns a generic string (CVE-class fix in ai@6.0.207, b4b575a). Detection: call site missing onError property OR onError that returns error.message / error.toString() / JSON.stringify(error). New analyzer concern type: required-named-argument-missing.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 contract added via API surface analysis of ai@6.0.209, detection rule needed."
+    },
+    "resolution": null
   }
 }
