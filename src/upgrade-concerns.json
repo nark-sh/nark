@@ -58844,5 +58844,85 @@
       "note": "Proactive \u2014 destructive admin op; detection needed for production-safety guardrail"
     },
     "resolution": null
+  },
+  "3108": {
+    "id": "concern-20260623-bigquery-deepen-1",
+    "created_at": "2026-06-23",
+    "source": "deepen",
+    "package": "@google-cloud/bigquery",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for table.createReadStream()/createQueryStream()/getXxxStream() calls without .on('error', ...) wired up. These are paginator.streamify wrappers that emit errors via event, not Promise rejection. Try/catch around the stream creation is FALSE confidence. Postcondition: createreadstream-missing-error-handler. Source: nark-corpus-pro/packages/@google-cloud/bigquery/contract.yaml (createReadStream block).",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 Phase 14 re-enumeration found 5 stream methods missed by original Promise-only enumeration. Detection rule needed for paginator.streamify-returned stream surface (event-based error delivery, not Promise rejection)."
+    },
+    "resolution": null
+  },
+  "3109": {
+    "id": "concern-20260623-bigquery-deepen-2",
+    "created_at": "2026-06-23",
+    "source": "deepen",
+    "package": "@google-cloud/bigquery",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for table.createInsertStream() without .on('error', ...) for PartialFailureError. Different error model from table.insert() \u2014 same error type, different delivery mechanism (event vs throw). Postcondition: createinsertstream-partial-failure-event-not-listener.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 Phase 14 re-enumeration found 5 stream methods missed by original Promise-only enumeration. Detection rule needed for paginator.streamify-returned stream surface (event-based error delivery, not Promise rejection)."
+    },
+    "resolution": null
+  },
+  "3110": {
+    "id": "concern-20260623-bigquery-deepen-3",
+    "created_at": "2026-06-23",
+    "source": "deepen",
+    "package": "@google-cloud/bigquery",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for table.createWriteStream() without .on('error', ...). Underlying load job failures propagate via stream.destroy(err) \u2014 must wire error handler on the writable. Postcondition: createwritestream-job-error-via-destroy.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 Phase 14 re-enumeration found 5 stream methods missed by original Promise-only enumeration. Detection rule needed for paginator.streamify-returned stream surface (event-based error delivery, not Promise rejection)."
+    },
+    "resolution": null
+  },
+  "3111": {
+    "id": "concern-20260623-bigquery-deepen-4",
+    "created_at": "2026-06-23",
+    "source": "deepen",
+    "package": "@google-cloud/bigquery",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for bigquery.createQueryStream(options)/dataset.createQueryStream(options) called WITHOUT outer try/catch \u2014 synchronous validation throws (missing query field, non-Table destination) bypass the event system. Postcondition: createquerystream-sync-validation-throw.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 Phase 14 re-enumeration found 5 stream methods missed by original Promise-only enumeration. Detection rule needed for paginator.streamify-returned stream surface (event-based error delivery, not Promise rejection)."
+    },
+    "resolution": null
+  },
+  "3112": {
+    "id": "concern-20260623-bigquery-deepen-5",
+    "created_at": "2026-06-23",
+    "source": "deepen",
+    "package": "@google-cloud/bigquery",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for job.getQueryResultsStream() without .on('error', ...). Job-state errors (400 invalidQuery / 404 / 5xx) surface as stream events. Postcondition: getqueryresultsstream-missing-error-handler.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive \u2014 Phase 14 re-enumeration found 5 stream methods missed by original Promise-only enumeration. Detection rule needed for paginator.streamify-returned stream surface (event-based error delivery, not Promise rejection)."
+    },
+    "resolution": null
   }
 }
