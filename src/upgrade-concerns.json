@@ -60926,5 +60926,37 @@
       "note": "Proactive — contract added via API surface re-verification (drift-by-staleness). Almost exclusively a browser-upload misconfiguration; rare in pure backend uploads."
     },
     "resolution": null
+  },
+  "3238": {
+    "id": "concern-20260624-express-session-deepen-1",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "express-session",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for req.sessionStore.all(callback) — admin-tooling Store method whose callback err argument can be silently swallowed (postcondition all-callback-error-unchecked) or whose method may be absent on stores that omit the Optional all() implementation (postcondition all-method-not-implemented). Both gaps surface as either silent empty admin UI or a TypeError 500 at deploy time.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — postconditions added via deepen API surface analysis (express-session Store interface §store.all). Detection rule needed for two patterns: (1) sessionStore.all(cb) where cb does not check the first parameter, (2) sessionStore.all(cb) without a preceding typeof sessionStore.all === 'function' guard."
+    },
+    "resolution": null
+  },
+  "3239": {
+    "id": "concern-20260624-express-session-deepen-2",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "express-session",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for req.sessionStore.clear(callback) — security-incident response Store method whose callback err argument can be silently swallowed (postcondition clear-callback-error-unchecked) or whose method may be absent on stores that omit the Optional clear() implementation (postcondition clear-method-not-implemented). Unchecked err here is a SECURITY_RISK because audit logs may claim revoke success while sessions remain valid.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — postconditions added via deepen API surface analysis (express-session Store interface §store.clear). Detection rule needed for two patterns: (1) sessionStore.clear(cb) where cb does not check the first parameter, (2) sessionStore.clear(cb) without a preceding typeof sessionStore.clear === 'function' guard. Severity bumped over deepen-1 because security-incident context turns unchecked errors into compliance/breach risk."
+    },
+    "resolution": null
   }
 }
