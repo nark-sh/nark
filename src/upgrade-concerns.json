@@ -62062,5 +62062,21 @@
       "note": "Proactive — added in mammoth deepen pass 2026-06-24 (deepen-stream-2 pass 72), postconditions readasbuffer-image-missing-from-zip and readasbuffer-browser-no-buffer-polyfill"
     },
     "resolution": null
+  },
+  "3309": {
+    "id": "concern-20260624-nestjs-common-deepen-1",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "@nestjs/common",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for StandardSchemaValidationPipe.transform() called without try-catch when the pipe is used programmatically (not via NestJS route-handler DI). The pipe throws BadRequestException (HTTP 400) by default when the attached standard schema returns issues. Note: this pipe is currently only accessible via deep import 'from @nestjs/common/pipes/standard-schema-validation.pipe' as of @nestjs/common@11.1.27 (not re-exported from main entry). Detection requires recognizing the deep-import path in addition to the existing @nestjs/common type_names.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — added in @nestjs/common deepen pass 2026-06-24 (deepen-stream-2 pass 73, drift re-verification against 11.1.27), postcondition standard-schema-validation-pipe-validation-error"
+    },
+    "resolution": null
   }
 }
