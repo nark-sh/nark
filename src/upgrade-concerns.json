@@ -62366,5 +62366,69 @@
       "note": "Proactive - postcondition added in deepen-stream-2 pass 81; same await-detection conventions as runGlobalSetup."
     },
     "resolution": null
+  },
+  "3328": {
+    "id": "concern-20260624-request-promise-deepen-1",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "request-promise",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for rp.options() calls without try/catch or .catch() — postconditions http-error-4xx-5xx + network-failure added in deepen-stream-3 pass 72 against request-promise@4.2.6. The OPTIONS verb shortcut shares the same StatusCodeError/RequestError rejection paths as the other HTTP verbs (verb table at request/index.js line 68). Detection rule should pattern-match `rp.options(...)` and `<defaulted-rp>.options(...)` callables identically to existing rp.get()/post()/put() rules.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis in deepen-stream-3 pass 72; detection rule needed for parity with other verb shortcuts. Functions verified empirically (rp.options('http://localhost:1') rejects with RequestError on 2026-06-24)."
+    },
+    "resolution": null
+  },
+  "3329": {
+    "id": "concern-20260624-request-promise-deepen-2",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "request-promise",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for rp.delete() (alias for rp.del()) calls without try/catch or .catch() — postconditions http-error-4xx-5xx + network-failure added in deepen-stream-3 pass 72. The `delete` name is the modern alias exposed alongside `del` in request/index.js lines 72-73. Detection rule should treat rp.delete() identically to the existing rp.del() rule — same shared callback in request-promise-core/lib/plumbing.js.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — alias for already-detected rp.del(). If the existing detector matches on method-name string === 'del', it needs to also accept 'delete'."
+    },
+    "resolution": null
+  },
+  "3330": {
+    "id": "concern-20260624-libsql-client-deepen-1",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "@libsql/client",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for transaction.batch() calls without try/catch within an interactive @libsql/client transaction — postcondition transaction-batch-no-try-catch added in deepen-stream-2 pass 82. Scanner should recognize the pattern `const tx = await client.transaction(...); await tx.batch([...])` where the tx.batch() call is not enclosed in a try/catch with tx.close() in finally. Same shape as tx.execute() detection but with batch() method name. Throws LibsqlError(TRANSACTION_CLOSED) on closed stream and LibsqlBatchError(statementIndex) on per-statement failure — transaction is NOT auto-rolled back on failure, so missing finally close holds the write lock until 5s server timeout.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — postcondition added via API surface re-enumeration against @libsql/client v0.17.4 source; detection rule needed"
+    },
+    "resolution": null
+  },
+  "3331": {
+    "id": "concern-20260624-libsql-client-deepen-2",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "@libsql/client",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for transaction.executeMultiple() calls without try/catch within an interactive @libsql/client transaction — postcondition transaction-execute-multiple-no-try-catch added in deepen-stream-2 pass 82. Scanner should recognize the pattern `const tx = await client.transaction(...); await tx.executeMultiple(`...`)` where the executeMultiple call is not enclosed in a try/catch with tx.close() in finally. Throws LibsqlError(TRANSACTION_CLOSED) on closed stream and LibsqlError(SQLITE_ERROR) on inner statement failure. executeMultiple internally calls this.close() in its catch block, so subsequent tx.execute calls will throw TRANSACTION_CLOSED if the user doesn't notice the first failure.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — postcondition added via API surface re-enumeration against @libsql/client v0.17.4 source; detection rule needed"
+    },
+    "resolution": null
   }
 }
