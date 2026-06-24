@@ -61854,5 +61854,85 @@
       "note": "Proactive — postcondition added via deepen API surface analysis of @upstash/qstash@2.11.1 (depth pass 2026-06-24, was 2026-04-17 last_deepened). Detection scope: extend the existing @upstash/qstash bare-await detector to match flowControl.resetRate on Client/UrlGroups/FlowControlApi/DLQ instances."
     },
     "resolution": null
+  },
+  "3296": {
+    "id": "concern-20260624-simple-git-deepen-14",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "simple-git",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for simple-git applyPatch() to enforce postcondition simple-git-apply-patch-missing-try-catch. Detector should fire on bare-await git.applyPatch(patches) or this.git.applyPatch(patches) outside try-catch. Same straightThroughStringTask error path as the rest of the simple-git methods. Source: simple-git dist/cjs/index.js applyPatchTask line 3671.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis in deepen pass 69; detector rule needed."
+    },
+    "resolution": null
+  },
+  "3297": {
+    "id": "concern-20260624-simple-git-deepen-15",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "simple-git",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for simple-git mirror() to enforce postcondition simple-git-mirror-missing-try-catch. Detector should fire on bare-await git.mirror(repo, path) outside try-catch. Same network/auth error profile as clone() — cloneMirrorTask appends --mirror and delegates to cloneTask. Source: simple-git dist/cjs/index.js cloneMirrorTask line 3456.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis in deepen pass 69; detector rule needed."
+    },
+    "resolution": null
+  },
+  "3298": {
+    "id": "concern-20260624-simple-git-deepen-16",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "simple-git",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for simple-git mergeFromTo() to enforce postcondition simple-git-merge-from-to-missing-try-catch. Detector should fire on bare-await git.mergeFromTo(remote, branch) outside try-catch. Delegates to mergeTask — same GitResponseError<MergeSummary> semantics as git.merge() when the parser detects conflicts. Source: simple-git dist/cjs/index.js line 3550.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis in deepen pass 69; detector rule needed."
+    },
+    "resolution": null
+  },
+  "3299": {
+    "id": "concern-20260624-simple-git-deepen-17",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "simple-git",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for simple-git deleteLocalBranches() to enforce postcondition simple-git-delete-local-branches-missing-try-catch. Detector should fire on bare-await git.deleteLocalBranches(names) outside try-catch. Multi-branch variant of deleteLocalBranch — onError path re-throws as GitError when hasBranchDeletionError does not match. Source: simple-git dist/cjs/index.js deleteBranchesTask line 3854.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis in deepen pass 69; detector rule needed."
+    },
+    "resolution": null
+  },
+  "3300": {
+    "id": "concern-20260624-simple-git-deepen-18",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "simple-git",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for simple-git checkoutLocalBranch() to enforce postcondition simple-git-checkout-local-branch-missing-try-catch. Detector should fire on bare-await git.checkoutLocalBranch(name) outside try-catch. Common failure: name collision throws 'fatal: A branch named X already exists'. Delegates to checkoutTask([-b, branchName, ...]). Source: simple-git dist/cjs/index.js line 2073.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis in deepen pass 69; detector rule needed."
+    },
+    "resolution": null
   }
 }
