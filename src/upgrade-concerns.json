@@ -60796,5 +60796,71 @@
       "note": "Proactive — postcondition added in deepen pass 47 (2026-06-24, deepen-stream-2). The branch-protection-403 case is hard to model statically; a hint-only suggestion in the catch-body recommendation is sufficient for now."
     },
     "resolution": null
+  },
+  "3230": {
+    "id": "concern-20260624-square-deepen-11",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "square",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for square.subscriptions.pause() — postconditions added (invalid-request, deferred-billing-trap, auth-and-throttling) but no scanner rule confirmed. v44 namespaced method on SubscriptionsClient. Detect missing try-catch around await client.subscriptions.pause(...). The deferred-billing-trap is a silent-success pattern where pauseEffectiveDate omitted or falling in current cycle defers to next billing cycle — should ideally surface as a hint when the caller doesn't read response.actions[0].effectiveDate.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — postconditions added in deepen pass 41 (2026-06-24, deepen-stream-3). Generic ThrowingFunctionDetector + InstanceTrackerPlugin + ContractMatcher likely already detects via class_names: SubscriptionsClient. Confirm via ground-truth fixture run."
+    },
+    "resolution": null
+  },
+  "3231": {
+    "id": "concern-20260624-square-deepen-12",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "square",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for square.subscriptions.resume() — postconditions added (customer-card-error, invalid-date, auth-and-throttling) but no scanner rule confirmed. v44 namespaced method on SubscriptionsClient. Detect missing try-catch around await client.subscriptions.resume(...). The customer-card-error case (INVALID_CARD/CUSTOMER_NOT_FOUND from stale customer record after a long pause) is a high-impact silent-failure path — caller should distinguish from operational errors.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — postconditions added in deepen pass 41 (2026-06-24, deepen-stream-3). Generic detection likely covers via class_names: SubscriptionsClient. Confirm via ground-truth fixture run."
+    },
+    "resolution": null
+  },
+  "3232": {
+    "id": "concern-20260624-square-deepen-13",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "square",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for square.invoices.cancel() — postconditions added (invalid-state, version-mismatch, auth-and-throttling) but no scanner rule confirmed. v44 namespaced method on InvoicesClient (class_names already in detection block). Detect missing try-catch around await client.invoices.cancel(...). The version-mismatch case is interesting — could possibly hint when caller passes a hard-coded version literal rather than a freshly-fetched value from invoices.get().",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — postconditions added in deepen pass 41 (2026-06-24, deepen-stream-3). InvoicesClient not currently in detection.class_names — needs to be added: PaymentsClient, OrdersClient, CustomersClient, RefundsClient, SubscriptionsClient, CatalogClient, DisputesClient, GiftCardsClient + InvoicesClient (and possibly CardsClient, CheckoutClient already implicit via SquareClient root). Verify via ground-truth fixture run."
+    },
+    "resolution": null
+  },
+  "3233": {
+    "id": "concern-20260624-aws-sqs-deepen-invalid-entry-id",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "@aws-sdk/client-sqs",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection rule for sqs-send-batch-invalid-entry-id postcondition. SendMessageBatchCommand (and the same-shape DeleteMessageBatchCommand / ChangeMessageVisibilityBatchCommand) throws InvalidBatchEntryId synchronously when entry.Id doesn't match [A-Za-z0-9_-]{1,80}. Common bug: callers pass database UUIDs containing dots / slashes, or upstream message IDs with ':' or '/'. The ENTIRE batch is rejected — none of the messages are sent. Detection should flag batch-send call sites where Entry.Id is sourced from a string variable without an upstream replace/sanitize/match call. Lower-precision alternative: flag any SendMessageBatchCommand callsite that doesn't have a regex test or sanitize call in the Entries.map() body. Heuristic could check for the literal characters '.', '/', ':' in inline Id values.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "fix_target": "scanner",
+      "note": "Proactive — postcondition added by bc-deepen-contract 2026-06-24, no scanner rule yet. Existing batch postconditions (sqs-send-batch-no-try-catch, sqs-send-batch-failed-not-checked) cover the request-level and partial-failure cases. This new postcondition covers the synchronous-throw path on malformed entry IDs which is distinct and not covered by the umbrella try-catch heuristic (developers often wrap in try-catch but log-and-swallow without sanitizing IDs)."
+    },
+    "resolution": null,
+    "corpus_tier": "public"
   }
 }
