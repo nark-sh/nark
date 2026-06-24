@@ -60236,5 +60236,101 @@
       "note": "Proactive — contract added via API surface analysis. Pattern: const x = await auth0.passwordless.verify() without try-catch. Added in v4.21/4.22; MfaRequiredError path added in v4.23 BREAKING."
     },
     "resolution": null
+  },
+  "3195": {
+    "id": "concern-20260624-openai-deepen-images-edit-1",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "openai",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for openai.images.edit() — postcondition added in deepen-stream-2 pass 39 (drift-by-staleness against openai-node@6.44.0). Non-streaming surface: authentication-error + content-policy-violation. Detect via 3-level property chain at openai.images.edit(...) and require try-catch when callable returns Promise<ImagesResponse>.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis. images.edit() was omitted in 2026-04-16 pass as \"same surface as generate\"; revisited 2026-06-24 because streaming variant was added to openai-node 6.x."
+    },
+    "resolution": null
+  },
+  "3196": {
+    "id": "concern-20260624-openai-deepen-images-edit-2",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "openai",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add stream-aware detection for openai.images.edit({stream: true}) — Stream<ImageEditStreamEvent>. Two postconditions: (a) for-await loop without try-catch around mid-stream APIError throw (core/streaming.js line 50, 66); (b) for-await exits silently on AbortController abort with no explicit completion-flag check (core/streaming.js line 75 — isAbortError returns without throw). Pattern mirrors chat.completions.stream detection family but emits on the images.edit() surface with stream:true in the body.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — streaming variant of images.edit was added after the 2026-04-16 deepen pass. SaaS chat UIs that integrate inline image editing use partial_image streaming for preview UX; mid-stream APIError + silent-abort are real production failure modes."
+    },
+    "resolution": null
+  },
+  "3197": {
+    "id": "concern-20260624-aws-sdk-client-lambda-deepen-9",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "@aws-sdk/client-lambda",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @aws-sdk/client-lambda AddPermissionCommand without try-catch — postcondition aws-lambda-add-permission-no-error-handling added. Generic aws-lambda-service-error rule fires for missing try-catch; a command-specific rule could additionally surface PolicyLengthExceededException (20 KB function policy doc cap) and PublicPolicyException (block-public-access guard, AuthType=NONE-style exposure). The PublicPolicyException pattern is especially important for security audit surfaces because it indicates the caller tried to grant Principal=\"*\" without a SourceAccount/SourceArn condition.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — AddPermissionCommand has unique throw set vs generic send including PolicyLengthExceededException (20 KB Lambda function policy size cap, AWS hard-quota), PublicPolicyException (block-public-access guardrail added 2024), PreconditionFailedException (RevisionId race). Heavily used in serverless deploy automation (API Gateway, S3, SNS, EventBridge wiring)."
+    },
+    "resolution": null
+  },
+  "3198": {
+    "id": "concern-20260624-aws-sdk-client-lambda-deepen-10",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "@aws-sdk/client-lambda",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @aws-sdk/client-lambda AddPermissionCommand catch block that does not specifically branch on PolicyLengthExceededException — postcondition aws-lambda-add-permission-policy-length-exceeded added. This is a silent operational failure pattern: once the function policy hits 20 KB, every subsequent AddPermission call fails identically. Generic catches that just log the error mask the condition; the policy must be manually pruned via RemovePermissionCommand before AddPermission can succeed again. Detection pattern: AddPermissionCommand inside try-catch where catch block has no `error.name === 'PolicyLengthExceededException'` branch.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — specific error-name detection pattern, analogous to the existing PreconditionFailedException patterns for UpdateFunctionCode/Configuration. The 20 KB cap is documented at https://docs.aws.amazon.com/lambda/latest/dg/gettingstarted-limits.html — a hard AWS-enforced quota."
+    },
+    "resolution": null
+  },
+  "3199": {
+    "id": "concern-20260624-aws-sdk-client-lambda-deepen-11",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "@aws-sdk/client-lambda",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @aws-sdk/client-lambda PublishVersionCommand without try-catch — postcondition aws-lambda-publish-version-no-error-handling added. Generic aws-lambda-service-error rule fires for missing try-catch; a command-specific rule could additionally surface CodeStorageExceededException (75 GB account quota — silent rollout failure across all functions once hit), FunctionVersionsPerCapacityProviderLimitExceededException (new in v3.1075.0 capacity provider feature), and the PreconditionFailedException race pattern when RevisionId / CodeSha256 do not match current $LATEST.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — PublishVersionCommand is core to blue/green deploy and alias-based traffic shifting. The CodeStorageExceededException is a silent pipeline-stop condition (every subsequent publish fails identically once the 75 GB quota is hit). FunctionVersionsPerCapacityProviderLimitExceededException is newly added in v3.1075.0 — older v3.0+ ranges may not throw it."
+    },
+    "resolution": null
+  },
+  "3200": {
+    "id": "concern-20260624-aws-sdk-client-lambda-deepen-12",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "@aws-sdk/client-lambda",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @aws-sdk/client-lambda CreateFunctionUrlConfigCommand without try-catch — postcondition aws-lambda-function-url-no-error-handling added. Generic aws-lambda-service-error rule fires; a command-specific rule could additionally surface the ResourceConflictException idempotency pattern (Function URL already exists — caller should switch to UpdateFunctionUrlConfigCommand) and the AuthType='NONE' public-exposure pattern. AuthType='NONE' makes the function URL publicly invokable — security audits should flag this when the value is a literal in source.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — Function URLs are a popular API Gateway replacement in 2026 SaaS apps for webhook receivers and OAuth callback handlers. The AuthType=NONE literal pattern is high-value security signal (lints exposed endpoints from source). ResourceConflictException is documented idempotency signal in deploy automation."
+    },
+    "resolution": null
   }
 }
