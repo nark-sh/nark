@@ -59308,5 +59308,69 @@
       "note": "Proactive — postcondition added via API surface analysis after detecting new v7.13+ Slack AI streaming methods (chat.startStream/appendStream/stopStream) absent from prior 2026-04-03 deepen pass against v7.10. Detection rule needs to fire on awaited client.chat.{startStream,appendStream,stopStream} without try-catch."
     },
     "resolution": null
+  },
+  "3137": {
+    "id": "concern-20260623-cassandra-driver-deepen-1",
+    "created_at": "2026-06-23",
+    "source": "deepen",
+    "package": "cassandra-driver",
+    "type": "ambiguous_detector",
+    "status": "pending",
+    "description": "Disambiguate Mapper.batch() vs Client.batch() — both share the .batch( await_pattern, so Mapper.batch() calls are currently attributed to Client.batch's batch-failure postcondition. Need namespace-aware detection (mapper instance from mapping.Mapper constructor) so violations on mapper.batch() fire as mapper-batch-no-try-catch instead.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — added in 2026-06-23 deepen pass alongside the mapper-batch-no-try-catch postcondition. Currently the ground-truth fixture asserts batch-failure fires (since that is what the scanner reports) but the contract-correct ID is mapper-batch-no-try-catch. Disambiguation requires tracking Mapper instances separately from Client instances and resolving .batch( against the instance class."
+    },
+    "resolution": null
+  },
+  "3138": {
+    "id": "concern-20260623-cassandra-driver-deepen-2",
+    "created_at": "2026-06-23",
+    "source": "deepen",
+    "package": "cassandra-driver",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add LWT-result-not-checked detection for Mapper.batch() — postcondition mapper-batch-lwt-not-checked added in 2026-06-23 deepen pass. When a conditional batch (containing ifNotExists / ifExists / when items) resolves without throwing, the result.wasApplied() check is required because un-applied conditional batches resolve successfully with no writes.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — same family of LWT-check gap as the existing mapper-insert-if-not-exists-not-checked and mapper-update-if-exists-not-checked concerns. Needs result.wasApplied() flow tracking after await mapper.batch([batching.insert(..., { ifNotExists: true }), ...])."
+    },
+    "resolution": null
+  },
+  "3139": {
+    "id": "concern-20260623-cassandra-driver-deepen-3",
+    "created_at": "2026-06-23",
+    "source": "deepen",
+    "package": "cassandra-driver",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for client.metadata.getTable() — postconditions metadata-gettable-no-try-catch and metadata-gettable-null-not-checked added in 2026-06-23 deepen pass. Metadata reads can reject pre-connect (DriverError) or on control-connection loss (NoHostAvailableError), and silently return null when the keyspace is unknown.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — extends the existing await_patterns entry .metadata.gettable( with a formal function entry. Detector needs (a) await client.metadata.getTable(...) without try-catch and (b) result property access without an intervening if (!t) null check, similar to mapper-get-null-not-checked."
+    },
+    "resolution": null
+  },
+  "3140": {
+    "id": "concern-20260623-cassandra-driver-deepen-4",
+    "created_at": "2026-06-23",
+    "source": "deepen",
+    "package": "cassandra-driver",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for client.metadata.refreshKeyspaces() and client.metadata.refreshKeyspace() — postcondition metadata-refreshkeyspaces-no-try-catch added in 2026-06-23 deepen pass. Schema refresh after DDL operations can reject when the control connection is unavailable (common during rolling restarts), so refreshKeyspaces() awaits must be wrapped in try-catch.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — schema management code path. Detector needs await client.metadata.refreshKeyspaces() / .refreshKeyspace(name) without try-catch. Rejection paths confirmed from lib/metadata/index.js refreshKeyspaces() and refreshKeyspacesInternal()."
+    },
+    "resolution": null
   }
 }
