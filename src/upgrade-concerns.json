@@ -60092,5 +60092,149 @@
       "note": "Proactive — contract added via API surface analysis, detection rule needed"
     },
     "resolution": null
+  },
+  "3186": {
+    "id": "concern-20260624-auth0-nextjs-auth0-deepen-1",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "@auth0/nextjs-auth0",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for Auth0Client.passkey.register() postcondition auth0-passkey-register-not-enabled — multi-level property access (auth0.passkey.* / auth0.passwordless.*); 4.23.0 BREAKING also surfaces MfaRequiredError from passkey.getToken and passwordless.verify",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis. Pattern: const x = await auth0.passkey.register() without try-catch. Added in v4.21/4.22; MfaRequiredError path added in v4.23 BREAKING."
+    },
+    "resolution": null
+  },
+  "3187": {
+    "id": "concern-20260624-auth0-nextjs-auth0-deepen-2",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "@auth0/nextjs-auth0",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for Auth0Client.passkey.challenge() postcondition auth0-passkey-challenge-no-credential — multi-level property access (auth0.passkey.* / auth0.passwordless.*); 4.23.0 BREAKING also surfaces MfaRequiredError from passkey.getToken and passwordless.verify",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis. Pattern: const x = await auth0.passkey.challenge() without try-catch. Added in v4.21/4.22; MfaRequiredError path added in v4.23 BREAKING."
+    },
+    "resolution": null
+  },
+  "3188": {
+    "id": "concern-20260624-auth0-nextjs-auth0-deepen-3",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "@auth0/nextjs-auth0",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for Auth0Client.passkey.getToken() postcondition auth0-passkey-gettoken-mfa-required — multi-level property access (auth0.passkey.* / auth0.passwordless.*); 4.23.0 BREAKING also surfaces MfaRequiredError from passkey.getToken and passwordless.verify",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis. Pattern: const x = await auth0.passkey.getToken() without try-catch. Added in v4.21/4.22; MfaRequiredError path added in v4.23 BREAKING."
+    },
+    "resolution": null
+  },
+  "3189": {
+    "id": "concern-20260624-auth0-nextjs-auth0-deepen-4",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "@auth0/nextjs-auth0",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for Auth0Client.passkey.getToken() postcondition auth0-passkey-gettoken-invalid-assertion — multi-level property access (auth0.passkey.* / auth0.passwordless.*); 4.23.0 BREAKING also surfaces MfaRequiredError from passkey.getToken and passwordless.verify",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis. Pattern: const x = await auth0.passkey.getToken() without try-catch. Added in v4.21/4.22; MfaRequiredError path added in v4.23 BREAKING."
+    },
+    "resolution": null
+  },
+  "3190": {
+    "id": "concern-20260624-auth0-nextjs-auth0-deepen-5",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "@auth0/nextjs-auth0",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for Auth0Client.passkey.enrollmentChallenge() postcondition auth0-passkey-enrollment-challenge-missing-scope — multi-level property access (auth0.passkey.* / auth0.passwordless.*); 4.23.0 BREAKING also surfaces MfaRequiredError from passkey.getToken and passwordless.verify",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis. Pattern: const x = await auth0.passkey.enrollmentChallenge() without try-catch. Added in v4.21/4.22; MfaRequiredError path added in v4.23 BREAKING."
+    },
+    "resolution": null
+  },
+  "3191": {
+    "id": "concern-20260624-auth0-nextjs-auth0-deepen-6",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "@auth0/nextjs-auth0",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for Auth0Client.passkey.enrollmentVerify() postcondition auth0-passkey-enrollment-verify-duplicate-or-rejected — multi-level property access (auth0.passkey.* / auth0.passwordless.*); 4.23.0 BREAKING also surfaces MfaRequiredError from passkey.getToken and passwordless.verify",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis. Pattern: const x = await auth0.passkey.enrollmentVerify() without try-catch. Added in v4.21/4.22; MfaRequiredError path added in v4.23 BREAKING."
+    },
+    "resolution": null
+  },
+  "3192": {
+    "id": "concern-20260624-auth0-nextjs-auth0-deepen-7",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "@auth0/nextjs-auth0",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for Auth0Client.passwordless.start() postcondition auth0-passwordless-start-rate-limit-or-disabled — multi-level property access (auth0.passkey.* / auth0.passwordless.*); 4.23.0 BREAKING also surfaces MfaRequiredError from passkey.getToken and passwordless.verify",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis. Pattern: const x = await auth0.passwordless.start() without try-catch. Added in v4.21/4.22; MfaRequiredError path added in v4.23 BREAKING."
+    },
+    "resolution": null
+  },
+  "3193": {
+    "id": "concern-20260624-auth0-nextjs-auth0-deepen-8",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "@auth0/nextjs-auth0",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for Auth0Client.passwordless.verify() postcondition auth0-passwordless-verify-mfa-required — multi-level property access (auth0.passkey.* / auth0.passwordless.*); 4.23.0 BREAKING also surfaces MfaRequiredError from passkey.getToken and passwordless.verify",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis. Pattern: const x = await auth0.passwordless.verify() without try-catch. Added in v4.21/4.22; MfaRequiredError path added in v4.23 BREAKING."
+    },
+    "resolution": null
+  },
+  "3194": {
+    "id": "concern-20260624-auth0-nextjs-auth0-deepen-9",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "@auth0/nextjs-auth0",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for Auth0Client.passwordless.verify() postcondition auth0-passwordless-verify-invalid-otp — multi-level property access (auth0.passkey.* / auth0.passwordless.*); 4.23.0 BREAKING also surfaces MfaRequiredError from passkey.getToken and passwordless.verify",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis. Pattern: const x = await auth0.passwordless.verify() without try-catch. Added in v4.21/4.22; MfaRequiredError path added in v4.23 BREAKING."
+    },
+    "resolution": null
   }
 }
