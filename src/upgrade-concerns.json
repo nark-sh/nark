@@ -61934,5 +61934,53 @@
       "note": "Proactive — contract added via API surface analysis in deepen pass 69; detector rule needed."
     },
     "resolution": null
+  },
+  "3301": {
+    "id": "concern-20260624-zod-deepen-1",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "zod",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for zod safeParseAsync() promise rejection from async refinement throw, enforcing postcondition safe-parse-async-refinement-throw. Detector should fire on bare-await schema.safeParseAsync(x) outside try-catch when the schema uses .refine(async fn) where the refinement body THROWS (not just returns false). Current contract treats safeParseAsync as throws=never; this is incorrect when refinement throws. Common failure: DB call inside refinement rejects, original Error propagates as promise rejection that bypasses {success:false} branch.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — postcondition added via API surface deepen pass 2026-06-24, detection rule needed. Confirmed via execution: z.string().refine(async()=>{throw new Error('boom')}).safeParseAsync('x') rejects with original Error, not ZodError."
+    },
+    "resolution": null
+  },
+  "3302": {
+    "id": "concern-20260624-zod-deepen-2",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "zod",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for zod safeEncodeAsync() promise rejection from $ZodEncodeError when schema has unidirectional .transform(). Enforces postconditions safe-encode-async-unidirectional-transform and safe-encode-async-refinement-throw. Detector should fire on bare-await schema.safeEncodeAsync(x) outside try-catch. Common failure: developer assumes 'safe' wrapper catches everything, but $ZodEncodeError propagates as a promise rejection on irreversible transforms.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — postcondition added via API surface deepen pass 2026-06-24, detection rule needed. Confirmed via execution: z.string().transform(s=>s.toUpperCase()).safeEncodeAsync('HELLO') rejects with $ZodEncodeError."
+    },
+    "resolution": null
+  },
+  "3303": {
+    "id": "concern-20260624-zod-deepen-3",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "zod",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for zod safeDecodeAsync() promise rejection from async refinement throw, enforcing postcondition safe-decode-async-refinement-throw. Detector should fire on bare-await schema.safeDecodeAsync(x) outside try-catch when the schema uses .refine(async fn) whose body may throw. safeDecodeAsync aliases safeParseAsync internally so same code path applies.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — postcondition added via API surface deepen pass 2026-06-24, detection rule needed. Confirmed via execution against zod@4.4.3."
+    },
+    "resolution": null
   }
 }
