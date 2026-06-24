@@ -60732,5 +60732,69 @@
       "note": "Proactive — postcondition added in deepen pass 45 (2026-06-24, deepen-stream-2) after re-reading lib/handlebars/compiler/compiler.js against handlebars 4.7.9. Mirrors precompile-invalid-input-type already detected. No new scanner rule needed for the no-try-catch case (existing ThrowingFunctionDetector covers compile()); a more precise rule could distinguish input-type vs syntax errors when source flow analysis is added."
     },
     "resolution": null
+  },
+  "3226": {
+    "id": "concern-20260624-octokit-rest-deepen-17",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "@octokit/rest",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for octokit.apps.createInstallationAccessToken() — JWT 401, 403 suspended, 404 uninstalled, 422 over-scoped. GitHub App backends mint installation tokens hourly; cached expired JWTs (10-min limit) cause auth failures that cascade through every downstream call. Scanner should flag the no-try-catch case so handlers explicitly differentiate retriable (401/JWT refresh) vs non-retriable (403/404/422) failures.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — postcondition added in deepen pass 47 (2026-06-24, deepen-stream-2). Existing generic RequestError detector likely covers the no-try-catch case; a future rule could distinguish JWT-expired (retriable) from installation-suspended (non-retriable) at the catch-block level."
+    },
+    "resolution": null
+  },
+  "3227": {
+    "id": "concern-20260624-octokit-rest-deepen-18",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "@octokit/rest",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for octokit.repos.compareCommitsWithBasehead() — 404 deleted ref, 422 unrelated history, 403 oversized diff. Deploy preview and changelog bots break silently when uncaught. Existing 404 handling around getContent applies to read-only repo data; this method has an additional 403 large-diff failure mode that should hint at paginated fallback in the required handling.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — postcondition added in deepen pass 47 (2026-06-24, deepen-stream-2). No-try-catch detection inherited from existing octokit instance-method rule; the large-diff 403 fallback (paginated fetch) is a hint-only refinement, not a hard detection requirement."
+    },
+    "resolution": null
+  },
+  "3228": {
+    "id": "concern-20260624-octokit-rest-deepen-19",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "@octokit/rest",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for octokit.issues.removeLabel() — dominant failure is 404-race between concurrent label automations. Stale-bot deployments at scale repeatedly crash mid-loop when two automations remove the same label. Scanner should flag no-try-catch and recommend treating 404 as no-op (desired end state); 410 (issue deleted) requires removing the issue from the queue.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — postcondition added in deepen pass 47 (2026-06-24, deepen-stream-2). Existing octokit await-pattern detector should pick this up; the 404-as-no-op semantic is a documentation-level hint for the suggested catch body, not a new scanner primitive."
+    },
+    "resolution": null
+  },
+  "3229": {
+    "id": "concern-20260624-octokit-rest-deepen-20",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "@octokit/rest",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for octokit.pulls.dismissReview() — 422 when already dismissed (race), 403 when branch protection forbids non-admin dismissal, 404 when review or PR gone. Auto-dismiss-on-push and compliance reset automations break silently. Recommend 422 as no-op, 403 surfaced to operator (policy mismatch, not retriable).",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — postcondition added in deepen pass 47 (2026-06-24, deepen-stream-2). The branch-protection-403 case is hard to model statically; a hint-only suggestion in the catch-body recommendation is sufficient for now."
+    },
+    "resolution": null
   }
 }
