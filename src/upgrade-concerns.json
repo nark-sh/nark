@@ -62543,5 +62543,149 @@
       "note": "Proactive deepen pass 2 (2026-06-24, deepen-stream-2). Two new postconditions added to stripe-v21 contract.yaml: parse-event-notification-async-signature-failed (StripeSignatureVerificationError) and parse-event-notification-async-wrong-payload-type (plain Error from wrong-parsing-method guard)."
     },
     "resolution": null
+  },
+  "3339": {
+    "id": "concern-20260624-anthropic-sdk-deepen-1",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "@anthropic-ai/sdk",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for beta.messages.toolRunner — async-iterable + awaitable runner helper. Scanner must detect: (a) for-await over runner without try-catch, (b) await runner / await runner.runUntilDone() / await runner.done() / await runner.generateToolResponse() without try-catch, (c) optionally: toolRunner called without max_iterations param (cost runaway).",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — postconditions tool-runner-no-try-catch and tool-runner-max-iterations-not-set added in deepen pass 6 (2026-06-24, deepen-stream-3) against SDK v0.105.0. New function in v0.105+. No detector exists; scanner needs new rule for chained .beta.messages.toolRunner() with iterator handling."
+    },
+    "resolution": null
+  },
+  "3340": {
+    "id": "concern-20260624-anthropic-sdk-deepen-2",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "@anthropic-ai/sdk",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for beta.messages.create — beta-channel variant of messages.create. Scanner must detect the .beta.messages.create chain (distinct from .messages.create). Two postconditions: (a) beta-messages-create-no-try-catch (missing try-catch on await), (b) beta-messages-create-beta-header-mismatch (beta-gated param without matching betas[] flag — programmer-error 400).",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — added in deepen pass 6 (2026-06-24, deepen-stream-3) against SDK v0.105.0. Beta surface separate from non-beta messages.create. Existing detector for messages.create may need extension to recognize the .beta.messages chain segment, or a new rule entirely."
+    },
+    "resolution": null
+  },
+  "3341": {
+    "id": "concern-20260624-claude-agent-sdk-deepen-1",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "@anthropic-ai/claude-agent-sdk",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Flow-sensitive detector: when listSessions() returns an array and the array is indexed (sessions[0].x) without a length guard, fire list-sessions-empty-result-unchecked",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  "3342": {
+    "id": "concern-20260624-claude-agent-sdk-deepen-2",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "@anthropic-ai/claude-agent-sdk",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Flow-sensitive detector: when getSessionInfo() returns a value and the value is dereferenced (.summary, .sessionId, etc.) without an undefined check, fire get-session-info-undefined-unchecked",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  "3343": {
+    "id": "concern-20260624-claude-agent-sdk-deepen-3",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "@anthropic-ai/claude-agent-sdk",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for listSessions({ sessionStore }) called without try/catch — store may not implement listSessions; produces TypeError on undefined method call",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  "3344": {
+    "id": "concern-20260624-claude-agent-sdk-deepen-4",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "@anthropic-ai/claude-agent-sdk",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for getSessionInfo({ sessionStore }) called without try/catch — store load failures must not be conflated with \"session not found\"",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  "3345": {
+    "id": "concern-20260624-claude-agent-sdk-deepen-5",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "@anthropic-ai/claude-agent-sdk",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for getSessionMessages() called without try/catch — corrupted JSONL transcripts throw and must not be silently swallowed as \"no messages\"",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  "3346": {
+    "id": "concern-20260624-claude-agent-sdk-deepen-6",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "@anthropic-ai/claude-agent-sdk",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for listSubagents({ sessionStore }) called without try/catch — same store-method-missing failure mode as listSessions",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  "3347": {
+    "id": "concern-20260624-claude-agent-sdk-deepen-7",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "@anthropic-ai/claude-agent-sdk",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for getSubagentMessages() called without try/catch — same dual-mode (empty vs thrown) contract as getSessionMessages",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
   }
 }
