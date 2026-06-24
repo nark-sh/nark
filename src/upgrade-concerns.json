@@ -59404,5 +59404,37 @@
       "note": "Proactive — contract added via API surface analysis, detection rule needed. Fixture annotation references the postcondition id."
     },
     "resolution": null
+  },
+  "3143": {
+    "id": "concern-20260623-clerk-nextjs-deepen-1",
+    "created_at": "2026-06-23",
+    "source": "deepen",
+    "package": "@clerk/nextjs",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for verifyToken() from @clerk/nextjs/server. Verifies JWT session tokens against Clerk's JWKS endpoint; throws TokenVerificationError on expired/invalid/malformed JWT, missing JWKS, missing CLERK_SECRET_KEY, or signature mismatch. Real-world use: webhook handlers, edge-runtime route handlers, machine-to-machine flows that validate tokens outside clerkMiddleware(). Scanner should flag bare `await verifyToken(...)` calls without try-catch/.catch — the dominant failure mode (expired token) is a normal unauthenticated request that should return 401, not 500.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — postcondition verify-token-no-error-handling added in deepen-stream-3 pass 21 (2026-06-23). verifyToken is re-exported from @clerk/backend via @clerk/nextjs/server. TokenVerificationError class + 15-value reason enum confirmed from @clerk/backend dist/chunk-I4B6KCGC.mjs and chunk-KDNHJOF3.mjs source inspection."
+    },
+    "resolution": null
+  },
+  "3144": {
+    "id": "concern-20260623-clerk-nextjs-deepen-2",
+    "created_at": "2026-06-23",
+    "source": "deepen",
+    "package": "@clerk/nextjs",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for useReverification() hook. The hook returns an enhanced fetcher whose promise rejects with ClerkRuntimeError(code: 'reverification_cancelled') when the user closes the reverification modal without completing it. Scanner should flag bare-await on the destructured fetcher without a try-catch + isReverificationCancelledError branch — without it, payment / sensitive-action UIs show generic 'Something went wrong' instead of polite retry UX, and optimistic UI is not reverted.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — postcondition use-reverification-cancel-not-handled added in deepen-stream-3 pass 21 (2026-06-23). isReverificationCancelledError logic confirmed in @clerk/shared dist/runtime/error-Dl9xmUf3.mjs: `isClerkRuntimeError(err) && err.code === 'reverification_cancelled'`. Hook is exported from '@clerk/nextjs' (re-export from @clerk/clerk-react)."
+    },
+    "resolution": null
   }
 }
