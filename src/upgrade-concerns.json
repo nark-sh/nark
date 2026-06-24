@@ -63039,5 +63039,37 @@
       "note": "Proactive - contract added via API surface analysis (parity gap with already-contracted ReplicateSecretToRegionsCommand), detection rule needed"
     },
     "resolution": null
+  },
+  "3370": {
+    "id": "concern-20260624-ethers-deepen-1",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "ethers",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for Signer.populateAuthorization() called without try-catch when chainId or nonce are omitted from the auth payload. Postconditions added in deepen-stream-2 pass 94 (populateauthorization-no-provider-for-auto-fill). This is the EIP-7702 (Pectra) sibling of populateTransaction; missing detection here means relayer / sponsored-gas / session-key flows that pre-fill auth payloads will silently drop type-4 transactions when the wallet has no provider. Detection rule mirrors populatetransaction-no-provider but targets `populateAuthorization` method-name resolution on a Signer / Wallet binding.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive - contract added via API surface analysis. Evidence: lib.esm/providers/abstract-signer.js:172-183 calls checkProvider(this, 'getNetwork') and this.getNonce() which can throw UNSUPPORTED_OPERATION when provider is null. Regression fixture: populateAuthorizationMissingErrorHandling in packages/ethers/fixtures/ground-truth.ts."
+    },
+    "resolution": null
+  },
+  "3371": {
+    "id": "concern-20260624-ethers-deepen-2",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "ethers",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for Signer.populateAuthorization() called without try-catch when the upstream RPC is degraded. Postconditions added in deepen-stream-2 pass 94 (populateauthorization-network-rpc-failure). populateAuthorization() makes two RPC calls (eth_chainId via provider.getNetwork() and eth_getTransactionCount via getNonce()); transient NETWORK_ERROR / SERVER_ERROR / TIMEOUT from either causes EIP-7702 batched transactions to disappear from relayer queues without a record of why. Detection rule can reuse the existing populatetransaction-network-fee-model-unsupported pattern shape (UNSUPPORTED_OPERATION + NETWORK_ERROR class), bound to the populateAuthorization method name.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive - contract added via API surface analysis. Evidence: provider.getNetwork() and provider.getTransactionCount() both propagate ErrorCode NETWORK_ERROR / SERVER_ERROR / TIMEOUT via the standard ethers v6 error system."
+    },
+    "resolution": null
   }
 }
