@@ -63151,5 +63151,6 @@
       "note": "Proactive — postcondition added via deepen pass 85 (deepen-stream-3) on 2026-06-24 covering FormidableError code 1004 (uninitializedParser) which is the last documented code in src/FormidableError.js without a dedicated postcondition. Defensive guard surface; low real-world hit-rate but completeness-driven."
     },
     "resolution": null
-  }
+  },
+  "_shape": "object keyed by string-integer id (\"0\", \"1\", ...). Iterate via Object.values(d). The integer keys are stable IDs — do not renumber. See bc-coordinator scanner-stream snippet for canonical pending-count pattern."
 }
