@@ -61486,5 +61486,21 @@
       "note": "Proactive - companion to concern-20260624-mongodb-deepen-2. Source confirmed: mongodb@7.3.0 src/gridfs/index.ts async rename(). Both concerns share the GridFSBucket instance tracking work; they can be implemented in a single scanner upgrade PR."
     },
     "resolution": null
+  },
+  "3273": {
+    "id": "concern-20260624-langchain-openai-deepen-1",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "@langchain/openai",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for legacy OpenAI/AzureOpenAI LLM class (extends BaseLLM, not BaseChatModel). These classes are still exported from @langchain/openai@1.5.3 and expose the same runnable interface (invoke/stream/generate) but require a separate scanner pattern array — existing ChatOpenAI patterns do not match them because they sit in a different inheritance tree. Postcondition added in deepen pass 55 (2026-06-24): llm-invoke-network-error with patterns: [OpenAI, AzureOpenAI]. Same error model as ChatOpenAI.invoke (wrapOpenAIClientError funnel) but the scanner needs to walk the legacy LLM class instance separately.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface re-enumeration against installed @langchain/openai@1.5.3. Legacy OpenAI class confirmed in dist/llms.d.ts (extends BaseLLM); AzureOpenAI confirmed in dist/azure/llms.d.ts (extends OpenAI). Both use completionWithRetry() → wrapOpenAIClientError() in dist/llms.js."
+    },
+    "resolution": null
   }
 }
