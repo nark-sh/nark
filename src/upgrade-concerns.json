@@ -62815,5 +62815,197 @@
       "note": "Proactive — contract added via API surface analysis. Pattern: track a variable bound to applyMiddlewares(...withOAuth(...)...)(fetch); flag bare awaits on it. Required regression fixtures: functions 71/72/73 in packages/@modelcontextprotocol/sdk/fixtures/ground-truth.ts. Earlier deepen-stream-2 pass 1 (2026-04-16) misclassified withOAuth as a 'sync factory' and omitted it — that omission was wrong: the factory is sync, but the returned function is async and throws UnauthorizedError."
     },
     "resolution": null
+  },
+  "3356": {
+    "id": "concern-20260624-trigger-dev-sdk-deepen-12",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "@trigger.dev/sdk",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for envvars.upload() — bulk env var import with both synchronous arg-validation throws (missing projectRef/slug/params) and async ApiError hierarchy (AuthenticationError, BadRequestError, RateLimitError, ApiConnectionError). The await call site MUST be wrapped in try/catch. When override:true, partial failures can leave a half-replaced environment — the contract requires both error handling and idempotency awareness.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis pass 82 (deepen-stream-3). Function: envvars.upload. Pattern: composable-middleware-misclassified-as-sync-factory (the namespace is a sync object but its methods are async + throw). Required regression fixtures already added: gt_envvars_upload_missing / _safe in packages/@trigger.dev/sdk/fixtures/ground-truth.ts."
+    },
+    "resolution": null
+  },
+  "3357": {
+    "id": "concern-20260624-trigger-dev-sdk-deepen-13",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "@trigger.dev/sdk",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for envvars.create() — env var creation with ConflictError (409) on duplicate name being the dominant operational failure. Detection rule: any await on envvars.create() outside a try/catch should fire. Bonus: detect missing ConflictError-specific fallback to envvars.update() in the catch block (warning, not error).",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis pass 82 (deepen-stream-3). Function: envvars.create. Pattern: composable-middleware-misclassified-as-sync-factory (the namespace is a sync object but its methods are async + throw). Required regression fixtures already added: gt_envvars_create_missing / _safe in packages/@trigger.dev/sdk/fixtures/ground-truth.ts."
+    },
+    "resolution": null
+  },
+  "3358": {
+    "id": "concern-20260624-trigger-dev-sdk-deepen-14",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "@trigger.dev/sdk",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for envvars.update() — env var update with NotFoundError on missing name. Detection rule: any await on envvars.update() outside a try/catch should fire. Suggested fixture: deploy script that should upsert (catches NotFoundError and calls create()).",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis pass 82 (deepen-stream-3). Function: envvars.update. Pattern: composable-middleware-misclassified-as-sync-factory (the namespace is a sync object but its methods are async + throw). Required regression fixtures already added: gt_envvars_update_missing / _safe in packages/@trigger.dev/sdk/fixtures/ground-truth.ts."
+    },
+    "resolution": null
+  },
+  "3359": {
+    "id": "concern-20260624-trigger-dev-sdk-deepen-15",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "@trigger.dev/sdk",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for envvars.del() — idempotent env var delete that throws NotFoundError if already gone. Detection rule: any await on envvars.del() outside a try/catch should fire. Common bug: cleanup script crashes on the second run because NotFoundError isn't caught.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis pass 82 (deepen-stream-3). Function: envvars.del. Pattern: composable-middleware-misclassified-as-sync-factory (the namespace is a sync object but its methods are async + throw). Required regression fixtures already added: gt_envvars_del_missing / _safe in packages/@trigger.dev/sdk/fixtures/ground-truth.ts."
+    },
+    "resolution": null
+  },
+  "3360": {
+    "id": "concern-20260624-trigger-dev-sdk-deepen-16",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "@trigger.dev/sdk",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for prompts.resolve() — prompt template resolution that returns the compiled prompt text. Critical: silent failure here means the AI task sends an empty/undefined prompt to the LLM. Detection rule: any await on prompts.resolve() outside a try/catch should fire as ERROR. Bonus: detect the prompts.resolve() result being passed to openai.chat.completions.create() WITHOUT a fallback (indicator that the caller has no protection against missing prompts).",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis pass 82 (deepen-stream-3). Function: prompts.resolve. Pattern: composable-middleware-misclassified-as-sync-factory (the namespace is a sync object but its methods are async + throw). Required regression fixtures already added: gt_prompts_resolve_missing / _safe in packages/@trigger.dev/sdk/fixtures/ground-truth.ts."
+    },
+    "resolution": null
+  },
+  "3361": {
+    "id": "concern-20260624-trigger-dev-sdk-deepen-17",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "@trigger.dev/sdk",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for prompts.promote() — promotes a prompt version to be the current active version. Destructive-if-unchecked: a wrong version number immediately swaps the prompt across all running tasks. Detection rule: any await on prompts.promote() outside a try/catch should fire. Bonus: warn if no audit log/console output precedes or follows the promote call (the version transition is invisible).",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis pass 82 (deepen-stream-3). Function: prompts.promote. Pattern: composable-middleware-misclassified-as-sync-factory (the namespace is a sync object but its methods are async + throw). Required regression fixtures already added: gt_prompts_promote_missing / _safe in packages/@trigger.dev/sdk/fixtures/ground-truth.ts."
+    },
+    "resolution": null
+  },
+  "3362": {
+    "id": "concern-20260624-trigger-dev-sdk-deepen-18",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "@trigger.dev/sdk",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for prompts.createOverride() — creates a dashboard override for a prompt. Common ConflictError (409) when override already exists. Detection rule: any await on prompts.createOverride() outside a try/catch should fire.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis pass 82 (deepen-stream-3). Function: prompts.createOverride. Pattern: composable-middleware-misclassified-as-sync-factory (the namespace is a sync object but its methods are async + throw). Required regression fixtures already added: gt_prompts_create_override_missing / _safe in packages/@trigger.dev/sdk/fixtures/ground-truth.ts."
+    },
+    "resolution": null
+  },
+  "3363": {
+    "id": "concern-20260624-trigger-dev-sdk-deepen-19",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "@trigger.dev/sdk",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for idempotencyKeys.create() — ASYNC despite the misleading 'key creation' naming. Detection rule (CRITICAL): flag any call to idempotencyKeys.create() that is NOT awaited (passing the Promise directly to .trigger({idempotencyKey: ...}) defeats idempotency entirely and allows duplicate child runs on parent retry). Secondary rule: await without try/catch in retry-sensitive paths should also fire. Pattern shape: missing-await is the high-impact bug; missing try/catch is secondary.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis pass 82 (deepen-stream-3). Function: idempotencyKeys.create. Pattern: composable-middleware-misclassified-as-sync-factory (the namespace is a sync object but its methods are async + throw). Required regression fixtures already added: gt_idempotency_keys_create_missing / _safe in packages/@trigger.dev/sdk/fixtures/ground-truth.ts."
+    },
+    "resolution": null
+  },
+  "3364": {
+    "id": "concern-20260624-trigger-dev-sdk-deepen-20",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "@trigger.dev/sdk",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for streams.read() — opens a Server-Sent Events subscription. Subtle pattern: errors can occur BOTH at the initial handshake AND mid-stream (via the AsyncIterable's next() rejection). Detection rule: any await on streams.read() outside a try/catch should fire. Bonus: detect when the returned stream is iterated (for-await) but the iteration loop is not wrapped in try/catch — mid-stream errors are silently swallowed.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis pass 82 (deepen-stream-3). Function: streams.read. Pattern: composable-middleware-misclassified-as-sync-factory (the namespace is a sync object but its methods are async + throw). Required regression fixtures already added: gt_streams_read_missing / _safe in packages/@trigger.dev/sdk/fixtures/ground-truth.ts."
+    },
+    "resolution": null
+  },
+  "3365": {
+    "id": "concern-20260624-trigger-dev-sdk-deepen-21",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "@trigger.dev/sdk",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for streams.append() — appends a chunk to a realtime stream. Throws SYNCHRONOUSLY when called outside a task without target option. Detection rule: any await on streams.append() outside a try/catch should fire. Bonus: detect the common LLM-streaming loop pattern where chunks are appended in a for-await iteration without per-chunk error handling (RateLimitError mid-flight causes silent stream truncation).",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis pass 82 (deepen-stream-3). Function: streams.append. Pattern: composable-middleware-misclassified-as-sync-factory (the namespace is a sync object but its methods are async + throw). Required regression fixtures already added: gt_streams_append_missing / _safe in packages/@trigger.dev/sdk/fixtures/ground-truth.ts."
+    },
+    "resolution": null
+  },
+  "3366": {
+    "id": "concern-20260624-trigger-dev-sdk-deepen-22",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "@trigger.dev/sdk",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for batch.retrieve() — retrieves a batch's per-item run statuses. Detection rule: any await on batch.retrieve() outside a try/catch should fire. Bonus secondary check: detect callers that retrieve a batch but never iterate batchInfo.runs to check per-item statuses (assuming overall success without verifying individual items).",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis pass 82 (deepen-stream-3). Function: batch.retrieve. Pattern: composable-middleware-misclassified-as-sync-factory (the namespace is a sync object but its methods are async + throw). Required regression fixtures already added: gt_batch_retrieve_missing / _safe in packages/@trigger.dev/sdk/fixtures/ground-truth.ts."
+    },
+    "resolution": null
+  },
+  "3367": {
+    "id": "concern-20260624-trigger-dev-sdk-deepen-23",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "@trigger.dev/sdk",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for usage.measure() — wraps an async callback for compute-cost measurement. The wrapper PROPAGATES callback errors after closing the OTEL span — callers writing 'I'll catch errors inside the callback' are misled. Detection rule: any await on usage.measure() outside a try/catch should fire. The inner callback's try/catch does NOT count toward satisfying this — the outer measure() await needs its own catch.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis pass 82 (deepen-stream-3). Function: usage.measure. Pattern: composable-middleware-misclassified-as-sync-factory (the namespace is a sync object but its methods are async + throw). Required regression fixtures already added: gt_usage_measure_missing / _safe in packages/@trigger.dev/sdk/fixtures/ground-truth.ts."
+    },
+    "resolution": null
   }
 }
