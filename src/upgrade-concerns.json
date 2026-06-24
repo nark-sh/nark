@@ -62767,5 +62767,21 @@
       "note": "Proactive — postcondition format-non-string-non-function-delayed-throw added in deepen-stream-2 pass 88 (2026-06-24). Two fixture cases at lines 145 and 157 of packages/morgan/fixtures/ground-truth.ts left un-annotated as regression material for the future detector."
     },
     "resolution": null
+  },
+  "3353": {
+    "id": "concern-20260624-cross-fetch-deepen-1",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "cross-fetch",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for fetch-max-redirect-error: fetch() called with node-fetch-specific { follow: <N> } init option (cross-fetch on Node.js) where the upstream redirect chain exceeds the configured limit. node-fetch v2 emits FetchError type='max-redirect' (see lib/index.js line 1590). Distinct from network-error, abort-error, and the existing fetch-request-timeout/body-timeout/max-size detections — needs a new pattern that flags await fetch(url, { follow: N }) (or { follow: N, ... } in any field position) outside a try-catch that recovers from FetchError type='max-redirect'. Postcondition added in deepen-stream-3 pass 77 (2026-06-24). Postcondition id: fetch-max-redirect-error. Fixture: packages/cross-fetch/fixtures/ground-truth.ts cases 17 (SHOULD_FIRE) and 18 (SHOULD_NOT_FIRE).",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract postcondition added via API surface analysis. node-fetch v2.7.0 source confirmed (lib/index.js line 1589-1591). README documents { follow: 20 } as the maximum redirect count init option. Detection rule not yet implemented in scanner."
+    },
+    "resolution": null
   }
 }
