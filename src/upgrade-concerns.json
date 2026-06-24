@@ -59772,5 +59772,37 @@
       "note": "Proactive - deepen pass added 3 postconditions covering INVALID_ACCOUNT_ID (closed account or processor enum typo), ITEM_LOGIN_REQUIRED (credentials expired, requires update-mode Link), and RATE_LIMIT_EXCEEDED for batch reconciliation."
     },
     "resolution": null
+  },
+  "3166": {
+    "id": "concern-20260624-tanstack-react-query-deepen-1",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "@tanstack/react-query",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add useSuspenseQueries detection to react-query-analyzer. Current analyzer (src/analyzers/react-query-analyzer.ts line 25) hardcodes the hook list as ['useQuery', 'useMutation', 'useInfiniteQuery']. Needs extension to also detect useSuspenseQueries — a Suspense hook variant whose options type explicitly omits throwOnError/enabled/placeholderData/suspense, meaning ALL errors throw to ErrorBoundary unconditionally. Detection should fire suspense-queries-error-boundary-required when a useSuspenseQueries() call is not wrapped in <ErrorBoundary> at the JSX consumer tree (or, as a simpler proxy, when the call site is in a function/component file that lacks any ErrorBoundary import).",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — deepen pass 26 (2026-06-24) added useSuspenseQueries function entry with 3 postconditions (suspense-queries-error-boundary-required, suspense-queries-cancellation-not-supported, suspense-queries-stale-refetch-cascade). Ground-truth fixture at packages/@tanstack/react-query/fixtures/ground-truth.ts:104 currently SHOULD_NOT_FIRE pending this detection rule. Flip annotation to SHOULD_FIRE once analyzer extended."
+    },
+    "resolution": null
+  },
+  "3167": {
+    "id": "concern-20260624-tanstack-react-query-deepen-2",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "@tanstack/react-query",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add QueryClient.resetQueries property-chain detection. The deepen pass added 2 postconditions for resetQueries (resetqueries-silent-refetch-failure / info severity, resetqueries-throws-when-throw-on-error / warning severity). Current scanner detects react-query hooks by import name (useQuery / useMutation / useInfiniteQuery) but does NOT walk property-chain access patterns like queryClient.resetQueries(...) on QueryClient instances. Same detection gap blocks invalidateQueries / refetchQueries / fetchQuery / ensureQueryData / etc. — addressing this concern would also lift detection for several already-contracted imperative QueryClient methods. Suggested approach: extend react-query-analyzer to recognize property-chain calls where the receiver is type-resolvable to QueryClient (or, as fallback, where the property name matches the documented imperative-method set: fetchQuery, fetchInfiniteQuery, ensureQueryData, ensureInfiniteQueryData, invalidateQueries, refetchQueries, resetQueries, prefetchQuery, prefetchInfiniteQuery).",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — also covers existing contracted QC methods that the scanner cannot yet detect via property-chain access. Ground-truth fixture at packages/@tanstack/react-query/fixtures/ground-truth.ts:138 currently SHOULD_NOT_FIRE acknowledging this gap."
+    },
+    "resolution": null
   }
 }
