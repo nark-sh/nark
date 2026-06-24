@@ -59372,5 +59372,37 @@
       "note": "Proactive — schema management code path. Detector needs await client.metadata.refreshKeyspaces() / .refreshKeyspace(name) without try-catch. Rejection paths confirmed from lib/metadata/index.js refreshKeyspaces() and refreshKeyspacesInternal()."
     },
     "resolution": null
+  },
+  "3141": {
+    "id": "concern-20260623-next-auth-deepen-1",
+    "created_at": "2026-06-23",
+    "source": "deepen",
+    "package": "next-auth",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for next-auth getCsrfToken() returning undefined when /api/auth/csrf is unreachable. Postcondition getcsrftoken-undefined-not-checked added in deepen pass (stream-2, pass 23). Caller code that does `const csrf = await getCsrfToken(); fetch(..., { body: { csrfToken: csrf, ... } })` without a null/undefined guard hits MissingCSRF on the server, which manifests as a silent auth failure. Detection pattern: await/then call to getCsrfToken from `next-auth/react`, result variable used without a falsy guard before being consumed in a fetch/POST/FormData/URLSearchParams expression. Fixture in nark-corpus/packages/next-auth/fixtures/ground-truth.ts (sections 11+12) supplies both SHOULD_FIRE and SHOULD_NOT_FIRE cases.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis, detection rule needed. Fixture annotation references the postcondition id."
+    },
+    "resolution": null
+  },
+  "3142": {
+    "id": "concern-20260623-next-auth-deepen-2",
+    "created_at": "2026-06-23",
+    "source": "deepen",
+    "package": "next-auth",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for next-auth getProviders() returning null when /api/auth/providers is unreachable. Postcondition getproviders-null-not-checked added in deepen pass (stream-2, pass 23). Caller code that does `const providers = await getProviders(); Object.values(providers).map(...)` without a null guard throws TypeError, blanking the custom sign-in page. Detection pattern: await/then call to getProviders from `next-auth/react`, result variable used in Object.values/Object.entries/iteration/property-access without a preceding falsy guard. Fixture in nark-corpus/packages/next-auth/fixtures/ground-truth.ts (sections 13+14) supplies both SHOULD_FIRE and SHOULD_NOT_FIRE cases.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis, detection rule needed. Fixture annotation references the postcondition id."
+    },
+    "resolution": null
   }
 }
