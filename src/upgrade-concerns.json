@@ -59500,5 +59500,53 @@
       "note": "Proactive — added via API surface analysis. Common pattern in graceful-degradation hooks; needs to be visible when fails."
     },
     "resolution": null
+  },
+  "3149": {
+    "id": "concern-20260623-puppeteer-deepen-1",
+    "created_at": "2026-06-23",
+    "source": "deepen",
+    "package": "puppeteer",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for top-level destructured async exports — puppeteer.executablePath(), puppeteer.defaultArgs(), puppeteer.trimCache() — became contracted in deepen-stream-2 pass 25 (2026-06-23). All three are top-level functions on the PuppeteerNode default export AND named exports of the puppeteer module. Code patterns: (1) `await puppeteer.executablePath()` via default import — already detected via existing receiver-expression path; (2) `import { executablePath } from \"puppeteer\"; await executablePath()` — needs named-import detection (the contract now declares named_imports: [connect, launch, executablePath, defaultArgs, trimCache] for this). v25.0.0 flipped executablePath and defaultArgs from sync to async, so legacy callers spreading or using the return synchronously will see silent failures (Promise stringification, Promise spread yielding []).",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis re-baseline against puppeteer@25.2.0 declaration files. v25.0.0 sync-to-async migration is the user-visible motivation; detection rule needed for top-level named-import call sites."
+    },
+    "resolution": null
+  },
+  "3150": {
+    "id": "concern-20260623-aws-sdk-client-s3-deepen-1",
+    "created_at": "2026-06-23",
+    "source": "deepen",
+    "package": "@aws-sdk/client-s3",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for waitUntilObjectNotExists() — postcondition s3-object-not-exists-waiter-timeout-not-handled added in 2026-06-23 deepen pass. Same waiter shape as waitUntilObjectExists (which also lacks a scanner rule per its FUTURE_SHOULD_FIRE fixture annotation). Detector should fire on bare-await `waitUntilObjectNotExists(...)` outside a try-catch block. Throws TimeoutError (error.name === \"TimeoutError\") via @smithy/util-waiter checkExceptions when the object remains visible past maxWaitTime (eventual-consistency lag in delete-then-verify flows / GDPR deletion confirmation). Fixture: nark-corpus/packages/@aws-sdk/client-s3/fixtures/ground-truth.ts (waitObjectNotExistsNoCatch).",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis (bc-deepen-contract pass 23, deepen-stream-3, 2026-06-23). No scanner rule exists for waitUntil* family of waiters yet. Same gap as positive waiters (waitUntilObjectExists / waitUntilBucketExists)."
+    },
+    "resolution": null
+  },
+  "3151": {
+    "id": "concern-20260623-aws-sdk-client-s3-deepen-2",
+    "created_at": "2026-06-23",
+    "source": "deepen",
+    "package": "@aws-sdk/client-s3",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for waitUntilBucketNotExists() — postcondition s3-bucket-not-exists-waiter-timeout-not-handled added in 2026-06-23 deepen pass. Symmetric counterpart to waitUntilBucketExists. Detector should fire on bare-await `waitUntilBucketNotExists(...)` outside a try-catch block. Throws TimeoutError (error.name === \"TimeoutError\") via @smithy/util-waiter when bucket remains visible past maxWaitTime (cross-region propagation lag in teardown flows / ephemeral test environments). Fixture: nark-corpus/packages/@aws-sdk/client-s3/fixtures/ground-truth.ts (waitBucketNotExistsNoCatch).",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis (bc-deepen-contract pass 23, deepen-stream-3, 2026-06-23). Same waiter family as positive counterparts."
+    },
+    "resolution": null
   }
 }
