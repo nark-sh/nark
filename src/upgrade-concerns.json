@@ -61518,5 +61518,149 @@
       "note": "Proactive — postcondition added via API surface analysis (instance.decrement is at sequelize/types/model.d.ts line 3260, Promise<this>). Detection rule does not yet exist."
     },
     "resolution": null
+  },
+  "3275": {
+    "id": "concern-20260624-next-deepen-1",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "next",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for forbidden() (next/navigation) called inside try-catch. forbidden() throws HTTPAccessFallbackError with digest='NEXT_HTTP_ERROR_FALLBACK;403'. Same family as notFound() — if the scanner already detects notFound-inside-try-catch, extend the pattern to forbidden(). Postcondition forbidden-inside-try-catch added in deepen pass 56 (2026-06-24).",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — postcondition added via API surface analysis (Next.js 16.x class-hierarchy gaps), detection rule needed"
+    },
+    "resolution": null
+  },
+  "3276": {
+    "id": "concern-20260624-next-deepen-2",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "next",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for unauthorized() (next/navigation) called inside try-catch. Throws HTTPAccessFallbackError with digest='NEXT_HTTP_ERROR_FALLBACK;401'. Sibling of forbidden() and notFound(). Postcondition unauthorized-inside-try-catch added in deepen pass 56 (2026-06-24).",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — postcondition added via API surface analysis (Next.js 16.x class-hierarchy gaps), detection rule needed"
+    },
+    "resolution": null
+  },
+  "3277": {
+    "id": "concern-20260624-next-deepen-3",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "next",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for connection() (next/server) missing await. Returns Promise<void> — calls without await silently fail to mark the route as dynamic. Mirrors cookies()/headers() missing-await detection. Postcondition connection-missing-await added in deepen pass 56 (2026-06-24).",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — postcondition added via API surface analysis (Next.js 16.x class-hierarchy gaps), detection rule needed"
+    },
+    "resolution": null
+  },
+  "3278": {
+    "id": "concern-20260624-next-deepen-4",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "next",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for connection() called inside after() callback. Throws E827 at runtime. Static detection requires tracking call-context through after() callback bodies. Postcondition connection-inside-after added in deepen pass 56 (2026-06-24).",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — postcondition added via API surface analysis (Next.js 16.x class-hierarchy gaps), detection rule needed"
+    },
+    "resolution": null
+  },
+  "3279": {
+    "id": "concern-20260624-next-deepen-5",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "next",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for draftMode() (next/headers) missing await. Returns Promise<DraftMode> in Next.js 15+ — destructuring without await yields undefined properties (e.g. .isEnabled). Same pattern as cookies()/headers() in v15. Postcondition draft-mode-missing-await added in deepen pass 56 (2026-06-24).",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — postcondition added via API surface analysis (Next.js 16.x class-hierarchy gaps), detection rule needed"
+    },
+    "resolution": null
+  },
+  "3280": {
+    "id": "concern-20260624-next-deepen-6",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "next",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for after() (next/server) callbacks that lack internal try-catch. after() runs post-response — errors are logged to stderr but never propagate, breaking observability assumptions. Postcondition after-error-swallowed added in deepen pass 56 (2026-06-24).",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — postcondition added via API surface analysis (Next.js 16.x class-hierarchy gaps), detection rule needed"
+    },
+    "resolution": null
+  },
+  "3281": {
+    "id": "concern-20260624-next-deepen-7",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "next",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for after() called outside a request scope. Throws E468 at runtime when no workStore is active. Postcondition after-called-outside-request-scope added in deepen pass 56 (2026-06-24).",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — postcondition added via API surface analysis (Next.js 16.x class-hierarchy gaps), detection rule needed"
+    },
+    "resolution": null
+  },
+  "3282": {
+    "id": "concern-20260624-next-deepen-8",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "next",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for updateTag() (next/cache) called after redirect() in a Server Action. Same dead-code pattern as revalidateTag-after-redirect and revalidatePath-after-redirect — extend the existing detector to recognize updateTag. Postcondition update-tag-after-redirect added in deepen pass 56 (2026-06-24).",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — postcondition added via API surface analysis (Next.js 16.x class-hierarchy gaps), detection rule needed"
+    },
+    "resolution": null
+  },
+  "3283": {
+    "id": "concern-20260624-next-deepen-9",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "next",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for updateTag() called from a Route Handler or Server Component instead of a Server Action ('use server'). updateTag is restricted to Server Actions for read-your-own-writes semantics. Static detection requires checking 'use server' directive in the enclosing function. Postcondition update-tag-outside-server-action added in deepen pass 56 (2026-06-24).",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — postcondition added via API surface analysis (Next.js 16.x class-hierarchy gaps), detection rule needed"
+    },
+    "resolution": null
   }
 }
