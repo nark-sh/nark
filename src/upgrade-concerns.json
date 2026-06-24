@@ -61502,5 +61502,21 @@
       "note": "Proactive — contract added via API surface re-enumeration against installed @langchain/openai@1.5.3. Legacy OpenAI class confirmed in dist/llms.d.ts (extends BaseLLM); AzureOpenAI confirmed in dist/azure/llms.d.ts (extends OpenAI). Both use completionWithRetry() → wrapOpenAIClientError() in dist/llms.js."
     },
     "resolution": null
+  },
+  "3274": {
+    "id": "concern-20260624-sequelize-deepen-1",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "sequelize",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add scanner detection for instance.decrement() on Sequelize model instances. Postcondition instance-decrement-db-error was added in deepen pass 67 (2026-06-24). Mirrors the existing instance.increment() gap — the scanner currently catches static Model.decrement(where) via the .decrement( await_pattern but does NOT track .decrement() called on an instance returned from findByPk/findOne. Same detector approach needed as instance.increment: track Promise<Model>-returning return values from findByPk/findOne/findOrCreate and propagate the Sequelize-instance type so .decrement() on that variable triggers the postcondition.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — postcondition added via API surface analysis (instance.decrement is at sequelize/types/model.d.ts line 3260, Promise<this>). Detection rule does not yet exist."
+    },
+    "resolution": null
   }
 }
