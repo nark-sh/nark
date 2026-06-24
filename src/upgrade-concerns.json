@@ -59964,5 +59964,133 @@
       "note": "Proactive — contract postcondition added via deepen-pass density review of @nestjs/jwt@11.0.2 source. Detection rule needed."
     },
     "resolution": null
+  },
+  "3178": {
+    "id": "concern-20260623-bigquery-deepen-1",
+    "created_at": "2026-06-23",
+    "source": "deepen",
+    "package": "@google-cloud/bigquery",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for table.createReadStream()/createQueryStream()/getXxxStream() calls without .on('error', ...) wired up. These are paginator.streamify wrappers that emit errors via event, not Promise rejection. Try/catch around the stream creation is FALSE confidence. Postcondition: createreadstream-missing-error-handler. Source: nark-corpus-pro/packages/@google-cloud/bigquery/contract.yaml (createReadStream block).",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — Phase 14 re-enumeration found 5 stream methods missed by original Promise-only enumeration. Detection rule needed for paginator.streamify-returned stream surface (event-based error delivery, not Promise rejection)."
+    },
+    "resolution": null
+  },
+  "3179": {
+    "id": "concern-20260623-bigquery-deepen-2",
+    "created_at": "2026-06-23",
+    "source": "deepen",
+    "package": "@google-cloud/bigquery",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for table.createInsertStream() without .on('error', ...) for PartialFailureError. Different error model from table.insert() — same error type, different delivery mechanism (event vs throw). Postcondition: createinsertstream-partial-failure-event-not-listener.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — Phase 14 re-enumeration found 5 stream methods missed by original Promise-only enumeration. Detection rule needed for paginator.streamify-returned stream surface (event-based error delivery, not Promise rejection)."
+    },
+    "resolution": null
+  },
+  "3180": {
+    "id": "concern-20260623-bigquery-deepen-3",
+    "created_at": "2026-06-23",
+    "source": "deepen",
+    "package": "@google-cloud/bigquery",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for table.createWriteStream() without .on('error', ...). Underlying load job failures propagate via stream.destroy(err) — must wire error handler on the writable. Postcondition: createwritestream-job-error-via-destroy.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — Phase 14 re-enumeration found 5 stream methods missed by original Promise-only enumeration. Detection rule needed for paginator.streamify-returned stream surface (event-based error delivery, not Promise rejection)."
+    },
+    "resolution": null
+  },
+  "3181": {
+    "id": "concern-20260623-bigquery-deepen-4",
+    "created_at": "2026-06-23",
+    "source": "deepen",
+    "package": "@google-cloud/bigquery",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for bigquery.createQueryStream(options)/dataset.createQueryStream(options) called WITHOUT outer try/catch — synchronous validation throws (missing query field, non-Table destination) bypass the event system. Postcondition: createquerystream-sync-validation-throw.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — Phase 14 re-enumeration found 5 stream methods missed by original Promise-only enumeration. Detection rule needed for paginator.streamify-returned stream surface (event-based error delivery, not Promise rejection)."
+    },
+    "resolution": null
+  },
+  "3182": {
+    "id": "concern-20260623-bigquery-deepen-5",
+    "created_at": "2026-06-23",
+    "source": "deepen",
+    "package": "@google-cloud/bigquery",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for job.getQueryResultsStream() without .on('error', ...). Job-state errors (400 invalidQuery / 404 / 5xx) surface as stream events. Postcondition: getqueryresultsstream-missing-error-handler.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — Phase 14 re-enumeration found 5 stream methods missed by original Promise-only enumeration. Detection rule needed for paginator.streamify-returned stream surface (event-based error delivery, not Promise rejection)."
+    },
+    "resolution": null
+  },
+  "3183": {
+    "id": "concern-20260624-aws-sdk-client-ses-deepen-1",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "@aws-sdk/client-ses",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for sesClient.send(new CloneReceiptRuleSetCommand({...})) without try-catch. Postconditions ses-clone-receipt-rule-set-already-exists + ses-clone-receipt-rule-set-source-not-found added in deepen pass 32 (drift-by-staleness mode). Inbound-mail routing is security-critical; AlreadyExistsException on rerun silently leaves the previous ruleset in place. Confirmed @throws AlreadyExistsException, LimitExceededException, RuleSetDoesNotExistException at @aws-sdk/client-ses@3.1075.0 dist-types/commands/CloneReceiptRuleSetCommand.d.ts.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  "3184": {
+    "id": "concern-20260624-aws-sdk-client-ses-deepen-2",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "@aws-sdk/client-ses",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for sesClient.send(new CreateReceiptFilterCommand({...})) without try-catch. Postconditions ses-create-receipt-filter-already-exists + ses-create-receipt-filter-limit-exceeded added in deepen pass 32 (drift-by-staleness mode). AlreadyExistsException is a SECURITY hazard: the new filter is not applied, leaving an old (possibly Allow) filter live for abusive CIDRs. Confirmed @throws AlreadyExistsException, LimitExceededException at @aws-sdk/client-ses@3.1075.0 dist-types/commands/CreateReceiptFilterCommand.d.ts.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  "3185": {
+    "id": "concern-20260624-aws-sdk-client-ses-deepen-3",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "@aws-sdk/client-ses",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for sesClient.send(new UpdateReceiptRuleCommand({...})) without try-catch. Postconditions ses-update-receipt-rule-invalid-action-config + ses-update-receipt-rule-not-found added in deepen pass 32 (drift-by-staleness mode). Failure leaves the rule pointing at the OLD Lambda/S3/SNS target; inbound mail silently routes to deprecated infrastructure. Confirmed @throws InvalidLambdaFunctionException, InvalidS3ConfigurationException, InvalidSnsTopicException, LimitExceededException, RuleDoesNotExistException, RuleSetDoesNotExistException at @aws-sdk/client-ses@3.1075.0 dist-types/commands/UpdateReceiptRuleCommand.d.ts.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
   }
 }
