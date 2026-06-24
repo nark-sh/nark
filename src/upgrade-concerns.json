@@ -62430,5 +62430,53 @@
       "note": "Proactive — postcondition added via API surface re-enumeration against @libsql/client v0.17.4 source; detection rule needed"
     },
     "resolution": null
+  },
+  "3332": {
+    "id": "concern-20260624-bull-deepen-getnextjob",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "bull",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for bull Queue.getNextJob() — manual job retrieval API that throws on Redis errors and requires finalization. Postconditions get-next-job-no-try-catch and get-next-job-not-finalized added via deepen pass 83 (2026-06-24) but no scanner rule exists for either.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  "3333": {
+    "id": "concern-20260624-bull-deepen-setworkername",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "bull",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for bull Queue.setWorkerName() — silently swallows CLIENT-unknown errors but rethrows others. Postconditions set-worker-name-silently-swallowed-on-disabled-client and set-worker-name-no-try-catch added via deepen pass 83 (2026-06-24).",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  "3334": {
+    "id": "concern-20260624-bull-deepen-getworkers",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "bull",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for bull Queue.getWorkers() — d.ts claims Promise<Array<...>> but resolves undefined when CLIENT is disabled. Postconditions get-workers-returns-undefined-when-client-disabled and get-workers-no-try-catch added via deepen pass 83 (2026-06-24). Detection should flag (a) unguarded .length / .map on result and (b) missing try-catch.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
   }
 }
