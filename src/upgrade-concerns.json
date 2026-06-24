@@ -61326,5 +61326,85 @@
       "note": "Proactive — exceptions-handle-installs-process-exit and rejections-handle-installs-process-exit postconditions added in deepen-stream-2 pass 56 (2026-06-24)"
     },
     "resolution": null
+  },
+  "3263": {
+    "id": "concern-20260624-ws-deepen-1",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "ws",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for ws.pong() — pong-before-open postcondition added in deepen pass 59 (2026-06-24); pong() throws synchronously when readyState === CONNECTING just like ping(). Scanner should treat .pong() identically to .ping() in pre-open context detection.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — postcondition added via API surface analysis (lib/websocket.js line 400-402, ws@8.21.0). No scanner rule exists yet."
+    },
+    "resolution": null
+  },
+  "3264": {
+    "id": "concern-20260624-ws-deepen-2",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "ws",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for ws.terminate() during CONNECTING — terminate-during-connecting-silent postcondition added in deepen pass 59 (2026-06-24). Promise-wrapped connect helpers that only resolve on 'open' hang forever if terminate() is called mid-connect. Scanner should detect new Promise wrappers around new WebSocket() that listen for 'open' but not 'close'/'error'.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — postcondition added via API surface analysis (lib/websocket.js line 494-498, ws@8.21.0). No scanner rule exists yet."
+    },
+    "resolution": null
+  },
+  "3265": {
+    "id": "concern-20260624-ws-deepen-3",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "ws",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for ws.terminate() relied on for 'close' side effect — terminate-on-closed-no-op postcondition added in deepen pass 59 (2026-06-24). When called on already-CLOSED socket, terminate() is silent no-op; cleanup logic that depends on it firing 'close' silently leaks. Scanner should flag cleanup code that runs after terminate() rather than inside an on('close') handler.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — postcondition added via API surface analysis (lib/websocket.js line 493, ws@8.21.0). No scanner rule exists yet."
+    },
+    "resolution": null
+  },
+  "3266": {
+    "id": "concern-20260624-mailgun.js-deepen-1",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "mailgun.js",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add scanner detection for mg.lists.members.upload(listAddress, csvFile, subscribed?, upsert?) without try-catch. Postcondition members-upload-no-try-catch covers bulk CSV member subscribe/unsubscribe — highest-stakes CAN-SPAM operation in the mailgun.js surface. Detection pattern: 3-level property chain on IMailgunClient (mg.lists.members.upload), same shape as the existing createMembers detector.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — lists.members.upload introduced in mailgun.js v13.0.0 (2026-04-16). Postcondition added by bc-deepen-contract deepen-stream-3 pass 50, 2026-06-24 (drift-by-staleness)."
+    },
+    "resolution": null
+  },
+  "3267": {
+    "id": "concern-20260624-mailgun.js-deepen-2",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "mailgun.js",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add scanner awareness for members-upload-payload-too-large postcondition (warning severity). Mailgun rejects CSV uploads above its per-file row/size cap with 400 or 413. Detection could surface uploads that lack a chunking strategy. Lower priority than members-upload-no-try-catch (warning vs error).",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — warning-severity companion to concern-20260624-mailgun.js-deepen-1. Postcondition added by bc-deepen-contract deepen-stream-3 pass 50, 2026-06-24."
+    },
+    "resolution": null
   }
 }
