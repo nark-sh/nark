@@ -59916,5 +59916,53 @@
       "note": "Proactive — contract postcondition added via API surface depth analysis, detection rule needed."
     },
     "resolution": null
+  },
+  "3175": {
+    "id": "concern-20260616-p-retry-return-propagation-1",
+    "created_at": "2026-06-16",
+    "source": "onboard",
+    "package": "p-retry",
+    "type": "fp_pattern",
+    "status": "open",
+    "description": "Scanner does not propagate caller ownership across `return` for retry-wrapper postconditions. Observed in p-retry contract pretry-unhandled-rejection at googleapis/js-genai src/_api_client.ts:723 (`return pRetry(runFetch, { retries })`). The contract documents `return pRetry(fn, opts)` as safe (required_handling clause 3) but the scanner flags the call site. Same gap as exponential-backoff backoff-unhandled-rejection. Fix: when a Promise-returning call to a contracted async function is the immediate return value of an enclosing function (no .then or .catch attached after), treat as caller-owned and suppress the unhandled-rejection postcondition.",
+    "fixtures_required": [
+      "add SHOULD_NOT_FIRE case for `return pRetry(fn, opts)` to ground-truth.ts; add same case for backOff in exponential-backoff"
+    ],
+    "evidence": [
+      "work-packages/p-retry/realworld-validation-result.json",
+      "nark-corpus-pro/packages/p-retry/contract.yaml required_handling clause 3"
+    ]
+  },
+  "3176": {
+    "id": "concern-20260624-nestjs-jwt-deepen-3",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "@nestjs/jwt",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for JwtService.signAsync() called with string payload + signOptions containing keys other than secret/privateKey. Postcondition sign-async-sync-throw-on-string-payload-with-options added in deepen pass 36 (drift-mode). Source-confirmed at @nestjs/jwt@11.0.2 dist/jwt.service.js lines 48-51: the string-payload-options check runs BEFORE the Promise constructor, so the throw is synchronous and `.catch()` on the returned Promise cannot catch it. Detection rule: when signAsync() is called with a string literal first argument AND an object literal second argument whose keys include any of [expiresIn, audience, issuer, subject, jwtid, notBefore, header, algorithm, keyid, mutatePayload, allowInsecureKeySizes, allowInvalidAsymmetricKeyTypes, encoding, noTimestamp], and the call is NOT wrapped in try-catch, flag as a sync-throw-in-async-method risk. Reference fixture: nark-corpus/packages/@nestjs/jwt/fixtures/ground-truth.ts signAsyncStringPayloadWithOptionsNoTryCatch.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract postcondition added via deepen-pass density review of @nestjs/jwt@11.0.2 source. Detection rule needed."
+    },
+    "resolution": null
+  },
+  "3177": {
+    "id": "concern-20260624-nestjs-jwt-deepen-4",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "@nestjs/jwt",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for verifyAsync() called against a JwtService instantiated with no secret/publicKey/secretOrKeyProvider. Postcondition verify-async-misconfigured-secret-unhandled-rejection added in deepen pass 36 (drift-mode). The misconfiguration manifests only at the first verify() call — JwtModule.register({}) succeeds silently. Detection rule: when `new JwtService(<obj>)` is constructed with a literal config that has no secret/publicKey/privateKey/secretOrKeyProvider key, AND verifyAsync()/verify() is called on that instance, AND the call is not wrapped in try-catch, flag as a misconfig-deferred-failure risk. Reference fixture: nark-corpus/packages/@nestjs/jwt/fixtures/ground-truth.ts verifyAsyncMisconfiguredNoCatch.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract postcondition added via deepen-pass density review of @nestjs/jwt@11.0.2 source. Detection rule needed."
+    },
+    "resolution": null
   }
 }
