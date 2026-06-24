@@ -60958,5 +60958,165 @@
       "note": "Proactive — postconditions added via deepen API surface analysis (express-session Store interface §store.clear). Detection rule needed for two patterns: (1) sessionStore.clear(cb) where cb does not check the first parameter, (2) sessionStore.clear(cb) without a preceding typeof sessionStore.clear === 'function' guard. Severity bumped over deepen-1 because security-incident context turns unchecked errors into compliance/breach risk."
     },
     "resolution": null
+  },
+  "3240": {
+    "id": "concern-20260624-google-cloud-storage-deepen-1",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "@google-cloud/storage",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for bucket.combine() exceeding 32-source GCS compose API limit — deepen pass 52 surfaced this postcondition but no scanner rule yet",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface deepen pass 52 for function `combine`, postcondition id `combine-source-limit-exceeded`. No scanner detection rule yet."
+    },
+    "resolution": null
+  },
+  "3241": {
+    "id": "concern-20260624-google-cloud-storage-deepen-2",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "@google-cloud/storage",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for bucket.combine() called without try-catch on source-missing (404) — deepen pass 52",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface deepen pass 52 for function `combine`, postcondition id `combine-source-not-found`. No scanner detection rule yet."
+    },
+    "resolution": null
+  },
+  "3242": {
+    "id": "concern-20260624-google-cloud-storage-deepen-3",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "@google-cloud/storage",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for bucket.combine() with ifGenerationMatch precondition without 412 handling — deepen pass 52",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface deepen pass 52 for function `combine`, postcondition id `combine-precondition-failed`. No scanner detection rule yet."
+    },
+    "resolution": null
+  },
+  "3243": {
+    "id": "concern-20260624-google-cloud-storage-deepen-4",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "@google-cloud/storage",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for file.moveFileAtomic() on non-HNS bucket (400) without fallback — deepen pass 52",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface deepen pass 52 for function `moveFileAtomic`, postcondition id `move-file-atomic-non-hns-bucket`. No scanner detection rule yet."
+    },
+    "resolution": null
+  },
+  "3244": {
+    "id": "concern-20260624-google-cloud-storage-deepen-5",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "@google-cloud/storage",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for file.moveFileAtomic() ifGenerationMatch (412) without re-read retry path — deepen pass 52",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface deepen pass 52 for function `moveFileAtomic`, postcondition id `move-file-atomic-precondition-failed`. No scanner detection rule yet."
+    },
+    "resolution": null
+  },
+  "3245": {
+    "id": "concern-20260624-google-cloud-storage-deepen-6",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "@google-cloud/storage",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for file.moveFileAtomic() 404 source-not-found without try-catch — deepen pass 52",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface deepen pass 52 for function `moveFileAtomic`, postcondition id `move-file-atomic-source-not-found`. No scanner detection rule yet."
+    },
+    "resolution": null
+  },
+  "3246": {
+    "id": "concern-20260624-google-cloud-storage-deepen-7",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "@google-cloud/storage",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for bucket.lock() 412 precondition without re-read+confirm retry — deepen pass 52, compliance impact",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface deepen pass 52 for function `lock`, postcondition id `lock-precondition-failed`. No scanner detection rule yet."
+    },
+    "resolution": null
+  },
+  "3247": {
+    "id": "concern-20260624-google-cloud-storage-deepen-8",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "@google-cloud/storage",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for bucket.lock() called without verifying retention policy exists — deepen pass 52, compliance time-bomb",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface deepen pass 52 for function `lock`, postcondition id `lock-no-retention-policy`. No scanner detection rule yet."
+    },
+    "resolution": null
+  },
+  "3248": {
+    "id": "concern-20260624-google-cloud-storage-deepen-9",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "@google-cloud/storage",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for bucket.lock() 403 without explicit operator surfacing — deepen pass 52, compliance",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface deepen pass 52 for function `lock`, postcondition id `lock-permission-error`. No scanner detection rule yet."
+    },
+    "resolution": null
+  },
+  "3249": {
+    "id": "concern-20260624-azure-identity-deepen-3",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "@azure/identity",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Distinguish DeviceCodeCredential.authenticate() from InteractiveBrowserCredential.authenticate(). Both methods share the name `authenticate` but throw on different infrastructure failure modes (device code expiry vs. browser redirect misconfig). The contract matcher currently routes any `.authenticate()` call on an @azure/identity credential to the `interactive-authenticate-no-try-catch` postcondition, mis-tagging DeviceCodeCredential.authenticate() violations. The new `device-code-authenticate-no-try-catch` postcondition (added 2026-06-24 deepen pass) needs a detection rule keyed on the credential class constructor (DeviceCodeCredential vs InteractiveBrowserCredential).",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis (drift-by-staleness deepen pass, last_deepened was 2026-04-16). Detection rule needed to distinguish per-credential-class authenticate() calls. Fixture lines 314 and 324 of packages/@azure/identity/fixtures/ground-truth.ts demonstrate the gap (currently misfiring as interactive-authenticate-no-try-catch)."
+    },
+    "resolution": null
   }
 }
