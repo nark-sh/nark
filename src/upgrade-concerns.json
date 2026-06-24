@@ -61118,5 +61118,21 @@
       "note": "Proactive — contract added via API surface analysis (drift-by-staleness deepen pass, last_deepened was 2026-04-16). Detection rule needed to distinguish per-credential-class authenticate() calls. Fixture lines 314 and 324 of packages/@azure/identity/fixtures/ground-truth.ts demonstrate the gap (currently misfiring as interactive-authenticate-no-try-catch)."
     },
     "resolution": null
+  },
+  "3250": {
+    "id": "concern-20260624-multer-deepen-fields-limits-1",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "multer",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Detect multer.fields()/single()/array()/any() callers that do not register an Express error-handling middleware capturing MulterError codes MISSING_FIELD_NAME, LIMIT_FIELD_KEY, LIMIT_FIELD_VALUE, LIMIT_FIELD_NESTING, LIMIT_PART_COUNT, LIMIT_FIELD_COUNT. These codes were added in multer 2.x and missed by the original 2026-04-16 deepen pass. The scanner currently only checks for LIMIT_UNEXPECTED_FILE/LIMIT_FILE_SIZE/LIMIT_FILE_COUNT in the error-handler pattern. Without coverage, hostile field-nesting and part-count probes silently return 500s instead of being logged + rejected. Postcondition added in 2026-06-24 drift-deepen: fields-throws-multer-error-field-limits.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via drift-deepen against multer@2.2.0. Source evidence: nark-dev/nark-corpus/packages/multer/contract.yaml (postcondition id: fields-throws-multer-error-field-limits). MulterError code list confirmed from node_modules/multer/lib/multer-error.js."
+    },
+    "resolution": null
   }
 }
