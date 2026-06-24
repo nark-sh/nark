@@ -62334,5 +62334,37 @@
       "note": "Proactive - postcondition added in deepen-stream-3 pass 68 against nock@14.0.15; no scanner rule yet."
     },
     "resolution": null
+  },
+  "3326": {
+    "id": "concern-20260624-mocha-deepen-1",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "mocha",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for Mocha.runGlobalSetup() calls without try/catch or .catch() — postcondition run-global-setup-fixture-rejects added in deepen-stream-2 pass 81 against mocha@11.7.6, no scanner rule yet.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive - postcondition added in deepen-stream-2 pass 81; require_await_detection is enabled for mocha so detector should fire on `await mocha.runGlobalSetup()` without surrounding try/catch."
+    },
+    "resolution": null
+  },
+  "3327": {
+    "id": "concern-20260624-mocha-deepen-2",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "mocha",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for Mocha.runGlobalTeardown() calls without try/catch or .catch() — postcondition run-global-teardown-fixture-rejects added in deepen-stream-2 pass 81 against mocha@11.7.6, no scanner rule yet.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive - postcondition added in deepen-stream-2 pass 81; same await-detection conventions as runGlobalSetup."
+    },
+    "resolution": null
   }
 }
