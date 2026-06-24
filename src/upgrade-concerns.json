@@ -61406,5 +61406,37 @@
       "note": "Proactive — warning-severity companion to concern-20260624-mailgun.js-deepen-1. Postcondition added by bc-deepen-contract deepen-stream-3 pass 50, 2026-06-24."
     },
     "resolution": null
+  },
+  "3268": {
+    "id": "concern-20260624-replicate-deepen-1",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "replicate",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for replicate.deployments.create() missing-try-catch. Postcondition deployments-create-no-error-handling added during deepen pass 2026-06-24 but no scanner rule covers this method specifically. May be partially covered by generic Replicate-class call detection.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  "3269": {
+    "id": "concern-20260624-replicate-deepen-2",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "replicate",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for replicate.deployments.create() followed by immediate replicate.deployments.predictions.create() against the same name without an intervening deployments.get() readiness poll. Postcondition deployments-create-not-yet-ready added during deepen pass 2026-06-24. Pattern: create+immediate-use silent failure — deployment not yet warm.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — sequence-pattern detector needed, no current analyzer covers create+immediate-use silent-failure shapes"
+    },
+    "resolution": null
   }
 }
