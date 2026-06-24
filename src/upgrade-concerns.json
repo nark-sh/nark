@@ -62783,5 +62783,37 @@
       "note": "Proactive — contract postcondition added via API surface analysis. node-fetch v2.7.0 source confirmed (lib/index.js line 1589-1591). README documents { follow: 20 } as the maximum redirect count init option. Detection rule not yet implemented in scanner."
     },
     "resolution": null
+  },
+  "3354": {
+    "id": "concern-20260624-modelcontextprotocol-sdk-deepen-32",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "@modelcontextprotocol/sdk",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for OAuthServerProvider.verifyAccessToken() implementer-contract: a class implementing OAuthServerProvider or OAuthTokenVerifier MUST throw InvalidTokenError (from @modelcontextprotocol/sdk/server/auth/errors.js) on any code path where the token cannot be verified. Returning dummy AuthInfo or coercing a JWT-verification failure into a default-object return creates an authentication bypass: requireBearerAuth() has no validity check and trusts the returned object. Detection rule: when a class implements (via 'implements OAuthServerProvider' or 'implements OAuthTokenVerifier'), inspect the verifyAccessToken method body for code paths that return AuthInfo from inside a catch block, or paths where the function's await chain swallows errors. Flag any return statement that produces AuthInfo from a catch arm where the caught error is NOT re-thrown as InvalidTokenError. Mirrors the implementer-contract pattern of postgres.Pool.on('error') and similar event-emitter registration-required patterns but inverted (must-throw, not must-register).",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — security-critical implementer-contract surface. Adds new detection class: 'interface-method-must-throw'. Required regression fixture: classes 68/69/70 in packages/@modelcontextprotocol/sdk/fixtures/ground-truth.ts."
+    },
+    "resolution": null
+  },
+  "3355": {
+    "id": "concern-20260624-modelcontextprotocol-sdk-deepen-33",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "@modelcontextprotocol/sdk",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for withOAuth() composable-middleware enhanced-fetch: when @modelcontextprotocol/sdk/client/middleware.js exports withOAuth/applyMiddlewares/createMiddleware are imported and the returned enhanced fetch is awaited, the await call site MUST be wrapped in try/catch handling UnauthorizedError. The enhanced fetch returned by applyMiddlewares(withOAuth(provider, baseUrl))(fetch) is async and has three throw paths (REDIRECT result, non-AUTHORIZED auth result, retried 401), all surfacing as UnauthorizedError. Detection rule: track the binding produced by applyMiddlewares() / withOAuth() chain. Any await on that binding outside a try/catch should fire. Alternative: when 'withOAuth' is imported from @modelcontextprotocol/sdk/client/middleware.js, any await on a chained applyMiddlewares result without enclosing try/catch should fire. Same shape as existing 'auth() result not checked' rules but for the fetch-wrapper indirection.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis. Pattern: track a variable bound to applyMiddlewares(...withOAuth(...)...)(fetch); flag bare awaits on it. Required regression fixtures: functions 71/72/73 in packages/@modelcontextprotocol/sdk/fixtures/ground-truth.ts. Earlier deepen-stream-2 pass 1 (2026-04-16) misclassified withOAuth as a 'sync factory' and omitted it — that omission was wrong: the factory is sync, but the returned function is async and throws UnauthorizedError."
+    },
+    "resolution": null
   }
 }
