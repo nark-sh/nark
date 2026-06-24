@@ -62014,5 +62014,53 @@
       "note": "Proactive — added in pusher deepen pass 2026-06-24, postcondition trigger-encryption-master-key-missing"
     },
     "resolution": null
+  },
+  "3306": {
+    "id": "concern-20260624-mammoth-deepen-1",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "mammoth",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for image.readAsArrayBuffer() called inside mammoth.images.imgElement(func) callback without surrounding try-catch or .catch(). Method is on Image objects passed into user callbacks; rejects with TypeError when JSZip cannot find the embedded image entry (lib/zipfile.js:14-25 — zipFile.file(name) returns null then .async() throws). Detection rule should track mammoth.images.imgElement(callback) and flag bare await on image.readAsArrayBuffer / image.readAsBase64String / image.readAsBuffer inside the callback body.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — added in mammoth deepen pass 2026-06-24 (deepen-stream-2 pass 72), postcondition readasarraybuffer-image-missing-from-zip"
+    },
+    "resolution": null
+  },
+  "3307": {
+    "id": "concern-20260624-mammoth-deepen-2",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "mammoth",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for image.readAsBase64String() called inside mammoth.images.imgElement(func) callback without try-catch. This is the method used by the default mammoth.images.dataUri converter — every document with images exercises it. Same TypeError-on-null-zip-entry surface as readAsArrayBuffer (lib/zipfile.js:14-25, lib/documents.js:177-179). Detection requires tracking the imgElement callback scope.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — added in mammoth deepen pass 2026-06-24 (deepen-stream-2 pass 72), postcondition readasbase64string-image-missing-from-zip"
+    },
+    "resolution": null
+  },
+  "3308": {
+    "id": "concern-20260624-mammoth-deepen-3",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "mammoth",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for image.readAsBuffer() called inside mammoth.images.imgElement(func) callback without try-catch. Two failure modes: (1) same TypeError-on-null-zip-entry as siblings; (2) ReferenceError in browsers without Buffer polyfill (README L496-498 explicitly warns). Detection requires tracking the imgElement callback scope; bonus detection: warn when readAsBuffer is called in code that targets a browser bundle (heuristic: presence of \"use client\" / browser entry point) without a Buffer polyfill import.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — added in mammoth deepen pass 2026-06-24 (deepen-stream-2 pass 72), postconditions readasbuffer-image-missing-from-zip and readasbuffer-browser-no-buffer-polyfill"
+    },
+    "resolution": null
   }
 }
