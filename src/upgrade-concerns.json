@@ -59436,5 +59436,69 @@
       "note": "Proactive — postcondition use-reverification-cancel-not-handled added in deepen-stream-3 pass 21 (2026-06-23). isReverificationCancelledError logic confirmed in @clerk/shared dist/runtime/error-Dl9xmUf3.mjs: `isClerkRuntimeError(err) && err.code === 'reverification_cancelled'`. Hook is exported from '@clerk/nextjs' (re-export from @clerk/clerk-react)."
     },
     "resolution": null
+  },
+  "3145": {
+    "id": "concern-20260623-bullmq-deepen-1",
+    "created_at": "2026-06-23",
+    "source": "deepen",
+    "package": "bullmq",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for Queue.promoteJobs() — postcondition queue-promotejobs-redis-error added in depth pass 24 (2026-06-23), but no scanner rule exists. Pattern: instance method call on Queue, missing try-catch. Same shape as existing retryJobs detector.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — added via API surface analysis. promoteJobs() introduced in newer bullmq@5 releases (delayed→wait batch transition). Same iteration/Lua failure mode as retryJobs."
+    },
+    "resolution": null
+  },
+  "3146": {
+    "id": "concern-20260623-bullmq-deepen-2",
+    "created_at": "2026-06-23",
+    "source": "deepen",
+    "package": "bullmq",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for Queue.removeOrphanedJobs() — postcondition queue-removeorphanedjobs-redis-error added in depth pass 24 (2026-06-23). Pattern: instance method call on Queue, missing try-catch. Iterative SCAN-based cleanup that can fail mid-iteration.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — recovery helper for bullmq@5.66.6 regression (#3694). Caller-must-handle to allow loop resume."
+    },
+    "resolution": null
+  },
+  "3147": {
+    "id": "concern-20260623-bullmq-deepen-3",
+    "created_at": "2026-06-23",
+    "source": "deepen",
+    "package": "bullmq",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for Queue.rateLimit() — postcondition queue-ratelimit-redis-error added in depth pass 24 (2026-06-23). Pattern: instance method call on Queue, missing try-catch. Runtime throttle override is a single Redis SET; silent failure means upstream rate-limit ban extends.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — added via API surface analysis. Often called from upstream-429 recovery handlers where swallowed errors compound the original incident."
+    },
+    "resolution": null
+  },
+  "3148": {
+    "id": "concern-20260623-bullmq-deepen-4",
+    "created_at": "2026-06-23",
+    "source": "deepen",
+    "package": "bullmq",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for Queue.setGlobalConcurrency() — postcondition queue-setglobalconcurrency-redis-error added in depth pass 24 (2026-06-23). Pattern: instance method call on Queue, missing try-catch. Failure means concurrency clamp during downstream incident never takes effect.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — added via API surface analysis. Common pattern in graceful-degradation hooks; needs to be visible when fails."
+    },
+    "resolution": null
   }
 }
