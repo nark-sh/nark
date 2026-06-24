@@ -59548,5 +59548,37 @@
       "note": "Proactive — contract added via API surface analysis (bc-deepen-contract pass 23, deepen-stream-3, 2026-06-23). Same waiter family as positive counterparts."
     },
     "resolution": null
+  },
+  "3152": {
+    "id": "concern-20260623-aws-sdk-client-dynamodb-deepen-7",
+    "created_at": "2026-06-23",
+    "source": "deepen",
+    "package": "@aws-sdk/client-dynamodb",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for the waitUntil* family from @aws-sdk/client-dynamodb (waitUntilTableExists, waitUntilTableNotExists, waitUntilExportCompleted, waitUntilImportCompleted, waitUntilContributorInsightsEnabled, waitUntilKinesisStreamingDestinationActive). Postcondition aws-dynamodb-wait-until-table-exists-no-try-catch added in 2026-06-23 deepen pass 24. Detector should fire on bare-await OR fire-and-forget waitUntilX(...) outside a try-catch block when imported from @aws-sdk/client-dynamodb. The waiters reject with synthetic Error objects where error.name === 'TimeoutError' (WaiterState.TIMEOUT, default 120s maxWaitTime) or error.name === 'AbortError' (WaiterState.ABORTED via WaiterConfiguration.abortSignal). Source-of-truth: @smithy/core/dist-es/submodules/client/util-waiter/waiter.js checkExceptions. Fixture: nark-corpus/packages/@aws-sdk/client-dynamodb/fixtures/ground-truth.ts (provisionTenantTableNoCatch, deprovisionTenantTableNoCatch, waitForExportNoCatch, waitForImportNoCatch, waitForContributorInsightsNoCatch, waitForKinesisDestNoCatch, fireAndForgetWaitNoCatch).",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis (bc-deepen-contract pass 24, deepen-stream-3, 2026-06-23). Same waiter family as @aws-sdk/client-s3 concerns (see concern-20260623-aws-sdk-client-s3-deepen-1/2). Detection rule should be package-agnostic across AWS SDK clients exposing waitUntil* — runtime contract is identical (delegates to @smithy/util-waiter)."
+    },
+    "resolution": null
+  },
+  "3153": {
+    "id": "concern-20260623-aws-sdk-client-dynamodb-deepen-8",
+    "created_at": "2026-06-23",
+    "source": "deepen",
+    "package": "@aws-sdk/client-dynamodb",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for waitUntil* abort-handling discrimination (postcondition aws-dynamodb-wait-until-abort-not-distinguished added in 2026-06-23 deepen pass 24). Detector should fire when a try-catch wraps a waitUntilX call from @aws-sdk/client-dynamodb and the catch handler does NOT branch on error.name === 'AbortError'. This is the cancellation-awareness check — distinct from the no-try-catch concern. Detection is harder (requires intra-catch AST analysis) and may be deferred to a later scanner upgrade. Lower severity (warning, not error).",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — secondary postcondition for the same waitUntil* family. Detector would need to inspect the catch block AST for error.name === 'AbortError' or equivalent (e.g. instanceof check, string compare in switch). Likely a Phase 2 follow-up after the primary no-try-catch detector ships."
+    },
+    "resolution": null
   }
 }
