@@ -60862,5 +60862,37 @@
     },
     "resolution": null,
     "corpus_tier": "public"
+  },
+  "3234": {
+    "id": "concern-20260624-firebase-admin-deepen-1",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "firebase-admin",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for firebase-admin DataConnect.executeGraphql() — 4 postconditions added in deepen pass 42 (data-connect-invalid-argument, permission-denied, network-error, query-error) but no dedicated scanner rule beyond generic await_patterns yet. Detection requires factory_method tracking for getDataConnect() returning DataConnect instance whose methods include executeGraphql / executeGraphqlRead / executeQuery / executeMutation. Data Connect is the GA Postgres-backed GraphQL service introduced in firebase-admin v14.0.0.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis of firebase-admin@14.0.0 (Data Connect GA). Detection rule needed for getDataConnect() factory + DataConnect instance method tracking."
+    },
+    "resolution": null
+  },
+  "3235": {
+    "id": "concern-20260624-firebase-admin-deepen-2",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "firebase-admin",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for firebase-admin PhoneNumberVerification.verifyToken() — 3 postconditions added in deepen pass 42 (phone-verify-token-invalid, token-expired, project-or-network-error) but no dedicated scanner rule beyond generic await_patterns yet. Detection requires factory_method tracking for getPhoneNumberVerification() returning PhoneNumberVerification instance whose verifyToken(jwt) method is a network-dependent JWT verification call. Phone Number Verification is a first-class Admin SDK service introduced in firebase-admin v14.0.0.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis of firebase-admin@14.0.0 (Phone Number Verification GA). Detection rule needed for getPhoneNumberVerification() factory + PhoneNumberVerification instance method tracking."
+    },
+    "resolution": null
   }
 }
