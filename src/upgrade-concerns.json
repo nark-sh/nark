@@ -62078,5 +62078,85 @@
       "note": "Proactive — added in @nestjs/common deepen pass 2026-06-24 (deepen-stream-2 pass 73, drift re-verification against 11.1.27), postcondition standard-schema-validation-pipe-validation-error"
     },
     "resolution": null
+  },
+  "3310": {
+    "id": "concern-20260624-ajv-deepen-1",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "ajv",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for ajv.validateSchema() called without try-catch when the input schema may have a non-string $schema property. Source (ajv/dist/core.js line 253-254 v8.20.0) throws Error('$schema must be a string') synchronously before meta-schema validation runs; this is NOT captured in ajv.errors. Postcondition id: validateschema-invalid-dollar-schema.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive - contract added via deepen API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  "3311": {
+    "id": "concern-20260624-ajv-deepen-2",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "ajv",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for ajv.removeSchema() called with a parameter that is not undefined/string/RegExp/object. Source (ajv/dist/core.js lines 291-324 v8.20.0) throws Error('ajv.removeSchema: invalid parameter') in the default switch branch. Postcondition id: removeschema-invalid-parameter.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive - contract added via deepen API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  "3312": {
+    "id": "concern-20260624-ajv-deepen-3",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "ajv",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for ajv.addMetaSchema() called without try-catch when registering a meta-schema that may have a duplicate $id or invalid structure. Source (ajv/dist/core.js lines 240-245 v8.20.0) delegates to addSchema which throws on both duplicate-key and invalid-schema conditions. Postcondition ids: addmetaschema-duplicate-key, addmetaschema-invalid-schema.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive - contract added via deepen API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  "3313": {
+    "id": "concern-20260624-express-async-errors-deepen-1",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "express-async-errors",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for callback-based-middleware-not-caught — async route handler invokes callback-based middleware (multer, busboy, formidable storage engines) and the user throws inside the synchronous callback. The throw escapes wrap()'s Promise.catch because it happens outside the outer async function's Promise chain. Postcondition added in deepen pass 74 (2026-06-24) but no scanner rule exists. Detection pattern: detect `throw` statements inside callback arguments to known callback-middleware constructors (multer diskStorage destination/filename, busboy event handlers) when express-async-errors is also required in the same project.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis (deepen pass), detection rule needed. Evidence: https://github.com/davidbanham/express-async-errors/issues/46"
+    },
+    "resolution": null
+  },
+  "3314": {
+    "id": "concern-20260624-express-async-errors-deepen-2",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "express-async-errors",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for noop-fallback-silent-swallow — a wrapped Express async handler is invoked outside Express's standard router dispatch (direct call in test code without supplying a next callback, used as Node EventEmitter listener). wrap() (index.js line 17) falls back to `next = noop` and silently discards async rejections. Postcondition added in deepen pass 74 (2026-06-24) but no scanner rule exists. Detection pattern: detect direct invocation of identifiers/imports registered as Express route handlers (`app.get(p, handler)`) where handler is called with fewer than 3 args or without a `next`-shaped callback as last arg.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis (deepen pass), detection rule needed. Evidence: node_modules/express-async-errors@3.1.1/index.js line 17"
+    },
+    "resolution": null
   }
 }
