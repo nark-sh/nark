@@ -59884,5 +59884,37 @@
       "note": "Proactive — contract added via API surface analysis (deepen pass 27, deepen-stream-3), detection rule needed. Pending fixture annotation marker in ground-truth.ts."
     },
     "resolution": null
+  },
+  "3173": {
+    "id": "concern-20260624-twilio-deepen-1",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "twilio",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for messages.create() catch block that does not check error.code === 21610 (recipient opted out via STOP). Postcondition messages-create-opted-out-not-handled added in deepen pass 28. Detection rule: when messages.create() is wrapped in try-catch but the catch body does not reference error.code 21610 (or use a switch/condition handling 21610 specifically), flag as silent-failure risk. Distinguish from messages-create-generic-catch — this one is specifically about the opted-out code path.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract postcondition added via API surface depth analysis, detection rule needed. Reference fixture: nark-corpus/packages/twilio/fixtures/ground-truth.ts function sendSmsGenericCatchNoOptOutCheck (annotated PENDING_DETECTOR)."
+    },
+    "resolution": null
+  },
+  "3174": {
+    "id": "concern-20260624-twilio-deepen-2",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "twilio",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for messages.create() catch block that does not check error.code === 21408 (geo-permission denied). Postcondition messages-create-geo-permission-not-handled added in deepen pass 28. Detection rule: when messages.create() is wrapped in try-catch but the catch body does not reference error.code 21408, flag as silent-failure risk affecting international user signup flows. Reference fixture: nark-corpus/packages/twilio/fixtures/ground-truth.ts function sendInternationalSmsNoGeoCheck (annotated PENDING_DETECTOR).",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract postcondition added via API surface depth analysis, detection rule needed."
+    },
+    "resolution": null
   }
 }
