@@ -60604,5 +60604,37 @@
       "note": "Proactive — postcondition sns-confirm-subscription-token-invalid-not-handled added via API surface analysis (drift-by-staleness pass 37, deepen-stream-3), command-specific error-name detector needed"
     },
     "resolution": null
+  },
+  "3218": {
+    "id": "concern-20260624-busboy-deepen-1",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "busboy",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for busboy mid-stream 'Malformed part header' (busboy-010) — distinct from busboy-001 generic error-listener absence: this fires AFTER the constructor succeeds, from lib/types/multipart.js line 398, so try/catch alone is insufficient. Detector should ensure the busboy instance has an 'error' event listener attached AND, for higher-precision scoring, that the listener branches on err.message to distinguish 'Malformed part header' (deterministic client bug, non-retryable) from 'Unexpected end of form/file' (transient network, retryable). Postcondition added in drift-by-staleness pass 43 but no scanner rule exists.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — postcondition busboy-010 added via API surface analysis (drift-by-staleness pass 43, deepen-stream-2). Detection overlaps busboy-001 at the 'no error listener' coarse level; busboy-010 motivates a finer-grained check on err.message branching."
+    },
+    "resolution": null
+  },
+  "3219": {
+    "id": "concern-20260624-dayjs-deepen-1",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "dayjs",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for dayjs Duration.humanize() called without the relativeTime plugin being extended (humanize-missing-relativetime-plugin). humanize() internally calls dayjs(...).fromNow() per duration.js source: t().add(this.$ms,'ms').locale(this.$l).fromNow(!s). Without dayjs.extend(relativeTime), the call throws TypeError: 'fromNow is not a function'. Empirically reproduced 2026-06-24 against dayjs@1.11.21. Detector candidates: (1) static analysis — if dayjs.extend(durationPlugin) is found in the module init but dayjs.extend(relativeTimePlugin) is not, any subsequent .humanize() call should fire; (2) AST-based — flag every call to Duration.humanize() that is not in a try/catch when the import-set lacks dayjs/plugin/relativeTime. The same pattern applies to direct Dayjs.fromNow/from/to/toNow when relativeTime is not loaded. This concern surfaces a class of plugin-dependency-omission bugs that are common in SSR / lazy-loaded environments.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — postcondition added via API surface analysis (deepen pass 38, deepen-stream-3). Postcondition id 'humanize-missing-relativetime-plugin' in packages/dayjs/contract.yaml. Detection rule not yet implemented."
+    },
+    "resolution": null
   }
 }
