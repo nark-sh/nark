@@ -63007,5 +63007,37 @@
       "note": "Proactive — contract added via API surface analysis pass 82 (deepen-stream-3). Function: usage.measure. Pattern: composable-middleware-misclassified-as-sync-factory (the namespace is a sync object but its methods are async + throw). Required regression fixtures already added: gt_usage_measure_missing / _safe in packages/@trigger.dev/sdk/fixtures/ground-truth.ts."
     },
     "resolution": null
+  },
+  "3368": {
+    "id": "concern-20260624-aws-secrets-manager-deepen-1",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "@aws-sdk/client-secrets-manager",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for UntagResourceCommand.send() without try-catch and for AccessDeniedException self-lockout when removing tags participating in IAM policy conditions. Postconditions added in deepen-stream-3 pass 83 (untag-resource-no-try-catch, untag-resource-self-lockout) but no scanner rule yet - fixture gt_untagResource_missing will not fire until a no-try-catch rule for UntagResourceCommand exists.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive - contract added via API surface analysis (parity gap with already-contracted TagResourceCommand), detection rule needed"
+    },
+    "resolution": null
+  },
+  "3369": {
+    "id": "concern-20260624-aws-secrets-manager-deepen-2",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "@aws-sdk/client-secrets-manager",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for StopReplicationToReplicaCommand.send() without try-catch and for wrong-Region invocation (InvalidRequestException). Postconditions added in deepen-stream-3 pass 83 (stop-replication-no-try-catch, stop-replication-wrong-region-invocation). This is an IRREVERSIBLE primary promotion in disaster-recovery automation - split-brain risk if errors are swallowed.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive - contract added via API surface analysis (parity gap with already-contracted ReplicateSecretToRegionsCommand), detection rule needed"
+    },
+    "resolution": null
   }
 }
