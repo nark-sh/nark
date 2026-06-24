@@ -61214,5 +61214,117 @@
       "note": "Proactive — contract added via API surface analysis (deepen-stream-2 pass 55, 2026-06-24). Postcondition api-request-response-status-unchecked. Requires new scanner pattern: detect await response.json()/text() without preceding response.ok / response.status check on same identifier."
     },
     "resolution": null
+  },
+  "3256": {
+    "id": "concern-20260624-google-genai-deepen-1",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "@google/genai",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for ai.fileSearchStores.uploadToFileSearchStore() and importFile() calls without try-catch. Three distinct throw paths from upload (Vertex client unsupported, MIME inference failure, upload location failure) plus ApiError from HTTP layer. New module in @google/genai v1.x.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive - postconditions added in deepen-stream-3 pass 47 against @google/genai@1.50.1; no scanner rule yet."
+    },
+    "resolution": null
+  },
+  "3257": {
+    "id": "concern-20260624-google-genai-deepen-2",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "@google/genai",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for ai.tunings.tune() calls without try-catch. Fine-tuning job submission throws ApiError on quota (403), invalid trainingDataset (400), unsupported baseModel (404), or rate limit (429). Marked @experimental in SDK.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive - postconditions added in deepen-stream-3 pass 47 against @google/genai@1.50.1; no scanner rule yet."
+    },
+    "resolution": null
+  },
+  "3258": {
+    "id": "concern-20260624-google-genai-deepen-3",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "@google/genai",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for ai.batches.createEmbeddings() calls without try-catch. Batch embedding job submission throws ApiError on HTTP failure; per-row failures surface on polled BatchJob.state field but submission errors throw from the create call.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive - postconditions added in deepen-stream-3 pass 47 against @google/genai@1.50.1; no scanner rule yet."
+    },
+    "resolution": null
+  },
+  "3259": {
+    "id": "concern-20260624-pinecone-deepen-1",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "@pinecone-database/pinecone",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for pc.inference.rerank() calls without try-catch. Reranking is the second-stage RAG step; uncaught rerank failures either crash API routes or silently degrade answer quality. Throws PineconeArgumentError on validation, PineconeAuthorizationError/PineconeBadRequestError/PineconeUnavailableError on HTTP failure.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — drift-by-staleness re-verify pass on 2026-06-24 (deepen-stream-3 pass-48) promoted inference.rerank from intentionally-omitted to contracted because reranking is now a standard 2-stage RAG component. Detection rule needed for pc.inference.rerank() property chain."
+    },
+    "resolution": null
+  },
+  "3260": {
+    "id": "concern-20260624-winston-deepen-1",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "winston",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for winston Logger.cli() — postcondition added in deepen pass for winston@3 migration trap. Logger.cli() was removed in winston@3.0.0 and throws synchronously. Need a ThrowingFunctionDetector rule that flags logger.cli() calls outside try/catch.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis (cli-throws-unconditionally postcondition) in deepen-stream-2 pass 56 (2026-06-24), detection rule needed"
+    },
+    "resolution": null
+  },
+  "3261": {
+    "id": "concern-20260624-winston-deepen-2",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "winston",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for winston.ExceptionHandler constructor throwing on null/undefined logger arg. Synchronous throw; ThrowingFunctionDetector rule needed for `new winston.ExceptionHandler(...)` when arg is undefined/null/missing.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — exception-handler-constructor-requires-logger postcondition added in deepen-stream-2 pass 56 (2026-06-24)"
+    },
+    "resolution": null
+  },
+  "3262": {
+    "id": "concern-20260624-winston-deepen-3",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "winston",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add awareness for winston exceptions.handle() and rejections.handle() installing process.exit(1) listeners. Postcondition is informational/awareness — recommend exitOnError: false when capture-only is desired. Detection rule could flag createLogger() with exceptionHandlers/rejectionHandlers and exitOnError unset (defaults to true).",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — exceptions-handle-installs-process-exit and rejections-handle-installs-process-exit postconditions added in deepen-stream-2 pass 56 (2026-06-24)"
+    },
+    "resolution": null
   }
 }
