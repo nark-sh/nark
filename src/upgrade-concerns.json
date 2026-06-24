@@ -60894,5 +60894,37 @@
       "note": "Proactive — contract added via API surface analysis of firebase-admin@14.0.0 (Phone Number Verification GA). Detection rule needed for getPhoneNumberVerification() factory + PhoneNumberVerification instance method tracking."
     },
     "resolution": null
+  },
+  "3236": {
+    "id": "concern-20260624-aws-sdk-lib-storage-deepen-1",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "@aws-sdk/lib-storage",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for upload.done() error message 'Exceeded N parts in multipart upload' — postcondition upload-done-exceeds-max-parts added in deepen-stream-2 pass 50. Detection would require pattern-matching the thrown error message or recognizing file-size / partSize ratio at construction time.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface re-verification (drift-by-staleness). MAX_PARTS=10000 is an S3 hard limit; default partSize=5MB caps file at ~48.8 GB without explicit tuning."
+    },
+    "resolution": null
+  },
+  "3237": {
+    "id": "concern-20260624-aws-sdk-lib-storage-deepen-2",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "@aws-sdk/lib-storage",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for upload.done() error message 'Part N is missing ETag in UploadPart response. Missing Bucket CORS configuration for ETag header?' — postcondition upload-done-missing-etag-cors added in deepen-stream-2 pass 50. Detection would route the developer to bucket CORS remediation, not retry logic.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface re-verification (drift-by-staleness). Almost exclusively a browser-upload misconfiguration; rare in pure backend uploads."
+    },
+    "resolution": null
   }
 }
