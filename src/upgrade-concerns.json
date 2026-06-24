@@ -62687,5 +62687,69 @@
       "note": "Proactive — contract added via API surface analysis, detection rule needed"
     },
     "resolution": null
+  },
+  "3348": {
+    "id": "concern-20260624-drizzle-orm-deepen-1",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "drizzle-orm",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for migrate() — drizzle-orm/<driver>/migrator migrate(db, { migrationsFolder }) — postcondition added in depth pass (pass 76, deepen-stream-3) but no scanner rule exists. Three postconditions: missing journal/sql files (fs Error), driver-error inside session.transaction (rolls back pending), and no-built-in-lock concurrent-startup race producing duplicate-object errors.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis (drizzle-orm@0.45.2 node_modules/drizzle-orm/node-postgres/migrator.d.ts). migrate() is THE startup-time call in drizzle apps; scanner should treat unhandled migrate() as ERROR (process-exit-or-throw failure equivalent to unhandled connect()). Import path varies by driver: drizzle-orm/node-postgres/migrator, drizzle-orm/postgres-js/migrator, drizzle-orm/neon-http/migrator, drizzle-orm/better-sqlite3/migrator, drizzle-orm/libsql/migrator, drizzle-orm/d1/migrator. Recommend a glob match on `drizzle-orm/*/migrator` for the named import. Postcondition ids: migrate-missing-journal-or-sql-file, migrate-driver-error-rolls-back-pending, migrate-no-built-in-lock-concurrent-startup-race."
+    },
+    "resolution": null
+  },
+  "3349": {
+    "id": "concern-20260624-drizzle-orm-deepen-2",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "drizzle-orm",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for db.$cache.invalidate() — new cache feature in drizzle-orm@0.45.x. Postcondition added in depth pass (pass 76, deepen-stream-3) but no scanner rule exists. Two postconditions: backend-error (Redis/Upstash propagation) and silent-noop-when-cache-not-configured (NoopCache wired when DrizzleConfig.cache omitted).",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis (drizzle-orm@0.45.2 pg-core/db.d.ts line 70, cache/upstash/cache.d.ts). Detection requires the scanner to recognize `$cache` as a property chain off a drizzle-tracked db instance. The InstanceTracker already follows `db.transaction`, `db.select`, etc.; extend the same association to `db.$cache.invalidate`. Postcondition ids: cache-invalidate-backend-error (error severity), cache-invalidate-silent-noop-when-cache-not-configured (warning severity). The silent-noop variant is informational — no scanner rule needed, it's a code-review signal."
+    },
+    "resolution": null
+  },
+  "3350": {
+    "id": "concern-20260624-drizzle-orm-deepen-3",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "drizzle-orm",
+    "type": "new_pattern",
+    "status": "pending",
+    "description": "Surface the migrate-no-built-in-lock-concurrent-startup-race pattern as a separate detector: warn when migrate() is called from app-level startup code (server.ts / index.ts entry points) without an obvious advisory-lock or release-phase guard. Pattern-match imports of migrate from drizzle-orm/*/migrator combined with a top-level await or main() call.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — deepen-stream-3 pass 76. Lower priority than concerns 1+2; this is a heuristic detector for a sharp edge, not a strict postcondition violation. Implement after concerns 1+2 land."
+    },
+    "resolution": null
+  },
+  "3351": {
+    "id": "concern-20260624-scanner-deepen-4",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "_scanner",
+    "type": "scanner_bug",
+    "status": "pending",
+    "description": "effectiveName.endsWith(\".\" + chainStr) causes beta-prefixed variants (e.g. beta.messages.create) to silently shadow non-beta postconditions (messages.create). When deepening any SDK with parallel beta/non-beta APIs (OpenAI, Anthropic, Stripe, etc.), adding the non-beta function to a contract risks regressing the beta detection because the suffix check matches both. Surfaced by deepen-stream-2 pass 75.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Re-queued from pass 75 observation; documented in pass 76 prompt. Reproduction: any contract where two postconditions share the same trailing chain segment (e.g. messages.create vs beta.messages.create). The endsWith check matches the shorter chain against the longer effectiveName, producing the wrong postcondition assignment. Fix: switch the comparison to a startsWith-or-exact match on the chain root segment, or carry the full property-access chain in the contract function name and compare on equality. Until fixed, deepen passes should queue new SDK functions as scanner-upgrade concerns rather than adding them to contracts that have beta/non-beta parallel APIs."
+    },
+    "resolution": null
   }
 }
