@@ -60476,5 +60476,133 @@
       "note": "Proactive — contract added via API surface re-verification (deepen-stream-2 pass 41, 2026-06-24). Detection rule needed."
     },
     "resolution": null
+  },
+  "3210": {
+    "id": "concern-20260624-vercel-blob-deepen-1",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "@vercel/blob",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @vercel/blob issueSignedToken() — POST /signed-token control-plane call introduced in v2.x — postconditions added in drift-by-staleness pass 42 but no scanner rule exists. Sync BlobError on bad validUntil + auth/network errors from requestApi.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — postcondition(s) blob-issue-signed-token-no-try-catch + blob-issue-signed-token-valid-until-in-past added via API surface analysis (drift-by-staleness pass 42), detection rule needed"
+    },
+    "resolution": null
+  },
+  "3211": {
+    "id": "concern-20260624-vercel-blob-deepen-2",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "@vercel/blob",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @vercel/blob presignUrl() — Sync BlobError on pathname/scope mismatch, expired delegation (dominant expected-failure path), or unauthorized operation — postconditions added in drift-by-staleness pass 42 but no scanner rule exists.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — postcondition(s) blob-presign-url-no-try-catch + blob-presign-url-delegation-expired added via API surface analysis (drift-by-staleness pass 42), detection rule needed"
+    },
+    "resolution": null
+  },
+  "3212": {
+    "id": "concern-20260624-vercel-blob-deepen-3",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "@vercel/blob",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @vercel/blob handleUploadPresigned() — Server route helper introduced in v2.x — Ed25519 webhook signature verification failure path is the dominant prod failure mode. Postconditions added in drift-by-staleness pass 42 but no scanner rule exists.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — postcondition(s) blob-handle-upload-presigned-no-try-catch + blob-handle-upload-presigned-missing-webhook-public-key added via API surface analysis (drift-by-staleness pass 42), detection rule needed"
+    },
+    "resolution": null
+  },
+  "3213": {
+    "id": "concern-20260624-vercel-blob-deepen-4",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "@vercel/blob",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @vercel/blob uploadPresigned() — Client-side presigned-URL upload introduced in v2.x — same error surface as upload() but adds expired-presigned-URL retry case. Postcondition added in drift-by-staleness pass 42 but no scanner rule exists.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — postcondition(s) blob-upload-presigned-no-try-catch added via API surface analysis (drift-by-staleness pass 42), detection rule needed"
+    },
+    "resolution": null
+  },
+  "3214": {
+    "id": "concern-20260624-aws-sns-deepen-4",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "@aws-sdk/client-sns",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @aws-sdk/client-sns PublishCommand EndpointDisabled and PlatformApplicationDisabled error-name-narrowing — caller catches generic SNSServiceException but does NOT branch on error.name === 'EndpointDisabled' to route to the device-deregistration flow; results in retry hammering of permanently-failing endpoints. Postcondition added in drift-by-staleness pass 37 but no scanner rule exists.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — postcondition sns-publish-endpoint-disabled-not-handled added via API surface analysis (drift-by-staleness pass 37, deepen-stream-3), error-name-narrowing detector needed"
+    },
+    "resolution": null
+  },
+  "3215": {
+    "id": "concern-20260624-aws-sns-deepen-5",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "@aws-sdk/client-sns",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @aws-sdk/client-sns PublishCommand KMS error family (KMSAccessDenied, KMSDisabled, KMSInvalidState, KMSNotFound, KMSOptInRequired, KMSThrottling) — caller lumps KMS errors with generic AuthorizationError, so operator postmortems chase SNS IAM instead of the KMS key. Postcondition added in drift-by-staleness pass 37 but no scanner rule exists.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — postcondition sns-publish-kms-error-not-handled added via API surface analysis (drift-by-staleness pass 37, deepen-stream-3), error-name-prefix detector for 'KMS' needed"
+    },
+    "resolution": null
+  },
+  "3216": {
+    "id": "concern-20260624-aws-sns-deepen-6",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "@aws-sdk/client-sns",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @aws-sdk/client-sns ConfirmSubscriptionCommand ReplayLimitExceeded — confirmation webhook silently ignores token-replay errors instead of triggering a re-subscription flow; leaves the subscription permanently pending. Postcondition added in drift-by-staleness pass 37 but no scanner rule exists.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — postcondition sns-confirm-subscription-replay-limit-exceeded added via API surface analysis (drift-by-staleness pass 37, deepen-stream-3), error-name-narrowing detector needed"
+    },
+    "resolution": null
+  },
+  "3217": {
+    "id": "concern-20260624-aws-sns-deepen-7",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "@aws-sdk/client-sns",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @aws-sdk/client-sns ConfirmSubscriptionCommand InvalidParameter — expired confirmation tokens (>2 days) surface as InvalidParameterException; caller must distinguish this from generic parameter validation and prompt user to re-subscribe. Postcondition added in drift-by-staleness pass 37 but no scanner rule exists.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — postcondition sns-confirm-subscription-token-invalid-not-handled added via API surface analysis (drift-by-staleness pass 37, deepen-stream-3), command-specific error-name detector needed"
+    },
+    "resolution": null
   }
 }
