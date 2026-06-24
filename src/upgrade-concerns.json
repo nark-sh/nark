@@ -59804,5 +59804,85 @@
       "note": "Proactive — also covers existing contracted QC methods that the scanner cannot yet detect via property-chain access. Ground-truth fixture at packages/@tanstack/react-query/fixtures/ground-truth.ts:138 currently SHOULD_NOT_FIRE acknowledging this gap."
     },
     "resolution": null
+  },
+  "3168": {
+    "id": "concern-20260624-inngest-deepen-1",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "inngest",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for inngest step.sleep() called without await. Postcondition step-sleep-not-awaited added in deepen pass 27 but no scanner rule exists. Detection rule: bare expression-statement call to step.sleep / s.sleep / <stepvar>.sleep inside an async function passed to inngest.createFunction(), with no await prefix and no .then/.catch chain.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis (deepen pass 27, deepen-stream-3), detection rule needed. Pending fixture annotation marker in ground-truth.ts."
+    },
+    "resolution": null
+  },
+  "3169": {
+    "id": "concern-20260624-inngest-deepen-2",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "inngest",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for inngest step.sleepUntil() called without await. Postcondition step-sleep-until-not-awaited added in deepen pass 27 but no scanner rule exists. Same shape as sleep detector — bare expression-statement call without await prefix.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis (deepen pass 27, deepen-stream-3), detection rule needed. Pending fixture annotation marker in ground-truth.ts."
+    },
+    "resolution": null
+  },
+  "3170": {
+    "id": "concern-20260624-inngest-deepen-3",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "inngest",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for inngest step.fetch() called without try/catch. Postcondition step-fetch-network-error-no-try-catch added in deepen pass 27. Detection rule: step.fetch awaited inside an async function with no enclosing try-catch (matches existing send-no-try-catch pattern). step.fetch is exported as both a step method and a module-level fetch import — detector should cover both call shapes.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis (deepen pass 27, deepen-stream-3), detection rule needed. Pending fixture annotation marker in ground-truth.ts."
+    },
+    "resolution": null
+  },
+  "3171": {
+    "id": "concern-20260624-inngest-deepen-4",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "inngest",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for inngest step.ai.infer() called without try/catch. Postcondition ai-infer-provider-error-no-try-catch added in deepen pass 27. Detection rule: step.ai.infer awaited inside an async function with no enclosing try-catch. Provider errors (rate limit / auth / model / 5xx) propagate after step retries.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis (deepen pass 27, deepen-stream-3), detection rule needed. Pending fixture annotation marker in ground-truth.ts."
+    },
+    "resolution": null
+  },
+  "3172": {
+    "id": "concern-20260624-inngest-deepen-5",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "inngest",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for inngest.realtime.publish() called without try/catch (client-level non-durable variant). Postcondition realtime-publish-no-try-catch added in deepen pass 27. Detection rule: inngest.realtime.publish / <client>.realtime.publish awaited with no enclosing try-catch. Schema validation failures throw permanently; non-ok API responses throw with no automatic retry.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis (deepen pass 27, deepen-stream-3), detection rule needed. Pending fixture annotation marker in ground-truth.ts."
+    },
+    "resolution": null
   }
 }
