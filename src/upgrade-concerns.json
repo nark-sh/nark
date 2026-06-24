@@ -60716,5 +60716,21 @@
       "note": "Proactive — postcondition added in depth pass 39 (2026-06-24). Existing fixture has both unsafe (line 247) and safe (line 265) formatter cases; scanner cannot currently distinguish them."
     },
     "resolution": null
+  },
+  "3225": {
+    "id": "concern-20260624-handlebars-deepen-5",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "handlebars",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for Handlebars.compile() invalid-input-type — non-string/non-AST input throws Handlebars.Exception with message 'You must pass a string or Handlebars AST to Handlebars.compile. You passed <input>' before any compilation. Scanner currently flags compile() without try-catch as invalid-template-syntax; this postcondition is a distinct error class that fires on null/undefined input from external sources.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — postcondition added in deepen pass 45 (2026-06-24, deepen-stream-2) after re-reading lib/handlebars/compiler/compiler.js against handlebars 4.7.9. Mirrors precompile-invalid-input-type already detected. No new scanner rule needed for the no-try-catch case (existing ThrowingFunctionDetector covers compile()); a more precise rule could distinguish input-type vs syntax errors when source flow analysis is added."
+    },
+    "resolution": null
   }
 }
