@@ -63071,5 +63071,37 @@
       "note": "Proactive - contract added via API surface analysis. Evidence: provider.getNetwork() and provider.getTransactionCount() both propagate ErrorCode NETWORK_ERROR / SERVER_ERROR / TIMEOUT via the standard ethers v6 error system."
     },
     "resolution": null
+  },
+  "3372": {
+    "id": "concern-20260624-fastify-deepen-1",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "fastify",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection (or explicit suppression) for fastify.route() postconditions added in deepen-stream-3 pass 84 (route-duplicated-route, route-handler-not-fn, route-method-not-supported). All three are severity=info startup-time programming errors (FST_ERR_DUPLICATED_ROUTE, FST_ERR_ROUTE_HANDLER_NOT_FN, FST_ERR_ROUTE_MISSING_HANDLER, FST_ERR_ROUTE_DUPLICATED_HANDLER, FST_ERR_ROUTE_METHOD_INVALID, FST_ERR_ROUTE_METHOD_NOT_SUPPORTED). Same FP shape as the register-* downgrades — most projects won't want per-callsite warnings. Recommend: implement a low-noise rule that fires only when a project has no setErrorHandler hook on the offending route, OR mark the postconditions as no-detector-required and rely on contract documentation only.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive deepen pass — contract added via API surface analysis (fastify.route imperative registration), no scanner rule needed yet."
+    },
+    "resolution": null
+  },
+  "3373": {
+    "id": "concern-20260624-fastify-deepen-2",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "fastify",
+    "type": "fixture_wiring",
+    "status": "pending",
+    "description": "Wire the new fastify.route() ground-truth fixture annotations into the assertion suite. Three new SHOULD_NOT_FIRE callsites added at the bottom of packages/fastify/fixtures/ground-truth.ts (routeImperativeDuplicate, routeImperativeMissingHandler, routeImperativeBadMethod). Once a detection rule exists for any of the three postconditions, flip the annotation to SHOULD_FIRE and add the expected postconditionId.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Companion to concern-20260624-fastify-deepen-1."
+    },
+    "resolution": null
   }
 }
