@@ -62238,5 +62238,69 @@
       "note": "Proactive — contract added via API surface analysis at pass 76 (deepen-stream-2 2026-06-24). Method operationIndex is on the v5 SearchClient; detection rule needed to fire on .operationIndex( call sites."
     },
     "resolution": null
+  },
+  "3320": {
+    "id": "concern-20260624-stripe-deepen-1",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "stripe",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for stripe.*.update() calls without try-catch that handles StripePermissionError (restricted-key / Connect / role-scoped failures). Postcondition: update-permission-error. Existing scanner rules may catch the bare-await pattern; verify instanceof Stripe.errors.StripePermissionError is recognized as a satisfying pattern.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive - postcondition added in deepen-stream-2 pass 78 against stripe@20.4.1; StripePermissionError class was uncovered by any prior postcondition in the corpus."
+    },
+    "resolution": null
+  },
+  "3321": {
+    "id": "concern-20260624-stripe-deepen-2",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "stripe",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for stripe.*.update() calls without try-catch that handles StripeIdempotencyError (Idempotency-Key re-used with different payload). Postcondition: update-idempotency-error. Should recognize instanceof Stripe.errors.StripeIdempotencyError as satisfying pattern. Important for retry-loop bugs.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive - postcondition added in deepen-stream-2 pass 78 against stripe@20.4.1; StripeIdempotencyError class was uncovered by any prior postcondition in the corpus."
+    },
+    "resolution": null
+  },
+  "3322": {
+    "id": "concern-20260624-stripe-deepen-3",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "stripe",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for stripe.*.update() calls without try-catch for invalid-state-transition errors. Postcondition: update-invalid-state-transition. Codes include invoice_not_editable, subscription_canceled, payment_intent_unexpected_state, resource_already_exists.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive - postcondition added in deepen-stream-2 pass 78 against stripe@20.4.1."
+    },
+    "resolution": null
+  },
+  "3323": {
+    "id": "concern-20260624-stripe-deepen-4",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "stripe",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for stripe.*.update() calls without try-catch for invalid-parameter errors. Postcondition: update-invalid-parameter. Likely already covered by generic StripeInvalidRequestError detection on update method - verify no regression needed.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive - postcondition added in deepen-stream-2 pass 78 against stripe@20.4.1."
+    },
+    "resolution": null
   }
 }
