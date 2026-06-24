@@ -61438,5 +61438,53 @@
       "note": "Proactive — sequence-pattern detector needed, no current analyzer covers create+immediate-use silent-failure shapes"
     },
     "resolution": null
+  },
+  "3270": {
+    "id": "concern-20260624-mongodb-deepen-1",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "mongodb",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for MongoClient.bulkWrite() (new v7+ admin command for cross-collection bulk writes, requires server 8.0+). 3 postconditions added in pass 65: clientbulkwrite-execution-error (caller-bug pre-flight: empty models, autoEncryption, w:0+verbose/ordered), clientbulkwrite-partial-failure-not-inspected (MongoClientBulkWriteError carries partialResult+writeErrors; catch-and-log discards partial-success data and causes double-applies on retry), clientbulkwrite-cursor-exhaustion-error (MongoClientBulkWriteCursorError - cursor disconnect mid-stream, indeterminate state, do NOT replay full models array). Detection: track client instances at construction (`new MongoClient(...)` or `MongoClient.connect()`) and flag bare `await client.bulkWrite(...)` calls outside try-catch.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive - contract added via API surface analysis. Sync-factory-with-async-methods pattern: MongoClient constructor is synchronous, .bulkWrite() is async. Source confirmed: nark-dev/nark-corpus/packages/mongodb/contract.yaml@1.3.0, evidence from mongodb@7.3.0 src/mongo_client.ts + src/error.ts + src/operations/client_bulk_write/executor.ts"
+    },
+    "resolution": null
+  },
+  "3271": {
+    "id": "concern-20260624-mongodb-deepen-2",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "mongodb",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for GridFSBucket.delete() and GridFSBucket.drop(). GridFSBucket is a synchronous constructor (`new GridFSBucket(db, options)`) that exposes async methods (.delete(), .rename(), .drop(), .openDownloadStream() which returns a stream). Postconditions added in pass 65: gridfs-delete-file-not-found (MongoRuntimeError when deletedCount===0, NOT idempotent), gridfs-delete-orphaned-chunks-on-files-failure (two-phase delete - files collection then chunks collection - chunks failure after files success leaves orphans). Detection: track GridFSBucket instances at construction and flag bare `await bucket.delete(id)` and `await bucket.drop()` outside try-catch.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive - sync-factory-with-async-methods pattern. Source confirmed: mongodb@7.3.0 src/gridfs/index.ts lines for async delete/rename/drop. Error type is generic MongoRuntimeError pending NODE-3483 (driver TODO to introduce MongoGridFSFileNotFoundError); message-matching is the only discrimination path until then."
+    },
+    "resolution": null
+  },
+  "3272": {
+    "id": "concern-20260624-mongodb-deepen-3",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "mongodb",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for GridFSBucket.rename(). Sync constructor, async method. Implementation: updateOne on files collection; throws MongoRuntimeError when matchedCount===0 with message 'File with id ${id} not found'. Postcondition added in pass 65: gridfs-rename-file-not-found. Unlike GridFSBucket.delete (where file-not-found is often the desired idempotent end state), rename-missing-file is almost always an application error and should be surfaced. Detection: track GridFSBucket instances and flag bare `await bucket.rename(id, name)` calls outside try-catch.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive - companion to concern-20260624-mongodb-deepen-2. Source confirmed: mongodb@7.3.0 src/gridfs/index.ts async rename(). Both concerns share the GridFSBucket instance tracking work; they can be implemented in a single scanner upgrade PR."
+    },
+    "resolution": null
   }
 }
