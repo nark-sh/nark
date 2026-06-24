@@ -60636,5 +60636,69 @@
       "note": "Proactive — postcondition added via API surface analysis (deepen pass 38, deepen-stream-3). Postcondition id 'humanize-missing-relativetime-plugin' in packages/dayjs/contract.yaml. Detection rule not yet implemented."
     },
     "resolution": null
+  },
+  "3220": {
+    "id": "concern-20260624-jszip-deepen-1",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "jszip",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for jszip JSZipObject.nodeStream() — postcondition file-node-stream-no-error-listener: scanner should detect zip.files['name'].nodeStream() (or zip.file('name').nodeStream()) calls where the returned NodeJS.ReadableStream is consumed without registering .on('error', ...). Unhandled stream 'error' events cause process crash per EventEmitter semantics. Pattern is the same as the existing generateNodeStream rule but on a JSZipObject, not on the JSZip root.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis. Pattern: detect calls to .nodeStream() that .pipe() or .on('data')/.on('end') without a sibling .on('error', ...). Likely shares helper code with the generate-node-stream-no-error-listener rule."
+    },
+    "resolution": null
+  },
+  "3221": {
+    "id": "concern-20260624-jszip-deepen-2",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "jszip",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for jszip JSZipObject.nodeStream(type) called with a non-'nodebuffer' type literal — postcondition file-node-stream-unsupported-type: scanner should detect .nodeStream('blob' | 'uint8array' | 'arraybuffer' | …) outside a try-catch. The check at lib/stream/StreamHelper.js:199-205 throws synchronously for non-nodebuffer output types; without try-catch the throw escapes.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — narrow detection. Trigger only when the type argument is a string literal AND is not 'nodebuffer'."
+    },
+    "resolution": null
+  },
+  "3222": {
+    "id": "concern-20260624-jszip-deepen-3",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "jszip",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for jszip JSZip.generateInternalStream() — postcondition generate-internal-stream-no-error-listener: scanner should detect zip.generateInternalStream(...).on('data', ...).on('end', ...) (or any consumption chain) without a sibling .on('error', ...). The StreamHelper EventEmitter forwards both synchronous-validation errors and async DEFLATE errors through the 'error' event; unhandled events crash the process.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — likely shares helper code with the generateNodeStream and nodeStream on('error') detectors. Differs in that StreamHelper is JSZip-internal (not a Node.js ReadableStream)."
+    },
+    "resolution": null
+  },
+  "3223": {
+    "id": "concern-20260624-jszip-deepen-4",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "jszip",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for jszip JSZip.generateInternalStream().accumulate() — postcondition generate-internal-stream-accumulate-unhandled-rejection: scanner should detect zip.generateInternalStream(...).accumulate() where the resulting Promise is not awaited inside try-catch nor handled via .catch(). This mirrors the existing generateAsync detection rule applied transitively through generateInternalStream().accumulate().",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — likely a thin wrapper over the generateAsync try-catch rule with the call chain extended to .generateInternalStream(...).accumulate()."
+    },
+    "resolution": null
   }
 }
