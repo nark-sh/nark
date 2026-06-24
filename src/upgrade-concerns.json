@@ -63135,5 +63135,21 @@
       "note": "Proactive — same family as the executeIncrementally abort-signal concerns (deepen-1 in 2026-06-18 batch). Detection should be shared across all four executor entry points."
     },
     "resolution": null
+  },
+  "3376": {
+    "id": "concern-20260624-formidable-deepen-1",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "formidable",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection branching for formidable-uninitialized-parser (FormidableError code 1004). Currently the AI fix prompt rolls into the generic parse-error branch; a specific branch should surface 'parser was never initialized — log as internal-fault rather than client error' to differentiate from input-validation rejections (noParser/missingContentType).",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — postcondition added via deepen pass 85 (deepen-stream-3) on 2026-06-24 covering FormidableError code 1004 (uninitializedParser) which is the last documented code in src/FormidableError.js without a dedicated postcondition. Defensive guard surface; low real-world hit-rate but completeness-driven."
+    },
+    "resolution": null
   }
 }
