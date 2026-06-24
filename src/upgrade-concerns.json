@@ -61662,5 +61662,197 @@
       "note": "Proactive — postcondition added via API surface analysis (Next.js 16.x class-hierarchy gaps), detection rule needed"
     },
     "resolution": null
+  },
+  "3284": {
+    "id": "concern-20260624-posthog-node-deepen-1",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "posthog-node",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for posthog-node.evaluateFlags() - the canonical v5.38+ flag evaluation API that replaces getFeatureFlag/isFeatureEnabled/getFeatureFlagPayload (all now @deprecated and emitting one-shot console deprecation warnings). Postcondition evaluate-flags-network-error added in pass 68 (deepen-stream-2, 2026-06-24, drift sweep against posthog-node@5.38.4). Detector should fire on bare-await evaluateFlags(...) outside a try-catch when imported from posthog-node - same shape as existing getFeatureFlag/getAllFlags detectors but on the new method name. Internally calls super.getFeatureFlagDetailsStateless() and propagates PostHogFetchHttpError / PostHogFetchNetworkError on auth/network/quota failures. Source-of-truth: posthog-node/dist/client.js lines 559-668. Fixture: nark-corpus/packages/posthog-node/fixtures/ground-truth.ts (evaluateFlagsNoCatch, evaluateFlagsOptionsNoCatch, evaluateFlagsWithCatch).",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive - contract added via drift-mode API surface analysis of posthog-node@5.38.4 (was @5.x at 2026-04-17 deepen). The deprecated single-flag methods still ship in 5.38.4 - the new method is additive. Detection scope: extend the existing posthog-node feature-flag detector to also match the evaluateFlags identifier."
+    },
+    "resolution": null
+  },
+  "3285": {
+    "id": "concern-20260624-posthog-node-deepen-2",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "posthog-node",
+    "type": "new_pattern",
+    "status": "pending",
+    "description": "Add detection for evaluate-flags-quota-limited-silent (postcondition added in pass 68). evaluateFlags() returns a FeatureFlagEvaluations snapshot with .quotaLimited set to true when the project has exceeded its feature-flag quota; subsequent snapshot.isEnabled() / snapshot.getFlag() calls then return the default-disabled answer for every flag - silent failure, no exception. Scanner should flag call sites where the value bound to evaluateFlags() is consumed by .isEnabled() / .getFlag() WITHOUT a preceding read of .quotaLimited on the same binding. Severity warning (not error) - this is a defensive-coding check, not a guaranteed bug. Likely a Phase 2 follow-up to the no-try-catch detector since it requires data-flow tracking from the awaited evaluateFlags() result through subsequent method calls.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive - secondary postcondition. Detector needs intra-function data-flow analysis: track the variable bound to evaluateFlags() and verify .quotaLimited is read before .isEnabled() / .getFlag() / .getFlagPayload(). Source-of-truth: posthog-node/dist/client.js line 615 (quotaLimited propagation into the FeatureFlagEvaluations constructor)."
+    },
+    "resolution": null
+  },
+  "3286": {
+    "id": "concern-20260624-upstash-qstash-deepen-1",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "@upstash/qstash",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @upstash/qstash urlGroups.addEndpoints() to enforce postcondition urlgroups-addendpoints-api-error. Detector should fire on bare-await client.urlGroups.addEndpoints(...) outside a try-catch when imported from @upstash/qstash. Internally calls http.request() and throws QstashError on non-2xx HTTP. Source: @upstash/qstash dist/index.js UrlGroups class line 2103. Postcondition added in pass 57 (deepen-stream-3, 2026-06-24) against @upstash/qstash@2.11.1. Fixture: nark-corpus/packages/@upstash/qstash/fixtures/ground-truth.ts.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — postcondition added via deepen API surface analysis of @upstash/qstash@2.11.1 (depth pass 2026-06-24, was 2026-04-17 last_deepened). Detection scope: extend the existing @upstash/qstash bare-await detector to match urlGroups.addEndpoints on Client/UrlGroups/FlowControlApi/DLQ instances."
+    },
+    "resolution": null
+  },
+  "3287": {
+    "id": "concern-20260624-upstash-qstash-deepen-2",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "@upstash/qstash",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @upstash/qstash urlGroups.removeEndpoints() to enforce postcondition urlgroups-removeendpoints-api-error. Detector should fire on bare-await client.urlGroups.removeEndpoints(...) outside try-catch. Same http.request() error path as addEndpoints. Source: @upstash/qstash dist/index.js UrlGroups class line 2115. Postcondition added in pass 57 (deepen-stream-3, 2026-06-24) against @upstash/qstash@2.11.1. Fixture: nark-corpus/packages/@upstash/qstash/fixtures/ground-truth.ts.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — postcondition added via deepen API surface analysis of @upstash/qstash@2.11.1 (depth pass 2026-06-24, was 2026-04-17 last_deepened). Detection scope: extend the existing @upstash/qstash bare-await detector to match urlGroups.removeEndpoints on Client/UrlGroups/FlowControlApi/DLQ instances."
+    },
+    "resolution": null
+  },
+  "3288": {
+    "id": "concern-20260624-upstash-qstash-deepen-3",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "@upstash/qstash",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @upstash/qstash urlGroups.delete() to enforce postcondition urlgroups-delete-api-error. Detector should fire on bare-await client.urlGroups.delete(name) outside try-catch. Same http.request() error path. Source: @upstash/qstash dist/index.js UrlGroups class line 2144. Postcondition added in pass 57 (deepen-stream-3, 2026-06-24) against @upstash/qstash@2.11.1. Fixture: nark-corpus/packages/@upstash/qstash/fixtures/ground-truth.ts.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — postcondition added via deepen API surface analysis of @upstash/qstash@2.11.1 (depth pass 2026-06-24, was 2026-04-17 last_deepened). Detection scope: extend the existing @upstash/qstash bare-await detector to match urlGroups.delete on Client/UrlGroups/FlowControlApi/DLQ instances."
+    },
+    "resolution": null
+  },
+  "3289": {
+    "id": "concern-20260624-upstash-qstash-deepen-4",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "@upstash/qstash",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @upstash/qstash dlq.listMessages() to enforce postcondition dlq-list-api-error. Detector should fire on bare-await client.dlq.listMessages(...) outside try-catch when imported from @upstash/qstash. Internally calls http.request() and throws QstashError on non-2xx. Source: @upstash/qstash dist/index.js DLQ class line 1193. Postcondition added in pass 57 (deepen-stream-3, 2026-06-24) against @upstash/qstash@2.11.1. Fixture: nark-corpus/packages/@upstash/qstash/fixtures/ground-truth.ts.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — postcondition added via deepen API surface analysis of @upstash/qstash@2.11.1 (depth pass 2026-06-24, was 2026-04-17 last_deepened). Detection scope: extend the existing @upstash/qstash bare-await detector to match dlq.listMessages on Client/UrlGroups/FlowControlApi/DLQ instances."
+    },
+    "resolution": null
+  },
+  "3290": {
+    "id": "concern-20260624-upstash-qstash-deepen-5",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "@upstash/qstash",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @upstash/qstash dlq.listMessages() to enforce postcondition dlq-list-cursor-not-checked. Detector should warn when client.dlq.listMessages() is called without paginating through the returned cursor field. Single-call usage misses every page after the first 100 messages. Similar pattern to existing dlq.delete/retry cursor checks. Postcondition added in pass 57 (deepen-stream-3, 2026-06-24) against @upstash/qstash@2.11.1. Fixture: nark-corpus/packages/@upstash/qstash/fixtures/ground-truth.ts.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — postcondition added via deepen API surface analysis of @upstash/qstash@2.11.1 (depth pass 2026-06-24, was 2026-04-17 last_deepened). Detection scope: extend the existing @upstash/qstash bare-await detector to match dlq.listMessages on Client/UrlGroups/FlowControlApi/DLQ instances."
+    },
+    "resolution": null
+  },
+  "3291": {
+    "id": "concern-20260624-upstash-qstash-deepen-6",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "@upstash/qstash",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @upstash/qstash flowControl.pause() to enforce postcondition flowcontrol-pause-api-error. Detector should fire on bare-await client.flowControl.pause(key) outside try-catch when imported from @upstash/qstash. Internally calls http.request() and throws QstashError on non-2xx. Source: @upstash/qstash dist/index.js FlowControlApi class line 1332. Postcondition added in pass 57 (deepen-stream-3, 2026-06-24) against @upstash/qstash@2.11.1. Fixture: nark-corpus/packages/@upstash/qstash/fixtures/ground-truth.ts.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — postcondition added via deepen API surface analysis of @upstash/qstash@2.11.1 (depth pass 2026-06-24, was 2026-04-17 last_deepened). Detection scope: extend the existing @upstash/qstash bare-await detector to match flowControl.pause on Client/UrlGroups/FlowControlApi/DLQ instances."
+    },
+    "resolution": null
+  },
+  "3292": {
+    "id": "concern-20260624-upstash-qstash-deepen-7",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "@upstash/qstash",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @upstash/qstash flowControl.resume() to enforce postcondition flowcontrol-resume-api-error. Detector should fire on bare-await client.flowControl.resume(key) outside try-catch. Same http.request() error path. Source: @upstash/qstash dist/index.js FlowControlApi class line 1342. Postcondition added in pass 57 (deepen-stream-3, 2026-06-24) against @upstash/qstash@2.11.1. Fixture: nark-corpus/packages/@upstash/qstash/fixtures/ground-truth.ts.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — postcondition added via deepen API surface analysis of @upstash/qstash@2.11.1 (depth pass 2026-06-24, was 2026-04-17 last_deepened). Detection scope: extend the existing @upstash/qstash bare-await detector to match flowControl.resume on Client/UrlGroups/FlowControlApi/DLQ instances."
+    },
+    "resolution": null
+  },
+  "3293": {
+    "id": "concern-20260624-upstash-qstash-deepen-8",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "@upstash/qstash",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @upstash/qstash flowControl.pin() to enforce postcondition flowcontrol-pin-api-error. Detector should fire on bare-await client.flowControl.pin(key, options) outside try-catch. Same http.request() error path. Source: @upstash/qstash dist/index.js FlowControlApi class line 1355. Postcondition added in pass 57 (deepen-stream-3, 2026-06-24) against @upstash/qstash@2.11.1. Fixture: nark-corpus/packages/@upstash/qstash/fixtures/ground-truth.ts.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — postcondition added via deepen API surface analysis of @upstash/qstash@2.11.1 (depth pass 2026-06-24, was 2026-04-17 last_deepened). Detection scope: extend the existing @upstash/qstash bare-await detector to match flowControl.pin on Client/UrlGroups/FlowControlApi/DLQ instances."
+    },
+    "resolution": null
+  },
+  "3294": {
+    "id": "concern-20260624-upstash-qstash-deepen-9",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "@upstash/qstash",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @upstash/qstash flowControl.unpin() to enforce postcondition flowcontrol-unpin-api-error. Detector should fire on bare-await client.flowControl.unpin(key, options) outside try-catch. Same http.request() error path. Source: @upstash/qstash dist/index.js FlowControlApi class line 1373. Postcondition added in pass 57 (deepen-stream-3, 2026-06-24) against @upstash/qstash@2.11.1. Fixture: nark-corpus/packages/@upstash/qstash/fixtures/ground-truth.ts.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — postcondition added via deepen API surface analysis of @upstash/qstash@2.11.1 (depth pass 2026-06-24, was 2026-04-17 last_deepened). Detection scope: extend the existing @upstash/qstash bare-await detector to match flowControl.unpin on Client/UrlGroups/FlowControlApi/DLQ instances."
+    },
+    "resolution": null
+  },
+  "3295": {
+    "id": "concern-20260624-upstash-qstash-deepen-10",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "@upstash/qstash",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @upstash/qstash flowControl.resetRate() to enforce postcondition flowcontrol-resetrate-api-error. Detector should fire on bare-await client.flowControl.resetRate(key) outside try-catch. Same http.request() error path. Source: @upstash/qstash dist/index.js FlowControlApi class line 1390. Postcondition added in pass 57 (deepen-stream-3, 2026-06-24) against @upstash/qstash@2.11.1. Fixture: nark-corpus/packages/@upstash/qstash/fixtures/ground-truth.ts.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — postcondition added via deepen API surface analysis of @upstash/qstash@2.11.1 (depth pass 2026-06-24, was 2026-04-17 last_deepened). Detection scope: extend the existing @upstash/qstash bare-await detector to match flowControl.resetRate on Client/UrlGroups/FlowControlApi/DLQ instances."
+    },
+    "resolution": null
   }
 }
