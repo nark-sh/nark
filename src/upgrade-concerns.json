@@ -62158,5 +62158,85 @@
       "note": "Proactive — contract added via API surface analysis (deepen pass), detection rule needed. Evidence: node_modules/express-async-errors@3.1.1/index.js line 17"
     },
     "resolution": null
+  },
+  "3315": {
+    "id": "concern-20260624-algoliasearch-deepen-1",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "algoliasearch",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for algoliasearch.batch() — single-index raw batch endpoint. Postcondition batch-no-try-catch added in deepen pass 76 (2026-06-24) but no scanner rule yet. Method is on the v5 SearchClient; await pattern .batch(. Fixture exists at packages/algoliasearch/fixtures/ground-truth.ts (bareBatchNoCatch) using v5Client cast to `any` — detection needs to fire even through type erasure or via type-resolved Algolia SearchClient method receiver.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis at pass 76 (deepen-stream-2 2026-06-24). Method batch is on the v5 SearchClient; detection rule needed to fire on .batch( call sites."
+    },
+    "resolution": null
+  },
+  "3316": {
+    "id": "concern-20260624-algoliasearch-deepen-2",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "algoliasearch",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for algoliasearch.multipleBatch() — multi-index batch endpoint. Postcondition multiplebatch-no-try-catch added in deepen pass 76 (2026-06-24) but no scanner rule yet. Method is on the v5 SearchClient; await pattern .multipleBatch(. Single 404 for any referenced index fails the entire batch atomically — common in multi-tenant fan-out flows. Fixture: bareMultipleBatchNoCatch.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis at pass 76 (deepen-stream-2 2026-06-24). Method multipleBatch is on the v5 SearchClient; detection rule needed to fire on .multipleBatch( call sites."
+    },
+    "resolution": null
+  },
+  "3317": {
+    "id": "concern-20260624-algoliasearch-deepen-3",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "algoliasearch",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for algoliasearch.browse() — paginated browse method. Postcondition browse-no-try-catch added in deepen pass 76 (2026-06-24) but no scanner rule yet. Method is on the v5 SearchClient; await pattern .browse(. Requires browse ACL (distinct from search ACL) — 403 thrown when search-only key used. Fixture: bareBrowseNoCatch.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis at pass 76 (deepen-stream-2 2026-06-24). Method browse is on the v5 SearchClient; detection rule needed to fire on .browse( call sites."
+    },
+    "resolution": null
+  },
+  "3318": {
+    "id": "concern-20260624-algoliasearch-deepen-4",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "algoliasearch",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for algoliasearch.browseObjects() — iterator helper over browse(). Postcondition browseobjects-no-try-catch added in deepen pass 76 (2026-06-24) but no scanner rule yet. Method is on the v5 SearchClient; await pattern .browseObjects(. Single page failure aborts iteration; user-supplied aggregator throws propagate. Fixture: bareBrowseObjectsNoCatch.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis at pass 76 (deepen-stream-2 2026-06-24). Method browseObjects is on the v5 SearchClient; detection rule needed to fire on .browseObjects( call sites."
+    },
+    "resolution": null
+  },
+  "3319": {
+    "id": "concern-20260624-algoliasearch-deepen-5",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "algoliasearch",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for algoliasearch.operationIndex() — copy/move index. Postcondition operationindex-no-try-catch added in deepen pass 76 (2026-06-24) but no scanner rule yet. Method is on the v5 SearchClient; await pattern .operationIndex(. COPY of missing source silently creates 0-record destination (no 404) — distinct silent-failure surface. Fixture: bareOperationIndexNoCatch.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis at pass 76 (deepen-stream-2 2026-06-24). Method operationIndex is on the v5 SearchClient; detection rule needed to fire on .operationIndex( call sites."
+    },
+    "resolution": null
   }
 }
