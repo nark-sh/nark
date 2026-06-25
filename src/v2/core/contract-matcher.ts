@@ -25,14 +25,6 @@ import { loadWrapperConfigSync } from "../../suppressions/wrapper-config.js";
 import { DetectionTraceAccumulator } from "./detection-trace-accumulator.js";
 import { MATCHER_IDS } from "../matchers/registry.js";
 
-// Wave 2 (Plan 01-03 Task 2 + Plans 01-04..01-08) wires these into the
-// matchDetections suppression guards. Referenced here at module load so
-// the symbols are bound (tsc otherwise reports TS6133 "declared but never
-// read" for imports added before their consumer code lands). Removing
-// these `void` markers is safe once Task 2 inlines the actual usage.
-void DetectionTraceAccumulator;
-void MATCHER_IDS;
-
 export interface ContractMatcherOptions {
   projectRoot: string;
   analyzerVersion?: string;
@@ -395,6 +387,30 @@ export class ContractMatcher {
       // current-user-null-not-handled, get-token-null-not-handled, auth-null-not-checked)
       // require null-guard detection, not try-catch analysis.
       const primaryPostcondition = this.pickMostSevere(postconditions);
+
+      // WAVE-2A: per-callsite detection-trace accumulator.
+      // Instantiated AFTER primaryPostcondition is known (we need both
+      // packageName + postconditionId for the accumulator context, and
+      // postcondition selection happens here). Wave 2 sub-waves push to
+      // `trace` via trace.record(...) at each guard's evaluation; the
+      // accumulator's serialize() is attached to violation.detectionTrace
+      // immediately before violations.push at the end of the loop body.
+      //
+      // CANONICAL PATTERN (Plans 01-04..01-08 must mirror this):
+      //   1. Instantiate `trace` here, ONCE per loop iteration.
+      //   2. At every short-circuit guard for this package family, emit a
+      //      trace.record(MATCHER_IDS.X, "passed"|"failed", reason?) BEFORE
+      //      the `continue`. Break OR-chains into N sequential record() calls
+      //      (Pitfall 1 — bundled boolean status hides which matcher fired).
+      //   3. When a passing matcher causes `continue`, ALSO push to
+      //      this._lastPassedDetections so Wave 9 can mine the convention.
+      //   4. At the violation construction site, assign
+      //      `violation.detectionTrace = trace.serialize()` BEFORE
+      //      violations.push.
+      const trace = new DetectionTraceAccumulator({
+        packageName: detection.packageName,
+        postconditionId: primaryPostcondition.id,
+      });
 
       // Special-case: react-hook-form handleSubmit — async-submit-unhandled-error
       // The postcondition only applies when the callback passed to handleSubmit is async.
@@ -2035,19 +2051,74 @@ export class ContractMatcher {
         } else {
           // Standard try-catch analysis: accept either try-catch or .catch() chain
           // Also accept Supabase's idiomatic { error } destructuring + if check pattern.
-          const inTryCatch =
+          //
+          // WAVE-2A: CANONICAL PATTERN.
+          // OR-chain broken into 4 sequential trace.record() calls so the
+          // detectionTrace captures EVERY matcher's outcome, not just the
+          // first short-circuit (Pitfall 1 mitigation). Plans 01-04..01-08
+          // mirror this pattern for their package families.
+          let inTryCatch = false;
+          let firstPassedMatcher: string | null = null;
+
+          if (
             detection.pattern === "throwing-function" ||
             detection.pattern === "property-chain"
-              ? this.controlFlow.isInTryCatch(detection.node) ||
-                (ts.isCallExpression(detection.node) &&
-                  this.controlFlow.hasCatchHandler(detection.node)) ||
-                (ts.isCallExpression(detection.node) &&
-                  this.controlFlow.hasOnErrorInOptions(detection.node)) ||
-                this.controlFlow.isDestructuredErrorTupleProtected(
-                  detection.node,
-                  sourceFile,
-                )
-              : false;
+          ) {
+            // Matcher 1: enclosing try-catch (the standard direct pattern).
+            const inTry = this.controlFlow.isInTryCatch(detection.node);
+            trace.record(
+              MATCHER_IDS.TRY_CATCH_DIRECT,
+              inTry ? "passed" : "failed",
+              inTry ? undefined : "no enclosing try",
+            );
+            if (inTry && firstPassedMatcher === null) {
+              firstPassedMatcher = MATCHER_IDS.TRY_CATCH_DIRECT;
+            }
+
+            // Matcher 2: .catch() handler on a Promise chain.
+            const catchHandler =
+              ts.isCallExpression(detection.node) &&
+              this.controlFlow.hasCatchHandler(detection.node);
+            trace.record(
+              MATCHER_IDS.PROMISE_CATCH_HANDLER,
+              catchHandler ? "passed" : "failed",
+              catchHandler ? undefined : "no .catch() handler",
+            );
+            if (catchHandler && firstPassedMatcher === null) {
+              firstPassedMatcher = MATCHER_IDS.PROMISE_CATCH_HANDLER;
+            }
+
+            // Matcher 3: `onError` callback passed in an options bag.
+            const onError =
+              ts.isCallExpression(detection.node) &&
+              this.controlFlow.hasOnErrorInOptions(detection.node);
+            trace.record(
+              MATCHER_IDS.OPTIONS_ON_ERROR,
+              onError ? "passed" : "failed",
+              onError ? undefined : "no onError option",
+            );
+            if (onError && firstPassedMatcher === null) {
+              firstPassedMatcher = MATCHER_IDS.OPTIONS_ON_ERROR;
+            }
+
+            // Matcher 4: Go-style destructured `[err, value] = await ...` tuple.
+            const destructured =
+              this.controlFlow.isDestructuredErrorTupleProtected(
+                detection.node,
+                sourceFile,
+              );
+            trace.record(
+              MATCHER_IDS.DESTRUCTURED_ERROR_TUPLE,
+              destructured ? "passed" : "failed",
+              destructured ? undefined : "no destructured-error tuple",
+            );
+            if (destructured && firstPassedMatcher === null) {
+              firstPassedMatcher = MATCHER_IDS.DESTRUCTURED_ERROR_TUPLE;
+            }
+
+            inTryCatch =
+              inTry || catchHandler || onError || destructured;
+          }
 
           if (inTryCatch) {
             // @sentry/* startSpanManual and startInactiveSpan: outer try-catch does NOT
@@ -2071,7 +2142,30 @@ export class ContractMatcher {
                   catchClause,
                   sourceFile,
                 );
-                if (catchViolation) violations.push(catchViolation);
+                if (catchViolation) {
+                  // WAVE-2A: warning-level catch violations also carry trace.
+                  catchViolation.detectionTrace = trace.serialize();
+                  violations.push(catchViolation);
+                }
+              }
+              // WAVE-2A: passing-site recorded for Wave 9 convention-miner.
+              // Restricted to HTTP-client packages in this wave; Plans 01-04..01-08
+              // extend to additional families as their matchers get wired.
+              if (
+                firstPassedMatcher !== null &&
+                ContractMatcher.HTTP_CLIENTS.has(detection.packageName)
+              ) {
+                const { line: passedLine } = this.getLocation(
+                  detection.node,
+                  sourceFile,
+                );
+                this._lastPassedDetections.push({
+                  packageName: detection.packageName,
+                  postconditionId: primaryPostcondition.id,
+                  file: sourceFile.fileName,
+                  line: passedLine,
+                  passedMatcherId: firstPassedMatcher,
+                });
               }
               continue;
             }
@@ -2981,6 +3075,13 @@ export class ContractMatcher {
         callExpression: detection.functionName,
         business_impact: postcondition.business_impact,
         subViolations: subViolations.length > 0 ? subViolations : undefined,
+        // WAVE-2A: serialize the per-callsite detection trace immediately
+        // before push. serialize() emits recorded passed/failed entries in
+        // insertion order, then fills not_applicable for registered-applicable
+        // matchers that were never recorded (consults applicabilityPredicate
+        // from MATCHER_IDS registry; encodes Pitfall 7 sentry-lifecycle gating).
+        // PH1-R2 (every violation has a non-empty detectionTrace) GREENs here.
+        detectionTrace: trace.serialize(),
       };
 
       violations.push(violation);
