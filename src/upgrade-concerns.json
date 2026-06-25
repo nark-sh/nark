@@ -63204,5 +63204,37 @@
       "note": "Proactive — contract added via Phase 1.5 pattern 3 (sync-factory-with-error) in bc-deepen-contract pass. Detection rule needed. The postcondition simple-git-construct-missing-try-catch is in contract.yaml but no scanner rule exists yet. Ground-truth fixture marks this as NO_DETECTOR_YET."
     },
     "resolution": null
+  },
+  "3380": {
+    "id": "concern-20260625-cassandra-driver-deepen-1",
+    "created_at": "2026-06-25",
+    "source": "deepen",
+    "package": "cassandra-driver",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for Client.executeGraph() without try-catch. executeGraph() uses FallthroughRetryPolicy — never retries — so any NoHostAvailableError, OperationTimedOutError, or ResponseError propagates immediately. Current await_patterns only cover .execute( and .batch( — .executeGraph( is a distinct method that was not contracted until deepen pass 2026-06-25. Detection: identify await client.executeGraph( outside try-catch.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis (deepen-stream-1 pass 2, 2026-06-25). Detection rule needed for postcondition execute-graph-no-try-catch."
+    },
+    "resolution": null
+  },
+  "3381": {
+    "id": "concern-20260625-cassandra-driver-deepen-2",
+    "created_at": "2026-06-25",
+    "source": "deepen",
+    "package": "cassandra-driver",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for Client.executeGraph() called with Array as parameters argument. executeGraph() throws TypeError synchronously (before any network call) when parameters is an Array: \"Parameters must be a Object instance as an associative array\". This is a common porting mistake from Client.execute() where Arrays are valid. Detection: identify executeGraph( call where second argument is an array literal or variable known to be array-typed.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis (deepen-stream-1 pass 2, 2026-06-25). Detection rule needed for postcondition execute-graph-array-params. Static detection may require type inference — lower priority than concern-1."
+    },
+    "resolution": null
   }
 }
