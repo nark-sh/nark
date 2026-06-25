@@ -106,6 +106,19 @@ export interface GroundTruthResult {
 }
 
 /**
+ * Extended ground-truth result that also exposes the per-file
+ * `passedDetections[]` aggregated across files matching the ground-truth
+ * filename. Used by Wave 2+ tests that need to verify the convention-miner
+ * plumbing (`FileAnalysisResult.passedDetections`) lands populated.
+ *
+ * IN-MEMORY ONLY — same constraint as `FileAnalysisResult.passedDetections`.
+ */
+export interface GroundTruthResultFull extends GroundTruthResult {
+  /** Aggregated passedDetections[] from all files matching ground-truth filename. */
+  passedDetections: import("../types/index.js").PassedDetection[];
+}
+
+/**
  * Run the V2 analyzer against a single ground-truth.ts file.
  *
  * Uses a synthetic tsconfig that points only at the ground-truth file so tests
@@ -227,6 +240,126 @@ export async function runGroundTruth(
     return { violations, violationsByLine, annotations };
   } finally {
     // Clean up temp tsconfig
+    try { fs.unlinkSync(tmpTsconfig); } catch { /* ignore */ }
+  }
+}
+
+/**
+ * Same as runGroundTruth but ALSO aggregates `passedDetections[]` across
+ * all files matching the ground-truth filename. Used by Wave 2+ tests that
+ * need to verify the convention-miner plumbing populates the in-memory
+ * passing-site buffer.
+ *
+ * Reuses the analyzer pipeline used by runGroundTruth — kept as a separate
+ * function so callers opt into the heavier return shape only when needed.
+ */
+export async function runGroundTruthFull(
+  groundTruthPath: string,
+  corpusPath: string = CORPUS_PATH,
+  options: { includeDrafts?: boolean; packageName?: string } = {}
+): Promise<GroundTruthResultFull> {
+  const corpusResult = await loadCorpus(corpusPath, { includeDrafts: options.includeDrafts });
+  if (corpusResult.errors.length > 0) {
+    const testedPkg = options.packageName;
+    const fatalErrors = testedPkg
+      ? corpusResult.errors.filter(e => e.includes(testedPkg))
+      : corpusResult.errors;
+    if (fatalErrors.length > 0) {
+      throw new Error(`Corpus load failed: ${fatalErrors.join(', ')}`);
+    }
+  }
+  const contracts: Map<string, PackageContract> = corpusResult.contracts;
+
+  const fixtureDir = path.dirname(groundTruthPath);
+  const tmpTsconfig = path.join(fixtureDir, '__ground-truth-tsconfig-full.json');
+
+  const groundTruthFilename = path.basename(groundTruthPath);
+  const tsConfigContent = {
+    compilerOptions: {
+      target: 'ES2020',
+      module: 'commonjs',
+      lib: ['ES2020'],
+      strict: false,
+      esModuleInterop: true,
+      skipLibCheck: true,
+      moduleResolution: 'node',
+    },
+    include: [groundTruthFilename],
+  };
+
+  fs.writeFileSync(tmpTsconfig, JSON.stringify(tsConfigContent, null, 2));
+
+  try {
+    // Same plugin wiring as runGroundTruth — see that function for rationale.
+    const factoryToPackage = new Map<string, string>();
+    const classToPackage = new Map<string, string>();
+    const typeToPackage = new Map<string, string>();
+    const promiseFactoryToPackage = new Map<string, string>();
+    const instanceChainMethodToPackage = new Map<string, string>();
+    const awaitablePropertyToFunctionName = new Map<string, string>();
+    const callableFactoryFunctionName = new Map<string, string>();
+
+    for (const [packageName, contract] of contracts.entries()) {
+      const detection = contract.detection;
+      if (!detection) continue;
+      for (const cls of detection.class_names || []) classToPackage.set(cls, packageName);
+      for (const factory of detection.factory_methods || []) factoryToPackage.set(factory, packageName);
+      for (const typeName of detection.type_names || []) typeToPackage.set(typeName, packageName);
+      for (const method of detection.promise_factory_methods || []) promiseFactoryToPackage.set(method, packageName);
+      for (const method of detection.instance_chain_methods || []) instanceChainMethodToPackage.set(method, packageName);
+      if (detection.awaitable_properties) {
+        for (const [propName, funcName] of Object.entries(detection.awaitable_properties)) {
+          awaitablePropertyToFunctionName.set(`${packageName}:${propName}`, funcName);
+        }
+      }
+      if (detection.callable_factory_function_name) {
+        callableFactoryFunctionName.set(packageName, detection.callable_factory_function_name);
+      }
+    }
+
+    const instanceTracker = new InstanceTrackerPlugin(
+      factoryToPackage,
+      classToPackage,
+      typeToPackage,
+      promiseFactoryToPackage,
+      instanceChainMethodToPackage,
+    );
+
+    const analyzer = new UniversalAnalyzer(
+      { tsConfigPath: tmpTsconfig, corpusPath },
+      contracts
+    );
+
+    analyzer.registerPlugin(instanceTracker);
+    analyzer.registerPlugin(new ThrowingFunctionDetector(instanceTracker, awaitablePropertyToFunctionName, callableFactoryFunctionName));
+    analyzer.registerPlugin(new PropertyChainDetector(instanceTracker));
+    analyzer.registerPlugin(new EventListenerDetector());
+    analyzer.registerPlugin(new EventListenerAbsencePlugin(contracts));
+
+    analyzer.initialize();
+    const result = analyzer.analyze();
+
+    const violations: Violation[] = [];
+    const passedDetections: import("../types/index.js").PassedDetection[] = [];
+    for (const fileResult of result.files) {
+      if (fileResult.file.includes(groundTruthFilename)) {
+        violations.push(...fileResult.violations.filter(v => !v.suppressed));
+        if (fileResult.passedDetections) {
+          passedDetections.push(...fileResult.passedDetections);
+        }
+      }
+    }
+
+    const violationsByLine = new Map<number, Violation[]>();
+    for (const v of violations) {
+      if (!violationsByLine.has(v.line)) violationsByLine.set(v.line, []);
+      violationsByLine.get(v.line)!.push(v);
+    }
+
+    const annotations = parseAnnotations(groundTruthPath);
+
+    return { violations, violationsByLine, annotations, passedDetections };
+  } finally {
     try { fs.unlinkSync(tmpTsconfig); } catch { /* ignore */ }
   }
 }

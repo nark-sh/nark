@@ -1,35 +1,28 @@
 /**
- * Passed-Detections Plumbing — Wave 2a (Plan 01-03) Task 1.
+ * Passed-Detections Plumbing + HTTP-Client Capture — Wave 2a (Plan 01-03).
  *
  * Pins the API surface that the convention-miner second pass (Wave 9 /
- * Plan 01-09) reads. We verify:
+ * Plan 01-09) reads, AND the Task 2 contract that HTTP-client passing
+ * sites land in `FileAnalysisResult.passedDetections` after a real scan.
  *
- *   1. `ContractMatcher` exposes `getLastPassedDetections()` returning an
- *      array (NOT undefined) immediately after `matchDetections()` runs.
- *   2. The internal buffer resets at the top of each `matchDetections()`
- *      call — a previous file's passing sites must not leak into the
- *      current file's results.
- *   3. After running the axios ground-truth fixture through the standard
- *      analyzer harness, the resulting `FileAnalysisResult.passedDetections`
- *      is an array.
+ *   Task 1 (plumbing) assertions:
+ *     1. `ContractMatcher` exposes `getLastPassedDetections()` returning
+ *        an array (NOT undefined) at construction.
+ *     2. The returned array is a copy — caller mutation does not bleed
+ *        into the internal buffer.
+ *     3. After running the axios ground-truth fixture through the
+ *        analyzer pipeline, `FileAnalysisResult.passedDetections` is an
+ *        array on the result.
  *
- * IMPORTANT — this test is split into Task 1 / Task 2 phases:
- *
- *   Task 1 (this commit) only proves the API exists and is reachable. The
- *   Task 1 assertions check that the field is `[]` or has entries — both
- *   are acceptable because Task 1 has not yet WIRED the recording into the
- *   matcher's suppression guards.
- *
- *   Task 2 (next commit) wires DetectionTraceAccumulator into the HTTP-client
- *   guards. AFTER Task 2 lands, the assertion in
- *   `axios fixture surfaces at least one passed detection (after Task 2)`
- *   will tighten to `.length >= 1` and a non-empty `passedMatcherId` from
- *   `MATCHER_IDS`. Until Task 2 lands, that block is marked `.skip` so the
- *   test file is GREEN at Task 1 and the Task 2 commit only flips it.
+ *   Task 2 (wiring) assertions:
+ *     4. The axios ground-truth fixture (which has SHOULD_NOT_FIRE lines
+ *        for idiomatic try/catch around axios calls) produces ≥1 passing
+ *        site captured under packageName="axios" with a `passedMatcherId`
+ *        from `MATCHER_IDS`.
  *
  * Wave 9 (convention-miner) requires the SHAPE to be in place before it can
- * even compile its consumer code — that's why this test asserts the API
- * surface even before there are records to consume.
+ * even compile its consumer code — that's why this test pins the API
+ * surface as a separate concern from the actual recording.
  */
 
 import { describe, it, expect } from "vitest";
@@ -37,7 +30,11 @@ import * as path from "path";
 import * as fs from "fs";
 import { fileURLToPath } from "url";
 import { ContractMatcher } from "./contract-matcher.js";
-import { runGroundTruth, CORPUS_PATH } from "../fixtures/harness.js";
+import {
+  runGroundTruth,
+  runGroundTruthFull,
+  CORPUS_PATH,
+} from "../fixtures/harness.js";
 import type { GroundTruthResult } from "../fixtures/harness.js";
 import { MATCHER_IDS } from "../matchers/registry.js";
 
@@ -101,26 +98,39 @@ describe("contract-matcher: passedDetections plumbing — analyzer integration",
       CORPUS_PATH,
     );
 
-    // The harness only returns violations, not file results — so we
-    // re-export the assertion as "the API does not crash" + "violations
-    // are produced as expected". The full FileAnalysisResult.passedDetections
-    // shape is exercised by the smoke-test CLI run in the plan's verify
-    // block.
+    // The harness's standard `runGroundTruth` only returns violations.
+    // We assert violations were produced (sanity) — the full
+    // `FileAnalysisResult.passedDetections` shape lives on the per-file
+    // results and is exercised by the next test via `runGroundTruthFull`.
     expect(result.violations.length).toBeGreaterThan(0);
   });
+});
 
-  // Task 2 (next commit) will flip this from .skip to a hard assertion
-  // once the HTTP-client suppression guards push to the buffer.
-  it.skip("axios fixture surfaces at least one passed detection (enabled by Task 2)", async () => {
-    // Use the analyzer pipeline directly to read per-file results
-    // (the harness aggregates across files). This block stays .skip until
-    // Task 2 wires the recording into the matcher's HTTP-client guards.
-    //
-    // EXPECTED Task 2 assertions:
-    //   - At least one PassedDetection from packageName === 'axios'
-    //   - Its passedMatcherId is one of the canonical MATCHER_IDS values
-    //
-    // Implementation deferred to Task 2's test edit.
-    void KNOWN_MATCHER_VALUES; // silence unused-var lint until Task 2
+describe("contract-matcher: passedDetections — HTTP-client capture (Task 2)", () => {
+  it("axios fixture surfaces at least one passing site under packageName='axios' with a canonical passedMatcherId", async () => {
+    // runGroundTruthFull (added in Plan 01-03) drives the same analyzer
+    // pipeline as runGroundTruth and additionally aggregates
+    // FileAnalysisResult.passedDetections across all files matching the
+    // ground-truth filename. The axios ground-truth corpus has
+    // SHOULD_NOT_FIRE lines (idiomatic try/catch around axios calls) that
+    // exercise the WAVE-2A passing-site push path inside the matcher's
+    // canonical OR-chain.
+    const result = await runGroundTruthFull(AXIOS_GROUND_TRUTH, CORPUS_PATH);
+
+    expect(
+      result.passedDetections.length,
+      "expected at least one passing axios site to land in passedDetections — Wave 2a guard rewiring not active?",
+    ).toBeGreaterThanOrEqual(1);
+
+    for (const p of result.passedDetections) {
+      expect(p.packageName).toBe("axios");
+      expect(p.postconditionId.length).toBeGreaterThan(0);
+      expect(p.file.length).toBeGreaterThan(0);
+      expect(p.line).toBeGreaterThan(0);
+      expect(
+        KNOWN_MATCHER_VALUES.has(p.passedMatcherId),
+        `unexpected passedMatcherId not in MATCHER_IDS: ${p.passedMatcherId}`,
+      ).toBe(true);
+    }
   });
 });
