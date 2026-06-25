@@ -87,6 +87,32 @@ export const MATCHER_IDS = {
   // Evidence: 2026-06-23 audit-stream wave 1+2 candidate #4
   // (callback-err-guard-in-promise-wrapper-not-detected).
   PROMISE_EXECUTOR_REJECT: "promise:executor-reject",
+
+  // Family: aws — per-command-family AWS SDK matchers. Wave 2d (Plan 01-06)
+  // adds these to the trace surface so the Wave 9 convention miner can spot
+  // "this repo wraps all S3 calls in try/catch" or "this repo always handles
+  // SQS receive timeouts." Each matcher records `passed` at the canonical
+  // OR-chain when the call site is protected by try/catch (or .catch handler,
+  // .onError option, destructured-error tuple) AND the package is in the
+  // matching @aws-sdk/* family. The AWS command class (e.g. "GetObjectCommand",
+  // "SendEmailCommand") is encoded via a colon-suffix on the recorded wire
+  // string: `aws:s3-command:GetObjectCommand` is recorded ALONGSIDE the
+  // base `aws:s3-command` so the miner can group by family AND drill down by
+  // command class without needing a separate index. The base ID stays stable
+  // for registry / POSTCONDITION_GATING; the suffixed form is "free-text" and
+  // not part of MATCHER_IDS (the accumulator accepts arbitrary record() strings).
+  AWS_S3_COMMAND: "aws:s3-command",
+  AWS_SES_COMMAND: "aws:ses-command",
+  AWS_SESV2_COMMAND: "aws:sesv2-command",
+  AWS_SQS_COMMAND: "aws:sqs-command",
+  AWS_SNS_COMMAND: "aws:sns-command",
+  AWS_DYNAMODB_COMMAND: "aws:dynamodb-command",
+  AWS_SECRETS_MANAGER_COMMAND: "aws:secrets-manager-command",
+  AWS_BEDROCK_INVOKE: "aws:bedrock-invoke",
+  AWS_LAMBDA_INVOKE: "aws:lambda-invoke",
+  AWS_CLOUDWATCH_LOG_EVENT: "aws:cloudwatch-log-event",
+  AWS_LIB_STORAGE_UPLOAD: "aws:lib-storage-upload",
+  AWS_S3_PRESIGNER: "aws:s3-presigner",
 } as const;
 
 /**
@@ -162,7 +188,7 @@ type GatePredicate = (ctx: ApplicabilityContext) => boolean;
 
 const POSTCONDITION_GATING: Record<string, GatePredicate> = {
   // Framework matchers — gated by package AND (where useful) by postcondition
-  // substring. Plans 01-06..01-08 add their families below.
+  // substring. Plans 01-07..01-08 add their families below.
   [MATCHER_IDS.FRAMEWORK_EXPRESS_ASYNC_ERRORS]: (c) =>
     c.packageName === "express" &&
     (c.postconditionId.includes("async-middleware") ||
@@ -199,6 +225,36 @@ const POSTCONDITION_GATING: Record<string, GatePredicate> = {
   // the ssh2 / snowflake-sdk / generic cb-promisify shape. Not package-gated:
   // the predicate matches any package that has a callback-shaped contract.
   [MATCHER_IDS.PROMISE_EXECUTOR_REJECT]: () => true,
+
+  // Wave 2d (Plan 01-06) — AWS SDK per-command-family matchers. Each gate
+  // narrows applicability to the specific @aws-sdk/* package family. The
+  // command class (e.g. "GetObjectCommand") is recorded ALONGSIDE the base
+  // matcher via a colon-suffixed wire string — that suffixed string is NOT
+  // gated here (it falls through to the default-true) because the per-command
+  // applicability is structural (the AST argument inspection at the canonical
+  // OR-chain). The base matcher gate below ensures the not_applicable surface
+  // for non-AWS callsites stays clean.
+  [MATCHER_IDS.AWS_S3_COMMAND]: (c) =>
+    c.packageName === "@aws-sdk/client-s3" ||
+    c.packageName === "@aws-sdk/lib-storage" ||
+    c.packageName === "@aws-sdk/s3-request-presigner",
+  [MATCHER_IDS.AWS_SES_COMMAND]: (c) => c.packageName === "@aws-sdk/client-ses",
+  [MATCHER_IDS.AWS_SESV2_COMMAND]: (c) => c.packageName === "@aws-sdk/client-sesv2",
+  [MATCHER_IDS.AWS_SQS_COMMAND]: (c) => c.packageName === "@aws-sdk/client-sqs",
+  [MATCHER_IDS.AWS_SNS_COMMAND]: (c) => c.packageName === "@aws-sdk/client-sns",
+  [MATCHER_IDS.AWS_DYNAMODB_COMMAND]: (c) =>
+    c.packageName === "@aws-sdk/client-dynamodb",
+  [MATCHER_IDS.AWS_SECRETS_MANAGER_COMMAND]: (c) =>
+    c.packageName === "@aws-sdk/client-secrets-manager",
+  [MATCHER_IDS.AWS_BEDROCK_INVOKE]: (c) =>
+    c.packageName === "@aws-sdk/client-bedrock-runtime",
+  [MATCHER_IDS.AWS_LAMBDA_INVOKE]: (c) => c.packageName === "@aws-sdk/client-lambda",
+  [MATCHER_IDS.AWS_CLOUDWATCH_LOG_EVENT]: (c) =>
+    c.packageName === "@aws-sdk/client-cloudwatch-logs",
+  [MATCHER_IDS.AWS_LIB_STORAGE_UPLOAD]: (c) =>
+    c.packageName === "@aws-sdk/lib-storage",
+  [MATCHER_IDS.AWS_S3_PRESIGNER]: (c) =>
+    c.packageName === "@aws-sdk/s3-request-presigner",
 
   // Pitfall 7 from RESEARCH: a try/catch around `Sentry.startSpanManual(...)`
   // is NOT a substitute for `span.end()` in finally. TRY_CATCH_DIRECT must

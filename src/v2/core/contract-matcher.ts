@@ -207,6 +207,134 @@ export class ContractMatcher {
     });
   }
 
+  // WAVE-2D: AWS SDK family-to-matcher routing helper.
+  /**
+   * WAVE-2D (Plan 01-06) helper: returns the canonical AWS_* MATCHER_IDS
+   * entry for an @aws-sdk/* package, or null when the package isn't an
+   * AWS SDK family. Used at the canonical OR-chain (line ~2380) to attach
+   * the per-command-family matcher record alongside the standard
+   * try-catch:direct / promise:catch-handler / options:on-error /
+   * destructured-error:tuple records.
+   *
+   * Package families collapsed into a single matcher when their command-
+   * shape semantics are equivalent (e.g. lib-storage and s3-request-presigner
+   * both map to aws:s3-command because Upload() and getSignedUrl() are S3
+   * operations even though they live in companion packages).
+   */
+  private static awsCommandMatcherIdFor(packageName: string): string | null {
+    switch (packageName) {
+      case "@aws-sdk/client-s3":
+        return MATCHER_IDS.AWS_S3_COMMAND;
+      case "@aws-sdk/client-ses":
+        return MATCHER_IDS.AWS_SES_COMMAND;
+      case "@aws-sdk/client-sesv2":
+        return MATCHER_IDS.AWS_SESV2_COMMAND;
+      case "@aws-sdk/client-sqs":
+        return MATCHER_IDS.AWS_SQS_COMMAND;
+      case "@aws-sdk/client-sns":
+        return MATCHER_IDS.AWS_SNS_COMMAND;
+      case "@aws-sdk/client-dynamodb":
+        return MATCHER_IDS.AWS_DYNAMODB_COMMAND;
+      case "@aws-sdk/client-secrets-manager":
+        return MATCHER_IDS.AWS_SECRETS_MANAGER_COMMAND;
+      case "@aws-sdk/client-bedrock-runtime":
+        return MATCHER_IDS.AWS_BEDROCK_INVOKE;
+      case "@aws-sdk/client-lambda":
+        return MATCHER_IDS.AWS_LAMBDA_INVOKE;
+      case "@aws-sdk/client-cloudwatch-logs":
+        return MATCHER_IDS.AWS_CLOUDWATCH_LOG_EVENT;
+      case "@aws-sdk/lib-storage":
+        return MATCHER_IDS.AWS_LIB_STORAGE_UPLOAD;
+      case "@aws-sdk/s3-request-presigner":
+        return MATCHER_IDS.AWS_S3_PRESIGNER;
+      default:
+        return null;
+    }
+  }
+
+  // WAVE-2D: AWS command-class extraction from detection AST.
+  /**
+   * WAVE-2D (Plan 01-06) helper: extract the AWS command class name from the
+   * first argument of a send()-shaped call. Returns the command class string
+   * (e.g. "GetObjectCommand", "SendEmailCommand") when the first argument is
+   * a `new CommandClass(...)` NewExpression, or null when the command shape
+   * cannot be statically determined (variable argument, no arguments, or
+   * non-NewExpression). Mirrors the shape used by pickS3SendPostcondition
+   * et al. (lines ~3700+), but returns the raw class name rather than a
+   * postcondition lookup — the convention miner consumes the class name
+   * directly via the `aws:<family>:<CommandClass>` suffixed matcher record.
+   *
+   * For lib-storage Upload (new Upload({...}).done()) and s3-request-presigner
+   * getSignedUrl(client, command, opts), the function inspection rules differ:
+   *  - lib-storage Upload: the detection node is the .done() call; we walk up
+   *    one level to find the new Upload() and synthesize "Upload" as the class.
+   *  - s3-request-presigner getSignedUrl: the second argument is the command
+   *    NewExpression; first argument is the client.
+   * Both fall back to null when the AST doesn't match, which is fine — the
+   * base aws:<family> matcher still records without the command suffix.
+   */
+  private extractAwsCommandClass(detection: Detection): string | null {
+    if (!ts.isCallExpression(detection.node)) return null;
+    const args = detection.node.arguments;
+
+    // s3-request-presigner.getSignedUrl(client, command, opts): inspect arg[1]
+    if (
+      detection.packageName === "@aws-sdk/s3-request-presigner" &&
+      detection.functionName === "getSignedUrl" &&
+      args.length >= 2
+    ) {
+      const cmdArg = args[1];
+      if (ts.isNewExpression(cmdArg) && ts.isIdentifier(cmdArg.expression)) {
+        return cmdArg.expression.text;
+      }
+      return null;
+    }
+
+    // lib-storage Upload: detection is the .done() call on a `new Upload()`
+    // instance. The instance-tracker resolves these as packageName=
+    // "@aws-sdk/lib-storage", functionName="done". The command-class is
+    // synthetically "Upload" since lib-storage has only one operation shape.
+    if (
+      detection.packageName === "@aws-sdk/lib-storage" &&
+      detection.functionName === "done"
+    ) {
+      return "Upload";
+    }
+
+    // bedrock-runtime invokeModel / invokeModelWithResponseStream / converse /
+    // converseStream — the detection.functionName already names the operation;
+    // there's no command-class wrapper in the modern bedrock API. Use the
+    // functionName as the synthetic command class so the miner can group by
+    // operation (e.g. aws:bedrock-invoke:invokeModel vs converse).
+    if (detection.packageName === "@aws-sdk/client-bedrock-runtime") {
+      if (
+        detection.functionName === "invokeModel" ||
+        detection.functionName === "invokeModelWithResponseStream" ||
+        detection.functionName === "converse" ||
+        detection.functionName === "converseStream"
+      ) {
+        return detection.functionName;
+      }
+    }
+
+    // lambda Invoke: traditional client.send(new InvokeCommand({...})) path
+    // falls through to the generic send() inspection below. Fall through.
+
+    // Generic send(new CommandClass({...})) — applies to client-s3, ses,
+    // sesv2, sqs, sns, dynamodb, secrets-manager, lambda, cloudwatch-logs.
+    if (detection.functionName === "send" && args.length >= 1) {
+      const firstArg = args[0];
+      if (
+        ts.isNewExpression(firstArg) &&
+        ts.isIdentifier(firstArg.expression)
+      ) {
+        return firstArg.expression.text;
+      }
+    }
+
+    return null;
+  }
+
   /**
    * Match a set of detections against contracts and produce violations.
    */
@@ -2340,6 +2468,29 @@ export class ContractMatcher {
 
             inTryCatch =
               inTry || catchHandler || onError || destructured;
+
+            // WAVE-2D: AWS SDK matchers. For @aws-sdk/* packages, also record
+            // the per-command-family matcher so the trace surfaces a
+            // passed/failed AWS_* entry (not the default not_applicable from
+            // the registry walk). The command-class suffix (e.g.
+            // aws:s3-command:GetObjectCommand) is also recorded with the same
+            // status so the Wave 9 convention miner can group AND drill down.
+            const awsMatcherIdEarly = ContractMatcher.awsCommandMatcherIdFor(
+              detection.packageName,
+            );
+            if (awsMatcherIdEarly !== null) {
+              const status = inTryCatch ? "passed" : "failed";
+              const reason = inTryCatch ? undefined : "aws command call outside try-catch";
+              trace.record(awsMatcherIdEarly, status, reason);
+              const cmdClassEarly = this.extractAwsCommandClass(detection);
+              if (cmdClassEarly !== null) {
+                trace.record(
+                  `${awsMatcherIdEarly}:${cmdClassEarly}`,
+                  status,
+                  reason,
+                );
+              }
+            }
           }
 
           if (inTryCatch) {
@@ -2389,6 +2540,31 @@ export class ContractMatcher {
                   passedMatcherId: firstPassedMatcher,
                 });
               }
+              // WAVE-2D: AWS SDK per-command-family passing-site recording.
+              // The AWS_* matcher itself was already recorded (passed/failed)
+              // immediately after the canonical OR-chain at ~line 2470, so
+              // the trace surface is complete. Here we additionally buffer
+              // the passing site into _lastPassedDetections (gated by
+              // PASSING_SITE_PACKAGES membership inside recordPassedSite) so
+              // the Wave 9 convention miner can spot "this repo wraps all S3
+              // calls" patterns across files. The AWS family matcher ID
+              // (not the command-class-suffixed variant) is used here so the
+              // miner aggregates at the family level; the per-command
+              // breakdown lives in the trace.
+              if (firstPassedMatcher !== null) {
+                const awsMatcherIdPass =
+                  ContractMatcher.awsCommandMatcherIdFor(
+                    detection.packageName,
+                  );
+                if (awsMatcherIdPass !== null) {
+                  this.recordPassedSite(
+                    detection,
+                    sourceFile,
+                    primaryPostcondition.id,
+                    awsMatcherIdPass,
+                  );
+                }
+              }
               continue;
             }
             // isSentryLifecyclePostcondition: fall through to fire even though inTryCatch
@@ -2400,6 +2576,14 @@ export class ContractMatcher {
       // For @aws-sdk/client-s3 send(): resolve postcondition based on the command
       // argument type (e.g. ListObjectsV2Command → warning, GetObjectCommand → error).
       // For all other packages: pick the most severe postcondition.
+      //
+      // WAVE-2D: the AWS_S3_COMMAND matcher record (and its `:<CommandClass>`
+      // suffixed variant) was emitted at the canonical OR-chain (line ~2470)
+      // BEFORE the postcondition gets refined here; the per-command resolution
+      // below is what makes the violation message + severity match the
+      // specific command (GetObjectCommand=error vs ListObjectsV2Command=warning)
+      // while the trace already carries the AWS_* matcher status and command
+      // class for the Wave 9 convention miner.
       let postconditionResolved = false;
       let postcondition = this.pickMostSevere(postconditions);
       if (
@@ -2419,6 +2603,9 @@ export class ContractMatcher {
       // @aws-sdk/client-ses send(): resolve postcondition based on the command
       // argument type. Each SES command has distinct error types; command-specific
       // postconditions provide more actionable guidance than the generic ses-send-no-try-catch.
+      //
+      // WAVE-2D: SES — see WAVE-2D rationale at S3 resolver above. AWS_SES_COMMAND
+      // already recorded; this branch resolves the violation message.
       //
       // Evidence: concern-20260415-@aws-sdk-client-ses-deepen-1 through -6 (6 uncovered
       // SES command functions: SendEmailCommand, TestRenderTemplateCommand,
@@ -2444,6 +2631,9 @@ export class ContractMatcher {
       // argument type. Each SESv2 command has distinct error types; command-specific
       // postconditions provide more actionable guidance than the generic sesv2-send-no-try-catch.
       //
+      // WAVE-2D: SESv2 — AWS_SESV2_COMMAND already recorded at canonical OR-chain;
+      // this branch refines the violation message + severity per command class.
+      //
       // Evidence: concern-20260416-sesv2-deepen-1 (SendEmailCommand),
       //           concern-20260416-sesv2-deepen-3 (CreateEmailIdentityCommand),
       //           concern-20260416-sesv2-deepen-4 (CreateImportJobCommand).
@@ -2468,6 +2658,9 @@ export class ContractMatcher {
       // each have unique error types; command-specific postconditions are more actionable
       // than the generic aws-service-error.
       //
+      // WAVE-2D: SQS — AWS_SQS_COMMAND already recorded at canonical OR-chain
+      // with the command class suffix (e.g. aws:sqs-command:CreateQueueCommand).
+      //
       // Evidence: concern-20260416-aws-sqs-deepen-4 (ChangeMessageVisibilityCommand —
       // sqs-change-visibility-not-inflight). Also covers CreateQueueCommand and PurgeQueueCommand
       // which were in the ground-truth fixture but lacked pending concerns.
@@ -2491,6 +2684,10 @@ export class ContractMatcher {
       // argument type. UpdateSecretVersionStageCommand, CancelRotateSecretCommand,
       // PutResourcePolicyCommand, and RestoreSecretCommand each have unique error types;
       // command-specific postconditions are more actionable than the generic aws-service-error.
+      //
+      // WAVE-2D: Secrets Manager — AWS_SECRETS_MANAGER_COMMAND already recorded at
+      // canonical OR-chain with the command class suffix. Convention miner can group
+      // by `aws:secrets-manager-command:*` to spot repos that wrap all secret reads.
       //
       // Evidence: concern-20260611-aws-sdk-client-secrets-manager-deepen-5 (UpdateSecretVersionStageCommand),
       //           concern-20260611-aws-sdk-client-secrets-manager-deepen-6 (CancelRotateSecretCommand),
@@ -3374,6 +3571,26 @@ export class ContractMatcher {
     "mongoose",
     "pg",
     "mysql2",
+    // WAVE-2D (Plan 01-06) — AWS SDK families. Each @aws-sdk/* package's
+    // send() / upload() / invokeModel() calls flow through the canonical
+    // OR-chain (Plan 01-03, line ~2277). When TRY_CATCH_DIRECT or another
+    // passing matcher short-circuits, the AWS-specific
+    // recordAwsCommandPassedSite() helper records the per-command matcher
+    // (e.g. aws:s3-command + aws:s3-command:GetObjectCommand) and pushes
+    // via recordPassedSite() so the Wave 9 convention miner can spot
+    // "this repo wraps all S3 calls" or "all SQS receives" patterns.
+    "@aws-sdk/client-s3",
+    "@aws-sdk/client-ses",
+    "@aws-sdk/client-sesv2",
+    "@aws-sdk/client-sqs",
+    "@aws-sdk/client-sns",
+    "@aws-sdk/client-dynamodb",
+    "@aws-sdk/client-secrets-manager",
+    "@aws-sdk/client-bedrock-runtime",
+    "@aws-sdk/client-lambda",
+    "@aws-sdk/client-cloudwatch-logs",
+    "@aws-sdk/lib-storage",
+    "@aws-sdk/s3-request-presigner",
   ]);
 
   /**
