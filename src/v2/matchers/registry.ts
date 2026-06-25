@@ -69,6 +69,24 @@ export const MATCHER_IDS = {
   FINALLY_SPAN_END: "finally:span-end",
   //   Transaction close — commit/rollback/release in finally.
   FINALLY_TRANSACTION_CLOSE: "finally:transaction-close",
+
+  // Family: architectural — project-level architectural patterns that route
+  // per-callsite errors to a central handler. Wave 2c (Plan 01-05) adds the
+  // data-layer pattern for knex Model-files and typeorm Repository-files when
+  // the project also defines a central errorHandler middleware. RESEARCH §3
+  // SECTION_10 evidence: lightdash (knex), rsschool-app (typeorm).
+  ARCHITECTURAL_DATA_LAYER: "architectural:data-layer-pattern",
+
+  // Family: promise — Promise(executor) callback-err-guard. When the
+  // contracted call sits inside `new Promise((resolve, reject) => ...)` and
+  // its callback propagates err via reject(err), the rejection surfaces at
+  // the outer await — that's where the try/catch belongs, not at the inner
+  // registration. Package-agnostic on purpose: canonical promisify shape
+  // across mongoose native cb-API, ssh2, snowflake-sdk, and generic
+  // node-style cb wrappers.
+  // Evidence: 2026-06-23 audit-stream wave 1+2 candidate #4
+  // (callback-err-guard-in-promise-wrapper-not-detected).
+  PROMISE_EXECUTOR_REJECT: "promise:executor-reject",
 } as const;
 
 /**
@@ -144,7 +162,7 @@ type GatePredicate = (ctx: ApplicabilityContext) => boolean;
 
 const POSTCONDITION_GATING: Record<string, GatePredicate> = {
   // Framework matchers — gated by package AND (where useful) by postcondition
-  // substring. Plans 01-05..01-08 add their families below.
+  // substring. Plans 01-06..01-08 add their families below.
   [MATCHER_IDS.FRAMEWORK_EXPRESS_ASYNC_ERRORS]: (c) =>
     c.packageName === "express" &&
     (c.postconditionId.includes("async-middleware") ||
@@ -167,6 +185,21 @@ const POSTCONDITION_GATING: Record<string, GatePredicate> = {
   [MATCHER_IDS.FINALLY_CLOSE]: (c) =>
     /close|leak|handle|connection/i.test(c.postconditionId),
 
+  // Wave 2c (Plan 01-05) — architectural data-layer pattern: gated to knex
+  // and typeorm because the SECTION_10 evidence base (lightdash, rsschool-app)
+  // only validates these two packages. Plan 01-08 (long-tail) may widen to
+  // prisma model-class pattern when empirical evidence ships.
+  [MATCHER_IDS.ARCHITECTURAL_DATA_LAYER]: (c) =>
+    c.packageName === "knex" || c.packageName === "typeorm",
+
+  // Wave 2c (Plan 01-05) — Promise(executor) callback-err-guard. Applies
+  // broadly to any package whose contracted call site can sit inside a
+  // `new Promise((resolve, reject) => ...)` executor. Most observed cases
+  // are DB drivers using the native callback API (mongoose, mysql2, pg) plus
+  // the ssh2 / snowflake-sdk / generic cb-promisify shape. Not package-gated:
+  // the predicate matches any package that has a callback-shaped contract.
+  [MATCHER_IDS.PROMISE_EXECUTOR_REJECT]: () => true,
+
   // Pitfall 7 from RESEARCH: a try/catch around `Sentry.startSpanManual(...)`
   // is NOT a substitute for `span.end()` in finally. TRY_CATCH_DIRECT must
   // NOT apply to sentry span-lifecycle postconditions even though the call
@@ -186,6 +219,9 @@ export function applicabilityPredicate(
   // Ungated matchers (broadly-applicable: PROMISE_CATCH_HANDLER, OPTIONS_ON_ERROR,
   // DESTRUCTURED_ERROR_TUPLE, RESPONSE_OK_GUARD, RESULT_NULL_GUARD,
   // CALLBACK_TRY_CATCH, and any unknown matcher) always apply.
+  // PROMISE_EXECUTOR_REJECT is registered with an `always true` gate (Wave 2c)
+  // because its applicability is structural (callback-shaped contract) rather
+  // than per-package — the runtime check happens at the AST walker.
   return gate ? gate(ctx) : true;
 }
 

@@ -173,21 +173,28 @@ export class ContractMatcher {
   }
 
   /**
-   * WAVE-2B (Plan 01-04) helper: capture a framework-family passing site
-   * into _lastPassedDetections so the Wave 9 convention-miner can read it.
-   * Gated by ContractMatcher.FRAMEWORK_PACKAGES — only the families that
-   * Plans 01-04..01-08 have explicitly wired participate.
+   * WAVE-2B (Plan 01-04) helper, renamed in WAVE-2C (Plan 01-05) from
+   * `recordFrameworkPassedSite` → `recordPassedSite` because the buffer now
+   * captures DB-driver and architectural passing sites too — not just
+   * framework families. Behavior unchanged; only the name and the gate set
+   * (PASSING_SITE_PACKAGES, formerly FRAMEWORK_PACKAGES) widened.
+   *
+   * Captures a passing site into _lastPassedDetections so the Wave 9
+   * convention-miner can read it. Gated by ContractMatcher.PASSING_SITE_PACKAGES
+   * — only the families that Plans 01-04..01-08 have explicitly wired
+   * participate. Plans 01-06..01-08 widen the set with AWS SDK / lifecycle /
+   * long-tail packages.
    *
    * Centralized to avoid repeating the gate + getLocation + push triplet at
-   * each of the ~13 framework suppression branches in matchDetections.
+   * each of the ~17+ suppression branches in matchDetections.
    */
-  private recordFrameworkPassedSite(
+  private recordPassedSite(
     detection: Detection,
     sourceFile: ts.SourceFile,
     postconditionId: string,
     passedMatcherId: string,
   ): void {
-    if (!ContractMatcher.FRAMEWORK_PACKAGES.has(detection.packageName)) {
+    if (!ContractMatcher.PASSING_SITE_PACKAGES.has(detection.packageName)) {
       return;
     }
     const { line } = this.getLocation(detection.node, sourceFile);
@@ -455,7 +462,7 @@ export class ContractMatcher {
         // Concern 1: if callback is NOT async, suppress — this postcondition does not apply.
         if (!this.controlFlow.isCallbackArgAsync(detection.node, 0)) {
           trace.record(MATCHER_IDS.FRAMEWORK_REACT_HOOK_FORM, "passed");
-          this.recordFrameworkPassedSite(
+          this.recordPassedSite(
             detection,
             sourceFile,
             primaryPostcondition.id,
@@ -471,7 +478,7 @@ export class ContractMatcher {
           )
         ) {
           trace.record(MATCHER_IDS.FRAMEWORK_REACT_HOOK_FORM, "passed");
-          this.recordFrameworkPassedSite(
+          this.recordPassedSite(
             detection,
             sourceFile,
             primaryPostcondition.id,
@@ -499,7 +506,7 @@ export class ContractMatcher {
           rhfFileText.includes("console.error")
         ) {
           trace.record(MATCHER_IDS.FRAMEWORK_REACT_HOOK_FORM, "passed");
-          this.recordFrameworkPassedSite(
+          this.recordPassedSite(
             detection,
             sourceFile,
             primaryPostcondition.id,
@@ -548,7 +555,7 @@ export class ContractMatcher {
         ts.isAwaitExpression(detection.node.parent)
       ) {
         trace.record(MATCHER_IDS.FRAMEWORK_REACT_HOOK_FORM, "passed");
-        this.recordFrameworkPassedSite(
+        this.recordPassedSite(
           detection,
           sourceFile,
           primaryPostcondition.id,
@@ -576,7 +583,7 @@ export class ContractMatcher {
         const args = detection.node.arguments;
         const recordPassedUseForm = (): void => {
           trace.record(MATCHER_IDS.FRAMEWORK_REACT_HOOK_FORM, "passed");
-          this.recordFrameworkPassedSite(
+          this.recordPassedSite(
             detection,
             sourceFile,
             primaryPostcondition.id,
@@ -656,7 +663,7 @@ export class ContractMatcher {
           /(TextArea|Select|Checkbox|Radio|Toggle|Switch|DatePicker|TimePicker|ColorPicker|Slider|Rating)\.(tsx?|jsx?)$/i.test(rhfProviderFileName)
         ) {
           trace.record(MATCHER_IDS.FRAMEWORK_REACT_HOOK_FORM, "passed");
-          this.recordFrameworkPassedSite(
+          this.recordPassedSite(
             detection,
             sourceFile,
             primaryPostcondition.id,
@@ -748,7 +755,7 @@ export class ContractMatcher {
               MATCHER_IDS.FRAMEWORK_EXPRESS_ASYNC_ERRORS,
               "passed",
             );
-            this.recordFrameworkPassedSite(
+            this.recordPassedSite(
               detection,
               sourceFile,
               primaryPostcondition.id,
@@ -770,7 +777,7 @@ export class ContractMatcher {
                 MATCHER_IDS.FRAMEWORK_EXPRESS_ASYNC_ERRORS,
                 "passed",
               );
-              this.recordFrameworkPassedSite(
+              this.recordPassedSite(
                 detection,
                 sourceFile,
                 primaryPostcondition.id,
@@ -796,7 +803,7 @@ export class ContractMatcher {
               MATCHER_IDS.FRAMEWORK_EXPRESS_ASYNC_ERRORS,
               "passed",
             );
-            this.recordFrameworkPassedSite(
+            this.recordPassedSite(
               detection,
               sourceFile,
               primaryPostcondition.id,
@@ -838,7 +845,7 @@ export class ContractMatcher {
           }
           if (handlerFullyWrapped) {
             trace.record(MATCHER_IDS.FRAMEWORK_FASTIFY_ROUTE, "passed");
-            this.recordFrameworkPassedSite(
+            this.recordPassedSite(
               detection,
               sourceFile,
               primaryPostcondition.id,
@@ -908,7 +915,7 @@ export class ContractMatcher {
           // framework-intended pattern — record FRAMEWORK_FASTIFY_ROUTE passed.
           if (!hasPrecedingAwaitedListen) {
             trace.record(MATCHER_IDS.FRAMEWORK_FASTIFY_ROUTE, "passed");
-            this.recordFrameworkPassedSite(
+            this.recordPassedSite(
               detection,
               sourceFile,
               primaryPostcondition.id,
@@ -1269,6 +1276,16 @@ export class ContractMatcher {
           this.isCallInDataLayerFile(sourceFile) &&
           this.projectHasCentralErrorHandlerMiddleware()
         ) {
+          // WAVE-2C: SECTION_10 data-layer + central errorHandler is the
+          // architectural pattern guard for knex Model-file per-callsite
+          // postconditions — record passed.
+          trace.record(MATCHER_IDS.ARCHITECTURAL_DATA_LAYER, "passed");
+          this.recordPassedSite(
+            detection,
+            sourceFile,
+            primaryPostcondition.id,
+            MATCHER_IDS.ARCHITECTURAL_DATA_LAYER,
+          );
           continue;
         }
       }
@@ -1288,6 +1305,16 @@ export class ContractMatcher {
           this.isCallInDataLayerFile(sourceFile) &&
           this.projectHasCentralErrorHandlerMiddleware()
         ) {
+          // WAVE-2C: SECTION_10 data-layer + central errorHandler is the
+          // architectural pattern guard for typeorm Repository-file per-callsite
+          // postconditions — record passed.
+          trace.record(MATCHER_IDS.ARCHITECTURAL_DATA_LAYER, "passed");
+          this.recordPassedSite(
+            detection,
+            sourceFile,
+            primaryPostcondition.id,
+            MATCHER_IDS.ARCHITECTURAL_DATA_LAYER,
+          );
           continue;
         }
       }
@@ -1307,6 +1334,17 @@ export class ContractMatcher {
         ts.isCallExpression(detection.node) &&
         this.isCallbackErrGuardedInPromiseExecutor(detection.node)
       ) {
+        // WAVE-2C: Promise(executor) reject(err) is the package-agnostic guard
+        // for callback-shaped contracts (mongoose / mysql2 / pg native cb-API,
+        // ssh2.exec, snowflake-sdk.connect, generic cb-promisify). Record passed
+        // so the trace shows we considered the promise-executor matcher.
+        trace.record(MATCHER_IDS.PROMISE_EXECUTOR_REJECT, "passed");
+        this.recordPassedSite(
+          detection,
+          sourceFile,
+          primaryPostcondition.id,
+          MATCHER_IDS.PROMISE_EXECUTOR_REJECT,
+        );
         continue;
       }
 
@@ -1338,7 +1376,7 @@ export class ContractMatcher {
           // WAVE-2B: project-wide setErrorHandler is the framework-pattern
           // guard for addhook-async-hook-no-try-catch — record passed.
           trace.record(MATCHER_IDS.FRAMEWORK_FASTIFY_ROUTE, "passed");
-          this.recordFrameworkPassedSite(
+          this.recordPassedSite(
             detection,
             sourceFile,
             primaryPostcondition.id,
@@ -1432,7 +1470,7 @@ export class ContractMatcher {
           sourceFile.getFullText().includes("useForm<"))
       ) {
         trace.record(MATCHER_IDS.FRAMEWORK_REACT_HOOK_FORM, "passed");
-        this.recordFrameworkPassedSite(
+        this.recordPassedSite(
           detection,
           sourceFile,
           primaryPostcondition.id,
@@ -1479,7 +1517,7 @@ export class ContractMatcher {
         );
         const recordPassedRq = (): void => {
           trace.record(MATCHER_IDS.FRAMEWORK_REACT_QUERY, "passed");
-          this.recordFrameworkPassedSite(
+          this.recordPassedSite(
             detection,
             sourceFile,
             primaryPostcondition.id,
@@ -3009,7 +3047,7 @@ export class ContractMatcher {
             MATCHER_IDS.FRAMEWORK_EXPRESS_ASYNC_ERRORS,
             "passed",
           );
-          this.recordFrameworkPassedSite(
+          this.recordPassedSite(
             detection,
             sourceFile,
             postcondition.id,
@@ -3202,7 +3240,18 @@ export class ContractMatcher {
           ts.forEachChild(node, checkForCloseInFinally);
         };
         checkForCloseInFinally(scopeToCheck);
-        if (hasCloseInFinally) continue; // finally { tx.close() } present — postcondition satisfied
+        if (hasCloseInFinally) {
+          // WAVE-2C: finally { tx.close() } is the canonical FINALLY_TRANSACTION_CLOSE
+          // guard for @libsql/client transaction-not-closed — record passed.
+          trace.record(MATCHER_IDS.FINALLY_TRANSACTION_CLOSE, "passed");
+          this.recordPassedSite(
+            detection,
+            sourceFile,
+            primaryPostcondition.id,
+            MATCHER_IDS.FINALLY_TRANSACTION_CLOSE,
+          );
+          continue; // finally { tx.close() } present — postcondition satisfied
+        }
       }
 
       // Get location
@@ -3298,20 +3347,33 @@ export class ContractMatcher {
   ]);
 
   /**
-   * WAVE-2B (Plan 01-04): framework packages that participate in
-   * passing-site capture for the Wave 9 convention-miner. When a
-   * framework-specific suppression guard short-circuits with a `passed`
-   * matcher record, the call site is buffered into _lastPassedDetections
-   * so the miner can read across files. Plans 01-05..01-08 widen this
-   * set with their additional package families.
+   * WAVE-2B (Plan 01-04), renamed WAVE-2C (Plan 01-05) from FRAMEWORK_PACKAGES
+   * → PASSING_SITE_PACKAGES because the set now includes DB drivers and other
+   * non-framework families. Packages that participate in passing-site capture
+   * for the Wave 9 convention-miner. When a suppression guard short-circuits
+   * with a `passed` matcher record, the call site is buffered into
+   * _lastPassedDetections so the miner can read across files. Plans 01-06..01-08
+   * widen this set with their additional package families (AWS SDK, lifecycle,
+   * long-tail).
    */
-  private static readonly FRAMEWORK_PACKAGES = new Set([
+  private static readonly PASSING_SITE_PACKAGES = new Set([
+    // WAVE-2B (Plan 01-04) — framework families
     "express",
     "fastify",
     "react-hook-form",
     "@tanstack/react-query",
     "react-query",
     "@apollo/server",
+    // WAVE-2C (Plan 01-05) — DB-driver families
+    "knex",
+    "typeorm",
+    "prisma",
+    "@prisma/client",
+    "@libsql/client",
+    "drizzle-orm",
+    "mongoose",
+    "pg",
+    "mysql2",
   ]);
 
   /**
