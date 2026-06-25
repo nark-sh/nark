@@ -63152,5 +63152,24 @@
     },
     "resolution": null
   },
-  "_shape": "object keyed by string-integer id (\"0\", \"1\", ...). Iterate via Object.values(d). The integer keys are stable IDs — do not renumber. See bc-coordinator scanner-stream snippet for canonical pending-count pattern."
+  "_shape": "object keyed by string-integer id (\"0\", \"1\", ...). Iterate via Object.values(d). The integer keys are stable IDs — do not renumber. See bc-coordinator scanner-stream snippet for canonical pending-count pattern.",
+  "3377": {
+    "id": "concern-20260624-scanner-cb-err-guard-promise-1",
+    "created_at": "2026-06-24",
+    "source": "harvester",
+    "package": "_scanner",
+    "type": "false_positive",
+    "status": "implemented",
+    "description": "Callback-style contracted methods wrapped in `new Promise((resolve, reject) => ...)` where the callback propagates err via `reject(err)` are flagged as missing try-catch. The rejection actually surfaces at the outer await — that's where the user's try/catch belongs, not at the inner callback registration. Canonical promisify shape across ssh2.exec, snowflake-sdk.connect / .execute (`complete:` named-prop variant), mongodb native cb-API, and generic node-style cb wrappers. Source: harvester wave 1+2 candidate #4 (callback-err-guard-in-promise-wrapper-not-detected), captured in work-packages/25-pr-initiative/0042-scanner-upgrades-backlog-2026-05-18.md.",
+    "evidence": {
+      "repos": [
+        "matt1398/claude-devtools",
+        "growthbook/back-end"
+      ],
+      "scan_file": "tools/bc-fp-harvester/triage/audit-stream-2026-06-23-matt1398-claude-devtools.json, tools/bc-fp-harvester/triage/audit-stream-2026-06-23-growthbook-backend.json",
+      "violation_count": 3,
+      "fix_target": "scanner"
+    },
+    "resolution": "Added isCallbackErrGuardedInPromiseExecutor() to ContractMatcher and a single package-agnostic suppression hook in the matcher's postcondition-firing loop. The detector walks up from a CallExpression looking for an enclosing `new Promise((resolve, reject) => ...)` executor (stopping at any non-executor function boundary so we never cross unrelated nested function scopes); extracts the call's callback arg (positional last-arg function OR object-literal property named `callback` / `complete` / `cb` / `done` / `fn`); requires the callback's first param to be err-named (err/error/e, case-insensitive); and confirms the callback body's first statement is an early-reject-on-err guard. Recognized guard shapes: `if (err) { reject(err); ... }` block, single-line `if (err) reject(err);`, `if (err) return reject(err);`, and the concise-arrow ternary `(err, val) => err ? reject(err) : resolve(val)`. Err truthcheck accepts `err`, `!!err`, `err != null`, `err !== null`. Reject call must pass the literal err identifier — `reject(new Error(...))` and `reject(err.message)` are conservatively rejected. Regression tests (7) added to src/v2/core/contract-matcher.test.ts covering: positional cb, single-line if-reject, named-property cb (`complete:`), ternary expression body, swallowed-err negative, no-Promise-wrapper negative, non-err-shaped-cb negative. Vitest: 4865 pass / 96 fail (baseline 4858 / 96 — 7 new tests pass, zero new failures)."
+  }
 }

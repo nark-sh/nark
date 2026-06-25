@@ -410,6 +410,216 @@ describe('ContractMatcher', () => {
     expect(violations[0].postconditionId).toBe('embeddings-create-no-try-catch');
   });
 
+  // ──────────────── Promise(executor) callback-err-guard suppression ────────────────
+
+  // Evidence: 2026-06-23 audit-stream wave 1+2 candidate #4
+  // (callback-err-guard-in-promise-wrapper-not-detected). Canonical promisify shape
+  // for callback-style packages — the inner callback registration is FP because the
+  // rejection propagates to the outer await; user's try/catch lives there.
+  function makeCbContract(): Map<string, PackageContract> {
+    const stub: PackageContract = {
+      package: '_test-cb',
+      semver: '*',
+      contract_version: '1.0.0',
+      maintainer: 'test',
+      last_verified: '2026-06-24',
+      functions: [
+        {
+          name: 'connect',
+          import_path: '_test-cb',
+          description: 'callback-style connect',
+          postconditions: [
+            {
+              id: 'cb-connect-no-try-catch',
+              condition: 'connection.connect(callback)',
+              throws: 'ConnectError',
+              sources: ['https://example.test/cb'],
+              severity: 'error',
+            },
+          ],
+        },
+      ],
+    };
+    return new Map<string, PackageContract>([['_test-cb', stub]]);
+  }
+
+  function findCallByCallee(
+    sf: ts.SourceFile,
+    calleeText: string,
+  ): ts.CallExpression {
+    const calls: ts.CallExpression[] = [];
+    function visit(n: ts.Node) {
+      if (ts.isCallExpression(n)) calls.push(n);
+      ts.forEachChild(n, visit);
+    }
+    visit(sf);
+    const match = calls.find((c) => {
+      if (ts.isPropertyAccessExpression(c.expression)) {
+        return c.expression.name.text === calleeText;
+      }
+      if (ts.isIdentifier(c.expression)) {
+        return c.expression.text === calleeText;
+      }
+      return false;
+    });
+    if (!match) throw new Error(`could not find call to ${calleeText}`);
+    return match;
+  }
+
+  it('suppresses positional cb in new Promise(executor) when cb propagates err via reject', () => {
+    const source = `
+      async function run() {
+        await new Promise((resolve, reject) => {
+          connection.connect((err, conn) => {
+            if (err) { reject(err); return; }
+            resolve(conn);
+          });
+        });
+      }
+    `;
+    const sf = parse(source);
+    const call = findCallByCallee(sf, 'connect');
+    const matcher = new ContractMatcher(makeCbContract(), { projectRoot: PROJECT_ROOT });
+    const violations = matcher.matchDetections(
+      [makeDetection(call, '_test-cb', 'connect')],
+      sf,
+    );
+    expect(violations).toHaveLength(0);
+  });
+
+  it('suppresses single-line if (err) reject(err)', () => {
+    const source = `
+      async function run() {
+        await new Promise((resolve, reject) => {
+          connection.connect((err, conn) => {
+            if (err) reject(err);
+            else resolve(conn);
+          });
+        });
+      }
+    `;
+    const sf = parse(source);
+    const call = findCallByCallee(sf, 'connect');
+    const matcher = new ContractMatcher(makeCbContract(), { projectRoot: PROJECT_ROOT });
+    const violations = matcher.matchDetections(
+      [makeDetection(call, '_test-cb', 'connect')],
+      sf,
+    );
+    expect(violations).toHaveLength(0);
+  });
+
+  it('suppresses named-property cb variant (complete: ...)', () => {
+    // snowflake-sdk shape — callback lives on `complete:` property of options object.
+    const source = `
+      async function run() {
+        await new Promise((resolve, reject) => {
+          connection.connect({
+            sqlText: 'SELECT 1',
+            complete: (err, stmt, rows) => {
+              if (err) { reject(err); return; }
+              resolve(rows);
+            },
+          });
+        });
+      }
+    `;
+    const sf = parse(source);
+    const call = findCallByCallee(sf, 'connect');
+    const matcher = new ContractMatcher(makeCbContract(), { projectRoot: PROJECT_ROOT });
+    const violations = matcher.matchDetections(
+      [makeDetection(call, '_test-cb', 'connect')],
+      sf,
+    );
+    expect(violations).toHaveLength(0);
+  });
+
+  it('suppresses ternary expression-body cb (err ? reject(err) : resolve(val))', () => {
+    const source = `
+      async function run() {
+        await new Promise((resolve, reject) =>
+          connection.connect((err, conn) => err ? reject(err) : resolve(conn))
+        );
+      }
+    `;
+    const sf = parse(source);
+    const call = findCallByCallee(sf, 'connect');
+    const matcher = new ContractMatcher(makeCbContract(), { projectRoot: PROJECT_ROOT });
+    const violations = matcher.matchDetections(
+      [makeDetection(call, '_test-cb', 'connect')],
+      sf,
+    );
+    expect(violations).toHaveLength(0);
+  });
+
+  it('does NOT suppress when cb swallows err (no reject(err) on err path)', () => {
+    // Negative case: err is logged but never propagated. Outer await would resolve
+    // successfully even on failure — this IS a real bug, must fire.
+    const source = `
+      async function run() {
+        await new Promise((resolve, reject) => {
+          connection.connect((err, conn) => {
+            console.log(err);
+            resolve(conn);
+          });
+        });
+      }
+    `;
+    const sf = parse(source);
+    const call = findCallByCallee(sf, 'connect');
+    const matcher = new ContractMatcher(makeCbContract(), { projectRoot: PROJECT_ROOT });
+    const violations = matcher.matchDetections(
+      [makeDetection(call, '_test-cb', 'connect')],
+      sf,
+    );
+    expect(violations.length).toBeGreaterThan(0);
+    expect(violations[0].postconditionId).toBe('cb-connect-no-try-catch');
+  });
+
+  it('does NOT suppress when call is outside any new Promise executor', () => {
+    // Bare callback registration without a Promise wrapper — err is genuinely
+    // unhandled. Must fire.
+    const source = `
+      function run() {
+        connection.connect((err, conn) => {
+          if (err) { reject(err); return; }
+          handle(conn);
+        });
+      }
+    `;
+    const sf = parse(source);
+    const call = findCallByCallee(sf, 'connect');
+    const matcher = new ContractMatcher(makeCbContract(), { projectRoot: PROJECT_ROOT });
+    const violations = matcher.matchDetections(
+      [makeDetection(call, '_test-cb', 'connect')],
+      sf,
+    );
+    expect(violations.length).toBeGreaterThan(0);
+    expect(violations[0].postconditionId).toBe('cb-connect-no-try-catch');
+  });
+
+  it('does NOT suppress when callback first param is not err-shaped', () => {
+    // Promise executor exists, but callback's first param is `response` — this is
+    // not a node-style err-first callback, so the suppression must not apply.
+    const source = `
+      async function run() {
+        await new Promise((resolve, reject) => {
+          connection.connect((response) => {
+            resolve(response);
+          });
+        });
+      }
+    `;
+    const sf = parse(source);
+    const call = findCallByCallee(sf, 'connect');
+    const matcher = new ContractMatcher(makeCbContract(), { projectRoot: PROJECT_ROOT });
+    const violations = matcher.matchDetections(
+      [makeDetection(call, '_test-cb', 'connect')],
+      sf,
+    );
+    expect(violations.length).toBeGreaterThan(0);
+    expect(violations[0].postconditionId).toBe('cb-connect-no-try-catch');
+  });
+
   // ──────────────── catch-block completeness (warning) ────────────────
 
   it('produces warning for incomplete catch block (no status code check)', () => {

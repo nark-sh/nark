@@ -1073,6 +1073,24 @@ export class ContractMatcher {
         }
       }
 
+      // Promise(executor) callback-err-guard: when the contracted call site sits inside
+      // `new Promise((resolve, reject) => ...)` and its callback propagates `err` via
+      // `reject(err)`, the rejection surfaces at the outer `await` — that's where the
+      // user's try/catch belongs, not at the inner registration. Package-agnostic on
+      // purpose: canonical promisify shape across ssh2, snowflake-sdk, mongodb native
+      // cb-API, and generic node-style cb wrappers.
+      //
+      // Evidence: 2026-06-23 audit-stream wave 1+2 candidate #4
+      // (callback-err-guard-in-promise-wrapper-not-detected) — 3+ occurrences across 2
+      // distinct repos (matt1398/claude-devtools ssh2.exec; growthbook/back-end
+      // snowflake-sdk.connect + .execute `complete:` named-prop variant).
+      if (
+        ts.isCallExpression(detection.node) &&
+        this.isCallbackErrGuardedInPromiseExecutor(detection.node)
+      ) {
+        continue;
+      }
+
       // §11.C: Fastify lifecycle hooks (addHook with onRequest/preHandler/etc.) route
       // uncaught throws through the same setErrorHandler chain as route handlers (per
       // fastify v5's lib/hooks.js#hookRunnerGenerator). When the project registers a
@@ -4705,5 +4723,246 @@ export class ContractMatcher {
     }
 
     return false;
+  }
+
+  /**
+   * Suppression detector for callback-style contracted methods wrapped in a
+   * `new Promise((resolve, reject) => ...)` executor whose callback propagates
+   * `err` via `reject(err)`.
+   *
+   * Canonical shape (snowflake-sdk, ssh2, mongodb native cb-API, generic node-
+   * style cb wrappers):
+   *
+   *   await new Promise((resolve, reject) => {
+   *     connection.connect((err, conn) => {
+   *       if (err) { reject(err); return; }
+   *       resolve(conn);
+   *     });
+   *   });
+   *
+   * Named-property variant (snowflake `complete:`, mongoose `callback:`):
+   *
+   *   await new Promise((resolve, reject) => {
+   *     connection.execute({
+   *       sqlText: '...',
+   *       complete: (err, stmt, rows) => {
+   *         if (err) { reject(err); return; }
+   *         resolve(rows);
+   *       },
+   *     });
+   *   });
+   *
+   * When this returns true the inner callback's apparent missing try/catch is a
+   * false positive — the rejection propagates to the outer `await`, which IS
+   * the user's responsibility and is the right anchor for a try/catch.
+   *
+   * Evidence: 2026-06-23 audit-stream wave 1+2 candidate #4
+   * (callback-err-guard-in-promise-wrapper-not-detected), 3+ occurrences across
+   * matt1398/claude-devtools (ssh2.exec) and growthbook/back-end
+   * (snowflake-sdk.connect + .execute).
+   */
+  private isCallbackErrGuardedInPromiseExecutor(
+    callNode: ts.CallExpression,
+  ): boolean {
+    const executor = this.findEnclosingPromiseExecutor(callNode);
+    if (!executor) return false;
+    const callback = this.extractCallbackArg(callNode);
+    if (!callback) return false;
+    if (callback.parameters.length === 0) return false;
+    const errParam = callback.parameters[0];
+    if (!ts.isIdentifier(errParam.name)) return false;
+    const errName = errParam.name.text;
+    // Err-style param name (err, error, e — case-insensitive).
+    if (!/^(err|error|e)$/i.test(errName)) return false;
+    return this.callbackBodyEarlyRejectsOnErr(
+      callback.body,
+      errName,
+      executor.rejectName,
+    );
+  }
+
+  /**
+   * Walks up from `node` looking for a `new Promise((resolve, reject) => ...)`
+   * executor. Returns the executor's reject-param name, or null if the call
+   * site isn't inside such an executor. Stops at any non-executor function
+   * boundary so we never cross unrelated nested function scopes.
+   */
+  private findEnclosingPromiseExecutor(
+    node: ts.Node,
+  ): { rejectName: string } | null {
+    let cur: ts.Node | undefined = node.parent;
+    while (cur) {
+      if (ts.isArrowFunction(cur) || ts.isFunctionExpression(cur)) {
+        const parent = cur.parent;
+        const isExecutor =
+          parent &&
+          ts.isNewExpression(parent) &&
+          ts.isIdentifier(parent.expression) &&
+          parent.expression.text === "Promise" &&
+          parent.arguments &&
+          parent.arguments[0] === cur;
+        if (isExecutor) {
+          const params = cur.parameters;
+          if (params.length < 2) return null;
+          const rejectParam = params[1];
+          if (!ts.isIdentifier(rejectParam.name)) return null;
+          return { rejectName: rejectParam.name.text };
+        }
+        // Non-executor function — don't escape its scope.
+        return null;
+      }
+      if (
+        ts.isFunctionDeclaration(cur) ||
+        ts.isMethodDeclaration(cur) ||
+        ts.isConstructorDeclaration(cur) ||
+        ts.isGetAccessorDeclaration(cur) ||
+        ts.isSetAccessorDeclaration(cur)
+      ) {
+        return null;
+      }
+      cur = cur.parent;
+    }
+    return null;
+  }
+
+  /**
+   * Returns the callback ArrowFunction/FunctionExpression argument of a call
+   * site, supporting both positional (last arg is a function) and named-
+   * property variants (last arg is an object literal with a `callback:` /
+   * `complete:` / `cb:` / `done:` / `fn:` property whose value is a function).
+   */
+  private extractCallbackArg(
+    callNode: ts.CallExpression,
+  ): ts.ArrowFunction | ts.FunctionExpression | null {
+    const args = callNode.arguments;
+    if (args.length === 0) return null;
+
+    const last = args[args.length - 1];
+    if (ts.isArrowFunction(last) || ts.isFunctionExpression(last)) {
+      return last;
+    }
+    if (ts.isObjectLiteralExpression(last)) {
+      for (const prop of last.properties) {
+        if (!ts.isPropertyAssignment(prop)) continue;
+        if (!ts.isIdentifier(prop.name)) continue;
+        if (
+          !ContractMatcher.PROMISE_WRAPPER_CALLBACK_PROPS.has(prop.name.text)
+        ) {
+          continue;
+        }
+        const value = prop.initializer;
+        if (ts.isArrowFunction(value) || ts.isFunctionExpression(value)) {
+          return value;
+        }
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Object-literal property names that conventionally carry a node-style
+   * callback in callback-API packages. Used by the Promise(executor) callback-
+   * err-guard suppression.
+   */
+  private static readonly PROMISE_WRAPPER_CALLBACK_PROPS: ReadonlySet<string> =
+    new Set(["callback", "complete", "cb", "done", "fn"]);
+
+  /**
+   * Checks the callback body for the canonical early-reject-on-err guard
+   * pattern.  Recognises:
+   *
+   *   if (err) { reject(err); ... [return] }
+   *   if (err) reject(err);
+   *   if (err) return reject(err);
+   *   (err, val) => err ? reject(err) : resolve(val)
+   *
+   * Conservative: requires literal `err` identifier passed to the reject call
+   * (not `reject(new Error(...))` or `reject(err.message)`) and an err-truth
+   * check (`err`, `!!err`, `err != null`, `err !== null`).
+   */
+  private callbackBodyEarlyRejectsOnErr(
+    body: ts.ConciseBody,
+    errName: string,
+    rejectName: string,
+  ): boolean {
+    if (!ts.isBlock(body)) {
+      // Expression body — only ternary `err ? reject(err) : resolve(val)` counts.
+      if (!ts.isConditionalExpression(body)) return false;
+      if (!this.isErrTruthCheck(body.condition, errName)) return false;
+      return this.isRejectErrCall(body.whenTrue, errName, rejectName);
+    }
+    const stmts = body.statements;
+    if (stmts.length === 0) return false;
+    const first = stmts[0];
+    if (!ts.isIfStatement(first)) return false;
+    if (!this.isErrTruthCheck(first.expression, errName)) return false;
+    return this.statementCallsReject(
+      first.thenStatement,
+      errName,
+      rejectName,
+    );
+  }
+
+  private isErrTruthCheck(expr: ts.Expression, errName: string): boolean {
+    // err
+    if (ts.isIdentifier(expr) && expr.text === errName) return true;
+    // !!err
+    if (
+      ts.isPrefixUnaryExpression(expr) &&
+      expr.operator === ts.SyntaxKind.ExclamationToken &&
+      ts.isPrefixUnaryExpression(expr.operand) &&
+      expr.operand.operator === ts.SyntaxKind.ExclamationToken &&
+      ts.isIdentifier(expr.operand.operand) &&
+      expr.operand.operand.text === errName
+    ) {
+      return true;
+    }
+    // err != null / err !== null / err != undefined / err !== undefined
+    if (
+      ts.isBinaryExpression(expr) &&
+      ts.isIdentifier(expr.left) &&
+      expr.left.text === errName &&
+      (expr.operatorToken.kind === ts.SyntaxKind.ExclamationEqualsToken ||
+        expr.operatorToken.kind ===
+          ts.SyntaxKind.ExclamationEqualsEqualsToken) &&
+      (expr.right.kind === ts.SyntaxKind.NullKeyword ||
+        (ts.isIdentifier(expr.right) && expr.right.text === "undefined"))
+    ) {
+      return true;
+    }
+    return false;
+  }
+
+  private statementCallsReject(
+    stmt: ts.Statement,
+    errName: string,
+    rejectName: string,
+  ): boolean {
+    if (ts.isBlock(stmt)) {
+      for (const s of stmt.statements) {
+        if (this.statementCallsReject(s, errName, rejectName)) return true;
+      }
+      return false;
+    }
+    if (ts.isExpressionStatement(stmt)) {
+      return this.isRejectErrCall(stmt.expression, errName, rejectName);
+    }
+    if (ts.isReturnStatement(stmt) && stmt.expression) {
+      return this.isRejectErrCall(stmt.expression, errName, rejectName);
+    }
+    return false;
+  }
+
+  private isRejectErrCall(
+    expr: ts.Expression,
+    errName: string,
+    rejectName: string,
+  ): boolean {
+    if (!ts.isCallExpression(expr)) return false;
+    if (!ts.isIdentifier(expr.expression)) return false;
+    if (expr.expression.text !== rejectName) return false;
+    if (expr.arguments.length === 0) return false;
+    const arg = expr.arguments[0];
+    return ts.isIdentifier(arg) && arg.text === errName;
   }
 }
