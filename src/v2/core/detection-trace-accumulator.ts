@@ -80,7 +80,13 @@ interface RecordedEntry {
 export class DetectionTraceAccumulator {
   private readonly recorded = new Map<string, RecordedEntry>();
 
-  constructor(private readonly ctx: AccumulatorCtx) {}
+  constructor(private readonly ctx: AccumulatorCtx) {
+    // WAVE-2B: ctx is retained for future predicate-aware logic in serialize()
+    // (e.g. a `serializeWithApplicabilityHint()` variant a SaaS consumer may
+    // want). Today serialize() emits not_applicable for every unrecorded
+    // matcher regardless of predicate, so ctx is unused in the hot path.
+    void this.ctx;
+  }
 
   /**
    * Record the outcome of a single matcher for this (callsite, postcondition).

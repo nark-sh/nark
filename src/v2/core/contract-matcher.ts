@@ -173,6 +173,34 @@ export class ContractMatcher {
   }
 
   /**
+   * WAVE-2B (Plan 01-04) helper: capture a framework-family passing site
+   * into _lastPassedDetections so the Wave 9 convention-miner can read it.
+   * Gated by ContractMatcher.FRAMEWORK_PACKAGES — only the families that
+   * Plans 01-04..01-08 have explicitly wired participate.
+   *
+   * Centralized to avoid repeating the gate + getLocation + push triplet at
+   * each of the ~13 framework suppression branches in matchDetections.
+   */
+  private recordFrameworkPassedSite(
+    detection: Detection,
+    sourceFile: ts.SourceFile,
+    postconditionId: string,
+    passedMatcherId: string,
+  ): void {
+    if (!ContractMatcher.FRAMEWORK_PACKAGES.has(detection.packageName)) {
+      return;
+    }
+    const { line } = this.getLocation(detection.node, sourceFile);
+    this._lastPassedDetections.push({
+      packageName: detection.packageName,
+      postconditionId,
+      file: sourceFile.fileName,
+      line,
+      passedMatcherId,
+    });
+  }
+
+  /**
    * Match a set of detections against contracts and produce violations.
    */
   public matchDetections(
@@ -417,6 +445,7 @@ export class ContractMatcher {
       // Additionally, if the async callback's body is fully wrapped in try-catch, the
       // postcondition is already satisfied and should not fire.
       // Evidence: dashboard-feedback 2026-04-01 (concerns react-hook-form-1 and react-hook-form-2).
+      // WAVE-2B: three sub-concerns each map to FRAMEWORK_REACT_HOOK_FORM passed.
       if (
         detection.packageName === "react-hook-form" &&
         detection.functionName === "handleSubmit" &&
@@ -425,6 +454,13 @@ export class ContractMatcher {
       ) {
         // Concern 1: if callback is NOT async, suppress — this postcondition does not apply.
         if (!this.controlFlow.isCallbackArgAsync(detection.node, 0)) {
+          trace.record(MATCHER_IDS.FRAMEWORK_REACT_HOOK_FORM, "passed");
+          this.recordFrameworkPassedSite(
+            detection,
+            sourceFile,
+            primaryPostcondition.id,
+            MATCHER_IDS.FRAMEWORK_REACT_HOOK_FORM,
+          );
           continue;
         }
         // Concern 2: if callback IS async and its body is fully wrapped in try-catch, suppress.
@@ -434,6 +470,13 @@ export class ContractMatcher {
             0,
           )
         ) {
+          trace.record(MATCHER_IDS.FRAMEWORK_REACT_HOOK_FORM, "passed");
+          this.recordFrameworkPassedSite(
+            detection,
+            sourceFile,
+            primaryPostcondition.id,
+            MATCHER_IDS.FRAMEWORK_REACT_HOOK_FORM,
+          );
           continue;
         }
         // Concern 3: if the file uses react-hook-form's setError() for error handling,
@@ -455,6 +498,13 @@ export class ContractMatcher {
           rhfFileText.includes("onError") ||
           rhfFileText.includes("console.error")
         ) {
+          trace.record(MATCHER_IDS.FRAMEWORK_REACT_HOOK_FORM, "passed");
+          this.recordFrameworkPassedSite(
+            detection,
+            sourceFile,
+            primaryPostcondition.id,
+            MATCHER_IDS.FRAMEWORK_REACT_HOOK_FORM,
+          );
           continue;
         }
         // Callback is async and not fully wrapped — fall through to fire violation.
@@ -489,6 +539,7 @@ export class ContractMatcher {
       // regardless of whether the caller awaits the Promise. Suppress when the call is the
       // direct operand of an AwaitExpression — those callers do await the result correctly.
       // Evidence: react-hook-form ground-truth line 257 (await form.trigger('email')).
+      // WAVE-2B: awaited trigger() is the correct framework usage — record passed.
       if (
         detection.packageName === "react-hook-form" &&
         detection.functionName === "trigger" &&
@@ -496,6 +547,13 @@ export class ContractMatcher {
         ts.isCallExpression(detection.node) &&
         ts.isAwaitExpression(detection.node.parent)
       ) {
+        trace.record(MATCHER_IDS.FRAMEWORK_REACT_HOOK_FORM, "passed");
+        this.recordFrameworkPassedSite(
+          detection,
+          sourceFile,
+          primaryPostcondition.id,
+          MATCHER_IDS.FRAMEWORK_REACT_HOOK_FORM,
+        );
         continue;
       }
 
@@ -505,6 +563,10 @@ export class ContractMatcher {
       // expression. Sync object literals, sync function calls, and no-defaultValues calls
       // are all safe — suppress them.
       // Evidence: wave1-fp-harvester — 140+ FPs across cal.com (118), nango (21), civitai (1+).
+      // WAVE-2B: every short-circuit in this block is a vacuous-satisfaction
+      // pattern for async-default-values-unhandled-rejection (no args / no
+      // options object / no defaultValues / sync defaultValues) — record
+      // FRAMEWORK_REACT_HOOK_FORM passed for each.
       if (
         detection.packageName === "react-hook-form" &&
         detection.functionName === "useForm" &&
@@ -512,11 +574,22 @@ export class ContractMatcher {
         ts.isCallExpression(detection.node)
       ) {
         const args = detection.node.arguments;
+        const recordPassedUseForm = (): void => {
+          trace.record(MATCHER_IDS.FRAMEWORK_REACT_HOOK_FORM, "passed");
+          this.recordFrameworkPassedSite(
+            detection,
+            sourceFile,
+            primaryPostcondition.id,
+            MATCHER_IDS.FRAMEWORK_REACT_HOOK_FORM,
+          );
+        };
         if (args.length === 0) {
+          recordPassedUseForm();
           continue;
         }
         const optionsArg = args[0];
         if (!ts.isObjectLiteralExpression(optionsArg)) {
+          recordPassedUseForm();
           continue;
         }
         const defaultValuesProp = optionsArg.properties.find(
@@ -526,6 +599,7 @@ export class ContractMatcher {
             p.name.text === "defaultValues",
         );
         if (!defaultValuesProp) {
+          recordPassedUseForm();
           continue;
         }
         const dv = defaultValuesProp.initializer;
@@ -535,6 +609,7 @@ export class ContractMatcher {
             (m) => m.kind === ts.SyntaxKind.AsyncKeyword,
           );
         if (!isAsyncDefaultValues) {
+          recordPassedUseForm();
           continue;
         }
       }
@@ -561,6 +636,8 @@ export class ContractMatcher {
       //           components/Input.tsx, src/components/ui/form.tsx (shared form primitives).
       //           concern-20260429-react-hook-form-2 — 6 FP instances in named sub-components
       //           like ArtistInstructionTextArea.tsx that are always rendered inside FormProvider.
+      // WAVE-2B: FormProvider presence (file-level) or sub-component pattern is the
+      // framework idiom that satisfies missing-form-provider — record passed.
       if (
         detection.packageName === "react-hook-form" &&
         primaryPostcondition.id === "missing-form-provider"
@@ -578,6 +655,13 @@ export class ContractMatcher {
           // be rendered inside a FormProvider by their parent.
           /(TextArea|Select|Checkbox|Radio|Toggle|Switch|DatePicker|TimePicker|ColorPicker|Slider|Rating)\.(tsx?|jsx?)$/i.test(rhfProviderFileName)
         ) {
+          trace.record(MATCHER_IDS.FRAMEWORK_REACT_HOOK_FORM, "passed");
+          this.recordFrameworkPassedSite(
+            detection,
+            sourceFile,
+            primaryPostcondition.id,
+            MATCHER_IDS.FRAMEWORK_REACT_HOOK_FORM,
+          );
           continue;
         }
       }
@@ -587,6 +671,9 @@ export class ContractMatcher {
       // processes a request, not when the factory is called. Suppress all postconditions
       // on express.json() and express.urlencoded() calls — they never throw at call time.
       // Evidence: concern-20260404-express-deepen-4 (ground-truth line 50, 112).
+      // WAVE-2B: factory-skip suppression — no framework matcher applies (this is a
+      // "not a real call site" gate, not an error-handling guard). Trace stays
+      // unused; serialize() is never called because we continue.
       if (
         detection.packageName === "express" &&
         (detection.functionName === "json" ||
@@ -600,6 +687,12 @@ export class ContractMatcher {
       // registers a server.on('error') event listener. The .on('error') handler is the
       // idiomatic Node.js pattern for handling listen errors on net.Server.
       // Evidence: concern-20260404-express-deepen-5 (ground-truth line 185).
+      // WAVE-2B: file-level .on('error') is the framework-pattern matcher for listen
+      // postconditions. FRAMEWORK_EXPRESS_ASYNC_ERRORS is gated by async-* postcondition
+      // substrings (per applicabilityPredicate POSTCONDITION_GATING) and would not apply
+      // to listen-eaddrinuse / listen-eacces, so recording it here would be incorrect.
+      // Trace stays unused; the listen postcondition is suppressed without framework
+      // matcher attribution.
       if (
         detection.packageName === "express" &&
         detection.functionName === "listen" &&
@@ -646,10 +739,26 @@ export class ContractMatcher {
             },
           );
           // No async function arg → factory/sync middleware → suppress (concern-1)
+          // WAVE-2B: not an async-error guard — the postcondition simply doesn't apply.
+          // Record FRAMEWORK_EXPRESS_ASYNC_ERRORS as passed (the framework idiom of
+          // "sync middleware factory or no async handler" satisfies the async-middleware
+          // postcondition vacuously).
           if (!asyncFuncArg) {
+            trace.record(
+              MATCHER_IDS.FRAMEWORK_EXPRESS_ASYNC_ERRORS,
+              "passed",
+            );
+            this.recordFrameworkPassedSite(
+              detection,
+              sourceFile,
+              primaryPostcondition.id,
+              MATCHER_IDS.FRAMEWORK_EXPRESS_ASYNC_ERRORS,
+            );
             continue;
           }
           // Entire async body is a single try-catch → suppress (concern-2)
+          // WAVE-2B: try-catch inside the callback is the canonical guard for async
+          // express middleware — record FRAMEWORK_EXPRESS_ASYNC_ERRORS as passed.
           if (ts.isBlock(asyncFuncArg.body)) {
             const stmts = asyncFuncArg.body.statements;
             if (
@@ -657,6 +766,16 @@ export class ContractMatcher {
               ts.isTryStatement(stmts[0]) &&
               stmts[0].catchClause
             ) {
+              trace.record(
+                MATCHER_IDS.FRAMEWORK_EXPRESS_ASYNC_ERRORS,
+                "passed",
+              );
+              this.recordFrameworkPassedSite(
+                detection,
+                sourceFile,
+                primaryPostcondition.id,
+                MATCHER_IDS.FRAMEWORK_EXPRESS_ASYNC_ERRORS,
+              );
               continue;
             }
           }
@@ -667,10 +786,22 @@ export class ContractMatcher {
           // unnecessary for all middleware in the file.
           // Evidence: concern-2026-04-20-express-1 — 5 FPs in api/dev-server.ts and
           //   api/browser-agent-server.ts which use express-async-errors for global handling.
+          // WAVE-2B: this is the namesake guard for FRAMEWORK_EXPRESS_ASYNC_ERRORS —
+          // record as passed.
           if (
             primaryPostcondition.id === "async-middleware-unhandled-rejection" &&
             sourceFile.getFullText().includes("express-async-errors")
           ) {
+            trace.record(
+              MATCHER_IDS.FRAMEWORK_EXPRESS_ASYNC_ERRORS,
+              "passed",
+            );
+            this.recordFrameworkPassedSite(
+              detection,
+              sourceFile,
+              primaryPostcondition.id,
+              MATCHER_IDS.FRAMEWORK_EXPRESS_ASYNC_ERRORS,
+            );
             continue; // express-async-errors installed — global rejection forwarding active
           }
         }
@@ -682,6 +813,8 @@ export class ContractMatcher {
       // app.get() call itself — but that's the correct pattern for fastify route handlers.
       // The callback argument is the last argument (after optional options objects).
       // Evidence: concern-20260413-dashboard-fastify-1 (line 51: SHOULD_NOT_FIRE with try-catch).
+      // WAVE-2B: try-catch inside the route handler callback is the canonical
+      // FRAMEWORK_FASTIFY_ROUTE guard — record passed.
       if (
         detection.packageName === "fastify" &&
         primaryPostcondition.id === "route-handler-async-error" &&
@@ -703,7 +836,16 @@ export class ContractMatcher {
               break;
             }
           }
-          if (handlerFullyWrapped) continue;
+          if (handlerFullyWrapped) {
+            trace.record(MATCHER_IDS.FRAMEWORK_FASTIFY_ROUTE, "passed");
+            this.recordFrameworkPassedSite(
+              detection,
+              sourceFile,
+              primaryPostcondition.id,
+              MATCHER_IDS.FRAMEWORK_FASTIFY_ROUTE,
+            );
+            continue;
+          }
         }
       }
 
@@ -762,7 +904,16 @@ export class ContractMatcher {
             }
           }
           // If no preceding listen/ready, this is setErrorHandler before start — suppress
+          // WAVE-2B: setErrorHandler called before listen()/ready() is the
+          // framework-intended pattern — record FRAMEWORK_FASTIFY_ROUTE passed.
           if (!hasPrecedingAwaitedListen) {
+            trace.record(MATCHER_IDS.FRAMEWORK_FASTIFY_ROUTE, "passed");
+            this.recordFrameworkPassedSite(
+              detection,
+              sourceFile,
+              primaryPostcondition.id,
+              MATCHER_IDS.FRAMEWORK_FASTIFY_ROUTE,
+            );
             continue;
           }
         }
@@ -1184,6 +1335,15 @@ export class ContractMatcher {
         primaryPostcondition.id === "addhook-async-hook-no-try-catch"
       ) {
         if (this.projectHasCentralErrorHandlerMiddleware()) {
+          // WAVE-2B: project-wide setErrorHandler is the framework-pattern
+          // guard for addhook-async-hook-no-try-catch — record passed.
+          trace.record(MATCHER_IDS.FRAMEWORK_FASTIFY_ROUTE, "passed");
+          this.recordFrameworkPassedSite(
+            detection,
+            sourceFile,
+            primaryPostcondition.id,
+            MATCHER_IDS.FRAMEWORK_FASTIFY_ROUTE,
+          );
           continue;
         }
       }
@@ -1261,6 +1421,8 @@ export class ContractMatcher {
       // (declarative error handling via form state, not try-catch).
       // Evidence: concern-20260401-react-hook-form-4.
       //           concern-2026-04-11-react-hook-form-19 — 2 FPs: profile-form.tsx.
+      // WAVE-2B: file-level handleSubmit / formState / useForm presence indicates
+      // form-level error handling — record FRAMEWORK_REACT_HOOK_FORM passed.
       if (
         detection.packageName === "react-hook-form" &&
         primaryPostcondition.id === "unhandled-field-array-operations" &&
@@ -1269,6 +1431,13 @@ export class ContractMatcher {
           sourceFile.getFullText().includes("useForm(") ||
           sourceFile.getFullText().includes("useForm<"))
       ) {
+        trace.record(MATCHER_IDS.FRAMEWORK_REACT_HOOK_FORM, "passed");
+        this.recordFrameworkPassedSite(
+          detection,
+          sourceFile,
+          primaryPostcondition.id,
+          MATCHER_IDS.FRAMEWORK_REACT_HOOK_FORM,
+        );
         continue;
       }
 
@@ -1290,6 +1459,9 @@ export class ContractMatcher {
       //           rank-12 openstatus 269/269 FPs, rank-06 chatbox 26/26 FPs, rank-08 sealos).
       //           concern-20260515-section3-gap-2-fetchquery-postconditions (1 retro;
       //           queryClient.fetchQuery in auth/providers.ts at rank-12 openstatus).
+      // WAVE-2B: each of the three react-query short-circuits below is a
+      // framework-idiomatic error-handling pattern — record FRAMEWORK_REACT_QUERY
+      // passed for each.
       if (
         detection.packageName === "@tanstack/react-query" &&
         (primaryPostcondition.id === "query-error-unhandled" ||
@@ -1305,7 +1477,17 @@ export class ContractMatcher {
         const baseName = path.basename(
           sourceFile.fileName.replace(/\.tsx?$/, ""),
         );
+        const recordPassedRq = (): void => {
+          trace.record(MATCHER_IDS.FRAMEWORK_REACT_QUERY, "passed");
+          this.recordFrameworkPassedSite(
+            detection,
+            sourceFile,
+            primaryPostcondition.id,
+            MATCHER_IDS.FRAMEWORK_REACT_QUERY,
+          );
+        };
         if (/^use[A-Z]/.test(baseName)) {
+          recordPassedRq();
           continue; // Hook wrapper file — caller's responsibility
         }
         // Component files using React Query's error state pattern (isError, error property).
@@ -1327,12 +1509,14 @@ export class ContractMatcher {
             fileText.includes("error }") ||
             fileText.includes("onError"))
         ) {
+          recordPassedRq();
           continue; // Error handled via React Query state API, not try-catch
         }
         // Project-level signal — applies to ALL five gated postconditions.
         // A global QueryCache(onError) / MutationCache(onError) / top-level ErrorBoundary /
         // central error handler module satisfies the postcondition cross-file.
         if (this.projectHasReactQueryGlobalErrorHandler()) {
+          recordPassedRq();
           continue;
         }
       }
@@ -2815,10 +2999,22 @@ export class ContractMatcher {
         const expressFileText = sourceFile.getFullText();
         // Check for 4-argument error handler signature (err, req, res, next)
         // or common error handler import patterns
+        // WAVE-2B: 4-arg express error handler in the same file is a framework idiom
+        // that satisfies async-middleware-unhandled-rejection — record passed.
         if (
           /\(\s*err[\s,]/.test(expressFileText) ||
           /errorHandler|error_handler|handleError/.test(expressFileText)
         ) {
+          trace.record(
+            MATCHER_IDS.FRAMEWORK_EXPRESS_ASYNC_ERRORS,
+            "passed",
+          );
+          this.recordFrameworkPassedSite(
+            detection,
+            sourceFile,
+            postcondition.id,
+            MATCHER_IDS.FRAMEWORK_EXPRESS_ASYNC_ERRORS,
+          );
           continue; // File has error handler — async middleware errors are propagated to it
         }
       }
@@ -3099,6 +3295,23 @@ export class ContractMatcher {
     "request",
     "ky",
     "undici",
+  ]);
+
+  /**
+   * WAVE-2B (Plan 01-04): framework packages that participate in
+   * passing-site capture for the Wave 9 convention-miner. When a
+   * framework-specific suppression guard short-circuits with a `passed`
+   * matcher record, the call site is buffered into _lastPassedDetections
+   * so the miner can read across files. Plans 01-05..01-08 widen this
+   * set with their additional package families.
+   */
+  private static readonly FRAMEWORK_PACKAGES = new Set([
+    "express",
+    "fastify",
+    "react-hook-form",
+    "@tanstack/react-query",
+    "react-query",
+    "@apollo/server",
   ]);
 
   /**
