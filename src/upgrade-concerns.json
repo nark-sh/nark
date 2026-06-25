@@ -63804,7 +63804,7 @@
     },
     "resolution": null
   },
-  "3417": {
+  "3418": {
     "id": "concern-20260625-supabase-js-deepen-1",
     "created_at": "2026-06-25",
     "source": "deepen",
@@ -63820,7 +63820,7 @@
     },
     "resolution": null
   },
-  "3418": {
+  "3419": {
     "id": "concern-20260625-supabase-js-deepen-2",
     "created_at": "2026-06-25",
     "source": "deepen",
@@ -63836,7 +63836,7 @@
     },
     "resolution": null
   },
-  "3419": {
+  "3420": {
     "id": "concern-20260625-supabase-js-deepen-3",
     "created_at": "2026-06-25",
     "source": "deepen",
@@ -63852,7 +63852,7 @@
     },
     "resolution": null
   },
-  "3420": {
+  "3421": {
     "id": "concern-20260625-supabase-js-deepen-4",
     "created_at": "2026-06-25",
     "source": "deepen",
@@ -63868,7 +63868,7 @@
     },
     "resolution": null
   },
-  "3421": {
+  "3422": {
     "id": "concern-20260625-supabase-js-deepen-5",
     "created_at": "2026-06-25",
     "source": "deepen",
@@ -63884,7 +63884,7 @@
     },
     "resolution": null
   },
-  "3422": {
+  "3423": {
     "id": "concern-20260625-supabase-js-deepen-6",
     "created_at": "2026-06-25",
     "source": "deepen",
@@ -63898,6 +63898,105 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis (deepen-stream-2 pass 1, 2026-06-25). Tokens valid 2h only; expiry is common in long-running flows."
     },
+    "resolution": null
+  },
+  "3424": {
+    "id": "concern-20260625-workos-feature-flag-enable-deepen-2",
+    "created_at": "2026-06-25",
+    "source": "deepen",
+    "package": "@workos-inc/node",
+    "type": "new_pattern",
+    "status": "pending",
+    "description": "Add detection for featureFlags.enableFeatureFlag() called without try-catch. Method throws NotFoundException (404) when flagId is invalid/deleted; without handling the flag stays in prior state with no audit trail. Postcondition: feature-flag-enable-no-error-handling.",
+    "evidence": "factory-DwW2quUn.cjs @throws JSDoc; handleHttpError canonical mapping",
+    "resolution": null
+  },
+  "3425": {
+    "id": "concern-20260625-workos-feature-flag-disable-deepen-2",
+    "created_at": "2026-06-25",
+    "source": "deepen",
+    "package": "@workos-inc/node",
+    "type": "new_pattern",
+    "status": "pending",
+    "description": "Add detection for featureFlags.disableFeatureFlag() called without try-catch. Method throws NotFoundException (404) when flagId is invalid; without handling the feature flag stays enabled indefinitely. Postcondition: feature-flag-disable-no-error-handling.",
+    "evidence": "factory-DwW2quUn.cjs @throws JSDoc",
+    "resolution": null
+  },
+  "3426": {
+    "id": "concern-20260625-workos-create-client-secret-deepen-2",
+    "created_at": "2026-06-25",
+    "source": "deepen",
+    "package": "@workos-inc/node",
+    "type": "new_pattern",
+    "status": "pending",
+    "description": "Add detection for connect.createApplicationClientSecret() called without try-catch. Method throws NotFoundException (404) or UnprocessableEntityException (422); on 422 the secret is NOT created but caller may proceed as if it was (security gap). Postcondition: connect-create-client-secret-no-error-handling.",
+    "evidence": "factory-DwW2quUn.cjs @throws JSDoc",
+    "resolution": null
+  },
+  "3427": {
+    "id": "concern-20260625-workos-delete-client-secret-deepen-2",
+    "created_at": "2026-06-25",
+    "source": "deepen",
+    "package": "@workos-inc/node",
+    "type": "new_pattern",
+    "status": "pending",
+    "description": "Add detection for connect.deleteClientSecret() called without try-catch. Method throws NotFoundException (404) when the secret is already deleted; rotation flows must handle idempotently. Postcondition: connect-delete-client-secret-no-error-handling.",
+    "evidence": "factory-DwW2quUn.cjs @throws JSDoc",
+    "resolution": null
+  },
+  "3428": {
+    "id": "concern-20260625-workos-delete-factor-deepen-2",
+    "created_at": "2026-06-25",
+    "source": "deepen",
+    "package": "@workos-inc/node",
+    "type": "new_pattern",
+    "status": "pending",
+    "description": "Add detection for mfa.deleteFactor() called without try-catch. Method throws NotFoundException (404) when factor already removed; MFA unenrollment flows crash on double-delete without handling. Postcondition: delete-factor-no-error-handling.",
+    "evidence": "factory-DwW2quUn.cjs @throws JSDoc",
+    "resolution": null
+  },
+  "3429": {
+    "id": "concern-20260625-workos-remove-role-assignment-deepen-2",
+    "created_at": "2026-06-25",
+    "source": "deepen",
+    "package": "@workos-inc/node",
+    "type": "new_pattern",
+    "status": "pending",
+    "description": "Add detection for fga.removeRoleAssignment() called without try-catch. Method throws 403 (caller lacks permission to revoke) and NotFoundException (404); on 403, the role revocation silently fails leaving the user with privileges they should have lost — a privilege-escalation risk. Postcondition: authorization-remove-role-assignment-no-error-handling.",
+    "evidence": "factory-DwW2quUn.cjs @throws JSDoc (403, NotFoundException)",
+    "resolution": null
+  },
+  "3430": {
+    "id": "concern-20260625-workos-radar-add-entry-deepen-2",
+    "created_at": "2026-06-25",
+    "source": "deepen",
+    "package": "@workos-inc/node",
+    "type": "new_pattern",
+    "status": "pending",
+    "description": "Add detection for radar.addListEntry() called without try-catch. Method throws BadRequestException (400) on invalid value format; without handling the blocklist entry is never created, creating a silent enforcement gap. Postcondition: radar-add-list-entry-no-error-handling.",
+    "evidence": "factory-DwW2quUn.cjs @throws JSDoc",
+    "resolution": null
+  },
+  "3431": {
+    "id": "concern-20260625-workos-radar-remove-entry-deepen-2",
+    "created_at": "2026-06-25",
+    "source": "deepen",
+    "package": "@workos-inc/node",
+    "type": "new_pattern",
+    "status": "pending",
+    "description": "Add detection for radar.removeListEntry() called without try-catch. Method throws BadRequestException (400) and NotFoundException (404); without handling, caller cannot distinguish idempotent removal from input bug. Postcondition: radar-remove-list-entry-no-error-handling.",
+    "evidence": "factory-DwW2quUn.cjs @throws JSDoc",
+    "resolution": null
+  },
+  "3432": {
+    "id": "concern-20260625-workos-vault-read-by-name-deepen-2",
+    "created_at": "2026-06-25",
+    "source": "deepen",
+    "package": "@workos-inc/node",
+    "type": "new_pattern",
+    "status": "pending",
+    "description": "Add detection for vault.readObjectByName() called without try-catch. Method calls handleHttpError() path; NotFoundException (404) when secret is deleted causes null-dereference downstream when result is used as a credential. Postcondition: vault-read-object-by-name-no-error-handling.",
+    "evidence": "factory-DwW2quUn.cjs handleHttpError() path analysis",
     "resolution": null
   }
 }
