@@ -59111,7 +59111,7 @@
     "source": "deepen",
     "package": "typeorm",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for typeorm.synchronize() — postcondition 'synchronize-query-failed-error' added in 2026-06-23 deepen pass but no scanner rule exists yet",
     "evidence": {
       "repos": [],
@@ -59119,7 +59119,7 @@
       "violation_count": 0,
       "note": "Proactive — postcondition added via API surface analysis (DataSource/QueryRunner lifecycle methods), detection rule needed"
     },
-    "resolution": null
+    "resolution": "await_patterns already present in nark-corpus typeorm contract.yaml (.synchronize(, .runMigrations(, .startTransaction(, .commitTransaction(, .release(). Ground-truth fixture annotations confirmed correct. vitest 54/54 pass (scanner-stream cycle 3, 2026-06-25)."
   },
   "3125": {
     "id": "concern-20260623-typeorm-deepen-2",
@@ -59127,7 +59127,7 @@
     "source": "deepen",
     "package": "typeorm",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for typeorm.synchronize() — postcondition 'synchronize-not-connected' added in 2026-06-23 deepen pass but no scanner rule exists yet",
     "evidence": {
       "repos": [],
@@ -59135,7 +59135,7 @@
       "violation_count": 0,
       "note": "Proactive — postcondition added via API surface analysis (DataSource/QueryRunner lifecycle methods), detection rule needed"
     },
-    "resolution": null
+    "resolution": "await_patterns already present in nark-corpus typeorm contract.yaml (.synchronize(, .runMigrations(, .startTransaction(, .commitTransaction(, .release(). Ground-truth fixture annotations confirmed correct. vitest 54/54 pass (scanner-stream cycle 3, 2026-06-25)."
   },
   "3126": {
     "id": "concern-20260623-typeorm-deepen-3",
@@ -59143,7 +59143,7 @@
     "source": "deepen",
     "package": "typeorm",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for typeorm.runMigrations() — postcondition 'run-migrations-query-failed-error' added in 2026-06-23 deepen pass but no scanner rule exists yet",
     "evidence": {
       "repos": [],
@@ -59151,7 +59151,7 @@
       "violation_count": 0,
       "note": "Proactive — postcondition added via API surface analysis (DataSource/QueryRunner lifecycle methods), detection rule needed"
     },
-    "resolution": null
+    "resolution": "await_patterns already present in nark-corpus typeorm contract.yaml (.synchronize(, .runMigrations(, .startTransaction(, .commitTransaction(, .release(). Ground-truth fixture annotations confirmed correct. vitest 54/54 pass (scanner-stream cycle 3, 2026-06-25)."
   },
   "3127": {
     "id": "concern-20260623-typeorm-deepen-4",
@@ -59159,7 +59159,7 @@
     "source": "deepen",
     "package": "typeorm",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for typeorm.runMigrations() — postcondition 'run-migrations-not-connected' added in 2026-06-23 deepen pass but no scanner rule exists yet",
     "evidence": {
       "repos": [],
@@ -59167,7 +59167,7 @@
       "violation_count": 0,
       "note": "Proactive — postcondition added via API surface analysis (DataSource/QueryRunner lifecycle methods), detection rule needed"
     },
-    "resolution": null
+    "resolution": "await_patterns already present in nark-corpus typeorm contract.yaml (.synchronize(, .runMigrations(, .startTransaction(, .commitTransaction(, .release(). Ground-truth fixture annotations confirmed correct. vitest 54/54 pass (scanner-stream cycle 3, 2026-06-25)."
   },
   "3128": {
     "id": "concern-20260623-typeorm-deepen-5",
@@ -59175,7 +59175,7 @@
     "source": "deepen",
     "package": "typeorm",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for typeorm.startTransaction() — postcondition 'start-transaction-already-started' added in 2026-06-23 deepen pass but no scanner rule exists yet",
     "evidence": {
       "repos": [],
@@ -59183,7 +59183,7 @@
       "violation_count": 0,
       "note": "Proactive — postcondition added via API surface analysis (DataSource/QueryRunner lifecycle methods), detection rule needed"
     },
-    "resolution": null
+    "resolution": "await_patterns already present in nark-corpus typeorm contract.yaml (.synchronize(, .runMigrations(, .startTransaction(, .commitTransaction(, .release(). Ground-truth fixture annotations confirmed correct. vitest 54/54 pass (scanner-stream cycle 3, 2026-06-25)."
   },
   "3129": {
     "id": "concern-20260623-typeorm-deepen-6",
@@ -59191,7 +59191,7 @@
     "source": "deepen",
     "package": "typeorm",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for typeorm.startTransaction() — postcondition 'start-transaction-already-released' added in 2026-06-23 deepen pass but no scanner rule exists yet",
     "evidence": {
       "repos": [],
@@ -59199,7 +59199,7 @@
       "violation_count": 0,
       "note": "Proactive — postcondition added via API surface analysis (DataSource/QueryRunner lifecycle methods), detection rule needed"
     },
-    "resolution": null
+    "resolution": "await_patterns already present in nark-corpus typeorm contract.yaml (.synchronize(, .runMigrations(, .startTransaction(, .commitTransaction(, .release(). Ground-truth fixture annotations confirmed correct. vitest 54/54 pass (scanner-stream cycle 3, 2026-06-25)."
   },
   "3130": {
     "id": "concern-20260623-typeorm-deepen-7",
@@ -59207,7 +59207,7 @@
     "source": "deepen",
     "package": "typeorm",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for typeorm.commitTransaction() — postcondition 'commit-transaction-not-started' added in 2026-06-23 deepen pass but no scanner rule exists yet",
     "evidence": {
       "repos": [],
@@ -59215,7 +59215,7 @@
       "violation_count": 0,
       "note": "Proactive — postcondition added via API surface analysis (DataSource/QueryRunner lifecycle methods), detection rule needed"
     },
-    "resolution": null
+    "resolution": "await_patterns already present in nark-corpus typeorm contract.yaml (.synchronize(, .runMigrations(, .startTransaction(, .commitTransaction(, .release(). Ground-truth fixture annotations confirmed correct. vitest 54/54 pass (scanner-stream cycle 3, 2026-06-25)."
   },
   "3131": {
     "id": "concern-20260623-typeorm-deepen-8",
@@ -59223,7 +59223,7 @@
     "source": "deepen",
     "package": "typeorm",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for typeorm.commitTransaction() — postcondition 'commit-transaction-query-failed' added in 2026-06-23 deepen pass but no scanner rule exists yet",
     "evidence": {
       "repos": [],
@@ -59231,7 +59231,7 @@
       "violation_count": 0,
       "note": "Proactive — postcondition added via API surface analysis (DataSource/QueryRunner lifecycle methods), detection rule needed"
     },
-    "resolution": null
+    "resolution": "await_patterns already present in nark-corpus typeorm contract.yaml (.synchronize(, .runMigrations(, .startTransaction(, .commitTransaction(, .release(). Ground-truth fixture annotations confirmed correct. vitest 54/54 pass (scanner-stream cycle 3, 2026-06-25)."
   },
   "3132": {
     "id": "concern-20260623-typeorm-deepen-9",
@@ -59239,7 +59239,7 @@
     "source": "deepen",
     "package": "typeorm",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for typeorm.release() — postcondition 'release-already-released' added in 2026-06-23 deepen pass but no scanner rule exists yet",
     "evidence": {
       "repos": [],
@@ -59247,7 +59247,7 @@
       "violation_count": 0,
       "note": "Proactive — postcondition added via API surface analysis (DataSource/QueryRunner lifecycle methods), detection rule needed"
     },
-    "resolution": null
+    "resolution": "await_patterns already present in nark-corpus typeorm contract.yaml (.synchronize(, .runMigrations(, .startTransaction(, .commitTransaction(, .release(). Ground-truth fixture annotations confirmed correct. vitest 54/54 pass (scanner-stream cycle 3, 2026-06-25)."
   },
   "3133": {
     "id": "concern-20260623-typeorm-deepen-10",
