@@ -83,6 +83,79 @@ export const MATCHER_IDS = {
   // guard). Gated to @clerk/nextjs.
   FRAMEWORK_CLERK_MIDDLEWARE_CONFIGURED: "framework:clerk-middleware-configured",
 
+  // ─────────────────────────────────────────────────────────────────────
+  // Wave 2f (Plan 01-08) — long-tail suppression family.
+  //
+  // The matchDetections() loop has ~60 untagged short-circuit `continue;`
+  // sites that don't fit any of the prior family-specific matchers
+  // (Waves 2a-2e). They cover patterns like "factory function — never
+  // throws", "return-delegate to caller", "retry-wrapper around the call
+  // site", "callback wrapper shell", "file-context architectural fit"
+  // (singleton bootstrap files, service-role files, script files,
+  // migration files, Next.js component files), etc.
+  //
+  // Rather than introduce a separate package-specific matcher for each
+  // (which would balloon the registry and confuse the convention miner —
+  // these are NOT minable conventions, they're scanner-engineering
+  // suppressions), Wave 2f collects them under a single SUPPRESSION_*
+  // family with descriptive specifiers. The wire string carries the
+  // reason; the matcher family signals "this is a Wave-2f long-tail
+  // suppression, not a convention candidate."
+  //
+  // POSTCONDITION_GATING: each SUPPRESSION_* matcher is package-agnostic
+  // by default (no gate → returns true) because the same shape recurs
+  // across many packages. Per-callsite trace.record() supplies the
+  // concrete reason string.
+  //
+  // PASSING_SITE_PACKAGES: SUPPRESSION_* matchers do NOT participate in
+  // passing-site capture by default — they describe scanner-engineering
+  // gates, not minable code-style conventions. The miner reads
+  // _lastPassedDetections only for matchers Plans 01-04..01-07 wired
+  // explicitly. (Exception: if a future audit reveals a SUPPRESSION_*
+  // family that IS minable, that single family can be added to
+  // PASSING_SITE_PACKAGES with its specific package set.)
+
+  // Factory / never-throws shapes — the call itself never produces an
+  // error to handle (factory functions, sync wrappers, constructors that
+  // build a client without network I/O, dayjs() with no args, etc.).
+  SUPPRESSION_FACTORY_FUNCTION: "suppression:factory-function",
+  SUPPRESSION_NEVER_THROWS: "suppression:never-throws",
+
+  // Caller-handles-the-error shapes — error is delegated to a higher
+  // layer (return-delegate, callback-wrapper shell, retry wrapper, project
+  // architectural pattern that owns the catch elsewhere).
+  SUPPRESSION_RETURN_DELEGATE: "suppression:return-delegate",
+  SUPPRESSION_RETRY_WRAPPER: "suppression:retry-wrapper",
+  SUPPRESSION_CALLBACK_WRAPPER_SHELL: "suppression:callback-wrapper-shell",
+  SUPPRESSION_PROJECT_ARCHITECTURE: "suppression:project-architecture",
+
+  // Inside-error-handling-context shapes — call site is already inside a
+  // catch block, Promise.allSettled, observable error operator, etc.
+  SUPPRESSION_INSIDE_CATCH: "suppression:inside-catch",
+  SUPPRESSION_PROMISE_ABSORBED: "suppression:promise-absorbed",
+  SUPPRESSION_OBSERVABLE_HANDLED: "suppression:observable-handled",
+
+  // Caller-explicitly-guards shapes — callback err parameter is
+  // explicitly checked, result is null-guarded, option is set to a value
+  // that disables the throw, etc.
+  SUPPRESSION_CALLBACK_ERR_CHECKED: "suppression:callback-err-checked",
+  SUPPRESSION_NULL_GUARDED: "suppression:null-guarded",
+  SUPPRESSION_OPTION_SUPPRESSES: "suppression:option-suppresses",
+
+  // File-context shapes — the file's role in the project (singleton
+  // bootstrap module, script, migration, service-role admin, auth
+  // context, Next.js framework boundary, etc.) makes the postcondition
+  // not-applicable at this callsite.
+  SUPPRESSION_FILE_SCOPE: "suppression:file-scope",
+  SUPPRESSION_FRAMEWORK_BOUNDARY: "suppression:framework-boundary",
+
+  // Import / typed-routing shapes — the postcondition is statically
+  // impossible (typed routing prevents invalid paths at compile time, or
+  // the package isn't actually imported in this file and the detection
+  // is a name-collision FP).
+  SUPPRESSION_PACKAGE_NOT_IMPORTED: "suppression:package-not-imported",
+  SUPPRESSION_TYPED_ROUTING: "suppression:typed-routing",
+
   // Family: architectural — project-level architectural patterns that route
   // per-callsite errors to a central handler. Wave 2c (Plan 01-05) adds the
   // data-layer pattern for knex Model-files and typeorm Repository-files when
@@ -213,7 +286,8 @@ type GatePredicate = (ctx: ApplicabilityContext) => boolean;
 
 const POSTCONDITION_GATING: Record<string, GatePredicate> = {
   // Framework matchers — gated by package AND (where useful) by postcondition
-  // substring. Plan 01-08 adds its family below.
+  // substring. Plan 01-08 adds its SUPPRESSION_* family below (intentionally
+  // ungated — see explanatory block at the bottom of this table).
   [MATCHER_IDS.FRAMEWORK_EXPRESS_ASYNC_ERRORS]: (c) =>
     c.packageName === "express" &&
     (c.postconditionId.includes("async-middleware") ||
@@ -323,6 +397,31 @@ const POSTCONDITION_GATING: Record<string, GatePredicate> = {
   // middleware.ts + clerkMiddleware default export (file-system probe).
   [MATCHER_IDS.FRAMEWORK_CLERK_MIDDLEWARE_CONFIGURED]: (c) =>
     c.packageName === "@clerk/nextjs",
+
+  // Wave 2f (Plan 01-08) — long-tail SUPPRESSION_* family.
+  //
+  // These matchers are INTENTIONALLY UNGATED (omitted from this table →
+  // applicabilityPredicate returns true). The reasoning:
+  //   - Each SUPPRESSION_* matcher describes a scanner-engineering gate,
+  //     not a package-specific code-style convention. The gate fires
+  //     whenever the corresponding shape is present in the code,
+  //     regardless of package — e.g. "this call is the operand of a
+  //     `return` statement" applies the same to @supabase/supabase-js as
+  //     it would to any future package whose suppression branch records
+  //     SUPPRESSION_RETURN_DELEGATE.
+  //   - Per-callsite trace.record() supplies the concrete reason string
+  //     via the third argument, which is what a trace reader needs.
+  //   - The `not_applicable` surface for a SUPPRESSION_* matcher would
+  //     be confusing: "the suppression didn't apply" is the default state
+  //     for every callsite, so emitting it explicitly for every violation
+  //     adds noise without signal. By leaving these matchers ungated
+  //     (default true), they only appear in the trace when they were
+  //     explicitly recorded — which is exactly the right surface.
+  //
+  // If a future audit reveals a SUPPRESSION_* family that needs gating
+  // (e.g. a postcondition that genuinely doesn't apply to a specific
+  // package), add the entry here following the FRAMEWORK_* / FINALLY_*
+  // template above.
 };
 
 export function applicabilityPredicate(

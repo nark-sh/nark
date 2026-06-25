@@ -348,6 +348,33 @@ export class ContractMatcher {
     // getLastPassedDetections().
     this._lastPassedDetections = [];
 
+    // WAVE-2F (Plan 01-08) — INTENTIONALLY UNREWIRED loop-control plumbing.
+    //
+    // The next ~9 `continue;` statements below (up to and including the
+    // postconditions-empty / return-value-pattern gates around line ~540) are
+    // pre-trace loop-control plumbing. They cannot be rewired with
+    // `trace.record(...)` because the DetectionTraceAccumulator (`trace`) is
+    // instantiated AFTER the postcondition selection at line ~570 — neither
+    // `packageName + postconditionId` context nor the accumulator itself
+    // exists yet.
+    //
+    // These continues handle:
+    //   1. missing-event-listener pattern routing (handled by separate plugin)
+    //   2. event-listener presence skip (handled by absence plugin)
+    //   3. decorator call skip (@Controller, @Injectable — not real call sites)
+    //   4. no matching contract for this package
+    //   5. require_await_detection: skip non-awaited calls
+    //   6. NextResponse.redirect() name-collision skip (NOT next/navigation)
+    //   7. no matching function contract (after default-import fallback)
+    //   8. zero throwing postconditions for this contract function
+    //   9. return-value-pattern skip (covered by throwing-function/property-chain)
+    //
+    // Each represents a "this detection should not produce a violation"
+    // signal that pre-dates postcondition selection. Wave 9 (convention
+    // mining) cannot consume these signals anyway — there is no violation
+    // and no postcondition to attach a convention to. Documented here so
+    // the grep audit (`continue;` count vs `trace.record` count) doesn't
+    // mistake these for missing rewires.
     for (const detection of detections) {
       // Handle missing-event-listener absence detection
       if (detection.pattern === "missing-event-listener") {
@@ -665,6 +692,14 @@ export class ContractMatcher {
               p.name.text === "assert",
           );
           if (assertProp && assertProp.initializer.kind === ts.SyntaxKind.FalseKeyword) {
+            // WAVE-2F: yup cast({ assert: false }) returns null/undefined
+            // instead of throwing — option explicitly disables the throw,
+            // record SUPPRESSION_OPTION_SUPPRESSES as passed.
+            trace.record(
+              MATCHER_IDS.SUPPRESSION_OPTION_SUPPRESSES,
+              "passed",
+              "yup cast({ assert: false }) — option disables throw",
+            );
             continue;
           }
         }
@@ -806,15 +841,20 @@ export class ContractMatcher {
       // processes a request, not when the factory is called. Suppress all postconditions
       // on express.json() and express.urlencoded() calls — they never throw at call time.
       // Evidence: concern-20260404-express-deepen-4 (ground-truth line 50, 112).
-      // WAVE-2B: factory-skip suppression — no framework matcher applies (this is a
-      // "not a real call site" gate, not an error-handling guard). Trace stays
-      // unused; serialize() is never called because we continue.
+      // WAVE-2B: original suppression with no framework matcher attribution.
+      // WAVE-2F: record SUPPRESSION_FACTORY_FUNCTION so the trace surface
+      // shows the explicit reason ("factory function — never throws at call site").
       if (
         detection.packageName === "express" &&
         (detection.functionName === "json" ||
           detection.functionName === "urlencoded" ||
           detection.functionName === "static")
       ) {
+        trace.record(
+          MATCHER_IDS.SUPPRESSION_FACTORY_FUNCTION,
+          "passed",
+          `express.${detection.functionName}() — middleware factory, never throws at call time`,
+        );
         continue;
       }
 
@@ -822,12 +862,11 @@ export class ContractMatcher {
       // registers a server.on('error') event listener. The .on('error') handler is the
       // idiomatic Node.js pattern for handling listen errors on net.Server.
       // Evidence: concern-20260404-express-deepen-5 (ground-truth line 185).
-      // WAVE-2B: file-level .on('error') is the framework-pattern matcher for listen
-      // postconditions. FRAMEWORK_EXPRESS_ASYNC_ERRORS is gated by async-* postcondition
-      // substrings (per applicabilityPredicate POSTCONDITION_GATING) and would not apply
-      // to listen-eaddrinuse / listen-eacces, so recording it here would be incorrect.
-      // Trace stays unused; the listen postcondition is suppressed without framework
-      // matcher attribution.
+      // WAVE-2B: original suppression — FRAMEWORK_EXPRESS_ASYNC_ERRORS is gated to
+      // async-* postcondition substrings (per POSTCONDITION_GATING) and would NOT
+      // apply to listen-eaddrinuse / listen-eacces, so recording it here would lie.
+      // WAVE-2F: record SUPPRESSION_PROJECT_ARCHITECTURE — the project owns the
+      // error via a file-level server.on('error') listener.
       if (
         detection.packageName === "express" &&
         detection.functionName === "listen" &&
@@ -839,6 +878,11 @@ export class ContractMatcher {
           fileText.includes(".on('error'") ||
           fileText.includes('.on("error"')
         ) {
+          trace.record(
+            MATCHER_IDS.SUPPRESSION_PROJECT_ARCHITECTURE,
+            "passed",
+            "file-level server.on('error') listener handles listen errors",
+          );
           continue;
         }
       }
@@ -1189,7 +1233,16 @@ export class ContractMatcher {
             break;
           cur = cur.parent;
         }
-        if (inCatchBlock) continue;
+        if (inCatchBlock) {
+          // WAVE-2F: simple-git call inside a catch{} block — fallback/retry
+          // operation, the enclosing error is already being handled.
+          trace.record(
+            MATCHER_IDS.SUPPRESSION_INSIDE_CATCH,
+            "passed",
+            "simple-git call is inside an enclosing catch block — fallback path",
+          );
+          continue;
+        }
       }
 
       // dotenv config(): in normal (non-vault) mode, config() NEVER throws — it returns
@@ -1205,7 +1258,14 @@ export class ContractMatcher {
           primaryPostcondition.id === "missing-env-file" ||
           primaryPostcondition.id === "parse-error"
         ) {
-          continue; // config() returns { error }, doesn't throw
+          // WAVE-2F: dotenv.config() returns { error } on failure in non-vault
+          // mode — never throws, so try-catch is irrelevant.
+          trace.record(
+            MATCHER_IDS.SUPPRESSION_NEVER_THROWS,
+            "passed",
+            "dotenv.config() returns { error } on failure — does not throw",
+          );
+          continue;
         }
         // Vault postconditions only apply when the file uses vault mode.
         // Detect actual vault USAGE (setting/reading DOTENV_KEY, referencing .env.vault),
@@ -1218,7 +1278,14 @@ export class ContractMatcher {
             /\.env\.vault\b/.test(fileText) ||
             /['"]\.env\.vault['"]/.test(fileText);
           if (!hasVaultUsage) {
-            continue; // Non-vault file — vault postconditions don't apply
+            // WAVE-2F: file does not use vault mode — vault-* postcondition
+            // does not apply at this callsite.
+            trace.record(
+              MATCHER_IDS.SUPPRESSION_FILE_SCOPE,
+              "passed",
+              "file does not use dotenv vault mode — vault-* postcondition not applicable",
+            );
+            continue;
           }
         }
       }
@@ -1252,7 +1319,16 @@ export class ContractMatcher {
           }
           cur = cur.parent;
         }
-        if (inAllSettled) continue;
+        if (inAllSettled) {
+          // WAVE-2F: Promise.allSettled() absorbs all rejections from contained
+          // promises — equivalent to a try-catch boundary at the array level.
+          trace.record(
+            MATCHER_IDS.SUPPRESSION_PROMISE_ABSORBED,
+            "passed",
+            "call is an element of Promise.allSettled([...]) — rejections absorbed",
+          );
+          continue;
+        }
 
         // @vercel/blob: suppress blob-del-no-try-catch in server-side request handler files.
         // Handler files in lib/sandbox/, api/, or similar server-side directories are invoked
@@ -1265,7 +1341,14 @@ export class ContractMatcher {
           (/[/\\](sandbox|handlers?|routes?|controllers?)[/\\]/i.test(sourceFile.fileName) ||
             /Handler\.(ts|tsx)$/.test(sourceFile.fileName))
         ) {
-          continue; // Server-side handler file — framework error boundary handles uncaught errors
+          // WAVE-2F: server-side handler file — framework error boundary
+          // turns uncaught errors into 500 responses.
+          trace.record(
+            MATCHER_IDS.SUPPRESSION_FRAMEWORK_BOUNDARY,
+            "passed",
+            "server-side handler file — framework error boundary handles uncaught errors",
+          );
+          continue;
         }
       }
 
@@ -1281,6 +1364,14 @@ export class ContractMatcher {
         (primaryPostcondition.id === "tool-execution-error" ||
           primaryPostcondition.id === "tool-schema-validation-error")
       ) {
+        // WAVE-2F: ai.tool() is a factory that creates a tool definition;
+        // the execute callback is invoked by the SDK's own pipeline which
+        // wraps it in its own error boundary.
+        trace.record(
+          MATCHER_IDS.SUPPRESSION_FACTORY_FUNCTION,
+          "passed",
+          "ai.tool() factory — execute callback runs inside SDK error boundary",
+        );
         continue;
       }
 
@@ -1296,7 +1387,14 @@ export class ContractMatcher {
         primaryPostcondition.id === "tool-execution-error" &&
         /[/\\]tools?[/\\]/i.test(sourceFile.fileName)
       ) {
-        continue; // Tool handler file — SDK runtime manages errors at invocation time
+        // WAVE-2F: tools/ directory file — SDK runtime manages errors at
+        // the tool() invocation site, not at the individual execute function.
+        trace.record(
+          MATCHER_IDS.SUPPRESSION_FILE_SCOPE,
+          "passed",
+          "tools/ directory file — SDK manages errors at invocation",
+        );
+        continue;
       }
 
       // ai (Vercel AI SDK): api-error-rate-limit fires on AI SDK calls inside eval harness
@@ -1317,7 +1415,13 @@ export class ContractMatcher {
           /[/\\]llms?[/\\]/i.test(sourceFile.fileName) ||
           /[/\\]utils?[/\\]llms?/i.test(sourceFile.fileName))
       ) {
-        continue; // Eval/batch/utility pipeline — harness or caller manages rate limits
+        // WAVE-2F: eval/batch/utility file — harness or caller manages rate limits.
+        trace.record(
+          MATCHER_IDS.SUPPRESSION_FILE_SCOPE,
+          "passed",
+          "eval/batch/utility file — harness or caller manages rate limits",
+        );
+        continue;
       }
 
       // @tanstack/react-router: TypeScript-generated route trees enforce path and param
@@ -1345,6 +1449,14 @@ export class ContractMatcher {
           "search-schema-validation-error",
         ]);
         if (tanStackTypedPostconditions.has(primaryPostcondition.id)) {
+          // WAVE-2F: TanStack Router's TypeScript-generated route trees
+          // enforce path/param correctness at compile time — invalid paths
+          // cannot reach runtime in a typed project.
+          trace.record(
+            MATCHER_IDS.SUPPRESSION_TYPED_ROUTING,
+            "passed",
+            "TanStack Router typed routing — compile-time path/param validation",
+          );
           continue;
         }
 
@@ -1361,9 +1473,23 @@ export class ContractMatcher {
         //   vendure rank-24; scanner-upgrades-todo.md line 46).
         if (primaryPostcondition.id === "loader-error-unhandled") {
           if (this.isInsideReactRouterLoaderCallback(detection.node)) {
+            // WAVE-2F: inside createRoute({ loader: ... }) — router config
+            // catches loader exceptions and routes to errorComponent.
+            trace.record(
+              MATCHER_IDS.SUPPRESSION_FRAMEWORK_BOUNDARY,
+              "passed",
+              "inside TanStack Router loader callback — errorComponent handles throws",
+            );
             continue;
           }
           if (this.projectHasReactQueryGlobalErrorHandler()) {
+            // WAVE-2F: project has global React Query error handler that
+            // catches cross-file loader errors.
+            trace.record(
+              MATCHER_IDS.SUPPRESSION_PROJECT_ARCHITECTURE,
+              "passed",
+              "project has global QueryCache(onError) / ErrorBoundary handler",
+            );
             continue;
           }
         }
@@ -1393,6 +1519,14 @@ export class ContractMatcher {
           primaryPostcondition.id === "trpc-query-missing-try-catch")
       ) {
         if (this.isInsideCallbackWrapperShell(detection.node, sourceFile)) {
+          // WAVE-2F: trpc call inside a PromiseCall / PromiseState / safeAsync
+          // callback wrapper shell — try-catch lives in the wrapper class one
+          // stack frame up.
+          trace.record(
+            MATCHER_IDS.SUPPRESSION_CALLBACK_WRAPPER_SHELL,
+            "passed",
+            "trpc call inside imported callback-wrapper shell — wrapper owns try-catch",
+          );
           continue;
         }
       }
@@ -1572,7 +1706,17 @@ export class ContractMatcher {
           }
           cur = cur.parent;
         }
-        if (inRetryWrapper) continue;
+        if (inRetryWrapper) {
+          // WAVE-2F: stripe call inside a retry/backoff wrapper (pRetry,
+          // withRetry, retryWithBackoff, etc.) — wrapper handles error and
+          // retry logic.
+          trace.record(
+            MATCHER_IDS.SUPPRESSION_RETRY_WRAPPER,
+            "passed",
+            "stripe call inside retry/backoff wrapper — wrapper handles errors",
+          );
+          continue;
+        }
       }
 
       // dayjs(): suppress dayjs-invalid-date when the call has zero arguments.
@@ -1588,7 +1732,14 @@ export class ContractMatcher {
         ts.isCallExpression(detection.node) &&
         detection.node.arguments.length === 0
       ) {
-        continue; // dayjs() with no args always returns current time — always valid
+        // WAVE-2F: dayjs() with no args always returns current time — no
+        // user input to validate, so .isValid() is irrelevant.
+        trace.record(
+          MATCHER_IDS.SUPPRESSION_NEVER_THROWS,
+          "passed",
+          "dayjs() with zero args — always returns current time, never invalid",
+        );
+        continue;
       }
 
       // dayjs: toISOString() genuinely throws on invalid dates, but in practice it's
@@ -1600,6 +1751,13 @@ export class ContractMatcher {
         detection.packageName === "dayjs" &&
         primaryPostcondition.id === "toisostring-invalid-date-throws"
       ) {
+        // WAVE-2F: toISOString() invalid-date throws cannot be statically
+        // determined; near-100% FP rate when fired.
+        trace.record(
+          MATCHER_IDS.SUPPRESSION_NEVER_THROWS,
+          "passed",
+          "dayjs toISOString() — invalid-date status not statically determinable",
+        );
         continue;
       }
 
@@ -1749,7 +1907,16 @@ export class ContractMatcher {
           }
           cur = cur.parent;
         }
-        if (inRetryWrapper) continue;
+        if (inRetryWrapper) {
+          // WAVE-2F: ai call inside a retry/backoff wrapper — wrapper handles
+          // rate limits and retry logic.
+          trace.record(
+            MATCHER_IDS.SUPPRESSION_RETRY_WRAPPER,
+            "passed",
+            "ai call inside retry/backoff wrapper — wrapper handles rate limits",
+          );
+          continue;
+        }
       }
 
       // ai (Vercel AI SDK): tool-execution-error fires on ai.tool() calls even though
@@ -1764,6 +1931,13 @@ export class ContractMatcher {
         detection.functionName === "tool" &&
         primaryPostcondition.id === "tool-execution-error"
       ) {
+        // WAVE-2F: ai.tool() factory does not throw — execute callback runs
+        // at generateText() time, not at definition time.
+        trace.record(
+          MATCHER_IDS.SUPPRESSION_FACTORY_FUNCTION,
+          "passed",
+          "ai.tool() factory — execute callback runs at generateText() time",
+        );
         continue;
       }
 
@@ -1826,7 +2000,16 @@ export class ContractMatcher {
               ts.forEachChild(n, walkForErrCheck);
             };
             if (func.body) walkForErrCheck(func.body);
-            if (errIsChecked) continue;
+            if (errIsChecked) {
+              // WAVE-2F: xml2js parseString callback explicitly checks the
+              // err parameter — callback-style error handling satisfied.
+              trace.record(
+                MATCHER_IDS.SUPPRESSION_CALLBACK_ERR_CHECKED,
+                "passed",
+                "parseString callback explicitly checks err parameter",
+              );
+              continue;
+            }
           }
         }
       }
@@ -1855,6 +2038,12 @@ export class ContractMatcher {
           if (this.controlFlow.isResultExplicitlyNullGuarded(detection.node)) {
             // Result has an explicit null guard (if (result == null)): suppress violation entirely.
             // The caller is correctly handling the empty-input case.
+            // WAVE-2F: explicit null guard satisfies parse-promise-null-return.
+            trace.record(
+              MATCHER_IDS.SUPPRESSION_NULL_GUARDED,
+              "passed",
+              "parseStringPromise result explicitly null-checked",
+            );
             continue;
           }
           // If the result is null-guarded (no non-optional property access), fall through to
@@ -1862,6 +2051,14 @@ export class ContractMatcher {
           if (!this.controlFlow.isResultNullGuarded(detection.node)) {
             // Not null-guarded: result accessed without null check → fire parse-promise-null-return
             // (skip standard try-catch analysis for this detection)
+            // WAVE-2F: record SUPPRESSION_NULL_GUARDED as failed so the
+            // violation trace shows the matcher WAS considered (the result
+            // was not null-guarded — that's the reason this violation fires).
+            trace.record(
+              MATCHER_IDS.SUPPRESSION_NULL_GUARDED,
+              "failed",
+              "parseStringPromise result accessed without null check",
+            );
             const { line, column } = this.getLocation(detection.node, sourceFile);
             const { json: codeContext, startLine: codeContextStartLine } =
               this.buildCodeContext(sourceFile, line - 1);
@@ -1900,6 +2097,10 @@ export class ContractMatcher {
                 fingerprint,
                 callExpression: detection.functionName,
                 business_impact: nullPostcondition.business_impact,
+                // WAVE-2F: violation pushed at custom firing path also carries
+                // the per-callsite detectionTrace (matches the canonical
+                // violation construction at line ~3656).
+                detectionTrace: trace.serialize(),
               });
             }
             continue;
@@ -1934,7 +2135,14 @@ export class ContractMatcher {
             }
           }
           if (!hasRedirectFalse) {
-            continue; // Default signIn() is a browser redirect — no error to catch
+            // WAVE-2F: default next-auth signIn() navigates the browser —
+            // no async error to catch unless { redirect: false }.
+            trace.record(
+              MATCHER_IDS.SUPPRESSION_NEVER_THROWS,
+              "passed",
+              "next-auth signIn() default — browser redirect, no error to catch",
+            );
+            continue;
           }
         }
       }
@@ -1970,7 +2178,16 @@ export class ContractMatcher {
           }
           cur = cur.parent;
         }
-        if (isReturnDelegate) continue;
+        if (isReturnDelegate) {
+          // WAVE-2F: supabase auth call directly returned to caller —
+          // error handling delegated.
+          trace.record(
+            MATCHER_IDS.SUPPRESSION_RETURN_DELEGATE,
+            "passed",
+            "supabase auth call directly returned to caller — caller handles { error }",
+          );
+          continue;
+        }
       }
 
       // redux-persist persistor.flush() / .purge() and top-level getStoredState() /
@@ -1981,6 +2198,13 @@ export class ContractMatcher {
       if (detection.packageName === "redux-persist") {
         const callParent = detection.node.parent;
         if (callParent && ts.isReturnStatement(callParent)) {
+          // WAVE-2F: bare `return persistor.flush()` delegates rejection
+          // handling to the caller — listed as valid handling in the contract.
+          trace.record(
+            MATCHER_IDS.SUPPRESSION_RETURN_DELEGATE,
+            "passed",
+            "redux-persist call is bare-returned — caller handles rejection",
+          );
           continue;
         }
       }
@@ -2041,10 +2265,24 @@ export class ContractMatcher {
         };
         checkForVerify(scopeToCheck);
         if (hasVerifyCall) {
+          // WAVE-2F: jwt.decode() inside an enclosing scope that also calls
+          // jwt.verify() — verify() handles the cryptographic check.
+          trace.record(
+            MATCHER_IDS.SUPPRESSION_PROJECT_ARCHITECTURE,
+            "passed",
+            "jwt.decode() paired with jwt.verify() in enclosing scope",
+          );
           continue;
         }
         // Fire violation — no verify() in file, decode() is being used for auth decisions
         // Fall through to violation generation (skip try-catch analysis — decode() never throws)
+        // WAVE-2F: record SUPPRESSION_PROJECT_ARCHITECTURE as failed so the
+        // violation trace surfaces the missing verify() pairing.
+        trace.record(
+          MATCHER_IDS.SUPPRESSION_PROJECT_ARCHITECTURE,
+          "failed",
+          "jwt.decode() has no paired jwt.verify() in enclosing scope",
+        );
         const { line, column } = this.getLocation(detection.node, sourceFile);
         const { json: codeContext, startLine: codeContextStartLine } =
           this.buildCodeContext(sourceFile, line - 1);
@@ -2083,6 +2321,9 @@ export class ContractMatcher {
             fingerprint,
             callExpression: detection.functionName,
             business_impact: primaryPostcondition.business_impact,
+            // WAVE-2F: custom-firing path also serializes the trace so the
+            // violation surface stays consistent with the canonical path.
+            detectionTrace: trace.serialize(),
           });
         }
         continue;
@@ -2105,7 +2346,14 @@ export class ContractMatcher {
               stmt.moduleSpecifier.text.startsWith("got/")),
         );
         if (!hasGotImport) {
-          continue; // got is not imported in this file — .extend() is from another package (e.g., Zod)
+          // WAVE-2F: got is not imported in this file — .extend() is a
+          // name-collision with Zod or another package; not a real got call.
+          trace.record(
+            MATCHER_IDS.SUPPRESSION_PACKAGE_NOT_IMPORTED,
+            "passed",
+            "got package not imported in this file — detection is a name-collision",
+          );
+          continue;
         }
       }
 
@@ -2128,6 +2376,13 @@ export class ContractMatcher {
         );
         if (monitorSlugPc && detection.node.arguments.length < 3) {
           // Arg count < 3 — upsertMonitorConfig missing: fire monitor-slug-not-configured
+          // WAVE-2F: record the missing upsertMonitorConfig argument as a
+          // failed check so the violation trace carries meaningful signal.
+          trace.record(
+            MATCHER_IDS.SUPPRESSION_OPTION_SUPPRESSES,
+            "failed",
+            "withMonitor() missing 3rd argument (upsertMonitorConfig) — slug auto-creation disabled",
+          );
           const { line: mLine, column: mCol } = this.getLocation(
             detection.node,
             sourceFile,
@@ -2173,6 +2428,13 @@ export class ContractMatcher {
             fingerprint: mFingerprint,
             callExpression: detection.functionName,
             business_impact: monitorSlugPc.business_impact,
+            // WAVE-2F: serialize the trace snapshot at slug-violation push
+            // time so the surfaced violation carries detectionTrace. The
+            // canonical OR-chain at the end of the loop body will continue
+            // recording matchers for the monitor-callback-rethrows violation
+            // (if it also fires) — those records appear in a separate
+            // violation's serialized trace.
+            detectionTrace: trace.serialize(),
           });
         }
         // Fall through to standard try-catch check for monitor-callback-rethrows
@@ -2405,7 +2667,13 @@ export class ContractMatcher {
                 return false;
               });
               if (hasCatchError) {
-                continue; // Observable handled via .pipe(catchError(...)) — postcondition satisfied
+                // WAVE-2F: nestjs/axios Observable handled via .pipe(catchError(...)).
+                trace.record(
+                  MATCHER_IDS.SUPPRESSION_OBSERVABLE_HANDLED,
+                  "passed",
+                  ".pipe(catchError(...)) on Observable handles error channel",
+                );
+                continue;
               }
             }
 
@@ -2429,7 +2697,13 @@ export class ContractMatcher {
                 });
               });
               if (hasErrorHandler) {
-                continue; // Observable handled via .subscribe({ error }) — postcondition satisfied
+                // WAVE-2F: nestjs/axios Observable handled via .subscribe({ error }).
+                trace.record(
+                  MATCHER_IDS.SUPPRESSION_OBSERVABLE_HANDLED,
+                  "passed",
+                  ".subscribe({ error }) on Observable handles error channel",
+                );
+                continue;
               }
             }
           }
@@ -2470,9 +2744,22 @@ export class ContractMatcher {
         if (requiresNullCheck) {
           // For null-check postconditions: skip if result is null-guarded
           if (this.controlFlow.isResultNullGuarded(detection.node)) {
+            // WAVE-2F: null-check postcondition with explicit result null guard.
+            trace.record(
+              MATCHER_IDS.SUPPRESSION_NULL_GUARDED,
+              "passed",
+              "result is null-guarded — null-check postcondition satisfied",
+            );
             continue;
           }
-          // Not null-guarded: fall through to fire violation below
+          // Not null-guarded: fall through to fire violation below.
+          // WAVE-2F: record SUPPRESSION_NULL_GUARDED as failed so the violation
+          // trace surfaces the missing null guard.
+          trace.record(
+            MATCHER_IDS.SUPPRESSION_NULL_GUARDED,
+            "failed",
+            "result is not null-guarded — null-check postcondition fires",
+          );
         } else {
           // Standard try-catch analysis: accept either try-catch or .catch() chain
           // Also accept Supabase's idiomatic { error } destructuring + if check pattern.
@@ -2853,6 +3140,13 @@ export class ContractMatcher {
         );
         if (optionSpecific === null) {
           // No throw option present — validate() will not throw, skip violation
+          // WAVE-2F: jsonschema validate() without throwFirst/throwAll/throwError
+          // options returns a result object instead of throwing.
+          trace.record(
+            MATCHER_IDS.SUPPRESSION_OPTION_SUPPRESSES,
+            "passed",
+            "jsonschema validate() without throw* options — returns result, never throws",
+          );
           continue;
         }
         if (optionSpecific) {
@@ -2898,7 +3192,14 @@ export class ContractMatcher {
             const ignoreVal = ofetchOptionKeys.get("ignoreResponseError");
             // Only suppress when literally `true` — false/variable cannot be statically determined
             if (ignoreVal && ignoreVal.kind === ts.SyntaxKind.TrueKeyword) {
-              continue; // ignoreResponseError: true — ofetch.raw() will not throw
+              // WAVE-2F: ofetch.raw({ ignoreResponseError: true }) — option
+              // disables the throw, returns response for all status codes.
+              trace.record(
+                MATCHER_IDS.SUPPRESSION_OPTION_SUPPRESSES,
+                "passed",
+                "ofetch.raw({ ignoreResponseError: true }) — option disables throw",
+              );
+              continue;
             }
           }
 
@@ -2976,6 +3277,13 @@ export class ContractMatcher {
       // return-value risks (e.g., dayjs.format ReDoS) that don't require try-catch handling.
       // Warning postconditions WITH `throws` (e.g., clerk setActive) should still fire.
       if (postcondition.severity !== "error" && !postcondition.throws) {
+        // WAVE-2F: postcondition is informational (warning + no throws) — no
+        // error-handling guard applies.
+        trace.record(
+          MATCHER_IDS.SUPPRESSION_NEVER_THROWS,
+          "passed",
+          `warning-level postcondition "${postcondition.id}" has no throws — no try-catch required`,
+        );
         continue;
       }
 
@@ -3029,7 +3337,14 @@ export class ContractMatcher {
           /[/\\]app[/\\]api[/\\]/.test(fileName) &&
           /\.tsx?$/.test(fileName)
         ) {
-          continue; // Next.js route handler — framework provides error boundary
+          // WAVE-2F: Next.js app/api route handler — framework wraps in
+          // error boundary, uncaught exceptions return 500.
+          trace.record(
+            MATCHER_IDS.SUPPRESSION_FRAMEWORK_BOUNDARY,
+            "passed",
+            "Next.js app/api route — framework error boundary handles throws",
+          );
+          continue;
         }
         // React component files (.tsx) using zod for form validation
         // The form library (RHF, etc.) handles validation errors through form state, not try-catch.
@@ -3042,7 +3357,14 @@ export class ContractMatcher {
             zodFileText.includes("formState") ||
             zodFileText.includes("safeParse")
           ) {
-            continue; // Form component with form-library error handling — validation errors surfaced via form state
+            // WAVE-2F: React component file with form-library wiring —
+            // RHF / Formik / safeParse surfaces validation errors via form state.
+            trace.record(
+              MATCHER_IDS.SUPPRESSION_FRAMEWORK_BOUNDARY,
+              "passed",
+              "React component file with form-library — validation errors via form state",
+            );
+            continue;
           }
         }
       }
@@ -3058,6 +3380,13 @@ export class ContractMatcher {
           postcondition.id === "parse-async-schema-error") &&
         this.isZodAssertionStyleParse(detection.node)
       ) {
+        // WAVE-2F: zod parse() used as an intentional assertion
+        // (config/factory/startup validation) — crashing loudly is correct.
+        trace.record(
+          MATCHER_IDS.SUPPRESSION_PROJECT_ARCHITECTURE,
+          "passed",
+          "zod parse() used as intentional assertion — crash-on-invalid is correct",
+        );
         continue;
       }
 
@@ -3097,7 +3426,16 @@ export class ContractMatcher {
             break;
           cur = cur.parent;
         }
-        if (isTopLevelSingleton) continue;
+        if (isTopLevelSingleton) {
+          // WAVE-2F: @upstash/redis module-level singleton — error listeners
+          // are registered elsewhere (bootstrap/init code).
+          trace.record(
+            MATCHER_IDS.SUPPRESSION_FILE_SCOPE,
+            "passed",
+            "@upstash/redis top-level singleton — listeners registered elsewhere",
+          );
+          continue;
+        }
       }
 
       // redis (node-redis): missing-error-listener — suppress for module-level singleton exports,
@@ -3124,7 +3462,13 @@ export class ContractMatcher {
           redisFileText.includes('.on("error"') ||
           redisFileText.includes(".on(`error`")
         ) {
-          continue; // File has error listener registration — suppress
+          // WAVE-2F: file registers .on('error') for the redis client.
+          trace.record(
+            MATCHER_IDS.SUPPRESSION_PROJECT_ARCHITECTURE,
+            "passed",
+            "file registers .on('error') listener for redis client",
+          );
+          continue;
         }
         // Suppress in bootstrap/initialization files (main.ts, server.ts, app.ts, index.ts)
         // These files assemble the application; redis clients created here have their error
@@ -3134,7 +3478,14 @@ export class ContractMatcher {
           /[/\\](main|server|app|index)\.(ts|tsx)$/.test(redisFileName) ||
           /[/\\](bootstrap|startup|init)\.(ts|tsx)$/.test(redisFileName)
         ) {
-          continue; // Bootstrap/initialization file — error listener registered by caller
+          // WAVE-2F: bootstrap/initialization file — caller wires the
+          // .on('error') listener after createClient() returns.
+          trace.record(
+            MATCHER_IDS.SUPPRESSION_FILE_SCOPE,
+            "passed",
+            "redis client in bootstrap/initialization file — listeners registered by caller",
+          );
+          continue;
         }
         // Also suppress for module-level singleton exports (same ioredis pattern)
         let isRedisTopLevel = false;
@@ -3164,7 +3515,16 @@ export class ContractMatcher {
             break;
           redisCur = redisCur.parent;
         }
-        if (isRedisTopLevel) continue;
+        if (isRedisTopLevel) {
+          // WAVE-2F: redis client is a module-level singleton — error listener
+          // registered elsewhere in the file or in caller bootstrap code.
+          trace.record(
+            MATCHER_IDS.SUPPRESSION_FILE_SCOPE,
+            "passed",
+            "redis client at module top-level — listeners registered elsewhere",
+          );
+          continue;
+        }
       }
 
       // winston: missing-error-listener — suppress in script files.
@@ -3183,13 +3543,26 @@ export class ContractMatcher {
           /[/\\](scripts|setup|migrations?|seed)[/\\]/i.test(fileName) ||
           fileName.toLowerCase().includes("setup-")
         ) {
-          continue; // Script file — not a long-running service transport
+          // WAVE-2F: winston in a one-off script/setup file — not a long-
+          // running service, transport errors don't matter.
+          trace.record(
+            MATCHER_IDS.SUPPRESSION_FILE_SCOPE,
+            "passed",
+            "winston logger in script/setup file — not a long-running service",
+          );
+          continue;
         }
         // Suppress when file already has error listener
         if (
           fileText.includes(".on('error'") ||
           fileText.includes('.on("error"')
         ) {
+          // WAVE-2F: file registers .on('error') for the winston logger.
+          trace.record(
+            MATCHER_IDS.SUPPRESSION_PROJECT_ARCHITECTURE,
+            "passed",
+            "file registers .on('error') listener for winston logger",
+          );
           continue;
         }
       }
@@ -3239,7 +3612,14 @@ export class ContractMatcher {
             cur = cur.parent;
           }
           if (enclosingFunc) {
-            continue; // Inside a regular function — caller handles errors
+            // WAVE-2F: node-fetch in a utility/wrapper file (utils/, helpers/,
+            // analysis/, client/) — caller is responsible for error handling.
+            trace.record(
+              MATCHER_IDS.SUPPRESSION_RETURN_DELEGATE,
+              "passed",
+              "node-fetch in utility/wrapper file — caller handles errors",
+            );
+            continue;
           }
         }
       }
@@ -3261,7 +3641,14 @@ export class ContractMatcher {
           fileName.toLowerCase().includes("auth-context") ||
           fileName.toLowerCase().includes("auth-provider")
         ) {
-          continue; // Auth context — password validation handled at form/UI layer
+          // WAVE-2F: supabase auth call in a React auth context/provider —
+          // password strength validation is performed at the form/UI layer.
+          trace.record(
+            MATCHER_IDS.SUPPRESSION_FILE_SCOPE,
+            "passed",
+            "supabase auth in React auth-context file — password validated at form layer",
+          );
+          continue;
         }
         // Also suppress when the file contains password validation patterns
         const fileText = sourceFile.getFullText();
@@ -3271,7 +3658,14 @@ export class ContractMatcher {
           fileText.includes("validatePassword") ||
           fileText.includes("password.length")
         ) {
-          continue; // File validates password before Supabase call
+          // WAVE-2F: file contains password validation patterns (minLength,
+          // passwordStrength, validatePassword) before the Supabase call.
+          trace.record(
+            MATCHER_IDS.SUPPRESSION_PROJECT_ARCHITECTURE,
+            "passed",
+            "file validates password strength before Supabase call",
+          );
+          continue;
         }
       }
 
@@ -3289,7 +3683,14 @@ export class ContractMatcher {
       ) {
         const fileName = sourceFile.fileName;
         if (/[/\\](migrations?|scripts?|setup|seed)[/\\]/i.test(fileName)) {
-          continue; // One-off script/migration file — env file errors are acceptable
+          // WAVE-2F: dotenv.config() in a one-off script/migration file —
+          // env file errors are acceptable.
+          trace.record(
+            MATCHER_IDS.SUPPRESSION_FILE_SCOPE,
+            "passed",
+            "dotenv.config() in migration/script file — env file errors acceptable",
+          );
+          continue;
         }
       }
 
@@ -3328,7 +3729,14 @@ export class ContractMatcher {
           // Evidence: concern-2026-04-20-undici-2 — api/analysis/, api/utils/, lib/catalog/, lib/ai/
           /[/\\](utils?|helpers?|analysis|catalog|lib|ai)[/\\]/i.test(fileName)
         ) {
-          continue; // Framework/component context — error boundary handles uncaught exceptions
+          // WAVE-2F: undici response.json() in React component / Next.js
+          // page / hook / utility — framework error boundary handles throws.
+          trace.record(
+            MATCHER_IDS.SUPPRESSION_FRAMEWORK_BOUNDARY,
+            "passed",
+            "undici response.json() in component/framework file — error boundary handles throws",
+          );
+          continue;
         }
       }
 
@@ -3395,7 +3803,14 @@ export class ContractMatcher {
           fileText.includes("serviceRole") ||
           fileText.includes("SUPABASE_SERVICE_ROLE_KEY")
         ) {
-          continue; // Service role context — RLS intentionally bypassed
+          // WAVE-2F: supabase service-role context bypasses RLS by design —
+          // rls-policy-violation is not applicable.
+          trace.record(
+            MATCHER_IDS.SUPPRESSION_FILE_SCOPE,
+            "passed",
+            "supabase service-role context — RLS intentionally bypassed",
+          );
+          continue;
         }
       }
 
@@ -3434,7 +3849,14 @@ export class ContractMatcher {
             cur = cur.parent;
           }
           if (isInsideRegularFunction) {
-            continue; // Utility wrapper — caller is responsible for error handling
+            // WAVE-2F: ai schema-validation in a utility/wrapper file
+            // (utils/, llms/, helpers/, lib/, ai/) — caller handles errors.
+            trace.record(
+              MATCHER_IDS.SUPPRESSION_RETURN_DELEGATE,
+              "passed",
+              "ai schema-validation in utility/wrapper file — caller handles errors",
+            );
+            continue;
           }
         }
       }
@@ -3509,7 +3931,14 @@ export class ContractMatcher {
         postcondition.id === "rate-limit-error" &&
         detection.functionName === "Stripe"
       ) {
-        continue; // Stripe constructor — no network call, cannot rate-limit
+        // WAVE-2F: Stripe constructor (new Stripe(key, options)) doesn't make
+        // network calls — rate-limit-error is impossible at construction.
+        trace.record(
+          MATCHER_IDS.SUPPRESSION_NEVER_THROWS,
+          "passed",
+          "Stripe constructor — no network call, rate-limit impossible",
+        );
+        continue;
       }
 
       // @libsql/client: transaction-not-closed — suppress when tx.close() (or any
