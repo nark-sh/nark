@@ -63,12 +63,25 @@ export const MATCHER_IDS = {
   FRAMEWORK_REACT_QUERY: "framework:react-query-on-error",
 
   // Family: finally — required cleanup in a finally block.
-  //   Generic close (file handle, connection).
+  //   Generic close (file handle, connection). Wave 2e (Plan 01-07) reuses this
+  //   for puppeteer browser.close()-in-finally suppression — the matcher is
+  //   package-agnostic in spirit (any "must close X in finally" guard) but
+  //   gates by postcondition shape (`close|leak|handle|connection`).
   FINALLY_CLOSE: "finally:close",
-  //   Sentry span lifecycle — `span.end()` must run in finally.
+  //   Sentry span lifecycle — `span.end()` must run in finally. Wave 2e (Plan
+  //   01-07) records this matcher when the sentry startSpanManual/startInactiveSpan
+  //   suppression branches detect the canonical try/finally with span.end()
+  //   shape. Gated to @sentry/* span/trace/transaction postconditions.
   FINALLY_SPAN_END: "finally:span-end",
   //   Transaction close — commit/rollback/release in finally.
   FINALLY_TRANSACTION_CLOSE: "finally:transaction-close",
+
+  // Family: framework — Clerk middleware configuration. Wave 2e (Plan 01-07)
+  // records this matcher when a Clerk-specific suppression branch detects
+  // that clerkMiddleware is properly configured at the project level
+  // (middleware.ts + ClerkProvider + protected route group + isLoaded inline
+  // guard). Gated to @clerk/nextjs.
+  FRAMEWORK_CLERK_MIDDLEWARE_CONFIGURED: "framework:clerk-middleware-configured",
 
   // Family: architectural — project-level architectural patterns that route
   // per-callsite errors to a central handler. Wave 2c (Plan 01-05) adds the
@@ -122,6 +135,18 @@ export const MATCHER_IDS = {
  * downstream typeof checks remain stable.
  */
 export const SENTRY_LIFECYCLE = MATCHER_IDS.FINALLY_SPAN_END;
+
+/**
+ * Wave 2e (Plan 01-07) aliases for the lifecycle-special suppression branches
+ * in contract-matcher.ts. These re-export the canonical IDs under
+ * package-suggestive names so the suppression branches read clearly. Wire
+ * strings are unchanged — downstream readers see `finally:span-end` /
+ * `finally:close` either way.
+ */
+export const SENTRY_FINALLY_SPAN_END = MATCHER_IDS.FINALLY_SPAN_END;
+export const PUPPETEER_FINALLY_CLOSE = MATCHER_IDS.FINALLY_CLOSE;
+export const CLERK_MIDDLEWARE_CONFIGURED =
+  MATCHER_IDS.FRAMEWORK_CLERK_MIDDLEWARE_CONFIGURED;
 
 // ──────────────────────────────────────────────────────────────────────────────
 // Type surface
@@ -188,7 +213,7 @@ type GatePredicate = (ctx: ApplicabilityContext) => boolean;
 
 const POSTCONDITION_GATING: Record<string, GatePredicate> = {
   // Framework matchers — gated by package AND (where useful) by postcondition
-  // substring. Plans 01-07..01-08 add their families below.
+  // substring. Plan 01-08 adds its family below.
   [MATCHER_IDS.FRAMEWORK_EXPRESS_ASYNC_ERRORS]: (c) =>
     c.packageName === "express" &&
     (c.postconditionId.includes("async-middleware") ||
@@ -260,11 +285,44 @@ const POSTCONDITION_GATING: Record<string, GatePredicate> = {
   // is NOT a substitute for `span.end()` in finally. TRY_CATCH_DIRECT must
   // NOT apply to sentry span-lifecycle postconditions even though the call
   // sits inside a try/catch. For non-sentry contexts the matcher applies.
+  //
+  // Wave 2e (Plan 01-07): the SAME Pitfall 7 logic generalises to the other
+  // three OR-chain matchers (PROMISE_CATCH_HANDLER / OPTIONS_ON_ERROR /
+  // DESTRUCTURED_ERROR_TUPLE). A .catch() on the outer promise still leaks
+  // the inner span; an `{onError}` option likewise; a Go-style tuple
+  // destructure on the outer await likewise. The contract-matcher's
+  // canonical OR-chain DELIBERATELY skips recording all four matchers for
+  // sentry-lifecycle postconditions so serialize() Pass 2 emits them as
+  // not_applicable. These predicate gates are the registry-side belt-and-
+  // suspenders — if a future code path forgets the skip, the gate still
+  // signals the matcher is conceptually not_applicable.
   [MATCHER_IDS.TRY_CATCH_DIRECT]: (c) =>
     !(
       c.packageName.startsWith("@sentry/") &&
       /span|trace|transaction/i.test(c.postconditionId)
     ),
+  [MATCHER_IDS.PROMISE_CATCH_HANDLER]: (c) =>
+    !(
+      c.packageName.startsWith("@sentry/") &&
+      /span|trace|transaction/i.test(c.postconditionId)
+    ),
+  [MATCHER_IDS.OPTIONS_ON_ERROR]: (c) =>
+    !(
+      c.packageName.startsWith("@sentry/") &&
+      /span|trace|transaction/i.test(c.postconditionId)
+    ),
+  [MATCHER_IDS.DESTRUCTURED_ERROR_TUPLE]: (c) =>
+    !(
+      c.packageName.startsWith("@sentry/") &&
+      /span|trace|transaction/i.test(c.postconditionId)
+    ),
+
+  // Wave 2e (Plan 01-07) — Clerk middleware-configured matcher. Applies only
+  // to @clerk/nextjs postconditions. The matcher is recorded by the clerk
+  // suppression branches in contract-matcher.ts when the project has a valid
+  // middleware.ts + clerkMiddleware default export (file-system probe).
+  [MATCHER_IDS.FRAMEWORK_CLERK_MIDDLEWARE_CONFIGURED]: (c) =>
+    c.packageName === "@clerk/nextjs",
 };
 
 export function applicabilityPredicate(

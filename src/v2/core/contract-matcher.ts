@@ -1088,7 +1088,19 @@ export class ContractMatcher {
             break;
           cur = cur.parent;
         }
-        if (inCatchOrFinally) continue;
+        if (inCatchOrFinally) {
+          // WAVE-2E: puppeteer close() in catch/finally is the canonical cleanup
+          // pattern — record FINALLY_CLOSE as passed and capture the site for
+          // the Wave 9 convention miner.
+          trace.record(MATCHER_IDS.FINALLY_CLOSE, "passed");
+          this.recordPassedSite(
+            detection,
+            sourceFile,
+            primaryPostcondition.id,
+            MATCHER_IDS.FINALLY_CLOSE,
+          );
+          continue;
+        }
       }
 
       // puppeteer browser-close-must-run: suppress when the launch() call is inside a
@@ -1138,7 +1150,19 @@ export class ContractMatcher {
             ts.forEachChild(node, checkForClose);
           };
           checkForClose(enclosingTry.finallyBlock);
-          if (hasCloseInFinally) continue; // try-finally with close() — postcondition satisfied
+          if (hasCloseInFinally) {
+            // WAVE-2E: puppeteer try-finally { browser.close() } around launch()
+            // — record FINALLY_CLOSE as passed and capture the site for the
+            // Wave 9 convention miner.
+            trace.record(MATCHER_IDS.FINALLY_CLOSE, "passed");
+            this.recordPassedSite(
+              detection,
+              sourceFile,
+              primaryPostcondition.id,
+              MATCHER_IDS.FINALLY_CLOSE,
+            );
+            continue; // try-finally with close() — postcondition satisfied
+          }
         }
       }
 
@@ -2212,9 +2236,30 @@ export class ContractMatcher {
           };
           checkForFinishInFinally(callbackArg.body);
           if (hasFinishInFinally) {
+            // WAVE-2E: sentry startSpanManual try/finally { finish() | span.end() }
+            // pattern detected — record FINALLY_SPAN_END as passed and capture the
+            // site for the Wave 9 convention miner. Gate inside recordPassedSite
+            // checks PASSING_SITE_PACKAGES membership.
+            trace.record(MATCHER_IDS.FINALLY_SPAN_END, "passed");
+            this.recordPassedSite(
+              detection,
+              sourceFile,
+              primaryPostcondition.id,
+              MATCHER_IDS.FINALLY_SPAN_END,
+            );
             continue; // Callback has try/finally with finish() or span.end() — postcondition satisfied
           }
         }
+        // WAVE-2E: callback lacks try/finally with finish/end — record
+        // FINALLY_SPAN_END as failed so the violation's detectionTrace shows
+        // the matcher WAS considered (not `not_applicable`). This is the
+        // PH1-R2b acceptance shape: try-catch family is not_applicable AND
+        // finally:span-end is failed.
+        trace.record(
+          MATCHER_IDS.FINALLY_SPAN_END,
+          "failed",
+          "no try/finally with finish() or span.end() in startSpanManual callback",
+        );
         // Callback lacks try/finally with finish/end: fall through to fire violation
         // (bypass the standard outer try-catch check — the required pattern is INSIDE the callback)
       }
@@ -2276,8 +2321,26 @@ export class ContractMatcher {
         };
         checkForEndInFinally(scopeNode);
         if (hasEndInFinally) {
+          // WAVE-2E: sentry startInactiveSpan enclosing-function try/finally
+          // { span.end() } pattern detected — record FINALLY_SPAN_END as passed
+          // and capture the site for the Wave 9 convention miner.
+          trace.record(MATCHER_IDS.FINALLY_SPAN_END, "passed");
+          this.recordPassedSite(
+            detection,
+            sourceFile,
+            primaryPostcondition.id,
+            MATCHER_IDS.FINALLY_SPAN_END,
+          );
           continue; // try/finally { span.end() } present — postcondition satisfied
         }
+        // WAVE-2E: no try/finally with end() in enclosing function — record
+        // FINALLY_SPAN_END as failed so the violation's detectionTrace shows
+        // the matcher WAS considered (not `not_applicable`).
+        trace.record(
+          MATCHER_IDS.FINALLY_SPAN_END,
+          "failed",
+          "no try/finally with span.end() in enclosing function",
+        );
         // No try/finally with end(): fall through to fire violation
         // (skip standard outer try-catch check — the pattern requires finally, not catch)
       }
@@ -2383,6 +2446,18 @@ export class ContractMatcher {
 
       if (isClerkMiddlewarePostcondition) {
         if (this.isClerkMiddlewareConfigured()) {
+          // WAVE-2E: clerk middleware.ts configured — record CLERK_MIDDLEWARE_CONFIGURED
+          // as passed and capture the site for the Wave 9 convention miner.
+          trace.record(
+            MATCHER_IDS.FRAMEWORK_CLERK_MIDDLEWARE_CONFIGURED,
+            "passed",
+          );
+          this.recordPassedSite(
+            detection,
+            sourceFile,
+            primaryPostcondition.id,
+            MATCHER_IDS.FRAMEWORK_CLERK_MIDDLEWARE_CONFIGURED,
+          );
           continue; // Middleware is properly configured — suppress violation
         }
         // Middleware not found: fall through to fire violation below (skip try-catch check)
@@ -2407,6 +2482,26 @@ export class ContractMatcher {
           // detectionTrace captures EVERY matcher's outcome, not just the
           // first short-circuit (Pitfall 1 mitigation). Plans 01-04..01-08
           // mirror this pattern for their package families.
+          //
+          // WAVE-2E (Plan 01-07) — Pitfall 7 fix. For @sentry/* span-lifecycle
+          // postconditions, NONE of the four OR-chain matchers semantically
+          // satisfy the postcondition: a try/catch wrapper, .catch() handler,
+          // onError option, or destructured error tuple all permit the inner
+          // span to leak (the required pattern is `try { ... } finally {
+          // span.end(); }`). Recording these matchers as `passed` would lie to
+          // the trace — Pitfall 7 in RESEARCH. We DELIBERATELY skip the four
+          // record() calls when the postcondition is sentry-lifecycle so
+          // DetectionTraceAccumulator.serialize() Pass 2 emits all four as
+          // `not_applicable` (per the Plan 01-04 inverted Pass 2 semantics).
+          // The applicabilityPredicate in registry.ts ALSO gates these four
+          // matchers off for sentry-lifecycle as belt-and-suspenders (so a
+          // future code path that forgets to skip still produces the right
+          // not_applicable surface).
+          const isSentryLifecycleForTrace =
+            detection.packageName.startsWith("@sentry/") &&
+            (primaryPostcondition.id === "span-manual-finish-never-called" ||
+              primaryPostcondition.id === "inactive-span-end-never-called");
+
           let inTryCatch = false;
           let firstPassedMatcher: string | null = null;
 
@@ -2416,11 +2511,13 @@ export class ContractMatcher {
           ) {
             // Matcher 1: enclosing try-catch (the standard direct pattern).
             const inTry = this.controlFlow.isInTryCatch(detection.node);
-            trace.record(
-              MATCHER_IDS.TRY_CATCH_DIRECT,
-              inTry ? "passed" : "failed",
-              inTry ? undefined : "no enclosing try",
-            );
+            if (!isSentryLifecycleForTrace) {
+              trace.record(
+                MATCHER_IDS.TRY_CATCH_DIRECT,
+                inTry ? "passed" : "failed",
+                inTry ? undefined : "no enclosing try",
+              );
+            }
             if (inTry && firstPassedMatcher === null) {
               firstPassedMatcher = MATCHER_IDS.TRY_CATCH_DIRECT;
             }
@@ -2429,11 +2526,13 @@ export class ContractMatcher {
             const catchHandler =
               ts.isCallExpression(detection.node) &&
               this.controlFlow.hasCatchHandler(detection.node);
-            trace.record(
-              MATCHER_IDS.PROMISE_CATCH_HANDLER,
-              catchHandler ? "passed" : "failed",
-              catchHandler ? undefined : "no .catch() handler",
-            );
+            if (!isSentryLifecycleForTrace) {
+              trace.record(
+                MATCHER_IDS.PROMISE_CATCH_HANDLER,
+                catchHandler ? "passed" : "failed",
+                catchHandler ? undefined : "no .catch() handler",
+              );
+            }
             if (catchHandler && firstPassedMatcher === null) {
               firstPassedMatcher = MATCHER_IDS.PROMISE_CATCH_HANDLER;
             }
@@ -2442,11 +2541,13 @@ export class ContractMatcher {
             const onError =
               ts.isCallExpression(detection.node) &&
               this.controlFlow.hasOnErrorInOptions(detection.node);
-            trace.record(
-              MATCHER_IDS.OPTIONS_ON_ERROR,
-              onError ? "passed" : "failed",
-              onError ? undefined : "no onError option",
-            );
+            if (!isSentryLifecycleForTrace) {
+              trace.record(
+                MATCHER_IDS.OPTIONS_ON_ERROR,
+                onError ? "passed" : "failed",
+                onError ? undefined : "no onError option",
+              );
+            }
             if (onError && firstPassedMatcher === null) {
               firstPassedMatcher = MATCHER_IDS.OPTIONS_ON_ERROR;
             }
@@ -2457,11 +2558,13 @@ export class ContractMatcher {
                 detection.node,
                 sourceFile,
               );
-            trace.record(
-              MATCHER_IDS.DESTRUCTURED_ERROR_TUPLE,
-              destructured ? "passed" : "failed",
-              destructured ? undefined : "no destructured-error tuple",
-            );
+            if (!isSentryLifecycleForTrace) {
+              trace.record(
+                MATCHER_IDS.DESTRUCTURED_ERROR_TUPLE,
+                destructured ? "passed" : "failed",
+                destructured ? undefined : "no destructured-error tuple",
+              );
+            }
             if (destructured && firstPassedMatcher === null) {
               firstPassedMatcher = MATCHER_IDS.DESTRUCTURED_ERROR_TUPLE;
             }
@@ -2884,6 +2987,20 @@ export class ContractMatcher {
         postcondition.id === "use-clerk-outside-provider"
       ) {
         if (this.projectHasClerkProvider()) {
+          // WAVE-2E: project has ClerkProvider in the component tree — record
+          // CLERK_MIDDLEWARE_CONFIGURED as passed. The matcher's name reflects
+          // the broader "clerk is properly configured at the project level"
+          // family (middleware + provider both signal the same convention).
+          trace.record(
+            MATCHER_IDS.FRAMEWORK_CLERK_MIDDLEWARE_CONFIGURED,
+            "passed",
+          );
+          this.recordPassedSite(
+            detection,
+            sourceFile,
+            postcondition.id,
+            MATCHER_IDS.FRAMEWORK_CLERK_MIDDLEWARE_CONFIGURED,
+          );
           continue; // ClerkProvider present — suppress false positive
         }
       }
@@ -3342,6 +3459,23 @@ export class ContractMatcher {
       ) {
         const fileName = sourceFile.fileName;
         const fileText = sourceFile.getFullText();
+        // WAVE-2E: both suppression paths below indicate clerk-middleware-style
+        // configuration — protected route group OR inline auth-state guards.
+        // Local helper to avoid duplicating the trace.record + recordPassedSite
+        // triplet on each short-circuit path (mirrors the WAVE-2B multi-path
+        // helper convention).
+        const recordPassedClerk = (): void => {
+          trace.record(
+            MATCHER_IDS.FRAMEWORK_CLERK_MIDDLEWARE_CONFIGURED,
+            "passed",
+          );
+          this.recordPassedSite(
+            detection,
+            sourceFile,
+            postcondition.id,
+            MATCHER_IDS.FRAMEWORK_CLERK_MIDDLEWARE_CONFIGURED,
+          );
+        };
         // Suppress in protected route group files: (dashboard), (auth), (protected)
         if (
           /[/\\]\(dashboard\)[/\\]/.test(fileName) ||
@@ -3351,10 +3485,12 @@ export class ContractMatcher {
           /[/\\](settings|profile)[/\\]/.test(fileName) ||
           /[/\\]providers?[/\\]/i.test(fileName)
         ) {
+          recordPassedClerk();
           continue; // Protected route context — middleware enforces isLoaded
         }
         // Suppress when the component file also checks isLoaded somewhere (partial guards)
         if (fileText.includes("isLoaded") || fileText.includes("isSignedIn")) {
+          recordPassedClerk();
           continue; // File has auth state checks present
         }
       }
@@ -3591,6 +3727,22 @@ export class ContractMatcher {
     "@aws-sdk/client-cloudwatch-logs",
     "@aws-sdk/lib-storage",
     "@aws-sdk/s3-request-presigner",
+    // WAVE-2E (Plan 01-07) — lifecycle-special families. Sentry
+    // startSpanManual/startInactiveSpan suppression branches record
+    // FINALLY_SPAN_END when the try/finally { span.end() } pattern fires;
+    // Clerk middleware/provider suppression branches record
+    // FRAMEWORK_CLERK_MIDDLEWARE_CONFIGURED when the project-wide
+    // configuration probe succeeds; puppeteer close-in-catch-or-finally
+    // suppression branches record FINALLY_CLOSE when the cleanup pattern
+    // fires. All three families participate in passing-site capture for the
+    // Wave 9 convention miner so cross-file conventions become minable.
+    "@sentry/node",
+    "@sentry/nextjs",
+    "@sentry/browser",
+    "@sentry/react",
+    "@sentry/electron",
+    "@clerk/nextjs",
+    "puppeteer",
   ]);
 
   /**
