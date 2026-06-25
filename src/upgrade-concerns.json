@@ -64034,5 +64034,149 @@
     "description": "client.creditNotes.create() is a sub-resource access. Scanner must detect this method and check for try-catch wrapping.",
     "detection_challenge": "Sub-resource method: client.creditNotes.create() — two-hop property chain.",
     "fixture_annotation": "NO_DETECTOR_YET in nark-corpus-pro/packages/orb-billing/fixtures/ground-truth.ts"
+  },
+  "3436": {
+    "id": "concern-20260625-workos-create-env-role-deepen-stream2-3",
+    "created_at": "2026-06-25",
+    "source": "deepen",
+    "package": "@workos-inc/node",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @workos-inc/node authorization.createEnvironmentRole() — postcondition added in deepen-stream-2 pass 3 but no scanner rule exists",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  "3437": {
+    "id": "concern-20260625-workos-update-env-role-deepen-stream2-3",
+    "created_at": "2026-06-25",
+    "source": "deepen",
+    "package": "@workos-inc/node",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @workos-inc/node authorization.updateEnvironmentRole() — postcondition added in deepen-stream-2 pass 3 but no scanner rule exists",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  "3438": {
+    "id": "concern-20260625-workos-add-env-role-perm-deepen-stream2-3",
+    "created_at": "2026-06-25",
+    "source": "deepen",
+    "package": "@workos-inc/node",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @workos-inc/node authorization.addEnvironmentRolePermission() — postcondition added in deepen-stream-2 pass 3 but no scanner rule exists",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  "3439": {
+    "id": "concern-20260625-workos-set-env-role-perms-deepen-stream2-3",
+    "created_at": "2026-06-25",
+    "source": "deepen",
+    "package": "@workos-inc/node",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @workos-inc/node authorization.setEnvironmentRolePermissions() — postcondition added in deepen-stream-2 pass 3 but no scanner rule exists",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  "3440": {
+    "id": "concern-20260625-workos-add-org-role-perm-deepen-stream2-3",
+    "created_at": "2026-06-25",
+    "source": "deepen",
+    "package": "@workos-inc/node",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @workos-inc/node authorization.addOrganizationRolePermission() — postcondition added in deepen-stream-2 pass 3 but no scanner rule exists",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  "3441": {
+    "id": "concern-20260625-workos-remove-org-role-perm-deepen-stream2-3",
+    "created_at": "2026-06-25",
+    "source": "deepen",
+    "package": "@workos-inc/node",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @workos-inc/node authorization.removeOrganizationRolePermission() — postcondition added in deepen-stream-2 pass 3 but no scanner rule exists",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  "3442": {
+    "id": "concern-20260625-workos-set-org-role-perms-deepen-stream2-3",
+    "created_at": "2026-06-25",
+    "source": "deepen",
+    "package": "@workos-inc/node",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @workos-inc/node authorization.setOrganizationRolePermissions() — postcondition added in deepen-stream-2 pass 3 but no scanner rule exists",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  "3443": {
+    "id": "concern-20260625-workos-add-flag-target-deepen-stream2-3",
+    "created_at": "2026-06-25",
+    "source": "deepen",
+    "package": "@workos-inc/node",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @workos-inc/node featureFlags.addFlagTarget() — postcondition added in deepen-stream-2 pass 3 but no scanner rule exists",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  "3444": {
+    "id": "concern-20260625-workos-remove-flag-target-deepen-stream2-3",
+    "created_at": "2026-06-25",
+    "source": "deepen",
+    "package": "@workos-inc/node",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @workos-inc/node featureFlags.removeFlagTarget() — postcondition added in deepen-stream-2 pass 3 but no scanner rule exists",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
   }
 }
