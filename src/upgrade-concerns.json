@@ -63188,5 +63188,21 @@
       "note": "trigger.dev contract uses the kebab convention for namespace.method entries (envvars-upload, prompts-resolve, batch-retrieve, etc.). The chain detector builds chainStr from `.`-joined property names. Without kebab normalization in the matcher, the chain and the contract entry never reconcile."
     },
     "resolution": "Added a kebab-form normalization step to findFunctionContract's exact-match pass. When chainStr contains a `.`, build the kebab equivalent from the snake-case-normalized form (so `.` AND `_` both fold to `-`). Compare it against bare `f.name` entries on non-namespaced contracts. Examples now route correctly: `batch.retrieve()` → batch-retrieve entry; `envvars.upload()` → envvars-upload entry; `idempotencyKeys.create()` → idempotency-keys-create entry; `streams.read()` → streams-read entry. Single-segment chains do NOT go through kebab normalization (a regression test confirms `create` does not spuriously match `create-token`). Unblocks the pending trigger.dev scanner concerns 3360-3367 (prompts.*, streams.*, batch.retrieve, idempotencyKeys.create, usage.measure) whose postconditions were already in the contract but unreachable from the matcher. 3 regression tests added to src/v2/core/contract-matcher.test.ts: batch.retrieve vs runs.retrieve disambiguation, camelCase (idempotencyKeys.create → idempotency-keys-create), and single-segment no-spurious-match negative. Vitest: 4868 pass / 96 fail (baseline 4865 / 96 — 3 new tests pass, zero new failures)."
+  },
+  "3379": {
+    "id": "concern-20260625-simple-git-deepen-1",
+    "created_at": "2026-06-25",
+    "source": "deepen",
+    "package": "simple-git",
+    "type": "new_pattern",
+    "status": "pending",
+    "description": "Add detection for simpleGit() factory call without try-catch. The simpleGit() factory throws GitConstructError SYNCHRONOUSLY (not as a Promise rejection) when the baseDir argument points to a non-existent directory. Current scanner uses await_patterns which only detects awaited call sites — the factory call is synchronous and not awaited, so the existing detection strategy misses it entirely. Postcondition added in deepen-stream-2 pass 1 (2026-06-25): simple-git-construct-missing-try-catch. Detection requires identifying: (1) simpleGit() call not wrapped in try-catch, (2) at a non-awaited call site (the error is sync). Common real-world pattern: const git = simpleGit(process.env.REPO_DIR) where REPO_DIR may be unset or point to a deleted path.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via Phase 1.5 pattern 3 (sync-factory-with-error) in bc-deepen-contract pass. Detection rule needed. The postcondition simple-git-construct-missing-try-catch is in contract.yaml but no scanner rule exists yet. Ground-truth fixture marks this as NO_DETECTOR_YET."
+    },
+    "resolution": null
   }
 }
