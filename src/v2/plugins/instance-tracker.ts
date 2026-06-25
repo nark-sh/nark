@@ -359,6 +359,20 @@ export class InstanceTrackerPlugin implements DetectorPlugin {
       const packageName = this.resolveNewExpression(init, context);
       if (packageName) {
         this.instanceMap.set(varName, packageName);
+        // Also record the class name in instanceTypeMap, BUT ONLY for classes that are
+        // explicitly registered via `class_names` in the contract's detection section.
+        // This enables disambiguation when multiple classes share a method name
+        // (e.g., @azure/identity has both DeviceCodeCredential.authenticate and
+        // InteractiveBrowserCredential.authenticate). Setting instanceTypeMap
+        // unconditionally would interfere with packages that don't need disambiguation
+        // and whose class names might accidentally match contract dotted-name prefixes.
+        // Pattern: const deviceCodeCredential = new DeviceCodeCredential(...) → typeName='DeviceCodeCredential'
+        if (ts.isIdentifier(init.expression)) {
+          const className = init.expression.text;
+          if (this.classToPackage.has(className)) {
+            this.instanceTypeMap.set(varName, className);
+          }
+        }
       }
       return [];
     }

@@ -3247,6 +3247,12 @@ export class ContractMatcher {
       PutIdentityPolicyCommand: "ses-put-identity-policy-invalid",
       // Evidence: concern-20260416-aws-sdk-client-ses-deepen-7 (DeleteConfigurationSetEventDestinationCommand)
       DeleteConfigurationSetEventDestinationCommand: "ses-delete-event-dest-config-set-not-found",
+      // Evidence: uncovered_function concerns — deepen pass added CloneReceiptRuleSetCommand,
+      // CreateReceiptFilterCommand, UpdateReceiptRuleCommand postconditions but command→postcondition
+      // routing was missing. Maps to the primary (most actionable) postcondition for each command.
+      CloneReceiptRuleSetCommand: "ses-clone-receipt-rule-set-already-exists",
+      CreateReceiptFilterCommand: "ses-create-receipt-filter-already-exists",
+      UpdateReceiptRuleCommand: "ses-update-receipt-rule-invalid-action-config",
     };
 
   /**
