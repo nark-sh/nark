@@ -63998,5 +63998,41 @@
     "description": "Add detection for vault.readObjectByName() called without try-catch. Method calls handleHttpError() path; NotFoundException (404) when secret is deleted causes null-dereference downstream when result is used as a credential. Postcondition: vault-read-object-by-name-no-error-handling.",
     "evidence": "factory-DwW2quUn.cjs handleHttpError() path analysis",
     "resolution": null
+  },
+  "3433": {
+    "id": "concern-20260625-orb-billing-deepen-1",
+    "title": "Detect events.backfills.create() without try-catch",
+    "profile": "packages/orb-billing",
+    "postcondition_id": "backfill-create-overlap-constraint",
+    "status": "queued",
+    "queued_date": "2026-06-25",
+    "queued_by": "bc-deepen-contract (deepen-stream-1 pass 4)",
+    "description": "client.events.backfills.create() is a multi-level property access (events -> backfills -> create). Scanner must detect this pattern and check for try-catch wrapping.",
+    "detection_challenge": "Multi-level method access: client.events.backfills.create() — requires 3-hop property chain detection.",
+    "fixture_annotation": "NO_DETECTOR_YET in nark-corpus-pro/packages/orb-billing/fixtures/ground-truth.ts"
+  },
+  "3434": {
+    "id": "concern-20260625-orb-billing-deepen-2",
+    "title": "Detect invoiceLineItems.create() without try-catch",
+    "profile": "packages/orb-billing",
+    "postcondition_id": "invoice-not-draft",
+    "status": "queued",
+    "queued_date": "2026-06-25",
+    "queued_by": "bc-deepen-contract (deepen-stream-1 pass 4)",
+    "description": "client.invoiceLineItems.create() is a sub-resource access. Scanner must detect this method and check for try-catch wrapping.",
+    "detection_challenge": "Sub-resource method: client.invoiceLineItems.create() — two-hop property chain.",
+    "fixture_annotation": "NO_DETECTOR_YET in nark-corpus-pro/packages/orb-billing/fixtures/ground-truth.ts"
+  },
+  "3435": {
+    "id": "concern-20260625-orb-billing-deepen-3",
+    "title": "Detect creditNotes.create() without try-catch",
+    "profile": "packages/orb-billing",
+    "postcondition_id": "mixed-service-period-constraint",
+    "status": "queued",
+    "queued_date": "2026-06-25",
+    "queued_by": "bc-deepen-contract (deepen-stream-1 pass 4)",
+    "description": "client.creditNotes.create() is a sub-resource access. Scanner must detect this method and check for try-catch wrapping.",
+    "detection_challenge": "Sub-resource method: client.creditNotes.create() — two-hop property chain.",
+    "fixture_annotation": "NO_DETECTOR_YET in nark-corpus-pro/packages/orb-billing/fixtures/ground-truth.ts"
   }
 }
