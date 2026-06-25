@@ -63688,5 +63688,24 @@
       "note": "Proactive — contract added via API surface analysis (deepen-stream-2 pass 3, 2026-06-25). getMachineLearning().publishModel(id) / createModel(opts) / deleteModel(id). Detection patterns needed for FirebaseMachineLearningError."
     },
     "resolution": null
+  },
+  "3410": {
+    "id": "concern-20260626-openai-images-edit-stream-abort-detection-1",
+    "created_at": "2026-06-26",
+    "source": "baseline-cleanup",
+    "package": "openai",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "openai.images.edit({stream: true}) followed by `for await (const event of stream) { ... }` needs detection for the absence of a completion-flag check inside the loop body. Postcondition `images-edit-stream-abort-silent-termination` (severity: warning) exists in the contract and describes the canonical safe pattern (set `completed = true` when `event.type === 'image_edit.completed'`, then check `completed` after the loop). The scanner does not currently detect this completion-flag absence — the only related violation that fires is the sibling `images-edit-stream-mid-stream-api-error` (missing try-catch) which is distinct. Detection requirement: when `for await (... of <streamBinding>)` where <streamBinding> was assigned from `openai.images.edit({stream: true, ...})`, walk the loop body for (a) an if-check on `event.type === 'image_edit.completed'` that sets a boolean OR (b) any equivalent completion-tracking pattern. If absent, fire the postcondition at the for-await line. Fixture line 1281 (openai/fixtures/ground-truth.ts) is the canonical SHOULD_FIRE case.",
+    "evidence": {
+      "repos": [],
+      "scan_file": "src/v2/fixtures/openai.ground-truth.test.ts (line 1281 failure)",
+      "violation_count": 0,
+      "fix_target": "scanner",
+      "fixture_path": "nark-corpus/packages/openai/fixtures/ground-truth.ts:1281",
+      "postcondition_id": "images-edit-stream-abort-silent-termination",
+      "related_postcondition_working": "images-edit-stream-mid-stream-api-error (fires correctly at line 1250 — try-catch absence)"
+    },
+    "resolution": null
   }
 }
