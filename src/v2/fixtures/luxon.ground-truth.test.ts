@@ -47,16 +47,20 @@ const GROUND_TRUTH_PATH = path.resolve(
 // To update: re-run the scanner against ground-truth.ts and update lines.
 // Command: node dist/index.js --tsconfig <fixturedir>/__gt-tsconfig.json --corpus ../nark-corpus
 
+// Lines below point to the actual call expression (not the @expect-violation
+// comment that precedes it). Updated 2026-06-25 — the fixture was edited and
+// the previous numbers tracked the comment lines, leaving the scanner unable
+// to find matching violations.
 const EXPECTED_VIOLATIONS: { line: number; postconditionId: string; label: string }[] = [
-  { line: 32,  postconditionId: 'frommillis-non-number-throws',        label: 'fromMillis — no try-catch' },
-  { line: 72,  postconditionId: 'fromseconds-non-number-throws',       label: 'fromSeconds — no try-catch' },
-  { line: 98,  postconditionId: 'fromobject-conflicting-specification', label: 'fromObject — weekYear+month mix' },
-  { line: 104, postconditionId: 'fromobject-conflicting-specification', label: 'fromObject — ordinal+month mix' },
-  { line: 134, postconditionId: 'fromformat-missing-args',             label: 'fromFormat — undefined format arg' },
-  { line: 158, postconditionId: 'startof-invalid-unit',                label: 'startOf — dynamic unit, no validation' },
-  { line: 192, postconditionId: 'endof-invalid-unit',                  label: 'endOf — dynamic unit, no validation' },
-  { line: 212, postconditionId: 'min-non-datetime-throws',             label: 'min — non-DateTime args' },
-  { line: 238, postconditionId: 'max-non-datetime-throws',             label: 'max — non-DateTime args' },
+  { line: 37,  postconditionId: 'frommillis-non-number-throws',        label: 'fromMillis — no try-catch' },
+  { line: 77,  postconditionId: 'fromseconds-non-number-throws',       label: 'fromSeconds — no try-catch' },
+  { line: 103, postconditionId: 'fromobject-conflicting-specification', label: 'fromObject — weekYear+month mix' },
+  { line: 109, postconditionId: 'fromobject-conflicting-specification', label: 'fromObject — ordinal+month mix' },
+  { line: 139, postconditionId: 'fromformat-missing-args',             label: 'fromFormat — undefined format arg' },
+  { line: 163, postconditionId: 'startof-invalid-unit',                label: 'startOf — dynamic unit, no validation' },
+  { line: 197, postconditionId: 'endof-invalid-unit',                  label: 'endOf — dynamic unit, no validation' },
+  { line: 217, postconditionId: 'min-non-datetime-throws',             label: 'min — non-DateTime args' },
+  { line: 243, postconditionId: 'max-non-datetime-throws',             label: 'max — non-DateTime args' },
 ];
 
 // Lines expected to be clean (no error-level violations).

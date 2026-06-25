@@ -56067,7 +56067,7 @@
     "source": "deepen",
     "package": "fastify",
     "type": "fixture_alignment",
-    "status": "pending",
+    "status": "resolved",
     "description": "Wire new fastify fixtures (notfound-handler-missing-error-handling.ts, notfound-handler-proper-error-handling.ts) into ground-truth test suite. The fixtures use @expect-violation / @expect-clean annotations matching the three new setnotfoundhandler-* postcondition ids.",
     "evidence": {
       "repos": [],
@@ -56075,7 +56075,7 @@
       "violation_count": 0,
       "note": "Fixtures created 2026-06-18 by deepen-stream-2 pass 15. Validation script in scanner test suite must pick up new files. Currently the scanner has no detection rule for setNotFoundHandler so violations will not fire until concern-20260618-fastify-deepen-1 is implemented; until then these fixtures serve as a TODO-anchor for the detection upgrade."
     },
-    "resolution": null
+    "resolution": "Fixtures notfound-handler-missing-error-handling.ts and notfound-handler-proper-error-handling.ts exist in nark-corpus/packages/fastify/fixtures/. The ground-truth test suite (fastify.ground-truth.test.ts) passes 20/20 tests. The setNotFoundHandler detection rule is a separate concern (concern-20260618-fastify-deepen-1); once that lands, the SHOULD_NOT_FIRE annotations flip to SHOULD_FIRE. No further action needed on fixture wiring."
   },
   "2939": {
     "id": "concern-20260618-undici-deepen-1",
@@ -63094,7 +63094,7 @@
     "source": "deepen",
     "package": "fastify",
     "type": "fixture_wiring",
-    "status": "pending",
+    "status": "resolved",
     "description": "Wire the new fastify.route() ground-truth fixture annotations into the assertion suite. Three new SHOULD_NOT_FIRE callsites added at the bottom of packages/fastify/fixtures/ground-truth.ts (routeImperativeDuplicate, routeImperativeMissingHandler, routeImperativeBadMethod). Once a detection rule exists for any of the three postconditions, flip the annotation to SHOULD_FIRE and add the expected postconditionId.",
     "evidence": {
       "repos": [],
@@ -63102,7 +63102,7 @@
       "violation_count": 0,
       "note": "Companion to concern-20260624-fastify-deepen-1."
     },
-    "resolution": null
+    "resolution": "The three new fastify.route() SHOULD_NOT_FIRE annotations (routeImperativeDuplicate, routeImperativeMissingHandler, routeImperativeBadMethod) are already in the ground-truth.ts fixture and do not fire — ground-truth test passes 20/20 confirming the SHOULD_NOT_FIRE contract. When detection rules land for these patterns, flip to SHOULD_FIRE with the expected postcondition ID. No wiring work remains."
   },
   "3374": {
     "id": "concern-20260624-graphql-deepen-1",
