@@ -240,5 +240,19 @@ function convertViolation(
     (v1 as any).suppressionReason = v2.suppressionReason;
   }
 
+  // WAVE-2A: pass through detection-trace evidence trail to the wire JSON.
+  // Wave 4 (Plans 01-10..01-12) consumes this in the SaaS persistence
+  // pipeline + telemetry. Optional — older v2 violations without trace
+  // still pass through cleanly via the truthy guard.
+  if (v2.detectionTrace) {
+    (v1 as any).detectionTrace = v2.detectionTrace;
+  }
+  // WAVE-3 (Plan 01-09): conventionMatch passthrough — adapter ready in
+  // advance so the miner's writes land on the wire without coordinated
+  // adapter change.
+  if (v2.conventionMatch) {
+    (v1 as any).conventionMatch = v2.conventionMatch;
+  }
+
   return v1;
 }
