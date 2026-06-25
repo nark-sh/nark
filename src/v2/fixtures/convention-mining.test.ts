@@ -59,7 +59,9 @@ interface ConventionMatch {
 }
 
 function readConvention(v: Violation): ConventionMatch | undefined {
-  // @ts-expect-error Wave 1 adds the `conventionMatch` field to Violation.
+  // Wave 1 (01-02) added Violation.conventionMatch as an optional field;
+  // the RED runtime assertion lives in the test bodies below.
+  // Wave 3 (01-09) populates this field via the convention miner.
   return v.conventionMatch as ConventionMatch | undefined;
 }
 
@@ -252,8 +254,9 @@ describe("convention-mining: PH1-R3a — below threshold, conventionMatch absent
     //      miner actually ran and consciously chose to omit conventionMatch.
     //   2. conventionMatch must be undefined (NOT null) - Wave 3 contract:
     //      the miner uses absence, not a sentinel, to signal "below threshold".
-    // Today (Wave 0) assertion #1 fails because detectionTrace doesn't exist.
-    // @ts-expect-error Wave 1 adds the `detectionTrace` field.
+    // Wave 1 (01-02) added the field; matchers do not yet populate it, so
+    // assertion #1 still fails RED at runtime (undefined) — flips GREEN once
+    // Waves 03-08 wire the accumulator into ContractMatcher.
     const trace = v.detectionTrace as unknown;
     expect(
       trace,

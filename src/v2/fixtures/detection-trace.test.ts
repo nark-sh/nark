@@ -57,7 +57,9 @@ interface TraceEntry {
 }
 
 function readTrace(violation: Violation): TraceEntry[] | undefined {
-  // @ts-expect-error Wave 1 adds the `detectionTrace` field to Violation.
+  // Wave 1 (01-02) added Violation.detectionTrace as an optional field; the
+  // RED runtime assertion now lives in the test bodies below (asserts the
+  // field is defined). Wave 2 (01-03..08) populates it from matchers.
   return violation.detectionTrace as TraceEntry[] | undefined;
 }
 

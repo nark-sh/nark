@@ -8,6 +8,70 @@ import * as ts from "typescript";
 import type { BusinessImpact } from "../../types.js";
 
 // ============================================================================
+// Detection Trace + Convention Match Types
+// ============================================================================
+
+/**
+ * Single entry in the per-matcher evidence trail attached to a Violation.
+ *
+ * Wire schema (locked by Phase 01 CONTEXT.md):
+ *   - `matcher`  : canonical wire-string identifier from
+ *                  `src/v2/matchers/registry.ts::MATCHER_IDS` (e.g.
+ *                  "try-catch:direct", "framework:fastify-route").
+ *   - `status`   : tri-state outcome of the matcher relative to this
+ *                  (callsite, postcondition).
+ *                    - "passed"         : matcher fired and protected the site.
+ *                    - "failed"         : matcher was applicable but did not
+ *                                         find protection.
+ *                    - "not_applicable" : the matcher does not apply to this
+ *                                         (package, postcondition) at all —
+ *                                         emitted so readers can see we
+ *                                         consciously considered and skipped it.
+ *   - `reason`   : optional human/machine-readable explanation. Per schema,
+ *                  `reason` is ONLY populated when `status === "failed"`. The
+ *                  DetectionTraceAccumulator strips reasons from passed/
+ *                  not_applicable entries on serialize().
+ */
+export interface DetectionTraceEntry {
+  matcher: string;
+  status: "passed" | "failed" | "not_applicable";
+  reason?: string;
+}
+
+/**
+ * Deterministic in-repo-convention fix recommendation produced by the
+ * convention-miner second pass.
+ *
+ * Wire schema (locked by Phase 01 CONTEXT.md):
+ *   - `pattern_id`        : canonical wire-string identifier of the
+ *                           dominant matcher signature (a `MatcherId`).
+ *   - `supporting_sites`  : the passing callsites whose protection idiom
+ *                           matched `pattern_id`. Each entry is a
+ *                           file/line pair the AI fixer can read.
+ *   - `site_count`        : `supporting_sites.length` — surfaced
+ *                           redundantly for cheap UI rollups.
+ *   - `match_ratio`       : fraction of comparable passing sites for this
+ *                           (package, postcondition) that share
+ *                           `pattern_id`. Range 0..1. Below 0.60 (i.e.
+ *                           no ≥60% majority), the miner omits
+ *                           conventionMatch entirely (absence, not a
+ *                           sentinel).
+ *
+ * NAMING DECISION (CONTEXT.md verbatim — do NOT rename):
+ *   `pattern_id` / `match_ratio` / `supporting_sites` / `site_count`.
+ *   The deprecated quick-191 sketch used `confidence` /
+ *   `supportingCallsites` / `alternativeIdioms`. RESEARCH §"State of the
+ *   Art" explicitly flags the rename — Wave 3 consumers MUST read this
+ *   shape verbatim.
+ */
+export interface ConventionMatch {
+  pattern_id: string;
+  supporting_sites: Array<{ file: string; line: number }>;
+  site_count: number;
+  match_ratio: number;
+}
+
+// ============================================================================
 // Detection Types
 // ============================================================================
 
@@ -109,6 +173,28 @@ export interface Violation {
     message: string;
     severity: "error" | "warning";
   }>;
+
+  /**
+   * Per-matcher evidence trail. For each matcher V2 considered for this
+   * (package, postcondition) at this callsite, records whether it passed,
+   * failed, or was not_applicable. Populated by DetectionTraceAccumulator
+   * during matchDetections. Optional for backward compat — older Violation
+   * consumers ignore the field.
+   *
+   * See: src/v2/core/detection-trace-accumulator.ts (Wave 1)
+   *      src/v2/matchers/registry.ts (canonical matcher ids + applicability)
+   */
+  detectionTrace?: DetectionTraceEntry[];
+
+  /**
+   * Deterministic in-repo-convention fix recommendation. Populated by the
+   * convention-miner second pass when ≥3 comparable sites share a
+   * dominant matcher signature (≥60% majority). Absent when below threshold
+   * — absence (NOT a sentinel) signals "no recommendation available".
+   *
+   * See: src/v2/core/convention-miner.ts (Wave 3)
+   */
+  conventionMatch?: ConventionMatch;
 }
 
 // ============================================================================
