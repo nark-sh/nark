@@ -13,11 +13,25 @@ import type {
   Postcondition,
   FunctionContract,
 } from "../../types.js";
-import type { Detection, Violation } from "../types/index.js";
+import type {
+  Detection,
+  Violation,
+  PassedDetection,
+} from "../types/index.js";
 import { ControlFlowAnalysis } from "./control-flow-analyzer.js";
 import { checkSuppression } from "../../suppressions/matcher.js";
 import { computeViolationFingerprint } from "../../suppressions/fingerprint.js";
 import { loadWrapperConfigSync } from "../../suppressions/wrapper-config.js";
+import { DetectionTraceAccumulator } from "./detection-trace-accumulator.js";
+import { MATCHER_IDS } from "../matchers/registry.js";
+
+// Wave 2 (Plan 01-03 Task 2 + Plans 01-04..01-08) wires these into the
+// matchDetections suppression guards. Referenced here at module load so
+// the symbols are bound (tsc otherwise reports TS6133 "declared but never
+// read" for imports added before their consumer code lands). Removing
+// these `void` markers is safe once Task 2 inlines the actual usage.
+void DetectionTraceAccumulator;
+void MATCHER_IDS;
 
 export interface ContractMatcherOptions {
   projectRoot: string;
@@ -110,6 +124,21 @@ export class ContractMatcher {
   /** Tracks real call site evaluations per package (pass + fail) */
   private _callSitesByPackage: Map<string, number> = new Map();
   /**
+   * Buffer of passing-site records captured during the LAST matchDetections
+   * call. Reset at the top of each matchDetections invocation. The analyzer
+   * reads this immediately after calling matchDetections() via
+   * getLastPassedDetections() and attaches it to FileAnalysisResult.
+   *
+   * Wave 2 (this and Plans 01-04..01-08): contract-matcher guards push to
+   * this buffer when a protection matcher causes a `continue`. Wave 9
+   * (Plan 01-09) reads the aggregated array via the per-file results.
+   *
+   * IN-MEMORY ONLY — NEVER serialized to public Violation JSON, SARIF, or
+   * telemetry. The audit-record path in src/reporter.ts only reads
+   * Violation fields, so this buffer never leaks through.
+   */
+  private _lastPassedDetections: PassedDetection[] = [];
+  /**
    * Cached project-level `.nark/suppress.yaml` callback_wrappers extension list
    * (null = not yet checked). Used to extend the built-in wrapper-name pattern
    * list per-project.
@@ -133,6 +162,25 @@ export class ContractMatcher {
   }
 
   /**
+   * Return the PassedDetection[] buffer captured during the most recent
+   * matchDetections() call. The analyzer reads this and attaches it to
+   * FileAnalysisResult.passedDetections so Wave 9 (convention-miner) can
+   * walk it project-wide.
+   *
+   * Returns a fresh array (caller may not mutate the internal buffer).
+   * Returns `[]` when no passing-site record was pushed (e.g. file had no
+   * detections, or every guard fell through to fire a violation, or Wave
+   * 2 rewiring has not yet covered the package family that fired the
+   * continue).
+   *
+   * IN-MEMORY ONLY — the analyzer wires this to FileAnalysisResult, never
+   * to the audit JSON.
+   */
+  public getLastPassedDetections(): PassedDetection[] {
+    return this._lastPassedDetections.slice();
+  }
+
+  /**
    * Match a set of detections against contracts and produce violations.
    */
   public matchDetections(
@@ -140,6 +188,10 @@ export class ContractMatcher {
     sourceFile: ts.SourceFile,
   ): Violation[] {
     const violations: Violation[] = [];
+    // Reset the passing-site buffer at the top of each call. The previous
+    // file's passing sites have already been consumed by the analyzer via
+    // getLastPassedDetections().
+    this._lastPassedDetections = [];
 
     for (const detection of detections) {
       // Handle missing-event-listener absence detection

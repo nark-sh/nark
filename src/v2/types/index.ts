@@ -71,6 +71,40 @@ export interface ConventionMatch {
   match_ratio: number;
 }
 
+/**
+ * Passing-site record produced when a contract-matcher guard short-circuits
+ * via `continue` because a protection matcher fired. Aggregated across all
+ * files by the analyzer and consumed by the Wave 9 convention-miner second
+ * pass (`src/v2/core/convention-miner.ts`) to compute deterministic
+ * in-repo-convention recommendations on the next scan.
+ *
+ * IMPORTANT: This data is IN-MEMORY ONLY. It must NEVER be serialized into
+ * any public Violation JSON, SARIF output, scan-writer payload, or
+ * telemetry event. Wave 2 (contract-matcher rewiring) and Wave 3
+ * (convention-miner) consume it in-process; nothing else should touch it.
+ *
+ * Wire-stability concern: even though this never reaches the wire, the
+ * `passedMatcherId` value is a string from `MATCHER_IDS` and therefore
+ * inherits the same additive-only contract — never repurpose existing IDs.
+ */
+export interface PassedDetection {
+  /** Package name of the contract whose guard passed (e.g. "axios", "@sentry/node"). */
+  packageName: string;
+  /** Postcondition ID from the contract (e.g. "error-4xx-5xx"). */
+  postconditionId: string;
+  /** Absolute source-file path where the protected callsite lives. */
+  file: string;
+  /** 1-indexed line number of the protected callsite. */
+  line: number;
+  /**
+   * Canonical matcher ID that caused this site to be considered protected.
+   * Value is one of `MATCHER_IDS` from `src/v2/matchers/registry.ts`. Wave
+   * 9 (convention-miner) groups passing sites by this field per
+   * (package, postcondition) bucket.
+   */
+  passedMatcherId: string;
+}
+
 // ============================================================================
 // Detection Types
 // ============================================================================
@@ -549,6 +583,19 @@ export interface FileAnalysisResult {
 
   /** Errors encountered during analysis */
   errors: AnalysisError[];
+
+  /**
+   * Passing-site records captured when a contract-matcher guard
+   * short-circuited via `continue` because a protection matcher fired.
+   *
+   * IN-MEMORY ONLY — Wave 9 convention-miner consumes these in-process;
+   * this field MUST NOT appear in any public Violation JSON, SARIF output,
+   * scan-writer payload, or telemetry event. The CLI's audit-record
+   * serialization path explicitly excludes this field.
+   *
+   * Optional for backward-compat — older analyzer integrations ignore it.
+   */
+  passedDetections?: PassedDetection[];
 }
 
 /**

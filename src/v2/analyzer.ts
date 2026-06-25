@@ -15,6 +15,7 @@ import {
   Violation,
   AnalysisError,
   DetectorPlugin,
+  PassedDetection,
 } from './types/index.js';
 import { TraversalEngine } from './core/traversal-engine.js';
 import { ContractMatcher } from './core/contract-matcher.js';
@@ -322,8 +323,14 @@ export class UniversalAnalyzer {
 
       // Match detections to contracts to get violations
       let violations: Violation[] = [];
+      // passedDetections is in-memory only — Wave 9 (convention-miner)
+      // consumes this; it must NEVER be serialized to the audit JSON.
+      let passedDetections: PassedDetection[] = [];
       if (this.contractMatcher) {
         violations = this.contractMatcher.matchDetections(detections, sourceFile);
+        // Capture passing-site records immediately — the matcher's internal
+        // buffer resets on the next matchDetections call.
+        passedDetections = this.contractMatcher.getLastPassedDetections();
       }
 
       // Suppress violations in database migration files.
@@ -347,6 +354,7 @@ export class UniversalAnalyzer {
         violations,
         duration,
         errors,
+        passedDetections,
       };
     } catch (error) {
       errors.push({
@@ -361,6 +369,7 @@ export class UniversalAnalyzer {
         violations: [],
         duration: Date.now() - startTime,
         errors,
+        passedDetections: [],
       };
     }
   }
