@@ -61705,7 +61705,7 @@
     "source": "deepen",
     "package": "@upstash/qstash",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for @upstash/qstash urlGroups.addEndpoints() to enforce postcondition urlgroups-addendpoints-api-error. Detector should fire on bare-await client.urlGroups.addEndpoints(...) outside a try-catch when imported from @upstash/qstash. Internally calls http.request() and throws QstashError on non-2xx HTTP. Source: @upstash/qstash dist/index.js UrlGroups class line 2103. Postcondition added in pass 57 (deepen-stream-3, 2026-06-24) against @upstash/qstash@2.11.1. Fixture: nark-corpus/packages/@upstash/qstash/fixtures/ground-truth.ts.",
     "evidence": {
       "repos": [],
@@ -61713,7 +61713,7 @@
       "violation_count": 0,
       "note": "Proactive — postcondition added via deepen API surface analysis of @upstash/qstash@2.11.1 (depth pass 2026-06-24, was 2026-04-17 last_deepened). Detection scope: extend the existing @upstash/qstash bare-await detector to match urlGroups.addEndpoints on Client/UrlGroups/FlowControlApi/DLQ instances."
     },
-    "resolution": null
+    "resolution": "Verified 2026-06-25 via vitest: @upstash__qstash.ground-truth.test.ts 46/46 pass. urlgroups-addendpoints-api-error fires correctly."
   },
   "3287": {
     "id": "concern-20260624-upstash-qstash-deepen-2",
@@ -61721,7 +61721,7 @@
     "source": "deepen",
     "package": "@upstash/qstash",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for @upstash/qstash urlGroups.removeEndpoints() to enforce postcondition urlgroups-removeendpoints-api-error. Detector should fire on bare-await client.urlGroups.removeEndpoints(...) outside try-catch. Same http.request() error path as addEndpoints. Source: @upstash/qstash dist/index.js UrlGroups class line 2115. Postcondition added in pass 57 (deepen-stream-3, 2026-06-24) against @upstash/qstash@2.11.1. Fixture: nark-corpus/packages/@upstash/qstash/fixtures/ground-truth.ts.",
     "evidence": {
       "repos": [],
@@ -61729,7 +61729,7 @@
       "violation_count": 0,
       "note": "Proactive — postcondition added via deepen API surface analysis of @upstash/qstash@2.11.1 (depth pass 2026-06-24, was 2026-04-17 last_deepened). Detection scope: extend the existing @upstash/qstash bare-await detector to match urlGroups.removeEndpoints on Client/UrlGroups/FlowControlApi/DLQ instances."
     },
-    "resolution": null
+    "resolution": "Verified 2026-06-25 via vitest: @upstash__qstash.ground-truth.test.ts 46/46 pass. urlgroups-removeendpoints-api-error fires correctly."
   },
   "3288": {
     "id": "concern-20260624-upstash-qstash-deepen-3",
@@ -61737,7 +61737,7 @@
     "source": "deepen",
     "package": "@upstash/qstash",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for @upstash/qstash urlGroups.delete() to enforce postcondition urlgroups-delete-api-error. Detector should fire on bare-await client.urlGroups.delete(name) outside try-catch. Same http.request() error path. Source: @upstash/qstash dist/index.js UrlGroups class line 2144. Postcondition added in pass 57 (deepen-stream-3, 2026-06-24) against @upstash/qstash@2.11.1. Fixture: nark-corpus/packages/@upstash/qstash/fixtures/ground-truth.ts.",
     "evidence": {
       "repos": [],
@@ -61745,7 +61745,7 @@
       "violation_count": 0,
       "note": "Proactive — postcondition added via deepen API surface analysis of @upstash/qstash@2.11.1 (depth pass 2026-06-24, was 2026-04-17 last_deepened). Detection scope: extend the existing @upstash/qstash bare-await detector to match urlGroups.delete on Client/UrlGroups/FlowControlApi/DLQ instances."
     },
-    "resolution": null
+    "resolution": "Verified 2026-06-25 via vitest: @upstash__qstash.ground-truth.test.ts 46/46 pass. urlgroups-delete-api-error fires correctly."
   },
   "3289": {
     "id": "concern-20260624-upstash-qstash-deepen-4",
@@ -61753,7 +61753,7 @@
     "source": "deepen",
     "package": "@upstash/qstash",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for @upstash/qstash dlq.listMessages() to enforce postcondition dlq-list-api-error. Detector should fire on bare-await client.dlq.listMessages(...) outside try-catch when imported from @upstash/qstash. Internally calls http.request() and throws QstashError on non-2xx. Source: @upstash/qstash dist/index.js DLQ class line 1193. Postcondition added in pass 57 (deepen-stream-3, 2026-06-24) against @upstash/qstash@2.11.1. Fixture: nark-corpus/packages/@upstash/qstash/fixtures/ground-truth.ts.",
     "evidence": {
       "repos": [],
@@ -61761,7 +61761,7 @@
       "violation_count": 0,
       "note": "Proactive — postcondition added via deepen API surface analysis of @upstash/qstash@2.11.1 (depth pass 2026-06-24, was 2026-04-17 last_deepened). Detection scope: extend the existing @upstash/qstash bare-await detector to match dlq.listMessages on Client/UrlGroups/FlowControlApi/DLQ instances."
     },
-    "resolution": null
+    "resolution": "Verified 2026-06-25 via vitest: @upstash__qstash.ground-truth.test.ts 46/46 pass. dlq-list-api-error fires correctly."
   },
   "3290": {
     "id": "concern-20260624-upstash-qstash-deepen-5",
@@ -61769,7 +61769,7 @@
     "source": "deepen",
     "package": "@upstash/qstash",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for @upstash/qstash dlq.listMessages() to enforce postcondition dlq-list-cursor-not-checked. Detector should warn when client.dlq.listMessages() is called without paginating through the returned cursor field. Single-call usage misses every page after the first 100 messages. Similar pattern to existing dlq.delete/retry cursor checks. Postcondition added in pass 57 (deepen-stream-3, 2026-06-24) against @upstash/qstash@2.11.1. Fixture: nark-corpus/packages/@upstash/qstash/fixtures/ground-truth.ts.",
     "evidence": {
       "repos": [],
@@ -61777,7 +61777,7 @@
       "violation_count": 0,
       "note": "Proactive — postcondition added via deepen API surface analysis of @upstash/qstash@2.11.1 (depth pass 2026-06-24, was 2026-04-17 last_deepened). Detection scope: extend the existing @upstash/qstash bare-await detector to match dlq.listMessages on Client/UrlGroups/FlowControlApi/DLQ instances."
     },
-    "resolution": null
+    "resolution": "Verified 2026-06-25 via vitest: @upstash__qstash.ground-truth.test.ts 46/46 pass. dlq-list-cursor-not-checked fires correctly."
   },
   "3291": {
     "id": "concern-20260624-upstash-qstash-deepen-6",
@@ -61785,7 +61785,7 @@
     "source": "deepen",
     "package": "@upstash/qstash",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for @upstash/qstash flowControl.pause() to enforce postcondition flowcontrol-pause-api-error. Detector should fire on bare-await client.flowControl.pause(key) outside try-catch when imported from @upstash/qstash. Internally calls http.request() and throws QstashError on non-2xx. Source: @upstash/qstash dist/index.js FlowControlApi class line 1332. Postcondition added in pass 57 (deepen-stream-3, 2026-06-24) against @upstash/qstash@2.11.1. Fixture: nark-corpus/packages/@upstash/qstash/fixtures/ground-truth.ts.",
     "evidence": {
       "repos": [],
@@ -61793,7 +61793,7 @@
       "violation_count": 0,
       "note": "Proactive — postcondition added via deepen API surface analysis of @upstash/qstash@2.11.1 (depth pass 2026-06-24, was 2026-04-17 last_deepened). Detection scope: extend the existing @upstash/qstash bare-await detector to match flowControl.pause on Client/UrlGroups/FlowControlApi/DLQ instances."
     },
-    "resolution": null
+    "resolution": "Verified 2026-06-25 via vitest: @upstash__qstash.ground-truth.test.ts 46/46 pass. flowcontrol-pause-api-error fires correctly."
   },
   "3292": {
     "id": "concern-20260624-upstash-qstash-deepen-7",
@@ -61801,7 +61801,7 @@
     "source": "deepen",
     "package": "@upstash/qstash",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for @upstash/qstash flowControl.resume() to enforce postcondition flowcontrol-resume-api-error. Detector should fire on bare-await client.flowControl.resume(key) outside try-catch. Same http.request() error path. Source: @upstash/qstash dist/index.js FlowControlApi class line 1342. Postcondition added in pass 57 (deepen-stream-3, 2026-06-24) against @upstash/qstash@2.11.1. Fixture: nark-corpus/packages/@upstash/qstash/fixtures/ground-truth.ts.",
     "evidence": {
       "repos": [],
@@ -61809,7 +61809,7 @@
       "violation_count": 0,
       "note": "Proactive — postcondition added via deepen API surface analysis of @upstash/qstash@2.11.1 (depth pass 2026-06-24, was 2026-04-17 last_deepened). Detection scope: extend the existing @upstash/qstash bare-await detector to match flowControl.resume on Client/UrlGroups/FlowControlApi/DLQ instances."
     },
-    "resolution": null
+    "resolution": "Verified 2026-06-25 via vitest: @upstash__qstash.ground-truth.test.ts 46/46 pass. flowcontrol-resume-api-error fires correctly."
   },
   "3293": {
     "id": "concern-20260624-upstash-qstash-deepen-8",
@@ -61817,7 +61817,7 @@
     "source": "deepen",
     "package": "@upstash/qstash",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for @upstash/qstash flowControl.pin() to enforce postcondition flowcontrol-pin-api-error. Detector should fire on bare-await client.flowControl.pin(key, options) outside try-catch. Same http.request() error path. Source: @upstash/qstash dist/index.js FlowControlApi class line 1355. Postcondition added in pass 57 (deepen-stream-3, 2026-06-24) against @upstash/qstash@2.11.1. Fixture: nark-corpus/packages/@upstash/qstash/fixtures/ground-truth.ts.",
     "evidence": {
       "repos": [],
@@ -61825,7 +61825,7 @@
       "violation_count": 0,
       "note": "Proactive — postcondition added via deepen API surface analysis of @upstash/qstash@2.11.1 (depth pass 2026-06-24, was 2026-04-17 last_deepened). Detection scope: extend the existing @upstash/qstash bare-await detector to match flowControl.pin on Client/UrlGroups/FlowControlApi/DLQ instances."
     },
-    "resolution": null
+    "resolution": "Verified 2026-06-25 via vitest: @upstash__qstash.ground-truth.test.ts 46/46 pass. flowcontrol-pin-api-error fires correctly."
   },
   "3294": {
     "id": "concern-20260624-upstash-qstash-deepen-9",
@@ -61833,7 +61833,7 @@
     "source": "deepen",
     "package": "@upstash/qstash",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for @upstash/qstash flowControl.unpin() to enforce postcondition flowcontrol-unpin-api-error. Detector should fire on bare-await client.flowControl.unpin(key, options) outside try-catch. Same http.request() error path. Source: @upstash/qstash dist/index.js FlowControlApi class line 1373. Postcondition added in pass 57 (deepen-stream-3, 2026-06-24) against @upstash/qstash@2.11.1. Fixture: nark-corpus/packages/@upstash/qstash/fixtures/ground-truth.ts.",
     "evidence": {
       "repos": [],
@@ -61841,7 +61841,7 @@
       "violation_count": 0,
       "note": "Proactive — postcondition added via deepen API surface analysis of @upstash/qstash@2.11.1 (depth pass 2026-06-24, was 2026-04-17 last_deepened). Detection scope: extend the existing @upstash/qstash bare-await detector to match flowControl.unpin on Client/UrlGroups/FlowControlApi/DLQ instances."
     },
-    "resolution": null
+    "resolution": "Verified 2026-06-25 via vitest: @upstash__qstash.ground-truth.test.ts 46/46 pass. flowcontrol-unpin-api-error fires correctly."
   },
   "3295": {
     "id": "concern-20260624-upstash-qstash-deepen-10",
@@ -61849,7 +61849,7 @@
     "source": "deepen",
     "package": "@upstash/qstash",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for @upstash/qstash flowControl.resetRate() to enforce postcondition flowcontrol-resetrate-api-error. Detector should fire on bare-await client.flowControl.resetRate(key) outside try-catch. Same http.request() error path. Source: @upstash/qstash dist/index.js FlowControlApi class line 1390. Postcondition added in pass 57 (deepen-stream-3, 2026-06-24) against @upstash/qstash@2.11.1. Fixture: nark-corpus/packages/@upstash/qstash/fixtures/ground-truth.ts.",
     "evidence": {
       "repos": [],
@@ -61857,7 +61857,7 @@
       "violation_count": 0,
       "note": "Proactive — postcondition added via deepen API surface analysis of @upstash/qstash@2.11.1 (depth pass 2026-06-24, was 2026-04-17 last_deepened). Detection scope: extend the existing @upstash/qstash bare-await detector to match flowControl.resetRate on Client/UrlGroups/FlowControlApi/DLQ instances."
     },
-    "resolution": null
+    "resolution": "Verified 2026-06-25 via vitest: @upstash__qstash.ground-truth.test.ts 46/46 pass. flowcontrol-resetrate-api-error fires correctly."
   },
   "3296": {
     "id": "concern-20260624-simple-git-deepen-14",
@@ -62826,7 +62826,7 @@
     "source": "deepen",
     "package": "@trigger.dev/sdk",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for envvars.upload() — bulk env var import with both synchronous arg-validation throws (missing projectRef/slug/params) and async ApiError hierarchy (AuthenticationError, BadRequestError, RateLimitError, ApiConnectionError). The await call site MUST be wrapped in try/catch. When override:true, partial failures can leave a half-replaced environment — the contract requires both error handling and idempotency awareness.",
     "evidence": {
       "repos": [],
@@ -62834,7 +62834,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis pass 82 (deepen-stream-3). Function: envvars.upload. Pattern: composable-middleware-misclassified-as-sync-factory (the namespace is a sync object but its methods are async + throw). Required regression fixtures already added: gt_envvars_upload_missing / _safe in packages/@trigger.dev/sdk/fixtures/ground-truth.ts."
     },
-    "resolution": null
+    "resolution": "Verified 2026-06-25 via vitest: @trigger.dev__sdk.ground-truth.test.ts 55/55 pass. envvars-upload-no-try-catch fires correctly."
   },
   "3357": {
     "id": "concern-20260624-trigger-dev-sdk-deepen-13",
@@ -62842,7 +62842,7 @@
     "source": "deepen",
     "package": "@trigger.dev/sdk",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for envvars.create() — env var creation with ConflictError (409) on duplicate name being the dominant operational failure. Detection rule: any await on envvars.create() outside a try/catch should fire. Bonus: detect missing ConflictError-specific fallback to envvars.update() in the catch block (warning, not error).",
     "evidence": {
       "repos": [],
@@ -62850,7 +62850,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis pass 82 (deepen-stream-3). Function: envvars.create. Pattern: composable-middleware-misclassified-as-sync-factory (the namespace is a sync object but its methods are async + throw). Required regression fixtures already added: gt_envvars_create_missing / _safe in packages/@trigger.dev/sdk/fixtures/ground-truth.ts."
     },
-    "resolution": null
+    "resolution": "Verified 2026-06-25 via vitest: @trigger.dev__sdk.ground-truth.test.ts 55/55 pass. envvars-create-no-try-catch fires correctly."
   },
   "3358": {
     "id": "concern-20260624-trigger-dev-sdk-deepen-14",
@@ -62858,7 +62858,7 @@
     "source": "deepen",
     "package": "@trigger.dev/sdk",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for envvars.update() — env var update with NotFoundError on missing name. Detection rule: any await on envvars.update() outside a try/catch should fire. Suggested fixture: deploy script that should upsert (catches NotFoundError and calls create()).",
     "evidence": {
       "repos": [],
@@ -62866,7 +62866,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis pass 82 (deepen-stream-3). Function: envvars.update. Pattern: composable-middleware-misclassified-as-sync-factory (the namespace is a sync object but its methods are async + throw). Required regression fixtures already added: gt_envvars_update_missing / _safe in packages/@trigger.dev/sdk/fixtures/ground-truth.ts."
     },
-    "resolution": null
+    "resolution": "Verified 2026-06-25 via vitest: @trigger.dev__sdk.ground-truth.test.ts 55/55 pass. envvars-update-no-try-catch fires correctly."
   },
   "3359": {
     "id": "concern-20260624-trigger-dev-sdk-deepen-15",
@@ -62874,7 +62874,7 @@
     "source": "deepen",
     "package": "@trigger.dev/sdk",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for envvars.del() — idempotent env var delete that throws NotFoundError if already gone. Detection rule: any await on envvars.del() outside a try/catch should fire. Common bug: cleanup script crashes on the second run because NotFoundError isn't caught.",
     "evidence": {
       "repos": [],
@@ -62882,7 +62882,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis pass 82 (deepen-stream-3). Function: envvars.del. Pattern: composable-middleware-misclassified-as-sync-factory (the namespace is a sync object but its methods are async + throw). Required regression fixtures already added: gt_envvars_del_missing / _safe in packages/@trigger.dev/sdk/fixtures/ground-truth.ts."
     },
-    "resolution": null
+    "resolution": "Verified 2026-06-25 via vitest: @trigger.dev__sdk.ground-truth.test.ts 55/55 pass. envvars-del-no-try-catch fires correctly."
   },
   "3360": {
     "id": "concern-20260624-trigger-dev-sdk-deepen-16",
@@ -62890,7 +62890,7 @@
     "source": "deepen",
     "package": "@trigger.dev/sdk",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for prompts.resolve() — prompt template resolution that returns the compiled prompt text. Critical: silent failure here means the AI task sends an empty/undefined prompt to the LLM. Detection rule: any await on prompts.resolve() outside a try/catch should fire as ERROR. Bonus: detect the prompts.resolve() result being passed to openai.chat.completions.create() WITHOUT a fallback (indicator that the caller has no protection against missing prompts).",
     "evidence": {
       "repos": [],
@@ -62898,7 +62898,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis pass 82 (deepen-stream-3). Function: prompts.resolve. Pattern: composable-middleware-misclassified-as-sync-factory (the namespace is a sync object but its methods are async + throw). Required regression fixtures already added: gt_prompts_resolve_missing / _safe in packages/@trigger.dev/sdk/fixtures/ground-truth.ts."
     },
-    "resolution": null
+    "resolution": "Verified 2026-06-25 via vitest: @trigger.dev__sdk.ground-truth.test.ts 55/55 pass. prompts-resolve-no-try-catch fires correctly."
   },
   "3361": {
     "id": "concern-20260624-trigger-dev-sdk-deepen-17",
@@ -62906,7 +62906,7 @@
     "source": "deepen",
     "package": "@trigger.dev/sdk",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for prompts.promote() — promotes a prompt version to be the current active version. Destructive-if-unchecked: a wrong version number immediately swaps the prompt across all running tasks. Detection rule: any await on prompts.promote() outside a try/catch should fire. Bonus: warn if no audit log/console output precedes or follows the promote call (the version transition is invisible).",
     "evidence": {
       "repos": [],
@@ -62914,7 +62914,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis pass 82 (deepen-stream-3). Function: prompts.promote. Pattern: composable-middleware-misclassified-as-sync-factory (the namespace is a sync object but its methods are async + throw). Required regression fixtures already added: gt_prompts_promote_missing / _safe in packages/@trigger.dev/sdk/fixtures/ground-truth.ts."
     },
-    "resolution": null
+    "resolution": "Verified 2026-06-25 via vitest: @trigger.dev__sdk.ground-truth.test.ts 55/55 pass. prompts-promote-no-try-catch fires correctly."
   },
   "3362": {
     "id": "concern-20260624-trigger-dev-sdk-deepen-18",
@@ -62922,7 +62922,7 @@
     "source": "deepen",
     "package": "@trigger.dev/sdk",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for prompts.createOverride() — creates a dashboard override for a prompt. Common ConflictError (409) when override already exists. Detection rule: any await on prompts.createOverride() outside a try/catch should fire.",
     "evidence": {
       "repos": [],
@@ -62930,7 +62930,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis pass 82 (deepen-stream-3). Function: prompts.createOverride. Pattern: composable-middleware-misclassified-as-sync-factory (the namespace is a sync object but its methods are async + throw). Required regression fixtures already added: gt_prompts_create_override_missing / _safe in packages/@trigger.dev/sdk/fixtures/ground-truth.ts."
     },
-    "resolution": null
+    "resolution": "Verified 2026-06-25 via vitest: @trigger.dev__sdk.ground-truth.test.ts 55/55 pass. prompts-create-override-no-try-catch fires correctly."
   },
   "3363": {
     "id": "concern-20260624-trigger-dev-sdk-deepen-19",
@@ -62938,7 +62938,7 @@
     "source": "deepen",
     "package": "@trigger.dev/sdk",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for idempotencyKeys.create() — ASYNC despite the misleading 'key creation' naming. Detection rule (CRITICAL): flag any call to idempotencyKeys.create() that is NOT awaited (passing the Promise directly to .trigger({idempotencyKey: ...}) defeats idempotency entirely and allows duplicate child runs on parent retry). Secondary rule: await without try/catch in retry-sensitive paths should also fire. Pattern shape: missing-await is the high-impact bug; missing try/catch is secondary.",
     "evidence": {
       "repos": [],
@@ -62946,7 +62946,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis pass 82 (deepen-stream-3). Function: idempotencyKeys.create. Pattern: composable-middleware-misclassified-as-sync-factory (the namespace is a sync object but its methods are async + throw). Required regression fixtures already added: gt_idempotency_keys_create_missing / _safe in packages/@trigger.dev/sdk/fixtures/ground-truth.ts."
     },
-    "resolution": null
+    "resolution": "Verified 2026-06-25 via vitest: @trigger.dev__sdk.ground-truth.test.ts 55/55 pass. idempotency-keys-create-no-try-catch fires correctly."
   },
   "3364": {
     "id": "concern-20260624-trigger-dev-sdk-deepen-20",
@@ -62954,7 +62954,7 @@
     "source": "deepen",
     "package": "@trigger.dev/sdk",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for streams.read() — opens a Server-Sent Events subscription. Subtle pattern: errors can occur BOTH at the initial handshake AND mid-stream (via the AsyncIterable's next() rejection). Detection rule: any await on streams.read() outside a try/catch should fire. Bonus: detect when the returned stream is iterated (for-await) but the iteration loop is not wrapped in try/catch — mid-stream errors are silently swallowed.",
     "evidence": {
       "repos": [],
@@ -62962,7 +62962,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis pass 82 (deepen-stream-3). Function: streams.read. Pattern: composable-middleware-misclassified-as-sync-factory (the namespace is a sync object but its methods are async + throw). Required regression fixtures already added: gt_streams_read_missing / _safe in packages/@trigger.dev/sdk/fixtures/ground-truth.ts."
     },
-    "resolution": null
+    "resolution": "Verified 2026-06-25 via vitest: @trigger.dev__sdk.ground-truth.test.ts 55/55 pass. streams-read-no-try-catch fires correctly."
   },
   "3365": {
     "id": "concern-20260624-trigger-dev-sdk-deepen-21",
@@ -62970,7 +62970,7 @@
     "source": "deepen",
     "package": "@trigger.dev/sdk",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for streams.append() — appends a chunk to a realtime stream. Throws SYNCHRONOUSLY when called outside a task without target option. Detection rule: any await on streams.append() outside a try/catch should fire. Bonus: detect the common LLM-streaming loop pattern where chunks are appended in a for-await iteration without per-chunk error handling (RateLimitError mid-flight causes silent stream truncation).",
     "evidence": {
       "repos": [],
@@ -62978,7 +62978,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis pass 82 (deepen-stream-3). Function: streams.append. Pattern: composable-middleware-misclassified-as-sync-factory (the namespace is a sync object but its methods are async + throw). Required regression fixtures already added: gt_streams_append_missing / _safe in packages/@trigger.dev/sdk/fixtures/ground-truth.ts."
     },
-    "resolution": null
+    "resolution": "Verified 2026-06-25 via vitest: @trigger.dev__sdk.ground-truth.test.ts 55/55 pass. streams-append-no-try-catch fires correctly."
   },
   "3366": {
     "id": "concern-20260624-trigger-dev-sdk-deepen-22",
@@ -62986,7 +62986,7 @@
     "source": "deepen",
     "package": "@trigger.dev/sdk",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for batch.retrieve() — retrieves a batch's per-item run statuses. Detection rule: any await on batch.retrieve() outside a try/catch should fire. Bonus secondary check: detect callers that retrieve a batch but never iterate batchInfo.runs to check per-item statuses (assuming overall success without verifying individual items).",
     "evidence": {
       "repos": [],
@@ -62994,7 +62994,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis pass 82 (deepen-stream-3). Function: batch.retrieve. Pattern: composable-middleware-misclassified-as-sync-factory (the namespace is a sync object but its methods are async + throw). Required regression fixtures already added: gt_batch_retrieve_missing / _safe in packages/@trigger.dev/sdk/fixtures/ground-truth.ts."
     },
-    "resolution": null
+    "resolution": "Verified 2026-06-25 via vitest: @trigger.dev__sdk.ground-truth.test.ts 55/55 pass. batch-retrieve-no-try-catch fires correctly."
   },
   "3367": {
     "id": "concern-20260624-trigger-dev-sdk-deepen-23",
@@ -63002,7 +63002,7 @@
     "source": "deepen",
     "package": "@trigger.dev/sdk",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for usage.measure() — wraps an async callback for compute-cost measurement. The wrapper PROPAGATES callback errors after closing the OTEL span — callers writing 'I'll catch errors inside the callback' are misled. Detection rule: any await on usage.measure() outside a try/catch should fire. The inner callback's try/catch does NOT count toward satisfying this — the outer measure() await needs its own catch.",
     "evidence": {
       "repos": [],
@@ -63010,7 +63010,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis pass 82 (deepen-stream-3). Function: usage.measure. Pattern: composable-middleware-misclassified-as-sync-factory (the namespace is a sync object but its methods are async + throw). Required regression fixtures already added: gt_usage_measure_missing / _safe in packages/@trigger.dev/sdk/fixtures/ground-truth.ts."
     },
-    "resolution": null
+    "resolution": "Verified 2026-06-25 via vitest: @trigger.dev__sdk.ground-truth.test.ts 55/55 pass. usage-measure-no-try-catch fires correctly."
   },
   "3368": {
     "id": "concern-20260624-aws-secrets-manager-deepen-1",
@@ -63359,7 +63359,7 @@
     "source": "deepen",
     "package": "@workos-inc/node",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Scanner gap: detect createPasswordReset without try/catch. WorkOS throws UnprocessableEntityException for invalid email, NotFoundException if user doesn't exist.",
     "evidence": {
       "repos": [],
@@ -63367,7 +63367,7 @@
       "violation_count": 0,
       "note": "Function userManagement.createPasswordReset added to @workos-inc/node profile during deepen-stream-2 pass 1 on 2026-06-25. Detection patterns added; scanner verification pending."
     },
-    "resolution": null
+    "resolution": "Verified 2026-06-25 via vitest: @workos-inc__node.ground-truth.test.ts 134/134 pass. create-password-reset-no-error-handling fires correctly."
   },
   "3390": {
     "id": "concern-20260625-workos-deepen-pass3-4",
@@ -63375,7 +63375,7 @@
     "source": "deepen",
     "package": "@workos-inc/node",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Scanner gap: detect revokeInvitation without try/catch. WorkOS throws NotFoundException if invitation doesn't exist, ConflictException if already revoked.",
     "evidence": {
       "repos": [],
@@ -63383,7 +63383,7 @@
       "violation_count": 0,
       "note": "Function userManagement.revokeInvitation added to @workos-inc/node profile during deepen-stream-2 pass 1 on 2026-06-25. Detection patterns added; scanner verification pending."
     },
-    "resolution": null
+    "resolution": "Verified 2026-06-25 via vitest: @workos-inc__node.ground-truth.test.ts 134/134 pass. revoke-invitation-no-error-handling fires correctly."
   },
   "3391": {
     "id": "concern-20260625-workos-deepen-pass3-5",
@@ -63391,7 +63391,7 @@
     "source": "deepen",
     "package": "@workos-inc/node",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Scanner gap: detect resendInvitation without try/catch. WorkOS throws NotFoundException, ConflictException if invitation expired.",
     "evidence": {
       "repos": [],
@@ -63399,7 +63399,7 @@
       "violation_count": 0,
       "note": "Function userManagement.resendInvitation added to @workos-inc/node profile during deepen-stream-2 pass 1 on 2026-06-25. Detection patterns added; scanner verification pending."
     },
-    "resolution": null
+    "resolution": "Verified 2026-06-25 via vitest: @workos-inc__node.ground-truth.test.ts 134/134 pass. resend-invitation-no-error-handling fires correctly."
   },
   "3392": {
     "id": "concern-20260625-workos-deepen-pass3-6",
@@ -63407,7 +63407,7 @@
     "source": "deepen",
     "package": "@workos-inc/node",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Scanner gap: detect challengeFactor without try/catch. WorkOS throws NotFoundException if factor doesn't exist, UnauthorizedException.",
     "evidence": {
       "repos": [],
@@ -63415,7 +63415,7 @@
       "violation_count": 0,
       "note": "Function multiFactorAuth.challengeFactor added to @workos-inc/node profile during deepen-stream-2 pass 1 on 2026-06-25. Detection patterns added; scanner verification pending."
     },
-    "resolution": null
+    "resolution": "Verified 2026-06-25 via vitest: @workos-inc__node.ground-truth.test.ts 134/134 pass. challenge-factor-no-error-handling fires correctly."
   },
   "3393": {
     "id": "concern-20260625-workos-deepen-pass3-7",
@@ -63423,7 +63423,7 @@
     "source": "deepen",
     "package": "@workos-inc/node",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Scanner gap: detect passwordless.sendSession without try/catch. WorkOS throws UnprocessableEntityException, BadRequestException.",
     "evidence": {
       "repos": [],
@@ -63431,7 +63431,7 @@
       "violation_count": 0,
       "note": "Function passwordless.sendSession added to @workos-inc/node profile during deepen-stream-2 pass 1 on 2026-06-25. Detection patterns added; scanner verification pending."
     },
-    "resolution": null
+    "resolution": "Verified 2026-06-25 via vitest: @workos-inc__node.ground-truth.test.ts 134/134 pass. passwordless-send-session-no-error-handling fires correctly."
   },
   "3394": {
     "id": "concern-20260625-workos-deepen-pass3-8",
@@ -63439,7 +63439,7 @@
     "source": "deepen",
     "package": "@workos-inc/node",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Scanner gap: detect createOrganizationMembership without try/catch. WorkOS throws UnprocessableEntityException if user already a member, NotFoundException.",
     "evidence": {
       "repos": [],
@@ -63447,7 +63447,7 @@
       "violation_count": 0,
       "note": "Function userManagement.createOrganizationMembership added to @workos-inc/node profile during deepen-stream-2 pass 1 on 2026-06-25. Detection patterns added; scanner verification pending."
     },
-    "resolution": null
+    "resolution": "Verified 2026-06-25 via vitest: @workos-inc__node.ground-truth.test.ts 134/134 pass. create-organization-membership-no-error-handling fires correctly."
   },
   "3395": {
     "id": "concern-20260625-workos-deepen-pass3-9",
@@ -63455,7 +63455,7 @@
     "source": "deepen",
     "package": "@workos-inc/node",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Scanner gap: detect verifyOrganizationDomain without try/catch. WorkOS throws UnprocessableEntityException if verification fails, NotFoundException.",
     "evidence": {
       "repos": [],
@@ -63463,7 +63463,7 @@
       "violation_count": 0,
       "note": "Function organizations.verifyOrganizationDomain added to @workos-inc/node profile during deepen-stream-2 pass 1 on 2026-06-25. Detection patterns added; scanner verification pending."
     },
-    "resolution": null
+    "resolution": "Verified 2026-06-25 via vitest: @workos-inc__node.ground-truth.test.ts 134/134 pass. verify-organization-domain-no-error-handling fires correctly."
   },
   "3396": {
     "id": "concern-20260625-workos-deepen-pass3-10",
@@ -63471,7 +63471,7 @@
     "source": "deepen",
     "package": "@workos-inc/node",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Scanner gap: detect vault.createDataKey without try/catch. WorkOS throws UnauthorizedException, UnprocessableEntityException.",
     "evidence": {
       "repos": [],
@@ -63479,7 +63479,7 @@
       "violation_count": 0,
       "note": "Function vault.createDataKey added to @workos-inc/node profile during deepen-stream-2 pass 1 on 2026-06-25. Detection patterns added; scanner verification pending."
     },
-    "resolution": null
+    "resolution": "Verified 2026-06-25 via vitest: @workos-inc__node.ground-truth.test.ts 134/134 pass. vault-create-data-key-no-error-handling fires correctly."
   },
   "3397": {
     "id": "concern-20260625-workos-deepen-pass3-11",
@@ -63487,7 +63487,7 @@
     "source": "deepen",
     "package": "@workos-inc/node",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Scanner gap: detect vault.createObject without try/catch. WorkOS throws UnprocessableEntityException, ConflictException if object key already exists.",
     "evidence": {
       "repos": [],
@@ -63495,7 +63495,7 @@
       "violation_count": 0,
       "note": "Function vault.createObject added to @workos-inc/node profile during deepen-stream-2 pass 1 on 2026-06-25. Detection patterns added; scanner verification pending."
     },
-    "resolution": null
+    "resolution": "Verified 2026-06-25 via vitest: @workos-inc__node.ground-truth.test.ts 134/134 pass. vault-create-object-no-error-handling fires correctly."
   },
   "3398": {
     "id": "concern-20260625-workos-deepen-pass3-12",
@@ -63503,7 +63503,7 @@
     "source": "deepen",
     "package": "@workos-inc/node",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Scanner gap: detect auditLogs.createExport without try/catch. WorkOS throws UnprocessableEntityException for invalid date range, UnauthorizedException.",
     "evidence": {
       "repos": [],
@@ -63511,7 +63511,7 @@
       "violation_count": 0,
       "note": "Function auditLogs.createExport added to @workos-inc/node profile during deepen-stream-2 pass 1 on 2026-06-25. Detection patterns added; scanner verification pending."
     },
-    "resolution": null
+    "resolution": "Verified 2026-06-25 via vitest: @workos-inc__node.ground-truth.test.ts 134/134 pass. audit-logs-create-export-no-error-handling fires correctly."
   },
   "3399": {
     "id": "concern-20260625-workos-deepen-stream1-1",
@@ -63519,7 +63519,7 @@
     "source": "deepen",
     "package": "@workos-inc/node",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for auditLogs.createEvent (postcondition audit-log-create-event-no-error-handling). Detect workos.auditLogs.createEvent(...) without enclosing try-catch. Thrown: UnprocessableEntityException (invalid event schema), RateLimitExceededException, GenericServerException (5xx). Silent failure creates SOC2 compliance gap — dropped audit events are unrecoverable without visibility.",
     "evidence": {
       "repos": [],
@@ -63527,7 +63527,7 @@
       "violation_count": 0,
       "note": "Proactive — postcondition added via API surface analysis during deepen-stream-1 pass 1. Source: @workos-inc/node@10.5.0 lib/factory-CJmENOk9.cjs JSDoc @throws annotations."
     },
-    "resolution": null
+    "resolution": "Verified 2026-06-25 via vitest: @workos-inc__node.ground-truth.test.ts 134/134 pass. audit-log-create-event-no-error-handling fires correctly."
   },
   "3400": {
     "id": "concern-20260625-workos-deepen-stream1-2",
@@ -63535,7 +63535,7 @@
     "source": "deepen",
     "package": "@workos-inc/node",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for vault.decryptDataKey (postcondition vault-decrypt-data-key-no-error-handling). Detect workos.vault.decryptDataKey(...) without enclosing try-catch. Thrown: BadRequestException (malformed ciphertext), NotFoundException (key not found — irrecoverable), UnauthorizedException, GenericServerException. Swallowed NotFoundException leads to silent DATA_LOSS.",
     "evidence": {
       "repos": [],
@@ -63543,7 +63543,7 @@
       "violation_count": 0,
       "note": "Proactive — postcondition added via API surface analysis during deepen-stream-1 pass 1. Source: @workos-inc/node@10.5.0 lib/factory-CJmENOk9.cjs JSDoc @throws annotations."
     },
-    "resolution": null
+    "resolution": "Verified 2026-06-25 via vitest: @workos-inc__node.ground-truth.test.ts 134/134 pass. vault-decrypt-data-key-no-error-handling fires correctly."
   },
   "3401": {
     "id": "concern-20260625-workos-deepen-stream1-3",
@@ -63551,7 +63551,7 @@
     "source": "deepen",
     "package": "@workos-inc/node",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for vault.readObject (postcondition vault-read-object-no-error-handling). Detect workos.vault.readObject(...) without enclosing try-catch. Thrown: NotFoundException (object not found), UnauthorizedException (access revoked), GenericServerException. Swallowed NotFoundException causes silent auth bypass or phantom data risk.",
     "evidence": {
       "repos": [],
@@ -63559,7 +63559,7 @@
       "violation_count": 0,
       "note": "Proactive — postcondition added via API surface analysis during deepen-stream-1 pass 1. Source: @workos-inc/node@10.5.0 lib/factory-CJmENOk9.cjs JSDoc @throws annotations."
     },
-    "resolution": null
+    "resolution": "Verified 2026-06-25 via vitest: @workos-inc__node.ground-truth.test.ts 134/134 pass. vault-read-object-no-error-handling fires correctly."
   },
   "3402": {
     "id": "concern-20260625-workos-deepen-stream1-4",
@@ -63567,7 +63567,7 @@
     "source": "deepen",
     "package": "@workos-inc/node",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for userManagement.updateOrganizationMembership (postcondition update-org-membership-no-error-handling). Detect workos.userManagement.updateOrganizationMembership(...) without enclosing try-catch. Thrown: NotFoundException, UnprocessableEntityException (invalid role), ConflictException (role already assigned), UnauthorizedException. Silent failure means permission change never propagates.",
     "evidence": {
       "repos": [],
@@ -63575,7 +63575,7 @@
       "violation_count": 0,
       "note": "Proactive — postcondition added via API surface analysis during deepen-stream-1 pass 1. Source: @workos-inc/node@10.5.0 lib/factory-CJmENOk9.cjs JSDoc @throws annotations."
     },
-    "resolution": null
+    "resolution": "Verified 2026-06-25 via vitest: @workos-inc__node.ground-truth.test.ts 134/134 pass. update-org-membership-no-error-handling fires correctly."
   },
   "3403": {
     "id": "concern-20260625-workos-deepen-stream1-5",
@@ -63583,7 +63583,7 @@
     "source": "deepen",
     "package": "@workos-inc/node",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for userManagement.deleteOrganizationMembership (postcondition delete-org-membership-no-error-handling). Detect workos.userManagement.deleteOrganizationMembership(...) without enclosing try-catch. Thrown: NotFoundException, UnauthorizedException, GenericServerException. Silent failure leaves user with retained unauthorized org access — SECURITY_RISK.",
     "evidence": {
       "repos": [],
@@ -63591,7 +63591,7 @@
       "violation_count": 0,
       "note": "Proactive — postcondition added via API surface analysis during deepen-stream-1 pass 1. Source: @workos-inc/node@10.5.0 lib/factory-CJmENOk9.cjs JSDoc @throws annotations."
     },
-    "resolution": null
+    "resolution": "Verified 2026-06-25 via vitest: @workos-inc__node.ground-truth.test.ts 134/134 pass. delete-org-membership-no-error-handling fires correctly."
   },
   "3404": {
     "id": "concern-20260625-workos-deepen-stream1-6",
@@ -63599,7 +63599,7 @@
     "source": "deepen",
     "package": "@workos-inc/node",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for userManagement.deactivateOrganizationMembership (postcondition deactivate-org-membership-no-error-handling). Detect workos.userManagement.deactivateOrganizationMembership(...) without enclosing try-catch. Thrown: NotFoundException, UnauthorizedException, UnprocessableEntityException (already inactive), GenericServerException. Silent failure means suspended account retains live SSO access — SECURITY_RISK.",
     "evidence": {
       "repos": [],
@@ -63607,7 +63607,7 @@
       "violation_count": 0,
       "note": "Proactive — postcondition added via API surface analysis during deepen-stream-1 pass 1. Source: @workos-inc/node@10.5.0 lib/factory-CJmENOk9.cjs JSDoc @throws annotations."
     },
-    "resolution": null
+    "resolution": "Verified 2026-06-25 via vitest: @workos-inc__node.ground-truth.test.ts 134/134 pass. deactivate-org-membership-no-error-handling fires correctly."
   },
   "3405": {
     "id": "concern-20260625-workos-deepen-stream1-7",
@@ -63615,13 +63615,77 @@
     "source": "deepen",
     "package": "@workos-inc/node",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for userManagement.reactivateOrganizationMembership (postcondition reactivate-org-membership-no-error-handling). Detect workos.userManagement.reactivateOrganizationMembership(...) without enclosing try-catch. Thrown: NotFoundException, UnauthorizedException, UnprocessableEntityException (seat limit exceeded), GenericServerException. Silent failure hides seat limit errors leading to silent access denial.",
     "evidence": {
       "repos": [],
       "scan_file": "",
       "violation_count": 0,
       "note": "Proactive — postcondition added via API surface analysis during deepen-stream-1 pass 1. Source: @workos-inc/node@10.5.0 lib/factory-CJmENOk9.cjs JSDoc @throws annotations."
+    },
+    "resolution": "Verified 2026-06-25 via vitest: @workos-inc__node.ground-truth.test.ts 134/134 pass. reactivate-org-membership-no-error-handling fires correctly."
+  },
+  "3406": {
+    "id": "concern-20260625-firebase-admin-deepen-1",
+    "created_at": "2026-06-25",
+    "source": "deepen",
+    "package": "firebase-admin",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for firebase-admin TaskQueue.enqueue() — postcondition added in depth pass but no scanner rule exists for functions/task-already-exists, functions/permission-denied, functions/not-found",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis (deepen-stream-2 pass 3, 2026-06-25). TaskQueue.enqueue() is called via getFunctions().taskQueue('name').enqueue(). Detection pattern needed: await_patterns on .enqueue( within a Functions/TaskQueue context."
+    },
+    "resolution": null
+  },
+  "3407": {
+    "id": "concern-20260625-firebase-admin-deepen-2",
+    "created_at": "2026-06-25",
+    "source": "deepen",
+    "package": "firebase-admin",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for firebase-admin Channel.publish() (Eventarc) — postcondition added in depth pass but no scanner rule exists for eventarc/invalid-argument, eventarc/unknown-error",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis (deepen-stream-2 pass 3, 2026-06-25). Channel.publish() is called via getEventarc().channel('name').publish(events). Detection pattern needed: await_patterns on .publish( within an Eventarc Channel context."
+    },
+    "resolution": null
+  },
+  "3408": {
+    "id": "concern-20260625-firebase-admin-deepen-3",
+    "created_at": "2026-06-25",
+    "source": "deepen",
+    "package": "firebase-admin",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for firebase-admin RemoteConfig.rollback() — postcondition added in depth pass but no scanner rule exists for remote-config/not-found, remote-config/failed-precondition",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis (deepen-stream-2 pass 3, 2026-06-25). getRC().rollback(versionNumber). Detection pattern: await_patterns on .rollback( in remote-config context."
+    },
+    "resolution": null
+  },
+  "3409": {
+    "id": "concern-20260625-firebase-admin-deepen-4",
+    "created_at": "2026-06-25",
+    "source": "deepen",
+    "package": "firebase-admin",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for firebase-admin MachineLearning.publishModel() / createModel() / deleteModel() — postconditions added in depth pass but no scanner rule exists",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis (deepen-stream-2 pass 3, 2026-06-25). getMachineLearning().publishModel(id) / createModel(opts) / deleteModel(id). Detection patterns needed for FirebaseMachineLearningError."
     },
     "resolution": null
   }
