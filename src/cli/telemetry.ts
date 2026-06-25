@@ -201,6 +201,43 @@ export interface EnrichedTelemetryPayload extends TelemetryPayload {
 }
 
 /**
+ * Plan 01-12 / Wave 4c — convention-match telemetry payload.
+ *
+ * Mirrors the Zod schema accepted by POST /api/telemetry/convention-match
+ * (added by Plan 01-11 on the SaaS side). Two event types share the same
+ * endpoint:
+ *   - `rendered`: fires once per violation whose `conventionMatch` was
+ *                 populated by the Wave 3 mineConventions() second pass
+ *                 (i.e. the CLI surfaced a "78% of YOUR similar callsites
+ *                 do X" recommendation to the user).
+ *   - `resolved_with_recommended_pattern`: fires when a prior recommended
+ *                 violation has disappeared between scans. v1.0 fires this
+ *                 from the SaaS side only (Inngest closed-loop detector in
+ *                 lib/inngest/functions/public-scan-resolved-detector.ts);
+ *                 the CLI does NOT fire it in v1.0 because it lacks local
+ *                 prior-scan state (Open Question #2 decision). The TYPE
+ *                 still accepts it so the v1.1 CLI side can fire it without
+ *                 a wire-shape change.
+ *
+ * Field names match the SaaS endpoint's Zod schema verbatim. Do NOT rename
+ * without updating the endpoint in tandem.
+ */
+export interface ConventionMatchTelemetryPayload {
+  eventType: "rendered" | "resolved_with_recommended_pattern";
+  patternId: string;
+  matchRatio: number;
+  siteCount: number;
+  /** Synthetic violation fingerprint — only used by `resolved_with_recommended_pattern` events. */
+  priorViolationFingerprint?: string;
+  /** SHA256 of git remote origin URL (same shape as the existing TelemetryPayload field). */
+  repoFingerprint?: string;
+  /** Anonymous stable device UUID (same shape as the existing TelemetryPayload field). */
+  deviceId?: string;
+  /** Nark version that produced this event (CLI package.json version). */
+  narkVersion: string;
+}
+
+/**
  * Compute a SHA256 hash of the git remote origin URL for the current working directory.
  * Returns undefined if git is unavailable, there is no origin remote, or any error occurs.
  * Never throws.
@@ -890,6 +927,87 @@ export async function fireEnrichedTelemetryEvent(
       error: true,
       errorReason: "UNKNOWN",
     };
+  }
+}
+
+/**
+ * Plan 01-12 / Wave 4c — fire a `conventionMatch_rendered` (or future
+ * `resolved_with_recommended_pattern`) event to the SaaS
+ * /api/telemetry/convention-match endpoint added by Plan 01-11.
+ *
+ * Best-effort: NEVER throws, NEVER returns a sentinel, NEVER blocks the
+ * scanner exit. Honors all existing opt-outs (NARK_TELEMETRY=off,
+ * DO_NOT_TRACK=1, telemetry.json `enabled: false`) via the shared
+ * readTelemetryConfig() helper. Mirrors the resilience posture of
+ * fireTelemetryEvent / fireEnrichedTelemetryEvent above.
+ *
+ * Enrichment: when `payload.deviceId` / `.repoFingerprint` are omitted,
+ * we transparently enrich with the same shared helpers the scan
+ * telemetry uses (`getOrCreateDeviceId()` + `getRepoFingerprint()`), so
+ * the caller (post-scan iteration in src/index.ts) doesn't need to
+ * thread them through manually.
+ *
+ * URL resolution: defaults to `https://app.nark.sh` (matching the
+ * existing NARK_API_BASE constant). Callers can override via
+ * `opts.apiUrl` — typically used in tests + local dev where the SaaS
+ * runs on http://localhost:3000 (see nark-dev/.claude/rules/telemetry-testing.md).
+ *
+ * Auth: callers may pass `opts.bearer` to attach an Authorization
+ * header. Anonymous (no bearer) calls are accepted by the SaaS endpoint
+ * per Plan 01-11.
+ *
+ * Timeout: AbortSignal.timeout(DEFAULT_TELEMETRY_TIMEOUT_MS) — matches
+ * the existing fire helpers' default (5s, bumped from 2s in qt-255).
+ */
+export async function fireConventionMatchRenderedEvent(
+  payload: ConventionMatchTelemetryPayload,
+  opts: {
+    apiUrl?: string;
+    bearer?: string;
+    timeoutMs?: number;
+  } = {},
+): Promise<void> {
+  // Opt-out gate — short-circuit BEFORE any network work. Reuses the
+  // shared readTelemetryConfig() helper so a single source of truth
+  // governs all three opt-out paths (env vars + file config).
+  const config = readTelemetryConfig();
+  if (!config.enabled) return;
+
+  try {
+    const base = opts.apiUrl ?? getCurrentNarkApiBase();
+    const url = `${base}/api/telemetry/convention-match`;
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+    };
+    if (opts.bearer) {
+      headers["Authorization"] = `Bearer ${opts.bearer}`;
+    }
+
+    // Transparent enrichment — if caller omitted deviceId / repoFingerprint,
+    // fill them in from the same helpers the scan telemetry uses. Both
+    // helpers are never-throw + return undefined on failure.
+    const fp = payload.repoFingerprint ?? getRepoFingerprint();
+    const did = payload.deviceId ?? getOrCreateDeviceId();
+    const enriched: ConventionMatchTelemetryPayload = {
+      ...payload,
+      ...(fp ? { repoFingerprint: fp } : {}),
+      ...(did ? { deviceId: did } : {}),
+    };
+
+    const timeoutMs = opts.timeoutMs ?? DEFAULT_TELEMETRY_TIMEOUT_MS;
+    await fetch(url, {
+      method: "POST",
+      headers,
+      body: JSON.stringify(enriched),
+      signal: AbortSignal.timeout(timeoutMs),
+    }).catch(() => null);
+    // Note: we deliberately don't inspect response.ok / status. The wire
+    // shape that comes back is irrelevant to the scanner; any 4xx/5xx is
+    // a SaaS-side concern surfaced via the SaaS's own observability stack.
+    // Telemetry must never affect scan UX.
+  } catch {
+    // Defense-in-depth: even if URL construction / JSON.stringify / fetch
+    // import itself fails, swallow. The scanner exit path must be unaffected.
   }
 }
 
