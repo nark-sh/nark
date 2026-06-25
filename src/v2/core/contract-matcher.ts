@@ -3651,7 +3651,12 @@ export class ContractMatcher {
         normalizedChainStr.endsWith("." + normalizeChain(functionName));
 
       if (chainStrContainsFunctionName) {
-        const chainMatch = functions.find((f) => {
+        // Two-pass match. Exact match wins over suffix match so that adding a non-beta
+        // postcondition (e.g., `messages.create`) to a contract that already has a
+        // beta-prefixed entry (`beta.messages.create`) does not silently shadow the new
+        // non-beta call. Concern: concern-20260624-scanner-deepen-4 (deepen-stream-2
+        // pass 75 — anthropic-sdk parallel beta/non-beta APIs).
+        const exactMatch = functions.find((f) => {
           // Build the effective full name when the contract uses the `namespace` field.
           // Contracts that use namespace+name (e.g., namespace: "messages", name: "create")
           // must be compared against chainStr using the combined "messages.create" form,
@@ -3662,20 +3667,32 @@ export class ContractMatcher {
           // Exact match on the full chain string (both as-is and normalized)
           if (effectiveName === chainStr) return true;
           if (normalizeChain(effectiveName) === normalizedChainStr) return true;
-          // Suffix match: effective name ends with chainStr (handles leading package root)
-          if (effectiveName.endsWith("." + chainStr)) return true;
-          if (normalizeChain(effectiveName).endsWith("." + normalizedChainStr)) return true;
           // Also match the plain f.name for non-namespaced contracts
           if (!f.namespace) {
             if (f.name === chainStr) return true;
             if (normalizeChain(f.name) === normalizedChainStr) return true;
+          }
+          return false;
+        });
+        if (exactMatch) {
+          return exactMatch;
+        }
+
+        // Fallback: suffix match handles the leading-package-root case where the contract
+        // function carries the package name as a prefix (e.g., contract has
+        // `openai.embeddings.create`, detection chainStr is `embeddings.create`).
+        const suffixMatch = functions.find((f) => {
+          const effectiveName = f.namespace ? `${f.namespace}.${f.name}` : f.name;
+          if (effectiveName.endsWith("." + chainStr)) return true;
+          if (normalizeChain(effectiveName).endsWith("." + normalizedChainStr)) return true;
+          if (!f.namespace) {
             if (f.name.endsWith("." + chainStr)) return true;
             if (normalizeChain(f.name).endsWith("." + normalizedChainStr)) return true;
           }
           return false;
         });
-        if (chainMatch) {
-          return chainMatch;
+        if (suffixMatch) {
+          return suffixMatch;
         }
       }
     }

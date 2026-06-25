@@ -62742,7 +62742,7 @@
     "source": "deepen",
     "package": "_scanner",
     "type": "scanner_bug",
-    "status": "pending",
+    "status": "implemented",
     "description": "effectiveName.endsWith(\".\" + chainStr) causes beta-prefixed variants (e.g. beta.messages.create) to silently shadow non-beta postconditions (messages.create). When deepening any SDK with parallel beta/non-beta APIs (OpenAI, Anthropic, Stripe, etc.), adding the non-beta function to a contract risks regressing the beta detection because the suffix check matches both. Surfaced by deepen-stream-2 pass 75.",
     "evidence": {
       "repos": [],
@@ -62750,7 +62750,7 @@
       "violation_count": 0,
       "note": "Re-queued from pass 75 observation; documented in pass 76 prompt. Reproduction: any contract where two postconditions share the same trailing chain segment (e.g. messages.create vs beta.messages.create). The endsWith check matches the shorter chain against the longer effectiveName, producing the wrong postcondition assignment. Fix: switch the comparison to a startsWith-or-exact match on the chain root segment, or carry the full property-access chain in the contract function name and compare on equality. Until fixed, deepen passes should queue new SDK functions as scanner-upgrade concerns rather than adding them to contracts that have beta/non-beta parallel APIs."
     },
-    "resolution": null
+    "resolution": "Fixed in src/v2/core/contract-matcher.ts findFunctionContract(): split the single chainStr-matching find() into two passes — exact match first (effectiveName === chainStr, both as-is and normalized), then suffix match as a fallback (effectiveName.endsWith('.' + chainStr)). The suffix-match step still handles the leading-package-root case (contract has `openai.embeddings.create`, chainStr is `embeddings.create`) but no longer shadows a non-beta postcondition with a beta-prefixed one when both exist on the same contract. Regression test added to src/v2/core/contract-matcher.test.ts (two cases: beta.messages.create + messages.create coexistence; package-root prefix fallback preserved). Full vitest suite verified: 4858 pass / 96 fail (baseline before fix: 4856 pass / 96 fail — the two new passes are the regression tests, no new failures)."
   },
   "3352": {
     "id": "concern-20260624-morgan-deepen-1",
