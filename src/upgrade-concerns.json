@@ -63320,5 +63320,197 @@
       "note": "Proactive — contract added via API surface analysis, detection rule needed"
     },
     "resolution": null
+  },
+  "3387": {
+    "id": "concern-20260625-workos-deepen-pass3-1",
+    "created_at": "2026-06-25",
+    "source": "deepen",
+    "package": "@workos-inc/node",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Scanner gap: detect updateUser without try/catch. WorkOS throws UnprocessableEntityException on email conflict, UnauthorizedException on auth failure.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Function userManagement.updateUser added to @workos-inc/node profile during deepen-stream-2 pass 1 on 2026-06-25. Detection patterns added; scanner verification pending."
+    },
+    "resolution": null
+  },
+  "3388": {
+    "id": "concern-20260625-workos-deepen-pass3-2",
+    "created_at": "2026-06-25",
+    "source": "deepen",
+    "package": "@workos-inc/node",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Scanner gap: detect createMagicAuth without try/catch. WorkOS throws BadRequestException for invalid email, RateLimitExceededException at high volume.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Function userManagement.createMagicAuth added to @workos-inc/node profile during deepen-stream-2 pass 1 on 2026-06-25. Detection patterns added; scanner verification pending."
+    },
+    "resolution": null
+  },
+  "3389": {
+    "id": "concern-20260625-workos-deepen-pass3-3",
+    "created_at": "2026-06-25",
+    "source": "deepen",
+    "package": "@workos-inc/node",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Scanner gap: detect createPasswordReset without try/catch. WorkOS throws UnprocessableEntityException for invalid email, NotFoundException if user doesn't exist.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Function userManagement.createPasswordReset added to @workos-inc/node profile during deepen-stream-2 pass 1 on 2026-06-25. Detection patterns added; scanner verification pending."
+    },
+    "resolution": null
+  },
+  "3390": {
+    "id": "concern-20260625-workos-deepen-pass3-4",
+    "created_at": "2026-06-25",
+    "source": "deepen",
+    "package": "@workos-inc/node",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Scanner gap: detect revokeInvitation without try/catch. WorkOS throws NotFoundException if invitation doesn't exist, ConflictException if already revoked.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Function userManagement.revokeInvitation added to @workos-inc/node profile during deepen-stream-2 pass 1 on 2026-06-25. Detection patterns added; scanner verification pending."
+    },
+    "resolution": null
+  },
+  "3391": {
+    "id": "concern-20260625-workos-deepen-pass3-5",
+    "created_at": "2026-06-25",
+    "source": "deepen",
+    "package": "@workos-inc/node",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Scanner gap: detect resendInvitation without try/catch. WorkOS throws NotFoundException, ConflictException if invitation expired.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Function userManagement.resendInvitation added to @workos-inc/node profile during deepen-stream-2 pass 1 on 2026-06-25. Detection patterns added; scanner verification pending."
+    },
+    "resolution": null
+  },
+  "3392": {
+    "id": "concern-20260625-workos-deepen-pass3-6",
+    "created_at": "2026-06-25",
+    "source": "deepen",
+    "package": "@workos-inc/node",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Scanner gap: detect challengeFactor without try/catch. WorkOS throws NotFoundException if factor doesn't exist, UnauthorizedException.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Function multiFactorAuth.challengeFactor added to @workos-inc/node profile during deepen-stream-2 pass 1 on 2026-06-25. Detection patterns added; scanner verification pending."
+    },
+    "resolution": null
+  },
+  "3393": {
+    "id": "concern-20260625-workos-deepen-pass3-7",
+    "created_at": "2026-06-25",
+    "source": "deepen",
+    "package": "@workos-inc/node",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Scanner gap: detect passwordless.sendSession without try/catch. WorkOS throws UnprocessableEntityException, BadRequestException.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Function passwordless.sendSession added to @workos-inc/node profile during deepen-stream-2 pass 1 on 2026-06-25. Detection patterns added; scanner verification pending."
+    },
+    "resolution": null
+  },
+  "3394": {
+    "id": "concern-20260625-workos-deepen-pass3-8",
+    "created_at": "2026-06-25",
+    "source": "deepen",
+    "package": "@workos-inc/node",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Scanner gap: detect createOrganizationMembership without try/catch. WorkOS throws UnprocessableEntityException if user already a member, NotFoundException.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Function userManagement.createOrganizationMembership added to @workos-inc/node profile during deepen-stream-2 pass 1 on 2026-06-25. Detection patterns added; scanner verification pending."
+    },
+    "resolution": null
+  },
+  "3395": {
+    "id": "concern-20260625-workos-deepen-pass3-9",
+    "created_at": "2026-06-25",
+    "source": "deepen",
+    "package": "@workos-inc/node",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Scanner gap: detect verifyOrganizationDomain without try/catch. WorkOS throws UnprocessableEntityException if verification fails, NotFoundException.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Function organizations.verifyOrganizationDomain added to @workos-inc/node profile during deepen-stream-2 pass 1 on 2026-06-25. Detection patterns added; scanner verification pending."
+    },
+    "resolution": null
+  },
+  "3396": {
+    "id": "concern-20260625-workos-deepen-pass3-10",
+    "created_at": "2026-06-25",
+    "source": "deepen",
+    "package": "@workos-inc/node",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Scanner gap: detect vault.createDataKey without try/catch. WorkOS throws UnauthorizedException, UnprocessableEntityException.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Function vault.createDataKey added to @workos-inc/node profile during deepen-stream-2 pass 1 on 2026-06-25. Detection patterns added; scanner verification pending."
+    },
+    "resolution": null
+  },
+  "3397": {
+    "id": "concern-20260625-workos-deepen-pass3-11",
+    "created_at": "2026-06-25",
+    "source": "deepen",
+    "package": "@workos-inc/node",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Scanner gap: detect vault.createObject without try/catch. WorkOS throws UnprocessableEntityException, ConflictException if object key already exists.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Function vault.createObject added to @workos-inc/node profile during deepen-stream-2 pass 1 on 2026-06-25. Detection patterns added; scanner verification pending."
+    },
+    "resolution": null
+  },
+  "3398": {
+    "id": "concern-20260625-workos-deepen-pass3-12",
+    "created_at": "2026-06-25",
+    "source": "deepen",
+    "package": "@workos-inc/node",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Scanner gap: detect auditLogs.createExport without try/catch. WorkOS throws UnprocessableEntityException for invalid date range, UnauthorizedException.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Function auditLogs.createExport added to @workos-inc/node profile during deepen-stream-2 pass 1 on 2026-06-25. Detection patterns added; scanner verification pending."
+    },
+    "resolution": null
   }
 }
