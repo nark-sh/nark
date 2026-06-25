@@ -19,6 +19,7 @@ import {
 } from './types/index.js';
 import { TraversalEngine } from './core/traversal-engine.js';
 import { ContractMatcher } from './core/contract-matcher.js';
+import { mineConventions } from './core/convention-miner.js';
 import type { PackageContract } from '../types.js';
 
 /**
@@ -296,6 +297,23 @@ export class UniversalAnalyzer {
       totalDetections += result.detections.length;
       totalViolations += result.violations.length;
     }
+
+    // Wave 3 (Plan 01-09) — convention-mining second pass.
+    //
+    // After every file has been analyzed, run mineConventions() ONCE across
+    // the project. The miner pools passedDetections + violations into
+    // (package, postcondition) groups and attaches conventionMatch to
+    // violations whose group meets the v1.0 thresholds (≥3 sites + ≥60%
+    // majority — DEFAULT_OPTS in convention-miner.ts).
+    //
+    // Pure function: reads fileResults[].passedDetections + violations,
+    // mutates violation.conventionMatch only. No IO, no timestamps, no
+    // randomness. Idempotent.
+    //
+    // Performance: O(N + V) where N = total passing sites, V = total
+    // violations. The Wave 5 perf benchmark (Plan 01-13) verifies the
+    // overhead stays well under the ≤5% scan-time budget.
+    mineConventions({ files: fileResults });
 
     const duration = Date.now() - startTime;
 
