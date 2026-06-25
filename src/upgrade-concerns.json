@@ -63707,5 +63707,101 @@
       "related_postcondition_working": "images-edit-stream-mid-stream-api-error (fires correctly at line 1250 — try-catch absence)"
     },
     "resolution": null
+  },
+  "3411": {
+    "id": "concern-20260625-workos-node-deepen-1",
+    "created_at": "2026-06-25",
+    "source": "deepen",
+    "package": "@workos-inc/node",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for workos.fga.writeWarrant() — postcondition fga-write-warrant-no-error-handling added in depth pass. Detection pattern: await_patterns on 'fga.writeWarrant(' in @workos-inc/node context.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis (deepen-stream-1 pass 2, 2026-06-25). Throws UnprocessableEntityException on schema violation."
+    },
+    "resolution": null
+  },
+  "3412": {
+    "id": "concern-20260625-workos-node-deepen-2",
+    "created_at": "2026-06-25",
+    "source": "deepen",
+    "package": "@workos-inc/node",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for workos.fga.batchWriteWarrants() — postcondition fga-batch-write-warrants-no-error-handling added. All-or-nothing batch; partial failures cause warrant drift.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis (deepen-stream-1 pass 2, 2026-06-25). Throws UnprocessableEntityException on schema violation."
+    },
+    "resolution": null
+  },
+  "3413": {
+    "id": "concern-20260625-workos-node-deepen-3",
+    "created_at": "2026-06-25",
+    "source": "deepen",
+    "package": "@workos-inc/node",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for workos.vault.deleteObject() — postcondition vault-delete-object-no-error-handling added. Irreversible deletion; swallowed failure means secret persists. DATA_LOSS incident label. Detection: 'vault.deleteObject(' and 'vault.deleteSecret('.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis (deepen-stream-1 pass 2, 2026-06-25). Throws NotFoundException (404) or GenericServerException."
+    },
+    "resolution": null
+  },
+  "3414": {
+    "id": "concern-20260625-workos-node-deepen-4",
+    "created_at": "2026-06-25",
+    "source": "deepen",
+    "package": "@workos-inc/node",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for workos.vault.updateObject() — postcondition vault-update-object-no-error-handling added. Silent failure leaves vault serving stale secret. Detection: 'vault.updateObject(' and 'vault.updateSecret('.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis (deepen-stream-1 pass 2, 2026-06-25). Throws NotFoundException (404), UnprocessableEntityException (422)."
+    },
+    "resolution": null
+  },
+  "3415": {
+    "id": "concern-20260625-workos-node-deepen-5",
+    "created_at": "2026-06-25",
+    "source": "deepen",
+    "package": "@workos-inc/node",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for workos.actions.constructAction() — postcondition actions-construct-action-no-error-handling added. Swallowed SignatureVerificationException allows forged action requests. SECURITY_RISK. Detection: 'actions.constructAction('.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis (deepen-stream-1 pass 2, 2026-06-25). Throws SignatureVerificationException (local crypto, no network)."
+    },
+    "resolution": null
+  },
+  "3416": {
+    "id": "concern-20260625-workos-node-deepen-6",
+    "created_at": "2026-06-25",
+    "source": "deepen",
+    "package": "@workos-inc/node",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for workos.apiKeys.validateApiKey() — postcondition api-keys-validate-no-error-handling added. Swallowed exception may bypass auth entirely. SECURITY_RISK. Detection: 'apiKeys.validateApiKey('. Also flag missing null-check on result.apiKey.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis (deepen-stream-1 pass 2, 2026-06-25). Valid-but-revoked key returns {apiKey: null} not an exception."
+    },
+    "resolution": null
   }
 }
