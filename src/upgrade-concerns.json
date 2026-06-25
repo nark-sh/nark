@@ -53816,7 +53816,7 @@
     "source": "onboard",
     "package": "@nestjs/axios",
     "type": "new_pattern",
-    "status": "pending",
+    "status": "implemented",
     "description": "@nestjs/axios HttpService methods (get/post/put/patch/delete/head/request/postForm/putForm/patchForm) return Observable<AxiosResponse>, not Promise. Underlying axios errors propagate via subscriber.error(err). Callers MUST satisfy the contract using ONE of three RxJS-aware patterns: (1) await firstValueFrom(...) inside a try/catch — currently DETECTED correctly; (2) .pipe(catchError(...)) on the Observable chain — currently NOT recognized as satisfying the postcondition, producing 2 FPs in ground-truth fixture (lines 139, 147); (3) .subscribe({ next, error }) with non-null error handler — currently NOT recognized, producing 1 FP in ground-truth fixture (line 159). The scanner correctly detects all 10 SHOULD_FIRE cases (bare firstValueFrom without try/catch across get/post/put/patch/delete/head/request/postForm/putForm/patchForm) and 4 SHOULD_NOT_FIRE try/catch cases. Need to extend the V2 analyzer to recognize .pipe(catchError(...)) and .subscribe({error: nonNull}) as satisfying postconditions whose throws clause says 'AxiosError emitted via the Observable error channel'.",
     "evidence": {
       "repos": [
@@ -53838,7 +53838,9 @@
         "fixture_file": "nark-dev/nark-corpus-pro/packages/@nestjs/axios/fixtures/ground-truth.ts",
         "test_file": "nark-dev/nark/src/v2/fixtures/@nestjs__axios.ground-truth.test.ts"
       }
-    }
+    },
+    "resolution": "Added Observable error-channel suppression block in contract-matcher.ts for @nestjs/axios verb methods. Suppresses FPs when: (2) .pipe(catchError(handler)) intercepts the error channel, or (3) .subscribe({error: handler}) provides a subscriber error handler. axiosRef-* postconditions excluded (Promise model). Implemented 2026-06-25. Regression gate: 84 current vs 90 baseline. 31/31 @nestjs/axios ground-truth tests pass.",
+    "resolved_at": "2026-06-25"
   },
   "2809": {
     "id": "concern-20260615-langgraph-stream-iteration-detector",
@@ -53846,7 +53848,7 @@
     "source": "onboard",
     "package": "@langchain/langgraph",
     "type": "new_pattern",
-    "status": "pending",
+    "status": "deferred",
     "description": "Stream iteration consumer detection. The @langchain/langgraph contract codifies a 'stream-iteration-no-try-catch' postcondition: when `const stream = await graph.stream(...)` is wrapped in try-catch but the subsequent `for await (const chunk of stream)` consumer loop is NOT inside that same try, mid-stream errors (GraphRecursionError after N supersteps, NodeTimeoutError, LLM rate-limit errors thrown by a node mid-graph) surface during iteration and are uncaught. The analyzer currently fires on the `await graph.stream(...)` call site itself (when bare) but does NOT detect the pattern of `for await (... of trackedStreamVar)` outside try. To support this postcondition, the V2 analyzer needs to (a) track that `streamVar` returned from `graph.stream()` is a tracked-package awaitable stream, and (b) emit a violation when the `ForOfStatement` with await is not enclosed in a try-catch. The same gap likely affects @langchain/openai's stream-iteration-error postcondition (already filed as a known scanner limitation in that contract).",
     "evidence": {
       "repos": [
@@ -53866,7 +53868,9 @@
           "@langchain/langgraph (CompiledStateGraph.stream stream-iteration-no-try-catch)"
         ]
       }
-    }
+    },
+    "deferred_reason": "Requires new ForAwaitConsumerDetector plugin: track stream-returning methods, detect for-await loops over tracked streams outside try-catch, add per-contract stream_methods opt-in. Larger than one scanner-stream cycle. Fixture correctly annotates gtStreamIterationOutsideTry as SHOULD_NOT_FIRE pending. Deferred to dedicated stream-consumer-pattern scanner cycle.",
+    "deferred_at": "2026-06-25"
   },
   "2810": {
     "id": "concern-20260615-instance-tracker-newexpression-chain-root",

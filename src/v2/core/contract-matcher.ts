@@ -1864,6 +1864,97 @@ export class ContractMatcher {
         // (skip standard outer try-catch check — the pattern requires finally, not catch)
       }
 
+      // @nestjs/axios Observable error-channel patterns.
+      //
+      // HttpService verb methods (get/post/put/patch/delete/head/request/postForm/putForm/patchForm)
+      // return Observable<AxiosResponse> — NOT a Promise. The standard try-catch analysis fires
+      // on the httpService.X(url) call site even when the Observable IS handled via two valid
+      // RxJS-aware patterns that the standard check does not recognize:
+      //
+      //   (2) .pipe(catchError(handler))  — Observable error intercepted before it propagates
+      //   (3) .subscribe({ error: handler }) — error handler provided to the subscriber
+      //
+      // Pattern (1) firstValueFrom + try/catch is already handled by standard isInTryCatch().
+      //
+      // Implementation: walk the immediate parent chain from the detection node. The detection
+      // node is the httpService.X(url) CallExpression. Its parent structure is:
+      //
+      //   For .pipe(): CallExpr → PropertyAccess(.pipe) → CallExpr(.pipe(args...))
+      //   For .subscribe(): CallExpr → PropertyAccess(.subscribe) → CallExpr(.subscribe({...}))
+      //
+      // axiosRef postconditions (postconditionId.startsWith('axiosref-')) use the standard
+      // Promise try-catch model and MUST NOT be suppressed here — they are not Observable.
+      //
+      // Evidence: concern-20260615-nestjs-axios-observable-handling-1 — 3 FPs in ground-truth
+      // fixture (lines 25/31 pipe+catchError, line 40 subscribe+error). When this suppression
+      // lands, move those cases from known-scanner-gaps.ts → ground-truth.ts as SHOULD_NOT_FIRE.
+      if (
+        detection.packageName === "@nestjs/axios" &&
+        !primaryPostcondition.id.startsWith("axiosref-") &&
+        ts.isCallExpression(detection.node)
+      ) {
+        // Walk immediate parent: CallExpr → PropertyAccess → outer CallExpr
+        const maybePropertyAccess = detection.node.parent;
+        if (
+          maybePropertyAccess &&
+          ts.isPropertyAccessExpression(maybePropertyAccess) &&
+          maybePropertyAccess.expression === detection.node
+        ) {
+          const chainName = maybePropertyAccess.name.text;
+          const outerCall = maybePropertyAccess.parent;
+          if (outerCall && ts.isCallExpression(outerCall)) {
+
+            // Pattern (2): .pipe(catchError(handler))
+            // The detection node is the receiver of .pipe(). One of .pipe()'s arguments
+            // must be a catchError(handler) call (callee named 'catchError').
+            if (chainName === "pipe") {
+              const hasCatchError = outerCall.arguments.some((arg) => {
+                if (!ts.isCallExpression(arg)) return false;
+                // catchError(handler) — callee is Identifier('catchError')
+                if (ts.isIdentifier(arg.expression) && arg.expression.text === "catchError") {
+                  return true;
+                }
+                // Namespaced: operators.catchError(handler)
+                if (
+                  ts.isPropertyAccessExpression(arg.expression) &&
+                  arg.expression.name.text === "catchError"
+                ) {
+                  return true;
+                }
+                return false;
+              });
+              if (hasCatchError) {
+                continue; // Observable handled via .pipe(catchError(...)) — postcondition satisfied
+              }
+            }
+
+            // Pattern (3): .subscribe({ next, error: handler })
+            // The detection node is the receiver of .subscribe(). The argument object must
+            // contain an 'error' property with a non-null (function-like) value.
+            if (chainName === "subscribe") {
+              const hasErrorHandler = outerCall.arguments.some((arg) => {
+                if (!ts.isObjectLiteralExpression(arg)) return false;
+                return arg.properties.some((prop) => {
+                  // error: (e) => ... or error(e) { ... } (method shorthand)
+                  if (ts.isPropertyAssignment(prop) && ts.isIdentifier(prop.name) && prop.name.text === "error") {
+                    // Value must not be undefined/null literal — any non-trivial expression qualifies
+                    return prop.initializer.kind !== ts.SyntaxKind.NullKeyword &&
+                           prop.initializer.kind !== ts.SyntaxKind.UndefinedKeyword;
+                  }
+                  if (ts.isMethodDeclaration(prop) && ts.isIdentifier(prop.name) && prop.name.text === "error") {
+                    return true;
+                  }
+                  return false;
+                });
+              });
+              if (hasErrorHandler) {
+                continue; // Observable handled via .subscribe({ error }) — postcondition satisfied
+              }
+            }
+          }
+        }
+      }
+
       // Special-case: Clerk middleware postconditions require file-system inspection,
       // not try-catch analysis. auth() and clerkMiddleware() are never wrapped in try-catch
       // in a properly configured app — the check is whether middleware.ts is set up.
