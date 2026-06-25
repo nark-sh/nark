@@ -58309,7 +58309,7 @@
     "source": "deepen",
     "package": "@aws-sdk/client-bedrock-runtime",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for ListAsyncInvokesCommand (postcondition bedrock-list-async-invokes-no-try-catch). Detect bedrockClient.send(new ListAsyncInvokesCommand(...)) without enclosing try-catch. Same property-chain detection as siblings. Used on admin dashboard listing pages and reconciliation polling loops over Bedrock async invocations.",
     "evidence": {
       "repos": [],
@@ -58317,7 +58317,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis during deepen-stream-4 pass 9 (promoted from intentionally-omitted in pass 1). Command was previously omitted because no real-world repos showed silent-failure pattern in test-repos corpus; postcondition added to complete the 12/12 Bedrock command surface. Severity warning. Detection should reuse existing AWS SDK send(new XxxCommand()) property-chain matcher — same shape as sibling 11 commands."
     },
-    "resolution": null
+    "resolution": "Verified 2026-06-25 via vitest run: @aws-sdk/client-bedrock-runtime ground-truth line 398 passes (bedrock-list-async-invokes-no-try-catch fires correctly). ListAsyncInvokesCommand was already in detection.command_names in the contract; the existing send(new XxxCommand()) property-chain matcher auto-detects it. No scanner code changes needed."
   },
   "3075": {
     "id": "concern-20260623-modern-tar-deepen-stream1-pass9-1",
@@ -63327,7 +63327,7 @@
     "source": "deepen",
     "package": "@workos-inc/node",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Scanner gap: detect updateUser without try/catch. WorkOS throws UnprocessableEntityException on email conflict, UnauthorizedException on auth failure.",
     "evidence": {
       "repos": [],
@@ -63335,7 +63335,7 @@
       "violation_count": 0,
       "note": "Function userManagement.updateUser added to @workos-inc/node profile during deepen-stream-2 pass 1 on 2026-06-25. Detection patterns added; scanner verification pending."
     },
-    "resolution": null
+    "resolution": "Verified 2026-06-25 via vitest: @workos-inc__node.ground-truth.test.ts 134/134 pass. update-user-no-error-handling fires correctly."
   },
   "3388": {
     "id": "concern-20260625-workos-deepen-pass3-2",
@@ -63343,7 +63343,7 @@
     "source": "deepen",
     "package": "@workos-inc/node",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Scanner gap: detect createMagicAuth without try/catch. WorkOS throws BadRequestException for invalid email, RateLimitExceededException at high volume.",
     "evidence": {
       "repos": [],
@@ -63351,7 +63351,7 @@
       "violation_count": 0,
       "note": "Function userManagement.createMagicAuth added to @workos-inc/node profile during deepen-stream-2 pass 1 on 2026-06-25. Detection patterns added; scanner verification pending."
     },
-    "resolution": null
+    "resolution": "Verified 2026-06-25 via vitest: @workos-inc__node.ground-truth.test.ts 134/134 pass. create-magic-auth-no-error-handling fires correctly."
   },
   "3389": {
     "id": "concern-20260625-workos-deepen-pass3-3",
@@ -63510,6 +63510,118 @@
       "scan_file": null,
       "violation_count": 0,
       "note": "Function auditLogs.createExport added to @workos-inc/node profile during deepen-stream-2 pass 1 on 2026-06-25. Detection patterns added; scanner verification pending."
+    },
+    "resolution": null
+  },
+  "3399": {
+    "id": "concern-20260625-workos-deepen-stream1-1",
+    "created_at": "2026-06-25",
+    "source": "deepen",
+    "package": "@workos-inc/node",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for auditLogs.createEvent (postcondition audit-log-create-event-no-error-handling). Detect workos.auditLogs.createEvent(...) without enclosing try-catch. Thrown: UnprocessableEntityException (invalid event schema), RateLimitExceededException, GenericServerException (5xx). Silent failure creates SOC2 compliance gap — dropped audit events are unrecoverable without visibility.",
+    "evidence": {
+      "repos": [],
+      "scan_file": "",
+      "violation_count": 0,
+      "note": "Proactive — postcondition added via API surface analysis during deepen-stream-1 pass 1. Source: @workos-inc/node@10.5.0 lib/factory-CJmENOk9.cjs JSDoc @throws annotations."
+    },
+    "resolution": null
+  },
+  "3400": {
+    "id": "concern-20260625-workos-deepen-stream1-2",
+    "created_at": "2026-06-25",
+    "source": "deepen",
+    "package": "@workos-inc/node",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for vault.decryptDataKey (postcondition vault-decrypt-data-key-no-error-handling). Detect workos.vault.decryptDataKey(...) without enclosing try-catch. Thrown: BadRequestException (malformed ciphertext), NotFoundException (key not found — irrecoverable), UnauthorizedException, GenericServerException. Swallowed NotFoundException leads to silent DATA_LOSS.",
+    "evidence": {
+      "repos": [],
+      "scan_file": "",
+      "violation_count": 0,
+      "note": "Proactive — postcondition added via API surface analysis during deepen-stream-1 pass 1. Source: @workos-inc/node@10.5.0 lib/factory-CJmENOk9.cjs JSDoc @throws annotations."
+    },
+    "resolution": null
+  },
+  "3401": {
+    "id": "concern-20260625-workos-deepen-stream1-3",
+    "created_at": "2026-06-25",
+    "source": "deepen",
+    "package": "@workos-inc/node",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for vault.readObject (postcondition vault-read-object-no-error-handling). Detect workos.vault.readObject(...) without enclosing try-catch. Thrown: NotFoundException (object not found), UnauthorizedException (access revoked), GenericServerException. Swallowed NotFoundException causes silent auth bypass or phantom data risk.",
+    "evidence": {
+      "repos": [],
+      "scan_file": "",
+      "violation_count": 0,
+      "note": "Proactive — postcondition added via API surface analysis during deepen-stream-1 pass 1. Source: @workos-inc/node@10.5.0 lib/factory-CJmENOk9.cjs JSDoc @throws annotations."
+    },
+    "resolution": null
+  },
+  "3402": {
+    "id": "concern-20260625-workos-deepen-stream1-4",
+    "created_at": "2026-06-25",
+    "source": "deepen",
+    "package": "@workos-inc/node",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for userManagement.updateOrganizationMembership (postcondition update-org-membership-no-error-handling). Detect workos.userManagement.updateOrganizationMembership(...) without enclosing try-catch. Thrown: NotFoundException, UnprocessableEntityException (invalid role), ConflictException (role already assigned), UnauthorizedException. Silent failure means permission change never propagates.",
+    "evidence": {
+      "repos": [],
+      "scan_file": "",
+      "violation_count": 0,
+      "note": "Proactive — postcondition added via API surface analysis during deepen-stream-1 pass 1. Source: @workos-inc/node@10.5.0 lib/factory-CJmENOk9.cjs JSDoc @throws annotations."
+    },
+    "resolution": null
+  },
+  "3403": {
+    "id": "concern-20260625-workos-deepen-stream1-5",
+    "created_at": "2026-06-25",
+    "source": "deepen",
+    "package": "@workos-inc/node",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for userManagement.deleteOrganizationMembership (postcondition delete-org-membership-no-error-handling). Detect workos.userManagement.deleteOrganizationMembership(...) without enclosing try-catch. Thrown: NotFoundException, UnauthorizedException, GenericServerException. Silent failure leaves user with retained unauthorized org access — SECURITY_RISK.",
+    "evidence": {
+      "repos": [],
+      "scan_file": "",
+      "violation_count": 0,
+      "note": "Proactive — postcondition added via API surface analysis during deepen-stream-1 pass 1. Source: @workos-inc/node@10.5.0 lib/factory-CJmENOk9.cjs JSDoc @throws annotations."
+    },
+    "resolution": null
+  },
+  "3404": {
+    "id": "concern-20260625-workos-deepen-stream1-6",
+    "created_at": "2026-06-25",
+    "source": "deepen",
+    "package": "@workos-inc/node",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for userManagement.deactivateOrganizationMembership (postcondition deactivate-org-membership-no-error-handling). Detect workos.userManagement.deactivateOrganizationMembership(...) without enclosing try-catch. Thrown: NotFoundException, UnauthorizedException, UnprocessableEntityException (already inactive), GenericServerException. Silent failure means suspended account retains live SSO access — SECURITY_RISK.",
+    "evidence": {
+      "repos": [],
+      "scan_file": "",
+      "violation_count": 0,
+      "note": "Proactive — postcondition added via API surface analysis during deepen-stream-1 pass 1. Source: @workos-inc/node@10.5.0 lib/factory-CJmENOk9.cjs JSDoc @throws annotations."
+    },
+    "resolution": null
+  },
+  "3405": {
+    "id": "concern-20260625-workos-deepen-stream1-7",
+    "created_at": "2026-06-25",
+    "source": "deepen",
+    "package": "@workos-inc/node",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for userManagement.reactivateOrganizationMembership (postcondition reactivate-org-membership-no-error-handling). Detect workos.userManagement.reactivateOrganizationMembership(...) without enclosing try-catch. Thrown: NotFoundException, UnauthorizedException, UnprocessableEntityException (seat limit exceeded), GenericServerException. Silent failure hides seat limit errors leading to silent access denial.",
+    "evidence": {
+      "repos": [],
+      "scan_file": "",
+      "violation_count": 0,
+      "note": "Proactive — postcondition added via API surface analysis during deepen-stream-1 pass 1. Source: @workos-inc/node@10.5.0 lib/factory-CJmENOk9.cjs JSDoc @throws annotations."
     },
     "resolution": null
   }
