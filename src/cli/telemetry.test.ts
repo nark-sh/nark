@@ -346,3 +346,235 @@ describe("fireEnrichedTelemetryEvent endpoint guards (S2-1)", () => {
     expect(result.endpoint).toMatch(/\/api\/telemetry\/scan$/);
   });
 });
+
+// ---------------------------------------------------------------------------
+// Plan 01-12 / Wave 4c — fireConventionMatchRenderedEvent
+// ---------------------------------------------------------------------------
+//
+// Best-effort firing of `conventionMatch_rendered` events to the SaaS
+// /api/telemetry/convention-match endpoint added by Plan 01-11. CLI iterates
+// scan-time violations, and fires one event per populated `conventionMatch`.
+// MUST honor the existing telemetry opt-outs (NARK_TELEMETRY=off /
+// DO_NOT_TRACK=1), MUST swallow network/HTTP failures, and MUST never throw.
+
+function conventionPayload(
+  overrides: Partial<{
+    eventType: "rendered" | "resolved_with_recommended_pattern";
+    patternId: string;
+    matchRatio: number;
+    siteCount: number;
+    narkVersion: string;
+  }> = {},
+) {
+  return {
+    eventType: "rendered" as const,
+    patternId: "try-catch:direct",
+    matchRatio: 0.857,
+    siteCount: 7,
+    narkVersion: "test-1.0.0",
+    ...overrides,
+  };
+}
+
+describe("fireConventionMatchRenderedEvent (Plan 01-12 / Wave 4c)", () => {
+  beforeEach(() => {
+    rmDir(TEST_HOME);
+    writeEnabledConfig();
+    delete process.env["NARK_TELEMETRY"];
+    delete process.env["DO_NOT_TRACK"];
+    delete process.env["NARK_API_URL"];
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    rmDir(TEST_HOME);
+    vi.resetModules();
+  });
+
+  it("opt-out: NARK_TELEMETRY=off short-circuits before any fetch", async () => {
+    process.env["NARK_TELEMETRY"] = "off";
+    const fetchMock = vi.fn(async () => ({
+      ok: true,
+      status: 200,
+      json: async () => ({}),
+    }));
+    vi.stubGlobal("fetch", fetchMock as unknown as typeof fetch);
+
+    const { fireConventionMatchRenderedEvent } = await import("./telemetry.js");
+    await fireConventionMatchRenderedEvent(conventionPayload());
+
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("opt-out: DO_NOT_TRACK=1 short-circuits before any fetch", async () => {
+    process.env["DO_NOT_TRACK"] = "1";
+    const fetchMock = vi.fn(async () => ({
+      ok: true,
+      status: 200,
+      json: async () => ({}),
+    }));
+    vi.stubGlobal("fetch", fetchMock as unknown as typeof fetch);
+
+    const { fireConventionMatchRenderedEvent } = await import("./telemetry.js");
+    await fireConventionMatchRenderedEvent(conventionPayload());
+
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("opt-out: file-config enabled=false short-circuits before any fetch", async () => {
+    // Overwrite the enabled config so the telemetry file says enabled=false
+    const dir = path.join(TEST_HOME, ".nark");
+    fs.mkdirSync(dir, { recursive: true });
+    fs.writeFileSync(
+      path.join(dir, "telemetry.json"),
+      JSON.stringify({ enabled: false, notified: true }),
+    );
+
+    const fetchMock = vi.fn(async () => ({
+      ok: true,
+      status: 200,
+      json: async () => ({}),
+    }));
+    vi.stubGlobal("fetch", fetchMock as unknown as typeof fetch);
+
+    const { fireConventionMatchRenderedEvent } = await import("./telemetry.js");
+    await fireConventionMatchRenderedEvent(conventionPayload());
+
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("opt-in: POSTs to /api/telemetry/convention-match with the expected payload", async () => {
+    const calls: Array<{
+      url: string;
+      method: string;
+      headers: Record<string, string>;
+      body: string;
+    }> = [];
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (url: string, init: RequestInit) => {
+        calls.push({
+          url,
+          method: init.method ?? "GET",
+          headers: (init.headers as Record<string, string>) ?? {},
+          body: init.body as string,
+        });
+        return { ok: true, status: 200, json: async () => ({}) };
+      }) as unknown as typeof fetch,
+    );
+
+    const { fireConventionMatchRenderedEvent } = await import("./telemetry.js");
+    await fireConventionMatchRenderedEvent(conventionPayload());
+
+    expect(calls).toHaveLength(1);
+    expect(calls[0]!.method).toBe("POST");
+    // Default base URL is https://app.nark.sh per project_telemetry_page_needed memory
+    expect(calls[0]!.url).toBe(
+      "https://app.nark.sh/api/telemetry/convention-match",
+    );
+    expect(calls[0]!.headers["Content-Type"]).toBe("application/json");
+    const parsed = JSON.parse(calls[0]!.body);
+    expect(parsed.eventType).toBe("rendered");
+    expect(parsed.patternId).toBe("try-catch:direct");
+    expect(parsed.matchRatio).toBe(0.857);
+    expect(parsed.siteCount).toBe(7);
+    expect(parsed.narkVersion).toBe("test-1.0.0");
+  });
+
+  it("respects opts.apiUrl override (NARK_API_URL dev override path)", async () => {
+    const calls: Array<{ url: string }> = [];
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (url: string) => {
+        calls.push({ url });
+        return { ok: true, status: 200, json: async () => ({}) };
+      }) as unknown as typeof fetch,
+    );
+
+    const { fireConventionMatchRenderedEvent } = await import("./telemetry.js");
+    await fireConventionMatchRenderedEvent(conventionPayload(), {
+      apiUrl: "http://localhost:3000",
+    });
+
+    expect(calls).toHaveLength(1);
+    expect(calls[0]!.url).toBe(
+      "http://localhost:3000/api/telemetry/convention-match",
+    );
+  });
+
+  it("attaches bearer when opts.bearer is set", async () => {
+    const calls: Array<{ headers: Record<string, string> }> = [];
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (_url: string, init: RequestInit) => {
+        calls.push({
+          headers: (init.headers as Record<string, string>) ?? {},
+        });
+        return { ok: true, status: 200, json: async () => ({}) };
+      }) as unknown as typeof fetch,
+    );
+
+    const { fireConventionMatchRenderedEvent } = await import("./telemetry.js");
+    await fireConventionMatchRenderedEvent(conventionPayload(), {
+      bearer: "bc_test_token",
+    });
+
+    expect(calls).toHaveLength(1);
+    expect(calls[0]!.headers["Authorization"]).toBe("Bearer bc_test_token");
+  });
+
+  it("best-effort: fetch rejection does NOT throw", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => {
+        throw new Error("ECONNREFUSED");
+      }) as unknown as typeof fetch,
+    );
+
+    const { fireConventionMatchRenderedEvent } = await import("./telemetry.js");
+    // Must complete (resolve) without throwing — never let telemetry break the scanner
+    await expect(
+      fireConventionMatchRenderedEvent(conventionPayload()),
+    ).resolves.toBeUndefined();
+  });
+
+  it("best-effort: HTTP 429 (rate-limited) does NOT throw", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => ({
+        ok: false,
+        status: 429,
+        json: async () => ({ error: "rate limited" }),
+      })) as unknown as typeof fetch,
+    );
+
+    const { fireConventionMatchRenderedEvent } = await import("./telemetry.js");
+    await expect(
+      fireConventionMatchRenderedEvent(conventionPayload()),
+    ).resolves.toBeUndefined();
+  });
+
+  it("type sanity: accepts 'resolved_with_recommended_pattern' eventType (future v1.1)", async () => {
+    // v1.0 CLI does NOT fire this event type per Plan 01-12 / Open Question #2.
+    // The TYPE accepts it for symmetry with the SaaS endpoint's Zod schema
+    // (which accepts both event types). This test just verifies the type signature
+    // doesn't reject it — future v1.1 CLI side will fire it.
+    const calls: Array<{ body: string }> = [];
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (_url: string, init: RequestInit) => {
+        calls.push({ body: init.body as string });
+        return { ok: true, status: 200, json: async () => ({}) };
+      }) as unknown as typeof fetch,
+    );
+
+    const { fireConventionMatchRenderedEvent } = await import("./telemetry.js");
+    await fireConventionMatchRenderedEvent(
+      conventionPayload({ eventType: "resolved_with_recommended_pattern" }),
+    );
+
+    expect(calls).toHaveLength(1);
+    const parsed = JSON.parse(calls[0]!.body);
+    expect(parsed.eventType).toBe("resolved_with_recommended_pattern");
+  });
+});
