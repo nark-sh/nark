@@ -63236,5 +63236,85 @@
       "note": "Proactive — contract added via API surface analysis (deepen-stream-1 pass 2, 2026-06-25). Detection rule needed for postcondition execute-graph-array-params. Static detection may require type inference — lower priority than concern-1."
     },
     "resolution": null
+  },
+  "3382": {
+    "id": "concern-20260625-googleapis-deepen-1",
+    "created_at": "2026-06-25",
+    "source": "deepen",
+    "package": "googleapis",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for gmail.users.watch() — postcondition gmail-watch-pubsub-permission-missing added in depth pass but no scanner rule exists for watch() calls",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  "3383": {
+    "id": "concern-20260625-googleapis-deepen-2",
+    "created_at": "2026-06-25",
+    "source": "deepen",
+    "package": "googleapis",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for drive.files.delete() — postconditions drive-files-delete-no-try-catch and drive-files-delete-folder-cascade added in depth pass but no scanner rule exists",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis, detection rule needed. High business impact: DATA_LOSS"
+    },
+    "resolution": null
+  },
+  "3384": {
+    "id": "concern-20260625-googleapis-deepen-3",
+    "created_at": "2026-06-25",
+    "source": "deepen",
+    "package": "googleapis",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for drive.files.export() — postcondition drive-files-export-no-try-catch added in depth pass but no scanner rule exists (10 MB limit enforced at 403 fileNotExportable)",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  "3385": {
+    "id": "concern-20260625-googleapis-deepen-4",
+    "created_at": "2026-06-25",
+    "source": "deepen",
+    "package": "googleapis",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for calendar.events.delete() — postcondition calendar-events-delete-no-try-catch added in depth pass but no scanner rule exists",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
+  },
+  "3386": {
+    "id": "concern-20260625-googleapis-deepen-5",
+    "created_at": "2026-06-25",
+    "source": "deepen",
+    "package": "googleapis",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for sheets.spreadsheets.values.append() — postcondition sheets-values-append-no-try-catch added in depth pass but no scanner rule exists (60 writes/user/min quota)",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis, detection rule needed"
+    },
+    "resolution": null
   }
 }
