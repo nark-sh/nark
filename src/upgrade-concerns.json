@@ -63803,5 +63803,101 @@
       "note": "Proactive — contract added via API surface analysis (deepen-stream-1 pass 2, 2026-06-25). Valid-but-revoked key returns {apiKey: null} not an exception."
     },
     "resolution": null
+  },
+  "3417": {
+    "id": "concern-20260625-supabase-js-deepen-1",
+    "created_at": "2026-06-25",
+    "source": "deepen",
+    "package": "@supabase/supabase-js",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for supabase.auth.getUserIdentities() — postcondition auth-get-identities-no-session added. Session-missing AuthApiError swallowed silently. Detection: '.getUserIdentities(' without error check.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis (deepen-stream-2 pass 1, 2026-06-25). Delegates to getUser() internally; propagates AuthApiError on session expiry."
+    },
+    "resolution": null
+  },
+  "3418": {
+    "id": "concern-20260625-supabase-js-deepen-2",
+    "created_at": "2026-06-25",
+    "source": "deepen",
+    "package": "@supabase/supabase-js",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for supabase.auth.linkIdentity() — postconditions auth-link-identity-already-exists and auth-link-identity-manual-linking-disabled added. DATA_LOSS-adjacent: swallowed identity_already_exists means user never knows link failed. Detection: '.linkIdentity(' without error check.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis (deepen-stream-2 pass 1, 2026-06-25). error.code === 'identity_already_exists' or 'manual_linking_disabled'."
+    },
+    "resolution": null
+  },
+  "3419": {
+    "id": "concern-20260625-supabase-js-deepen-3",
+    "created_at": "2026-06-25",
+    "source": "deepen",
+    "package": "@supabase/supabase-js",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for supabase.auth.unlinkIdentity() — postconditions auth-unlink-identity-single-identity (DATA_LOSS: user lockout) and auth-unlink-identity-email-conflict added. CRITICAL: missing error check on single_identity_not_deletable leaves users permanently locked out. Detection: '.unlinkIdentity(' without error check.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis (deepen-stream-2 pass 1, 2026-06-25). DATA_LOSS: user loses all account access if single identity unlinked on password-less account."
+    },
+    "resolution": null
+  },
+  "3420": {
+    "id": "concern-20260625-supabase-js-deepen-4",
+    "created_at": "2026-06-25",
+    "source": "deepen",
+    "package": "@supabase/supabase-js",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for supabase.storage.from().update() — postconditions storage-update-not-found and storage-update-unauthorized added. Silent StorageApiError swallowed means file appears updated when it wasn't. Detection: '.update(' on storage builder chain without error check.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis (deepen-stream-2 pass 1, 2026-06-25). update() calls uploadOrUpdate(PUT) — same error surface as upload()."
+    },
+    "resolution": null
+  },
+  "3421": {
+    "id": "concern-20260625-supabase-js-deepen-5",
+    "created_at": "2026-06-25",
+    "source": "deepen",
+    "package": "@supabase/supabase-js",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for supabase.storage.from().createSignedUploadUrl() — postconditions storage-create-signed-upload-url-no-token and storage-create-signed-upload-url-unauthorized added. Passing null signedUrl to uploader produces confusing downstream error. Detection: '.createSignedUploadUrl(' without error check.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis (deepen-stream-2 pass 1, 2026-06-25). server-side: StorageError('No token returned by API') on internal misconfiguration."
+    },
+    "resolution": null
+  },
+  "3422": {
+    "id": "concern-20260625-supabase-js-deepen-6",
+    "created_at": "2026-06-25",
+    "source": "deepen",
+    "package": "@supabase/supabase-js",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for supabase.storage.from().uploadToSignedUrl() — postconditions storage-upload-to-signed-url-expired-token and storage-upload-to-signed-url-unauthorized added. Expired token error swallowed means file silently not uploaded. Detection: '.uploadToSignedUrl(' without error check.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis (deepen-stream-2 pass 1, 2026-06-25). Tokens valid 2h only; expiry is common in long-running flows."
+    },
+    "resolution": null
   }
 }
