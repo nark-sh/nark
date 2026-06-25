@@ -3674,6 +3674,21 @@ export class ContractMatcher {
         // beta-prefixed entry (`beta.messages.create`) does not silently shadow the new
         // non-beta call. Concern: concern-20260624-scanner-deepen-4 (deepen-stream-2
         // pass 75 — anthropic-sdk parallel beta/non-beta APIs).
+        // Kebab equivalent of chainStr for contracts that flatten a namespace
+        // into a single kebab-cased entry name (e.g., trigger.dev's contract uses
+        // `name: batch-retrieve` for the `batch.retrieve()` call, `name: envvars-upload`
+        // for `envvars.upload()`, `name: idempotency-keys-create` for the camelCase
+        // `idempotencyKeys.create()`, etc.). Built from the normalized form so the
+        // camelCase split (snake_case) collapses correctly into kebab (`.` and `_`
+        // both become `-`). Only meaningful when chainStr has multiple segments;
+        // single-segment names go through the standard equality check below.
+        // Without this, `batch.retrieve()` falls through to the bare-name fallback and
+        // wrongly picks the `retrieve` entry (intended for `runs.retrieve()`).
+        // Concern: trigger.dev namespace.method shared-name disambiguation (deepen-stream
+        // pass 92; pattern #15 in bc-deepen-contract Phase 1.5).
+        const kebabedChainStr = chainStr.includes(".")
+          ? normalizedChainStr.replace(/[._]/g, "-")
+          : null;
         const exactMatch = functions.find((f) => {
           // Build the effective full name when the contract uses the `namespace` field.
           // Contracts that use namespace+name (e.g., namespace: "messages", name: "create")
@@ -3689,6 +3704,8 @@ export class ContractMatcher {
           if (!f.namespace) {
             if (f.name === chainStr) return true;
             if (normalizeChain(f.name) === normalizedChainStr) return true;
+            // Kebab variant of the chain string for namespace-as-prefix names.
+            if (kebabedChainStr !== null && f.name === kebabedChainStr) return true;
           }
           return false;
         });

@@ -63171,5 +63171,22 @@
       "fix_target": "scanner"
     },
     "resolution": "Added isCallbackErrGuardedInPromiseExecutor() to ContractMatcher and a single package-agnostic suppression hook in the matcher's postcondition-firing loop. The detector walks up from a CallExpression looking for an enclosing `new Promise((resolve, reject) => ...)` executor (stopping at any non-executor function boundary so we never cross unrelated nested function scopes); extracts the call's callback arg (positional last-arg function OR object-literal property named `callback` / `complete` / `cb` / `done` / `fn`); requires the callback's first param to be err-named (err/error/e, case-insensitive); and confirms the callback body's first statement is an early-reject-on-err guard. Recognized guard shapes: `if (err) { reject(err); ... }` block, single-line `if (err) reject(err);`, `if (err) return reject(err);`, and the concise-arrow ternary `(err, val) => err ? reject(err) : resolve(val)`. Err truthcheck accepts `err`, `!!err`, `err != null`, `err !== null`. Reject call must pass the literal err identifier — `reject(new Error(...))` and `reject(err.message)` are conservatively rejected. Regression tests (7) added to src/v2/core/contract-matcher.test.ts covering: positional cb, single-line if-reject, named-property cb (`complete:`), ternary expression body, swallowed-err negative, no-Promise-wrapper negative, non-err-shaped-cb negative. Vitest: 4865 pass / 96 fail (baseline 4858 / 96 — 7 new tests pass, zero new failures)."
+  },
+  "3378": {
+    "id": "concern-20260624-scanner-namespace-kebab-disambig-1",
+    "created_at": "2026-06-24",
+    "source": "deepen",
+    "package": "_scanner",
+    "type": "scanner_bug",
+    "status": "implemented",
+    "description": "namespace.method shared-name disambiguation: when a contract uses bare `name: retrieve` for one namespace (e.g. trigger.dev's `runs.retrieve()`) and a kebab-cased entry `name: batch-retrieve` for a sibling namespace (`batch.retrieve()`), the matcher could not route a `batch.retrieve()` call to its postcondition. The exact-match pass failed (no equality between `batch.retrieve` and `batch-retrieve`), suffix-match failed, and the call fell through to the bare-name fallback — which incorrectly returned the `retrieve` entry intended for the runs namespace. Affects trigger.dev's prompts.*, streams.*, batch.retrieve, idempotencyKeys.create, usage.measure, envvars.* surfaces (all use kebab-named entries). Surfaced by deepen-stream pass 92 (pattern #15 in bc-deepen-contract Phase 1.5).",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "fix_target": "scanner",
+      "note": "trigger.dev contract uses the kebab convention for namespace.method entries (envvars-upload, prompts-resolve, batch-retrieve, etc.). The chain detector builds chainStr from `.`-joined property names. Without kebab normalization in the matcher, the chain and the contract entry never reconcile."
+    },
+    "resolution": "Added a kebab-form normalization step to findFunctionContract's exact-match pass. When chainStr contains a `.`, build the kebab equivalent from the snake-case-normalized form (so `.` AND `_` both fold to `-`). Compare it against bare `f.name` entries on non-namespaced contracts. Examples now route correctly: `batch.retrieve()` → batch-retrieve entry; `envvars.upload()` → envvars-upload entry; `idempotencyKeys.create()` → idempotency-keys-create entry; `streams.read()` → streams-read entry. Single-segment chains do NOT go through kebab normalization (a regression test confirms `create` does not spuriously match `create-token`). Unblocks the pending trigger.dev scanner concerns 3360-3367 (prompts.*, streams.*, batch.retrieve, idempotencyKeys.create, usage.measure) whose postconditions were already in the contract but unreachable from the matcher. 3 regression tests added to src/v2/core/contract-matcher.test.ts: batch.retrieve vs runs.retrieve disambiguation, camelCase (idempotencyKeys.create → idempotency-keys-create), and single-segment no-spurious-match negative. Vitest: 4868 pass / 96 fail (baseline 4865 / 96 — 3 new tests pass, zero new failures)."
   }
 }

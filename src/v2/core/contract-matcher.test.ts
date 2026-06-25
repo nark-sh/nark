@@ -410,6 +410,189 @@ describe('ContractMatcher', () => {
     expect(violations[0].postconditionId).toBe('embeddings-create-no-try-catch');
   });
 
+  // ──────────────── namespace.method dot/kebab disambiguation ────────────────
+
+  // Concern: trigger.dev namespace.method shared-name disambiguation (deepen-stream
+  // pass 92; pattern #15 in bc-deepen-contract Phase 1.5). Contracts that flatten
+  // a namespace into a single kebab-cased entry (e.g. `name: batch-retrieve` for
+  // `batch.retrieve()`) must route correctly when a sibling namespace (`runs`)
+  // exposes a bare-named entry (`name: retrieve`) for the same method.
+  it('routes batch.retrieve to the batch-retrieve contract entry, not runs.retrieve', () => {
+    const stubContract: PackageContract = {
+      package: '_test-kebab',
+      semver: '*',
+      contract_version: '1.0.0',
+      maintainer: 'test',
+      last_verified: '2026-06-24',
+      functions: [
+        // The bare-name `retrieve` is intended for `runs.retrieve()`. Listed first
+        // so the bare-name fallback would grab it for any `*.retrieve()` call if the
+        // kebab disambiguation were missing.
+        {
+          name: 'retrieve',
+          import_path: '_test-kebab',
+          description: 'runs.retrieve',
+          postconditions: [
+            {
+              id: 'runs-retrieve-no-try-catch',
+              condition: 'await runs.retrieve()',
+              throws: 'ApiError',
+              sources: ['https://example.test/runs'],
+              severity: 'error',
+            },
+          ],
+        },
+        {
+          name: 'batch-retrieve',
+          import_path: '_test-kebab',
+          description: 'batch.retrieve',
+          postconditions: [
+            {
+              id: 'batch-retrieve-no-try-catch',
+              condition: 'await batch.retrieve()',
+              throws: 'NotFoundError',
+              sources: ['https://example.test/batch'],
+              severity: 'error',
+            },
+          ],
+        },
+      ],
+    };
+    const stubContracts = new Map<string, PackageContract>([
+      ['_test-kebab', stubContract],
+    ]);
+    const matcher = new ContractMatcher(stubContracts, { projectRoot: PROJECT_ROOT });
+
+    // batch.retrieve() — must route to batch-retrieve, not the bare `retrieve`.
+    const batchSource = `await client.batch.retrieve('batch_123');`;
+    const batchSf = parse(batchSource);
+    const batchCall = findFirst(batchSf, ts.isCallExpression)!;
+    const batchDetection: Detection = {
+      pluginName: 'test',
+      pattern: 'property-chain',
+      node: batchCall,
+      packageName: '_test-kebab',
+      functionName: 'retrieve',
+      confidence: 'high',
+      metadata: { chainStr: 'batch.retrieve' },
+    };
+    const batchViolations = matcher.matchDetections([batchDetection], batchSf);
+    expect(batchViolations.length).toBeGreaterThan(0);
+    expect(batchViolations[0].postconditionId).toBe('batch-retrieve-no-try-catch');
+
+    // runs.retrieve() — must still route to the bare `retrieve` entry via fallback.
+    const runsSource = `await client.runs.retrieve('run_123');`;
+    const runsSf = parse(runsSource);
+    const runsCall = findFirst(runsSf, ts.isCallExpression)!;
+    const runsDetection: Detection = {
+      pluginName: 'test',
+      pattern: 'property-chain',
+      node: runsCall,
+      packageName: '_test-kebab',
+      functionName: 'retrieve',
+      confidence: 'high',
+      metadata: { chainStr: 'runs.retrieve' },
+    };
+    const runsViolations = matcher.matchDetections([runsDetection], runsSf);
+    expect(runsViolations.length).toBeGreaterThan(0);
+    expect(runsViolations[0].postconditionId).toBe('runs-retrieve-no-try-catch');
+  });
+
+  // CamelCase chain like `idempotencyKeys.create` must kebab-normalize to
+  // `idempotency-keys-create` (camelCase split collapses via the existing
+  // snake_case normalization, then `.` and `_` both fold to `-`).
+  it('routes camelCase namespace.method (idempotencyKeys.create) to its kebab contract entry', () => {
+    const stubContract: PackageContract = {
+      package: '_test-camel-kebab',
+      semver: '*',
+      contract_version: '1.0.0',
+      maintainer: 'test',
+      last_verified: '2026-06-24',
+      functions: [
+        {
+          name: 'idempotency-keys-create',
+          import_path: '_test-camel-kebab',
+          description: 'idempotencyKeys.create',
+          postconditions: [
+            {
+              id: 'idempotency-keys-create-not-awaited',
+              condition: 'await idempotencyKeys.create()',
+              throws: 'IdempotencyError',
+              sources: ['https://example.test/'],
+              severity: 'error',
+            },
+          ],
+        },
+      ],
+    };
+    const stubContracts = new Map<string, PackageContract>([
+      ['_test-camel-kebab', stubContract],
+    ]);
+    const matcher = new ContractMatcher(stubContracts, { projectRoot: PROJECT_ROOT });
+    const source = `await client.idempotencyKeys.create({ key: 'k1' });`;
+    const sf = parse(source);
+    const call = findFirst(sf, ts.isCallExpression)!;
+    const detection: Detection = {
+      pluginName: 'test',
+      pattern: 'property-chain',
+      node: call,
+      packageName: '_test-camel-kebab',
+      functionName: 'create',
+      confidence: 'high',
+      metadata: { chainStr: 'idempotencyKeys.create' },
+    };
+    const violations = matcher.matchDetections([detection], sf);
+    expect(violations.length).toBeGreaterThan(0);
+    expect(violations[0].postconditionId).toBe('idempotency-keys-create-not-awaited');
+  });
+
+  // The kebab normalization must NOT apply to single-segment chains, or any
+  // bare-named entry containing a dash would spuriously match.
+  it('does not kebab-match single-segment chains', () => {
+    const stubContract: PackageContract = {
+      package: '_test-kebab-single',
+      semver: '*',
+      contract_version: '1.0.0',
+      maintainer: 'test',
+      last_verified: '2026-06-24',
+      functions: [
+        {
+          name: 'create-token',
+          import_path: '_test-kebab-single',
+          description: 'createToken',
+          postconditions: [
+            {
+              id: 'create-token-no-try-catch',
+              condition: 'await createToken()',
+              throws: 'AuthError',
+              sources: ['https://example.test/'],
+              severity: 'error',
+            },
+          ],
+        },
+      ],
+    };
+    const stubContracts = new Map<string, PackageContract>([
+      ['_test-kebab-single', stubContract],
+    ]);
+    const matcher = new ContractMatcher(stubContracts, { projectRoot: PROJECT_ROOT });
+    // A single-segment chainStr "create" must NOT match "create-token" via kebab.
+    const source = `await sdk.create();`;
+    const sf = parse(source);
+    const call = findFirst(sf, ts.isCallExpression)!;
+    const detection: Detection = {
+      pluginName: 'test',
+      pattern: 'property-chain',
+      node: call,
+      packageName: '_test-kebab-single',
+      functionName: 'create',
+      confidence: 'high',
+      metadata: { chainStr: 'create' },
+    };
+    const violations = matcher.matchDetections([detection], sf);
+    expect(violations).toHaveLength(0);
+  });
+
   // ──────────────── Promise(executor) callback-err-guard suppression ────────────────
 
   // Evidence: 2026-06-23 audit-stream wave 1+2 candidate #4
