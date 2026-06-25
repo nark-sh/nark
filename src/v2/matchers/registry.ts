@@ -120,83 +120,73 @@ export interface ApplicabilityContext {
  * postconditions; framework-gated and lifecycle-gated matchers return false
  * unless the package/postcondition signals match.
  *
- * The Wave 1 trace finalizer uses this to decide whether an UNRECORDED
- * matcher should be emitted as `not_applicable` (predicate returns false)
- * versus `failed` (predicate returns true but no `passed` entry was logged).
+ * The Wave 1 trace finalizer uses this predicate to decide whether the
+ * matcher is relevant to a (packageName, postconditionId) context. As of
+ * Plan 01-04 (Wave 2b), the accumulator's serialize() Pass 2 always emits
+ * `not_applicable` for ANY unrecorded matcher in the registry — this
+ * predicate is consulted directly by Wave 0 tests and by external callers
+ * who want to know "should I bother running this matcher?" but the
+ * accumulator no longer gates by it (it surfaces the matcher either way so
+ * the trace stays auditable).
+ *
+ * POSTCONDITION_GATING (Wave 2b) replaces the prior switch: a per-matcher
+ * predicate lookup table. Framework matchers now gate by BOTH package and
+ * postcondition substring; broadly-applicable matchers omit a gate (default
+ * true). This shape unblocks Plans 01-04..01-08 — they can add new gated
+ * matchers by appending an entry without touching the switch.
  *
  * IMPORTANT: This is conservative on purpose. New matchers default to
  * "applies broadly" unless they have an explicit gate; teams adding a new
- * gated matcher must extend the switch here. Wave 2's matcher unit tests
- * verify that no new matcher is silently broad.
+ * gated matcher must extend POSTCONDITION_GATING. Wave 2's matcher unit
+ * tests pin no new matcher is silently broad.
  */
+type GatePredicate = (ctx: ApplicabilityContext) => boolean;
+
+const POSTCONDITION_GATING: Record<string, GatePredicate> = {
+  // Framework matchers — gated by package AND (where useful) by postcondition
+  // substring. Plans 01-05..01-08 add their families below.
+  [MATCHER_IDS.FRAMEWORK_EXPRESS_ASYNC_ERRORS]: (c) =>
+    c.packageName === "express" &&
+    (c.postconditionId.includes("async-middleware") ||
+      c.postconditionId.includes("async-route-handler") ||
+      c.postconditionId.includes("async-router") ||
+      c.postconditionId.includes("express-async")),
+  [MATCHER_IDS.FRAMEWORK_FASTIFY_ROUTE]: (c) => c.packageName === "fastify",
+  [MATCHER_IDS.FRAMEWORK_REACT_HOOK_FORM]: (c) =>
+    c.packageName === "react-hook-form",
+  [MATCHER_IDS.FRAMEWORK_REACT_QUERY]: (c) =>
+    c.packageName === "@tanstack/react-query" ||
+    c.packageName === "react-query",
+
+  // Lifecycle / finally-gated matchers — postcondition-shape based.
+  [MATCHER_IDS.FINALLY_SPAN_END]: (c) =>
+    c.packageName.startsWith("@sentry/") &&
+    /span|trace|transaction/i.test(c.postconditionId),
+  [MATCHER_IDS.FINALLY_TRANSACTION_CLOSE]: (c) =>
+    /transaction|commit|rollback|release/i.test(c.postconditionId),
+  [MATCHER_IDS.FINALLY_CLOSE]: (c) =>
+    /close|leak|handle|connection/i.test(c.postconditionId),
+
+  // Pitfall 7 from RESEARCH: a try/catch around `Sentry.startSpanManual(...)`
+  // is NOT a substitute for `span.end()` in finally. TRY_CATCH_DIRECT must
+  // NOT apply to sentry span-lifecycle postconditions even though the call
+  // sits inside a try/catch. For non-sentry contexts the matcher applies.
+  [MATCHER_IDS.TRY_CATCH_DIRECT]: (c) =>
+    !(
+      c.packageName.startsWith("@sentry/") &&
+      /span|trace|transaction/i.test(c.postconditionId)
+    ),
+};
+
 export function applicabilityPredicate(
   matcherId: string,
   ctx: ApplicabilityContext,
 ): boolean {
-  switch (matcherId) {
-    // Framework-gated matchers — only apply when the framework signal
-    // is present. The trace finalizer should mark them `not_applicable`
-    // for unrelated packages/postconditions rather than `failed`.
-    case MATCHER_IDS.FRAMEWORK_EXPRESS_ASYNC_ERRORS:
-      // Express middleware error-propagation only applies when:
-      //   - the package is express OR a postcondition relates to async-handler errors
-      // Wave 1 will pass a richer context; for Wave 0 we approximate.
-      return ctx.packageName === "express";
-
-    case MATCHER_IDS.FRAMEWORK_FASTIFY_ROUTE:
-      return ctx.packageName === "fastify";
-
-    case MATCHER_IDS.FRAMEWORK_REACT_HOOK_FORM:
-      return ctx.packageName === "react-hook-form";
-
-    case MATCHER_IDS.FRAMEWORK_REACT_QUERY:
-      return ctx.packageName === "@tanstack/react-query";
-
-    // Lifecycle / finally-gated matchers — they only apply to postconditions
-    // that explicitly demand cleanup. Conservatively gate by postcondition-id
-    // substrings until Wave 1 wires the actual `required_handling` shape.
-    case MATCHER_IDS.FINALLY_SPAN_END:
-      return (
-        ctx.packageName.startsWith("@sentry/") &&
-        /span|trace|transaction/i.test(ctx.postconditionId)
-      );
-
-    case MATCHER_IDS.FINALLY_TRANSACTION_CLOSE:
-      return /transaction|commit|rollback|release/i.test(ctx.postconditionId);
-
-    case MATCHER_IDS.FINALLY_CLOSE:
-      // Close-in-finally applies to resource-handle packages (db, fs, network
-      // sockets) and to postconditions whose name hints at resource leak.
-      return /close|leak|handle|connection/i.test(ctx.postconditionId);
-
-    // Pitfall 7 from RESEARCH: a try/catch around `Sentry.startSpanManual(...)`
-    // is NOT a substitute for `span.end()` in finally. The TRY_CATCH_DIRECT
-    // matcher therefore must NOT be considered applicable to span-lifecycle
-    // postconditions — even though the call site sits inside a try/catch.
-    case MATCHER_IDS.TRY_CATCH_DIRECT:
-      if (
-        ctx.packageName.startsWith("@sentry/") &&
-        /span|trace|transaction/i.test(ctx.postconditionId)
-      ) {
-        return false;
-      }
-      return true;
-
-    // Broadly-applicable matchers — apply everywhere by default.
-    case MATCHER_IDS.PROMISE_CATCH_HANDLER:
-    case MATCHER_IDS.OPTIONS_ON_ERROR:
-    case MATCHER_IDS.DESTRUCTURED_ERROR_TUPLE:
-    case MATCHER_IDS.RESPONSE_OK_GUARD:
-    case MATCHER_IDS.RESULT_NULL_GUARD:
-    case MATCHER_IDS.CALLBACK_TRY_CATCH:
-      return true;
-
-    default:
-      // Unknown matcher id — conservatively treat as applicable so the trace
-      // surfaces a `failed` entry that authors can investigate. Wave 2 unit
-      // tests should pin this contract.
-      return true;
-  }
+  const gate = POSTCONDITION_GATING[matcherId];
+  // Ungated matchers (broadly-applicable: PROMISE_CATCH_HANDLER, OPTIONS_ON_ERROR,
+  // DESTRUCTURED_ERROR_TUPLE, RESPONSE_OK_GUARD, RESULT_NULL_GUARD,
+  // CALLBACK_TRY_CATCH, and any unknown matcher) always apply.
+  return gate ? gate(ctx) : true;
 }
 
 // ──────────────────────────────────────────────────────────────────────────────

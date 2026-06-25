@@ -87,26 +87,19 @@ describe("DetectionTraceAccumulator — record + serialize", () => {
 // ──────────────────────────────────────────────────────────────────────────────
 
 describe("DetectionTraceAccumulator — serialize() fills not_applicable", () => {
-  it("emits not_applicable for registered matchers that ARE applicable but were never recorded", () => {
+  it("emits not_applicable for every registered matcher that was never recorded", () => {
     const acc = new DetectionTraceAccumulator(AXIOS_CTX);
-    // Record only one matcher; the rest of the broadly-applicable ones
-    // should auto-emit as not_applicable from the finalizer... no wait,
-    // they should emit as not_applicable ONLY if applicabilityPredicate
-    // returns true for them in the given context. For axios broadly-
-    // applicable matchers DO apply, so they would have been "failed"
-    // had a matcher consulted them. But the accumulator's serialize()
-    // contract (per plan) is: "emit not_applicable for any registered-
-    // applicable matcher that was never `record()`-ed". Wave 2 plugins
-    // are responsible for calling record(..., "failed") for matchers
-    // they considered and rejected. If a matcher was applicable but the
-    // plugin neither passed nor failed it, the accumulator surfaces
-    // not_applicable so the trace is complete.
+    // Record only one matcher; every other matcher in MATCHER_IDS must
+    // appear in the trace as not_applicable so a downstream reader sees
+    // the complete consideration set (WAVE-2B: predicate-gating was
+    // removed from serialize() Pass 2; the predicate is now informational
+    // only — the trace surfaces every registered matcher exactly once).
     acc.record(MATCHER_IDS.TRY_CATCH_DIRECT, "failed", "checked, no try");
 
     const trace = acc.serialize();
 
-    // PROMISE_CATCH_HANDLER applies broadly (registry returns true for axios)
-    // and was NOT recorded, so it must be present as not_applicable.
+    // PROMISE_CATCH_HANDLER was NOT recorded, so it must be present as
+    // not_applicable.
     const promise = trace.find(
       (e) => e.matcher === MATCHER_IDS.PROMISE_CATCH_HANDLER,
     );
@@ -117,19 +110,23 @@ describe("DetectionTraceAccumulator — serialize() fills not_applicable", () =>
 });
 
 // ──────────────────────────────────────────────────────────────────────────────
-// serialize() — omits matchers whose applicabilityPredicate is false
+// serialize() — emits not_applicable for matchers whose predicate is false
+// (WAVE-2B revision: trace surface is now complete; predicate is informational
+// but no longer filters serialize().)
 // ──────────────────────────────────────────────────────────────────────────────
 
-describe("DetectionTraceAccumulator — serialize() omits non-applicable", () => {
-  it("does NOT emit not_applicable for matchers gated off by applicabilityPredicate", () => {
+describe("DetectionTraceAccumulator — serialize() surfaces non-applicable matchers", () => {
+  it("emits not_applicable for matchers whose applicabilityPredicate is false (WAVE-2B: auditable trace)", () => {
     const acc = new DetectionTraceAccumulator(AXIOS_CTX);
     // record nothing — let serialize() walk the registry.
     const trace = acc.serialize();
 
-    // FRAMEWORK_EXPRESS_ASYNC_ERRORS gates to packageName === "express";
-    // applicabilityPredicate returns false for axios, so it must be ABSENT
-    // entirely (not present as not_applicable).
-    // Sanity-check the registry contract first:
+    // FRAMEWORK_EXPRESS_ASYNC_ERRORS is postcondition-gated to express
+    // async-middleware family; applicabilityPredicate returns false for
+    // (axios, error-4xx-5xx). The predicate value is informational only —
+    // the serialize() Pass 2 emits not_applicable for it regardless, so a
+    // trace consumer can see "we considered this matcher and it didn't
+    // apply here" (Wave 0 PH1-R2a acceptance criterion).
     expect(
       applicabilityPredicate(
         MATCHER_IDS.FRAMEWORK_EXPRESS_ASYNC_ERRORS,
@@ -140,10 +137,12 @@ describe("DetectionTraceAccumulator — serialize() omits non-applicable", () =>
     const entry = trace.find(
       (e) => e.matcher === MATCHER_IDS.FRAMEWORK_EXPRESS_ASYNC_ERRORS,
     );
-    expect(entry).toBeUndefined();
+    expect(entry).toBeDefined();
+    expect(entry?.status).toBe("not_applicable");
+    expect(entry).not.toHaveProperty("reason");
   });
 
-  it("Pitfall 7: TRY_CATCH_DIRECT is absent for sentry span-lifecycle when not recorded", () => {
+  it("Pitfall 7: TRY_CATCH_DIRECT emitted as not_applicable for sentry span-lifecycle when not recorded", () => {
     const acc = new DetectionTraceAccumulator(SENTRY_SPAN_CTX);
     // Sanity: the registry gates TRY_CATCH_DIRECT off for sentry span-life.
     expect(
@@ -154,7 +153,13 @@ describe("DetectionTraceAccumulator — serialize() omits non-applicable", () =>
     const entry = trace.find(
       (e) => e.matcher === MATCHER_IDS.TRY_CATCH_DIRECT,
     );
-    expect(entry).toBeUndefined();
+    // The matcher is now surfaced as not_applicable (WAVE-2B trace
+    // completeness). The PH1-R2b test in detection-trace.test.ts still
+    // checks the value flips from "failed" (recorded by canonical OR-chain)
+    // to "not_applicable" — that flip lands in Plan 01-07 (Wave 2e) by
+    // skipping the record() call for sentry span-lifecycle contexts.
+    expect(entry).toBeDefined();
+    expect(entry?.status).toBe("not_applicable");
   });
 });
 

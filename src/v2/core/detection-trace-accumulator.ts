@@ -129,13 +129,26 @@ export class DetectionTraceAccumulator {
       }
     }
 
-    // Pass 2: not_applicable entries for registered-applicable matchers
-    // that the caller never record()-ed. Walking Object.values(MATCHER_IDS)
-    // is deterministic — declaration order is preserved by JavaScript object
+    // Pass 2: not_applicable entries for every registered matcher the
+    // caller never record()-ed. Walking Object.values(MATCHER_IDS) is
+    // deterministic — declaration order is preserved by JavaScript object
     // semantics (matched-key insertion order on the const-as-object).
+    //
+    // WAVE-2B (Plan 01-04): the predicate gate was REMOVED here so the
+    // trace surface is complete and auditable. A consumer (Wave 9
+    // convention miner, SaaS UI, future SARIF writer) needs to be able to
+    // tell "we considered FRAMEWORK_EXPRESS_ASYNC_ERRORS for this axios
+    // callsite and it didn't apply" — that requires the entry to appear
+    // as `not_applicable`, not silently absent. The applicabilityPredicate
+    // remains available for external callers ("should I bother running
+    // this matcher?") but no longer filters the trace itself.
+    //
+    // The void below silences TS6133 ("declared but never read") because
+    // applicabilityPredicate is still imported for the JSDoc reference
+    // above and for external callers via re-export downstream.
+    void applicabilityPredicate;
     for (const wireString of Object.values(MATCHER_IDS)) {
       if (this.recorded.has(wireString)) continue;
-      if (!applicabilityPredicate(wireString, this.ctx)) continue;
       entries.push({ matcher: wireString, status: "not_applicable" });
     }
 
