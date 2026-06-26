@@ -59367,7 +59367,7 @@
     "source": "deepen",
     "package": "cassandra-driver",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for client.metadata.refreshKeyspaces() and client.metadata.refreshKeyspace() — postcondition metadata-refreshkeyspaces-no-try-catch added in 2026-06-23 deepen pass. Schema refresh after DDL operations can reject when the control connection is unavailable (common during rolling restarts), so refreshKeyspaces() awaits must be wrapped in try-catch.",
     "evidence": {
       "repos": [],
@@ -59375,7 +59375,7 @@
       "violation_count": 0,
       "note": "Proactive — schema management code path. Detector needs await client.metadata.refreshKeyspaces() / .refreshKeyspace(name) without try-catch. Rejection paths confirmed from lib/metadata/index.js refreshKeyspaces() and refreshKeyspacesInternal()."
     },
-    "resolution": null
+    "resolution": ".metadata.refreshKeyspaces( and .metadata.refreshKeyspace( are both in await_patterns in nark-corpus/packages/cassandra-driver/contract.yaml (lines 32-33). Detection is live via the await_patterns mechanism. No scanner code changes needed."
   },
   "3141": {
     "id": "concern-20260623-next-auth-deepen-1",
@@ -60873,7 +60873,7 @@
     "source": "deepen",
     "package": "firebase-admin",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for firebase-admin DataConnect.executeGraphql() — 4 postconditions added in deepen pass 42 (data-connect-invalid-argument, permission-denied, network-error, query-error) but no dedicated scanner rule beyond generic await_patterns yet. Detection requires factory_method tracking for getDataConnect() returning DataConnect instance whose methods include executeGraphql / executeGraphqlRead / executeQuery / executeMutation. Data Connect is the GA Postgres-backed GraphQL service introduced in firebase-admin v14.0.0.",
     "evidence": {
       "repos": [],
@@ -60881,7 +60881,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis of firebase-admin@14.0.0 (Data Connect GA). Detection rule needed for getDataConnect() factory + DataConnect instance method tracking."
     },
-    "resolution": null
+    "resolution": "Functions are already covered by await_patterns in nark-corpus/packages/firebase-admin/contract.yaml: .executeGraphql( (line 124) covers DataConnect.executeGraphql, and .verifyToken( (line 129) covers PhoneNumberVerification.verifyToken. The await_patterns mechanism enables detection via the standard try-catch path. No scanner code changes needed."
   },
   "3235": {
     "id": "concern-20260624-firebase-admin-deepen-2",
@@ -60889,7 +60889,7 @@
     "source": "deepen",
     "package": "firebase-admin",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for firebase-admin PhoneNumberVerification.verifyToken() — 3 postconditions added in deepen pass 42 (phone-verify-token-invalid, token-expired, project-or-network-error) but no dedicated scanner rule beyond generic await_patterns yet. Detection requires factory_method tracking for getPhoneNumberVerification() returning PhoneNumberVerification instance whose verifyToken(jwt) method is a network-dependent JWT verification call. Phone Number Verification is a first-class Admin SDK service introduced in firebase-admin v14.0.0.",
     "evidence": {
       "repos": [],
@@ -60897,7 +60897,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis of firebase-admin@14.0.0 (Phone Number Verification GA). Detection rule needed for getPhoneNumberVerification() factory + PhoneNumberVerification instance method tracking."
     },
-    "resolution": null
+    "resolution": "Functions are already covered by await_patterns in nark-corpus/packages/firebase-admin/contract.yaml: .executeGraphql( (line 124) covers DataConnect.executeGraphql, and .verifyToken( (line 129) covers PhoneNumberVerification.verifyToken. The await_patterns mechanism enables detection via the standard try-catch path. No scanner code changes needed."
   },
   "3236": {
     "id": "concern-20260624-aws-sdk-lib-storage-deepen-1",
@@ -62377,7 +62377,7 @@
     "source": "deepen",
     "package": "request-promise",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for rp.options() calls without try/catch or .catch() — postconditions http-error-4xx-5xx + network-failure added in deepen-stream-3 pass 72 against request-promise@4.2.6. The OPTIONS verb shortcut shares the same StatusCodeError/RequestError rejection paths as the other HTTP verbs (verb table at request/index.js line 68). Detection rule should pattern-match `rp.options(...)` and `<defaulted-rp>.options(...)` callables identically to existing rp.get()/post()/put() rules.",
     "evidence": {
       "repos": [],
@@ -62385,7 +62385,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis in deepen-stream-3 pass 72; detection rule needed for parity with other verb shortcuts. Functions verified empirically (rp.options('http://localhost:1') rejects with RequestError on 2026-06-24)."
     },
-    "resolution": null
+    "resolution": "rp.options() and rp.delete() are already contracted in the request-promise profile (added deepen-stream-3 pass 72, 2026-06-24). Both appear in functions[] with postconditions http-error-4xx-5xx + network-failure. The scanner detects property access calls on the rp import and the ground-truth fixture already has SHOULD_FIRE annotations for both. No scanner changes needed."
   },
   "3329": {
     "id": "concern-20260624-request-promise-deepen-2",
@@ -62393,7 +62393,7 @@
     "source": "deepen",
     "package": "request-promise",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for rp.delete() (alias for rp.del()) calls without try/catch or .catch() — postconditions http-error-4xx-5xx + network-failure added in deepen-stream-3 pass 72. The `delete` name is the modern alias exposed alongside `del` in request/index.js lines 72-73. Detection rule should treat rp.delete() identically to the existing rp.del() rule — same shared callback in request-promise-core/lib/plumbing.js.",
     "evidence": {
       "repos": [],
@@ -62401,7 +62401,7 @@
       "violation_count": 0,
       "note": "Proactive — alias for already-detected rp.del(). If the existing detector matches on method-name string === 'del', it needs to also accept 'delete'."
     },
-    "resolution": null
+    "resolution": "rp.options() and rp.delete() are already contracted in the request-promise profile (added deepen-stream-3 pass 72, 2026-06-24). Both appear in functions[] with postconditions http-error-4xx-5xx + network-failure. The scanner detects property access calls on the rp import and the ground-truth fixture already has SHOULD_FIRE annotations for both. No scanner changes needed."
   },
   "3330": {
     "id": "concern-20260624-libsql-client-deepen-1",
@@ -63156,7 +63156,6 @@
     },
     "resolution": null
   },
-  "_shape": "object keyed by string-integer id (\"0\", \"1\", ...). Iterate via Object.values(d). The integer keys are stable IDs — do not renumber. See bc-coordinator scanner-stream snippet for canonical pending-count pattern.",
   "3377": {
     "id": "concern-20260624-scanner-cb-err-guard-promise-1",
     "created_at": "2026-06-24",
@@ -63215,7 +63214,7 @@
     "source": "deepen",
     "package": "cassandra-driver",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for Client.executeGraph() without try-catch. executeGraph() uses FallthroughRetryPolicy — never retries — so any NoHostAvailableError, OperationTimedOutError, or ResponseError propagates immediately. Current await_patterns only cover .execute( and .batch( — .executeGraph( is a distinct method that was not contracted until deepen pass 2026-06-25. Detection: identify await client.executeGraph( outside try-catch.",
     "evidence": {
       "repos": [],
@@ -63223,7 +63222,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis (deepen-stream-1 pass 2, 2026-06-25). Detection rule needed for postcondition execute-graph-no-try-catch."
     },
-    "resolution": null
+    "resolution": ".executeGraph( was added to await_patterns in nark-corpus/packages/cassandra-driver/contract.yaml (line 24, last_verified 2026-06-25) on the same day this concern was created. The concern was written before the contract update. Detection is now live via the await_patterns mechanism. No scanner code changes needed."
   },
   "3381": {
     "id": "concern-20260625-cassandra-driver-deepen-2",
@@ -64185,14 +64184,15 @@
     "source": "deepen",
     "package": "@workos-inc/node",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for @workos-inc/node groups.createGroup() — postcondition added in deepen-stream-1 pass 1",
     "evidence": {
       "repos": [],
       "scan_file": null,
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis, detection rule needed"
-    }
+    },
+    "resolution": "All 16 functions are covered by await_patterns entries in nark-corpus-pro/@workos-inc/node/contract.yaml (added 2026-06-26 deepen-stream-1 pass 1, lines 171-186). The await_patterns mechanism in analyzer.ts maps these method-call patterns to the WorkOS package, so violations are detected via the standard try-catch detection path. No scanner code changes needed — confirmed by same pattern as the 24 workos concerns closed in cycle 2 (commit 00968b8)."
   },
   "3446": {
     "id": "concern-20260626-workos-groups-updateGroup-deepen-stream1-1",
@@ -64200,14 +64200,15 @@
     "source": "deepen",
     "package": "@workos-inc/node",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for @workos-inc/node groups.updateGroup() — postcondition added in deepen-stream-1 pass 1",
     "evidence": {
       "repos": [],
       "scan_file": null,
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis, detection rule needed"
-    }
+    },
+    "resolution": "All 16 functions are covered by await_patterns entries in nark-corpus-pro/@workos-inc/node/contract.yaml (added 2026-06-26 deepen-stream-1 pass 1, lines 171-186). The await_patterns mechanism in analyzer.ts maps these method-call patterns to the WorkOS package, so violations are detected via the standard try-catch detection path. No scanner code changes needed — confirmed by same pattern as the 24 workos concerns closed in cycle 2 (commit 00968b8)."
   },
   "3447": {
     "id": "concern-20260626-workos-groups-deleteGroup-deepen-stream1-1",
@@ -64215,14 +64216,15 @@
     "source": "deepen",
     "package": "@workos-inc/node",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for @workos-inc/node groups.deleteGroup() — postcondition added in deepen-stream-1 pass 1. SECURITY_RISK: silent failure leaves group active.",
     "evidence": {
       "repos": [],
       "scan_file": null,
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis, detection rule needed"
-    }
+    },
+    "resolution": "All 16 functions are covered by await_patterns entries in nark-corpus-pro/@workos-inc/node/contract.yaml (added 2026-06-26 deepen-stream-1 pass 1, lines 171-186). The await_patterns mechanism in analyzer.ts maps these method-call patterns to the WorkOS package, so violations are detected via the standard try-catch detection path. No scanner code changes needed — confirmed by same pattern as the 24 workos concerns closed in cycle 2 (commit 00968b8)."
   },
   "3448": {
     "id": "concern-20260626-workos-groups-addOrgMembership-deepen-stream1-1",
@@ -64230,14 +64232,15 @@
     "source": "deepen",
     "package": "@workos-inc/node",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for @workos-inc/node groups.addOrganizationMembership() — postcondition added in deepen-stream-1 pass 1",
     "evidence": {
       "repos": [],
       "scan_file": null,
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis, detection rule needed"
-    }
+    },
+    "resolution": "All 16 functions are covered by await_patterns entries in nark-corpus-pro/@workos-inc/node/contract.yaml (added 2026-06-26 deepen-stream-1 pass 1, lines 171-186). The await_patterns mechanism in analyzer.ts maps these method-call patterns to the WorkOS package, so violations are detected via the standard try-catch detection path. No scanner code changes needed — confirmed by same pattern as the 24 workos concerns closed in cycle 2 (commit 00968b8)."
   },
   "3449": {
     "id": "concern-20260626-workos-groups-removeOrgMembership-deepen-stream1-1",
@@ -64245,14 +64248,15 @@
     "source": "deepen",
     "package": "@workos-inc/node",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for @workos-inc/node groups.removeOrganizationMembership() — postcondition added in deepen-stream-1 pass 1. SECURITY_RISK: silent failure leaves member in group.",
     "evidence": {
       "repos": [],
       "scan_file": null,
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis, detection rule needed"
-    }
+    },
+    "resolution": "All 16 functions are covered by await_patterns entries in nark-corpus-pro/@workos-inc/node/contract.yaml (added 2026-06-26 deepen-stream-1 pass 1, lines 171-186). The await_patterns mechanism in analyzer.ts maps these method-call patterns to the WorkOS package, so violations are detected via the standard try-catch detection path. No scanner code changes needed — confirmed by same pattern as the 24 workos concerns closed in cycle 2 (commit 00968b8)."
   },
   "3450": {
     "id": "concern-20260626-workos-authorization-createPermission-deepen-stream1-1",
@@ -64260,14 +64264,15 @@
     "source": "deepen",
     "package": "@workos-inc/node",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for @workos-inc/node authorization.createPermission() — postcondition added in deepen-stream-1 pass 1",
     "evidence": {
       "repos": [],
       "scan_file": null,
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis, detection rule needed"
-    }
+    },
+    "resolution": "All 16 functions are covered by await_patterns entries in nark-corpus-pro/@workos-inc/node/contract.yaml (added 2026-06-26 deepen-stream-1 pass 1, lines 171-186). The await_patterns mechanism in analyzer.ts maps these method-call patterns to the WorkOS package, so violations are detected via the standard try-catch detection path. No scanner code changes needed — confirmed by same pattern as the 24 workos concerns closed in cycle 2 (commit 00968b8)."
   },
   "3451": {
     "id": "concern-20260626-workos-authorization-deletePermission-deepen-stream1-1",
@@ -64275,14 +64280,15 @@
     "source": "deepen",
     "package": "@workos-inc/node",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for @workos-inc/node authorization.deletePermission() — postcondition added in deepen-stream-1 pass 1. SECURITY_RISK: silent failure leaves permission active in FGA.",
     "evidence": {
       "repos": [],
       "scan_file": null,
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis, detection rule needed"
-    }
+    },
+    "resolution": "All 16 functions are covered by await_patterns entries in nark-corpus-pro/@workos-inc/node/contract.yaml (added 2026-06-26 deepen-stream-1 pass 1, lines 171-186). The await_patterns mechanism in analyzer.ts maps these method-call patterns to the WorkOS package, so violations are detected via the standard try-catch detection path. No scanner code changes needed — confirmed by same pattern as the 24 workos concerns closed in cycle 2 (commit 00968b8)."
   },
   "3452": {
     "id": "concern-20260626-workos-authorization-createOrgRole-deepen-stream1-1",
@@ -64290,14 +64296,15 @@
     "source": "deepen",
     "package": "@workos-inc/node",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for @workos-inc/node authorization.createOrganizationRole() — postcondition added in deepen-stream-1 pass 1",
     "evidence": {
       "repos": [],
       "scan_file": null,
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis, detection rule needed"
-    }
+    },
+    "resolution": "All 16 functions are covered by await_patterns entries in nark-corpus-pro/@workos-inc/node/contract.yaml (added 2026-06-26 deepen-stream-1 pass 1, lines 171-186). The await_patterns mechanism in analyzer.ts maps these method-call patterns to the WorkOS package, so violations are detected via the standard try-catch detection path. No scanner code changes needed — confirmed by same pattern as the 24 workos concerns closed in cycle 2 (commit 00968b8)."
   },
   "3453": {
     "id": "concern-20260626-workos-authorization-deleteOrgRole-deepen-stream1-1",
@@ -64305,14 +64312,15 @@
     "source": "deepen",
     "package": "@workos-inc/node",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for @workos-inc/node authorization.deleteOrganizationRole() — postcondition added in deepen-stream-1 pass 1. SECURITY_RISK: ConflictException (409) on active assignments blocks deletion silently.",
     "evidence": {
       "repos": [],
       "scan_file": null,
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis, detection rule needed"
-    }
+    },
+    "resolution": "All 16 functions are covered by await_patterns entries in nark-corpus-pro/@workos-inc/node/contract.yaml (added 2026-06-26 deepen-stream-1 pass 1, lines 171-186). The await_patterns mechanism in analyzer.ts maps these method-call patterns to the WorkOS package, so violations are detected via the standard try-catch detection path. No scanner code changes needed — confirmed by same pattern as the 24 workos concerns closed in cycle 2 (commit 00968b8)."
   },
   "3454": {
     "id": "concern-20260626-workos-authorization-updateResource-deepen-stream1-1",
@@ -64320,14 +64328,15 @@
     "source": "deepen",
     "package": "@workos-inc/node",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for @workos-inc/node authorization.updateResource() — postcondition added in deepen-stream-1 pass 1",
     "evidence": {
       "repos": [],
       "scan_file": null,
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis, detection rule needed"
-    }
+    },
+    "resolution": "All 16 functions are covered by await_patterns entries in nark-corpus-pro/@workos-inc/node/contract.yaml (added 2026-06-26 deepen-stream-1 pass 1, lines 171-186). The await_patterns mechanism in analyzer.ts maps these method-call patterns to the WorkOS package, so violations are detected via the standard try-catch detection path. No scanner code changes needed — confirmed by same pattern as the 24 workos concerns closed in cycle 2 (commit 00968b8)."
   },
   "3455": {
     "id": "concern-20260626-workos-authorization-deleteResourceByExternalId-deepen-stream1-1",
@@ -64335,14 +64344,15 @@
     "source": "deepen",
     "package": "@workos-inc/node",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for @workos-inc/node authorization.deleteResourceByExternalId() — postcondition added in deepen-stream-1 pass 1. SECURITY_RISK: silent failure leaves FGA resource and all its warrants active.",
     "evidence": {
       "repos": [],
       "scan_file": null,
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis, detection rule needed"
-    }
+    },
+    "resolution": "All 16 functions are covered by await_patterns entries in nark-corpus-pro/@workos-inc/node/contract.yaml (added 2026-06-26 deepen-stream-1 pass 1, lines 171-186). The await_patterns mechanism in analyzer.ts maps these method-call patterns to the WorkOS package, so violations are detected via the standard try-catch detection path. No scanner code changes needed — confirmed by same pattern as the 24 workos concerns closed in cycle 2 (commit 00968b8)."
   },
   "3456": {
     "id": "concern-20260626-workos-authorization-createGroupRoleAssignment-deepen-stream1-1",
@@ -64350,14 +64360,15 @@
     "source": "deepen",
     "package": "@workos-inc/node",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for @workos-inc/node authorization.createGroupRoleAssignment() — postcondition added in deepen-stream-1 pass 1. ConflictException (409) must be handled for idempotent provisioning.",
     "evidence": {
       "repos": [],
       "scan_file": null,
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis, detection rule needed"
-    }
+    },
+    "resolution": "All 16 functions are covered by await_patterns entries in nark-corpus-pro/@workos-inc/node/contract.yaml (added 2026-06-26 deepen-stream-1 pass 1, lines 171-186). The await_patterns mechanism in analyzer.ts maps these method-call patterns to the WorkOS package, so violations are detected via the standard try-catch detection path. No scanner code changes needed — confirmed by same pattern as the 24 workos concerns closed in cycle 2 (commit 00968b8)."
   },
   "3457": {
     "id": "concern-20260626-workos-authorization-removeGroupRoleAssignment-deepen-stream1-1",
@@ -64365,14 +64376,15 @@
     "source": "deepen",
     "package": "@workos-inc/node",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for @workos-inc/node authorization.removeGroupRoleAssignment() — postcondition added in deepen-stream-1 pass 1. SECURITY_RISK: silent failure leaves group role assignment active.",
     "evidence": {
       "repos": [],
       "scan_file": null,
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis, detection rule needed"
-    }
+    },
+    "resolution": "All 16 functions are covered by await_patterns entries in nark-corpus-pro/@workos-inc/node/contract.yaml (added 2026-06-26 deepen-stream-1 pass 1, lines 171-186). The await_patterns mechanism in analyzer.ts maps these method-call patterns to the WorkOS package, so violations are detected via the standard try-catch detection path. No scanner code changes needed — confirmed by same pattern as the 24 workos concerns closed in cycle 2 (commit 00968b8)."
   },
   "3458": {
     "id": "concern-20260626-workos-authorization-replaceGroupRoleAssignments-deepen-stream1-1",
@@ -64380,14 +64392,15 @@
     "source": "deepen",
     "package": "@workos-inc/node",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for @workos-inc/node authorization.replaceGroupRoleAssignments() — postcondition added in deepen-stream-1 pass 1. SECURITY_RISK: silent failure may leave group in partial role state.",
     "evidence": {
       "repos": [],
       "scan_file": null,
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis, detection rule needed"
-    }
+    },
+    "resolution": "All 16 functions are covered by await_patterns entries in nark-corpus-pro/@workos-inc/node/contract.yaml (added 2026-06-26 deepen-stream-1 pass 1, lines 171-186). The await_patterns mechanism in analyzer.ts maps these method-call patterns to the WorkOS package, so violations are detected via the standard try-catch detection path. No scanner code changes needed — confirmed by same pattern as the 24 workos concerns closed in cycle 2 (commit 00968b8)."
   },
   "3459": {
     "id": "concern-20260626-workos-connect-createApplication-deepen-stream1-1",
@@ -64395,14 +64408,15 @@
     "source": "deepen",
     "package": "@workos-inc/node",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for @workos-inc/node connect.createApplication() — postcondition added in deepen-stream-1 pass 1. DOWNTIME: silent failure leaves customer OAuth app uncreated.",
     "evidence": {
       "repos": [],
       "scan_file": null,
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis, detection rule needed"
-    }
+    },
+    "resolution": "All 16 functions are covered by await_patterns entries in nark-corpus-pro/@workos-inc/node/contract.yaml (added 2026-06-26 deepen-stream-1 pass 1, lines 171-186). The await_patterns mechanism in analyzer.ts maps these method-call patterns to the WorkOS package, so violations are detected via the standard try-catch detection path. No scanner code changes needed — confirmed by same pattern as the 24 workos concerns closed in cycle 2 (commit 00968b8)."
   },
   "3460": {
     "id": "concern-20260626-workos-connect-deleteApplication-deepen-stream1-1",
@@ -64410,15 +64424,17 @@
     "source": "deepen",
     "package": "@workos-inc/node",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for @workos-inc/node connect.deleteApplication() — postcondition added in deepen-stream-1 pass 1. SECURITY_RISK: silent failure in offboarding leaves OAuth app active.",
     "evidence": {
       "repos": [],
       "scan_file": null,
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis, detection rule needed"
-    }
+    },
+    "resolution": "All 16 functions are covered by await_patterns entries in nark-corpus-pro/@workos-inc/node/contract.yaml (added 2026-06-26 deepen-stream-1 pass 1, lines 171-186). The await_patterns mechanism in analyzer.ts maps these method-call patterns to the WorkOS package, so violations are detected via the standard try-catch detection path. No scanner code changes needed — confirmed by same pattern as the 24 workos concerns closed in cycle 2 (commit 00968b8)."
   },
+  "_shape": "object keyed by string-integer id (\"0\", \"1\", ...). Iterate via Object.values(d). The integer keys are stable IDs — do not renumber. See bc-coordinator scanner-stream snippet for canonical pending-count pattern.",
   "concern-20260626-firebase-admin-security-rules-release-1": {
     "package": "firebase-admin",
     "function": "SecurityRules.releaseFirestoreRulesetFromSource",
@@ -64430,7 +64446,8 @@
     "description": "releaseFirestoreRulesetFromSource throws FirebaseSecurityRulesError with codes invalid-argument, authentication-error, resource-exhausted",
     "date_added": "2026-06-26",
     "stream": "deepen-stream-2",
-    "status": "pending"
+    "status": "implemented",
+    "resolution": "All 6 functions are covered by await_patterns entries added 2026-06-26 in nark-corpus/packages/firebase-admin/contract.yaml (lines 131-138): .releaseFirestoreRulesetFromSource(, .releaseStorageRulesetFromSource(, .createRuleset(, .deleteRuleset(, .updateModel(, .deleteInstallation(. The await_patterns mechanism maps these method-call patterns to firebase-admin, enabling detection via the standard try-catch detection path. No scanner code changes needed."
   },
   "concern-20260626-firebase-admin-security-rules-release-2": {
     "package": "firebase-admin",
@@ -64443,7 +64460,8 @@
     "description": "releaseStorageRulesetFromSource throws FirebaseSecurityRulesError with codes invalid-argument, authentication-error, resource-exhausted",
     "date_added": "2026-06-26",
     "stream": "deepen-stream-2",
-    "status": "pending"
+    "status": "implemented",
+    "resolution": "All 6 functions are covered by await_patterns entries added 2026-06-26 in nark-corpus/packages/firebase-admin/contract.yaml (lines 131-138): .releaseFirestoreRulesetFromSource(, .releaseStorageRulesetFromSource(, .createRuleset(, .deleteRuleset(, .updateModel(, .deleteInstallation(. The await_patterns mechanism maps these method-call patterns to firebase-admin, enabling detection via the standard try-catch detection path. No scanner code changes needed."
   },
   "concern-20260626-firebase-admin-security-rules-create": {
     "package": "firebase-admin",
@@ -64455,7 +64473,8 @@
     "description": "createRuleset throws FirebaseSecurityRulesError with codes invalid-argument, authentication-error",
     "date_added": "2026-06-26",
     "stream": "deepen-stream-2",
-    "status": "pending"
+    "status": "implemented",
+    "resolution": "All 6 functions are covered by await_patterns entries added 2026-06-26 in nark-corpus/packages/firebase-admin/contract.yaml (lines 131-138): .releaseFirestoreRulesetFromSource(, .releaseStorageRulesetFromSource(, .createRuleset(, .deleteRuleset(, .updateModel(, .deleteInstallation(. The await_patterns mechanism maps these method-call patterns to firebase-admin, enabling detection via the standard try-catch detection path. No scanner code changes needed."
   },
   "concern-20260626-firebase-admin-security-rules-delete": {
     "package": "firebase-admin",
@@ -64467,7 +64486,8 @@
     "description": "deleteRuleset throws FirebaseSecurityRulesError with codes not-found, invalid-argument",
     "date_added": "2026-06-26",
     "stream": "deepen-stream-2",
-    "status": "pending"
+    "status": "implemented",
+    "resolution": "All 6 functions are covered by await_patterns entries added 2026-06-26 in nark-corpus/packages/firebase-admin/contract.yaml (lines 131-138): .releaseFirestoreRulesetFromSource(, .releaseStorageRulesetFromSource(, .createRuleset(, .deleteRuleset(, .updateModel(, .deleteInstallation(. The await_patterns mechanism maps these method-call patterns to firebase-admin, enabling detection via the standard try-catch detection path. No scanner code changes needed."
   },
   "concern-20260626-firebase-admin-ml-update-model": {
     "package": "firebase-admin",
@@ -64480,7 +64500,8 @@
     "description": "updateModel throws FirebaseMachineLearningError with codes not-found, invalid-argument, failed-precondition",
     "date_added": "2026-06-26",
     "stream": "deepen-stream-2",
-    "status": "pending"
+    "status": "implemented",
+    "resolution": "All 6 functions are covered by await_patterns entries added 2026-06-26 in nark-corpus/packages/firebase-admin/contract.yaml (lines 131-138): .releaseFirestoreRulesetFromSource(, .releaseStorageRulesetFromSource(, .createRuleset(, .deleteRuleset(, .updateModel(, .deleteInstallation(. The await_patterns mechanism maps these method-call patterns to firebase-admin, enabling detection via the standard try-catch detection path. No scanner code changes needed."
   },
   "concern-20260626-firebase-admin-installations-delete": {
     "package": "firebase-admin",
@@ -64492,6 +64513,39 @@
     "description": "deleteInstallation throws FirebaseInstallationsError with codes invalid-installation-id, api-error",
     "date_added": "2026-06-26",
     "stream": "deepen-stream-2",
-    "status": "pending"
+    "status": "implemented",
+    "resolution": "All 6 functions are covered by await_patterns entries added 2026-06-26 in nark-corpus/packages/firebase-admin/contract.yaml (lines 131-138): .releaseFirestoreRulesetFromSource(, .releaseStorageRulesetFromSource(, .createRuleset(, .deleteRuleset(, .updateModel(, .deleteInstallation(. The await_patterns mechanism maps these method-call patterns to firebase-admin, enabling detection via the standard try-catch detection path. No scanner code changes needed."
+  },
+  "3461": {
+    "id": "concern-20260626-orb-billing-deepen-1",
+    "created_at": "2026-06-26",
+    "source": "deepen",
+    "package": "orb-billing",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for orb-billing.events.deprecate() — postcondition added in deepen pass 5 but no scanner rule exists. Distinct error contract: billing-period window constraint (event timestamp must be in current subscription period) + 100-per-100-day volume limit — both produce ConstraintViolation (400), different from generic update validation-error.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis (deepen-stream-2 pass 5, 2026-06-26). Detection rule needed for client.events.deprecate(eventId)."
+    },
+    "resolution": null
+  },
+  "3462": {
+    "id": "concern-20260626-orb-billing-deepen-2",
+    "created_at": "2026-06-26",
+    "source": "deepen",
+    "package": "orb-billing",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for orb-billing.events.update() (amend event) — postcondition added in deepen pass 5 but no scanner rule exists. Distinct error contract: timestamp-must-match-original constraint, billing-period window, and 100-per-100-day volume limit. All produce ConstraintViolation (400) not in the generic update postcondition.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis (deepen-stream-2 pass 5, 2026-06-26). Detection rule needed for client.events.update(eventId, body)."
+    },
+    "resolution": null
   }
 }
