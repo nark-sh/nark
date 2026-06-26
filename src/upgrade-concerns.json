@@ -65034,5 +65034,133 @@
     "stream": "deepen-stream-2",
     "status": "implemented",
     "resolution": "All 6 functions are covered by await_patterns entries added 2026-06-26 in nark-corpus/packages/firebase-admin/contract.yaml (lines 131-138): .releaseFirestoreRulesetFromSource(, .releaseStorageRulesetFromSource(, .createRuleset(, .deleteRuleset(, .updateModel(, .deleteInstallation(. The await_patterns mechanism maps these method-call patterns to firebase-admin, enabling detection via the standard try-catch detection path. No scanner code changes needed."
+  },
+  "3497": {
+    "id": "concern-20260626-minio-deepen-1",
+    "created_at": "2026-06-26",
+    "source": "deepen",
+    "package": "minio",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for minio.Client.setCredentialsProvider() — postconditions minio-setcredentialsprovider-invalid-type and minio-setcredentialsprovider-refresh-failure added in deepen pass but no scanner rule exists. The method is called on a Client instance; detection should match via PropertyChainDetector when setCredentialsProvider is awaited without try-catch.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis (minio@8.0.7 client.d.ts), detection rule needed"
+    },
+    "resolution": null
+  },
+  "3498": {
+    "id": "concern-20260626-firebase-deepen-1",
+    "created_at": "2026-06-26",
+    "source": "deepen",
+    "package": "firebase",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for sendSignInLinkToEmail() — postcondition send-sign-in-link-argument-error added in deepen pass but no scanner rule exists. Function is called as sendSignInLinkToEmail(auth, email, actionCodeSettings) and throws auth/argument-error when handleCodeInApp is not true, plus auth/unauthorized-domain and auth/invalid-email.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis (firebase/auth v9+ modular API), detection rule needed"
+    },
+    "resolution": null
+  },
+  "3499": {
+    "id": "concern-20260626-firebase-deepen-2",
+    "created_at": "2026-06-26",
+    "source": "deepen",
+    "package": "firebase",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for verifyPasswordResetCode() — postcondition verify-password-reset-code-error added in deepen pass but no scanner rule exists. Function throws auth/expired-action-code, auth/invalid-action-code, auth/user-disabled, auth/user-not-found.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis (firebase/auth v9+ modular API), detection rule needed"
+    },
+    "resolution": null
+  },
+  "3500": {
+    "id": "concern-20260626-firebase-deepen-3",
+    "created_at": "2026-06-26",
+    "source": "deepen",
+    "package": "firebase",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for checkActionCode() — postcondition check-action-code-error added in deepen pass but no scanner rule exists. Function throws auth/expired-action-code, auth/invalid-action-code, auth/user-disabled, auth/user-not-found.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis (firebase/auth v9+ modular API), detection rule needed"
+    },
+    "resolution": null
+  },
+  "3501": {
+    "id": "concern-20260626-firebase-deepen-4",
+    "created_at": "2026-06-26",
+    "source": "deepen",
+    "package": "firebase",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for unlink() — postcondition unlink-no-such-provider added in deepen pass but no scanner rule exists. Function is called as unlink(user, providerId) and throws auth/no-such-provider when provider not linked, plus auth/requires-recent-login and auth/user-token-expired.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis (firebase/auth v9+ modular API), detection rule needed"
+    },
+    "resolution": null
+  },
+  "3502": {
+    "id": "concern-20260626-firebase-deepen-5",
+    "created_at": "2026-06-26",
+    "source": "deepen",
+    "package": "firebase",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for reload() — postcondition reload-token-or-network-error added in deepen pass but no scanner rule exists. Function is called as reload(user) and throws auth/user-token-expired, auth/user-not-found, auth/network-request-failed, auth/user-disabled.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis (firebase/auth v9+ modular API), detection rule needed"
+    },
+    "resolution": null
+  },
+  "3503": {
+    "id": "concern-20260626-firebase-deepen-6",
+    "created_at": "2026-06-26",
+    "source": "deepen",
+    "package": "firebase",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for signInWithCredential() — postcondition sign-in-with-credential-error added in deepen pass but no scanner rule exists. Function is called as signInWithCredential(auth, credential) and throws auth/invalid-credential, auth/account-exists-with-different-credential, auth/user-disabled, auth/operation-not-allowed.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis (firebase/auth v9+ modular API), detection rule needed"
+    },
+    "resolution": null
+  },
+  "3504": {
+    "id": "concern-20260626-firebase-deepen-7",
+    "created_at": "2026-06-26",
+    "source": "deepen",
+    "package": "firebase",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for updateMetadata() from firebase/storage — postcondition update-metadata-error added in deepen pass but no scanner rule exists. Function is called as updateMetadata(storageRef, metadata) and throws storage/object-not-found, storage/unauthorized, storage/retry-limit-exceeded, storage/unauthenticated.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis (firebase/storage v9+ modular API), detection rule needed"
+    },
+    "resolution": null
   }
 }
