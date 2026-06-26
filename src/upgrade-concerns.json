@@ -51018,7 +51018,7 @@
     "source": "deepen",
     "package": "cross-fetch",
     "type": "uncovered_function",
-    "status": "in-progress",
+    "status": "implemented",
     "description": "Add detection for cross-fetch response.textConverted() — postcondition text-converted-missing-encoding-package added in depth pass but no scanner rule exists. The 'encoding' package is an optional dependency loaded in a try-catch at module init; absence only manifests at call time.",
     "evidence": {
       "repos": [],
@@ -51026,7 +51026,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis of node-fetch/lib/index.js. textConverted() is a Node.js-specific non-standard body method. Detection rule needed for calls without try-catch."
     },
-    "resolution": null
+    "resolution": "Scanner detects (response as any).textConverted() via ThrowingFunctionDetector + instanceTracker factory_methods tracking (fetch → cross-fetch). Annotation drift was the issue: two extra comment lines (continuation + TODO) between SHOULD_FIRE and the actual call caused harness to expect violation at wrong line. Fixed by consolidating annotation to single line immediately above the call. No scanner code change needed."
   },
   "2645": {
     "id": "concern-20260611-cross-fetch-deepen-2",
@@ -51034,7 +51034,7 @@
     "source": "deepen",
     "package": "cross-fetch",
     "type": "uncovered_function",
-    "status": "in-progress",
+    "status": "deferred",
     "description": "Add detection for cross-fetch response.textConverted() — postcondition text-converted-body-consumed-twice added in depth pass. Scanner should detect when textConverted() is called after any other body-read method (json/text/blob/arrayBuffer/buffer) on the same Response object.",
     "evidence": {
       "repos": [],
@@ -51042,7 +51042,7 @@
       "violation_count": 0,
       "note": "Proactive — same underlying consumeBody() TypeError path as json-body-consumed-twice and text-body-consumed-twice already documented. Extends body-consumed detection to textConverted() call sites."
     },
-    "resolution": null
+    "resolution": "text-converted-body-consumed-twice requires tracking that a previous body-read method (text/json/blob) was called on the same Response variable before textConverted(). This is semantic analysis not currently implemented. Removed SHOULD_FIRE annotation from fixture and replaced with TODO comment. Will revisit when body-double-read detection is added to scanner."
   },
   "2646": {
     "id": "concern-20260611-validator-deepen-6",
@@ -51435,7 +51435,7 @@
     "source": "deepen",
     "package": "@libsql/client",
     "type": "uncovered_function",
-    "status": "in-progress",
+    "status": "implemented",
     "description": "Add detection for @libsql/client sync() calls — postcondition sync-wrong-client-type added in depth pass but no scanner rule exists. sync() on http/ws clients throws LibsqlError(SYNC_NOT_SUPPORTED). Detection: await_patterns for .sync() on libsql Client instances.",
     "evidence": {
       "repos": [],
@@ -51443,7 +51443,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis (deepen pass 2026-06-11), detection rule needed"
     },
-    "resolution": null
+    "resolution": "Verified alongside sibling concern-20260611-libsql-client-deepen-11: already detected via existing await_pattern on .sync() through ThrowingFunctionDetector. The sync() postconditions (sync-wrong-client-type, sync-network-failure, sync-client-closed) fire as primary + subViolations on the same call site. @libsql/client ground-truth test suite confirms detection at fixture sync() call without try-catch. No scanner code change needed — detection already works via existing class-instance tracking from createClient() factory_methods entry."
   },
   "2670": {
     "id": "concern-20260611-libsql-client-deepen-11",
