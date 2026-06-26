@@ -64801,5 +64801,21 @@
       "violation_count": 0,
       "note": "Proactive — postcondition added in deepen-stream-2 pass 5. authorization.removeGroupRoleAssignments( added to await_patterns."
     }
+  },
+  "3483": {
+    "id": "concern-20260626-simple-git-deepen-1",
+    "created_at": "2026-06-26",
+    "source": "deepen",
+    "package": "simple-git",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for git.checkoutBranch() — postcondition simple-git-checkout-branch-missing-try-catch added in deepen-stream-6 pass 1. Current scanner matches checkoutBranch() calls under the 'checkout' function entry (which already covers checkoutBranch per description). Verify that the scanner's await_patterns for simple-git include checkoutBranch as a distinct call pattern, or confirm that the existing 'checkout' contract is matched when seeing git.checkoutBranch() calls. The distinct production failure — startPoint ref pruned by git fetch --prune — is not captured by any existing postcondition description.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — checkoutBranch contracted in deepen pass 2026-06-26 (deepen-stream-6). Existing checkout postcondition covers the technical error class but the stale-remote-tracking-branch scenario warrants explicit scanner coverage for checkoutBranch call sites."
+    },
+    "resolution": null
   }
 }
