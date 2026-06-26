@@ -64418,5 +64418,80 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis, detection rule needed"
     }
+  },
+  "concern-20260626-firebase-admin-security-rules-release-1": {
+    "package": "firebase-admin",
+    "function": "SecurityRules.releaseFirestoreRulesetFromSource",
+    "postcondition_ids": [
+      "security-rules-release-firestore-invalid-argument",
+      "security-rules-release-firestore-auth-error",
+      "security-rules-release-firestore-resource-exhausted"
+    ],
+    "description": "releaseFirestoreRulesetFromSource throws FirebaseSecurityRulesError with codes invalid-argument, authentication-error, resource-exhausted",
+    "date_added": "2026-06-26",
+    "stream": "deepen-stream-2",
+    "status": "pending"
+  },
+  "concern-20260626-firebase-admin-security-rules-release-2": {
+    "package": "firebase-admin",
+    "function": "SecurityRules.releaseStorageRulesetFromSource",
+    "postcondition_ids": [
+      "security-rules-release-storage-invalid-argument",
+      "security-rules-release-storage-auth-error",
+      "security-rules-release-storage-resource-exhausted"
+    ],
+    "description": "releaseStorageRulesetFromSource throws FirebaseSecurityRulesError with codes invalid-argument, authentication-error, resource-exhausted",
+    "date_added": "2026-06-26",
+    "stream": "deepen-stream-2",
+    "status": "pending"
+  },
+  "concern-20260626-firebase-admin-security-rules-create": {
+    "package": "firebase-admin",
+    "function": "SecurityRules.createRuleset",
+    "postcondition_ids": [
+      "security-rules-create-ruleset-invalid-argument",
+      "security-rules-create-ruleset-auth-error"
+    ],
+    "description": "createRuleset throws FirebaseSecurityRulesError with codes invalid-argument, authentication-error",
+    "date_added": "2026-06-26",
+    "stream": "deepen-stream-2",
+    "status": "pending"
+  },
+  "concern-20260626-firebase-admin-security-rules-delete": {
+    "package": "firebase-admin",
+    "function": "SecurityRules.deleteRuleset",
+    "postcondition_ids": [
+      "security-rules-delete-ruleset-not-found",
+      "security-rules-delete-ruleset-invalid-argument"
+    ],
+    "description": "deleteRuleset throws FirebaseSecurityRulesError with codes not-found, invalid-argument",
+    "date_added": "2026-06-26",
+    "stream": "deepen-stream-2",
+    "status": "pending"
+  },
+  "concern-20260626-firebase-admin-ml-update-model": {
+    "package": "firebase-admin",
+    "function": "MachineLearning.updateModel",
+    "postcondition_ids": [
+      "ml-update-model-not-found",
+      "ml-update-model-invalid-argument",
+      "ml-update-model-failed-precondition"
+    ],
+    "description": "updateModel throws FirebaseMachineLearningError with codes not-found, invalid-argument, failed-precondition",
+    "date_added": "2026-06-26",
+    "stream": "deepen-stream-2",
+    "status": "pending"
+  },
+  "concern-20260626-firebase-admin-installations-delete": {
+    "package": "firebase-admin",
+    "function": "Installations.deleteInstallation",
+    "postcondition_ids": [
+      "installations-delete-invalid-installation-id",
+      "installations-delete-api-error"
+    ],
+    "description": "deleteInstallation throws FirebaseInstallationsError with codes invalid-installation-id, api-error",
+    "date_added": "2026-06-26",
+    "stream": "deepen-stream-2",
+    "status": "pending"
   }
 }
