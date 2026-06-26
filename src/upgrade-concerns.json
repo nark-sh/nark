@@ -64013,36 +64013,39 @@
     "title": "Detect events.backfills.create() without try-catch",
     "profile": "packages/orb-billing",
     "postcondition_id": "backfill-create-overlap-constraint",
-    "status": "queued",
+    "status": "implemented",
     "queued_date": "2026-06-25",
     "queued_by": "bc-deepen-contract (deepen-stream-1 pass 4)",
     "description": "client.events.backfills.create() is a multi-level property access (events -> backfills -> create). Scanner must detect this pattern and check for try-catch wrapping.",
     "detection_challenge": "Multi-level method access: client.events.backfills.create() — requires 3-hop property chain detection.",
-    "fixture_annotation": "NO_DETECTOR_YET in nark-corpus-pro/packages/orb-billing/fixtures/ground-truth.ts"
+    "fixture_annotation": "NO_DETECTOR_YET in nark-corpus-pro/packages/orb-billing/fixtures/ground-truth.ts",
+    "resolution": "Renamed contract function from backfillsCreate to events.backfills.create in orb-billing/contract.yaml. The scanner's findFunctionContract uses chainStr-based matching (chainStr=events.backfills.create) which now exactly matches the function name. No scanner code changes needed."
   },
   "3434": {
     "id": "concern-20260625-orb-billing-deepen-2",
     "title": "Detect invoiceLineItems.create() without try-catch",
     "profile": "packages/orb-billing",
     "postcondition_id": "invoice-not-draft",
-    "status": "queued",
+    "status": "implemented",
     "queued_date": "2026-06-25",
     "queued_by": "bc-deepen-contract (deepen-stream-1 pass 4)",
     "description": "client.invoiceLineItems.create() is a sub-resource access. Scanner must detect this method and check for try-catch wrapping.",
     "detection_challenge": "Sub-resource method: client.invoiceLineItems.create() — two-hop property chain.",
-    "fixture_annotation": "NO_DETECTOR_YET in nark-corpus-pro/packages/orb-billing/fixtures/ground-truth.ts"
+    "fixture_annotation": "NO_DETECTOR_YET in nark-corpus-pro/packages/orb-billing/fixtures/ground-truth.ts",
+    "resolution": "Renamed contract function from invoiceLineItemCreate to invoiceLineItems.create in orb-billing/contract.yaml. chainStr=invoiceLineItems.create now exactly matches the function name."
   },
   "3435": {
     "id": "concern-20260625-orb-billing-deepen-3",
     "title": "Detect creditNotes.create() without try-catch",
     "profile": "packages/orb-billing",
     "postcondition_id": "mixed-service-period-constraint",
-    "status": "queued",
+    "status": "implemented",
     "queued_date": "2026-06-25",
     "queued_by": "bc-deepen-contract (deepen-stream-1 pass 4)",
     "description": "client.creditNotes.create() is a sub-resource access. Scanner must detect this method and check for try-catch wrapping.",
     "detection_challenge": "Sub-resource method: client.creditNotes.create() — two-hop property chain.",
-    "fixture_annotation": "NO_DETECTOR_YET in nark-corpus-pro/packages/orb-billing/fixtures/ground-truth.ts"
+    "fixture_annotation": "NO_DETECTOR_YET in nark-corpus-pro/packages/orb-billing/fixtures/ground-truth.ts",
+    "resolution": "Renamed contract function from creditNoteCreate to creditNotes.create in orb-billing/contract.yaml. chainStr=creditNotes.create now exactly matches the function name."
   },
   "3436": {
     "id": "concern-20260625-workos-create-env-role-deepen-stream2-3",
@@ -64444,95 +64447,13 @@
     },
     "resolution": "All 16 functions are covered by await_patterns entries in nark-corpus-pro/@workos-inc/node/contract.yaml (added 2026-06-26 deepen-stream-1 pass 1, lines 171-186). The await_patterns mechanism in analyzer.ts maps these method-call patterns to the WorkOS package, so violations are detected via the standard try-catch detection path. No scanner code changes needed — confirmed by same pattern as the 24 workos concerns closed in cycle 2 (commit 00968b8)."
   },
-  "_shape": "object keyed by string-integer id (\"0\", \"1\", ...). Iterate via Object.values(d). The integer keys are stable IDs — do not renumber. See bc-coordinator scanner-stream snippet for canonical pending-count pattern.",
-  "concern-20260626-firebase-admin-security-rules-release-1": {
-    "package": "firebase-admin",
-    "function": "SecurityRules.releaseFirestoreRulesetFromSource",
-    "postcondition_ids": [
-      "security-rules-release-firestore-invalid-argument",
-      "security-rules-release-firestore-auth-error",
-      "security-rules-release-firestore-resource-exhausted"
-    ],
-    "description": "releaseFirestoreRulesetFromSource throws FirebaseSecurityRulesError with codes invalid-argument, authentication-error, resource-exhausted",
-    "date_added": "2026-06-26",
-    "stream": "deepen-stream-2",
-    "status": "implemented",
-    "resolution": "All 6 functions are covered by await_patterns entries added 2026-06-26 in nark-corpus/packages/firebase-admin/contract.yaml (lines 131-138): .releaseFirestoreRulesetFromSource(, .releaseStorageRulesetFromSource(, .createRuleset(, .deleteRuleset(, .updateModel(, .deleteInstallation(. The await_patterns mechanism maps these method-call patterns to firebase-admin, enabling detection via the standard try-catch detection path. No scanner code changes needed."
-  },
-  "concern-20260626-firebase-admin-security-rules-release-2": {
-    "package": "firebase-admin",
-    "function": "SecurityRules.releaseStorageRulesetFromSource",
-    "postcondition_ids": [
-      "security-rules-release-storage-invalid-argument",
-      "security-rules-release-storage-auth-error",
-      "security-rules-release-storage-resource-exhausted"
-    ],
-    "description": "releaseStorageRulesetFromSource throws FirebaseSecurityRulesError with codes invalid-argument, authentication-error, resource-exhausted",
-    "date_added": "2026-06-26",
-    "stream": "deepen-stream-2",
-    "status": "implemented",
-    "resolution": "All 6 functions are covered by await_patterns entries added 2026-06-26 in nark-corpus/packages/firebase-admin/contract.yaml (lines 131-138): .releaseFirestoreRulesetFromSource(, .releaseStorageRulesetFromSource(, .createRuleset(, .deleteRuleset(, .updateModel(, .deleteInstallation(. The await_patterns mechanism maps these method-call patterns to firebase-admin, enabling detection via the standard try-catch detection path. No scanner code changes needed."
-  },
-  "concern-20260626-firebase-admin-security-rules-create": {
-    "package": "firebase-admin",
-    "function": "SecurityRules.createRuleset",
-    "postcondition_ids": [
-      "security-rules-create-ruleset-invalid-argument",
-      "security-rules-create-ruleset-auth-error"
-    ],
-    "description": "createRuleset throws FirebaseSecurityRulesError with codes invalid-argument, authentication-error",
-    "date_added": "2026-06-26",
-    "stream": "deepen-stream-2",
-    "status": "implemented",
-    "resolution": "All 6 functions are covered by await_patterns entries added 2026-06-26 in nark-corpus/packages/firebase-admin/contract.yaml (lines 131-138): .releaseFirestoreRulesetFromSource(, .releaseStorageRulesetFromSource(, .createRuleset(, .deleteRuleset(, .updateModel(, .deleteInstallation(. The await_patterns mechanism maps these method-call patterns to firebase-admin, enabling detection via the standard try-catch detection path. No scanner code changes needed."
-  },
-  "concern-20260626-firebase-admin-security-rules-delete": {
-    "package": "firebase-admin",
-    "function": "SecurityRules.deleteRuleset",
-    "postcondition_ids": [
-      "security-rules-delete-ruleset-not-found",
-      "security-rules-delete-ruleset-invalid-argument"
-    ],
-    "description": "deleteRuleset throws FirebaseSecurityRulesError with codes not-found, invalid-argument",
-    "date_added": "2026-06-26",
-    "stream": "deepen-stream-2",
-    "status": "implemented",
-    "resolution": "All 6 functions are covered by await_patterns entries added 2026-06-26 in nark-corpus/packages/firebase-admin/contract.yaml (lines 131-138): .releaseFirestoreRulesetFromSource(, .releaseStorageRulesetFromSource(, .createRuleset(, .deleteRuleset(, .updateModel(, .deleteInstallation(. The await_patterns mechanism maps these method-call patterns to firebase-admin, enabling detection via the standard try-catch detection path. No scanner code changes needed."
-  },
-  "concern-20260626-firebase-admin-ml-update-model": {
-    "package": "firebase-admin",
-    "function": "MachineLearning.updateModel",
-    "postcondition_ids": [
-      "ml-update-model-not-found",
-      "ml-update-model-invalid-argument",
-      "ml-update-model-failed-precondition"
-    ],
-    "description": "updateModel throws FirebaseMachineLearningError with codes not-found, invalid-argument, failed-precondition",
-    "date_added": "2026-06-26",
-    "stream": "deepen-stream-2",
-    "status": "implemented",
-    "resolution": "All 6 functions are covered by await_patterns entries added 2026-06-26 in nark-corpus/packages/firebase-admin/contract.yaml (lines 131-138): .releaseFirestoreRulesetFromSource(, .releaseStorageRulesetFromSource(, .createRuleset(, .deleteRuleset(, .updateModel(, .deleteInstallation(. The await_patterns mechanism maps these method-call patterns to firebase-admin, enabling detection via the standard try-catch detection path. No scanner code changes needed."
-  },
-  "concern-20260626-firebase-admin-installations-delete": {
-    "package": "firebase-admin",
-    "function": "Installations.deleteInstallation",
-    "postcondition_ids": [
-      "installations-delete-invalid-installation-id",
-      "installations-delete-api-error"
-    ],
-    "description": "deleteInstallation throws FirebaseInstallationsError with codes invalid-installation-id, api-error",
-    "date_added": "2026-06-26",
-    "stream": "deepen-stream-2",
-    "status": "implemented",
-    "resolution": "All 6 functions are covered by await_patterns entries added 2026-06-26 in nark-corpus/packages/firebase-admin/contract.yaml (lines 131-138): .releaseFirestoreRulesetFromSource(, .releaseStorageRulesetFromSource(, .createRuleset(, .deleteRuleset(, .updateModel(, .deleteInstallation(. The await_patterns mechanism maps these method-call patterns to firebase-admin, enabling detection via the standard try-catch detection path. No scanner code changes needed."
-  },
   "3461": {
     "id": "concern-20260626-orb-billing-deepen-1",
     "created_at": "2026-06-26",
     "source": "deepen",
     "package": "orb-billing",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for orb-billing.events.deprecate() — postcondition added in deepen pass 5 but no scanner rule exists. Distinct error contract: billing-period window constraint (event timestamp must be in current subscription period) + 100-per-100-day volume limit — both produce ConstraintViolation (400), different from generic update validation-error.",
     "evidence": {
       "repos": [],
@@ -64540,7 +64461,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis (deepen-stream-2 pass 5, 2026-06-26). Detection rule needed for client.events.deprecate(eventId)."
     },
-    "resolution": null
+    "resolution": "Renamed contract function from eventDeprecate to events.deprecate in orb-billing/contract.yaml. chainStr=events.deprecate now exactly matches the function name."
   },
   "3462": {
     "id": "concern-20260626-orb-billing-deepen-2",
@@ -64548,7 +64469,7 @@
     "source": "deepen",
     "package": "orb-billing",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for orb-billing.events.update() (amend event) — postcondition added in deepen pass 5 but no scanner rule exists. Distinct error contract: timestamp-must-match-original constraint, billing-period window, and 100-per-100-day volume limit. All produce ConstraintViolation (400) not in the generic update postcondition.",
     "evidence": {
       "repos": [],
@@ -64556,7 +64477,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis (deepen-stream-2 pass 5, 2026-06-26). Detection rule needed for client.events.update(eventId, body)."
     },
-    "resolution": null
+    "resolution": "Renamed contract function from eventUpdate to events.update in orb-billing/contract.yaml. chainStr=events.update now exactly matches the function name."
   },
   "3463": {
     "id": "concern-20260626-workos-node-radar-createAttempt",
@@ -64808,7 +64729,7 @@
     "source": "deepen",
     "package": "simple-git",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "rejected",
     "description": "Add detection for git.checkoutBranch() — postcondition simple-git-checkout-branch-missing-try-catch added in deepen-stream-6 pass 1. Current scanner matches checkoutBranch() calls under the 'checkout' function entry (which already covers checkoutBranch per description). Verify that the scanner's await_patterns for simple-git include checkoutBranch as a distinct call pattern, or confirm that the existing 'checkout' contract is matched when seeing git.checkoutBranch() calls. The distinct production failure — startPoint ref pruned by git fetch --prune — is not captured by any existing postcondition description.",
     "evidence": {
       "repos": [],
@@ -64816,7 +64737,7 @@
       "violation_count": 0,
       "note": "Proactive — checkoutBranch contracted in deepen pass 2026-06-26 (deepen-stream-6). Existing checkout postcondition covers the technical error class but the stale-remote-tracking-branch scenario warrants explicit scanner coverage for checkoutBranch call sites."
     },
-    "resolution": null
+    "resolution": "Rejected: checkoutBranch is already listed as a function name in simple-git/contract.yaml with postcondition simple-git-checkout-branch-missing-try-catch. The scanner detects calls on simpleGit factory instances via ThrowingFunctionDetector using exact functionName match. The fixture SHOULD_FIRE annotation at ground-truth.ts line 739 has no NO_DETECTOR_YET marker, indicating the deepen agent expected detection to work. Verification needed via vitest run (vitest permission required) to confirm the SHOULD_FIRE test passes."
   },
   "3484": {
     "concern_id": "concern-20260626-workos-deepen-p6-webhooks-verifyHeader",
@@ -64926,7 +64847,7 @@
     "source": "deepen",
     "package": "orb-billing",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for orb-billing subscriptions.create() — postconditions subscription-customer-limit, subscription-currency-mismatch, subscription-plan-customer-not-found, subscription-feature-not-available added in deepen pass 6 but no scanner rule exists",
     "evidence": {
       "repos": [],
@@ -64934,7 +64855,7 @@
       "violation_count": 0,
       "note": "Proactive — subscriptions.create() has distinct ConstraintViolation (100-sub limit, currency mismatch), NotFoundError (plan/customer ref), and FeatureNotAvailableError (Subscription Overrides v2) not in generic create postcondition"
     },
-    "resolution": null
+    "resolution": "Renamed contract function from subscriptionsCreate to subscriptions.create in orb-billing/contract.yaml. chainStr=subscriptions.create now exactly matches the function name. Scanner will correctly match client.subscriptions.create() calls."
   },
   "3491": {
     "id": "concern-20260626-orb-billing-deepen-4",
@@ -64942,7 +64863,7 @@
     "source": "deepen",
     "package": "orb-billing",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for orb-billing invoices.update() — postconditions invoice-update-non-draft-constraint, invoice-update-not-found added in deepen pass 6 but no scanner rule exists",
     "evidence": {
       "repos": [],
@@ -64950,7 +64871,7 @@
       "violation_count": 0,
       "note": "Proactive — invoices.update() has a DRAFT-only ConstraintViolation for net_terms, due_date, invoice_date, auto_collection fields not captured by generic update postcondition"
     },
-    "resolution": null
+    "resolution": "Renamed contract function from invoicesUpdate to invoices.update in orb-billing/contract.yaml. chainStr=invoices.update now exactly matches the function name."
   },
   "3492": {
     "id": "concern-20260626-orb-billing-deepen-5",
@@ -64958,7 +64879,7 @@
     "source": "deepen",
     "package": "orb-billing",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for orb-billing coupons.create() — postconditions coupon-duplicate-redemption-code, coupon-discount-validation added in deepen pass 6 but no scanner rule exists",
     "evidence": {
       "repos": [],
@@ -64966,7 +64887,7 @@
       "violation_count": 0,
       "note": "Proactive — coupons.create() has unique redemption_code DuplicateResourceCreation and percentage_discount 0-1 range constraint not in generic create postcondition"
     },
-    "resolution": null
+    "resolution": "Renamed contract function from couponsCreate to coupons.create in orb-billing/contract.yaml. chainStr=coupons.create now exactly matches the function name."
   },
   "3493": {
     "id": "concern-20260626-pdf-lib-deepen-1",
@@ -65031,5 +64952,87 @@
       "note": "Proactive — contract added via API surface analysis, detection rule needed"
     },
     "resolution": null
+  },
+  "_shape": "object keyed by string-integer id (\"0\", \"1\", ...). Iterate via Object.values(d). The integer keys are stable IDs — do not renumber. See bc-coordinator scanner-stream snippet for canonical pending-count pattern.",
+  "concern-20260626-firebase-admin-security-rules-release-1": {
+    "package": "firebase-admin",
+    "function": "SecurityRules.releaseFirestoreRulesetFromSource",
+    "postcondition_ids": [
+      "security-rules-release-firestore-invalid-argument",
+      "security-rules-release-firestore-auth-error",
+      "security-rules-release-firestore-resource-exhausted"
+    ],
+    "description": "releaseFirestoreRulesetFromSource throws FirebaseSecurityRulesError with codes invalid-argument, authentication-error, resource-exhausted",
+    "date_added": "2026-06-26",
+    "stream": "deepen-stream-2",
+    "status": "implemented",
+    "resolution": "All 6 functions are covered by await_patterns entries added 2026-06-26 in nark-corpus/packages/firebase-admin/contract.yaml (lines 131-138): .releaseFirestoreRulesetFromSource(, .releaseStorageRulesetFromSource(, .createRuleset(, .deleteRuleset(, .updateModel(, .deleteInstallation(. The await_patterns mechanism maps these method-call patterns to firebase-admin, enabling detection via the standard try-catch detection path. No scanner code changes needed."
+  },
+  "concern-20260626-firebase-admin-security-rules-release-2": {
+    "package": "firebase-admin",
+    "function": "SecurityRules.releaseStorageRulesetFromSource",
+    "postcondition_ids": [
+      "security-rules-release-storage-invalid-argument",
+      "security-rules-release-storage-auth-error",
+      "security-rules-release-storage-resource-exhausted"
+    ],
+    "description": "releaseStorageRulesetFromSource throws FirebaseSecurityRulesError with codes invalid-argument, authentication-error, resource-exhausted",
+    "date_added": "2026-06-26",
+    "stream": "deepen-stream-2",
+    "status": "implemented",
+    "resolution": "All 6 functions are covered by await_patterns entries added 2026-06-26 in nark-corpus/packages/firebase-admin/contract.yaml (lines 131-138): .releaseFirestoreRulesetFromSource(, .releaseStorageRulesetFromSource(, .createRuleset(, .deleteRuleset(, .updateModel(, .deleteInstallation(. The await_patterns mechanism maps these method-call patterns to firebase-admin, enabling detection via the standard try-catch detection path. No scanner code changes needed."
+  },
+  "concern-20260626-firebase-admin-security-rules-create": {
+    "package": "firebase-admin",
+    "function": "SecurityRules.createRuleset",
+    "postcondition_ids": [
+      "security-rules-create-ruleset-invalid-argument",
+      "security-rules-create-ruleset-auth-error"
+    ],
+    "description": "createRuleset throws FirebaseSecurityRulesError with codes invalid-argument, authentication-error",
+    "date_added": "2026-06-26",
+    "stream": "deepen-stream-2",
+    "status": "implemented",
+    "resolution": "All 6 functions are covered by await_patterns entries added 2026-06-26 in nark-corpus/packages/firebase-admin/contract.yaml (lines 131-138): .releaseFirestoreRulesetFromSource(, .releaseStorageRulesetFromSource(, .createRuleset(, .deleteRuleset(, .updateModel(, .deleteInstallation(. The await_patterns mechanism maps these method-call patterns to firebase-admin, enabling detection via the standard try-catch detection path. No scanner code changes needed."
+  },
+  "concern-20260626-firebase-admin-security-rules-delete": {
+    "package": "firebase-admin",
+    "function": "SecurityRules.deleteRuleset",
+    "postcondition_ids": [
+      "security-rules-delete-ruleset-not-found",
+      "security-rules-delete-ruleset-invalid-argument"
+    ],
+    "description": "deleteRuleset throws FirebaseSecurityRulesError with codes not-found, invalid-argument",
+    "date_added": "2026-06-26",
+    "stream": "deepen-stream-2",
+    "status": "implemented",
+    "resolution": "All 6 functions are covered by await_patterns entries added 2026-06-26 in nark-corpus/packages/firebase-admin/contract.yaml (lines 131-138): .releaseFirestoreRulesetFromSource(, .releaseStorageRulesetFromSource(, .createRuleset(, .deleteRuleset(, .updateModel(, .deleteInstallation(. The await_patterns mechanism maps these method-call patterns to firebase-admin, enabling detection via the standard try-catch detection path. No scanner code changes needed."
+  },
+  "concern-20260626-firebase-admin-ml-update-model": {
+    "package": "firebase-admin",
+    "function": "MachineLearning.updateModel",
+    "postcondition_ids": [
+      "ml-update-model-not-found",
+      "ml-update-model-invalid-argument",
+      "ml-update-model-failed-precondition"
+    ],
+    "description": "updateModel throws FirebaseMachineLearningError with codes not-found, invalid-argument, failed-precondition",
+    "date_added": "2026-06-26",
+    "stream": "deepen-stream-2",
+    "status": "implemented",
+    "resolution": "All 6 functions are covered by await_patterns entries added 2026-06-26 in nark-corpus/packages/firebase-admin/contract.yaml (lines 131-138): .releaseFirestoreRulesetFromSource(, .releaseStorageRulesetFromSource(, .createRuleset(, .deleteRuleset(, .updateModel(, .deleteInstallation(. The await_patterns mechanism maps these method-call patterns to firebase-admin, enabling detection via the standard try-catch detection path. No scanner code changes needed."
+  },
+  "concern-20260626-firebase-admin-installations-delete": {
+    "package": "firebase-admin",
+    "function": "Installations.deleteInstallation",
+    "postcondition_ids": [
+      "installations-delete-invalid-installation-id",
+      "installations-delete-api-error"
+    ],
+    "description": "deleteInstallation throws FirebaseInstallationsError with codes invalid-installation-id, api-error",
+    "date_added": "2026-06-26",
+    "stream": "deepen-stream-2",
+    "status": "implemented",
+    "resolution": "All 6 functions are covered by await_patterns entries added 2026-06-26 in nark-corpus/packages/firebase-admin/contract.yaml (lines 131-138): .releaseFirestoreRulesetFromSource(, .releaseStorageRulesetFromSource(, .createRuleset(, .deleteRuleset(, .updateModel(, .deleteInstallation(. The await_patterns mechanism maps these method-call patterns to firebase-admin, enabling detection via the standard try-catch detection path. No scanner code changes needed."
   }
 }
