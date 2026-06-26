@@ -53,7 +53,7 @@ import {
   handleFirstRunNotice,
   fireTelemetryEvent,
   fireEnrichedTelemetryEvent,
-  fireConventionMatchRenderedEvent,
+  fireConventionMatchBatch,
   getCurrentNarkApiBase,
   isNarkApiUrlSet,
   readAiHintShown,
@@ -1774,27 +1774,32 @@ async function main(options: any) {
     // ConventionMatchTelemetryEvent for distribution-of-recommendations
     // dashboards.
     //
-    // Best-effort: fireConventionMatchRenderedEvent already honors the
-    // same opt-outs (NARK_TELEMETRY=off / DO_NOT_TRACK=1 /
-    // telemetry.json enabled=false) and swallows every failure (network,
-    // HTTP 4xx/5xx, AbortSignal timeout). If the firing function ever
-    // throws synchronously (it shouldn't), the await on Promise.allSettled
-    // below still resolves so the scanner exit path is never affected.
+    // 2026-06-25 batching change: a real scan can produce dozens-to-hundreds
+    // of conventionMatch'd violations. Firing one POST per violation hits
+    // the per-IP 10/min rate limit and silently drops events past the
+    // budget. We now collect the payloads once and POST the whole scan's
+    // events in a single request via fireConventionMatchBatch. The server
+    // endpoint accepts either the legacy single-event shape or the new
+    // `{ events: [...] }` batch shape, so older CLI versions still work.
     //
-    // Why Promise.allSettled instead of fire-and-forget `void`: the
-    // existing scan-telemetry call above uses `await` so the request
-    // doesn't get killed mid-flight when process.exit() runs. Mirroring
-    // that pattern here trades ~50-200ms of extra wall-clock time at scan
-    // exit for guaranteed event delivery — important because the
-    // conventionMatch_rendered distribution dashboard is the only signal
-    // we have for tuning the v1.0 DEFAULT_OPTS thresholds.
+    // Best-effort: fireConventionMatchBatch honors the same opt-outs
+    // (NARK_TELEMETRY=off / DO_NOT_TRACK=1 / telemetry.json enabled=false)
+    // and swallows every failure (network, HTTP 4xx/5xx, AbortSignal
+    // timeout). Empty input is a no-op, so we can unconditionally invoke
+    // it after the iteration without guarding on length.
     //
     // Per Plan 01-12 Open Question #2 v1.0 decision: CLI does NOT fire
     // 'resolved_with_recommended_pattern' events — that requires local
     // prior-scan state nark doesn't currently keep. The SaaS-side Inngest
     // closed-loop detector in public-scan-resolved-detector.ts fires
     // those events from comparing public-scan rows.
-    const conventionMatchPromises: Array<Promise<void>> = [];
+    const conventionMatchPayloads: Array<{
+      eventType: "rendered";
+      patternId: string;
+      matchRatio: number;
+      siteCount: number;
+      narkVersion: string;
+    }> = [];
     for (const v of violations) {
       // WAVE-3 (Plan 01-09): conventionMatch is attached via the v2 adapter
       // using `(v1 as any).conventionMatch = v2.conventionMatch`. The
@@ -1804,29 +1809,22 @@ async function main(options: any) {
       // shape never reaches the telemetry endpoint.
       const cm = (v as { conventionMatch?: { pattern_id: string; match_ratio: number; site_count: number } }).conventionMatch;
       if (!cm || typeof cm.pattern_id !== "string") continue;
-      conventionMatchPromises.push(
-        fireConventionMatchRenderedEvent(
-          {
-            eventType: "rendered",
-            patternId: cm.pattern_id,
-            matchRatio: cm.match_ratio,
-            siteCount: cm.site_count,
-            narkVersion,
-          },
-          {
-            // Reuse the same NARK_API_URL resolution path as the scan
-            // telemetry above — explicit override on the env var,
-            // default to https://app.nark.sh otherwise.
-            apiUrl: getCurrentNarkApiBase(),
-            ...(token !== null ? { bearer: token } : {}),
-            ...(telemetryTimeoutMs !== undefined ? { timeoutMs: telemetryTimeoutMs } : {}),
-          },
-        ),
-      );
+      conventionMatchPayloads.push({
+        eventType: "rendered",
+        patternId: cm.pattern_id,
+        matchRatio: cm.match_ratio,
+        siteCount: cm.site_count,
+        narkVersion,
+      });
     }
-    if (conventionMatchPromises.length > 0) {
-      await Promise.allSettled(conventionMatchPromises);
-    }
+    await fireConventionMatchBatch(conventionMatchPayloads, {
+      // Reuse the same NARK_API_URL resolution path as the scan telemetry
+      // above — explicit override on the env var, default to
+      // https://app.nark.sh otherwise.
+      apiUrl: getCurrentNarkApiBase(),
+      ...(token !== null ? { bearer: token } : {}),
+      ...(telemetryTimeoutMs !== undefined ? { timeoutMs: telemetryTimeoutMs } : {}),
+    });
 
     // Checkpoint 4b: verbose telemetry feedback
     if (verboseFlag) {

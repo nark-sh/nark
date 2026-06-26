@@ -578,3 +578,260 @@ describe("fireConventionMatchRenderedEvent (Plan 01-12 / Wave 4c)", () => {
     expect(parsed.eventType).toBe("resolved_with_recommended_pattern");
   });
 });
+
+// ---------------------------------------------------------------------------
+// 2026-06-25 — fireConventionMatchBatch (per-scan batching)
+// ---------------------------------------------------------------------------
+//
+// Replaces the per-violation fan-out of fireConventionMatchRenderedEvent with
+// a single POST per scan shaped as { events: [...] }. Honors the same
+// opt-outs and same swallow-everything posture; on top, an empty input is a
+// guaranteed no-op so callers don't have to guard on length.
+
+describe("fireConventionMatchBatch (2026-06-25 batching)", () => {
+  beforeEach(() => {
+    rmDir(TEST_HOME);
+    writeEnabledConfig();
+    delete process.env["NARK_TELEMETRY"];
+    delete process.env["DO_NOT_TRACK"];
+    delete process.env["NARK_API_URL"];
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    rmDir(TEST_HOME);
+    vi.resetModules();
+  });
+
+  it("empty payloads array → no fetch fires (guard-free no-op)", async () => {
+    const fetchMock = vi.fn(async () => ({
+      ok: true,
+      status: 200,
+      json: async () => ({}),
+    }));
+    vi.stubGlobal("fetch", fetchMock as unknown as typeof fetch);
+
+    const { fireConventionMatchBatch } = await import("./telemetry.js");
+    await fireConventionMatchBatch([]);
+
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("opt-out: NARK_TELEMETRY=off short-circuits before any fetch", async () => {
+    process.env["NARK_TELEMETRY"] = "off";
+    const fetchMock = vi.fn(async () => ({
+      ok: true,
+      status: 200,
+      json: async () => ({}),
+    }));
+    vi.stubGlobal("fetch", fetchMock as unknown as typeof fetch);
+
+    const { fireConventionMatchBatch } = await import("./telemetry.js");
+    await fireConventionMatchBatch([conventionPayload(), conventionPayload()]);
+
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("opt-out: DO_NOT_TRACK=1 short-circuits before any fetch", async () => {
+    process.env["DO_NOT_TRACK"] = "1";
+    const fetchMock = vi.fn(async () => ({
+      ok: true,
+      status: 200,
+      json: async () => ({}),
+    }));
+    vi.stubGlobal("fetch", fetchMock as unknown as typeof fetch);
+
+    const { fireConventionMatchBatch } = await import("./telemetry.js");
+    await fireConventionMatchBatch([conventionPayload()]);
+
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("opt-out: file-config enabled=false short-circuits before any fetch", async () => {
+    const dir = path.join(TEST_HOME, ".nark");
+    fs.mkdirSync(dir, { recursive: true });
+    fs.writeFileSync(
+      path.join(dir, "telemetry.json"),
+      JSON.stringify({ enabled: false, notified: true }),
+    );
+
+    const fetchMock = vi.fn(async () => ({
+      ok: true,
+      status: 200,
+      json: async () => ({}),
+    }));
+    vi.stubGlobal("fetch", fetchMock as unknown as typeof fetch);
+
+    const { fireConventionMatchBatch } = await import("./telemetry.js");
+    await fireConventionMatchBatch([conventionPayload()]);
+
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("happy path: N payloads → exactly 1 POST with { events: [...] }", async () => {
+    const calls: Array<{
+      url: string;
+      method: string;
+      headers: Record<string, string>;
+      body: string;
+    }> = [];
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (url: string, init: RequestInit) => {
+        calls.push({
+          url,
+          method: init.method ?? "GET",
+          headers: (init.headers as Record<string, string>) ?? {},
+          body: init.body as string,
+        });
+        return { ok: true, status: 200, json: async () => ({}) };
+      }) as unknown as typeof fetch,
+    );
+
+    const { fireConventionMatchBatch } = await import("./telemetry.js");
+    const payloads = [
+      conventionPayload({ patternId: "try-catch:direct" }),
+      conventionPayload({ patternId: "result-type:err-then-ok" }),
+      conventionPayload({ patternId: "log-then-rethrow" }),
+    ];
+    await fireConventionMatchBatch(payloads);
+
+    expect(calls).toHaveLength(1);
+    expect(calls[0]!.method).toBe("POST");
+    expect(calls[0]!.url).toBe(
+      "https://app.nark.sh/api/telemetry/convention-match",
+    );
+    expect(calls[0]!.headers["Content-Type"]).toBe("application/json");
+
+    const parsed = JSON.parse(calls[0]!.body);
+    expect(parsed.events).toHaveLength(3);
+    expect(parsed.events[0].patternId).toBe("try-catch:direct");
+    expect(parsed.events[1].patternId).toBe("result-type:err-then-ok");
+    expect(parsed.events[2].patternId).toBe("log-then-rethrow");
+    expect(parsed.events[0].eventType).toBe("rendered");
+  });
+
+  it("large batch: 30 payloads → still exactly 1 POST (the whole point)", async () => {
+    const calls: Array<{ body: string }> = [];
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (_url: string, init: RequestInit) => {
+        calls.push({ body: init.body as string });
+        return { ok: true, status: 200, json: async () => ({}) };
+      }) as unknown as typeof fetch,
+    );
+
+    const payloads = Array.from({ length: 30 }, (_, i) =>
+      conventionPayload({ patternId: `pattern-${i}` }),
+    );
+    const { fireConventionMatchBatch } = await import("./telemetry.js");
+    await fireConventionMatchBatch(payloads);
+
+    expect(calls).toHaveLength(1);
+    const parsed = JSON.parse(calls[0]!.body);
+    expect(parsed.events).toHaveLength(30);
+    expect(parsed.events[0].patternId).toBe("pattern-0");
+    expect(parsed.events[29].patternId).toBe("pattern-29");
+  });
+
+  it("respects opts.apiUrl override (local-dev path)", async () => {
+    const calls: Array<{ url: string }> = [];
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (url: string) => {
+        calls.push({ url });
+        return { ok: true, status: 200, json: async () => ({}) };
+      }) as unknown as typeof fetch,
+    );
+
+    const { fireConventionMatchBatch } = await import("./telemetry.js");
+    await fireConventionMatchBatch([conventionPayload()], {
+      apiUrl: "http://localhost:3000",
+    });
+
+    expect(calls).toHaveLength(1);
+    expect(calls[0]!.url).toBe(
+      "http://localhost:3000/api/telemetry/convention-match",
+    );
+  });
+
+  it("attaches bearer when opts.bearer is set", async () => {
+    const calls: Array<{ headers: Record<string, string> }> = [];
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (_url: string, init: RequestInit) => {
+        calls.push({
+          headers: (init.headers as Record<string, string>) ?? {},
+        });
+        return { ok: true, status: 200, json: async () => ({}) };
+      }) as unknown as typeof fetch,
+    );
+
+    const { fireConventionMatchBatch } = await import("./telemetry.js");
+    await fireConventionMatchBatch([conventionPayload()], {
+      bearer: "bc_test_token",
+    });
+
+    expect(calls).toHaveLength(1);
+    expect(calls[0]!.headers["Authorization"]).toBe("Bearer bc_test_token");
+  });
+
+  it("best-effort: fetch rejection does NOT throw", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => {
+        throw new Error("ECONNREFUSED");
+      }) as unknown as typeof fetch,
+    );
+
+    const { fireConventionMatchBatch } = await import("./telemetry.js");
+    await expect(
+      fireConventionMatchBatch([conventionPayload()]),
+    ).resolves.toBeUndefined();
+  });
+
+  it("best-effort: HTTP 429 (rate-limited) does NOT throw", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => ({
+        ok: false,
+        status: 429,
+        json: async () => ({ error: "rate limited" }),
+      })) as unknown as typeof fetch,
+    );
+
+    const { fireConventionMatchBatch } = await import("./telemetry.js");
+    await expect(
+      fireConventionMatchBatch([conventionPayload()]),
+    ).resolves.toBeUndefined();
+  });
+
+  it("payload-supplied repoFingerprint/deviceId override enrichment defaults", async () => {
+    const calls: Array<{ body: string }> = [];
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (_url: string, init: RequestInit) => {
+        calls.push({ body: init.body as string });
+        return { ok: true, status: 200, json: async () => ({}) };
+      }) as unknown as typeof fetch,
+    );
+
+    const customFp =
+      "deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef";
+    const customDid = "11111111-2222-4333-8444-555555555555";
+
+    const { fireConventionMatchBatch } = await import("./telemetry.js");
+    await fireConventionMatchBatch([
+      {
+        ...conventionPayload(),
+        repoFingerprint: customFp,
+        deviceId: customDid,
+      },
+    ]);
+
+    expect(calls).toHaveLength(1);
+    const parsed = JSON.parse(calls[0]!.body);
+    expect(parsed.events[0].repoFingerprint).toBe(customFp);
+    expect(parsed.events[0].deviceId).toBe(customDid);
+  });
+});

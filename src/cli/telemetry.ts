@@ -1012,6 +1012,89 @@ export async function fireConventionMatchRenderedEvent(
 }
 
 /**
+ * Batched sibling of fireConventionMatchRenderedEvent — POSTs the entire
+ * scan's conventionMatch events to /api/telemetry/convention-match in a
+ * single request shaped as `{ events: ConventionMatchTelemetryPayload[] }`.
+ *
+ * Rationale: a scan against a real repo can produce dozens-to-hundreds of
+ * conventionMatch'd violations. Firing one POST per violation hits the
+ * per-IP rate limit (10/min) and silently drops events past the budget.
+ * Batching collapses every scan's events into one POST, so a "scan" costs
+ * 1 budget unit instead of N.
+ *
+ * Identical resilience contract to the single-event helper:
+ *   - NEVER throws, NEVER returns a sentinel, NEVER blocks scanner exit
+ *   - Honors NARK_TELEMETRY=off / DO_NOT_TRACK=1 / telemetry.json enabled=false
+ *   - Transparent enrichment with deviceId / repoFingerprint when missing
+ *   - AbortSignal.timeout(DEFAULT_TELEMETRY_TIMEOUT_MS) default
+ *   - Bearer header attached when opts.bearer is set
+ *   - Empty input is a no-op (no fetch fires)
+ *
+ * Server compatibility: the endpoint accepts either the legacy single-event
+ * shape OR the batched `{ events: [...] }` shape (z.union in route.ts).
+ * Older CLI versions still firing single events continue to work; new CLI
+ * versions send batches. Do NOT remove the single-event helper without
+ * coordinating a deprecation window.
+ */
+export async function fireConventionMatchBatch(
+  payloads: ConventionMatchTelemetryPayload[],
+  opts: {
+    apiUrl?: string;
+    bearer?: string;
+    timeoutMs?: number;
+  } = {},
+): Promise<void> {
+  // Empty input is a no-op — no network, no log noise. This lets the caller
+  // unconditionally invoke us after iterating violations without guarding
+  // on payloads.length itself.
+  if (!Array.isArray(payloads) || payloads.length === 0) return;
+
+  // Opt-out gate — short-circuit BEFORE any network work. Reuses the
+  // shared readTelemetryConfig() helper so a single source of truth
+  // governs all three opt-out paths (env vars + file config).
+  const config = readTelemetryConfig();
+  if (!config.enabled) return;
+
+  try {
+    const base = opts.apiUrl ?? getCurrentNarkApiBase();
+    const url = `${base}/api/telemetry/convention-match`;
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+    };
+    if (opts.bearer) {
+      headers["Authorization"] = `Bearer ${opts.bearer}`;
+    }
+
+    // Compute enrichment fields ONCE for the whole batch — every event in
+    // a single scan shares the same deviceId + repoFingerprint by
+    // definition. Avoids N redundant getRepoFingerprint() execSync spawns.
+    const fp = getRepoFingerprint();
+    const did = getOrCreateDeviceId();
+
+    const enrichedEvents: ConventionMatchTelemetryPayload[] = payloads.map(
+      (p) => ({
+        ...p,
+        ...(p.repoFingerprint ? {} : fp ? { repoFingerprint: fp } : {}),
+        ...(p.deviceId ? {} : did ? { deviceId: did } : {}),
+      }),
+    );
+
+    const timeoutMs = opts.timeoutMs ?? DEFAULT_TELEMETRY_TIMEOUT_MS;
+    await fetch(url, {
+      method: "POST",
+      headers,
+      body: JSON.stringify({ events: enrichedEvents }),
+      signal: AbortSignal.timeout(timeoutMs),
+    }).catch(() => null);
+    // Same posture as the single-event helper — we deliberately don't
+    // inspect response.ok / status. Telemetry must never affect scan UX.
+  } catch {
+    // Defense-in-depth: swallow JSON.stringify / fetch import / etc.
+    // The scanner exit path must be unaffected.
+  }
+}
+
+/**
  * Create the `nark telemetry` subcommand.
  */
 export function createTelemetryCommand(): Command {
