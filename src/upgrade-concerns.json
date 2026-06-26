@@ -64657,5 +64657,49 @@
     "function": "userManagement.findInvitationByToken",
     "postcondition_id": "usermgmt-find-invitation-by-token-no-error-handling",
     "notes": "throws NotFoundException (404) when token invalid/expired; DOWNTIME — invitation redemption fails silently"
+  },
+  "3473": {
+    "id": "concern-20260626-firebase-admin-deepen-appcheck-createtoken",
+    "created_at": "2026-06-26",
+    "source": "deepen",
+    "package": "firebase-admin",
+    "type": "uncovered_function",
+    "status": "pending",
+    "function": "AppCheck.createToken",
+    "postcondition_id": "app-check-create-token-invalid-argument",
+    "notes": "Throws FirebaseAppCheckError with 'app-check/invalid-argument' for bad appId, 'app-check/permission-denied' for IAM issues, 'app-check/not-found' for unregistered app. Proactive deepen pass — detection rule needed for getAppCheck().createToken() calls."
+  },
+  "3474": {
+    "id": "concern-20260626-firebase-admin-deepen-appcheck-verifytoken",
+    "created_at": "2026-06-26",
+    "source": "deepen",
+    "package": "firebase-admin",
+    "type": "uncovered_function",
+    "status": "pending",
+    "function": "AppCheck.verifyToken",
+    "postcondition_id": "app-check-verify-token-expired",
+    "notes": "Throws FirebaseAppCheckError with 'app-check/app-check-token-expired' (JWT exp passed), 'app-check/invalid-argument' (bad JWT or invalid signature), 'app-check/invalid-credential' (no project credentials). Security-critical: missing handling allows unverified App Check tokens to pass through. Detection rule needed for getAppCheck().verifyToken() calls."
+  },
+  "3475": {
+    "id": "concern-20260626-firebase-admin-deepen-deleteusers",
+    "created_at": "2026-06-26",
+    "source": "deepen",
+    "package": "firebase-admin",
+    "type": "uncovered_function",
+    "status": "pending",
+    "function": "deleteUsers",
+    "postcondition_id": "delete-users-partial-failure",
+    "notes": "deleteUsers() NEVER throws for individual user failures — they appear in result.errors[]. Callers who ignore result.failureCount silently miss deletions (GDPR risk). Detection requires checking whether the call result is inspected for failureCount. Also throws FirebaseAuthError for batch-size-exceeded (>1000 uids). Proactive deepen pass."
+  },
+  "3476": {
+    "id": "concern-20260626-firebase-admin-deepen-generateemailverificationlink",
+    "created_at": "2026-06-26",
+    "source": "deepen",
+    "package": "firebase-admin",
+    "type": "uncovered_function",
+    "status": "pending",
+    "function": "generateEmailVerificationLink",
+    "postcondition_id": "generate-email-verification-link-email-not-found",
+    "notes": "Throws FirebaseAuthError with 'auth/email-not-found' when the email is not registered, 'auth/unauthorized-continue-uri' when actionCodeSettings has an unauthorized domain. Same family as generatePasswordResetLink (contracted). Detection rule needed."
   }
 }
