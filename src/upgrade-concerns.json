@@ -64817,5 +64817,107 @@
       "note": "Proactive — checkoutBranch contracted in deepen pass 2026-06-26 (deepen-stream-6). Existing checkout postcondition covers the technical error class but the stale-remote-tracking-branch scenario warrants explicit scanner coverage for checkoutBranch call sites."
     },
     "resolution": null
+  },
+  "3484": {
+    "concern_id": "concern-20260626-workos-deepen-p6-webhooks-verifyHeader",
+    "source": "deepen",
+    "package": "@workos-inc/node",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Detect await/return on webhooks.verifyHeader() without try-catch. Throws SignatureVerificationException (factory-DwW2quUn.cjs lines 589-595) in 4 distinct cases: missing webhook signature header, timestamp outside tolerance window, HMAC-SHA256 mismatch, unparseable header format. Postcondition workos-webhooks-verify-header-no-error-handling added pass 6 (deepen-stream-4). Detection: function call to webhooks.verifyHeader without surrounding try-catch should fire ERROR. SECURITY_RISK — unhandled exception means caller cannot distinguish tampered payload from server error.",
+    "evidence": {
+      "repos": [],
+      "fixtures": [
+        "packages/@workos-inc/node/fixtures/ground-truth.ts:gt_webhooks_verifyHeader_no_catch"
+      ],
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis (deepen-stream-4 pass 6, 2026-06-26)"
+    },
+    "resolution": null
+  },
+  "3485": {
+    "concern_id": "concern-20260626-workos-deepen-p6-actions-signResponse",
+    "source": "deepen",
+    "package": "@workos-inc/node",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Detect await/return on actions.signResponse() without try-catch. Calls computeHMACSignatureAsync internally using Web Crypto SubtleCrypto.sign(). Throws if Web Crypto API unavailable (non-HTTPS context, old Node without crypto.subtle) or HMAC key import fails. Postcondition workos-actions-sign-response-no-error-handling added pass 6 (deepen-stream-4). Detection: function call to actions.signResponse without surrounding try-catch should fire ERROR. DOWNTIME/authentication_failure — unsigned action responses are rejected by WorkOS.",
+    "evidence": {
+      "repos": [],
+      "fixtures": [
+        "packages/@workos-inc/node/fixtures/ground-truth.ts:gt_actions_signResponse_no_catch"
+      ],
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis (deepen-stream-4 pass 6, 2026-06-26)"
+    },
+    "resolution": null
+  },
+  "3486": {
+    "concern_id": "concern-20260626-workos-deepen-p6-session-authenticate",
+    "source": "deepen",
+    "package": "@workos-inc/node",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Detect await/return on session.authenticate() without try-catch. Local JWT validation (no network for token check). Returns {authenticated: false, reason} union on soft failures (expired token, missing cookie). But hard throws Error('Missing client ID...') if clientId not provided at WorkOS initialization, plus throws on JWKS network failure (initial key fetch). Postcondition workos-session-authenticate-no-error-handling added pass 6 (deepen-stream-4). Detection: function call to session.authenticate without try-catch should fire ERROR. SECURITY_RISK/authentication_failure — unhandled exception masks config error or network partition.",
+    "evidence": {
+      "repos": [],
+      "fixtures": [
+        "packages/@workos-inc/node/fixtures/ground-truth.ts:gt_session_authenticate_no_catch"
+      ],
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis (deepen-stream-4 pass 6, 2026-06-26)"
+    },
+    "resolution": null
+  },
+  "3487": {
+    "concern_id": "concern-20260626-workos-deepen-p6-mfa-createUserAuthFactor",
+    "source": "deepen",
+    "package": "@workos-inc/node",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Detect await/return on multiFactorAuth.createUserAuthFactor() without try-catch. POST /user_management/users/{userId}/auth_factors. Throws NotFoundException (404) for unknown userId, ConflictException (409) if user already has auth factor of this type, UnprocessableEntityException (422) for invalid factor type. Postcondition workos-mfa-create-user-auth-factor-no-error-handling added pass 6 (deepen-stream-4). Detection: function call to multiFactorAuth.createUserAuthFactor without try-catch should fire ERROR. SILENT_FAILURE — auth factor not created, no signal to caller.",
+    "evidence": {
+      "repos": [],
+      "fixtures": [
+        "packages/@workos-inc/node/fixtures/ground-truth.ts:gt_mfa_createUserAuthFactor_no_catch"
+      ],
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis (deepen-stream-4 pass 6, 2026-06-26)"
+    },
+    "resolution": null
+  },
+  "3488": {
+    "concern_id": "concern-20260626-workos-deepen-p6-connect-createOAuthApplication",
+    "source": "deepen",
+    "package": "@workos-inc/node",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Detect await/return on connect.createOAuthApplication() without try-catch. POST to create OAuth 2.0 application under WorkOS Connect organization. Throws UnprocessableEntityException for HTTP (non-HTTPS) redirect URIs in production, ConflictException for duplicate application name. Postcondition workos-connect-create-oauth-application-no-error-handling added pass 6 (deepen-stream-4). Detection: function call to connect.createOAuthApplication without try-catch should fire ERROR. DOWNTIME — app not created, user-facing auth flow cannot proceed.",
+    "evidence": {
+      "repos": [],
+      "fixtures": [
+        "packages/@workos-inc/node/fixtures/ground-truth.ts:gt_connect_createOAuthApplication_no_catch"
+      ],
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis (deepen-stream-4 pass 6, 2026-06-26)"
+    },
+    "resolution": null
+  },
+  "3489": {
+    "concern_id": "concern-20260626-workos-deepen-p6-connect-createM2MApplication",
+    "source": "deepen",
+    "package": "@workos-inc/node",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Detect await/return on connect.createM2MApplication() without try-catch. POST to create machine-to-machine application credential pair. Throws NotFoundException for unknown organizationId, ConflictException for duplicate application name. Postcondition workos-connect-create-m2m-application-no-error-handling added pass 6 (deepen-stream-4). Detection: function call to connect.createM2MApplication without try-catch should fire ERROR. DOWNTIME — M2M credentials not issued, downstream service-to-service calls fail.",
+    "evidence": {
+      "repos": [],
+      "fixtures": [
+        "packages/@workos-inc/node/fixtures/ground-truth.ts:gt_connect_createM2MApplication_no_catch"
+      ],
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis (deepen-stream-4 pass 6, 2026-06-26)"
+    },
+    "resolution": null
   }
 }
