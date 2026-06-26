@@ -59575,7 +59575,7 @@
     "source": "deepen",
     "package": "@aws-sdk/client-dynamodb",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "rejected",
     "description": "Add detection for waitUntil* abort-handling discrimination (postcondition aws-dynamodb-wait-until-abort-not-distinguished added in 2026-06-23 deepen pass 24). Detector should fire when a try-catch wraps a waitUntilX call from @aws-sdk/client-dynamodb and the catch handler does NOT branch on error.name === 'AbortError'. This is the cancellation-awareness check — distinct from the no-try-catch concern. Detection is harder (requires intra-catch AST analysis) and may be deferred to a later scanner upgrade. Lower severity (warning, not error).",
     "evidence": {
       "repos": [],
@@ -59583,7 +59583,7 @@
       "violation_count": 0,
       "note": "Proactive — secondary postcondition for the same waitUntil* family. Detector would need to inspect the catch block AST for error.name === 'AbortError' or equivalent (e.g. instanceof check, string compare in switch). Likely a Phase 2 follow-up after the primary no-try-catch detector ships."
     },
-    "resolution": null
+    "resolution": "Rejected: This concern explicitly requires Phase 2 catch-block AST inspection (detecting error.name branching inside existing try-catch). The evidence note states: 'Likely a Phase 2 follow-up after the primary no-try-catch detector ships.' Re-queue after primary waitUntil no-try-catch detection is implemented."
   },
   "3154": {
     "id": "concern-20260623-got-deepen-1",
@@ -60727,7 +60727,7 @@
     "source": "deepen",
     "package": "handlebars",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "rejected",
     "description": "Add detection for Handlebars.compile() invalid-input-type — non-string/non-AST input throws Handlebars.Exception with message 'You must pass a string or Handlebars AST to Handlebars.compile. You passed <input>' before any compilation. Scanner currently flags compile() without try-catch as invalid-template-syntax; this postcondition is a distinct error class that fires on null/undefined input from external sources.",
     "evidence": {
       "repos": [],
@@ -60735,7 +60735,7 @@
       "violation_count": 0,
       "note": "Proactive — postcondition added in deepen pass 45 (2026-06-24, deepen-stream-2) after re-reading lib/handlebars/compiler/compiler.js against handlebars 4.7.9. Mirrors precompile-invalid-input-type already detected. No new scanner rule needed for the no-try-catch case (existing ThrowingFunctionDetector covers compile()); a more precise rule could distinguish input-type vs syntax errors when source flow analysis is added."
     },
-    "resolution": null
+    "resolution": "Rejected: The existing ThrowingFunctionDetector already fires on Handlebars.compile() without try-catch (covering both invalid-input-type and invalid-template-syntax cases). Distinguishing error types requires source flow analysis not yet in the scanner. Evidence note confirms: 'No new scanner rule needed for the no-try-catch case (existing ThrowingFunctionDetector covers compile())'. Re-queue when source flow analysis added."
   },
   "3226": {
     "id": "concern-20260624-octokit-rest-deepen-17",
@@ -61689,7 +61689,7 @@
     "source": "deepen",
     "package": "posthog-node",
     "type": "new_pattern",
-    "status": "pending",
+    "status": "rejected",
     "description": "Add detection for evaluate-flags-quota-limited-silent (postcondition added in pass 68). evaluateFlags() returns a FeatureFlagEvaluations snapshot with .quotaLimited set to true when the project has exceeded its feature-flag quota; subsequent snapshot.isEnabled() / snapshot.getFlag() calls then return the default-disabled answer for every flag - silent failure, no exception. Scanner should flag call sites where the value bound to evaluateFlags() is consumed by .isEnabled() / .getFlag() WITHOUT a preceding read of .quotaLimited on the same binding. Severity warning (not error) - this is a defensive-coding check, not a guaranteed bug. Likely a Phase 2 follow-up to the no-try-catch detector since it requires data-flow tracking from the awaited evaluateFlags() result through subsequent method calls.",
     "evidence": {
       "repos": [],
@@ -61697,7 +61697,7 @@
       "violation_count": 0,
       "note": "Proactive - secondary postcondition. Detector needs intra-function data-flow analysis: track the variable bound to evaluateFlags() and verify .quotaLimited is read before .isEnabled() / .getFlag() / .getFlagPayload(). Source-of-truth: posthog-node/dist/client.js line 615 (quotaLimited propagation into the FeatureFlagEvaluations constructor)."
     },
-    "resolution": null
+    "resolution": "Rejected: Requires intra-function data-flow analysis to track the variable bound to evaluateFlags() and verify .quotaLimited is read before .isEnabled()/.getFlag(). Scanner does not yet support this. Evidence note: 'Detector needs intra-function data-flow analysis'. Re-queue when data-flow analysis is available."
   },
   "3286": {
     "id": "concern-20260624-upstash-qstash-deepen-1",
