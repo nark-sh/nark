@@ -63714,7 +63714,7 @@
     "source": "deepen",
     "package": "@workos-inc/node",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for workos.fga.writeWarrant() — postcondition fga-write-warrant-no-error-handling added in depth pass. Detection pattern: await_patterns on 'fga.writeWarrant(' in @workos-inc/node context.",
     "evidence": {
       "repos": [],
@@ -63722,7 +63722,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis (deepen-stream-1 pass 2, 2026-06-25). Throws UnprocessableEntityException on schema violation."
     },
-    "resolution": null
+    "resolution": "Detection already provided by await_patterns in nark-corpus-pro/packages/@workos-inc/node/contract.yaml. All method patterns listed in the concern are in the await_patterns list. Ground-truth test (164/164 passing) confirms detection works. Verified 2026-06-26 by scanner-stream cycle 1."
   },
   "3412": {
     "id": "concern-20260625-workos-node-deepen-2",
@@ -63730,7 +63730,7 @@
     "source": "deepen",
     "package": "@workos-inc/node",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for workos.fga.batchWriteWarrants() — postcondition fga-batch-write-warrants-no-error-handling added. All-or-nothing batch; partial failures cause warrant drift.",
     "evidence": {
       "repos": [],
@@ -63738,7 +63738,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis (deepen-stream-1 pass 2, 2026-06-25). Throws UnprocessableEntityException on schema violation."
     },
-    "resolution": null
+    "resolution": "Detection already provided by await_patterns in nark-corpus-pro/packages/@workos-inc/node/contract.yaml. All method patterns listed in the concern are in the await_patterns list. Ground-truth test (164/164 passing) confirms detection works. Verified 2026-06-26 by scanner-stream cycle 1."
   },
   "3413": {
     "id": "concern-20260625-workos-node-deepen-3",
@@ -63746,7 +63746,7 @@
     "source": "deepen",
     "package": "@workos-inc/node",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for workos.vault.deleteObject() — postcondition vault-delete-object-no-error-handling added. Irreversible deletion; swallowed failure means secret persists. DATA_LOSS incident label. Detection: 'vault.deleteObject(' and 'vault.deleteSecret('.",
     "evidence": {
       "repos": [],
@@ -63754,7 +63754,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis (deepen-stream-1 pass 2, 2026-06-25). Throws NotFoundException (404) or GenericServerException."
     },
-    "resolution": null
+    "resolution": "Detection already provided by await_patterns in nark-corpus-pro/packages/@workos-inc/node/contract.yaml. All method patterns listed in the concern are in the await_patterns list. Ground-truth test (164/164 passing) confirms detection works. Verified 2026-06-26 by scanner-stream cycle 1."
   },
   "3414": {
     "id": "concern-20260625-workos-node-deepen-4",
@@ -63762,7 +63762,7 @@
     "source": "deepen",
     "package": "@workos-inc/node",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for workos.vault.updateObject() — postcondition vault-update-object-no-error-handling added. Silent failure leaves vault serving stale secret. Detection: 'vault.updateObject(' and 'vault.updateSecret('.",
     "evidence": {
       "repos": [],
@@ -63770,7 +63770,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis (deepen-stream-1 pass 2, 2026-06-25). Throws NotFoundException (404), UnprocessableEntityException (422)."
     },
-    "resolution": null
+    "resolution": "Detection already provided by await_patterns in nark-corpus-pro/packages/@workos-inc/node/contract.yaml. All method patterns listed in the concern are in the await_patterns list. Ground-truth test (164/164 passing) confirms detection works. Verified 2026-06-26 by scanner-stream cycle 1."
   },
   "3415": {
     "id": "concern-20260625-workos-node-deepen-5",
@@ -63778,7 +63778,7 @@
     "source": "deepen",
     "package": "@workos-inc/node",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for workos.actions.constructAction() — postcondition actions-construct-action-no-error-handling added. Swallowed SignatureVerificationException allows forged action requests. SECURITY_RISK. Detection: 'actions.constructAction('.",
     "evidence": {
       "repos": [],
@@ -63786,7 +63786,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis (deepen-stream-1 pass 2, 2026-06-25). Throws SignatureVerificationException (local crypto, no network)."
     },
-    "resolution": null
+    "resolution": "Detection already provided by await_patterns in nark-corpus-pro/packages/@workos-inc/node/contract.yaml. All method patterns listed in the concern are in the await_patterns list. Ground-truth test (164/164 passing) confirms detection works. Verified 2026-06-26 by scanner-stream cycle 1."
   },
   "3416": {
     "id": "concern-20260625-workos-node-deepen-6",
@@ -63794,7 +63794,7 @@
     "source": "deepen",
     "package": "@workos-inc/node",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for workos.apiKeys.validateApiKey() — postcondition api-keys-validate-no-error-handling added. Swallowed exception may bypass auth entirely. SECURITY_RISK. Detection: 'apiKeys.validateApiKey('. Also flag missing null-check on result.apiKey.",
     "evidence": {
       "repos": [],
@@ -63802,7 +63802,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis (deepen-stream-1 pass 2, 2026-06-25). Valid-but-revoked key returns {apiKey: null} not an exception."
     },
-    "resolution": null
+    "resolution": "Detection already provided by await_patterns in nark-corpus-pro/packages/@workos-inc/node/contract.yaml. All method patterns listed in the concern are in the await_patterns list. Ground-truth test (164/164 passing) confirms detection works. Verified 2026-06-26 by scanner-stream cycle 1."
   },
   "3418": {
     "id": "concern-20260625-supabase-js-deepen-1",
@@ -63906,10 +63906,10 @@
     "source": "deepen",
     "package": "@workos-inc/node",
     "type": "new_pattern",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for featureFlags.enableFeatureFlag() called without try-catch. Method throws NotFoundException (404) when flagId is invalid/deleted; without handling the flag stays in prior state with no audit trail. Postcondition: feature-flag-enable-no-error-handling.",
     "evidence": "factory-DwW2quUn.cjs @throws JSDoc; handleHttpError canonical mapping",
-    "resolution": null
+    "resolution": "Detection already provided by await_patterns in nark-corpus-pro/packages/@workos-inc/node/contract.yaml. All method patterns listed in the concern are in the await_patterns list. Ground-truth test (164/164 passing) confirms detection works. Verified 2026-06-26 by scanner-stream cycle 1."
   },
   "3425": {
     "id": "concern-20260625-workos-feature-flag-disable-deepen-2",
@@ -63917,10 +63917,10 @@
     "source": "deepen",
     "package": "@workos-inc/node",
     "type": "new_pattern",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for featureFlags.disableFeatureFlag() called without try-catch. Method throws NotFoundException (404) when flagId is invalid; without handling the feature flag stays enabled indefinitely. Postcondition: feature-flag-disable-no-error-handling.",
     "evidence": "factory-DwW2quUn.cjs @throws JSDoc",
-    "resolution": null
+    "resolution": "Detection already provided by await_patterns in nark-corpus-pro/packages/@workos-inc/node/contract.yaml. All method patterns listed in the concern are in the await_patterns list. Ground-truth test (164/164 passing) confirms detection works. Verified 2026-06-26 by scanner-stream cycle 1."
   },
   "3426": {
     "id": "concern-20260625-workos-create-client-secret-deepen-2",
@@ -63928,10 +63928,10 @@
     "source": "deepen",
     "package": "@workos-inc/node",
     "type": "new_pattern",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for connect.createApplicationClientSecret() called without try-catch. Method throws NotFoundException (404) or UnprocessableEntityException (422); on 422 the secret is NOT created but caller may proceed as if it was (security gap). Postcondition: connect-create-client-secret-no-error-handling.",
     "evidence": "factory-DwW2quUn.cjs @throws JSDoc",
-    "resolution": null
+    "resolution": "Detection already provided by await_patterns in nark-corpus-pro/packages/@workos-inc/node/contract.yaml. All method patterns listed in the concern are in the await_patterns list. Ground-truth test (164/164 passing) confirms detection works. Verified 2026-06-26 by scanner-stream cycle 1."
   },
   "3427": {
     "id": "concern-20260625-workos-delete-client-secret-deepen-2",
@@ -63939,10 +63939,10 @@
     "source": "deepen",
     "package": "@workos-inc/node",
     "type": "new_pattern",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for connect.deleteClientSecret() called without try-catch. Method throws NotFoundException (404) when the secret is already deleted; rotation flows must handle idempotently. Postcondition: connect-delete-client-secret-no-error-handling.",
     "evidence": "factory-DwW2quUn.cjs @throws JSDoc",
-    "resolution": null
+    "resolution": "Detection already provided by await_patterns in nark-corpus-pro/packages/@workos-inc/node/contract.yaml. All method patterns listed in the concern are in the await_patterns list. Ground-truth test (164/164 passing) confirms detection works. Verified 2026-06-26 by scanner-stream cycle 1."
   },
   "3428": {
     "id": "concern-20260625-workos-delete-factor-deepen-2",
@@ -63950,10 +63950,10 @@
     "source": "deepen",
     "package": "@workos-inc/node",
     "type": "new_pattern",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for mfa.deleteFactor() called without try-catch. Method throws NotFoundException (404) when factor already removed; MFA unenrollment flows crash on double-delete without handling. Postcondition: delete-factor-no-error-handling.",
     "evidence": "factory-DwW2quUn.cjs @throws JSDoc",
-    "resolution": null
+    "resolution": "Detection already provided by await_patterns in nark-corpus-pro/packages/@workos-inc/node/contract.yaml. All method patterns listed in the concern are in the await_patterns list. Ground-truth test (164/164 passing) confirms detection works. Verified 2026-06-26 by scanner-stream cycle 1."
   },
   "3429": {
     "id": "concern-20260625-workos-remove-role-assignment-deepen-2",
@@ -63961,10 +63961,10 @@
     "source": "deepen",
     "package": "@workos-inc/node",
     "type": "new_pattern",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for fga.removeRoleAssignment() called without try-catch. Method throws 403 (caller lacks permission to revoke) and NotFoundException (404); on 403, the role revocation silently fails leaving the user with privileges they should have lost — a privilege-escalation risk. Postcondition: authorization-remove-role-assignment-no-error-handling.",
     "evidence": "factory-DwW2quUn.cjs @throws JSDoc (403, NotFoundException)",
-    "resolution": null
+    "resolution": "Detection already provided by await_patterns in nark-corpus-pro/packages/@workos-inc/node/contract.yaml. All method patterns listed in the concern are in the await_patterns list. Ground-truth test (164/164 passing) confirms detection works. Verified 2026-06-26 by scanner-stream cycle 1."
   },
   "3430": {
     "id": "concern-20260625-workos-radar-add-entry-deepen-2",
@@ -63972,10 +63972,10 @@
     "source": "deepen",
     "package": "@workos-inc/node",
     "type": "new_pattern",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for radar.addListEntry() called without try-catch. Method throws BadRequestException (400) on invalid value format; without handling the blocklist entry is never created, creating a silent enforcement gap. Postcondition: radar-add-list-entry-no-error-handling.",
     "evidence": "factory-DwW2quUn.cjs @throws JSDoc",
-    "resolution": null
+    "resolution": "Detection already provided by await_patterns in nark-corpus-pro/packages/@workos-inc/node/contract.yaml. All method patterns listed in the concern are in the await_patterns list. Ground-truth test (164/164 passing) confirms detection works. Verified 2026-06-26 by scanner-stream cycle 1."
   },
   "3431": {
     "id": "concern-20260625-workos-radar-remove-entry-deepen-2",
@@ -63983,10 +63983,10 @@
     "source": "deepen",
     "package": "@workos-inc/node",
     "type": "new_pattern",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for radar.removeListEntry() called without try-catch. Method throws BadRequestException (400) and NotFoundException (404); without handling, caller cannot distinguish idempotent removal from input bug. Postcondition: radar-remove-list-entry-no-error-handling.",
     "evidence": "factory-DwW2quUn.cjs @throws JSDoc",
-    "resolution": null
+    "resolution": "Detection already provided by await_patterns in nark-corpus-pro/packages/@workos-inc/node/contract.yaml. All method patterns listed in the concern are in the await_patterns list. Ground-truth test (164/164 passing) confirms detection works. Verified 2026-06-26 by scanner-stream cycle 1."
   },
   "3432": {
     "id": "concern-20260625-workos-vault-read-by-name-deepen-2",
@@ -63994,10 +63994,10 @@
     "source": "deepen",
     "package": "@workos-inc/node",
     "type": "new_pattern",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for vault.readObjectByName() called without try-catch. Method calls handleHttpError() path; NotFoundException (404) when secret is deleted causes null-dereference downstream when result is used as a credential. Postcondition: vault-read-object-by-name-no-error-handling.",
     "evidence": "factory-DwW2quUn.cjs handleHttpError() path analysis",
-    "resolution": null
+    "resolution": "Detection already provided by await_patterns in nark-corpus-pro/packages/@workos-inc/node/contract.yaml. All method patterns listed in the concern are in the await_patterns list. Ground-truth test (164/164 passing) confirms detection works. Verified 2026-06-26 by scanner-stream cycle 1."
   },
   "3433": {
     "id": "concern-20260625-orb-billing-deepen-1",
@@ -64041,7 +64041,7 @@
     "source": "deepen",
     "package": "@workos-inc/node",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for @workos-inc/node authorization.createEnvironmentRole() — postcondition added in deepen-stream-2 pass 3 but no scanner rule exists",
     "evidence": {
       "repos": [],
@@ -64049,7 +64049,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis, detection rule needed"
     },
-    "resolution": null
+    "resolution": "Detection already provided by await_patterns in nark-corpus-pro/packages/@workos-inc/node/contract.yaml. All method patterns listed in the concern are in the await_patterns list. Ground-truth test (164/164 passing) confirms detection works. Verified 2026-06-26 by scanner-stream cycle 1."
   },
   "3437": {
     "id": "concern-20260625-workos-update-env-role-deepen-stream2-3",
@@ -64057,7 +64057,7 @@
     "source": "deepen",
     "package": "@workos-inc/node",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for @workos-inc/node authorization.updateEnvironmentRole() — postcondition added in deepen-stream-2 pass 3 but no scanner rule exists",
     "evidence": {
       "repos": [],
@@ -64065,7 +64065,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis, detection rule needed"
     },
-    "resolution": null
+    "resolution": "Detection already provided by await_patterns in nark-corpus-pro/packages/@workos-inc/node/contract.yaml. All method patterns listed in the concern are in the await_patterns list. Ground-truth test (164/164 passing) confirms detection works. Verified 2026-06-26 by scanner-stream cycle 1."
   },
   "3438": {
     "id": "concern-20260625-workos-add-env-role-perm-deepen-stream2-3",
@@ -64073,7 +64073,7 @@
     "source": "deepen",
     "package": "@workos-inc/node",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for @workos-inc/node authorization.addEnvironmentRolePermission() — postcondition added in deepen-stream-2 pass 3 but no scanner rule exists",
     "evidence": {
       "repos": [],
@@ -64081,7 +64081,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis, detection rule needed"
     },
-    "resolution": null
+    "resolution": "Detection already provided by await_patterns in nark-corpus-pro/packages/@workos-inc/node/contract.yaml. All method patterns listed in the concern are in the await_patterns list. Ground-truth test (164/164 passing) confirms detection works. Verified 2026-06-26 by scanner-stream cycle 1."
   },
   "3439": {
     "id": "concern-20260625-workos-set-env-role-perms-deepen-stream2-3",
@@ -64089,7 +64089,7 @@
     "source": "deepen",
     "package": "@workos-inc/node",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for @workos-inc/node authorization.setEnvironmentRolePermissions() — postcondition added in deepen-stream-2 pass 3 but no scanner rule exists",
     "evidence": {
       "repos": [],
@@ -64097,7 +64097,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis, detection rule needed"
     },
-    "resolution": null
+    "resolution": "Detection already provided by await_patterns in nark-corpus-pro/packages/@workos-inc/node/contract.yaml. All method patterns listed in the concern are in the await_patterns list. Ground-truth test (164/164 passing) confirms detection works. Verified 2026-06-26 by scanner-stream cycle 1."
   },
   "3440": {
     "id": "concern-20260625-workos-add-org-role-perm-deepen-stream2-3",
@@ -64105,7 +64105,7 @@
     "source": "deepen",
     "package": "@workos-inc/node",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for @workos-inc/node authorization.addOrganizationRolePermission() — postcondition added in deepen-stream-2 pass 3 but no scanner rule exists",
     "evidence": {
       "repos": [],
@@ -64113,7 +64113,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis, detection rule needed"
     },
-    "resolution": null
+    "resolution": "Detection already provided by await_patterns in nark-corpus-pro/packages/@workos-inc/node/contract.yaml. All method patterns listed in the concern are in the await_patterns list. Ground-truth test (164/164 passing) confirms detection works. Verified 2026-06-26 by scanner-stream cycle 1."
   },
   "3441": {
     "id": "concern-20260625-workos-remove-org-role-perm-deepen-stream2-3",
@@ -64121,7 +64121,7 @@
     "source": "deepen",
     "package": "@workos-inc/node",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for @workos-inc/node authorization.removeOrganizationRolePermission() — postcondition added in deepen-stream-2 pass 3 but no scanner rule exists",
     "evidence": {
       "repos": [],
@@ -64129,7 +64129,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis, detection rule needed"
     },
-    "resolution": null
+    "resolution": "Detection already provided by await_patterns in nark-corpus-pro/packages/@workos-inc/node/contract.yaml. All method patterns listed in the concern are in the await_patterns list. Ground-truth test (164/164 passing) confirms detection works. Verified 2026-06-26 by scanner-stream cycle 1."
   },
   "3442": {
     "id": "concern-20260625-workos-set-org-role-perms-deepen-stream2-3",
@@ -64137,7 +64137,7 @@
     "source": "deepen",
     "package": "@workos-inc/node",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for @workos-inc/node authorization.setOrganizationRolePermissions() — postcondition added in deepen-stream-2 pass 3 but no scanner rule exists",
     "evidence": {
       "repos": [],
@@ -64145,7 +64145,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis, detection rule needed"
     },
-    "resolution": null
+    "resolution": "Detection already provided by await_patterns in nark-corpus-pro/packages/@workos-inc/node/contract.yaml. All method patterns listed in the concern are in the await_patterns list. Ground-truth test (164/164 passing) confirms detection works. Verified 2026-06-26 by scanner-stream cycle 1."
   },
   "3443": {
     "id": "concern-20260625-workos-add-flag-target-deepen-stream2-3",
@@ -64153,7 +64153,7 @@
     "source": "deepen",
     "package": "@workos-inc/node",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for @workos-inc/node featureFlags.addFlagTarget() — postcondition added in deepen-stream-2 pass 3 but no scanner rule exists",
     "evidence": {
       "repos": [],
@@ -64161,7 +64161,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis, detection rule needed"
     },
-    "resolution": null
+    "resolution": "Detection already provided by await_patterns in nark-corpus-pro/packages/@workos-inc/node/contract.yaml. All method patterns listed in the concern are in the await_patterns list. Ground-truth test (164/164 passing) confirms detection works. Verified 2026-06-26 by scanner-stream cycle 1."
   },
   "3444": {
     "id": "concern-20260625-workos-remove-flag-target-deepen-stream2-3",
@@ -64169,7 +64169,7 @@
     "source": "deepen",
     "package": "@workos-inc/node",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for @workos-inc/node featureFlags.removeFlagTarget() — postcondition added in deepen-stream-2 pass 3 but no scanner rule exists",
     "evidence": {
       "repos": [],
@@ -64177,6 +64177,6 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis, detection rule needed"
     },
-    "resolution": null
+    "resolution": "Detection already provided by await_patterns in nark-corpus-pro/packages/@workos-inc/node/contract.yaml. All method patterns listed in the concern are in the await_patterns list. Ground-truth test (164/164 passing) confirms detection works. Verified 2026-06-26 by scanner-stream cycle 1."
   }
 }
