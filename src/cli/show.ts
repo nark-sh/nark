@@ -279,7 +279,7 @@ function createDeploymentSubcommand(): Command {
           if (email) console.log(`  ${chalk.dim('email')}   ${email}`);
           if (plan) console.log(`  ${chalk.dim('plan')}    ${plan}`);
         } else {
-          console.log(chalk.yellow('Not logged in. Run `nark login` to connect to nark.sh'));
+          console.log(chalk.yellow('Not logged in. Run `npx nark login` to connect to nark.sh'));
         }
         console.log('');
         process.exit(0);

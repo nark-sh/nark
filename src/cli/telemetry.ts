@@ -72,7 +72,7 @@ function emitStaleTokenNotice(): void {
   if (_staleTokenNoticeEmitted) return;
   _staleTokenNoticeEmitted = true;
   process.stderr.write(
-    "nark login expired or doesn't match this endpoint — sent anonymous telemetry instead. Re-run 'nark login' to link scans to your dashboard.\n",
+    "nark login expired or doesn't match this endpoint — sent anonymous telemetry instead. Re-run 'npx nark login' to link scans to your dashboard.\n",
   );
 }
 
@@ -1186,7 +1186,7 @@ export function createTelemetryCommand(): Command {
           );
           console.log("");
           console.log(
-            chalk.bold("Additional data when logged in (nark login):"),
+            chalk.bold("Additional data when logged in (npx nark login):"),
           );
           console.log(
             chalk.dim("  • Git repo URL, branch, commit SHA, author name"),

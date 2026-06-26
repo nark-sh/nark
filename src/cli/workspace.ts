@@ -30,7 +30,7 @@ export function createWorkspaceCommand(): Command {
   cmd.action(() => {
     const ws = listWorkspaces();
     if (ws.length === 0) {
-      process.stderr.write("Not logged in. Run `nark login`.\n");
+      process.stderr.write("Not logged in. Run `npx nark login`.\n");
       process.exit(1);
     }
     for (const w of ws) {

@@ -260,7 +260,7 @@ export async function loginAction(opts: LoginOptions = {}): Promise<void> {
 
   // Timed out
   process.stderr.write(
-    `\nAuthentication timed out. Run nark login to try again.\n`,
+    `\nAuthentication timed out. Run npx nark login to try again.\n`,
   );
   process.exit(1);
 }

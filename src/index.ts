@@ -1859,7 +1859,7 @@ async function main(options: any) {
           );
         } else if (r.sent) {
           verboseLog(
-            `[verbose] Telemetry: sent anonymously — run 'nark login' to link scans to your dashboard`,
+            `[verbose] Telemetry: sent anonymously — run 'npx nark login' to link scans to your dashboard`,
           );
         }
       }

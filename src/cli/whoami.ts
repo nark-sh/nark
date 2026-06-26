@@ -25,7 +25,7 @@ export function createWhoamiCommand(): Command {
 
     const r = resolveActiveWorkspace({ orgSlug, cwd: process.cwd() });
     if (!r) {
-      process.stderr.write("Not logged in. Run `nark login`.\n");
+      process.stderr.write("Not logged in. Run `npx nark login`.\n");
       process.exit(1);
     }
 
