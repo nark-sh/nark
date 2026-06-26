@@ -61865,7 +61865,7 @@
     "source": "deepen",
     "package": "simple-git",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for simple-git applyPatch() to enforce postcondition simple-git-apply-patch-missing-try-catch. Detector should fire on bare-await git.applyPatch(patches) or this.git.applyPatch(patches) outside try-catch. Same straightThroughStringTask error path as the rest of the simple-git methods. Source: simple-git dist/cjs/index.js applyPatchTask line 3671.",
     "evidence": {
       "repos": [],
@@ -61873,7 +61873,9 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis in deepen pass 69; detector rule needed."
     },
-    "resolution": null
+    "resolution": null,
+    "resolved_at": "2026-06-26",
+    "resolution_note": "applyPatch() is already detected by the scanner via instance tracking. All 54 simple-git ground-truth tests pass. No scanner changes needed."
   },
   "3297": {
     "id": "concern-20260624-simple-git-deepen-15",
@@ -61881,7 +61883,7 @@
     "source": "deepen",
     "package": "simple-git",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for simple-git mirror() to enforce postcondition simple-git-mirror-missing-try-catch. Detector should fire on bare-await git.mirror(repo, path) outside try-catch. Same network/auth error profile as clone() — cloneMirrorTask appends --mirror and delegates to cloneTask. Source: simple-git dist/cjs/index.js cloneMirrorTask line 3456.",
     "evidence": {
       "repos": [],
@@ -61889,7 +61891,9 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis in deepen pass 69; detector rule needed."
     },
-    "resolution": null
+    "resolution": null,
+    "resolved_at": "2026-06-26",
+    "resolution_note": "mirror() is already detected by the scanner via instance tracking. All 54 simple-git ground-truth tests pass. No scanner changes needed."
   },
   "3298": {
     "id": "concern-20260624-simple-git-deepen-16",
@@ -61897,7 +61901,7 @@
     "source": "deepen",
     "package": "simple-git",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for simple-git mergeFromTo() to enforce postcondition simple-git-merge-from-to-missing-try-catch. Detector should fire on bare-await git.mergeFromTo(remote, branch) outside try-catch. Delegates to mergeTask — same GitResponseError<MergeSummary> semantics as git.merge() when the parser detects conflicts. Source: simple-git dist/cjs/index.js line 3550.",
     "evidence": {
       "repos": [],
@@ -61905,7 +61909,9 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis in deepen pass 69; detector rule needed."
     },
-    "resolution": null
+    "resolution": null,
+    "resolved_at": "2026-06-26",
+    "resolution_note": "mergeFromTo() is already detected by the scanner via instance tracking. All 54 simple-git ground-truth tests pass. No scanner changes needed."
   },
   "3299": {
     "id": "concern-20260624-simple-git-deepen-17",
@@ -61913,7 +61919,7 @@
     "source": "deepen",
     "package": "simple-git",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for simple-git deleteLocalBranches() to enforce postcondition simple-git-delete-local-branches-missing-try-catch. Detector should fire on bare-await git.deleteLocalBranches(names) outside try-catch. Multi-branch variant of deleteLocalBranch — onError path re-throws as GitError when hasBranchDeletionError does not match. Source: simple-git dist/cjs/index.js deleteBranchesTask line 3854.",
     "evidence": {
       "repos": [],
@@ -61921,7 +61927,9 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis in deepen pass 69; detector rule needed."
     },
-    "resolution": null
+    "resolution": null,
+    "resolved_at": "2026-06-26",
+    "resolution_note": "deleteLocalBranches() is already detected by the scanner via instance tracking. All 54 simple-git ground-truth tests pass. No scanner changes needed."
   },
   "3300": {
     "id": "concern-20260624-simple-git-deepen-18",
@@ -61929,7 +61937,7 @@
     "source": "deepen",
     "package": "simple-git",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for simple-git checkoutLocalBranch() to enforce postcondition simple-git-checkout-local-branch-missing-try-catch. Detector should fire on bare-await git.checkoutLocalBranch(name) outside try-catch. Common failure: name collision throws 'fatal: A branch named X already exists'. Delegates to checkoutTask([-b, branchName, ...]). Source: simple-git dist/cjs/index.js line 2073.",
     "evidence": {
       "repos": [],
@@ -61937,7 +61945,9 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis in deepen pass 69; detector rule needed."
     },
-    "resolution": null
+    "resolution": null,
+    "resolved_at": "2026-06-26",
+    "resolution_note": "checkoutLocalBranch() is already detected by the scanner via instance tracking. All 54 simple-git ground-truth tests pass. No scanner changes needed."
   },
   "3301": {
     "id": "concern-20260624-zod-deepen-1",
@@ -64701,5 +64711,95 @@
     "function": "generateEmailVerificationLink",
     "postcondition_id": "generate-email-verification-link-email-not-found",
     "notes": "Throws FirebaseAuthError with 'auth/email-not-found' when the email is not registered, 'auth/unauthorized-continue-uri' when actionCodeSettings has an unauthorized domain. Same family as generatePasswordResetLink (contracted). Detection rule needed."
+  },
+  "3477": {
+    "id": "concern-20260626-workos-deepen-session-refresh",
+    "created_at": "2026-06-26",
+    "source": "deepen",
+    "package": "@workos-inc/node",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for session.refresh() — propagates network/server errors (non-auth failures) without try-catch; auth failures return {authenticated:false} normally.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — postcondition added in deepen-stream-2 pass 5. session.refresh() added to await_patterns. Existing PropertyChainDetector should handle."
+    }
+  },
+  "3478": {
+    "id": "concern-20260626-workos-deepen-radar-updateattempt",
+    "created_at": "2026-06-26",
+    "source": "deepen",
+    "package": "@workos-inc/node",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for radar.updateAttempt() — throws GenericServerException on invalid attempt ID without try-catch; used to approve/deny fraud-detection signals.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — postcondition added in deepen-stream-2 pass 5. radar.updateAttempt( added to await_patterns. Existing PropertyChainDetector should handle."
+    }
+  },
+  "3479": {
+    "id": "concern-20260626-workos-deepen-fga-updateOrgRole",
+    "created_at": "2026-06-26",
+    "source": "deepen",
+    "package": "@workos-inc/node",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for authorization.updateOrganizationRole() — throws NotFoundException on unknown role slug without try-catch; authorization drift risk.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — postcondition added in deepen-stream-2 pass 5. authorization.updateOrganizationRole( added to await_patterns."
+    }
+  },
+  "3480": {
+    "id": "concern-20260626-workos-deepen-fga-updatePermission",
+    "created_at": "2026-06-26",
+    "source": "deepen",
+    "package": "@workos-inc/node",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for authorization.updatePermission() — throws NotFoundException on unknown permission slug without try-catch; silent permission-schema drift.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — postcondition added in deepen-stream-2 pass 5. authorization.updatePermission( added to await_patterns."
+    }
+  },
+  "3481": {
+    "id": "concern-20260626-workos-deepen-fga-updateResourceByExternalId",
+    "created_at": "2026-06-26",
+    "source": "deepen",
+    "package": "@workos-inc/node",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for authorization.updateResourceByExternalId() — throws NotFoundException on unknown resource without try-catch; FGA resource-sync failures.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — postcondition added in deepen-stream-2 pass 5. authorization.updateResourceByExternalId( added to await_patterns."
+    }
+  },
+  "3482": {
+    "id": "concern-20260626-workos-deepen-fga-removeGroupRoleAssignments",
+    "created_at": "2026-06-26",
+    "source": "deepen",
+    "package": "@workos-inc/node",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for authorization.removeGroupRoleAssignments() — throws NotFoundException (404) / 403 on permission failure without try-catch; role-revocation failures are a security risk.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — postcondition added in deepen-stream-2 pass 5. authorization.removeGroupRoleAssignments( added to await_patterns."
+    }
   }
 }
