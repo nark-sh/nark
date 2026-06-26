@@ -64178,5 +64178,245 @@
       "note": "Proactive — contract added via API surface analysis, detection rule needed"
     },
     "resolution": "Detection already provided by await_patterns in nark-corpus-pro/packages/@workos-inc/node/contract.yaml. All method patterns listed in the concern are in the await_patterns list. Ground-truth test (164/164 passing) confirms detection works. Verified 2026-06-26 by scanner-stream cycle 1."
+  },
+  "3445": {
+    "id": "concern-20260626-workos-groups-createGroup-deepen-stream1-1",
+    "created_at": "2026-06-26",
+    "source": "deepen",
+    "package": "@workos-inc/node",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @workos-inc/node groups.createGroup() — postcondition added in deepen-stream-1 pass 1",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis, detection rule needed"
+    }
+  },
+  "3446": {
+    "id": "concern-20260626-workos-groups-updateGroup-deepen-stream1-1",
+    "created_at": "2026-06-26",
+    "source": "deepen",
+    "package": "@workos-inc/node",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @workos-inc/node groups.updateGroup() — postcondition added in deepen-stream-1 pass 1",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis, detection rule needed"
+    }
+  },
+  "3447": {
+    "id": "concern-20260626-workos-groups-deleteGroup-deepen-stream1-1",
+    "created_at": "2026-06-26",
+    "source": "deepen",
+    "package": "@workos-inc/node",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @workos-inc/node groups.deleteGroup() — postcondition added in deepen-stream-1 pass 1. SECURITY_RISK: silent failure leaves group active.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis, detection rule needed"
+    }
+  },
+  "3448": {
+    "id": "concern-20260626-workos-groups-addOrgMembership-deepen-stream1-1",
+    "created_at": "2026-06-26",
+    "source": "deepen",
+    "package": "@workos-inc/node",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @workos-inc/node groups.addOrganizationMembership() — postcondition added in deepen-stream-1 pass 1",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis, detection rule needed"
+    }
+  },
+  "3449": {
+    "id": "concern-20260626-workos-groups-removeOrgMembership-deepen-stream1-1",
+    "created_at": "2026-06-26",
+    "source": "deepen",
+    "package": "@workos-inc/node",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @workos-inc/node groups.removeOrganizationMembership() — postcondition added in deepen-stream-1 pass 1. SECURITY_RISK: silent failure leaves member in group.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis, detection rule needed"
+    }
+  },
+  "3450": {
+    "id": "concern-20260626-workos-authorization-createPermission-deepen-stream1-1",
+    "created_at": "2026-06-26",
+    "source": "deepen",
+    "package": "@workos-inc/node",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @workos-inc/node authorization.createPermission() — postcondition added in deepen-stream-1 pass 1",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis, detection rule needed"
+    }
+  },
+  "3451": {
+    "id": "concern-20260626-workos-authorization-deletePermission-deepen-stream1-1",
+    "created_at": "2026-06-26",
+    "source": "deepen",
+    "package": "@workos-inc/node",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @workos-inc/node authorization.deletePermission() — postcondition added in deepen-stream-1 pass 1. SECURITY_RISK: silent failure leaves permission active in FGA.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis, detection rule needed"
+    }
+  },
+  "3452": {
+    "id": "concern-20260626-workos-authorization-createOrgRole-deepen-stream1-1",
+    "created_at": "2026-06-26",
+    "source": "deepen",
+    "package": "@workos-inc/node",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @workos-inc/node authorization.createOrganizationRole() — postcondition added in deepen-stream-1 pass 1",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis, detection rule needed"
+    }
+  },
+  "3453": {
+    "id": "concern-20260626-workos-authorization-deleteOrgRole-deepen-stream1-1",
+    "created_at": "2026-06-26",
+    "source": "deepen",
+    "package": "@workos-inc/node",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @workos-inc/node authorization.deleteOrganizationRole() — postcondition added in deepen-stream-1 pass 1. SECURITY_RISK: ConflictException (409) on active assignments blocks deletion silently.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis, detection rule needed"
+    }
+  },
+  "3454": {
+    "id": "concern-20260626-workos-authorization-updateResource-deepen-stream1-1",
+    "created_at": "2026-06-26",
+    "source": "deepen",
+    "package": "@workos-inc/node",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @workos-inc/node authorization.updateResource() — postcondition added in deepen-stream-1 pass 1",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis, detection rule needed"
+    }
+  },
+  "3455": {
+    "id": "concern-20260626-workos-authorization-deleteResourceByExternalId-deepen-stream1-1",
+    "created_at": "2026-06-26",
+    "source": "deepen",
+    "package": "@workos-inc/node",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @workos-inc/node authorization.deleteResourceByExternalId() — postcondition added in deepen-stream-1 pass 1. SECURITY_RISK: silent failure leaves FGA resource and all its warrants active.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis, detection rule needed"
+    }
+  },
+  "3456": {
+    "id": "concern-20260626-workos-authorization-createGroupRoleAssignment-deepen-stream1-1",
+    "created_at": "2026-06-26",
+    "source": "deepen",
+    "package": "@workos-inc/node",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @workos-inc/node authorization.createGroupRoleAssignment() — postcondition added in deepen-stream-1 pass 1. ConflictException (409) must be handled for idempotent provisioning.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis, detection rule needed"
+    }
+  },
+  "3457": {
+    "id": "concern-20260626-workos-authorization-removeGroupRoleAssignment-deepen-stream1-1",
+    "created_at": "2026-06-26",
+    "source": "deepen",
+    "package": "@workos-inc/node",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @workos-inc/node authorization.removeGroupRoleAssignment() — postcondition added in deepen-stream-1 pass 1. SECURITY_RISK: silent failure leaves group role assignment active.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis, detection rule needed"
+    }
+  },
+  "3458": {
+    "id": "concern-20260626-workos-authorization-replaceGroupRoleAssignments-deepen-stream1-1",
+    "created_at": "2026-06-26",
+    "source": "deepen",
+    "package": "@workos-inc/node",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @workos-inc/node authorization.replaceGroupRoleAssignments() — postcondition added in deepen-stream-1 pass 1. SECURITY_RISK: silent failure may leave group in partial role state.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis, detection rule needed"
+    }
+  },
+  "3459": {
+    "id": "concern-20260626-workos-connect-createApplication-deepen-stream1-1",
+    "created_at": "2026-06-26",
+    "source": "deepen",
+    "package": "@workos-inc/node",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @workos-inc/node connect.createApplication() — postcondition added in deepen-stream-1 pass 1. DOWNTIME: silent failure leaves customer OAuth app uncreated.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis, detection rule needed"
+    }
+  },
+  "3460": {
+    "id": "concern-20260626-workos-connect-deleteApplication-deepen-stream1-1",
+    "created_at": "2026-06-26",
+    "source": "deepen",
+    "package": "@workos-inc/node",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for @workos-inc/node connect.deleteApplication() — postcondition added in deepen-stream-1 pass 1. SECURITY_RISK: silent failure in offboarding leaves OAuth app active.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — contract added via API surface analysis, detection rule needed"
+    }
   }
 }
