@@ -64919,5 +64919,53 @@
       "note": "Proactive — contract added via API surface analysis (deepen-stream-4 pass 6, 2026-06-26)"
     },
     "resolution": null
+  },
+  "3490": {
+    "id": "concern-20260626-orb-billing-deepen-3",
+    "created_at": "2026-06-26",
+    "source": "deepen",
+    "package": "orb-billing",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for orb-billing subscriptions.create() — postconditions subscription-customer-limit, subscription-currency-mismatch, subscription-plan-customer-not-found, subscription-feature-not-available added in deepen pass 6 but no scanner rule exists",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — subscriptions.create() has distinct ConstraintViolation (100-sub limit, currency mismatch), NotFoundError (plan/customer ref), and FeatureNotAvailableError (Subscription Overrides v2) not in generic create postcondition"
+    },
+    "resolution": null
+  },
+  "3491": {
+    "id": "concern-20260626-orb-billing-deepen-4",
+    "created_at": "2026-06-26",
+    "source": "deepen",
+    "package": "orb-billing",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for orb-billing invoices.update() — postconditions invoice-update-non-draft-constraint, invoice-update-not-found added in deepen pass 6 but no scanner rule exists",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — invoices.update() has a DRAFT-only ConstraintViolation for net_terms, due_date, invoice_date, auto_collection fields not captured by generic update postcondition"
+    },
+    "resolution": null
+  },
+  "3492": {
+    "id": "concern-20260626-orb-billing-deepen-5",
+    "created_at": "2026-06-26",
+    "source": "deepen",
+    "package": "orb-billing",
+    "type": "uncovered_function",
+    "status": "pending",
+    "description": "Add detection for orb-billing coupons.create() — postconditions coupon-duplicate-redemption-code, coupon-discount-validation added in deepen pass 6 but no scanner rule exists",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 0,
+      "note": "Proactive — coupons.create() has unique redemption_code DuplicateResourceCreation and percentage_discount 0-1 range constraint not in generic create postcondition"
+    },
+    "resolution": null
   }
 }
