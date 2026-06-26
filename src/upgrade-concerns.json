@@ -64547,5 +64547,115 @@
       "note": "Proactive — contract added via API surface analysis (deepen-stream-2 pass 5, 2026-06-26). Detection rule needed for client.events.update(eventId, body)."
     },
     "resolution": null
+  },
+  "3463": {
+    "id": "concern-20260626-workos-node-radar-createAttempt",
+    "created_at": "2026-06-26",
+    "source": "deepen",
+    "package": "@workos-inc/node",
+    "type": "uncovered_function",
+    "status": "pending",
+    "function": "radar.createAttempt",
+    "postcondition_id": "radar-create-attempt-no-error-handling",
+    "notes": "throws BadRequestException (400) on invalid fields; SECURITY_RISK — fraud detection silent failure"
+  },
+  "3464": {
+    "id": "concern-20260626-workos-node-connect-completeOAuth2",
+    "created_at": "2026-06-26",
+    "source": "deepen",
+    "package": "@workos-inc/node",
+    "type": "uncovered_function",
+    "status": "pending",
+    "function": "connect.completeOAuth2",
+    "postcondition_id": "connect-complete-oauth2-no-error-handling",
+    "notes": "throws BadRequestException/UnprocessableEntityException; DOWNTIME — OAuth2 flow completion failure"
+  },
+  "3465": {
+    "id": "concern-20260626-workos-node-connect-updateApplication",
+    "created_at": "2026-06-26",
+    "source": "deepen",
+    "package": "@workos-inc/node",
+    "type": "uncovered_function",
+    "status": "pending",
+    "function": "connect.updateApplication",
+    "postcondition_id": "connect-update-application-no-error-handling",
+    "notes": "throws BadRequestException/UnprocessableEntityException; SILENT_FAILURE — config update lost silently"
+  },
+  "3466": {
+    "id": "concern-20260626-workos-node-auditLogs-createSchema",
+    "created_at": "2026-06-26",
+    "source": "deepen",
+    "package": "@workos-inc/node",
+    "type": "uncovered_function",
+    "status": "pending",
+    "function": "auditLogs.createSchema",
+    "postcondition_id": "auditlogs-create-schema-no-error-handling",
+    "notes": "throws BadRequestException/ConflictException; SILENT_FAILURE — audit schema registration fails silently"
+  },
+  "3467": {
+    "id": "concern-20260626-workos-node-multiFactorAuth-deleteFactor",
+    "created_at": "2026-06-26",
+    "source": "deepen",
+    "package": "@workos-inc/node",
+    "type": "uncovered_function",
+    "status": "pending",
+    "function": "multiFactorAuth.deleteFactor",
+    "postcondition_id": "mfa-delete-factor-no-error-handling",
+    "notes": "throws NotFoundException/UnauthorizedException; SECURITY_RISK — MFA factor deletion failure leaves stale auth"
+  },
+  "3468": {
+    "id": "concern-20260626-workos-node-vault-updateObject",
+    "created_at": "2026-06-26",
+    "source": "deepen",
+    "package": "@workos-inc/node",
+    "type": "uncovered_function",
+    "status": "pending",
+    "function": "vault.updateObject",
+    "postcondition_id": "vault-update-object-no-error-handling",
+    "notes": "throws BadRequestException/ConflictException (409 optimistic locking); DATA_LOSS — secrets update overwrites silently"
+  },
+  "3469": {
+    "id": "concern-20260626-workos-node-vault-deleteObject",
+    "created_at": "2026-06-26",
+    "source": "deepen",
+    "package": "@workos-inc/node",
+    "type": "uncovered_function",
+    "status": "pending",
+    "function": "vault.deleteObject",
+    "postcondition_id": "vault-delete-object-no-error-handling",
+    "notes": "throws NotFoundException/ConflictException; DATA_LOSS — secret deletion conflict unhandled"
+  },
+  "3470": {
+    "id": "concern-20260626-workos-node-vault-createRekey",
+    "created_at": "2026-06-26",
+    "source": "deepen",
+    "package": "@workos-inc/node",
+    "type": "uncovered_function",
+    "status": "pending",
+    "function": "vault.createRekey",
+    "postcondition_id": "vault-create-rekey-no-error-handling",
+    "notes": "throws BadRequestException/UnprocessableEntityException; DOWNTIME — secrets rekey failure unhandled"
+  },
+  "3471": {
+    "id": "concern-20260626-workos-node-widgets-createToken",
+    "created_at": "2026-06-26",
+    "source": "deepen",
+    "package": "@workos-inc/node",
+    "type": "uncovered_function",
+    "status": "pending",
+    "function": "widgets.createToken",
+    "postcondition_id": "widgets-create-token-no-error-handling",
+    "notes": "throws BadRequestException/NotFoundException/UnprocessableEntityException; DOWNTIME — widget token creation fails silently"
+  },
+  "3472": {
+    "id": "concern-20260626-workos-node-userManagement-findInvitationByToken",
+    "created_at": "2026-06-26",
+    "source": "deepen",
+    "package": "@workos-inc/node",
+    "type": "uncovered_function",
+    "status": "pending",
+    "function": "userManagement.findInvitationByToken",
+    "postcondition_id": "usermgmt-find-invitation-by-token-no-error-handling",
+    "notes": "throws NotFoundException (404) when token invalid/expired; DOWNTIME — invitation redemption fails silently"
   }
 }
