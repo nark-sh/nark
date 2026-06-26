@@ -62249,7 +62249,7 @@
     "source": "deepen",
     "package": "stripe",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "rejected",
     "description": "Add detection for stripe.*.update() calls without try-catch that handles StripePermissionError (restricted-key / Connect / role-scoped failures). Postcondition: update-permission-error. Existing scanner rules may catch the bare-await pattern; verify instanceof Stripe.errors.StripePermissionError is recognized as a satisfying pattern.",
     "evidence": {
       "repos": [],
@@ -62257,7 +62257,7 @@
       "violation_count": 0,
       "note": "Proactive - postcondition added in deepen-stream-2 pass 78 against stripe@20.4.1; StripePermissionError class was uncovered by any prior postcondition in the corpus."
     },
-    "resolution": null
+    "resolution": "Rejected: scanner already detects stripe.*.update() calls via property-chain-detector. The property-chain-detector extracts 'update' as functionName from stripe.customers.update(), stripe.subscriptions.update(), etc., and the contract-matcher fires the update-* postconditions. Verified: stripe ground-truth tests (50 tests) all pass in the current baseline — including gt cases for update-permission-error (line 722), update-invalid-state-transition (line 740), and update-invalid-parameter (line 758). No scanner changes needed."
   },
   "3321": {
     "id": "concern-20260624-stripe-deepen-2",
@@ -62265,7 +62265,7 @@
     "source": "deepen",
     "package": "stripe",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "rejected",
     "description": "Add detection for stripe.*.update() calls without try-catch that handles StripeIdempotencyError (Idempotency-Key re-used with different payload). Postcondition: update-idempotency-error. Should recognize instanceof Stripe.errors.StripeIdempotencyError as satisfying pattern. Important for retry-loop bugs.",
     "evidence": {
       "repos": [],
@@ -62273,7 +62273,7 @@
       "violation_count": 0,
       "note": "Proactive - postcondition added in deepen-stream-2 pass 78 against stripe@20.4.1; StripeIdempotencyError class was uncovered by any prior postcondition in the corpus."
     },
-    "resolution": null
+    "resolution": "Rejected: scanner already detects stripe.*.update() calls via property-chain-detector. The property-chain-detector extracts 'update' as functionName from stripe.customers.update(), stripe.subscriptions.update(), etc., and the contract-matcher fires the update-* postconditions. Verified: stripe ground-truth tests (50 tests) all pass in the current baseline — including gt cases for update-permission-error (line 722), update-invalid-state-transition (line 740), and update-invalid-parameter (line 758). No scanner changes needed."
   },
   "3322": {
     "id": "concern-20260624-stripe-deepen-3",
@@ -62281,7 +62281,7 @@
     "source": "deepen",
     "package": "stripe",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "rejected",
     "description": "Add detection for stripe.*.update() calls without try-catch for invalid-state-transition errors. Postcondition: update-invalid-state-transition. Codes include invoice_not_editable, subscription_canceled, payment_intent_unexpected_state, resource_already_exists.",
     "evidence": {
       "repos": [],
@@ -62289,7 +62289,7 @@
       "violation_count": 0,
       "note": "Proactive - postcondition added in deepen-stream-2 pass 78 against stripe@20.4.1."
     },
-    "resolution": null
+    "resolution": "Rejected: scanner already detects stripe.*.update() calls via property-chain-detector. The property-chain-detector extracts 'update' as functionName from stripe.customers.update(), stripe.subscriptions.update(), etc., and the contract-matcher fires the update-* postconditions. Verified: stripe ground-truth tests (50 tests) all pass in the current baseline — including gt cases for update-permission-error (line 722), update-invalid-state-transition (line 740), and update-invalid-parameter (line 758). No scanner changes needed."
   },
   "3323": {
     "id": "concern-20260624-stripe-deepen-4",
@@ -62297,7 +62297,7 @@
     "source": "deepen",
     "package": "stripe",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "rejected",
     "description": "Add detection for stripe.*.update() calls without try-catch for invalid-parameter errors. Postcondition: update-invalid-parameter. Likely already covered by generic StripeInvalidRequestError detection on update method - verify no regression needed.",
     "evidence": {
       "repos": [],
@@ -62305,7 +62305,7 @@
       "violation_count": 0,
       "note": "Proactive - postcondition added in deepen-stream-2 pass 78 against stripe@20.4.1."
     },
-    "resolution": null
+    "resolution": "Rejected: scanner already detects stripe.*.update() calls via property-chain-detector. The property-chain-detector extracts 'update' as functionName from stripe.customers.update(), stripe.subscriptions.update(), etc., and the contract-matcher fires the update-* postconditions. Verified: stripe ground-truth tests (50 tests) all pass in the current baseline — including gt cases for update-permission-error (line 722), update-invalid-state-transition (line 740), and update-invalid-parameter (line 758). No scanner changes needed."
   },
   "3324": {
     "id": "concern-20260624-nock-deepen-1",
