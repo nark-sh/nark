@@ -54538,7 +54538,7 @@
     "source": "deepen",
     "package": "ethers",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "in-progress",
     "description": "Detect missing try-catch around await signer.populateTransaction(tx). Throws UNSUPPORTED_OPERATION when signer has no provider, INVALID_ARGUMENT on chainId mismatch and mixed-fee fields, UNSUPPORTED_OPERATION when network does not support requested fee model. Critical pre-signing pipeline used by relayer/MEV/cold-wallet flows; un-handled rejection kills worker mid-batch.",
     "evidence": {
       "repos": [],

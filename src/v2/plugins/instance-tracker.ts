@@ -98,8 +98,30 @@ export class InstanceTrackerPlugin implements DetectorPlugin {
           confirmedTypes.set(typeName, contractPkg);
         }
       }
-      if (confirmedTypes.size > 0) {
-        this.walkTypeAnnotations(sf, confirmedTypes);
+
+      // Build a map of namespace qualifiers: localName → packageName.
+      // This handles the pattern `signer: ethers.Signer` where 'ethers' is imported as
+      // a named export from 'ethers' (import { ethers } from 'ethers') rather than as a
+      // bare type import (import { Signer } from 'ethers').
+      // Concern: concern-20260618-ethers-deepen-1 — signer: ethers.Signer parameter type
+      // was not recognized because 'Signer' is not a named import in the fixture.
+      // Covers: namespace imports (import * as X), default imports (import X), and
+      // named imports where the local name matches the package root (e.g. import { ethers }).
+      const namespaceQualifiers = new Map<string, string>(); // localQualifierName → packageName
+      for (const [localName, importInfo] of ctx.importMap.entries()) {
+        if (
+          importInfo.kind === 'namespace' ||
+          importInfo.kind === 'default' ||
+          // Named import where the imported name == the local name (e.g. import { ethers } from 'ethers')
+          // and the local name is used as a namespace qualifier (e.g. ethers.Signer)
+          (importInfo.kind === 'named' && localName === importInfo.importedName)
+        ) {
+          namespaceQualifiers.set(localName, importInfo.packageName);
+        }
+      }
+
+      if (confirmedTypes.size > 0 || namespaceQualifiers.size > 0) {
+        this.walkTypeAnnotations(sf, confirmedTypes, namespaceQualifiers);
       }
     }
 
@@ -259,11 +281,15 @@ export class InstanceTrackerPlugin implements DetectorPlugin {
    *   - Class properties:             private channel: TextChannel;
    *   - Constructor params w/ mod:    constructor(private msg: Message)
    */
-  private walkTypeAnnotations(node: ts.Node, importedTypes: Map<string, string>): void {
+  private walkTypeAnnotations(
+    node: ts.Node,
+    importedTypes: Map<string, string>,
+    namespaceQualifiers?: Map<string, string>,
+  ): void {
     // Function/method/arrow parameters
     if (ts.isParameter(node) && node.name && node.type && ts.isIdentifier(node.name)) {
       const varName = node.name.text;
-      const result = this.resolveTypeAnnotationWithName(node.type, importedTypes);
+      const result = this.resolveTypeAnnotationWithName(node.type, importedTypes, namespaceQualifiers);
       if (result) {
         this.instanceMap.set(varName, result.pkg);
         this.instanceTypeMap.set(varName, result.typeName);
@@ -273,7 +299,7 @@ export class InstanceTrackerPlugin implements DetectorPlugin {
     // Variable declarations with explicit type: const x: SomeType = ...
     if (ts.isVariableDeclaration(node) && node.type && ts.isIdentifier(node.name)) {
       const varName = node.name.text;
-      const result = this.resolveTypeAnnotationWithName(node.type, importedTypes);
+      const result = this.resolveTypeAnnotationWithName(node.type, importedTypes, namespaceQualifiers);
       if (result) {
         this.instanceMap.set(varName, result.pkg);
         this.instanceTypeMap.set(varName, result.typeName);
@@ -283,14 +309,14 @@ export class InstanceTrackerPlugin implements DetectorPlugin {
     // Class property declarations: private channel: TextChannel;
     if (ts.isPropertyDeclaration(node) && node.type && ts.isIdentifier(node.name)) {
       const varName = node.name.text;
-      const result = this.resolveTypeAnnotationWithName(node.type, importedTypes);
+      const result = this.resolveTypeAnnotationWithName(node.type, importedTypes, namespaceQualifiers);
       if (result) {
         this.instanceMap.set(varName, result.pkg);
         this.instanceTypeMap.set(varName, result.typeName);
       }
     }
 
-    ts.forEachChild(node, (child) => this.walkTypeAnnotations(child, importedTypes));
+    ts.forEachChild(node, (child) => this.walkTypeAnnotations(child, importedTypes, namespaceQualifiers));
   }
 
   /**
@@ -300,7 +326,8 @@ export class InstanceTrackerPlugin implements DetectorPlugin {
    */
   private resolveTypeAnnotationWithName(
     typeNode: ts.TypeNode,
-    importedTypes: Map<string, string>
+    importedTypes: Map<string, string>,
+    namespaceQualifiers?: Map<string, string>,
   ): { pkg: string; typeName: string } | null {
     if (ts.isTypeReferenceNode(typeNode)) {
       const name = typeNode.typeName;
@@ -308,14 +335,31 @@ export class InstanceTrackerPlugin implements DetectorPlugin {
         const pkg = importedTypes.get(name.text);
         if (pkg) return { pkg, typeName: name.text };
       }
-      if (ts.isQualifiedName(name) && ts.isIdentifier(name.right)) {
-        const pkg = importedTypes.get(name.right.text);
-        if (pkg) return { pkg, typeName: name.right.text };
+      if (ts.isQualifiedName(name) && ts.isIdentifier(name.right) && ts.isIdentifier(name.left)) {
+        // Path 1: right side is in importedTypes (e.g. import { Signer } from 'ethers',
+        //         type annotation 'ethers.Signer' — right='Signer' in importedTypes).
+        const pkgFromRight = importedTypes.get(name.right.text);
+        if (pkgFromRight) return { pkg: pkgFromRight, typeName: name.right.text };
+
+        // Path 2: left side is a namespace qualifier (e.g. import { ethers } from 'ethers',
+        //         type annotation 'ethers.Signer' — left='ethers' in namespaceQualifiers).
+        // Concern: concern-20260618-ethers-deepen-1 — signer: ethers.Signer was not tracked
+        // because 'Signer' is not a named import; only 'ethers' (namespace) is imported.
+        if (namespaceQualifiers) {
+          const qualifierPkg = namespaceQualifiers.get(name.left.text);
+          if (qualifierPkg) {
+            // Verify that name.right.text is a known type_name for this package.
+            const rightTypePkg = this.typeToPackage.get(name.right.text);
+            if (rightTypePkg === qualifierPkg) {
+              return { pkg: qualifierPkg, typeName: name.right.text };
+            }
+          }
+        }
       }
     }
     if (ts.isUnionTypeNode(typeNode)) {
       for (const t of typeNode.types) {
-        const result = this.resolveTypeAnnotationWithName(t, importedTypes);
+        const result = this.resolveTypeAnnotationWithName(t, importedTypes, namespaceQualifiers);
         if (result) return result;
       }
     }
