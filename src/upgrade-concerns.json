@@ -63208,7 +63208,7 @@
     "source": "deepen",
     "package": "simple-git",
     "type": "new_pattern",
-    "status": "pending",
+    "status": "resolved",
     "description": "Add detection for simpleGit() factory call without try-catch. The simpleGit() factory throws GitConstructError SYNCHRONOUSLY (not as a Promise rejection) when the baseDir argument points to a non-existent directory. Current scanner uses await_patterns which only detects awaited call sites — the factory call is synchronous and not awaited, so the existing detection strategy misses it entirely. Postcondition added in deepen-stream-2 pass 1 (2026-06-25): simple-git-construct-missing-try-catch. Detection requires identifying: (1) simpleGit() call not wrapped in try-catch, (2) at a non-awaited call site (the error is sync). Common real-world pattern: const git = simpleGit(process.env.REPO_DIR) where REPO_DIR may be unset or point to a deleted path.",
     "evidence": {
       "repos": [],
@@ -63216,7 +63216,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via Phase 1.5 pattern 3 (sync-factory-with-error) in bc-deepen-contract pass. Detection rule needed. The postcondition simple-git-construct-missing-try-catch is in contract.yaml but no scanner rule exists yet. Ground-truth fixture marks this as NO_DETECTOR_YET."
     },
-    "resolution": null
+    "resolution": "The NO_DETECTOR_YET annotation in the simple-git ground-truth fixture was incorrect. ThrowingFunctionDetector.onCallExpression() fires for ALL CallExpression nodes (not just awaited ones) — TraversalEngine.emitEventsForNode() emits 'callExpression' for every ts.isCallExpression(node) match. The fixture was annotated with // SHOULD_FIRE (no detector yet): which does NOT generate test assertions; the correct format is // SHOULD_FIRE: <postcondition-id>. Fixed in 2026-06-29: converted the two NO_DETECTOR_YET / SHOULD_FIRE-no-detector blocks to // SHOULD_FIRE: simple-git-construct-missing-try-catch annotations. Ground-truth test count for simple-git went from 55 to 57 (both new tests pass). simpleGit() default import (import simpleGit from 'simple-git') resolves to importedName='simpleGit', kind='default'; ThrowingFunctionDetector.handleDirectCall() returns Detection{packageName:'simple-git', functionName:'simpleGit'}; contract-matcher.findFunctionContract() finds the 'simpleGit' entry; controlFlow.isInTryCatch() determines whether the factory call is protected. No scanner code changes required."
   },
   "3380": {
     "id": "concern-20260625-cassandra-driver-deepen-1",
