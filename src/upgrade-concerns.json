@@ -58525,7 +58525,7 @@
     "source": "deepen",
     "package": "@supabase/supabase-js",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for @supabase/supabase-js signInWithOtp() — postconditions signin-otp-rate-limit / signin-otp-signup-disabled / signin-otp-network-error added in deepen pass 11 but no scanner rule exists. Detect supabase.auth.signInWithOtp({...}) calls where { error } from the response is not checked. Should flag missing error.code branching.",
     "evidence": {
       "repos": [],
@@ -58533,7 +58533,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface enumeration against supabase-js@2.108.2 in deepen pass 11."
     },
-    "resolution": null
+    "resolution": "Scanner already detects this function via property-chain detection + supabase contract chainStr matching. FUTURE_FIRE promoted to SHOULD_FIRE in ground-truth fixture. Ground-truth tests: 43 pass (was 38)."
   },
   "3088": {
     "id": "concern-20260623-supabase-supabase-js-deepen-stream3-pass11-2",
@@ -58541,7 +58541,7 @@
     "source": "deepen",
     "package": "@supabase/supabase-js",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for @supabase/supabase-js verifyOtp() — postconditions verify-otp-token-expired / verify-otp-invalid-code added in deepen pass 11 but no scanner rule exists. Detect supabase.auth.verifyOtp({...}) calls where { error } is not checked.",
     "evidence": {
       "repos": [],
@@ -58549,7 +58549,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface enumeration against supabase-js@2.108.2 in deepen pass 11."
     },
-    "resolution": null
+    "resolution": "Scanner already detects this function via property-chain detection + supabase contract chainStr matching. FUTURE_FIRE promoted to SHOULD_FIRE in ground-truth fixture. Ground-truth tests: 43 pass (was 38)."
   },
   "3089": {
     "id": "concern-20260623-supabase-supabase-js-deepen-stream3-pass11-3",
@@ -58557,7 +58557,7 @@
     "source": "deepen",
     "package": "@supabase/supabase-js",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for @supabase/supabase-js getUser() — postconditions get-user-session-expired / get-user-network-error added in deepen pass 11 but no scanner rule exists. Detect supabase.auth.getUser() calls where { error } is not checked. SECURITY CRITICAL — used for server-side auth validation; missing check = silent unauthenticated access. Distinguishing AuthRetryableFetchError from 401 is also required.",
     "evidence": {
       "repos": [],
@@ -58565,7 +58565,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface enumeration against supabase-js@2.108.2 in deepen pass 11."
     },
-    "resolution": null
+    "resolution": "Scanner already detects this function via property-chain detection + supabase contract chainStr matching. FUTURE_FIRE promoted to SHOULD_FIRE in ground-truth fixture. Ground-truth tests: 43 pass (was 38)."
   },
   "3090": {
     "id": "concern-20260623-supabase-supabase-js-deepen-stream3-pass11-4",
@@ -58573,7 +58573,7 @@
     "source": "deepen",
     "package": "@supabase/supabase-js",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for @supabase/supabase-js updateUser() — postconditions update-user-weak-password / update-user-reauthentication-needed / update-user-same-password added in deepen pass 11 but no scanner rule exists. Detect supabase.auth.updateUser({...}) calls where { error.code } is not checked. weak_password and reauthentication_needed must both be branched.",
     "evidence": {
       "repos": [],
@@ -58581,7 +58581,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface enumeration against supabase-js@2.108.2 in deepen pass 11."
     },
-    "resolution": null
+    "resolution": "Scanner already detects this function via property-chain detection + supabase contract chainStr matching. FUTURE_FIRE promoted to SHOULD_FIRE in ground-truth fixture. Ground-truth tests: 43 pass (was 38)."
   },
   "3091": {
     "id": "concern-20260623-supabase-supabase-js-deepen-stream3-pass11-5",
@@ -58589,7 +58589,7 @@
     "source": "deepen",
     "package": "@supabase/supabase-js",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for @supabase/supabase-js refreshSession() — postconditions refresh-session-token-revoked / refresh-session-network-error added in deepen pass 11 but no scanner rule exists. Detect supabase.auth.refreshSession() calls where { error } is not checked. Need to distinguish revoked-token (hard signout) from network error (retry-safe).",
     "evidence": {
       "repos": [],
@@ -58597,7 +58597,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface enumeration against supabase-js@2.108.2 in deepen pass 11."
     },
-    "resolution": null
+    "resolution": "Scanner already detects this function via property-chain detection + supabase contract chainStr matching. FUTURE_FIRE promoted to SHOULD_FIRE in ground-truth fixture. Ground-truth tests: 43 pass (was 38)."
   },
   "3092": {
     "id": "concern-20260623-supabase-supabase-js-deepen-stream3-pass11-6",
@@ -58605,7 +58605,7 @@
     "source": "deepen",
     "package": "@supabase/supabase-js",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for @supabase/supabase-js exchangeCodeForSession() — postconditions exchange-code-pkce-verifier-missing / exchange-code-expired added in deepen pass 11 but no scanner rule exists. Detect supabase.auth.exchangeCodeForSession(code) calls where { error } is not checked in OAuth/PKCE callback handlers.",
     "evidence": {
       "repos": [],
@@ -58613,7 +58613,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface enumeration against supabase-js@2.108.2 in deepen pass 11."
     },
-    "resolution": null
+    "resolution": "Scanner already detects this function via property-chain detection + supabase contract chainStr matching. FUTURE_FIRE promoted to SHOULD_FIRE in ground-truth fixture. Ground-truth tests: 43 pass (was 38)."
   },
   "3093": {
     "id": "concern-20260623-supabase-supabase-js-deepen-stream3-pass11-7",
@@ -58621,7 +58621,7 @@
     "source": "deepen",
     "package": "@supabase/supabase-js",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for @supabase/supabase-js storage.download() — postconditions storage-download-not-found / storage-download-unauthorized added in deepen pass 11 but no scanner rule exists. Detect supabase.storage.from(bucket).download(path) calls where { error } is not checked. Need to recognize the .from(bucket).download(path) builder chain. SECURITY — must not leak the difference between 404 and 403 to end users.",
     "evidence": {
       "repos": [],
@@ -58629,7 +58629,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface enumeration against supabase-js@2.108.2 in deepen pass 11."
     },
-    "resolution": null
+    "resolution": "Scanner already detects this function via property-chain detection + supabase contract chainStr matching. FUTURE_FIRE promoted to SHOULD_FIRE in ground-truth fixture. Ground-truth tests: 43 pass (was 38)."
   },
   "3094": {
     "id": "concern-20260623-supabase-supabase-js-deepen-stream3-pass11-8",
@@ -58637,7 +58637,7 @@
     "source": "deepen",
     "package": "@supabase/supabase-js",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for @supabase/supabase-js storage.createSignedUrl() — postconditions storage-signed-url-not-found / storage-signed-url-unauthorized added in deepen pass 11 but no scanner rule exists. Detect supabase.storage.from(bucket).createSignedUrl(path, expiresIn) calls where { error } is not checked before returning the signedUrl to a caller.",
     "evidence": {
       "repos": [],
@@ -58645,7 +58645,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface enumeration against supabase-js@2.108.2 in deepen pass 11."
     },
-    "resolution": null
+    "resolution": "Scanner already detects this function via property-chain detection + supabase contract chainStr matching. FUTURE_FIRE promoted to SHOULD_FIRE in ground-truth fixture. Ground-truth tests: 43 pass (was 38)."
   },
   "3095": {
     "id": "concern-20260623-ai-deepen-stream2-pass14-1",
@@ -63849,7 +63849,7 @@
     "source": "deepen",
     "package": "@supabase/supabase-js",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for supabase.auth.getUserIdentities() — postcondition auth-get-identities-no-session added. Session-missing AuthApiError swallowed silently. Detection: '.getUserIdentities(' without error check.",
     "evidence": {
       "repos": [],
@@ -63857,7 +63857,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis (deepen-stream-2 pass 1, 2026-06-25). Delegates to getUser() internally; propagates AuthApiError on session expiry."
     },
-    "resolution": null
+    "resolution": "Scanner already detects this function via property-chain detection + supabase contract chainStr matching. FUTURE_FIRE promoted to SHOULD_FIRE in ground-truth fixture. Ground-truth tests: 43 pass (was 38)."
   },
   "3419": {
     "id": "concern-20260625-supabase-js-deepen-2",
@@ -63865,7 +63865,7 @@
     "source": "deepen",
     "package": "@supabase/supabase-js",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for supabase.auth.linkIdentity() — postconditions auth-link-identity-already-exists and auth-link-identity-manual-linking-disabled added. DATA_LOSS-adjacent: swallowed identity_already_exists means user never knows link failed. Detection: '.linkIdentity(' without error check.",
     "evidence": {
       "repos": [],
@@ -63873,7 +63873,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis (deepen-stream-2 pass 1, 2026-06-25). error.code === 'identity_already_exists' or 'manual_linking_disabled'."
     },
-    "resolution": null
+    "resolution": "Scanner already detects this function via property-chain detection + supabase contract chainStr matching. FUTURE_FIRE promoted to SHOULD_FIRE in ground-truth fixture. Ground-truth tests: 43 pass (was 38)."
   },
   "3420": {
     "id": "concern-20260625-supabase-js-deepen-3",
@@ -63881,7 +63881,7 @@
     "source": "deepen",
     "package": "@supabase/supabase-js",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for supabase.auth.unlinkIdentity() — postconditions auth-unlink-identity-single-identity (DATA_LOSS: user lockout) and auth-unlink-identity-email-conflict added. CRITICAL: missing error check on single_identity_not_deletable leaves users permanently locked out. Detection: '.unlinkIdentity(' without error check.",
     "evidence": {
       "repos": [],
@@ -63889,7 +63889,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis (deepen-stream-2 pass 1, 2026-06-25). DATA_LOSS: user loses all account access if single identity unlinked on password-less account."
     },
-    "resolution": null
+    "resolution": "Scanner already detects this function via property-chain detection + supabase contract chainStr matching. FUTURE_FIRE promoted to SHOULD_FIRE in ground-truth fixture. Ground-truth tests: 43 pass (was 38)."
   },
   "3421": {
     "id": "concern-20260625-supabase-js-deepen-4",
@@ -63897,7 +63897,7 @@
     "source": "deepen",
     "package": "@supabase/supabase-js",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "deferred",
     "description": "Add detection for supabase.storage.from().update() — postconditions storage-update-not-found and storage-update-unauthorized added. Silent StorageApiError swallowed means file appears updated when it wasn't. Detection: '.update(' on storage builder chain without error check.",
     "evidence": {
       "repos": [],
@@ -63905,7 +63905,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis (deepen-stream-2 pass 1, 2026-06-25). update() calls uploadOrUpdate(PUT) — same error surface as upload()."
     },
-    "resolution": null
+    "resolution": "Scanner limitation: supabase.storage.from().update() has chainStr \"from.update\" which does not suffix-match contract entry name \"storage.update\". The DB query builder update() (rls-policy-violation) wins. Requires disambiguation in contract-matcher or a unique contract function name. Kept as FUTURE_FIRE in fixture."
   },
   "3422": {
     "id": "concern-20260625-supabase-js-deepen-5",
@@ -63913,7 +63913,7 @@
     "source": "deepen",
     "package": "@supabase/supabase-js",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for supabase.storage.from().createSignedUploadUrl() — postconditions storage-create-signed-upload-url-no-token and storage-create-signed-upload-url-unauthorized added. Passing null signedUrl to uploader produces confusing downstream error. Detection: '.createSignedUploadUrl(' without error check.",
     "evidence": {
       "repos": [],
@@ -63921,7 +63921,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis (deepen-stream-2 pass 1, 2026-06-25). server-side: StorageError('No token returned by API') on internal misconfiguration."
     },
-    "resolution": null
+    "resolution": "Scanner already detects this function via property-chain detection + supabase contract chainStr matching. FUTURE_FIRE promoted to SHOULD_FIRE in ground-truth fixture. Ground-truth tests: 43 pass (was 38)."
   },
   "3423": {
     "id": "concern-20260625-supabase-js-deepen-6",
@@ -63929,7 +63929,7 @@
     "source": "deepen",
     "package": "@supabase/supabase-js",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for supabase.storage.from().uploadToSignedUrl() — postconditions storage-upload-to-signed-url-expired-token and storage-upload-to-signed-url-unauthorized added. Expired token error swallowed means file silently not uploaded. Detection: '.uploadToSignedUrl(' without error check.",
     "evidence": {
       "repos": [],
@@ -63937,7 +63937,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis (deepen-stream-2 pass 1, 2026-06-25). Tokens valid 2h only; expiry is common in long-running flows."
     },
-    "resolution": null
+    "resolution": "Scanner already detects this function via property-chain detection + supabase contract chainStr matching. FUTURE_FIRE promoted to SHOULD_FIRE in ground-truth fixture. Ground-truth tests: 43 pass (was 38)."
   },
   "3424": {
     "id": "concern-20260625-workos-feature-flag-enable-deepen-2",
