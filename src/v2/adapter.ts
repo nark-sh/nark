@@ -18,6 +18,7 @@ import { EventListenerDetector } from './plugins/event-listener-detector.js';
 import { EventListenerAbsencePlugin } from './plugins/event-listener-absence.js';
 import { ReturnValueChecker } from './plugins/return-value-checker.js';
 import { InstanceTrackerPlugin } from './plugins/instance-tracker.js';
+import { BedrockStreamChunkDetector } from './plugins/bedrock-stream-chunk-detector.js';
 
 export interface V2AdapterResult {
   violations: V1Violation[];
@@ -124,6 +125,7 @@ export async function runV2Analyzer(
   analyzer.registerPlugin(new EventListenerDetector());
   analyzer.registerPlugin(new EventListenerAbsencePlugin(contracts));
   analyzer.registerPlugin(new ReturnValueChecker());
+  analyzer.registerPlugin(new BedrockStreamChunkDetector(instanceTracker));
 
   // Initialize and run
   if (onProgress) {

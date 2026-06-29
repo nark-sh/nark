@@ -21,6 +21,7 @@ import { PropertyChainDetector } from '../plugins/property-chain-detector.js';
 import { EventListenerDetector } from '../plugins/event-listener-detector.js';
 import { EventListenerAbsencePlugin } from '../plugins/event-listener-absence.js';
 import { InstanceTrackerPlugin } from '../plugins/instance-tracker.js';
+import { BedrockStreamChunkDetector } from '../plugins/bedrock-stream-chunk-detector.js';
 import type { PackageContract } from '../../types.js';
 import type { Violation } from '../types/index.js';
 
@@ -216,6 +217,7 @@ export async function runGroundTruth(
     analyzer.registerPlugin(new PropertyChainDetector(instanceTracker));
     analyzer.registerPlugin(new EventListenerDetector());
     analyzer.registerPlugin(new EventListenerAbsencePlugin(contracts));
+    analyzer.registerPlugin(new BedrockStreamChunkDetector(instanceTracker));
 
     analyzer.initialize();
     const result = analyzer.analyze();
@@ -335,6 +337,7 @@ export async function runGroundTruthFull(
     analyzer.registerPlugin(new PropertyChainDetector(instanceTracker));
     analyzer.registerPlugin(new EventListenerDetector());
     analyzer.registerPlugin(new EventListenerAbsencePlugin(contracts));
+    analyzer.registerPlugin(new BedrockStreamChunkDetector(instanceTracker));
 
     analyzer.initialize();
     const result = analyzer.analyze();

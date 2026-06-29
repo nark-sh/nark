@@ -54088,7 +54088,7 @@
     "source": "deepen",
     "package": "@aws-sdk/client-bedrock-runtime",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for InvokeModelWithResponseStreamCommand stream-error chunk events (postcondition bedrock-invoke-model-stream-errors-not-checked). Parallel to bedrock-converse-stream-errors-not-checked. The response.body iterable can carry 6 silent-failure error fields: internalServerException, modelStreamErrorException, modelTimeoutException, serviceUnavailableException, throttlingException, validationException. Scanner needs to detect for-await-of loops over response.body that skip these per-chunk checks.",
     "evidence": {
       "repos": [],
@@ -54096,7 +54096,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis, detection rule needed. Sister postcondition bedrock-converse-stream-errors-not-checked already exists and is also pending scanner detection."
     },
-    "resolution": null
+    "resolution": "Implemented BedrockStreamChunkDetector plugin (src/v2/plugins/bedrock-stream-chunk-detector.ts). Plugin tracks variables assigned from await client.send(new InvokeModelWithResponseStreamCommand(...)) then in afterTraversal walks for for-await-of loops over <tracked>.body. Fires bedrock-invoke-model-stream-errors-not-checked when any of the 6 required error fields (internalServerException, modelStreamErrorException, modelTimeoutException, serviceUnavailableException, throttlingException, validationException) are missing from the loop body. Registered plugin in adapter.ts and harness.ts. contract-matcher.ts updated with handleBedrockStreamChunkMissing(). All 26 bedrock ground-truth tests pass."
   },
   "2820": {
     "id": "concern-20260618-bedrock-deepen-2",
