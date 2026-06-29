@@ -54538,7 +54538,7 @@
     "source": "deepen",
     "package": "ethers",
     "type": "uncovered_function",
-    "status": "in-progress",
+    "status": "implemented",
     "description": "Detect missing try-catch around await signer.populateTransaction(tx). Throws UNSUPPORTED_OPERATION when signer has no provider, INVALID_ARGUMENT on chainId mismatch and mixed-fee fields, UNSUPPORTED_OPERATION when network does not support requested fee model. Critical pre-signing pipeline used by relayer/MEV/cold-wallet flows; un-handled rejection kills worker mid-batch.",
     "evidence": {
       "repos": [],
@@ -54546,7 +54546,7 @@
       "violation_count": 0,
       "note": "Proactive — Signer.populateTransaction contract added via API surface analysis (ethers@6.17.0). Source evidence at lib.esm/providers/abstract-signer.js populateTransaction(); 4 postconditions: populatetransaction-no-provider, -chainid-mismatch, -mixed-fee-fields, -network-fee-model-unsupported. Detection rule needed."
     },
-    "resolution": null
+    "resolution": "Added namespaceQualifiers map in instance-tracker.ts beforeTraversal. Resolves QualifiedName type annotations (ethers.Signer) where only the namespace is imported (import { ethers } from \"ethers\"), not the bare type. Both populateTransaction and populateAuthorization now fire for signer: ethers.Signer parameter types. Regression gate: 75/75 (delta 0). Committed 2026-06-29."
   },
   "2846": {
     "id": "concern-20260618-ethers-deepen-2",
