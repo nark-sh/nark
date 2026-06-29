@@ -520,6 +520,33 @@ export class ContractMatcher {
         continue;
       }
 
+      // next: deepen-stream-3 special patterns (2026-06-29).
+      // These functions have INVERSE detection semantics (fire when inside try-catch,
+      // fire when NOT awaited, fire based on call context, etc.) that cannot be handled
+      // by the standard "fire when outside try-catch" flow. Intercept all detections
+      // for these functions, handle them via handleNextSpecialPatterns(), and skip the
+      // standard matching loop. Covers postconditions added in next contract v1.2.0:
+      //   forbidden-inside-try-catch, unauthorized-inside-try-catch,
+      //   connection-missing-await, connection-inside-after,
+      //   draft-mode-missing-await, after-error-swallowed,
+      //   update-tag-after-redirect, update-tag-outside-server-action
+      if (
+        detection.packageName === "next" &&
+        (detection.functionName === "forbidden" ||
+          detection.functionName === "unauthorized" ||
+          detection.functionName === "connection" ||
+          detection.functionName === "draftMode" ||
+          detection.functionName === "after" ||
+          detection.functionName === "updateTag")
+      ) {
+        const nextViolation = this.handleNextSpecialPatterns(
+          detection,
+          sourceFile,
+        );
+        if (nextViolation) violations.push(nextViolation);
+        continue;
+      }
+
       let funcContract = this.findFunctionContract(
         contract,
         effectiveFunctionName,
@@ -4552,6 +4579,304 @@ export class ContractMatcher {
       callExpression: detection.functionName,
       business_impact: postcondition.business_impact,
     };
+  }
+
+  /**
+   * next package: deepen-stream-3 special pattern handler (2026-06-29).
+   *
+   * Handles 8 postconditions added in next contract v1.2.0 that have INVERSE or
+   * context-dependent detection semantics:
+   *
+   * INVERSE (fire when INSIDE try-catch, not outside):
+   *   forbidden-inside-try-catch  — forbidden() swallowed by catch → 403 never renders
+   *   unauthorized-inside-try-catch — unauthorized() swallowed by catch → 401 never renders
+   *
+   * MISSING AWAIT (fire when NOT awaited):
+   *   connection-missing-await — unawaited connection() = dynamic boundary never set
+   *   draft-mode-missing-await — unawaited draftMode() = isEnabled always undefined
+   *
+   * CONTEXT DETECTION (fire based on call location):
+   *   connection-inside-after — connection() inside after() throws E827 at runtime
+   *   after-error-swallowed — after() callback body lacks try-catch = silent failures
+   *   update-tag-after-redirect — updateTag() after redirect() = dead code
+   *   update-tag-outside-server-action — updateTag() in Route Handler = throws
+   *
+   * Returns the Violation to push, or null if the pattern is NOT violated (caller skips).
+   * Called unconditionally for the 6 function names above; handles all postconditions.
+   */
+  private handleNextSpecialPatterns(
+    detection: Detection,
+    sourceFile: ts.SourceFile,
+  ): Violation | null {
+    const contract = this.contracts.get("next");
+    if (!contract) return null;
+
+    const fnName = detection.functionName;
+    const node = detection.node;
+
+    // ── Pattern helpers ──────────────────────────────────────────────────────
+
+    /** Build a Violation for the given postcondition ID on this detection. */
+    const buildViolation = (postconditionId: string, customMessage?: string): Violation | null => {
+      const funcContract = this.findFunctionContract(contract, fnName);
+      if (!funcContract) return null;
+      const pc = (funcContract.postconditions || []).find(
+        (p) => p.id === postconditionId,
+      );
+      if (!pc) return null;
+
+      const { line, column } = this.getLocation(node, sourceFile);
+      const { json: codeContext, startLine: codeContextStartLine } =
+        this.buildCodeContext(sourceFile, line - 1);
+
+      const fingerprint = computeViolationFingerprint({
+        packageName: "next",
+        postconditionId: pc.id,
+        filePath: sourceFile.fileName,
+        lineNumber: line,
+        callExpression: fnName,
+      });
+
+      const suppressionResult = checkSuppression({
+        projectRoot: this.options.projectRoot,
+        sourceFile,
+        line,
+        column,
+        packageName: "next",
+        postconditionId: pc.id,
+        analyzerVersion: this.options.analyzerVersion || "2.0.0",
+        updateManifest: false,
+        fingerprint,
+      });
+
+      const message = customMessage ??
+        (pc.throws
+          ? `${fnName}() pattern violation: ${pc.id}. ${pc.throws}`
+          : `${fnName}() pattern violation: ${pc.id}. ${pc.condition ?? pc.id}`);
+
+      return {
+        file: sourceFile.fileName,
+        line,
+        column,
+        package: "next",
+        function: fnName,
+        postconditionId: pc.id,
+        severity: pc.severity as "error" | "warning",
+        message,
+        codeContext,
+        codeContextStartLine,
+        inTryCatch: false,
+        suppressed: suppressionResult.suppressed,
+        suppressionReason: suppressionResult.suppressed
+          ? suppressionResult.source
+          : undefined,
+        fingerprint,
+        callExpression: fnName,
+        business_impact: pc.business_impact,
+      };
+    };
+
+    /** Check if this node is directly inside an after() callback argument. */
+    const isInsideAfterCallback = (): boolean => {
+      let current: ts.Node | undefined = node.parent;
+      while (current) {
+        // We're looking for a function expression/arrow function that is the argument to after()
+        if (
+          (ts.isArrowFunction(current) || ts.isFunctionExpression(current)) &&
+          current.parent &&
+          ts.isCallExpression(current.parent)
+        ) {
+          const callExpr = current.parent as ts.CallExpression;
+          // Check if the call is after() — direct identifier
+          if (
+            ts.isIdentifier(callExpr.expression) &&
+            callExpr.expression.text === "after"
+          ) {
+            // Check that our node is in the arguments list (i.e., is the callback)
+            return callExpr.arguments.some((arg) => arg === current);
+          }
+        }
+        // Stop traversal at function boundaries (don't escape enclosing functions)
+        if (
+          ts.isFunctionDeclaration(current) ||
+          ts.isMethodDeclaration(current)
+        ) {
+          break;
+        }
+        current = current.parent;
+      }
+      return false;
+    };
+
+    /** Check if call node is awaited. */
+    const isCallAwaited = (): boolean => {
+      if (!ts.isCallExpression(node)) return false;
+      return ts.isAwaitExpression(node.parent);
+    };
+
+    /** Get the enclosing function-like node for the detection. */
+    const getEnclosingFunction = (): ts.FunctionLikeDeclaration | null => {
+      let current: ts.Node | undefined = node.parent;
+      while (current) {
+        if (
+          ts.isFunctionDeclaration(current) ||
+          ts.isArrowFunction(current) ||
+          ts.isFunctionExpression(current) ||
+          ts.isMethodDeclaration(current)
+        ) {
+          return current as ts.FunctionLikeDeclaration;
+        }
+        current = current.parent;
+      }
+      return null;
+    };
+
+    /** Check if the enclosing function has a 'use server' directive. */
+    const enclosingFunctionHasUseServer = (): boolean => {
+      const fn = getEnclosingFunction();
+      if (!fn) return false;
+      const body = (fn as { body?: ts.Node }).body;
+      if (!body || !ts.isBlock(body)) return false;
+      for (const stmt of body.statements) {
+        if (ts.isExpressionStatement(stmt)) {
+          const expr = stmt.expression;
+          if (ts.isStringLiteral(expr) && expr.text === "use server") {
+            return true;
+          }
+        }
+        // Directives only appear at the top of the function body — stop after first non-directive
+        break;
+      }
+      return false;
+    };
+
+    /** Check if a 'redirect()' call (from next/navigation) appears before this node
+     *  in the same immediate function scope (same containing function body). */
+    const redirectAppearsBeforeInSameScope = (): boolean => {
+      const fn = getEnclosingFunction();
+      if (!fn) return false;
+      const body = (fn as { body?: ts.Node }).body;
+      if (!body || !ts.isBlock(body)) return false;
+      let foundRedirect = false;
+      const nodeStart = node.getStart(sourceFile);
+      for (const stmt of body.statements) {
+        // Walk each top-level statement looking for redirect() calls
+        const stmtStart = stmt.getStart(sourceFile);
+        if (stmtStart >= nodeStart) break; // we've passed the updateTag() call
+        const hasRedirect = (n: ts.Node): boolean => {
+          if (
+            ts.isCallExpression(n) &&
+            ts.isIdentifier(n.expression) &&
+            n.expression.text === "redirect"
+          ) {
+            return true;
+          }
+          return ts.forEachChild(n, hasRedirect) ?? false;
+        };
+        if (hasRedirect(stmt)) {
+          foundRedirect = true;
+          break;
+        }
+      }
+      return foundRedirect;
+    };
+
+    /** Check if the after() callback's body lacks a try-catch at the top level. */
+    const afterCallbackLacksTryCatch = (): boolean => {
+      if (!ts.isCallExpression(node)) return false;
+      // The first argument to after() is the callback
+      const callNode = node as ts.CallExpression;
+      const callbackArg = callNode.arguments[0];
+      if (!callbackArg) return false;
+      // Check if it is wrapped in try-catch
+      return !this.controlFlow.isCallbackBodyFullyWrappedInTryCatch(callNode, 0);
+    };
+
+    // ── Dispatch by function name ─────────────────────────────────────────────
+
+    if (fnName === "forbidden") {
+      // forbidden-inside-try-catch: fire when IS in try-catch
+      if (this.controlFlow.isInTryCatch(node)) {
+        return buildViolation(
+          "forbidden-inside-try-catch",
+          "forbidden() is inside a try-catch block — the catch intercepts the 403 throw and the 403 page never renders, silently bypassing the authorization check.",
+        );
+      }
+      return null; // correct usage: forbidden() outside try-catch
+    }
+
+    if (fnName === "unauthorized") {
+      // unauthorized-inside-try-catch: fire when IS in try-catch
+      if (this.controlFlow.isInTryCatch(node)) {
+        return buildViolation(
+          "unauthorized-inside-try-catch",
+          "unauthorized() is inside a try-catch block — the catch intercepts the 401 throw and the 401 page never renders, silently serving content to unauthenticated users.",
+        );
+      }
+      return null; // correct usage: unauthorized() outside try-catch
+    }
+
+    if (fnName === "connection") {
+      // connection-inside-after: fire when connection() is called inside an after() callback
+      if (isInsideAfterCallback()) {
+        return buildViolation(
+          "connection-inside-after",
+          "connection() is called inside an after() callback — after() executes post-response so the dynamic-boundary signal is meaningless and Next.js throws E827 at runtime.",
+        );
+      }
+      // connection-missing-await: fire when connection() is called without await
+      if (!isCallAwaited()) {
+        return buildViolation(
+          "connection-missing-await",
+          "connection() is called without await — the returned Promise is dropped, the dynamic-rendering boundary is never signalled, and the route may be prerendered with stale data.",
+        );
+      }
+      return null; // correct: await connection() outside after()
+    }
+
+    if (fnName === "draftMode") {
+      // draft-mode-missing-await: fire when draftMode() is called without await
+      if (!isCallAwaited()) {
+        return buildViolation(
+          "draft-mode-missing-await",
+          "draftMode() is called without await — the returned Promise is accessed directly, so isEnabled is always undefined and draft content is never shown.",
+        );
+      }
+      return null; // correct: await draftMode()
+    }
+
+    if (fnName === "after") {
+      // after-error-swallowed: fire when the callback body is not wrapped in try-catch
+      if (afterCallbackLacksTryCatch()) {
+        return buildViolation(
+          "after-error-swallowed",
+          "The after() callback body has no try-catch — errors in the post-response phase are silently swallowed and never surface in error monitoring.",
+        );
+      }
+      return null; // correct: callback is wrapped in try-catch
+    }
+
+    if (fnName === "updateTag") {
+      // update-tag-after-redirect: fire when redirect() appears before updateTag() in the same scope
+      if (redirectAppearsBeforeInSameScope()) {
+        return buildViolation(
+          "update-tag-after-redirect",
+          "updateTag() appears after redirect() in the same function scope — redirect() throws RedirectError immediately, so updateTag() is dead code that never executes.",
+        );
+      }
+      // update-tag-outside-server-action: fire when updateTag() is NOT in a Server Action
+      // A Server Action must have a 'use server' directive at the top of the function body.
+      // Route Handlers (export async function POST/GET/etc) do NOT have 'use server' directives.
+      if (!enclosingFunctionHasUseServer()) {
+        return buildViolation(
+          "update-tag-outside-server-action",
+          "updateTag() is called outside a Server Action — it must only be called from functions with a 'use server' directive. Route Handlers should use revalidateTag() instead.",
+        );
+      }
+      return null; // correct: updateTag() in a Server Action before any redirect()
+    }
+
+    return null; // unrecognized function for this handler — should not be reached
   }
 
   /**
