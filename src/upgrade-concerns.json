@@ -56173,7 +56173,7 @@
     "source": "deepen",
     "package": "undici",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for new EventSource(url) where url is dynamic (not a string literal) without try-catch around the constructor. Postcondition eventsource-constructor-syntax-error was added in deepen pass. Constructor throws DOMException SyntaxError synchronously on invalid URLs. Pattern mirrors WebSocket constructor detection (websocket-constructor-syntax-error) which is already implemented.",
     "evidence": {
       "repos": [],
@@ -56181,7 +56181,10 @@
       "violation_count": 0,
       "note": "Proactive — extend the existing WebSocket constructor detection to also recognize EventSource. Both throw DOMException SyntaxError on invalid URLs. Both have similar detection requirements (dynamic URL + missing try-catch)."
     },
-    "resolution": null
+    "resolution": {
+      "implemented_at": "2026-06-29",
+      "verified_by": "scanner-stream cycle 4 -- undici ground-truth 36/36 pass"
+    }
   },
   "2945": {
     "id": "concern-20260618-undici-deepen-7",
@@ -56189,7 +56192,7 @@
     "source": "deepen",
     "package": "undici",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for new EventSource() without 'error' event listener registered. Postcondition eventsource-connection-error-not-handled was added in deepen pass. EventSource is uniquely dangerous because it RETRIES INDEFINITELY on connection errors — missing an error listener means SSE consumers silently hang with no observability. Detection mirrors WebSocket required_event_listeners ('error') but for the EventSource constructor.",
     "evidence": {
       "repos": [],
@@ -56197,7 +56200,10 @@
       "violation_count": 0,
       "note": "Proactive — extend the existing detection.required_event_listeners machinery (already declared in undici contract.yaml for WebSocket) to also apply to EventSource constructor. Both share the W3C event-target error model."
     },
-    "resolution": null
+    "resolution": {
+      "implemented_at": "2026-06-29",
+      "verified_by": "scanner-stream cycle 4 -- undici ground-truth 36/36 pass"
+    }
   },
   "2946": {
     "id": "concern-20260618-undici-deepen-8",

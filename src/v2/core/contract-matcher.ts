@@ -2831,7 +2831,8 @@ export class ContractMatcher {
 
           if (
             detection.pattern === "throwing-function" ||
-            detection.pattern === "property-chain"
+            detection.pattern === "property-chain" ||
+            detection.pattern === "throwing-constructor"
           ) {
             // Matcher 1: enclosing try-catch (the standard direct pattern).
             const inTry = this.controlFlow.isInTryCatch(detection.node);

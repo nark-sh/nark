@@ -107,6 +107,16 @@ export interface RequiredEventListener {
   required: boolean;
   /** Severity if missing (error, warning, info) */
   severity?: "error" | "warning" | "info";
+  /**
+   * Specific postcondition ID to use for this missing-event-listener violation.
+   * When set, overrides the default behavior of picking the first error-severity
+   * postcondition from the function contract. Use this when a class has multiple
+   * postconditions with different purposes (e.g., constructor-syntax-error vs
+   * connection-error-not-handled) and the missing-listener case should map to
+   * a specific one.
+   * Example: "eventsource-connection-error-not-handled"
+   */
+  postcondition_id?: string;
 }
 
 /**
@@ -125,6 +135,12 @@ export interface SatisfyingPattern {
 export interface DetectionRules {
   /** Class names used for instantiation (e.g., ["Octokit", "PrismaClient"]) */
   class_names?: string[];
+  /**
+   * Constructor names whose `new ClassName(...)` call can throw synchronously
+   * when outside a try-catch. Used to detect missing try-catch around constructors.
+   * Example: ["EventSource"] — new EventSource(invalidUrl) throws DOMException.
+   */
+  throwing_constructors?: string[];
   /** TypeScript type names used in declarations (e.g., ["Octokit", "AxiosInstance"]) */
   type_names?: string[];
   /** Factory method names (e.g., ["createClient", "create"]) */

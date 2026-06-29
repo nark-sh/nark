@@ -435,6 +435,15 @@ export interface DetectorPlugin {
     node: ts.TaggedTemplateExpression,
     context: NodeContext,
   ): Detection[];
+
+  /**
+   * Called for every new expression (constructor call).
+   * Examples: new WebSocket(url), new EventSource(url), new Redis(opts)
+   */
+  onNewExpression?(
+    node: ts.NewExpression,
+    context: NodeContext,
+  ): Detection[];
 }
 
 // ============================================================================

@@ -407,16 +407,25 @@ export class EventListenerAbsencePlugin implements DetectorPlugin {
     for (const creation of this.trackedCreations) {
       for (const required of creation.requiredListeners) {
         if (!creation.attachedEvents.has(required.event)) {
-          // Find the postcondition ID for this missing event
-          const contract = this.contracts.get(creation.packageName);
-          const funcContract = (contract?.functions ?? []).find(
-            (f) => f.name === creation.factoryMethodName
-          );
-          // Prefer error-severity postconditions (missing error listener is more severe
-          // than syntax errors). Fall back to warning if no error-severity postcondition.
-          const postcondition =
-            funcContract?.postconditions?.find((p) => p.severity === 'error') ??
-            funcContract?.postconditions?.find((p) => p.severity === 'warning');
+          // Find the postcondition ID for this missing event.
+          // If the required_event_listeners entry has an explicit postcondition_id, use it.
+          // This is needed when a class has multiple postconditions with different purposes
+          // (e.g., EventSource: constructor-syntax-error vs connection-error-not-handled).
+          let resolvedPostconditionId: string;
+          if (required.postcondition_id) {
+            resolvedPostconditionId = required.postcondition_id;
+          } else {
+            const contract = this.contracts.get(creation.packageName);
+            const funcContract = (contract?.functions ?? []).find(
+              (f) => f.name === creation.factoryMethodName
+            );
+            // Prefer error-severity postconditions (missing error listener is more severe
+            // than syntax errors). Fall back to warning if no error-severity postcondition.
+            const postcondition =
+              funcContract?.postconditions?.find((p) => p.severity === 'error') ??
+              funcContract?.postconditions?.find((p) => p.severity === 'warning');
+            resolvedPostconditionId = postcondition?.id ?? 'missing-error-listener';
+          }
 
           detections.push({
             pluginName: this.name,
@@ -427,7 +436,7 @@ export class EventListenerAbsencePlugin implements DetectorPlugin {
             confidence: 'high',
             metadata: {
               missingEvent: required.event,
-              postconditionId: postcondition?.id ?? 'missing-error-listener',
+              postconditionId: resolvedPostconditionId,
             },
           });
         }

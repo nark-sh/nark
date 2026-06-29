@@ -65,6 +65,10 @@ export async function runV2Analyzer(
   // When the tracked instance variable is directly invoked (not via .method), report as this function name.
   // e.g., '@octokit/auth-app' → 'auth'  (const auth = createAppAuth(...); await auth({...}))
   const callableFactoryFunctionName = new Map<string, string>();
+  // throwingConstructorToPackage: constructors that can throw synchronously outside try-catch.
+  // Built from detection.throwing_constructors in each contract.
+  // e.g., 'EventSource' → 'undici' (new EventSource(invalidUrl) throws DOMException).
+  const throwingConstructorToPackage = new Map<string, string>();
 
   for (const [packageName, contract] of contracts.entries()) {
     const detection = contract.detection;
@@ -93,6 +97,9 @@ export async function runV2Analyzer(
     if (detection.callable_factory_function_name) {
       callableFactoryFunctionName.set(packageName, detection.callable_factory_function_name);
     }
+    for (const ctor of (detection as any).throwing_constructors || []) {
+      throwingConstructorToPackage.set(ctor, packageName);
+    }
   }
 
   // Create shared instance tracker (consulted by other plugins)
@@ -120,7 +127,7 @@ export async function runV2Analyzer(
 
   // Register plugins in order (InstanceTracker must come before plugins that use it)
   analyzer.registerPlugin(instanceTracker);
-  analyzer.registerPlugin(new ThrowingFunctionDetector(instanceTracker, awaitablePropertyToFunctionName, callableFactoryFunctionName));
+  analyzer.registerPlugin(new ThrowingFunctionDetector(instanceTracker, awaitablePropertyToFunctionName, callableFactoryFunctionName, throwingConstructorToPackage));
   analyzer.registerPlugin(new PropertyChainDetector(instanceTracker));
   analyzer.registerPlugin(new EventListenerDetector());
   analyzer.registerPlugin(new EventListenerAbsencePlugin(contracts));

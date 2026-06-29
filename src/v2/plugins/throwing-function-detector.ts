@@ -43,15 +43,24 @@ export class ThrowingFunctionDetector implements DetectorPlugin {
    * Example: '@octokit/auth-app' → 'auth'
    */
   private callableFactoryFunctionName: Map<string, string>;
+  /**
+   * Maps constructor class name → package name for constructors that can throw.
+   * Built from contract detection.throwing_constructors.
+   * Example: 'EventSource' → 'undici' (constructor throws DOMException on invalid URL).
+   * When `new ClassName(...)` is outside a try-catch, emit a violation.
+   */
+  private throwingConstructorToPackage: Map<string, string>;
 
   constructor(
     instanceTracker?: InstanceTrackerPlugin,
     awaitablePropertyToFunctionName?: Map<string, string>,
     callableFactoryFunctionName?: Map<string, string>,
+    throwingConstructorToPackage?: Map<string, string>,
   ) {
     this.instanceTracker = instanceTracker;
     this.awaitablePropertyToFunctionName = awaitablePropertyToFunctionName ?? new Map();
     this.callableFactoryFunctionName = callableFactoryFunctionName ?? new Map();
+    this.throwingConstructorToPackage = throwingConstructorToPackage ?? new Map();
   }
 
   /**
@@ -137,6 +146,54 @@ export class ThrowingFunctionDetector implements DetectorPlugin {
     // Case 3: Other expressions (new Foo(), (fn)(), etc.)
     // For now, we'll skip these - can add support later if needed
     return [];
+  }
+
+  /**
+   * Handle constructor expressions: new EventSource(url), new ClassName(...)
+   *
+   * When a constructor is listed in detection.throwing_constructors, it can throw
+   * synchronously when called with invalid arguments. Fire a violation if the
+   * `new ClassName(...)` call is outside a try-catch.
+   *
+   * This handles patterns like:
+   *   new EventSource(url)  — throws DOMException on invalid URL
+   */
+  public onNewExpression(node: ts.NewExpression, context: NodeContext): Detection[] {
+    if (this.throwingConstructorToPackage.size === 0) return [];
+    if (!ts.isIdentifier(node.expression)) return [];
+
+    const className = node.expression.text;
+
+    // Check if this constructor is in the importMap (i.e., explicitly imported from a package).
+    // importMap is authoritative — use it over throwingConstructorToPackage when available.
+    const importInfo = context.importMap.get(className);
+    let packageName: string | null = null;
+
+    if (importInfo && this.throwingConstructorToPackage.has(className)) {
+      // The class is explicitly imported AND is in the throwing_constructors list.
+      // Use importInfo.packageName (authoritative per-file import).
+      packageName = importInfo.packageName;
+    } else if (this.throwingConstructorToPackage.has(className)) {
+      // Not in importMap (possibly a global or re-exported symbol) but in throwing_constructors.
+      packageName = this.throwingConstructorToPackage.get(className)!;
+    }
+
+    if (!packageName) return [];
+
+    return [
+      {
+        pluginName: this.name,
+        pattern: 'throwing-constructor',
+        node,
+        packageName,
+        functionName: className,  // Use the class name as the function name for lookup
+        confidence: 'high',
+        metadata: {
+          depth: 0,
+          constructorCall: true,
+        },
+      },
+    ];
   }
 
   /**

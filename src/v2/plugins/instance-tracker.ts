@@ -623,7 +623,13 @@ export class InstanceTrackerPlugin implements DetectorPlugin {
       const importInfo = context.importMap.get(funcName);
       if (importInfo) {
         // Only treat as factory if the function name suggests it creates an instance
-        if (this.isFactoryMethodName(funcName)) {
+        // OR if the contract explicitly declares it as a factory method via detection.factory_methods.
+        // importInfo is authoritative — it tells us exactly which package this function was
+        // imported from in this file. Using importInfo when the contract declares the function
+        // as a factory prevents cross-package ambiguity when multiple packages export the same
+        // factory name (e.g., both cross-fetch and undici export `fetch`; the importMap tells
+        // us which one was actually imported here, so we use it over the factoryToPackage map).
+        if (this.isFactoryMethodName(funcName) || this.factoryToPackage.has(funcName)) {
           return importInfo.packageName;
         }
       }

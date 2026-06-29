@@ -29,7 +29,8 @@ type TraversalEvent =
   | 'identifier'
   | 'binaryExpression'
   | 'conditionalExpression'
-  | 'taggedTemplateExpression';
+  | 'taggedTemplateExpression'
+  | 'newExpression';
 
 /**
  * Event handler function type
@@ -105,6 +106,9 @@ export class TraversalEngine {
     }
     if (plugin.onTaggedTemplateExpression) {
       this.addEventListener('taggedTemplateExpression', plugin.onTaggedTemplateExpression.bind(plugin));
+    }
+    if (plugin.onNewExpression) {
+      this.addEventListener('newExpression', plugin.onNewExpression.bind(plugin));
     }
   }
 
@@ -250,6 +254,12 @@ export class TraversalEngine {
       const results = this.emitEvent('taggedTemplateExpression', node, context);
       detections.push(...results);
     }
+
+    // New expression: new ClassName(...)
+    if (ts.isNewExpression(node)) {
+      const results = this.emitEvent('newExpression', node, context);
+      detections.push(...results);
+    }
   }
 
   /**
@@ -296,6 +306,7 @@ export class TraversalEngine {
       'binaryExpression',
       'conditionalExpression',
       'taggedTemplateExpression',
+      'newExpression',
     ];
 
     for (const event of events) {
