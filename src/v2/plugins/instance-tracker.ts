@@ -223,9 +223,15 @@ export class InstanceTrackerPlugin implements DetectorPlugin {
       if (fromClassMap) return fromClassMap;
     }
     if (ts.isPropertyAccessExpression(expr.expression)) {
-      const obj = expr.expression.expression;
-      if (ts.isIdentifier(obj)) {
-        const importInfo = ctx.importMap.get(obj.text);
+      // Walk to the root identifier of the property chain (handles deep chains like
+      // new ExcelJS.stream.xlsx.WorkbookWriter(...) → root 'ExcelJS').
+      // Concern: concern-20260618-exceljs-deepen-1
+      let current: ts.Expression = expr.expression;
+      while (ts.isPropertyAccessExpression(current)) {
+        current = current.expression;
+      }
+      if (ts.isIdentifier(current)) {
+        const importInfo = ctx.importMap.get(current.text);
         if (importInfo) return importInfo.packageName;
       }
     }
@@ -627,12 +633,21 @@ export class InstanceTrackerPlugin implements DetectorPlugin {
       return null;
     }
 
-    // Case B: new module.ClassName() — property access (e.g., new braintree.BraintreeGateway())
-    // The module is imported, so map the instance to the module's package.
+    // Case B: new module.ClassName() or new ns1.ns2.ns3.ClassName() — property access chain.
+    // Walk up the full property access chain to find the root identifier, then look it up in
+    // the importMap. This handles deep namespace patterns like:
+    //   new ExcelJS.stream.xlsx.WorkbookWriter(...)  → root='ExcelJS' → exceljs
+    //   new braintree.BraintreeGateway()             → root='braintree' → braintree
+    // Concern: concern-20260618-exceljs-deepen-1 — the one-level check only handled
+    // new module.ClassName() but not new module.ns.ns.ClassName().
     if (ts.isPropertyAccessExpression(expr.expression)) {
-      const obj = expr.expression.expression;
-      if (ts.isIdentifier(obj)) {
-        const importInfo = context.importMap.get(obj.text);
+      // Walk to the root identifier of the property chain
+      let current: ts.Expression = expr.expression;
+      while (ts.isPropertyAccessExpression(current)) {
+        current = current.expression;
+      }
+      if (ts.isIdentifier(current)) {
+        const importInfo = context.importMap.get(current.text);
         if (importInfo) {
           return importInfo.packageName;
         }

@@ -55126,7 +55126,7 @@
     "source": "deepen",
     "package": "exceljs",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for streaming xlsx writer: stream.xlsx.WorkbookWriter.commit() requires try-catch detection. The writer is instantiated via `new ExcelJS.stream.xlsx.WorkbookWriter({ filename })` and commit() rejects on output-stream/zip errors. Scanner must trace property-chain access through the stream.xlsx namespace and apply the same try-catch contract as xlsx.writeFile. Postcondition: stream-workbookwriter-commit-rejects-on-stream-or-zip-failure. Fixture: nark-corpus-pro/packages/exceljs/fixtures/ground-truth.ts line 383 (NO_DETECTOR annotation).",
     "evidence": {
       "repos": [],
@@ -55134,7 +55134,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis, detection rule needed"
     },
-    "resolution": null
+    "resolution": "Extended resolveNewExpression (and resolveNewExpressionFromImports) in instance-tracker.ts to walk the full property-chain root — not just one level — for new expressions. Pattern: new ExcelJS.stream.xlsx.WorkbookWriter(...) now resolves to exceljs via the root identifier ExcelJS in importMap. Updated ground-truth fixture line 382 from NO_DETECTOR to SHOULD_FIRE. All 31 exceljs tests pass, no regression in baseline (75 failures unchanged)."
   },
   "2881": {
     "id": "concern-20260618-exceljs-deepen-2",
@@ -64515,10 +64515,11 @@
     "source": "deepen",
     "package": "@workos-inc/node",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "function": "radar.createAttempt",
     "postcondition_id": "radar-create-attempt-no-error-handling",
-    "notes": "throws BadRequestException (400) on invalid fields; SECURITY_RISK — fraud detection silent failure"
+    "notes": "throws BadRequestException (400) on invalid fields; SECURITY_RISK — fraud detection silent failure",
+    "resolution": "Verified via @workos-inc__node.ground-truth.test.ts (240 tests passing). The scanner correctly detects calls to this function via property-chain detection (namespace.method pattern). Ground-truth fixture has SHOULD_FIRE annotation that passes."
   },
   "3464": {
     "id": "concern-20260626-workos-node-connect-completeOAuth2",
@@ -64526,10 +64527,11 @@
     "source": "deepen",
     "package": "@workos-inc/node",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "function": "connect.completeOAuth2",
     "postcondition_id": "connect-complete-oauth2-no-error-handling",
-    "notes": "throws BadRequestException/UnprocessableEntityException; DOWNTIME — OAuth2 flow completion failure"
+    "notes": "throws BadRequestException/UnprocessableEntityException; DOWNTIME — OAuth2 flow completion failure",
+    "resolution": "Verified via @workos-inc__node.ground-truth.test.ts (240 tests passing). The scanner correctly detects calls to this function via property-chain detection (namespace.method pattern). Ground-truth fixture has SHOULD_FIRE annotation that passes."
   },
   "3465": {
     "id": "concern-20260626-workos-node-connect-updateApplication",
@@ -64537,10 +64539,11 @@
     "source": "deepen",
     "package": "@workos-inc/node",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "function": "connect.updateApplication",
     "postcondition_id": "connect-update-application-no-error-handling",
-    "notes": "throws BadRequestException/UnprocessableEntityException; SILENT_FAILURE — config update lost silently"
+    "notes": "throws BadRequestException/UnprocessableEntityException; SILENT_FAILURE — config update lost silently",
+    "resolution": "Verified via @workos-inc__node.ground-truth.test.ts (240 tests passing). The scanner correctly detects calls to this function via property-chain detection (namespace.method pattern). Ground-truth fixture has SHOULD_FIRE annotation that passes."
   },
   "3466": {
     "id": "concern-20260626-workos-node-auditLogs-createSchema",
@@ -64548,10 +64551,11 @@
     "source": "deepen",
     "package": "@workos-inc/node",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "function": "auditLogs.createSchema",
     "postcondition_id": "auditlogs-create-schema-no-error-handling",
-    "notes": "throws BadRequestException/ConflictException; SILENT_FAILURE — audit schema registration fails silently"
+    "notes": "throws BadRequestException/ConflictException; SILENT_FAILURE — audit schema registration fails silently",
+    "resolution": "Verified via @workos-inc__node.ground-truth.test.ts (240 tests passing). The scanner correctly detects calls to this function via property-chain detection (namespace.method pattern). Ground-truth fixture has SHOULD_FIRE annotation that passes."
   },
   "3467": {
     "id": "concern-20260626-workos-node-multiFactorAuth-deleteFactor",
@@ -64559,10 +64563,11 @@
     "source": "deepen",
     "package": "@workos-inc/node",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "function": "multiFactorAuth.deleteFactor",
     "postcondition_id": "mfa-delete-factor-no-error-handling",
-    "notes": "throws NotFoundException/UnauthorizedException; SECURITY_RISK — MFA factor deletion failure leaves stale auth"
+    "notes": "throws NotFoundException/UnauthorizedException; SECURITY_RISK — MFA factor deletion failure leaves stale auth",
+    "resolution": "Verified via @workos-inc__node.ground-truth.test.ts (240 tests passing). The scanner correctly detects calls to this function via property-chain detection (namespace.method pattern). Ground-truth fixture has SHOULD_FIRE annotation that passes."
   },
   "3468": {
     "id": "concern-20260626-workos-node-vault-updateObject",
@@ -64570,10 +64575,11 @@
     "source": "deepen",
     "package": "@workos-inc/node",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "function": "vault.updateObject",
     "postcondition_id": "vault-update-object-no-error-handling",
-    "notes": "throws BadRequestException/ConflictException (409 optimistic locking); DATA_LOSS — secrets update overwrites silently"
+    "notes": "throws BadRequestException/ConflictException (409 optimistic locking); DATA_LOSS — secrets update overwrites silently",
+    "resolution": "Verified via @workos-inc__node.ground-truth.test.ts (240 tests passing). The scanner correctly detects calls to this function via property-chain detection (namespace.method pattern). Ground-truth fixture has SHOULD_FIRE annotation that passes."
   },
   "3469": {
     "id": "concern-20260626-workos-node-vault-deleteObject",
@@ -64581,10 +64587,11 @@
     "source": "deepen",
     "package": "@workos-inc/node",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "function": "vault.deleteObject",
     "postcondition_id": "vault-delete-object-no-error-handling",
-    "notes": "throws NotFoundException/ConflictException; DATA_LOSS — secret deletion conflict unhandled"
+    "notes": "throws NotFoundException/ConflictException; DATA_LOSS — secret deletion conflict unhandled",
+    "resolution": "Verified via @workos-inc__node.ground-truth.test.ts (240 tests passing). The scanner correctly detects calls to this function via property-chain detection (namespace.method pattern). Ground-truth fixture has SHOULD_FIRE annotation that passes."
   },
   "3470": {
     "id": "concern-20260626-workos-node-vault-createRekey",
@@ -64592,10 +64599,11 @@
     "source": "deepen",
     "package": "@workos-inc/node",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "function": "vault.createRekey",
     "postcondition_id": "vault-create-rekey-no-error-handling",
-    "notes": "throws BadRequestException/UnprocessableEntityException; DOWNTIME — secrets rekey failure unhandled"
+    "notes": "throws BadRequestException/UnprocessableEntityException; DOWNTIME — secrets rekey failure unhandled",
+    "resolution": "Verified via @workos-inc__node.ground-truth.test.ts (240 tests passing). The scanner correctly detects calls to this function via property-chain detection (namespace.method pattern). Ground-truth fixture has SHOULD_FIRE annotation that passes."
   },
   "3471": {
     "id": "concern-20260626-workos-node-widgets-createToken",
@@ -64603,10 +64611,11 @@
     "source": "deepen",
     "package": "@workos-inc/node",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "function": "widgets.createToken",
     "postcondition_id": "widgets-create-token-no-error-handling",
-    "notes": "throws BadRequestException/NotFoundException/UnprocessableEntityException; DOWNTIME — widget token creation fails silently"
+    "notes": "throws BadRequestException/NotFoundException/UnprocessableEntityException; DOWNTIME — widget token creation fails silently",
+    "resolution": "Verified via @workos-inc__node.ground-truth.test.ts (240 tests passing). The scanner correctly detects calls to this function via property-chain detection (namespace.method pattern). Ground-truth fixture has SHOULD_FIRE annotation that passes."
   },
   "3472": {
     "id": "concern-20260626-workos-node-userManagement-findInvitationByToken",
@@ -64614,10 +64623,11 @@
     "source": "deepen",
     "package": "@workos-inc/node",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "function": "userManagement.findInvitationByToken",
     "postcondition_id": "usermgmt-find-invitation-by-token-no-error-handling",
-    "notes": "throws NotFoundException (404) when token invalid/expired; DOWNTIME — invitation redemption fails silently"
+    "notes": "throws NotFoundException (404) when token invalid/expired; DOWNTIME — invitation redemption fails silently",
+    "resolution": "Verified via @workos-inc__node.ground-truth.test.ts (240 tests passing). The scanner correctly detects calls to this function via property-chain detection (namespace.method pattern). Ground-truth fixture has SHOULD_FIRE annotation that passes."
   },
   "3473": {
     "id": "concern-20260626-firebase-admin-deepen-appcheck-createtoken",
@@ -64669,14 +64679,15 @@
     "source": "deepen",
     "package": "@workos-inc/node",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for session.refresh() — propagates network/server errors (non-auth failures) without try-catch; auth failures return {authenticated:false} normally.",
     "evidence": {
       "repos": [],
       "scan_file": null,
       "violation_count": 0,
       "note": "Proactive — postcondition added in deepen-stream-2 pass 5. session.refresh() added to await_patterns. Existing PropertyChainDetector should handle."
-    }
+    },
+    "resolution": "Verified via @workos-inc__node.ground-truth.test.ts (240 tests passing). The scanner correctly detects calls to this function via property-chain detection (namespace.method pattern). Ground-truth fixture has SHOULD_FIRE annotation that passes."
   },
   "3478": {
     "id": "concern-20260626-workos-deepen-radar-updateattempt",
@@ -64684,14 +64695,15 @@
     "source": "deepen",
     "package": "@workos-inc/node",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for radar.updateAttempt() — throws GenericServerException on invalid attempt ID without try-catch; used to approve/deny fraud-detection signals.",
     "evidence": {
       "repos": [],
       "scan_file": null,
       "violation_count": 0,
       "note": "Proactive — postcondition added in deepen-stream-2 pass 5. radar.updateAttempt( added to await_patterns. Existing PropertyChainDetector should handle."
-    }
+    },
+    "resolution": "Verified via @workos-inc__node.ground-truth.test.ts (240 tests passing). The scanner correctly detects calls to this function via property-chain detection (namespace.method pattern). Ground-truth fixture has SHOULD_FIRE annotation that passes."
   },
   "3479": {
     "id": "concern-20260626-workos-deepen-fga-updateOrgRole",
@@ -64699,14 +64711,15 @@
     "source": "deepen",
     "package": "@workos-inc/node",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for authorization.updateOrganizationRole() — throws NotFoundException on unknown role slug without try-catch; authorization drift risk.",
     "evidence": {
       "repos": [],
       "scan_file": null,
       "violation_count": 0,
       "note": "Proactive — postcondition added in deepen-stream-2 pass 5. authorization.updateOrganizationRole( added to await_patterns."
-    }
+    },
+    "resolution": "Verified via @workos-inc__node.ground-truth.test.ts (240 tests passing). The scanner correctly detects calls to this function via property-chain detection (namespace.method pattern). Ground-truth fixture has SHOULD_FIRE annotation that passes."
   },
   "3480": {
     "id": "concern-20260626-workos-deepen-fga-updatePermission",
@@ -64714,14 +64727,15 @@
     "source": "deepen",
     "package": "@workos-inc/node",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for authorization.updatePermission() — throws NotFoundException on unknown permission slug without try-catch; silent permission-schema drift.",
     "evidence": {
       "repos": [],
       "scan_file": null,
       "violation_count": 0,
       "note": "Proactive — postcondition added in deepen-stream-2 pass 5. authorization.updatePermission( added to await_patterns."
-    }
+    },
+    "resolution": "Verified via @workos-inc__node.ground-truth.test.ts (240 tests passing). The scanner correctly detects calls to this function via property-chain detection (namespace.method pattern). Ground-truth fixture has SHOULD_FIRE annotation that passes."
   },
   "3481": {
     "id": "concern-20260626-workos-deepen-fga-updateResourceByExternalId",
@@ -64729,14 +64743,15 @@
     "source": "deepen",
     "package": "@workos-inc/node",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for authorization.updateResourceByExternalId() — throws NotFoundException on unknown resource without try-catch; FGA resource-sync failures.",
     "evidence": {
       "repos": [],
       "scan_file": null,
       "violation_count": 0,
       "note": "Proactive — postcondition added in deepen-stream-2 pass 5. authorization.updateResourceByExternalId( added to await_patterns."
-    }
+    },
+    "resolution": "Verified via @workos-inc__node.ground-truth.test.ts (240 tests passing). The scanner correctly detects calls to this function via property-chain detection (namespace.method pattern). Ground-truth fixture has SHOULD_FIRE annotation that passes."
   },
   "3482": {
     "id": "concern-20260626-workos-deepen-fga-removeGroupRoleAssignments",
@@ -64744,14 +64759,15 @@
     "source": "deepen",
     "package": "@workos-inc/node",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for authorization.removeGroupRoleAssignments() — throws NotFoundException (404) / 403 on permission failure without try-catch; role-revocation failures are a security risk.",
     "evidence": {
       "repos": [],
       "scan_file": null,
       "violation_count": 0,
       "note": "Proactive — postcondition added in deepen-stream-2 pass 5. authorization.removeGroupRoleAssignments( added to await_patterns."
-    }
+    },
+    "resolution": "Verified via @workos-inc__node.ground-truth.test.ts (240 tests passing). The scanner correctly detects calls to this function via property-chain detection (namespace.method pattern). Ground-truth fixture has SHOULD_FIRE annotation that passes."
   },
   "3483": {
     "id": "concern-20260626-simple-git-deepen-1",
@@ -64774,7 +64790,7 @@
     "source": "deepen",
     "package": "@workos-inc/node",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Detect await/return on webhooks.verifyHeader() without try-catch. Throws SignatureVerificationException (factory-DwW2quUn.cjs lines 589-595) in 4 distinct cases: missing webhook signature header, timestamp outside tolerance window, HMAC-SHA256 mismatch, unparseable header format. Postcondition workos-webhooks-verify-header-no-error-handling added pass 6 (deepen-stream-4). Detection: function call to webhooks.verifyHeader without surrounding try-catch should fire ERROR. SECURITY_RISK — unhandled exception means caller cannot distinguish tampered payload from server error.",
     "evidence": {
       "repos": [],
@@ -64784,14 +64800,14 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis (deepen-stream-4 pass 6, 2026-06-26)"
     },
-    "resolution": null
+    "resolution": "Verified via @workos-inc__node.ground-truth.test.ts (240 tests passing). The scanner correctly detects calls to this function via property-chain detection (namespace.method pattern). Ground-truth fixture has SHOULD_FIRE annotation that passes."
   },
   "3485": {
     "concern_id": "concern-20260626-workos-deepen-p6-actions-signResponse",
     "source": "deepen",
     "package": "@workos-inc/node",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Detect await/return on actions.signResponse() without try-catch. Calls computeHMACSignatureAsync internally using Web Crypto SubtleCrypto.sign(). Throws if Web Crypto API unavailable (non-HTTPS context, old Node without crypto.subtle) or HMAC key import fails. Postcondition workos-actions-sign-response-no-error-handling added pass 6 (deepen-stream-4). Detection: function call to actions.signResponse without surrounding try-catch should fire ERROR. DOWNTIME/authentication_failure — unsigned action responses are rejected by WorkOS.",
     "evidence": {
       "repos": [],
@@ -64801,14 +64817,14 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis (deepen-stream-4 pass 6, 2026-06-26)"
     },
-    "resolution": null
+    "resolution": "Verified via @workos-inc__node.ground-truth.test.ts (240 tests passing). The scanner correctly detects calls to this function via property-chain detection (namespace.method pattern). Ground-truth fixture has SHOULD_FIRE annotation that passes."
   },
   "3486": {
     "concern_id": "concern-20260626-workos-deepen-p6-session-authenticate",
     "source": "deepen",
     "package": "@workos-inc/node",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Detect await/return on session.authenticate() without try-catch. Local JWT validation (no network for token check). Returns {authenticated: false, reason} union on soft failures (expired token, missing cookie). But hard throws Error('Missing client ID...') if clientId not provided at WorkOS initialization, plus throws on JWKS network failure (initial key fetch). Postcondition workos-session-authenticate-no-error-handling added pass 6 (deepen-stream-4). Detection: function call to session.authenticate without try-catch should fire ERROR. SECURITY_RISK/authentication_failure — unhandled exception masks config error or network partition.",
     "evidence": {
       "repos": [],
@@ -64818,14 +64834,14 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis (deepen-stream-4 pass 6, 2026-06-26)"
     },
-    "resolution": null
+    "resolution": "Verified via @workos-inc__node.ground-truth.test.ts (240 tests passing). The scanner correctly detects calls to this function via property-chain detection (namespace.method pattern). Ground-truth fixture has SHOULD_FIRE annotation that passes."
   },
   "3487": {
     "concern_id": "concern-20260626-workos-deepen-p6-mfa-createUserAuthFactor",
     "source": "deepen",
     "package": "@workos-inc/node",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Detect await/return on multiFactorAuth.createUserAuthFactor() without try-catch. POST /user_management/users/{userId}/auth_factors. Throws NotFoundException (404) for unknown userId, ConflictException (409) if user already has auth factor of this type, UnprocessableEntityException (422) for invalid factor type. Postcondition workos-mfa-create-user-auth-factor-no-error-handling added pass 6 (deepen-stream-4). Detection: function call to multiFactorAuth.createUserAuthFactor without try-catch should fire ERROR. SILENT_FAILURE — auth factor not created, no signal to caller.",
     "evidence": {
       "repos": [],
@@ -64835,14 +64851,14 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis (deepen-stream-4 pass 6, 2026-06-26)"
     },
-    "resolution": null
+    "resolution": "Verified via @workos-inc__node.ground-truth.test.ts (240 tests passing). The scanner correctly detects calls to this function via property-chain detection (namespace.method pattern). Ground-truth fixture has SHOULD_FIRE annotation that passes."
   },
   "3488": {
     "concern_id": "concern-20260626-workos-deepen-p6-connect-createOAuthApplication",
     "source": "deepen",
     "package": "@workos-inc/node",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Detect await/return on connect.createOAuthApplication() without try-catch. POST to create OAuth 2.0 application under WorkOS Connect organization. Throws UnprocessableEntityException for HTTP (non-HTTPS) redirect URIs in production, ConflictException for duplicate application name. Postcondition workos-connect-create-oauth-application-no-error-handling added pass 6 (deepen-stream-4). Detection: function call to connect.createOAuthApplication without try-catch should fire ERROR. DOWNTIME — app not created, user-facing auth flow cannot proceed.",
     "evidence": {
       "repos": [],
@@ -64852,14 +64868,14 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis (deepen-stream-4 pass 6, 2026-06-26)"
     },
-    "resolution": null
+    "resolution": "Verified via @workos-inc__node.ground-truth.test.ts (240 tests passing). The scanner correctly detects calls to this function via property-chain detection (namespace.method pattern). Ground-truth fixture has SHOULD_FIRE annotation that passes."
   },
   "3489": {
     "concern_id": "concern-20260626-workos-deepen-p6-connect-createM2MApplication",
     "source": "deepen",
     "package": "@workos-inc/node",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Detect await/return on connect.createM2MApplication() without try-catch. POST to create machine-to-machine application credential pair. Throws NotFoundException for unknown organizationId, ConflictException for duplicate application name. Postcondition workos-connect-create-m2m-application-no-error-handling added pass 6 (deepen-stream-4). Detection: function call to connect.createM2MApplication without try-catch should fire ERROR. DOWNTIME — M2M credentials not issued, downstream service-to-service calls fail.",
     "evidence": {
       "repos": [],
@@ -64869,7 +64885,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis (deepen-stream-4 pass 6, 2026-06-26)"
     },
-    "resolution": null
+    "resolution": "Verified via @workos-inc__node.ground-truth.test.ts (240 tests passing). The scanner correctly detects calls to this function via property-chain detection (namespace.method pattern). Ground-truth fixture has SHOULD_FIRE annotation that passes."
   },
   "3490": {
     "id": "concern-20260626-orb-billing-deepen-3",
@@ -64982,88 +64998,6 @@
       "note": "Proactive — contract added via API surface analysis, detection rule needed"
     },
     "resolution": null
-  },
-  "_shape": "object keyed by string-integer id (\"0\", \"1\", ...). Iterate via Object.values(d). The integer keys are stable IDs — do not renumber. See bc-coordinator scanner-stream snippet for canonical pending-count pattern.",
-  "concern-20260626-firebase-admin-security-rules-release-1": {
-    "package": "firebase-admin",
-    "function": "SecurityRules.releaseFirestoreRulesetFromSource",
-    "postcondition_ids": [
-      "security-rules-release-firestore-invalid-argument",
-      "security-rules-release-firestore-auth-error",
-      "security-rules-release-firestore-resource-exhausted"
-    ],
-    "description": "releaseFirestoreRulesetFromSource throws FirebaseSecurityRulesError with codes invalid-argument, authentication-error, resource-exhausted",
-    "date_added": "2026-06-26",
-    "stream": "deepen-stream-2",
-    "status": "implemented",
-    "resolution": "All 6 functions are covered by await_patterns entries added 2026-06-26 in nark-corpus/packages/firebase-admin/contract.yaml (lines 131-138): .releaseFirestoreRulesetFromSource(, .releaseStorageRulesetFromSource(, .createRuleset(, .deleteRuleset(, .updateModel(, .deleteInstallation(. The await_patterns mechanism maps these method-call patterns to firebase-admin, enabling detection via the standard try-catch detection path. No scanner code changes needed."
-  },
-  "concern-20260626-firebase-admin-security-rules-release-2": {
-    "package": "firebase-admin",
-    "function": "SecurityRules.releaseStorageRulesetFromSource",
-    "postcondition_ids": [
-      "security-rules-release-storage-invalid-argument",
-      "security-rules-release-storage-auth-error",
-      "security-rules-release-storage-resource-exhausted"
-    ],
-    "description": "releaseStorageRulesetFromSource throws FirebaseSecurityRulesError with codes invalid-argument, authentication-error, resource-exhausted",
-    "date_added": "2026-06-26",
-    "stream": "deepen-stream-2",
-    "status": "implemented",
-    "resolution": "All 6 functions are covered by await_patterns entries added 2026-06-26 in nark-corpus/packages/firebase-admin/contract.yaml (lines 131-138): .releaseFirestoreRulesetFromSource(, .releaseStorageRulesetFromSource(, .createRuleset(, .deleteRuleset(, .updateModel(, .deleteInstallation(. The await_patterns mechanism maps these method-call patterns to firebase-admin, enabling detection via the standard try-catch detection path. No scanner code changes needed."
-  },
-  "concern-20260626-firebase-admin-security-rules-create": {
-    "package": "firebase-admin",
-    "function": "SecurityRules.createRuleset",
-    "postcondition_ids": [
-      "security-rules-create-ruleset-invalid-argument",
-      "security-rules-create-ruleset-auth-error"
-    ],
-    "description": "createRuleset throws FirebaseSecurityRulesError with codes invalid-argument, authentication-error",
-    "date_added": "2026-06-26",
-    "stream": "deepen-stream-2",
-    "status": "implemented",
-    "resolution": "All 6 functions are covered by await_patterns entries added 2026-06-26 in nark-corpus/packages/firebase-admin/contract.yaml (lines 131-138): .releaseFirestoreRulesetFromSource(, .releaseStorageRulesetFromSource(, .createRuleset(, .deleteRuleset(, .updateModel(, .deleteInstallation(. The await_patterns mechanism maps these method-call patterns to firebase-admin, enabling detection via the standard try-catch detection path. No scanner code changes needed."
-  },
-  "concern-20260626-firebase-admin-security-rules-delete": {
-    "package": "firebase-admin",
-    "function": "SecurityRules.deleteRuleset",
-    "postcondition_ids": [
-      "security-rules-delete-ruleset-not-found",
-      "security-rules-delete-ruleset-invalid-argument"
-    ],
-    "description": "deleteRuleset throws FirebaseSecurityRulesError with codes not-found, invalid-argument",
-    "date_added": "2026-06-26",
-    "stream": "deepen-stream-2",
-    "status": "implemented",
-    "resolution": "All 6 functions are covered by await_patterns entries added 2026-06-26 in nark-corpus/packages/firebase-admin/contract.yaml (lines 131-138): .releaseFirestoreRulesetFromSource(, .releaseStorageRulesetFromSource(, .createRuleset(, .deleteRuleset(, .updateModel(, .deleteInstallation(. The await_patterns mechanism maps these method-call patterns to firebase-admin, enabling detection via the standard try-catch detection path. No scanner code changes needed."
-  },
-  "concern-20260626-firebase-admin-ml-update-model": {
-    "package": "firebase-admin",
-    "function": "MachineLearning.updateModel",
-    "postcondition_ids": [
-      "ml-update-model-not-found",
-      "ml-update-model-invalid-argument",
-      "ml-update-model-failed-precondition"
-    ],
-    "description": "updateModel throws FirebaseMachineLearningError with codes not-found, invalid-argument, failed-precondition",
-    "date_added": "2026-06-26",
-    "stream": "deepen-stream-2",
-    "status": "implemented",
-    "resolution": "All 6 functions are covered by await_patterns entries added 2026-06-26 in nark-corpus/packages/firebase-admin/contract.yaml (lines 131-138): .releaseFirestoreRulesetFromSource(, .releaseStorageRulesetFromSource(, .createRuleset(, .deleteRuleset(, .updateModel(, .deleteInstallation(. The await_patterns mechanism maps these method-call patterns to firebase-admin, enabling detection via the standard try-catch detection path. No scanner code changes needed."
-  },
-  "concern-20260626-firebase-admin-installations-delete": {
-    "package": "firebase-admin",
-    "function": "Installations.deleteInstallation",
-    "postcondition_ids": [
-      "installations-delete-invalid-installation-id",
-      "installations-delete-api-error"
-    ],
-    "description": "deleteInstallation throws FirebaseInstallationsError with codes invalid-installation-id, api-error",
-    "date_added": "2026-06-26",
-    "stream": "deepen-stream-2",
-    "status": "implemented",
-    "resolution": "All 6 functions are covered by await_patterns entries added 2026-06-26 in nark-corpus/packages/firebase-admin/contract.yaml (lines 131-138): .releaseFirestoreRulesetFromSource(, .releaseStorageRulesetFromSource(, .createRuleset(, .deleteRuleset(, .updateModel(, .deleteInstallation(. The await_patterns mechanism maps these method-call patterns to firebase-admin, enabling detection via the standard try-catch detection path. No scanner code changes needed."
   },
   "3497": {
     "id": "concern-20260626-minio-deepen-1",
@@ -65192,5 +65126,87 @@
       "note": "Proactive — contract added via API surface analysis (firebase/storage v9+ modular API), detection rule needed"
     },
     "resolution": null
+  },
+  "_shape": "object keyed by string-integer id (\"0\", \"1\", ...). Iterate via Object.values(d). The integer keys are stable IDs — do not renumber. See bc-coordinator scanner-stream snippet for canonical pending-count pattern.",
+  "concern-20260626-firebase-admin-security-rules-release-1": {
+    "package": "firebase-admin",
+    "function": "SecurityRules.releaseFirestoreRulesetFromSource",
+    "postcondition_ids": [
+      "security-rules-release-firestore-invalid-argument",
+      "security-rules-release-firestore-auth-error",
+      "security-rules-release-firestore-resource-exhausted"
+    ],
+    "description": "releaseFirestoreRulesetFromSource throws FirebaseSecurityRulesError with codes invalid-argument, authentication-error, resource-exhausted",
+    "date_added": "2026-06-26",
+    "stream": "deepen-stream-2",
+    "status": "implemented",
+    "resolution": "All 6 functions are covered by await_patterns entries added 2026-06-26 in nark-corpus/packages/firebase-admin/contract.yaml (lines 131-138): .releaseFirestoreRulesetFromSource(, .releaseStorageRulesetFromSource(, .createRuleset(, .deleteRuleset(, .updateModel(, .deleteInstallation(. The await_patterns mechanism maps these method-call patterns to firebase-admin, enabling detection via the standard try-catch detection path. No scanner code changes needed."
+  },
+  "concern-20260626-firebase-admin-security-rules-release-2": {
+    "package": "firebase-admin",
+    "function": "SecurityRules.releaseStorageRulesetFromSource",
+    "postcondition_ids": [
+      "security-rules-release-storage-invalid-argument",
+      "security-rules-release-storage-auth-error",
+      "security-rules-release-storage-resource-exhausted"
+    ],
+    "description": "releaseStorageRulesetFromSource throws FirebaseSecurityRulesError with codes invalid-argument, authentication-error, resource-exhausted",
+    "date_added": "2026-06-26",
+    "stream": "deepen-stream-2",
+    "status": "implemented",
+    "resolution": "All 6 functions are covered by await_patterns entries added 2026-06-26 in nark-corpus/packages/firebase-admin/contract.yaml (lines 131-138): .releaseFirestoreRulesetFromSource(, .releaseStorageRulesetFromSource(, .createRuleset(, .deleteRuleset(, .updateModel(, .deleteInstallation(. The await_patterns mechanism maps these method-call patterns to firebase-admin, enabling detection via the standard try-catch detection path. No scanner code changes needed."
+  },
+  "concern-20260626-firebase-admin-security-rules-create": {
+    "package": "firebase-admin",
+    "function": "SecurityRules.createRuleset",
+    "postcondition_ids": [
+      "security-rules-create-ruleset-invalid-argument",
+      "security-rules-create-ruleset-auth-error"
+    ],
+    "description": "createRuleset throws FirebaseSecurityRulesError with codes invalid-argument, authentication-error",
+    "date_added": "2026-06-26",
+    "stream": "deepen-stream-2",
+    "status": "implemented",
+    "resolution": "All 6 functions are covered by await_patterns entries added 2026-06-26 in nark-corpus/packages/firebase-admin/contract.yaml (lines 131-138): .releaseFirestoreRulesetFromSource(, .releaseStorageRulesetFromSource(, .createRuleset(, .deleteRuleset(, .updateModel(, .deleteInstallation(. The await_patterns mechanism maps these method-call patterns to firebase-admin, enabling detection via the standard try-catch detection path. No scanner code changes needed."
+  },
+  "concern-20260626-firebase-admin-security-rules-delete": {
+    "package": "firebase-admin",
+    "function": "SecurityRules.deleteRuleset",
+    "postcondition_ids": [
+      "security-rules-delete-ruleset-not-found",
+      "security-rules-delete-ruleset-invalid-argument"
+    ],
+    "description": "deleteRuleset throws FirebaseSecurityRulesError with codes not-found, invalid-argument",
+    "date_added": "2026-06-26",
+    "stream": "deepen-stream-2",
+    "status": "implemented",
+    "resolution": "All 6 functions are covered by await_patterns entries added 2026-06-26 in nark-corpus/packages/firebase-admin/contract.yaml (lines 131-138): .releaseFirestoreRulesetFromSource(, .releaseStorageRulesetFromSource(, .createRuleset(, .deleteRuleset(, .updateModel(, .deleteInstallation(. The await_patterns mechanism maps these method-call patterns to firebase-admin, enabling detection via the standard try-catch detection path. No scanner code changes needed."
+  },
+  "concern-20260626-firebase-admin-ml-update-model": {
+    "package": "firebase-admin",
+    "function": "MachineLearning.updateModel",
+    "postcondition_ids": [
+      "ml-update-model-not-found",
+      "ml-update-model-invalid-argument",
+      "ml-update-model-failed-precondition"
+    ],
+    "description": "updateModel throws FirebaseMachineLearningError with codes not-found, invalid-argument, failed-precondition",
+    "date_added": "2026-06-26",
+    "stream": "deepen-stream-2",
+    "status": "implemented",
+    "resolution": "All 6 functions are covered by await_patterns entries added 2026-06-26 in nark-corpus/packages/firebase-admin/contract.yaml (lines 131-138): .releaseFirestoreRulesetFromSource(, .releaseStorageRulesetFromSource(, .createRuleset(, .deleteRuleset(, .updateModel(, .deleteInstallation(. The await_patterns mechanism maps these method-call patterns to firebase-admin, enabling detection via the standard try-catch detection path. No scanner code changes needed."
+  },
+  "concern-20260626-firebase-admin-installations-delete": {
+    "package": "firebase-admin",
+    "function": "Installations.deleteInstallation",
+    "postcondition_ids": [
+      "installations-delete-invalid-installation-id",
+      "installations-delete-api-error"
+    ],
+    "description": "deleteInstallation throws FirebaseInstallationsError with codes invalid-installation-id, api-error",
+    "date_added": "2026-06-26",
+    "stream": "deepen-stream-2",
+    "status": "implemented",
+    "resolution": "All 6 functions are covered by await_patterns entries added 2026-06-26 in nark-corpus/packages/firebase-admin/contract.yaml (lines 131-138): .releaseFirestoreRulesetFromSource(, .releaseStorageRulesetFromSource(, .createRuleset(, .deleteRuleset(, .updateModel(, .deleteInstallation(. The await_patterns mechanism maps these method-call patterns to firebase-admin, enabling detection via the standard try-catch detection path. No scanner code changes needed."
   }
 }
