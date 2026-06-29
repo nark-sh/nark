@@ -54554,7 +54554,7 @@
     "source": "deepen",
     "package": "ethers",
     "type": "scanner_method_resolution",
-    "status": "pending",
+    "status": "deferred",
     "description": "Scanner needs to resolve Signer.populateTransaction() called on subclasses (Wallet, JsonRpcSigner, NonceManager, BrowserProvider-returned signers, HDNodeWallet). All inherit from AbstractSigner; the canonical call sites are wallet.populateTransaction(), (await provider.getSigner()).populateTransaction(), and signer.populateTransaction(). Detector must follow chained method-resolution back to the AbstractSigner contract entry.",
     "evidence": {
       "repos": [],
@@ -54562,7 +54562,7 @@
       "violation_count": 0,
       "note": "Sibling concern for the new Signer.populateTransaction contract. Existing chained-call resolver should cover most cases; verify with ground-truth fixture."
     },
-    "resolution": null
+    "resolution": "Ethers package uses the .expected.ts fixture format, not the SHOULD_FIRE/SHOULD_NOT_FIRE ground-truth test harness. No vitest ground-truth test file exists for ethers — the populateTransaction concern cannot be verified via the regression gate. Deferred pending migration of ethers fixtures to the ground-truth.test.ts format. The contract entry and fixture annotations at packages/ethers/fixtures/ground-truth.ts lines 637-650 document the expected behavior."
   },
   "2847": {
     "id": "concern-20260618-trigger-dev-sdk-deepen-1",
@@ -56288,7 +56288,7 @@
     "source": "deepen",
     "package": "@nestjs/axios",
     "type": "new_pattern",
-    "status": "pending",
+    "status": "resolved",
     "description": "Distinguish bare axiosRef access (sync configuration like httpService.axiosRef.interceptors.request.use(...)) from awaited axiosRef.<verb>(...) calls. Bare reads SHOULD NOT fire — only chained verb invocations should trigger the postcondition check. Avoids FPs for interceptor setup, baseURL reads, defaults configuration, etc.",
     "evidence": {
       "repos": [],
@@ -56296,7 +56296,7 @@
       "violation_count": 0,
       "note": "Edge case axiosref-getter-itself-is-sync — paired with concern-1 above. Both should land in the same scanner upgrade."
     },
-    "resolution": null
+    "resolution": "Scanner correctly handles bare axiosRef access (sync interceptor setup) as SHOULD_NOT_FIRE. The axiosRef property access without a chained verb call is not awaited, so it never reaches the await_patterns matching path. All 31 @nestjs/axios ground-truth tests pass including the axiosRef.interceptors.request.use() case at line 237 of ground-truth.ts. No scanner change needed."
   },
   "2952": {
     "id": "concern-20260618-canvas-deepen-1",
@@ -59319,7 +59319,7 @@
     "source": "deepen",
     "package": "cassandra-driver",
     "type": "ambiguous_detector",
-    "status": "pending",
+    "status": "rejected",
     "description": "Disambiguate Mapper.batch() vs Client.batch() — both share the .batch( await_pattern, so Mapper.batch() calls are currently attributed to Client.batch's batch-failure postcondition. Need namespace-aware detection (mapper instance from mapping.Mapper constructor) so violations on mapper.batch() fire as mapper-batch-no-try-catch instead.",
     "evidence": {
       "repos": [],
@@ -59327,7 +59327,7 @@
       "violation_count": 0,
       "note": "Proactive — added in 2026-06-23 deepen pass alongside the mapper-batch-no-try-catch postcondition. Currently the ground-truth fixture asserts batch-failure fires (since that is what the scanner reports) but the contract-correct ID is mapper-batch-no-try-catch. Disambiguation requires tracking Mapper instances separately from Client instances and resolving .batch( against the instance class."
     },
-    "resolution": null
+    "resolution": "Requires namespace-aware instance tracking: scanner must distinguish mapper (Mapper instance) from client (Client instance) when both expose .batch(). This is the same infrastructure gap as the 2026-04-03 cassandra concerns (rejected: concern-2026-04-03-cassandra-driver-1/2/3). InstanceTracker does not yet support multi-level resolution (mapping.Mapper constructor -> forModel() -> ModelMapper). Ground-truth annotation preserved with batch-failure assertion (current behavior) until namespace-aware resolution lands."
   },
   "3138": {
     "id": "concern-20260623-cassandra-driver-deepen-2",
@@ -62708,7 +62708,7 @@
     "source": "deepen",
     "package": "drizzle-orm",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "resolved",
     "description": "Add detection for migrate() — drizzle-orm/<driver>/migrator migrate(db, { migrationsFolder }) — postcondition added in depth pass (pass 76, deepen-stream-3) but no scanner rule exists. Three postconditions: missing journal/sql files (fs Error), driver-error inside session.transaction (rolls back pending), and no-built-in-lock concurrent-startup race producing duplicate-object errors.",
     "evidence": {
       "repos": [],
@@ -62716,7 +62716,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis (drizzle-orm@0.45.2 node_modules/drizzle-orm/node-postgres/migrator.d.ts). migrate() is THE startup-time call in drizzle apps; scanner should treat unhandled migrate() as ERROR (process-exit-or-throw failure equivalent to unhandled connect()). Import path varies by driver: drizzle-orm/node-postgres/migrator, drizzle-orm/postgres-js/migrator, drizzle-orm/neon-http/migrator, drizzle-orm/better-sqlite3/migrator, drizzle-orm/libsql/migrator, drizzle-orm/d1/migrator. Recommend a glob match on `drizzle-orm/*/migrator` for the named import. Postcondition ids: migrate-missing-journal-or-sql-file, migrate-driver-error-rolls-back-pending, migrate-no-built-in-lock-concurrent-startup-race."
     },
-    "resolution": null
+    "resolution": "migrate() detection is already live. drizzle-orm/node-postgres/migrator is a subpath of drizzle-orm, so TS resolves all imports to node_modules/drizzle-orm/ and the scanner correctly identifies packageName='drizzle-orm'. The migrate function entry in contract.yaml matches by name='migrate'. All 27 drizzle-orm.ground-truth.test.ts tests pass including the three migrate() test cases (lines 289, 304, 295). No scanner change needed."
   },
   "3349": {
     "id": "concern-20260624-drizzle-orm-deepen-2",
@@ -62724,7 +62724,7 @@
     "source": "deepen",
     "package": "drizzle-orm",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "resolved",
     "description": "Add detection for db.$cache.invalidate() — new cache feature in drizzle-orm@0.45.x. Postcondition added in depth pass (pass 76, deepen-stream-3) but no scanner rule exists. Two postconditions: backend-error (Redis/Upstash propagation) and silent-noop-when-cache-not-configured (NoopCache wired when DrizzleConfig.cache omitted).",
     "evidence": {
       "repos": [],
@@ -62732,7 +62732,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis (drizzle-orm@0.45.2 pg-core/db.d.ts line 70, cache/upstash/cache.d.ts). Detection requires the scanner to recognize `$cache` as a property chain off a drizzle-tracked db instance. The InstanceTracker already follows `db.transaction`, `db.select`, etc.; extend the same association to `db.$cache.invalidate`. Postcondition ids: cache-invalidate-backend-error (error severity), cache-invalidate-silent-noop-when-cache-not-configured (warning severity). The silent-noop variant is informational — no scanner rule needed, it's a code-review signal."
     },
-    "resolution": null
+    "resolution": "db.$cache.invalidate() detection is already live via the InstanceTracker's property-chain mechanism. The drizzle-orm contract has the cache-invalidate-backend-error postcondition under the invalidate function entry. All 27 drizzle-orm.ground-truth.test.ts tests pass including the $cache.invalidate() test cases at lines 317, 323, 331. No scanner change needed."
   },
   "3350": {
     "id": "concern-20260624-drizzle-orm-deepen-3",
