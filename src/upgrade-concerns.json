@@ -58011,7 +58011,7 @@
     "source": "deepen",
     "package": "esbuild",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for PluginBuild.resolve() silent-resolution-failure. Per https://esbuild.github.io/plugins/, build.resolve() resolves (not rejects) when the requested path cannot be resolved — result.path is '' and result.errors is populated. Scanner should flag plugin code that awaits build.resolve() and uses result.path without first inspecting result.errors. Detection requires tracking PluginBuild as an esbuild-instance type (via the type_names detection block in esbuild contract.yaml). Real-world callsites: cloudflare/workers-sdk, QwikDev/qwik, ng-packagr, egoist/rollup-plugin-esbuild, modernweb-dev/web.",
     "evidence": {
       "repos": [
@@ -58025,7 +58025,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis in deepen pass 2026-06-23 (deepen-stream-1 pass 8). Postcondition id: pluginbuild-resolve-silent-resolution-failure. Fixture: nark-corpus-pro/packages/esbuild/fixtures/ground-truth.ts (gt_resolve_no_errors_check, gt_resolve_empty_catch)."
     },
-    "resolution": null
+    "resolution": "Added PluginBuild to detection.type_names in nark-corpus-pro/packages/esbuild/contract.yaml (scanner-stream cycle 2, 2026-06-29). The build parameter typed as PluginBuild in plugin setup() callbacks is now tracked as an esbuild instance via instance-tracker.walkTypeAnnotations. L201 in ground-truth.ts now fires pluginbuild-resolve-silent-resolution-failure correctly. Ground-truth test: esbuild.ground-truth.test.ts."
   },
   "3057": {
     "id": "concern-20260623-esbuild-deepen-2",
@@ -58033,7 +58033,7 @@
     "source": "deepen",
     "package": "esbuild",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for PluginBuild.resolve() service-stopped rejection. When the parent BuildContext is disposed (or stop() is called, or the child process exits), build.resolve() rejects with Error('The service is no longer running...'). This is common in long-lived plugin code that performs deferred async I/O before calling build.resolve(). Scanner should flag bare-await on build.resolve() inside plugin setup callbacks that contain other async I/O (fetch, fs.readFile, etc.) — those are the high-risk callsites. Detection scope: PluginBuild instance method calls. Sources: lib/main.js lines 879-880, 1407-1408.",
     "evidence": {
       "repos": [
@@ -58045,7 +58045,7 @@
       "violation_count": 0,
       "note": "Proactive — postcondition id: pluginbuild-resolve-service-stopped. Distinct from concern-1 because it covers the .catch() / try-catch detection axis, while concern-1 covers the result.errors-check axis."
     },
-    "resolution": null
+    "resolution": "Covered by same fix as deepen-1: PluginBuild added to detection.type_names in nark-corpus-pro/packages/esbuild/contract.yaml. The pluginbuild-resolve-service-stopped postcondition fires on the same call sites as pluginbuild-resolve-silent-resolution-failure when build.resolve() is called without try-catch. Both postconditions share the same detection gate."
   },
   "3058": {
     "id": "concern-20260623-ssh2-deepen-14",
