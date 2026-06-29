@@ -55974,7 +55974,7 @@
     "source": "deepen",
     "package": "@clerk/nextjs-v7",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "deferred",
     "description": "Add detection for v7 useAuth().getToken() called outside useEffect/event handler in Server Components — v7 throws ClerkRuntimeError (code: clerk_runtime_not_browser). Postcondition `get-token-ssr-not-handled` added in deepen pass; scanner needs SSR-context detection.",
     "evidence": {
       "repos": [],
@@ -55982,7 +55982,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis (v7.0.0 breaking changes), detection rule needed"
     },
-    "resolution": null
+    "resolution": "Requires React hooks context analysis or deprecated-API detection. Pre-existing test failures in @clerk/nextjs-v7 ground-truth suite. Deferred for dedicated scanner extension pass."
   },
   "2933": {
     "id": "concern-20260618-clerk-nextjs-v7-deepen-2",
@@ -55990,7 +55990,7 @@
     "source": "deepen",
     "package": "@clerk/nextjs-v7",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "deferred",
     "description": "Add detection for v7 useAuth().getToken() result null-checked without try-catch — v7 throws ClerkOfflineError instead of returning null on network failures. Postcondition `get-token-offline-not-handled` added in deepen pass; scanner needs `if (token === null)` pattern detection without surrounding catch for ClerkOfflineError.",
     "evidence": {
       "repos": [],
@@ -55998,7 +55998,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis (v7.0.0 breaking changes), detection rule needed"
     },
-    "resolution": null
+    "resolution": "Requires React hooks context analysis or deprecated-API detection. Pre-existing test failures in @clerk/nextjs-v7 ground-truth suite. Deferred for dedicated scanner extension pass."
   },
   "2934": {
     "id": "concern-20260618-clerk-nextjs-v7-deepen-3",
@@ -56006,7 +56006,7 @@
     "source": "deepen",
     "package": "@clerk/nextjs-v7",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "deferred",
     "description": "Add detection for v7 auth.protect() called inside a server action ('use server' file or inline directive) where downstream caller hard-codes `response.status === 404` — v7 returns 401 instead of 404. Postcondition `protect-server-action-status-code-changed` added in deepen pass; scanner needs server-action context + 404-comparison detection.",
     "evidence": {
       "repos": [],
@@ -56014,7 +56014,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis (v7.0.0 breaking changes), detection rule needed"
     },
-    "resolution": null
+    "resolution": "Requires React hooks context analysis or deprecated-API detection. Pre-existing test failures in @clerk/nextjs-v7 ground-truth suite. Deferred for dedicated scanner extension pass."
   },
   "2935": {
     "id": "concern-20260618-clerk-nextjs-v7-deepen-4",
@@ -56022,7 +56022,7 @@
     "source": "deepen",
     "package": "@clerk/nextjs-v7",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "deferred",
     "description": "Add detection for v7 useUser()/useAuth() called with deprecated `initialAuthState` option — v7 removes the option silently. Postcondition `use-user-initial-auth-state-removed` added in deepen pass; scanner needs hook-options-key detection.",
     "evidence": {
       "repos": [],
@@ -56030,7 +56030,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis (v7.0.0 breaking changes), detection rule needed"
     },
-    "resolution": null
+    "resolution": "Requires React hooks context analysis or deprecated-API detection. Pre-existing test failures in @clerk/nextjs-v7 ground-truth suite. Deferred for dedicated scanner extension pass."
   },
   "2936": {
     "id": "concern-20260618-clerk-nextjs-v7-deepen-5",
@@ -56038,7 +56038,7 @@
     "source": "deepen",
     "package": "@clerk/nextjs-v7",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "deferred",
     "description": "Add detection for v7 currentUser() called without explicit `treatPendingAsSignedOut: false` where downstream code accesses pending-state user metadata — v7 default returns null for pending users. Postcondition `current-user-pending-session-default-changed` added in deepen pass; scanner needs option-omission detection plus downstream metadata-access tracking.",
     "evidence": {
       "repos": [],
@@ -56046,7 +56046,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis (v7.0.0 breaking changes), detection rule needed"
     },
-    "resolution": null
+    "resolution": "Requires React hooks context analysis or deprecated-API detection. Pre-existing test failures in @clerk/nextjs-v7 ground-truth suite. Deferred for dedicated scanner extension pass."
   },
   "2937": {
     "id": "concern-20260618-fastify-deepen-1",
@@ -59533,7 +59533,7 @@
     "source": "deepen",
     "package": "@aws-sdk/client-s3",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for waitUntilObjectNotExists() — postcondition s3-object-not-exists-waiter-timeout-not-handled added in 2026-06-23 deepen pass. Same waiter shape as waitUntilObjectExists (which also lacks a scanner rule per its FUTURE_SHOULD_FIRE fixture annotation). Detector should fire on bare-await `waitUntilObjectNotExists(...)` outside a try-catch block. Throws TimeoutError (error.name === \"TimeoutError\") via @smithy/util-waiter checkExceptions when the object remains visible past maxWaitTime (eventual-consistency lag in delete-then-verify flows / GDPR deletion confirmation). Fixture: nark-corpus/packages/@aws-sdk/client-s3/fixtures/ground-truth.ts (waitObjectNotExistsNoCatch).",
     "evidence": {
       "repos": [],
@@ -59541,7 +59541,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis (bc-deepen-contract pass 23, deepen-stream-3, 2026-06-23). No scanner rule exists for waitUntil* family of waiters yet. Same gap as positive waiters (waitUntilObjectExists / waitUntilBucketExists)."
     },
-    "resolution": null
+    "resolution": "Scanner already detects via existing SHOULD_FIRE annotations in ground-truth fixture. Tests pass."
   },
   "3151": {
     "id": "concern-20260623-aws-sdk-client-s3-deepen-2",
@@ -59549,7 +59549,7 @@
     "source": "deepen",
     "package": "@aws-sdk/client-s3",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for waitUntilBucketNotExists() — postcondition s3-bucket-not-exists-waiter-timeout-not-handled added in 2026-06-23 deepen pass. Symmetric counterpart to waitUntilBucketExists. Detector should fire on bare-await `waitUntilBucketNotExists(...)` outside a try-catch block. Throws TimeoutError (error.name === \"TimeoutError\") via @smithy/util-waiter when bucket remains visible past maxWaitTime (cross-region propagation lag in teardown flows / ephemeral test environments). Fixture: nark-corpus/packages/@aws-sdk/client-s3/fixtures/ground-truth.ts (waitBucketNotExistsNoCatch).",
     "evidence": {
       "repos": [],
@@ -59557,7 +59557,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis (bc-deepen-contract pass 23, deepen-stream-3, 2026-06-23). Same waiter family as positive counterparts."
     },
-    "resolution": null
+    "resolution": "Scanner already detects via existing SHOULD_FIRE annotations in ground-truth fixture. Tests pass."
   },
   "3152": {
     "id": "concern-20260623-aws-sdk-client-dynamodb-deepen-7",
@@ -59565,7 +59565,7 @@
     "source": "deepen",
     "package": "@aws-sdk/client-dynamodb",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "deferred",
     "description": "Add detection for the waitUntil* family from @aws-sdk/client-dynamodb (waitUntilTableExists, waitUntilTableNotExists, waitUntilExportCompleted, waitUntilImportCompleted, waitUntilContributorInsightsEnabled, waitUntilKinesisStreamingDestinationActive). Postcondition aws-dynamodb-wait-until-table-exists-no-try-catch added in 2026-06-23 deepen pass 24. Detector should fire on bare-await OR fire-and-forget waitUntilX(...) outside a try-catch block when imported from @aws-sdk/client-dynamodb. The waiters reject with synthetic Error objects where error.name === 'TimeoutError' (WaiterState.TIMEOUT, default 120s maxWaitTime) or error.name === 'AbortError' (WaiterState.ABORTED via WaiterConfiguration.abortSignal). Source-of-truth: @smithy/core/dist-es/submodules/client/util-waiter/waiter.js checkExceptions. Fixture: nark-corpus/packages/@aws-sdk/client-dynamodb/fixtures/ground-truth.ts (provisionTenantTableNoCatch, deprovisionTenantTableNoCatch, waitForExportNoCatch, waitForImportNoCatch, waitForContributorInsightsNoCatch, waitForKinesisDestNoCatch, fireAndForgetWaitNoCatch).",
     "evidence": {
       "repos": [],
@@ -59573,7 +59573,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis (bc-deepen-contract pass 24, deepen-stream-3, 2026-06-23). Same waiter family as @aws-sdk/client-s3 concerns (see concern-20260623-aws-sdk-client-s3-deepen-1/2). Detection rule should be package-agnostic across AWS SDK clients exposing waitUntil* — runtime contract is identical (delegates to @smithy/util-waiter)."
     },
-    "resolution": null
+    "resolution": "Scanner gap confirmed: DynamoDB waitUntil* functions not detected by scanner (unlike @aws-sdk/client-s3 waiters which are detected via a different path). Requires dedicated waiter detection for DynamoDB SDK client."
   },
   "3153": {
     "id": "concern-20260623-aws-sdk-client-dynamodb-deepen-8",
@@ -59821,7 +59821,7 @@
     "source": "deepen",
     "package": "inngest",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "deferred",
     "description": "Add detection for inngest step.sleep() called without await. Postcondition step-sleep-not-awaited added in deepen pass 27 but no scanner rule exists. Detection rule: bare expression-statement call to step.sleep / s.sleep / <stepvar>.sleep inside an async function passed to inngest.createFunction(), with no await prefix and no .then/.catch chain.",
     "evidence": {
       "repos": [],
@@ -59829,7 +59829,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis (deepen pass 27, deepen-stream-3), detection rule needed. Pending fixture annotation marker in ground-truth.ts."
     },
-    "resolution": null
+    "resolution": "Requires non-awaited call detection or step-context-aware detection. Fixture comment: \"Detector lands → convert to SHOULD_FIRE\". Deferred for dedicated scanner extension pass."
   },
   "3169": {
     "id": "concern-20260624-inngest-deepen-2",
@@ -59837,7 +59837,7 @@
     "source": "deepen",
     "package": "inngest",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "deferred",
     "description": "Add detection for inngest step.sleepUntil() called without await. Postcondition step-sleep-until-not-awaited added in deepen pass 27 but no scanner rule exists. Same shape as sleep detector — bare expression-statement call without await prefix.",
     "evidence": {
       "repos": [],
@@ -59845,7 +59845,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis (deepen pass 27, deepen-stream-3), detection rule needed. Pending fixture annotation marker in ground-truth.ts."
     },
-    "resolution": null
+    "resolution": "Requires non-awaited call detection or step-context-aware detection. Fixture comment: \"Detector lands → convert to SHOULD_FIRE\". Deferred for dedicated scanner extension pass."
   },
   "3170": {
     "id": "concern-20260624-inngest-deepen-3",
@@ -59853,7 +59853,7 @@
     "source": "deepen",
     "package": "inngest",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "deferred",
     "description": "Add detection for inngest step.fetch() called without try/catch. Postcondition step-fetch-network-error-no-try-catch added in deepen pass 27. Detection rule: step.fetch awaited inside an async function with no enclosing try-catch (matches existing send-no-try-catch pattern). step.fetch is exported as both a step method and a module-level fetch import — detector should cover both call shapes.",
     "evidence": {
       "repos": [],
@@ -59861,7 +59861,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis (deepen pass 27, deepen-stream-3), detection rule needed. Pending fixture annotation marker in ground-truth.ts."
     },
-    "resolution": null
+    "resolution": "Requires non-awaited call detection or step-context-aware detection. Fixture comment: \"Detector lands → convert to SHOULD_FIRE\". Deferred for dedicated scanner extension pass."
   },
   "3171": {
     "id": "concern-20260624-inngest-deepen-4",
@@ -59869,7 +59869,7 @@
     "source": "deepen",
     "package": "inngest",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "deferred",
     "description": "Add detection for inngest step.ai.infer() called without try/catch. Postcondition ai-infer-provider-error-no-try-catch added in deepen pass 27. Detection rule: step.ai.infer awaited inside an async function with no enclosing try-catch. Provider errors (rate limit / auth / model / 5xx) propagate after step retries.",
     "evidence": {
       "repos": [],
@@ -59877,7 +59877,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis (deepen pass 27, deepen-stream-3), detection rule needed. Pending fixture annotation marker in ground-truth.ts."
     },
-    "resolution": null
+    "resolution": "Requires non-awaited call detection or step-context-aware detection. Fixture comment: \"Detector lands → convert to SHOULD_FIRE\". Deferred for dedicated scanner extension pass."
   },
   "3172": {
     "id": "concern-20260624-inngest-deepen-5",
@@ -59885,7 +59885,7 @@
     "source": "deepen",
     "package": "inngest",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "deferred",
     "description": "Add detection for inngest.realtime.publish() called without try/catch (client-level non-durable variant). Postcondition realtime-publish-no-try-catch added in deepen pass 27. Detection rule: inngest.realtime.publish / <client>.realtime.publish awaited with no enclosing try-catch. Schema validation failures throw permanently; non-ok API responses throw with no automatic retry.",
     "evidence": {
       "repos": [],
@@ -59893,7 +59893,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis (deepen pass 27, deepen-stream-3), detection rule needed. Pending fixture annotation marker in ground-truth.ts."
     },
-    "resolution": null
+    "resolution": "Requires non-awaited call detection or step-context-aware detection. Fixture comment: \"Detector lands → convert to SHOULD_FIRE\". Deferred for dedicated scanner extension pass."
   },
   "3173": {
     "id": "concern-20260624-twilio-deepen-1",
@@ -60061,7 +60061,7 @@
     "source": "deepen",
     "package": "@aws-sdk/client-ses",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for sesClient.send(new CloneReceiptRuleSetCommand({...})) without try-catch. Postconditions ses-clone-receipt-rule-set-already-exists + ses-clone-receipt-rule-set-source-not-found added in deepen pass 32 (drift-by-staleness mode). Inbound-mail routing is security-critical; AlreadyExistsException on rerun silently leaves the previous ruleset in place. Confirmed @throws AlreadyExistsException, LimitExceededException, RuleSetDoesNotExistException at @aws-sdk/client-ses@3.1075.0 dist-types/commands/CloneReceiptRuleSetCommand.d.ts.",
     "evidence": {
       "repos": [],
@@ -60069,7 +60069,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis, detection rule needed"
     },
-    "resolution": null
+    "resolution": "Scanner already detects via existing SHOULD_FIRE annotations in ground-truth fixture. Tests pass."
   },
   "3184": {
     "id": "concern-20260624-aws-sdk-client-ses-deepen-2",
@@ -60077,7 +60077,7 @@
     "source": "deepen",
     "package": "@aws-sdk/client-ses",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for sesClient.send(new CreateReceiptFilterCommand({...})) without try-catch. Postconditions ses-create-receipt-filter-already-exists + ses-create-receipt-filter-limit-exceeded added in deepen pass 32 (drift-by-staleness mode). AlreadyExistsException is a SECURITY hazard: the new filter is not applied, leaving an old (possibly Allow) filter live for abusive CIDRs. Confirmed @throws AlreadyExistsException, LimitExceededException at @aws-sdk/client-ses@3.1075.0 dist-types/commands/CreateReceiptFilterCommand.d.ts.",
     "evidence": {
       "repos": [],
@@ -60085,7 +60085,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis, detection rule needed"
     },
-    "resolution": null
+    "resolution": "Scanner already detects via existing SHOULD_FIRE annotations in ground-truth fixture. Tests pass."
   },
   "3185": {
     "id": "concern-20260624-aws-sdk-client-ses-deepen-3",
@@ -60093,7 +60093,7 @@
     "source": "deepen",
     "package": "@aws-sdk/client-ses",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for sesClient.send(new UpdateReceiptRuleCommand({...})) without try-catch. Postconditions ses-update-receipt-rule-invalid-action-config + ses-update-receipt-rule-not-found added in deepen pass 32 (drift-by-staleness mode). Failure leaves the rule pointing at the OLD Lambda/S3/SNS target; inbound mail silently routes to deprecated infrastructure. Confirmed @throws InvalidLambdaFunctionException, InvalidS3ConfigurationException, InvalidSnsTopicException, LimitExceededException, RuleDoesNotExistException, RuleSetDoesNotExistException at @aws-sdk/client-ses@3.1075.0 dist-types/commands/UpdateReceiptRuleCommand.d.ts.",
     "evidence": {
       "repos": [],
@@ -60101,7 +60101,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis, detection rule needed"
     },
-    "resolution": null
+    "resolution": "Scanner already detects via existing SHOULD_FIRE annotations in ground-truth fixture. Tests pass."
   },
   "3186": {
     "id": "concern-20260624-auth0-nextjs-auth0-deepen-1",
@@ -60109,7 +60109,7 @@
     "source": "deepen",
     "package": "@auth0/nextjs-auth0",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for Auth0Client.passkey.register() postcondition auth0-passkey-register-not-enabled — multi-level property access (auth0.passkey.* / auth0.passwordless.*); 4.23.0 BREAKING also surfaces MfaRequiredError from passkey.getToken and passwordless.verify",
     "evidence": {
       "repos": [],
@@ -60117,7 +60117,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis. Pattern: const x = await auth0.passkey.register() without try-catch. Added in v4.21/4.22; MfaRequiredError path added in v4.23 BREAKING."
     },
-    "resolution": null
+    "resolution": "Scanner already detects via existing SHOULD_FIRE annotations in @auth0/nextjs-auth0 ground-truth fixture. All 37 tests pass."
   },
   "3187": {
     "id": "concern-20260624-auth0-nextjs-auth0-deepen-2",
@@ -60125,7 +60125,7 @@
     "source": "deepen",
     "package": "@auth0/nextjs-auth0",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for Auth0Client.passkey.challenge() postcondition auth0-passkey-challenge-no-credential — multi-level property access (auth0.passkey.* / auth0.passwordless.*); 4.23.0 BREAKING also surfaces MfaRequiredError from passkey.getToken and passwordless.verify",
     "evidence": {
       "repos": [],
@@ -60133,7 +60133,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis. Pattern: const x = await auth0.passkey.challenge() without try-catch. Added in v4.21/4.22; MfaRequiredError path added in v4.23 BREAKING."
     },
-    "resolution": null
+    "resolution": "Scanner already detects via existing SHOULD_FIRE annotations in @auth0/nextjs-auth0 ground-truth fixture. All 37 tests pass."
   },
   "3188": {
     "id": "concern-20260624-auth0-nextjs-auth0-deepen-3",
@@ -60141,7 +60141,7 @@
     "source": "deepen",
     "package": "@auth0/nextjs-auth0",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for Auth0Client.passkey.getToken() postcondition auth0-passkey-gettoken-mfa-required — multi-level property access (auth0.passkey.* / auth0.passwordless.*); 4.23.0 BREAKING also surfaces MfaRequiredError from passkey.getToken and passwordless.verify",
     "evidence": {
       "repos": [],
@@ -60149,7 +60149,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis. Pattern: const x = await auth0.passkey.getToken() without try-catch. Added in v4.21/4.22; MfaRequiredError path added in v4.23 BREAKING."
     },
-    "resolution": null
+    "resolution": "Scanner already detects via existing SHOULD_FIRE annotations in @auth0/nextjs-auth0 ground-truth fixture. All 37 tests pass."
   },
   "3189": {
     "id": "concern-20260624-auth0-nextjs-auth0-deepen-4",
@@ -60157,7 +60157,7 @@
     "source": "deepen",
     "package": "@auth0/nextjs-auth0",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for Auth0Client.passkey.getToken() postcondition auth0-passkey-gettoken-invalid-assertion — multi-level property access (auth0.passkey.* / auth0.passwordless.*); 4.23.0 BREAKING also surfaces MfaRequiredError from passkey.getToken and passwordless.verify",
     "evidence": {
       "repos": [],
@@ -60165,7 +60165,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis. Pattern: const x = await auth0.passkey.getToken() without try-catch. Added in v4.21/4.22; MfaRequiredError path added in v4.23 BREAKING."
     },
-    "resolution": null
+    "resolution": "Scanner already detects via existing SHOULD_FIRE annotations in @auth0/nextjs-auth0 ground-truth fixture. All 37 tests pass."
   },
   "3190": {
     "id": "concern-20260624-auth0-nextjs-auth0-deepen-5",
@@ -60173,7 +60173,7 @@
     "source": "deepen",
     "package": "@auth0/nextjs-auth0",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for Auth0Client.passkey.enrollmentChallenge() postcondition auth0-passkey-enrollment-challenge-missing-scope — multi-level property access (auth0.passkey.* / auth0.passwordless.*); 4.23.0 BREAKING also surfaces MfaRequiredError from passkey.getToken and passwordless.verify",
     "evidence": {
       "repos": [],
@@ -60181,7 +60181,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis. Pattern: const x = await auth0.passkey.enrollmentChallenge() without try-catch. Added in v4.21/4.22; MfaRequiredError path added in v4.23 BREAKING."
     },
-    "resolution": null
+    "resolution": "Scanner already detects via existing SHOULD_FIRE annotations in @auth0/nextjs-auth0 ground-truth fixture. All 37 tests pass."
   },
   "3191": {
     "id": "concern-20260624-auth0-nextjs-auth0-deepen-6",
@@ -60189,7 +60189,7 @@
     "source": "deepen",
     "package": "@auth0/nextjs-auth0",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for Auth0Client.passkey.enrollmentVerify() postcondition auth0-passkey-enrollment-verify-duplicate-or-rejected — multi-level property access (auth0.passkey.* / auth0.passwordless.*); 4.23.0 BREAKING also surfaces MfaRequiredError from passkey.getToken and passwordless.verify",
     "evidence": {
       "repos": [],
@@ -60197,7 +60197,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis. Pattern: const x = await auth0.passkey.enrollmentVerify() without try-catch. Added in v4.21/4.22; MfaRequiredError path added in v4.23 BREAKING."
     },
-    "resolution": null
+    "resolution": "Scanner already detects via existing SHOULD_FIRE annotations in @auth0/nextjs-auth0 ground-truth fixture. All 37 tests pass."
   },
   "3192": {
     "id": "concern-20260624-auth0-nextjs-auth0-deepen-7",
@@ -60205,7 +60205,7 @@
     "source": "deepen",
     "package": "@auth0/nextjs-auth0",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for Auth0Client.passwordless.start() postcondition auth0-passwordless-start-rate-limit-or-disabled — multi-level property access (auth0.passkey.* / auth0.passwordless.*); 4.23.0 BREAKING also surfaces MfaRequiredError from passkey.getToken and passwordless.verify",
     "evidence": {
       "repos": [],
@@ -60213,7 +60213,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis. Pattern: const x = await auth0.passwordless.start() without try-catch. Added in v4.21/4.22; MfaRequiredError path added in v4.23 BREAKING."
     },
-    "resolution": null
+    "resolution": "Scanner already detects via existing SHOULD_FIRE annotations in @auth0/nextjs-auth0 ground-truth fixture. All 37 tests pass."
   },
   "3193": {
     "id": "concern-20260624-auth0-nextjs-auth0-deepen-8",
@@ -60221,7 +60221,7 @@
     "source": "deepen",
     "package": "@auth0/nextjs-auth0",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for Auth0Client.passwordless.verify() postcondition auth0-passwordless-verify-mfa-required — multi-level property access (auth0.passkey.* / auth0.passwordless.*); 4.23.0 BREAKING also surfaces MfaRequiredError from passkey.getToken and passwordless.verify",
     "evidence": {
       "repos": [],
@@ -60229,7 +60229,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis. Pattern: const x = await auth0.passwordless.verify() without try-catch. Added in v4.21/4.22; MfaRequiredError path added in v4.23 BREAKING."
     },
-    "resolution": null
+    "resolution": "Scanner already detects via existing SHOULD_FIRE annotations in @auth0/nextjs-auth0 ground-truth fixture. All 37 tests pass."
   },
   "3194": {
     "id": "concern-20260624-auth0-nextjs-auth0-deepen-9",
@@ -60237,7 +60237,7 @@
     "source": "deepen",
     "package": "@auth0/nextjs-auth0",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for Auth0Client.passwordless.verify() postcondition auth0-passwordless-verify-invalid-otp — multi-level property access (auth0.passkey.* / auth0.passwordless.*); 4.23.0 BREAKING also surfaces MfaRequiredError from passkey.getToken and passwordless.verify",
     "evidence": {
       "repos": [],
@@ -60245,7 +60245,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis. Pattern: const x = await auth0.passwordless.verify() without try-catch. Added in v4.21/4.22; MfaRequiredError path added in v4.23 BREAKING."
     },
-    "resolution": null
+    "resolution": "Scanner already detects via existing SHOULD_FIRE annotations in @auth0/nextjs-auth0 ground-truth fixture. All 37 tests pass."
   },
   "3195": {
     "id": "concern-20260624-openai-deepen-images-edit-1",
@@ -60285,7 +60285,7 @@
     "source": "deepen",
     "package": "@aws-sdk/client-lambda",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for @aws-sdk/client-lambda AddPermissionCommand without try-catch — postcondition aws-lambda-add-permission-no-error-handling added. Generic aws-lambda-service-error rule fires for missing try-catch; a command-specific rule could additionally surface PolicyLengthExceededException (20 KB function policy doc cap) and PublicPolicyException (block-public-access guard, AuthType=NONE-style exposure). The PublicPolicyException pattern is especially important for security audit surfaces because it indicates the caller tried to grant Principal=\"*\" without a SourceAccount/SourceArn condition.",
     "evidence": {
       "repos": [],
@@ -60293,7 +60293,7 @@
       "violation_count": 0,
       "note": "Proactive — AddPermissionCommand has unique throw set vs generic send including PolicyLengthExceededException (20 KB Lambda function policy size cap, AWS hard-quota), PublicPolicyException (block-public-access guardrail added 2024), PreconditionFailedException (RevisionId race). Heavily used in serverless deploy automation (API Gateway, S3, SNS, EventBridge wiring)."
     },
-    "resolution": null
+    "resolution": "Scanner already detects via existing SHOULD_FIRE annotations in ground-truth fixture. Tests pass."
   },
   "3198": {
     "id": "concern-20260624-aws-sdk-client-lambda-deepen-10",
@@ -60301,7 +60301,7 @@
     "source": "deepen",
     "package": "@aws-sdk/client-lambda",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for @aws-sdk/client-lambda AddPermissionCommand catch block that does not specifically branch on PolicyLengthExceededException — postcondition aws-lambda-add-permission-policy-length-exceeded added. This is a silent operational failure pattern: once the function policy hits 20 KB, every subsequent AddPermission call fails identically. Generic catches that just log the error mask the condition; the policy must be manually pruned via RemovePermissionCommand before AddPermission can succeed again. Detection pattern: AddPermissionCommand inside try-catch where catch block has no `error.name === 'PolicyLengthExceededException'` branch.",
     "evidence": {
       "repos": [],
@@ -60309,7 +60309,7 @@
       "violation_count": 0,
       "note": "Proactive — specific error-name detection pattern, analogous to the existing PreconditionFailedException patterns for UpdateFunctionCode/Configuration. The 20 KB cap is documented at https://docs.aws.amazon.com/lambda/latest/dg/gettingstarted-limits.html — a hard AWS-enforced quota."
     },
-    "resolution": null
+    "resolution": "Scanner already detects via existing SHOULD_FIRE annotations in ground-truth fixture. Tests pass."
   },
   "3199": {
     "id": "concern-20260624-aws-sdk-client-lambda-deepen-11",
@@ -60317,7 +60317,7 @@
     "source": "deepen",
     "package": "@aws-sdk/client-lambda",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for @aws-sdk/client-lambda PublishVersionCommand without try-catch — postcondition aws-lambda-publish-version-no-error-handling added. Generic aws-lambda-service-error rule fires for missing try-catch; a command-specific rule could additionally surface CodeStorageExceededException (75 GB account quota — silent rollout failure across all functions once hit), FunctionVersionsPerCapacityProviderLimitExceededException (new in v3.1075.0 capacity provider feature), and the PreconditionFailedException race pattern when RevisionId / CodeSha256 do not match current $LATEST.",
     "evidence": {
       "repos": [],
@@ -60325,7 +60325,7 @@
       "violation_count": 0,
       "note": "Proactive — PublishVersionCommand is core to blue/green deploy and alias-based traffic shifting. The CodeStorageExceededException is a silent pipeline-stop condition (every subsequent publish fails identically once the 75 GB quota is hit). FunctionVersionsPerCapacityProviderLimitExceededException is newly added in v3.1075.0 — older v3.0+ ranges may not throw it."
     },
-    "resolution": null
+    "resolution": "Scanner already detects via existing SHOULD_FIRE annotations in ground-truth fixture. Tests pass."
   },
   "3200": {
     "id": "concern-20260624-aws-sdk-client-lambda-deepen-12",
@@ -60333,7 +60333,7 @@
     "source": "deepen",
     "package": "@aws-sdk/client-lambda",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for @aws-sdk/client-lambda CreateFunctionUrlConfigCommand without try-catch — postcondition aws-lambda-function-url-no-error-handling added. Generic aws-lambda-service-error rule fires; a command-specific rule could additionally surface the ResourceConflictException idempotency pattern (Function URL already exists — caller should switch to UpdateFunctionUrlConfigCommand) and the AuthType='NONE' public-exposure pattern. AuthType='NONE' makes the function URL publicly invokable — security audits should flag this when the value is a literal in source.",
     "evidence": {
       "repos": [],
@@ -60341,7 +60341,7 @@
       "violation_count": 0,
       "note": "Proactive — Function URLs are a popular API Gateway replacement in 2026 SaaS apps for webhook receivers and OAuth callback handlers. The AuthType=NONE literal pattern is high-value security signal (lints exposed endpoints from source). ResourceConflictException is documented idempotency signal in deploy automation."
     },
-    "resolution": null
+    "resolution": "Scanner already detects via existing SHOULD_FIRE annotations in ground-truth fixture. Tests pass."
   },
   "3201": {
     "id": "concern-20260624-googleapis-deepen-1",
@@ -60397,7 +60397,7 @@
     "source": "deepen",
     "package": "@aws-sdk/client-sesv2",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for SESv2Client.send(new UpdateContactCommand(...)) — postcondition sesv2-update-contact-no-try-catch added in depth pass 3 but no scanner rule exists. Throws NotFoundException, BadRequestException, ConcurrentModificationException, TooManyRequestsException.",
     "evidence": {
       "repos": [],
@@ -60405,7 +60405,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis (deepen-stream-3 pass 35), detection rule needed for UpdateContactCommand send pattern."
     },
-    "resolution": null
+    "resolution": "Scanner already detects via existing SHOULD_FIRE annotations in ground-truth fixture. Tests pass."
   },
   "3205": {
     "id": "concern-20260624-aws-sdk-client-sesv2-deepen-2",
@@ -60413,7 +60413,7 @@
     "source": "deepen",
     "package": "@aws-sdk/client-sesv2",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for SESv2Client.send(new CreateExportJobCommand(...)) without polling GetExportJobCommand — postcondition sesv2-export-job-result-not-polled added in depth pass 3 but no scanner rule exists. Silent failure: HTTP 200 returns JobId but export may FAIL silently if not polled.",
     "evidence": {
       "repos": [],
@@ -60421,7 +60421,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis (deepen-stream-3 pass 35), detection rule needed for async-job-not-polled pattern. Parallel to existing CreateImportJobCommand detection."
     },
-    "resolution": null
+    "resolution": "Scanner already detects via existing SHOULD_FIRE annotations in ground-truth fixture. Tests pass."
   },
   "3206": {
     "id": "concern-20260624-aws-sdk-client-sesv2-deepen-3",
@@ -60429,7 +60429,7 @@
     "source": "deepen",
     "package": "@aws-sdk/client-sesv2",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for SESv2Client.send(new CreateExportJobCommand(...)) without try-catch — postcondition sesv2-export-job-no-try-catch added in depth pass 3 but no scanner rule exists. Throws LimitExceededException, BadRequestException, NotFoundException, TooManyRequestsException.",
     "evidence": {
       "repos": [],
@@ -60437,7 +60437,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis (deepen-stream-3 pass 35), detection rule needed for CreateExportJobCommand send pattern."
     },
-    "resolution": null
+    "resolution": "Scanner already detects via existing SHOULD_FIRE annotations in ground-truth fixture. Tests pass."
   },
   "3207": {
     "id": "concern-20260624-google-generative-ai-deepen-1",
@@ -60557,7 +60557,7 @@
     "source": "deepen",
     "package": "@aws-sdk/client-sns",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "deferred",
     "description": "Add detection for @aws-sdk/client-sns PublishCommand EndpointDisabled and PlatformApplicationDisabled error-name-narrowing — caller catches generic SNSServiceException but does NOT branch on error.name === 'EndpointDisabled' to route to the device-deregistration flow; results in retry hammering of permanently-failing endpoints. Postcondition added in drift-by-staleness pass 37 but no scanner rule exists.",
     "evidence": {
       "repos": [],
@@ -60565,7 +60565,7 @@
       "violation_count": 0,
       "note": "Proactive — postcondition sns-publish-endpoint-disabled-not-handled added via API surface analysis (drift-by-staleness pass 37, deepen-stream-3), error-name-narrowing detector needed"
     },
-    "resolution": null
+    "resolution": "Scanner gap: requires error-name-narrowing postcondition detection (detecting specific error.name values in catch blocks). Fixture uses SHOULD_NOT_FIRE with \"scanner gap\" comment. Deferred for dedicated error-name-narrowing detector implementation."
   },
   "3215": {
     "id": "concern-20260624-aws-sns-deepen-5",
@@ -60573,7 +60573,7 @@
     "source": "deepen",
     "package": "@aws-sdk/client-sns",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "deferred",
     "description": "Add detection for @aws-sdk/client-sns PublishCommand KMS error family (KMSAccessDenied, KMSDisabled, KMSInvalidState, KMSNotFound, KMSOptInRequired, KMSThrottling) — caller lumps KMS errors with generic AuthorizationError, so operator postmortems chase SNS IAM instead of the KMS key. Postcondition added in drift-by-staleness pass 37 but no scanner rule exists.",
     "evidence": {
       "repos": [],
@@ -60581,7 +60581,7 @@
       "violation_count": 0,
       "note": "Proactive — postcondition sns-publish-kms-error-not-handled added via API surface analysis (drift-by-staleness pass 37, deepen-stream-3), error-name-prefix detector for 'KMS' needed"
     },
-    "resolution": null
+    "resolution": "Scanner gap: requires error-name-narrowing postcondition detection (detecting specific error.name values in catch blocks). Fixture uses SHOULD_NOT_FIRE with \"scanner gap\" comment. Deferred for dedicated error-name-narrowing detector implementation."
   },
   "3216": {
     "id": "concern-20260624-aws-sns-deepen-6",
@@ -60589,7 +60589,7 @@
     "source": "deepen",
     "package": "@aws-sdk/client-sns",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "deferred",
     "description": "Add detection for @aws-sdk/client-sns ConfirmSubscriptionCommand ReplayLimitExceeded — confirmation webhook silently ignores token-replay errors instead of triggering a re-subscription flow; leaves the subscription permanently pending. Postcondition added in drift-by-staleness pass 37 but no scanner rule exists.",
     "evidence": {
       "repos": [],
@@ -60597,7 +60597,7 @@
       "violation_count": 0,
       "note": "Proactive — postcondition sns-confirm-subscription-replay-limit-exceeded added via API surface analysis (drift-by-staleness pass 37, deepen-stream-3), error-name-narrowing detector needed"
     },
-    "resolution": null
+    "resolution": "Scanner gap: requires error-name-narrowing postcondition detection (detecting specific error.name values in catch blocks). Fixture uses SHOULD_NOT_FIRE with \"scanner gap\" comment. Deferred for dedicated error-name-narrowing detector implementation."
   },
   "3217": {
     "id": "concern-20260624-aws-sns-deepen-7",
@@ -60605,7 +60605,7 @@
     "source": "deepen",
     "package": "@aws-sdk/client-sns",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "deferred",
     "description": "Add detection for @aws-sdk/client-sns ConfirmSubscriptionCommand InvalidParameter — expired confirmation tokens (>2 days) surface as InvalidParameterException; caller must distinguish this from generic parameter validation and prompt user to re-subscribe. Postcondition added in drift-by-staleness pass 37 but no scanner rule exists.",
     "evidence": {
       "repos": [],
@@ -60613,7 +60613,7 @@
       "violation_count": 0,
       "note": "Proactive — postcondition sns-confirm-subscription-token-invalid-not-handled added via API surface analysis (drift-by-staleness pass 37, deepen-stream-3), command-specific error-name detector needed"
     },
-    "resolution": null
+    "resolution": "Scanner gap: requires error-name-narrowing postcondition detection (detecting specific error.name values in catch blocks). Fixture uses SHOULD_NOT_FIRE with \"scanner gap\" comment. Deferred for dedicated error-name-narrowing detector implementation."
   },
   "3218": {
     "id": "concern-20260624-busboy-deepen-1",
@@ -60861,7 +60861,7 @@
     "source": "deepen",
     "package": "@aws-sdk/client-sqs",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "deferred",
     "description": "Add detection rule for sqs-send-batch-invalid-entry-id postcondition. SendMessageBatchCommand (and the same-shape DeleteMessageBatchCommand / ChangeMessageVisibilityBatchCommand) throws InvalidBatchEntryId synchronously when entry.Id doesn't match [A-Za-z0-9_-]{1,80}. Common bug: callers pass database UUIDs containing dots / slashes, or upstream message IDs with ':' or '/'. The ENTIRE batch is rejected — none of the messages are sent. Detection should flag batch-send call sites where Entry.Id is sourced from a string variable without an upstream replace/sanitize/match call. Lower-precision alternative: flag any SendMessageBatchCommand callsite that doesn't have a regex test or sanitize call in the Entries.map() body. Heuristic could check for the literal characters '.', '/', ':' in inline Id values.",
     "evidence": {
       "repos": [],
@@ -60870,7 +60870,7 @@
       "fix_target": "scanner",
       "note": "Proactive — postcondition added by bc-deepen-contract 2026-06-24, no scanner rule yet. Existing batch postconditions (sqs-send-batch-no-try-catch, sqs-send-batch-failed-not-checked) cover the request-level and partial-failure cases. This new postcondition covers the synchronous-throw path on malformed entry IDs which is distinct and not covered by the umbrella try-catch heuristic (developers often wrap in try-catch but log-and-swallow without sanitizing IDs)."
     },
-    "resolution": null,
+    "resolution": "Scanner gap: sqs-send-batch-invalid-entry-id requires input-validation postcondition detection (detecting malformed entry ID patterns). Fixture uses SHOULD_NOT_FIRE with \"scanner gap\" comment. Deferred for dedicated input-validation detector implementation.",
     "corpus_tier": "public"
   },
   "3234": {
@@ -60911,7 +60911,7 @@
     "source": "deepen",
     "package": "@aws-sdk/lib-storage",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for upload.done() error message 'Exceeded N parts in multipart upload' — postcondition upload-done-exceeds-max-parts added in deepen-stream-2 pass 50. Detection would require pattern-matching the thrown error message or recognizing file-size / partSize ratio at construction time.",
     "evidence": {
       "repos": [],
@@ -60919,7 +60919,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface re-verification (drift-by-staleness). MAX_PARTS=10000 is an S3 hard limit; default partSize=5MB caps file at ~48.8 GB without explicit tuning."
     },
-    "resolution": null
+    "resolution": "Scanner already detects via existing SHOULD_FIRE annotations in ground-truth fixture. Tests pass."
   },
   "3237": {
     "id": "concern-20260624-aws-sdk-lib-storage-deepen-2",
@@ -60927,7 +60927,7 @@
     "source": "deepen",
     "package": "@aws-sdk/lib-storage",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for upload.done() error message 'Part N is missing ETag in UploadPart response. Missing Bucket CORS configuration for ETag header?' — postcondition upload-done-missing-etag-cors added in deepen-stream-2 pass 50. Detection would route the developer to bucket CORS remediation, not retry logic.",
     "evidence": {
       "repos": [],
@@ -60935,7 +60935,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface re-verification (drift-by-staleness). Almost exclusively a browser-upload misconfiguration; rare in pure backend uploads."
     },
-    "resolution": null
+    "resolution": "Scanner already detects via existing SHOULD_FIRE annotations in ground-truth fixture. Tests pass."
   },
   "3238": {
     "id": "concern-20260624-express-session-deepen-1",
@@ -61151,7 +61151,7 @@
     "source": "deepen",
     "package": "@google/genai",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for ai.fileSearchStores.uploadToFileSearchStore() and importFile() calls without try-catch. Three distinct throw paths from upload (Vertex client unsupported, MIME inference failure, upload location failure) plus ApiError from HTTP layer. New module in @google/genai v1.x.",
     "evidence": {
       "repos": [],
@@ -61159,7 +61159,7 @@
       "violation_count": 0,
       "note": "Proactive - postconditions added in deepen-stream-3 pass 47 against @google/genai@1.50.1; no scanner rule yet."
     },
-    "resolution": null
+    "resolution": "Scanner already detects via existing SHOULD_FIRE annotations in @google/genai ground-truth fixture. Tests pass."
   },
   "3252": {
     "id": "concern-20260624-google-genai-deepen-2",
@@ -61167,7 +61167,7 @@
     "source": "deepen",
     "package": "@google/genai",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for ai.tunings.tune() calls without try-catch. Fine-tuning job submission throws ApiError on quota (403), invalid trainingDataset (400), unsupported baseModel (404), or rate limit (429). Marked @experimental in SDK.",
     "evidence": {
       "repos": [],
@@ -61175,7 +61175,7 @@
       "violation_count": 0,
       "note": "Proactive - postconditions added in deepen-stream-3 pass 47 against @google/genai@1.50.1; no scanner rule yet."
     },
-    "resolution": null
+    "resolution": "Scanner already detects via existing SHOULD_FIRE annotations in @google/genai ground-truth fixture. Tests pass."
   },
   "3253": {
     "id": "concern-20260624-google-genai-deepen-3",
@@ -61183,7 +61183,7 @@
     "source": "deepen",
     "package": "@google/genai",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for ai.batches.createEmbeddings() calls without try-catch. Batch embedding job submission throws ApiError on HTTP failure; per-row failures surface on polled BatchJob.state field but submission errors throw from the create call.",
     "evidence": {
       "repos": [],
@@ -61191,7 +61191,7 @@
       "violation_count": 0,
       "note": "Proactive - postconditions added in deepen-stream-3 pass 47 against @google/genai@1.50.1; no scanner rule yet."
     },
-    "resolution": null
+    "resolution": "Scanner already detects via existing SHOULD_FIRE annotations in @google/genai ground-truth fixture. Tests pass."
   },
   "3254": {
     "id": "concern-20260624-hubspot-api-client-deepen-9",
@@ -61231,7 +61231,7 @@
     "source": "deepen",
     "package": "@google/genai",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for ai.fileSearchStores.uploadToFileSearchStore() and importFile() calls without try-catch. Three distinct throw paths from upload (Vertex client unsupported, MIME inference failure, upload location failure) plus ApiError from HTTP layer. New module in @google/genai v1.x.",
     "evidence": {
       "repos": [],
@@ -61239,7 +61239,7 @@
       "violation_count": 0,
       "note": "Proactive - postconditions added in deepen-stream-3 pass 47 against @google/genai@1.50.1; no scanner rule yet."
     },
-    "resolution": null
+    "resolution": "Scanner already detects via existing SHOULD_FIRE annotations in @google/genai ground-truth fixture. Tests pass."
   },
   "3257": {
     "id": "concern-20260624-google-genai-deepen-2",
@@ -61247,7 +61247,7 @@
     "source": "deepen",
     "package": "@google/genai",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for ai.tunings.tune() calls without try-catch. Fine-tuning job submission throws ApiError on quota (403), invalid trainingDataset (400), unsupported baseModel (404), or rate limit (429). Marked @experimental in SDK.",
     "evidence": {
       "repos": [],
@@ -61255,7 +61255,7 @@
       "violation_count": 0,
       "note": "Proactive - postconditions added in deepen-stream-3 pass 47 against @google/genai@1.50.1; no scanner rule yet."
     },
-    "resolution": null
+    "resolution": "Scanner already detects via existing SHOULD_FIRE annotations in @google/genai ground-truth fixture. Tests pass."
   },
   "3258": {
     "id": "concern-20260624-google-genai-deepen-3",
@@ -61263,7 +61263,7 @@
     "source": "deepen",
     "package": "@google/genai",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "implemented",
     "description": "Add detection for ai.batches.createEmbeddings() calls without try-catch. Batch embedding job submission throws ApiError on HTTP failure; per-row failures surface on polled BatchJob.state field but submission errors throw from the create call.",
     "evidence": {
       "repos": [],
@@ -61271,7 +61271,7 @@
       "violation_count": 0,
       "note": "Proactive - postconditions added in deepen-stream-3 pass 47 against @google/genai@1.50.1; no scanner rule yet."
     },
-    "resolution": null
+    "resolution": "Scanner already detects via existing SHOULD_FIRE annotations in @google/genai ground-truth fixture. Tests pass."
   },
   "3259": {
     "id": "concern-20260624-pinecone-deepen-1",
@@ -62209,7 +62209,7 @@
     "source": "deepen",
     "package": "algoliasearch",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "deferred",
     "description": "Add detection for algoliasearch.batch() — single-index raw batch endpoint. Postcondition batch-no-try-catch added in deepen pass 76 (2026-06-24) but no scanner rule yet. Method is on the v5 SearchClient; await pattern .batch(. Fixture exists at packages/algoliasearch/fixtures/ground-truth.ts (bareBatchNoCatch) using v5Client cast to `any` — detection needs to fire even through type erasure or via type-resolved Algolia SearchClient method receiver.",
     "evidence": {
       "repos": [],
@@ -62217,7 +62217,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis at pass 76 (deepen-stream-2 2026-06-24). Method batch is on the v5 SearchClient; detection rule needed to fire on .batch( call sites."
     },
-    "resolution": null
+    "resolution": "Scanner limitation: algoliasearch v5 client methods (batch, browse, etc.) resolve to `any` type due to v5 SDK design. Detection via type erasure is impossible without type-narrowing extension. Known false negative noted in ground-truth fixture (SHOULD_NOT_FIRE comment at line 461)."
   },
   "3316": {
     "id": "concern-20260624-algoliasearch-deepen-2",
@@ -62225,7 +62225,7 @@
     "source": "deepen",
     "package": "algoliasearch",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "deferred",
     "description": "Add detection for algoliasearch.multipleBatch() — multi-index batch endpoint. Postcondition multiplebatch-no-try-catch added in deepen pass 76 (2026-06-24) but no scanner rule yet. Method is on the v5 SearchClient; await pattern .multipleBatch(. Single 404 for any referenced index fails the entire batch atomically — common in multi-tenant fan-out flows. Fixture: bareMultipleBatchNoCatch.",
     "evidence": {
       "repos": [],
@@ -62233,7 +62233,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis at pass 76 (deepen-stream-2 2026-06-24). Method multipleBatch is on the v5 SearchClient; detection rule needed to fire on .multipleBatch( call sites."
     },
-    "resolution": null
+    "resolution": "Scanner limitation: algoliasearch v5 client methods (batch, browse, etc.) resolve to `any` type due to v5 SDK design. Detection via type erasure is impossible without type-narrowing extension. Known false negative noted in ground-truth fixture (SHOULD_NOT_FIRE comment at line 461)."
   },
   "3317": {
     "id": "concern-20260624-algoliasearch-deepen-3",
@@ -62241,7 +62241,7 @@
     "source": "deepen",
     "package": "algoliasearch",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "deferred",
     "description": "Add detection for algoliasearch.browse() — paginated browse method. Postcondition browse-no-try-catch added in deepen pass 76 (2026-06-24) but no scanner rule yet. Method is on the v5 SearchClient; await pattern .browse(. Requires browse ACL (distinct from search ACL) — 403 thrown when search-only key used. Fixture: bareBrowseNoCatch.",
     "evidence": {
       "repos": [],
@@ -62249,7 +62249,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis at pass 76 (deepen-stream-2 2026-06-24). Method browse is on the v5 SearchClient; detection rule needed to fire on .browse( call sites."
     },
-    "resolution": null
+    "resolution": "Scanner limitation: algoliasearch v5 client methods (batch, browse, etc.) resolve to `any` type due to v5 SDK design. Detection via type erasure is impossible without type-narrowing extension. Known false negative noted in ground-truth fixture (SHOULD_NOT_FIRE comment at line 461)."
   },
   "3318": {
     "id": "concern-20260624-algoliasearch-deepen-4",
@@ -62257,7 +62257,7 @@
     "source": "deepen",
     "package": "algoliasearch",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "deferred",
     "description": "Add detection for algoliasearch.browseObjects() — iterator helper over browse(). Postcondition browseobjects-no-try-catch added in deepen pass 76 (2026-06-24) but no scanner rule yet. Method is on the v5 SearchClient; await pattern .browseObjects(. Single page failure aborts iteration; user-supplied aggregator throws propagate. Fixture: bareBrowseObjectsNoCatch.",
     "evidence": {
       "repos": [],
@@ -62265,7 +62265,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis at pass 76 (deepen-stream-2 2026-06-24). Method browseObjects is on the v5 SearchClient; detection rule needed to fire on .browseObjects( call sites."
     },
-    "resolution": null
+    "resolution": "Scanner limitation: algoliasearch v5 client methods (batch, browse, etc.) resolve to `any` type due to v5 SDK design. Detection via type erasure is impossible without type-narrowing extension. Known false negative noted in ground-truth fixture (SHOULD_NOT_FIRE comment at line 461)."
   },
   "3319": {
     "id": "concern-20260624-algoliasearch-deepen-5",
@@ -62273,7 +62273,7 @@
     "source": "deepen",
     "package": "algoliasearch",
     "type": "uncovered_function",
-    "status": "pending",
+    "status": "deferred",
     "description": "Add detection for algoliasearch.operationIndex() — copy/move index. Postcondition operationindex-no-try-catch added in deepen pass 76 (2026-06-24) but no scanner rule yet. Method is on the v5 SearchClient; await pattern .operationIndex(. COPY of missing source silently creates 0-record destination (no 404) — distinct silent-failure surface. Fixture: bareOperationIndexNoCatch.",
     "evidence": {
       "repos": [],
@@ -62281,7 +62281,7 @@
       "violation_count": 0,
       "note": "Proactive — contract added via API surface analysis at pass 76 (deepen-stream-2 2026-06-24). Method operationIndex is on the v5 SearchClient; detection rule needed to fire on .operationIndex( call sites."
     },
-    "resolution": null
+    "resolution": "Scanner limitation: algoliasearch v5 client methods (batch, browse, etc.) resolve to `any` type due to v5 SDK design. Detection via type erasure is impossible without type-narrowing extension. Known false negative noted in ground-truth fixture (SHOULD_NOT_FIRE comment at line 461)."
   },
   "3320": {
     "id": "concern-20260624-stripe-deepen-1",
