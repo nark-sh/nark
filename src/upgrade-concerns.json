@@ -65131,6 +65131,38 @@
     },
     "resolution": "Scanner already detects via existing SHOULD_FIRE annotations in package ground-truth fixture. All ground-truth tests pass. No scanner changes needed."
   },
+  "3505": {
+    "id": "concern-20260630-xml2js-instance-disambiguation-1",
+    "created_at": "2026-06-30",
+    "source": "baseline-cleanup",
+    "package": "xml2js",
+    "type": "new_pattern",
+    "status": "implemented",
+    "description": "Scanner cannot distinguish between module-level parseString() calls and Parser instance parseString() calls. When a new Parser() instance is stored in a variable and parser.parseString(xml, cb) is called, the scanner fires parse-string-callback-error-ignored (module-level) instead of parser-instance-parse-string-callback-error-ignored (instance-level). The contract has class_names: [Builder, Parser] and distinct postconditions per caller type, but the matcher is not routing instance method calls to the instance-level postconditions. Three fixture lines affected: 189, 197 (parser-instance-parse-string-callback-error-ignored), 206 (parser-instance-parse-string-no-callback). The scanner fires violations at the right lines but with wrong postconditionId.",
+    "evidence": {
+      "repos": [],
+      "scan_file": null,
+      "violation_count": 3,
+      "fixture": "nark-corpus/packages/xml2js/fixtures/ground-truth.ts",
+      "fixture_lines": [
+        189,
+        197,
+        206
+      ],
+      "expected_postconditions": [
+        "parser-instance-parse-string-callback-error-ignored",
+        "parser-instance-parse-string-callback-error-ignored",
+        "parser-instance-parse-string-no-callback"
+      ],
+      "actual_postconditions": [
+        "parse-string-callback-error-ignored (+ parse-string-no-callback)",
+        "parse-string-callback-error-ignored (+ parse-string-no-callback)",
+        "parse-string-callback-error-ignored (+ parse-string-no-callback)"
+      ],
+      "note": "Category E — scanner gap. The contract has import_class: Parser for the instance methods, but the matcher does not use this to route violations when the call is parser.parseString() on a variable of type Parser. Fix: when detecting parseString calls, check if the receiver is an instance of a class in class_names (Parser) and route to the instance-level postconditions."
+    },
+    "resolution": "Added Parser.parseString rerouting in contract-matcher.ts (same pattern as existing Parser.parseStringPromise rerouting at lines 477-486). When functionName=parseString and chain[0] is not 'xml2js' or 'parseString', route to Parser.parseString. Added parallel callback-err-check suppression for parser-instance-parse-string-callback-error-ignored (mirrors the module-level parse-string-callback-error-ignored suppression). Removed 3 SKIP-CLEANUP markers from ground-truth.ts. Baseline dropped 72 → 69 (3 tests now passing). Implemented 2026-06-30."
+  },
   "_shape": "object keyed by string-integer id (\"0\", \"1\", ...). Iterate via Object.values(d). The integer keys are stable IDs — do not renumber. See bc-coordinator scanner-stream snippet for canonical pending-count pattern.",
   "concern-20260626-firebase-admin-security-rules-release-1": {
     "package": "firebase-admin",
@@ -65212,36 +65244,5 @@
     "stream": "deepen-stream-2",
     "status": "implemented",
     "resolution": "All 6 functions are covered by await_patterns entries added 2026-06-26 in nark-corpus/packages/firebase-admin/contract.yaml (lines 131-138): .releaseFirestoreRulesetFromSource(, .releaseStorageRulesetFromSource(, .createRuleset(, .deleteRuleset(, .updateModel(, .deleteInstallation(. The await_patterns mechanism maps these method-call patterns to firebase-admin, enabling detection via the standard try-catch detection path. No scanner code changes needed."
-  },
-  "3505": {
-    "id": "concern-20260630-xml2js-instance-disambiguation-1",
-    "created_at": "2026-06-30",
-    "source": "baseline-cleanup",
-    "package": "xml2js",
-    "type": "new_pattern",
-    "status": "pending",
-    "description": "Scanner cannot distinguish between module-level parseString() calls and Parser instance parseString() calls. When a new Parser() instance is stored in a variable and parser.parseString(xml, cb) is called, the scanner fires parse-string-callback-error-ignored (module-level) instead of parser-instance-parse-string-callback-error-ignored (instance-level). The contract has class_names: [Builder, Parser] and distinct postconditions per caller type, but the matcher is not routing instance method calls to the instance-level postconditions. Three fixture lines affected: 189, 197 (parser-instance-parse-string-callback-error-ignored), 206 (parser-instance-parse-string-no-callback). The scanner fires violations at the right lines but with wrong postconditionId.",
-    "evidence": {
-      "repos": [],
-      "scan_file": null,
-      "violation_count": 3,
-      "fixture": "nark-corpus/packages/xml2js/fixtures/ground-truth.ts",
-      "fixture_lines": [
-        189,
-        197,
-        206
-      ],
-      "expected_postconditions": [
-        "parser-instance-parse-string-callback-error-ignored",
-        "parser-instance-parse-string-callback-error-ignored",
-        "parser-instance-parse-string-no-callback"
-      ],
-      "actual_postconditions": [
-        "parse-string-callback-error-ignored (+ parse-string-no-callback)",
-        "parse-string-callback-error-ignored (+ parse-string-no-callback)",
-        "parse-string-callback-error-ignored (+ parse-string-no-callback)"
-      ],
-      "note": "Category E — scanner gap. The contract has import_class: Parser for the instance methods, but the matcher does not use this to route violations when the call is parser.parseString() on a variable of type Parser. Fix: when detecting parseString calls, check if the receiver is an instance of a class in class_names (Parser) and route to the instance-level postconditions."
-    }
   }
 }

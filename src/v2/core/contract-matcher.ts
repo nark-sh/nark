@@ -485,6 +485,33 @@ export class ContractMatcher {
         effectiveFunctionName = "Parser.parseStringPromise";
       }
 
+      // xml2js: Parser instance rerouting for parseString() (callback form).
+      // When a Parser instance calls parseString(), the ThrowingFunctionDetector resolves
+      // the call as packageName='xml2js', functionName='parseString'. The exact-match
+      // findFunctionContract returns the module-level parseString entry (postconditions:
+      // parse-string-callback-error-ignored, parse-string-no-callback). But Parser instances
+      // have their own contract entry: Parser.parseString (postconditions:
+      // parser-instance-parse-string-callback-error-ignored, parser-instance-parse-string-no-callback).
+      //
+      // Detection: metadata.chain is ['parser', 'parseString'] for parser.parseString()
+      // and ['xml2js', 'parseString'] or ['parseString'] for module-level calls.
+      // When chain[0] is not the xml2js import name and not the function name itself (i.e., it's a
+      // variable holding a Parser instance), reroute to Parser.parseString.
+      //
+      // Evidence: concern-20260630-xml2js-instance-disambiguation-1 — scanner was firing
+      // parse-string-callback-error-ignored (module-level) instead of
+      // parser-instance-parse-string-callback-error-ignored for parser.parseString() calls.
+      if (
+        detection.packageName === "xml2js" &&
+        detection.functionName === "parseString" &&
+        Array.isArray(detection.metadata?.chain) &&
+        (detection.metadata.chain as string[])[0] !== "xml2js" &&
+        (detection.metadata.chain as string[])[0] !== "parseString"
+      ) {
+        // Call is on a Parser instance variable — use Parser.parseString entry
+        effectiveFunctionName = "Parser.parseString";
+      }
+
       // luxon: Duration.fromObject disambiguation.
       // Both DateTime.fromObject and Duration.fromObject share the same method name 'fromObject'.
       // ThrowingFunctionDetector resolves these as functionName='fromObject' with metadata.chain
@@ -2044,6 +2071,79 @@ export class ContractMatcher {
                 MATCHER_IDS.SUPPRESSION_CALLBACK_ERR_CHECKED,
                 "passed",
                 "parseString callback explicitly checks err parameter",
+              );
+              continue;
+            }
+          }
+        }
+      }
+
+      // xml2js Parser.parseString (instance method, callback form): parallel suppression to the
+      // module-level parseString check above. After the Parser.parseString rerouting above,
+      // effectiveFunctionName is 'Parser.parseString' for parser.parseString() calls, and the
+      // primary postcondition is parser-instance-parse-string-callback-error-ignored.
+      //
+      // The same callback-err-check logic applies: suppress when the callback's first parameter
+      // is explicitly checked in an if-statement inside the callback body.
+      //
+      // Evidence: concern-20260630-xml2js-instance-disambiguation-1 — ground-truth lines 189, 197
+      // (parser.parseString with callbacks that ignore err should fire
+      // parser-instance-parse-string-callback-error-ignored; parser.parseString with callbacks
+      // that check err should SHOULD_NOT_FIRE).
+      if (
+        detection.packageName === "xml2js" &&
+        effectiveFunctionName === "Parser.parseString" &&
+        primaryPostcondition.id === "parser-instance-parse-string-callback-error-ignored"
+      ) {
+        // Resolve the callback node: either the detection.node itself (error-first-callback),
+        // or the last function-like argument of the CallExpression (throwing-function).
+        let cbNode: ts.Node = detection.node;
+        if (
+          !ts.isArrowFunction(cbNode) &&
+          !ts.isFunctionExpression(cbNode) &&
+          ts.isCallExpression(detection.node)
+        ) {
+          const args = detection.node.arguments;
+          for (let i = args.length - 1; i >= 0; i--) {
+            if (ts.isArrowFunction(args[i]) || ts.isFunctionExpression(args[i])) {
+              cbNode = args[i];
+              break;
+            }
+          }
+        }
+        if (ts.isArrowFunction(cbNode) || ts.isFunctionExpression(cbNode)) {
+          const func = cbNode as ts.ArrowFunction | ts.FunctionExpression;
+          const errParamName =
+            func.parameters.length > 0 && ts.isIdentifier(func.parameters[0].name)
+              ? func.parameters[0].name.text
+              : null;
+          if (errParamName) {
+            let errIsChecked = false;
+            const walkForErrCheck = (n: ts.Node): void => {
+              if (errIsChecked) return;
+              // Match: if (err) {...} or if (err !== null) {...} or if (err != null) {...}
+              if (ts.isIfStatement(n)) {
+                const condText = n.expression.getText(sourceFile);
+                if (
+                  condText === errParamName ||
+                  condText.startsWith(errParamName + " ") ||
+                  condText.startsWith(errParamName + "!") ||
+                  condText.startsWith(errParamName + ")")
+                ) {
+                  errIsChecked = true;
+                  return;
+                }
+              }
+              ts.forEachChild(n, walkForErrCheck);
+            };
+            if (func.body) walkForErrCheck(func.body);
+            if (errIsChecked) {
+              // WAVE-2F: xml2js Parser.parseString instance callback explicitly checks
+              // the err parameter — callback-style error handling satisfied.
+              trace.record(
+                MATCHER_IDS.SUPPRESSION_CALLBACK_ERR_CHECKED,
+                "passed",
+                "Parser.parseString instance callback explicitly checks err parameter",
               );
               continue;
             }
