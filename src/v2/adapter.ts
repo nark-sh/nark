@@ -200,10 +200,15 @@ function convertViolation(
   v2: V2Violation,
   contracts: Map<string, PackageContract>
 ): V1Violation {
-  // Look up source doc and suggested fix from contract
+  // Look up source doc, suggested fix, and maturity tier from contract.
+  // `maturity` was added Wave 1 to the corpus schema (accuracy roadmap
+  // 0002-ci-gate-spec.md §2) and is threaded through here so downstream
+  // consumers (ci --json, PR bot, accuracy dashboard) can render tiering
+  // caveats without re-loading the corpus.
   const contract = contracts.get(v2.package);
   let sourceDoc = '';
   let suggestedFix: string | undefined;
+  let maturity: 'stable' | 'beta' | 'experimental' | undefined;
 
   if (contract) {
     const funcContract = (contract.functions ?? []).find((f) => f.name === v2.function);
@@ -214,6 +219,7 @@ function convertViolation(
       if (postcondition) {
         sourceDoc = postcondition.sources?.[0] || postcondition.source || '';
         suggestedFix = postcondition.required_handling;
+        maturity = postcondition.maturity;
       }
     }
   }
@@ -233,6 +239,9 @@ function convertViolation(
     description: v2.message,
     source_doc: sourceDoc,
     suggested_fix: suggestedFix,
+    // Omit `maturity` entirely when unset so the JSON stream is `{"...": undefined}`-free.
+    // Consumers should treat absence as "unknown" (spec: don't default).
+    ...(maturity !== undefined ? { maturity } : {}),
     subViolations: v2.subViolations?.map((sv) => ({
       postconditionId: sv.postconditionId,
       description: sv.message,

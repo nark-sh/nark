@@ -140,8 +140,12 @@ function ensureFingerprints(violations: Violation[]): void {
 
 /**
  * Print a single violation to the terminal in the nark style.
+ * `write` allows the caller to route output to stderr when --json is active.
  */
-function printViolation(v: Violation): void {
+function printViolation(
+  v: Violation,
+  write: (msg: string) => void = (msg): void => console.log(msg)
+): void {
   const sevColor =
     v.severity === 'error'
       ? chalk.red.bold
@@ -150,13 +154,13 @@ function printViolation(v: Violation): void {
         : chalk.blue.bold;
 
   const sevLabel = v.severity.toUpperCase();
-  console.log(`  ${sevColor(sevLabel)} ${chalk.bold(v.package)} — ${v.description}`);
-  console.log(`    ${chalk.gray(`${v.file}:${v.line}:${v.column}`)}`);
+  write(`  ${sevColor(sevLabel)} ${chalk.bold(v.package)} — ${v.description}`);
+  write(`    ${chalk.gray(`${v.file}:${v.line}:${v.column}`)}`);
 
   if (v.suggested_fix) {
-    console.log(`    ${chalk.dim('Fix:')} ${v.suggested_fix}`);
+    write(`    ${chalk.dim('Fix:')} ${v.suggested_fix}`);
   }
-  console.log();
+  write('');
 }
 
 // ---------------------------------------------------------------------------
@@ -214,8 +218,21 @@ export function createCiCommand(): Command {
     .option('--baseline-commit <hash>', 'Commit hash to diff against (auto-detected if omitted)')
     .option('--sarif', 'Output diff results in SARIF 2.1.0 format to stdout')
     .option('--sarif-output <path>', 'Write SARIF 2.1.0 diff results to file')
+    .option(
+      '--json',
+      'Emit a compact schema-versioned JSON envelope on stdout. Human output moves to stderr. Mutually exclusive with --sarif and --sarif-output.'
+    )
     .action(async (options) => {
       try {
+        // Mutual exclusion enforced at dispatch time per spec 0002 §4.
+        if (options.json && (options.sarif || options.sarifOutput)) {
+          process.stderr.write(
+            chalk.red(
+              'Error: --json cannot be combined with --sarif or --sarif-output.\n'
+            )
+          );
+          process.exit(2);
+        }
         await runCi(options);
       } catch (err) {
         const msg = err instanceof Error ? err.message : String(err);
@@ -238,7 +255,17 @@ async function runCi(options: {
   baselineCommit?: string;
   sarif?: boolean;
   sarifOutput?: string;
+  json?: boolean;
 }): Promise<void> {
+  // `--json` reroutes all human chatter to stderr so stdout can carry the
+  // envelope untouched (spec 0002 §4). We use a `write()` helper rather than
+  // console.log/error so the redirect is a single flag flip.
+  const jsonMode = !!options.json;
+  const write = (msg: string): void => {
+    if (jsonMode) process.stderr.write(msg + '\n');
+    else console.log(msg);
+  };
+
   // 1. Resolve tsconfig and project root
   const tsconfigPath = normalizeTsconfigPath(options.tsconfig);
   const projectRoot = path.dirname(tsconfigPath);
@@ -354,21 +381,22 @@ async function runCi(options: {
 
   fireLifecycleEvents(lifecycleEvents);
 
-  // 13. Print header
-  console.log(chalk.bold('\nnark ci — diff-aware scan\n'));
-  console.log(chalk.gray(`  tsconfig: ${tsconfigPath}`));
-  console.log(chalk.gray(`  corpus:   ${options.corpus}`));
-  console.log(chalk.gray(`  baseline: ${baselineCommit ?? '(none)'}`));
-  console.log(chalk.gray(`  current:  ${currentCommit}`));
-  console.log();
+  // 13. Print header. Under --json this goes to stderr; regular output
+  // remains untouched on stdout.
+  write(chalk.bold('\nnark ci — diff-aware scan\n'));
+  write(chalk.gray(`  tsconfig: ${tsconfigPath}`));
+  write(chalk.gray(`  corpus:   ${options.corpus}`));
+  write(chalk.gray(`  baseline: ${baselineCommit ?? '(none)'}`));
+  write(chalk.gray(`  current:  ${currentCommit}`));
+  write('');
 
   if (!baselineRecord) {
-    console.log(
+    write(
       chalk.yellow(
         'Warning: No baseline scan found. Showing all violations (no diff available).'
       )
     );
-    console.log();
+    write('');
   }
 
   const baselineLabel = baselineCommit
@@ -376,7 +404,7 @@ async function runCi(options: {
     : 'unknown baseline';
 
   if (newViolations.length === 0) {
-    console.log(
+    write(
       chalk.green('✓') +
         chalk.bold(
           ` 0 new violations introduced since ${baselineLabel}` +
@@ -386,13 +414,13 @@ async function runCi(options: {
         )
     );
   } else {
-    console.log(
+    write(
       chalk.red.bold(`${newViolations.length} new violation(s) introduced since ${baselineLabel}`) +
         (preExistingCount > 0
           ? chalk.dim(` (${preExistingCount} pre-existing, not shown)`)
           : '')
     );
-    console.log();
+    write('');
 
     // Group by severity for display
     const errors = newViolations.filter((v) => v.severity === 'error');
@@ -400,21 +428,21 @@ async function runCi(options: {
     const infos = newViolations.filter((v) => v.severity === 'info');
 
     if (errors.length > 0) {
-      console.log(chalk.red.bold(`Errors (${errors.length}):`));
-      errors.forEach(printViolation);
+      write(chalk.red.bold(`Errors (${errors.length}):`));
+      errors.forEach((v) => printViolation(v, write));
     }
     if (warnings.length > 0) {
-      console.log(chalk.yellow.bold(`Warnings (${warnings.length}):`));
-      warnings.forEach(printViolation);
+      write(chalk.yellow.bold(`Warnings (${warnings.length}):`));
+      warnings.forEach((v) => printViolation(v, write));
     }
     if (infos.length > 0) {
-      console.log(chalk.blue.bold(`Info (${infos.length}):`));
-      infos.forEach(printViolation);
+      write(chalk.blue.bold(`Info (${infos.length}):`));
+      infos.forEach((v) => printViolation(v, write));
     }
   }
 
-  // 14. SARIF output for new violations only
-  if (options.sarif || options.sarifOutput) {
+  // 14. SARIF output for new violations only. Guarded so --json takes over.
+  if (!jsonMode && (options.sarif || options.sarifOutput)) {
     writeSarifOutput(newViolations, options.sarifOutput);
   }
 
@@ -445,10 +473,65 @@ async function runCi(options: {
     writeAuditRecord(auditRecord, options.output);
   }
 
+  // 15b. --json stdout envelope per spec 0002 §4.
+  // Emitted just before exit so all human chatter (already redirected to
+  // stderr via `write`) is flushed first. Consumers can parse stdout as a
+  // single JSON document.
+  if (jsonMode) {
+    const exitCode = newViolations.length > 0 ? 1 : 0;
+    const baselineSource: 'committed' | 'saas' | 'none' = baselineRecord
+      ? 'committed'
+      : 'none';
+    const envelope = {
+      $schema_version: '1',
+      baseline: {
+        found: !!baselineRecord,
+        source: baselineSource,
+        base_commit: baselineCommit ?? null,
+      },
+      counts: {
+        total_violations: violations.length,
+        new_violations: newViolations.length,
+        resolved_violations: resolvedViolations.length,
+      },
+      new_violations: newViolations.map((v) => toEnvelopeViolation(v)),
+      resolved_violations: (resolvedViolations as Violation[]).map((v) =>
+        toEnvelopeViolation(v)
+      ),
+      exit_code: exitCode,
+    };
+    process.stdout.write(JSON.stringify(envelope) + '\n');
+  }
+
   // 16. Exit code
   if (newViolations.length > 0) {
     process.exit(1);
   } else {
     process.exit(0);
   }
+}
+
+/**
+ * Map an internal Violation into the --json envelope's per-violation shape.
+ * Kept adjacent to runCi so the envelope schema is co-located with its writer.
+ * Field selection per 0002-ci-gate-spec.md §4 — a subset of Violation, plus
+ * the maturity tier threaded through from the corpus postcondition.
+ */
+function toEnvelopeViolation(v: Violation): Record<string, unknown> {
+  const row: Record<string, unknown> = {
+    rule_id: `${v.package}/${v.contract_clause}`,
+    package: v.package,
+    postcondition_id: v.contract_clause,
+    severity: v.severity,
+    file: v.file,
+    line: v.line,
+    column: v.column,
+    message: v.description,
+  };
+  // Optional fields — omitted (not null) when absent so the wire is thin.
+  if (v.suggested_fix) row['suggested_fix'] = v.suggested_fix;
+  if (v.maturity !== undefined) row['maturity'] = v.maturity;
+  const fp = (v as unknown as { fingerprint?: string }).fingerprint;
+  if (fp) row['fingerprint'] = fp;
+  return row;
 }

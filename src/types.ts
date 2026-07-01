@@ -63,6 +63,17 @@ export interface Postcondition {
   sources: string[];
   severity: Severity;
   /**
+   * Enforcement maturity tier per work-packages/accuracy-roadmap/0002-ci-gate-spec.md §2.
+   * - "stable" (default for grandfathered rules): fires at declared severity.
+   * - "beta": probation channel; scanner enforcement may downgrade to warning
+   *   until precision/recall are measured.
+   * - "experimental": info-only, never gates CI.
+   * Backfilled Wave 1 to `stable` for all pre-existing postconditions. Additive
+   * metadata; surfaced on the `Violation` for consumers (CI --json, PR bot,
+   * accuracy dashboard).
+   */
+  maturity?: "stable" | "beta" | "experimental";
+  /**
    * Patterns that satisfy this postcondition, suppressing violations.
    * Used when specific catch patterns (e.g., instanceof checks) are sufficient.
    */
@@ -262,6 +273,13 @@ export interface Violation {
   description: string;
   source_doc: string;
   suggested_fix?: string;
+  /**
+   * Enforcement maturity of the violated postcondition
+   * (see `Postcondition.maturity`). Omitted when the corpus postcondition
+   * has no `maturity` field set — consumers should treat the absence as
+   * "unknown" rather than defaulting.
+   */
+  maturity?: "stable" | "beta" | "experimental";
   /** Business impact from the contract rule — used to surface counterfactual value to users */
   business_impact?: BusinessImpact;
   /** Additional postconditions violated at the same call site — lets the developer/AI write a complete fix upfront. */
