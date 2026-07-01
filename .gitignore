@@ -7,3 +7,8 @@ dist/
 pnpm-lock.yaml
 .claude/
 output/
+# Mutation harness staging + run outputs. Never commit these — they're
+# regenerated per run and can contain thousands of files.
+# See work-packages/accuracy-roadmap/0004-mutation-harness-spec.md §7.
+/mutations/staging/
+/mutations/runs/

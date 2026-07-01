@@ -83,6 +83,7 @@ import {
   promptPicker,
 } from "./lib/tsconfig-picker.js";
 import { createCiCommand } from "./cli/ci.js";
+import { createBenchmarkCommand } from "./cli/benchmark.js";
 import { generateAIPrompt } from "./ai-prompt-generator.js";
 import { writeScanResults, findNarkDir } from "./output/index.js";
 import { getNarkRunsDir, displayProjectId } from "./lib/global-paths.js";
@@ -175,6 +176,7 @@ program.addCommand(createLogoutCommand());
 program.addCommand(createWorkspaceCommand());
 program.addCommand(createWhoamiCommand());
 program.addCommand(createCiCommand());
+program.addCommand(createBenchmarkCommand());
 
 program
   .option(
