@@ -1,0 +1,240 @@
+name: Mutation harness
+
+# Runs the scanner-facing mutation harness (scripts/mutation-harness/runner.ts).
+# Per work-packages/accuracy-roadmap/0004-mutation-harness-spec.md §5:
+#   - Per-PR: 20% deterministic sample, ~4 min wall time, single shard.
+#   - Nightly + workflow_dispatch: full matrix, sharded 10-way for ~15 min E2E.
+#
+# NON-BLOCKING for the PR. Regression alerting is dashboard-side
+# (Wave 1 SaaS `AccuracyRunEvent` table + /admin/accuracy), NOT
+# workflow-side. Interpreting the numbers is a human step until a
+# defensible per-operator regression threshold is established.
+#
+# See .claude/rules/cloud-scan-architecture.md — the mutation harness is
+# the CI-path analog of scan quality; it runs on GHA, not in the cloud
+# scan worker.
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  schedule:
+    # 05:00 UTC == 00:00 US Eastern (roughly). Nightly full-matrix run.
+    - cron: "0 5 * * *"
+  workflow_dispatch:
+    inputs:
+      sample:
+        description: "Sample rate (0.0-1.0). 1.0 = full matrix."
+        required: false
+        default: "1.0"
+
+jobs:
+  # -------------------------------------------------------------------------
+  # Per-PR job: 20% sampled slice, one shard, ~4 min.
+  # -------------------------------------------------------------------------
+  mutation-per-pr:
+    name: mutation-harness (per-PR sample)
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout nark
+        uses: actions/checkout@v4
+        with:
+          # Matches the runner's expected layout: WORKSPACE_ROOT/nark-dev/nark/
+          # (runner.ts derives corpus path as WORKSPACE_ROOT/nark-dev/nark-corpus).
+          path: nark-dev/nark
+
+      - name: Checkout nark-corpus
+        uses: actions/checkout@v4
+        with:
+          repository: nark-sh/nark-corpus
+          path: nark-dev/nark-corpus
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 9
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        working-directory: nark-dev/nark
+        # pnpm-lock.yaml is gitignored (see .gitignore); pnpm re-resolves
+        # from package.json. Same pattern as ci.yml. `tsx` is a devDep the
+        # runner needs to execute the TypeScript entry point.
+        run: pnpm install
+
+      - name: Build scanner
+        working-directory: nark-dev/nark
+        run: pnpm build
+
+      - name: Run mutation harness (20% sample)
+        working-directory: nark-dev/nark
+        env:
+          # Deterministic slice keyed by PR number so the same PR keeps the
+          # same seeds across pushes — matches spec §5 sampling recommendation.
+          # The runner also hashes seed paths (deterministic within a rate),
+          # so this env is informational only for now.
+          MUTATION_PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          mkdir -p /tmp/mutation-out
+          pnpm tsx scripts/mutation-harness/runner.ts \
+            --sample 0.2 \
+            --output "/tmp/mutation-out/mutation-run-${{ github.sha }}.json"
+
+      - name: Upload mutation report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mutation-report-${{ github.sha }}
+          path: /tmp/mutation-out/mutation-run-*.json
+          retention-days: 30
+
+  # -------------------------------------------------------------------------
+  # Nightly / manual job: full matrix, 10-way shard, ~15 min E2E.
+  # -------------------------------------------------------------------------
+  mutation-nightly:
+    name: mutation-harness (nightly shard ${{ matrix.shard }})
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+
+    steps:
+      - name: Checkout nark
+        uses: actions/checkout@v4
+        with:
+          path: nark-dev/nark
+
+      - name: Checkout nark-corpus
+        uses: actions/checkout@v4
+        with:
+          repository: nark-sh/nark-corpus
+          path: nark-dev/nark-corpus
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 9
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        working-directory: nark-dev/nark
+        run: pnpm install
+
+      - name: Build scanner
+        working-directory: nark-dev/nark
+        run: pnpm build
+
+      - name: Run mutation harness (shard ${{ matrix.shard }} of 10)
+        working-directory: nark-dev/nark
+        run: |
+          mkdir -p /tmp/mutation-out
+          SAMPLE_RATE="${{ github.event.inputs.sample || '1.0' }}"
+          pnpm tsx scripts/mutation-harness/runner.ts \
+            --sample "$SAMPLE_RATE" \
+            --shard-index ${{ matrix.shard }} \
+            --shard-count 10 \
+            --output "/tmp/mutation-out/mutation-run-${{ github.sha }}-shard-${{ matrix.shard }}.json"
+
+      - name: Upload mutation report (shard ${{ matrix.shard }})
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mutation-report-${{ github.sha }}-shard-${{ matrix.shard }}
+          path: /tmp/mutation-out/mutation-run-*.json
+          retention-days: 90
+
+      - name: Upload to SaaS accuracy dashboard
+        # Push benchmark numbers to the Wave 1 SaaS accuracy endpoint so the
+        # dashboard can trend them. NARK_ADMIN_TOKEN is a repo secret;
+        # gracefully skips on forks + when the secret is unset.
+        if: env.NARK_ADMIN_TOKEN != '' && (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch')
+        working-directory: nark-dev/nark
+        env:
+          NARK_ADMIN_TOKEN: ${{ secrets.NARK_ADMIN_TOKEN }}
+        run: |
+          node dist/index.js benchmark upload \
+            --source=mutation \
+            /tmp/mutation-out/mutation-run-${{ github.sha }}-shard-${{ matrix.shard }}.json
+
+  # -------------------------------------------------------------------------
+  # Main-branch push: run 20% sample, upload to SaaS. Sits between per-PR
+  # (never touches SaaS) and nightly (full matrix). Rationale: main pushes
+  # merit a data point on the dashboard without paying the 15-min full-matrix
+  # cost every merge.
+  # -------------------------------------------------------------------------
+  mutation-main-push:
+    name: mutation-harness (main push, 20% sample)
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout nark
+        uses: actions/checkout@v4
+        with:
+          path: nark-dev/nark
+
+      - name: Checkout nark-corpus
+        uses: actions/checkout@v4
+        with:
+          repository: nark-sh/nark-corpus
+          path: nark-dev/nark-corpus
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 9
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        working-directory: nark-dev/nark
+        run: pnpm install
+
+      - name: Build scanner
+        working-directory: nark-dev/nark
+        run: pnpm build
+
+      - name: Run mutation harness (20% sample)
+        working-directory: nark-dev/nark
+        run: |
+          mkdir -p /tmp/mutation-out
+          pnpm tsx scripts/mutation-harness/runner.ts \
+            --sample 0.2 \
+            --output "/tmp/mutation-out/mutation-run-${{ github.sha }}.json"
+
+      - name: Upload mutation report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mutation-report-main-${{ github.sha }}
+          path: /tmp/mutation-out/mutation-run-*.json
+          retention-days: 90
+
+      - name: Upload to SaaS accuracy dashboard
+        if: env.NARK_ADMIN_TOKEN != ''
+        working-directory: nark-dev/nark
+        env:
+          NARK_ADMIN_TOKEN: ${{ secrets.NARK_ADMIN_TOKEN }}
+        run: |
+          node dist/index.js benchmark upload \
+            --source=mutation \
+            /tmp/mutation-out/mutation-run-${{ github.sha }}.json

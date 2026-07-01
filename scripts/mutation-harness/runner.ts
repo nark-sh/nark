@@ -8,6 +8,12 @@
  * Invocation:
  *   node scripts/mutation-harness/runner.ts [--sample 0.2] [--output <path>]
  *   node scripts/mutation-harness/runner.ts --sample 0.02 --output /tmp/mutation-run.json
+ *   node scripts/mutation-harness/runner.ts --sample 1 --shard-index 0 --shard-count 10
+ *
+ * Sharding (spec 0004 §5): the nightly full matrix is fanned across 10 GHA
+ * runners via `--shard-index N --shard-count K`. Deterministic hash of the
+ * (seed_path, operator_name) tuple decides ownership so every shard sees
+ * ~1/K of the total pairs with no overlap and no coordination.
  *
  * Design notes:
  *   - Walks BOTH `nark-corpus/` and `nark-corpus-pro/` per multi-corpus rules
@@ -99,6 +105,14 @@ interface RunReport {
   nark_commit_sha?: string;
   corpus_commit_sha?: string;
   sample_rate: number;
+  /**
+   * Shard identity for this partial run. shard_count=1 means this run holds
+   * the entire (sampled) matrix; shard_count>1 means the run holds ~1/K of
+   * the (seed, operator) pairs and must be merged with sibling shards for
+   * matrix-complete stats.
+   */
+  shard_index?: number;
+  shard_count?: number;
   totals: {
     seeds: number;
     operators: number;
@@ -190,6 +204,33 @@ function sampleSeeds(seeds: Seed[], rate: number): Seed[] {
     const asUint = digest.readUInt32BE(0);
     return asUint / 0xffffffff < rate;
   });
+}
+
+/**
+ * Deterministic shard selection.
+ *
+ * Given a `(seed, operator)` pair, decide whether the current shard owns it.
+ * Hash-based selection means every shard sees ~1/K of the total workload with
+ * no coordination and no cross-shard overlap. Used by the nightly workflow
+ * (spec 0004 §5) to fan the full matrix across 10 GHA runners.
+ *
+ * Called at pair-classify time (see main loop). Kept here rather than at
+ * seed-filter time because M9/M10 apply to `any` seed and we want operator
+ * variety per shard, not just per seed.
+ */
+function shardOwns(
+  seedPath: string,
+  operatorName: string,
+  shardIndex: number,
+  shardCount: number,
+): boolean {
+  if (shardCount <= 1) return true;
+  const digest = crypto
+    .createHash('sha256')
+    .update(`${seedPath}::${operatorName}`)
+    .digest();
+  const asUint = digest.readUInt32BE(0);
+  return asUint % shardCount === shardIndex;
 }
 
 // ---------------------------------------------------------------------------
@@ -323,24 +364,38 @@ function stageMutant(
 interface RunnerOptions {
   sample: number;
   outputPath: string;
+  shardIndex: number;
+  shardCount: number;
 }
 
 function parseArgs(argv: string[]): RunnerOptions {
   let sample = 1;
   let outputPath = '';
+  let shardIndex = 0;
+  let shardCount = 1;
   for (let i = 2; i < argv.length; i++) {
     const arg = argv[i];
     if (arg === '--sample' && argv[i + 1]) {
       sample = parseFloat(argv[++i]);
     } else if (arg === '--output' && argv[i + 1]) {
       outputPath = argv[++i];
+    } else if (arg === '--shard-index' && argv[i + 1]) {
+      shardIndex = parseInt(argv[++i], 10);
+    } else if (arg === '--shard-count' && argv[i + 1]) {
+      shardCount = parseInt(argv[++i], 10);
     }
   }
   if (!outputPath) {
     const ts = new Date().toISOString().replace(/[:.]/g, '-');
     outputPath = path.join(RUNS_ROOT, `${ts}.json`);
   }
-  return { sample, outputPath };
+  if (shardCount < 1) shardCount = 1;
+  if (shardIndex < 0 || shardIndex >= shardCount) {
+    throw new Error(
+      `--shard-index must be in [0, ${shardCount}); got ${shardIndex}`,
+    );
+  }
+  return { sample, outputPath, shardIndex, shardCount };
 }
 
 function readPackageVersion(pkgJsonPath: string): string {
@@ -379,8 +434,12 @@ async function main(): Promise<void> {
     path.join(CORPUS_TIERS[0].path, 'package.json'),
   );
 
+  const shardLabel =
+    opts.shardCount > 1
+      ? ` shard=${opts.shardIndex}/${opts.shardCount}`
+      : '';
   console.error(
-    `[mutation-harness] scanner=${scannerVersion} corpus=${publicCorpusVersion} seeds=${sampled.length}/${allSeeds.length} sample=${opts.sample} operators=${ALL_OPERATORS.length}`,
+    `[mutation-harness] scanner=${scannerVersion} corpus=${publicCorpusVersion} seeds=${sampled.length}/${allSeeds.length} sample=${opts.sample} operators=${ALL_OPERATORS.length}${shardLabel}`,
   );
 
   const results: PairOutcome[] = [];
@@ -393,6 +452,16 @@ async function main(): Promise<void> {
   const total = sampled.length * ALL_OPERATORS.length;
 
   for (const seed of sampled) {
+    // Shard optimization: if NO operator on this seed belongs to this shard,
+    // don't pay the seed-scan cost. (`ALL_OPERATORS` is ~10, cheap to check.)
+    const seedInShard = ALL_OPERATORS.some((op) =>
+      shardOwns(seed.path, op.name, opts.shardIndex, opts.shardCount),
+    );
+    if (!seedInShard) {
+      processed += ALL_OPERATORS.length;
+      continue;
+    }
+
     // Scan seed once, reuse for every operator.
     let seedViolations: ScanViolation[];
     try {
@@ -401,6 +470,10 @@ async function main(): Promise<void> {
     } catch (err) {
       // Log and skip this seed entirely.
       for (const op of ALL_OPERATORS) {
+        if (!shardOwns(seed.path, op.name, opts.shardIndex, opts.shardCount)) {
+          processed++;
+          continue;
+        }
         results.push({
           seed_path: path.relative(WORKSPACE_ROOT, seed.path),
           seed_tier: seed.tier,
@@ -423,6 +496,11 @@ async function main(): Promise<void> {
 
     for (const op of ALL_OPERATORS) {
       processed++;
+      // Shard filter — determines whether THIS shard owns the (seed, operator)
+      // pair. See shardOwns() for the hash contract.
+      if (!shardOwns(seed.path, op.name, opts.shardIndex, opts.shardCount)) {
+        continue;
+      }
       // Filter: does the operator apply to this seed type?
       if (op.seedType !== 'any' && op.seedType !== seed.type) {
         // Not a skip — genuinely not applicable, so we don't record it.
@@ -543,6 +621,8 @@ async function main(): Promise<void> {
     nark_commit_sha: readCommitSha(REPO_ROOT),
     corpus_commit_sha: readCommitSha(CORPUS_TIERS[0].path),
     sample_rate: opts.sample,
+    shard_index: opts.shardCount > 1 ? opts.shardIndex : undefined,
+    shard_count: opts.shardCount > 1 ? opts.shardCount : undefined,
     totals,
     aggregates: { per_operator: perOperator },
     results,
