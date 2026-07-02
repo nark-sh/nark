@@ -3,7 +3,15 @@ name: Mutation harness
 # Runs the scanner-facing mutation harness (scripts/mutation-harness/runner.ts).
 # Per work-packages/accuracy-roadmap/0004-mutation-harness-spec.md §5:
 #   - Per-PR: 20% deterministic sample, ~4 min wall time, single shard.
-#   - Nightly + workflow_dispatch: full matrix, sharded 10-way for ~15 min E2E.
+#   - workflow_dispatch: full matrix, sharded 10-way for ~15 min E2E.
+#
+# LOCAL-FIRST PIVOT (2026-07-02):
+# Nightly cron disabled 2026-07-02 per Caleb preference for local-first
+# execution. Use `pnpm harness:full` locally, or trigger this workflow
+# manually via workflow_dispatch. Per-PR 20% sample stays on GHA (public
+# repo, free minutes). Rationale: keep the per-PR signal, move the
+# full-matrix cadence off cloud until positive revenue justifies the
+# minutes budget.
 #
 # NON-BLOCKING for the PR. Regression alerting is dashboard-side
 # (Wave 1 SaaS `AccuracyRunEvent` table + /admin/accuracy), NOT
@@ -19,9 +27,10 @@ on:
     branches: [main]
   push:
     branches: [main]
-  schedule:
-    # 05:00 UTC == 00:00 US Eastern (roughly). Nightly full-matrix run.
-    - cron: "0 5 * * *"
+  # Nightly cron disabled 2026-07-02 (local-first pivot — see comment above).
+  # schedule:
+  #   # 05:00 UTC == 00:00 US Eastern (roughly). Nightly full-matrix run.
+  #   - cron: "0 5 * * *"
   workflow_dispatch:
     inputs:
       sample:
@@ -97,10 +106,13 @@ jobs:
           retention-days: 30
 
   # -------------------------------------------------------------------------
-  # Nightly / manual job: full matrix, 10-way shard, ~15 min E2E.
+  # Manual full-matrix job: 10-way shard, ~15 min E2E.
+  # Was nightly cron; nightly disabled 2026-07-02 (local-first pivot).
+  # Now fires only on workflow_dispatch. The `schedule` clause in the `if`
+  # is preserved defensively in case the cron trigger is re-enabled later.
   # -------------------------------------------------------------------------
   mutation-nightly:
-    name: mutation-harness (nightly shard ${{ matrix.shard }})
+    name: mutation-harness (full-matrix shard ${{ matrix.shard }})
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     timeout-minutes: 30

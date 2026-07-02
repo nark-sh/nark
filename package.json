@@ -26,6 +26,9 @@
     "typecheck": "tsc --noEmit -p tsconfig.build.json",
     "format": "prettier --write \"src/**/*.ts\" \"*.json\" \"*.md\"",
     "format:check": "prettier --check \"src/**/*.ts\" \"*.json\" \"*.md\"",
+    "harness:sample": "tsx scripts/mutation-harness/runner.ts --sample 0.05",
+    "harness:full": "tsx scripts/mutation-harness/runner.ts",
+    "harness:upload": "node dist/index.js benchmark upload --source=mutation",
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
