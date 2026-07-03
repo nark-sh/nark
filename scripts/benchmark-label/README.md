@@ -17,10 +17,11 @@ To defensibly measure nark's precision and recall, the labelers cannot see
 what nark decided. Otherwise "precision" collapses to "how often nark
 agrees with itself." Structural blindness comes from:
 
-1. Two independent labelers per violation, invoked in parallel API calls
-   with distinct sampling parameters (temperature 0.2 and 0.4).
+1. Two independent labelers per violation, spawned as parallel Claude Code
+   background agents with fresh contexts per batch.
 2. Both labelers see the same reasoning-from-first-principles prompt with
-   NO reference to a scanner verdict.
+   NO reference to a scanner verdict; the second labeler receives the
+   batch in reverse order to reduce positional bias.
 3. Agreement is trusted (agreed_TP / agreed_FP become gold labels).
    Disagreement escalates to human adjudication (you).
 4. Verification (per-rule precision / recall / F1) is downstream arithmetic
@@ -45,8 +46,9 @@ Reference: the "Double-Blind Labeling Protocol" panel on the admin
 └────────────────────────────────────────────────┘  └────────────────────────┘
        ~ 5 sec       ~ minutes    ~ hours   ~ hours       ~ seconds
 
-Env needed:  none         none    ANTHROPIC_    none        NARK_ADMIN_
-                                  API_KEY                   TOKEN
+Env needed:  none         none    none          none        NARK_ADMIN_
+                                  (runs in                  TOKEN
+                                  Claude Code)
 ```
 
 ### 1. Rank candidates → `shortlist.json`
@@ -87,31 +89,47 @@ pnpm label:scan
 
 ### 3. Label (double-blind) → `~/.nark/benchmark-label/labels/<repo>.jsonl`
 
-For every violation, runs two Claude Sonnet 4.6 calls in parallel — one at
-T=0.2, one at T=0.4. Both get the same prompt (no scanner verdict included).
-Aggregates:
+Labeling runs inside a Claude Code session via the `bc-benchmark-label`
+skill. Each invocation processes ONE batch of ~30 violations, then exits.
+Re-invoke for the next batch (same pattern as `bc-coordinator`).
+
+Per batch, the skill spawns two Claude Code background agents in parallel:
+
+- **Labeler-A** — fresh context, blind labeling prompt, batch input in order
+- **Labeler-B** — fresh context, same prompt, batch input in reverse (to
+  reduce positional bias)
+
+Both agents reason from first principles about code + package docs. Neither
+sees nark's verdict, and neither sees the other labeler's verdict.
+Aggregation is pure arithmetic in the skill orchestrator:
 
 - both TP → `agreed_TP`
 - both FP → `agreed_FP`
 - split TP/FP → `disagree`
 - any undecidable → `escalate`
 
-Writes JSONL incrementally so a crash loses no work. Re-running resumes by
-skipping violations already labeled.
+Writes JSONL incrementally per batch so a crash loses at most one batch.
+Re-invoking resumes by skipping violations already labeled.
 
-Optional `--opus-verify` runs a 3rd call (Opus 4.7, T=0.2) on disagreements
-as a tiebreaker.
-
-```bash
-export ANTHROPIC_API_KEY=sk-ant-...
-pnpm label:run                          # default
-pnpm label:run --opus-verify            # add opus tiebreaker
-pnpm label:run --repo cal.com           # single repo
-pnpm label:run --concurrency 5          # tune rate
-pnpm label:run --dry-run                # stub API, verify pipeline (no cost)
+```
+# Inside a Claude Code session:
+/bc-benchmark-label                # process next batch (~30 violations)
+/bc-benchmark-label cal.com        # single-repo focus
 ```
 
-Live progress: `labeled 342 / 1284 · agreed 74% · disagreed 18% · escalated 8% · est cost so far $23.40`
+Optionally wrap with `/loop /bc-benchmark-label` to run the batches back to
+back without re-typing.
+
+**No API keys.** The skill runs entirely on the parent Claude Code session
++ its background agents. The $200/mo Max plan covers it. NO
+`ANTHROPIC_API_KEY` required. NO project code imports an AI SDK.
+
+Prompt template lives at `.claude/skills/bc-benchmark-label/prompt-template.md`
+(version tag `LABELER_PROMPT_VERSION: 2026-07-03.v2`) and every stored
+label carries the `prompt_version` field for cross-version bisection.
+
+Live progress printed at exit of each wave:
+`labeled batch of 30 for cal.com: 21 agreed_TP · 5 agreed_FP · 3 disagree · 1 escalate · 47 remaining`
 
 ### 4. Adjudicate → `~/.nark/benchmark-label/labels-final.jsonl`
 
@@ -176,72 +194,57 @@ Every step is crash-safe.
 | adjudicate | `labels-final.jsonl` | Skips already-adjudicated violation IDs |
 | upload | server-side dedup | Wave 2 CLI handles idempotency |
 
-If the labeler is killed mid-flight, the JSONL file contains complete lines
-for everything already labeled. Re-run `pnpm label:run` to pick up where
-you left off.
+If a labeling wave is killed mid-flight, the JSONL file contains complete
+lines for everything already labeled in prior waves. Re-invoke
+`/bc-benchmark-label` to pick up where you left off — the skill filters
+out already-labeled IDs before selecting the next batch.
 
 ---
 
 ## Cost estimate
 
-Assumes ~1300 violations in the top-50 shortlist (median 25 per repo, weighted
-toward the top-5 large monorepos).
+**$0 marginal.** Labeling runs inside a Claude Code session via the
+`bc-benchmark-label` skill and two background agents per wave. The $200/mo
+Max plan covers everything.
 
-**Sonnet-only (default):**
-- 2 calls per violation × 1300 violations = 2600 calls
-- System prompt: ~500 tokens, cache-eligible (~90% cache hit after first call)
-- User prompt + snippet: ~700 tokens per call
-- Output: ~80 tokens per call
-- Effective cost: ~$0.03 per violation × 1300 = **~$40** (was ~$90 pre-caching)
+The prior SDK-based labeler (deleted 2026-07-03) estimated ~$40 for the
+top-50 shortlist at Sonnet-only, ~$70 with Opus tiebreaker. That path was
+removed because it violated the rule that nark project code stays
+LLM-free: the Anthropic SDK was a devDep of `nark-dev/nark` and burned
+separate API credit for what the Max plan already covers via Claude Code.
 
-**With `--opus-verify`:**
-- Adds one Opus call per disagreement (~15% of violations = ~200 calls)
-- Opus is 5x sonnet: ~$0.15 per Opus call × 200 = ~$30 extra
-- Total: **~$70**
-
-Actual costs will vary with your prompt caching hit rate, the exact size of
-each snippet, and the disagreement rate. The labeler prints running cost so
-you can pause if the burn is higher than expected.
-
----
-
-## Prompt caching strategy
-
-Anthropic prompt caching reuses the prefix of a request when the same block
-is sent within the cache TTL (~5 minutes). Our labeler:
-
-1. Marks the system prompt (~500 tokens, static across ALL calls) with
-   `cache_control: { type: 'ephemeral' }`.
-2. Keeps the user prompt (per-violation, unique) uncached.
-
-First call to any given model warms the cache. Every subsequent call within
-5 minutes reads the system-prompt tokens at 10% of the normal input rate
-(and the labeler runs ~10 concurrent calls, so the cache stays warm).
-
-Expected cache hit rate: ~99% for the system prompt after the first ~10
-calls.
+Wall-clock cost is roughly one wave every couple minutes (two background
+agents run in parallel; each processes ~30 violations per call). For ~1300
+violations across the top-50 shortlist that's ~45 waves, achievable in a
+long afternoon of `/loop /bc-benchmark-label`.
 
 ---
 
 ## Version pinning
 
-The prompt template is versioned via `LABELER_PROMPT_VERSION` in `prompts.ts`.
-Every stored label carries the prompt_version field so you can bisect if the
-template changes. Bumping the version invalidates the cache prefix and means
-cross-version verdict comparisons are apples-to-oranges — do it only for
-material wording changes.
+The prompt template lives at
+`.claude/skills/bc-benchmark-label/prompt-template.md` and is versioned
+via `LABELER_PROMPT_VERSION`. Every stored label carries the
+prompt_version field so you can bisect if the template changes.
+Cross-version verdict comparisons are apples-to-oranges — bump the version
+only for material wording changes.
+
+Current version: `2026-07-03.v2` (batch-mode, background-agent delivery).
+Previous: `2026-07-02.v1` (SDK, single-call).
 
 ---
 
 ## Environment reference
 
 ```
-ANTHROPIC_API_KEY    Required for step 3 (label). Not needed for other steps.
 NARK_ADMIN_TOKEN     Required for step 5 (upload). Not needed for any other step.
 
 NARK_TELEMETRY=off   Set automatically by scan-repos.ts to avoid noisy telemetry.
 NARK_ALLOW_MISSING_DEPS=1   Set automatically by scan-repos.ts per cloud-scan rule.
 ```
+
+Notably absent: no `ANTHROPIC_API_KEY`. The labeling step runs inside
+Claude Code and requires no API keys.
 
 ---
 
@@ -252,11 +255,13 @@ nark-dev/nark/scripts/benchmark-label/
 ├── README.md               (this file)
 ├── tsconfig.json
 ├── types.ts                shared types
-├── prompts.ts              versioned prompt templates
 ├── rank-candidates.ts      step 1
 ├── scan-repos.ts           step 2
-├── labeler.ts              step 3
 └── adjudicate.ts           step 4
+
+.claude/skills/bc-benchmark-label/
+├── SKILL.md                step 3 orchestrator
+└── prompt-template.md      versioned labeling prompt
 ```
 
 Runtime state (created at first run, not checked in):
@@ -273,10 +278,6 @@ Runtime state (created at first run, not checked in):
 
 ## Troubleshooting
 
-**"ANTHROPIC_API_KEY not set"** — set it or pass `--dry-run` to test the
-pipeline without hitting the API. Dry-run returns deterministic fake
-verdicts.
-
 **"Shortlist not found"** — run `pnpm label:rank` before `pnpm label:scan`.
 
 **"nark not built"** — run `pnpm build` at the nark repo root.
@@ -288,5 +289,11 @@ under `test-repos/`. The pipeline continues with the repos you DO have.
 have a root tsconfig; you'd need to descend into a sub-package. See
 Section 4 of `0003-gold-benchmark-candidates.md` for guidance.
 
-**Labeler stuck at 0 / N** — try lowering `--concurrency`. Also verify
-your API key has permission to call sonnet-4-6.
+**`/bc-benchmark-label` prints "no violations to label"** — either you
+haven't run `pnpm label:scan` yet, or every violation has already been
+labeled. Run `pnpm label:adjudicate` next.
+
+**Labeler agent returns malformed JSON** — the skill orchestrator marks
+affected violations as `escalate` with a note; the wave still completes
+for the rest of the batch. Re-invoke `/bc-benchmark-label` and it will
+re-attempt (the JSONL append only records successful pairs).
