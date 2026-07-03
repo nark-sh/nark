@@ -29,6 +29,11 @@
     "harness:sample": "tsx scripts/mutation-harness/runner.ts --sample 0.05",
     "harness:full": "tsx scripts/mutation-harness/runner.ts",
     "harness:upload": "node dist/index.js benchmark upload --source=mutation",
+    "label:rank": "tsx scripts/benchmark-label/rank-candidates.ts",
+    "label:scan": "tsx scripts/benchmark-label/scan-repos.ts",
+    "label:run": "tsx scripts/benchmark-label/labeler.ts",
+    "label:adjudicate": "tsx scripts/benchmark-label/adjudicate.ts",
+    "label:upload": "node dist/index.js benchmark upload --source=gold",
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
@@ -46,6 +51,7 @@
     "nark-corpus": "*"
   },
   "devDependencies": {
+    "@anthropic-ai/sdk": "^0.110.0",
     "@types/node": "^20.11.0",
     "@types/semver": "^7.5.0",
     "prettier": "^3.8.3",
