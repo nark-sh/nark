@@ -195,7 +195,7 @@ program
   )
   .option(
     "--corpus <paths>",
-    "Corpus directory path, or comma-separated list of paths (highest precedence first). Default: auto-resolves nark-corpus-private-*, nark-corpus-pro, nark-corpus.",
+    "Corpus directory path, or comma-separated list of paths (highest precedence first). Default: auto-resolves nark-corpus-private-*, @nark-sh/corpus-pro (or legacy nark-corpus-pro), nark-corpus.",
     (() => {
       const fromRc = _narkRc?.corpus;
       if (Array.isArray(fromRc)) return fromRc.join(",");
@@ -2295,7 +2295,7 @@ function getCompactDescription(v: Violation): string {
  *
  * Chain: customer-private > pro > public. Each is opt-in by being installed.
  *   1. nark-corpus-private-<customer> (auto-detected in node_modules)
- *   2. nark-corpus-pro (paid tier)
+ *   2. @nark-sh/corpus-pro (paid tier, GitHub Packages) or legacy nark-corpus-pro
  *   3. nark-corpus (free, public)
  *
  * Backwards compat: the legacy `NARK_CORPUS_PATH` env var, if set, is treated
@@ -2350,17 +2350,27 @@ function findDefaultCorpusPaths(): string[] {
     // node_modules unreadable; fine, skip
   }
 
-  // Try 2: nark-corpus-pro (paid tier)
-  try {
-    const proMod = _require("nark-corpus-pro");
-    if (proMod && typeof proMod.getCorpusPath === "function") {
-      const corpusRoot = path.dirname(proMod.getCorpusPath());
-      if (fs.existsSync(path.join(corpusRoot, "packages"))) {
-        paths.push(corpusRoot);
+  // Try 2: pro corpus (paid tier). We probe both the current package name
+  // (@nark-sh/corpus-pro, GitHub Packages) and the legacy pre-rename name
+  // (nark-corpus-pro, direct git+ssh install). Whichever resolves first
+  // wins. Falling back to legacy keeps existing customer installs working
+  // during the rename cutover.
+  const PRO_PACKAGE_CANDIDATES = ["@nark-sh/corpus-pro", "nark-corpus-pro"];
+  let proResolved = false;
+  for (const pkgName of PRO_PACKAGE_CANDIDATES) {
+    if (proResolved) break;
+    try {
+      const proMod = _require(pkgName);
+      if (proMod && typeof proMod.getCorpusPath === "function") {
+        const corpusRoot = path.dirname(proMod.getCorpusPath());
+        if (fs.existsSync(path.join(corpusRoot, "packages"))) {
+          paths.push(corpusRoot);
+          proResolved = true;
+        }
       }
+    } catch {
+      // This candidate not installed; try the next
     }
-  } catch {
-    // Pro not installed; that's the default state for non-paying users
   }
 
   // Try 3: nark-corpus (public free tier) via npm package
