@@ -65879,7 +65879,7 @@
     "source": "accuracy-roadmap-waves-1-5",
     "package": "@tanstack/react-query",
     "type": "false_positive",
-    "status": "pending",
+    "status": "implemented",
     "description": "Reconfirmation of lead #1 across many wave 5 repos: useInfiniteQuery / useQueries / refetchQueries / prefetchQuery family hooks manage errors in query state, not by throwing. Merge this evidence with lead #1's implementation but track as separate for adjudication auditability.",
     "evidence": {
       "repos": [
@@ -65902,7 +65902,7 @@
       "lead_number_in_readme": 24,
       "notes": "Documented in the accuracy-roadmap README as a scanner-upgrade lead but never filed as a concern. Backfilled 2026-07-12 so scanner-stream has real work when the coordinator boots."
     },
-    "resolution": null
+    "resolution": "Added unconditional suppression in contract-matcher.ts for refetchqueries-silent-failure and prefetchquery-silently-swallows-errors. Both postconditions have near-100% FP rate: refetchQueries never throws by design (throwOnError:false default, errors go into query state), and prefetchQuery silently swallows errors by design (cache-warming pattern). delta: fp_eliminated=7 fp_retained=0 tp_retained=0 tp_dropped=1 (C_conf=0.60, noise-band accepted — see report: work-packages/accuracy-roadmap/scanner-upgrade-log/2026-07-11-tanstack-react-query-refetchqueries-prefetchquery-fp.md)"
   },
   "3530": {
     "id": "concern-20260712-lead-25-rxjs-firstvaluefrom-framework-observables",

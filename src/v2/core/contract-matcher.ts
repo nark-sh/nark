@@ -1931,6 +1931,33 @@ export class ContractMatcher {
         continue;
       }
 
+      // @tanstack/react-query: refetchQueries and prefetchQuery never throw by design.
+      // refetchqueries-silent-failure postcondition is self-contradictory — it documents
+      // throwOnError:false (no throw) but the description claims crash risk. The postcondition
+      // misrepresents the API's actual behavior. refetchQueries errors go into query state.
+      // prefetchquery-silently-swallows-errors: prefetchQuery intentionally never throws —
+      // errors are silently discarded as the designed cache-warming pattern. Fire-and-forget
+      // is correct usage. try-catch around these calls is dead code.
+      // Evidence: concern-20260712-lead-24-tanstack-query-family-hooks-reconfirmation
+      //           (2 refetchqueries-silent-failure FPs in vendure-dashboard, scira-firecrawl;
+      //            5 prefetchquery-silently-swallows-errors FPs in supabase-studio;
+      //            all labeled C=FP with high confidence by wave 5 adjudicators).
+      // WAVE-2B: unconditional — these postconditions have near-100% FP rate.
+      if (
+        detection.packageName === "@tanstack/react-query" &&
+        (primaryPostcondition.id === "refetchqueries-silent-failure" ||
+          primaryPostcondition.id === "prefetchquery-silently-swallows-errors")
+      ) {
+        trace.record(MATCHER_IDS.FRAMEWORK_REACT_QUERY, "passed");
+        this.recordPassedSite(
+          detection,
+          sourceFile,
+          primaryPostcondition.id,
+          MATCHER_IDS.FRAMEWORK_REACT_QUERY,
+        );
+        continue;
+      }
+
       // @tanstack/react-query: error postconditions fire as FPs in three patterns:
       //   1. Custom hook files (useXxx.ts) — wrappers that return {data, error, isError};
       //      error handling is the caller's responsibility.
