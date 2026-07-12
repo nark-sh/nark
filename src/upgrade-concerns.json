@@ -65803,7 +65803,7 @@
     "source": "accuracy-roadmap-waves-1-5",
     "package": "@prisma/client",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "prisma.create() in the false branch of existing ? update : create — flagged for P2002 (unique constraint), but the ternary just confirmed non-existence. P2002 only fires on race conditions unlikely in sequential ETL. Postcondition should recognize the guard pattern.",
     "evidence": {
       "repos": [
@@ -65819,7 +65819,7 @@
       "lead_number_in_readme": 21,
       "notes": "Documented in the accuracy-roadmap README as a scanner-upgrade lead but never filed as a concern. Backfilled 2026-07-12 so scanner-stream has real work when the coordinator boots."
     },
-    "resolution": null
+    "resolution": "Rejected: the tiebreak adjudicator (C verdict) resolved all 4 labeled violations for @prisma/client:create:unique-constraint-violation as TP — including the 2 resi--etl ternary-pattern instances (C_conf=0.65 and 0.60). Implementing a ternary-guard suppression would drop 2 labeled TPs, violating the accuracy gate. The ternary check confirms non-existence at query time but does not eliminate P2002 risk from concurrent writers. Adjudicator reasoning: \"the upsert-via-ternary pattern is race-prone.\" delta: fp_eliminated=0 tp_dropped=0 tp_retained=4 fp_retained=0 (rejection — no code change; report: work-packages/accuracy-roadmap/scanner-upgrade-log/2026-07-11-prisma-client-create-unique-constraint-violation-ternary-rejection.md)"
   },
   "3527": {
     "id": "concern-20260712-lead-22-socket-io-client-on-error-severity",
