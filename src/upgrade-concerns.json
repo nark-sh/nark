@@ -65539,7 +65539,7 @@
     "source": "accuracy-roadmap-waves-1-5",
     "package": "_scanner",
     "type": "false_positive",
-    "status": "pending",
+    "status": "needs-manual",
     "description": "Framework-boundary FPs — Remix loaders/actions, Express middleware, Nest exception filters convert throws to error responses. Postcondition should recognize framework-boundary context and exempt calls within a loader/action/middleware body.",
     "evidence": {
       "repos": [
@@ -65558,7 +65558,7 @@
       "lead_number_in_readme": 11,
       "notes": "Documented in the accuracy-roadmap README as a scanner-upgrade lead but never filed as a concern. Backfilled 2026-07-12 so scanner-stream has real work when the coordinator boots."
     },
-    "resolution": null
+    "resolution": "Framework-boundary FP detection requires scanner infrastructure changes: the scanner currently checks for try-catch around Express middleware factory calls (bodyParser.json(), bodyParser.urlencoded(), cookie-parser, compression, helmet), but these packages deliver errors via next(err) into Express's 4-arg error handler chain — not as async exceptions at the call site. Pre-existing concern concern-2026-04-03-body-parser-1 (key 298, status 'open') documents this architectural gap explicitly. The body-parser ground-truth test (body-parser.ground-truth.test.ts) has a DETECTION MODEL MISMATCH warning and disables SHOULD_NOT_FIRE assertions until this is resolved. The deferred concern chain (keys 1089-1094) confirms: V2 cannot detect middleware error patterns without full HTTP request lifecycle simulation. Affected labels: body-parser:json:malformed-json-throws, body-parser:urlencoded:payload-too-large, cookie-parser:cookieParser:parse-error-propagated, compression:compression:filter-throws, helmet:helmet:config-validation-error — all agreed FP across api-example-firebase-admin-nodejs, reduced-to-cm, trigger.dev-webapp, nestjs-rest-cqrs-example. Requires: (1) scanner ability to detect Express app.use() / app.get() / router middleware chains, (2) check for 4-arg error handler registration, (3) suppress middleware-factory call violations when a 4-arg handler is registered in the same Express app scope. This is a V3/next-generation scanner capability, not a localized matcher fix. Marked needs-manual 2026-07-11 per scope-discipline rule: infra changes required."
   },
   "3517": {
     "id": "concern-20260712-lead-12-axios-validate-status-exempt-429",
