@@ -13,6 +13,8 @@
  *   after-error-swallowed: after() callback error not handled — logged to stderr, never surfaces
  *   update-tag-after-redirect: updateTag() called after redirect() is dead code (redirect throws first)
  *   update-tag-outside-server-action: updateTag() called outside a Server Action throws
+ *   revalidate-after-redirect: revalidatePath() called after redirect() is dead code (concern-20260712-lead-08)
+ *   revalidate-tag-after-redirect: revalidateTag() called after redirect() is dead code (concern-20260712-lead-08)
  *
  * Key behaviors under test (deepen-stream-3 additions):
  *   - forbidden() inside try-catch                → SHOULD_FIRE: forbidden-inside-try-catch
@@ -30,6 +32,11 @@
  *   - updateTag() after redirect()                → SHOULD_FIRE: update-tag-after-redirect
  *   - updateTag() before redirect()               → SHOULD_NOT_FIRE
  *   - updateTag() from Route Handler              → SHOULD_FIRE: update-tag-outside-server-action
+ *   - revalidatePath() with no redirect in scope  → SHOULD_NOT_FIRE (FP fix: concern-20260712-lead-08)
+ *   - revalidatePath() before redirect()          → SHOULD_NOT_FIRE
+ *   - revalidatePath() after redirect()           → SHOULD_FIRE: revalidate-after-redirect
+ *   - revalidateTag() with no redirect in scope   → SHOULD_NOT_FIRE (FP fix: concern-20260712-lead-08)
+ *   - revalidateTag() after redirect()            → SHOULD_FIRE: revalidate-tag-after-redirect
  *
  * Functions from 'next/navigation', 'next/server', 'next/headers', 'next/cache'.
  */

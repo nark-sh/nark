@@ -65461,7 +65461,7 @@
     "source": "accuracy-roadmap-waves-1-5",
     "package": "next",
     "type": "false_positive",
-    "status": "pending",
+    "status": "implemented",
     "description": "revalidate-tag-after-redirect / revalidate-path-after-redirect fires when no redirect() is present in the scope. Rule needs scope-aware check for the actual redirect() call.",
     "evidence": {
       "repos": [
@@ -65479,7 +65479,7 @@
       "lead_number_in_readme": 8,
       "notes": "Documented in the accuracy-roadmap README as a scanner-upgrade lead but never filed as a concern. Backfilled 2026-07-12 so scanner-stream has real work when the coordinator boots."
     },
-    "resolution": null
+    "resolution": "Added revalidatePath and revalidateTag to handleNextSpecialPatterns() in contract-matcher.ts. Both now fire revalidate-after-redirect / revalidate-tag-after-redirect ONLY when redirect() appears before them in the same function scope (scope-aware check via redirectAppearsBeforeInSameScope()). Without redirect in scope, the standard try-catch matcher was incorrectly firing these as generic \"no try-catch\" violations. Also preserved revalidate-tag-deprecated-single-arg detection (single-arg form) within the intercept handler. delta: fp_eliminated=41 (revalidatePath:24 + revalidateTag:17) fp_retained=7 tp_retained=0 tp_dropped=0 (reports: work-packages/accuracy-roadmap/scanner-upgrade-log/2026-07-12-next-revalidatepath-revalidate-after-redirect.md + 2026-07-12-next-revalidatetag-revalidate-tag-after-redirect.md)"
   },
   "3514": {
     "id": "concern-20260712-lead-09-bcryptjs-jwt-typed-inputs",

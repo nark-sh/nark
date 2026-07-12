@@ -561,7 +561,8 @@ export class ContractMatcher {
       //   forbidden-inside-try-catch, unauthorized-inside-try-catch,
       //   connection-missing-await, connection-inside-after,
       //   draft-mode-missing-await, after-error-swallowed,
-      //   update-tag-after-redirect, update-tag-outside-server-action
+      //   update-tag-after-redirect, update-tag-outside-server-action,
+      //   revalidate-after-redirect (concern-20260712-lead-08), revalidate-tag-after-redirect
       if (
         detection.packageName === "next" &&
         (detection.functionName === "redirect" ||
@@ -572,7 +573,9 @@ export class ContractMatcher {
           detection.functionName === "connection" ||
           detection.functionName === "draftMode" ||
           detection.functionName === "after" ||
-          detection.functionName === "updateTag")
+          detection.functionName === "updateTag" ||
+          detection.functionName === "revalidatePath" ||
+          detection.functionName === "revalidateTag")
       ) {
         const nextViolation = this.handleNextSpecialPatterns(
           detection,
@@ -5111,6 +5114,48 @@ export class ContractMatcher {
         );
       }
       return null; // correct: updateTag() in a Server Action before any redirect()
+    }
+
+    // concern-20260712-lead-08: revalidatePath and revalidateTag after redirect.
+    // The contract postconditions revalidate-after-redirect and revalidate-tag-after-redirect
+    // describe dead-code placement (revalidate called AFTER redirect() which throws first).
+    // The standard try-catch matcher fires these on ANY bare revalidatePath/revalidateTag call
+    // because the postcondition `throws` field is populated (with redirect's throw, not their own).
+    // Fix: only fire when redirect() actually appears before the revalidate call in the same scope.
+    // If no redirect() is present, the call is correct (revalidate without redirect = fine).
+    if (fnName === "revalidatePath") {
+      if (redirectAppearsBeforeInSameScope()) {
+        return buildViolation(
+          "revalidate-after-redirect",
+          "revalidatePath() appears after redirect() in the same function scope — redirect() throws RedirectError immediately, so revalidatePath() is dead code that never executes. Call revalidatePath() BEFORE redirect().",
+        );
+      }
+      return null; // correct: revalidatePath() before redirect(), or no redirect in scope
+    }
+
+    if (fnName === "revalidateTag") {
+      // revalidate-tag-after-redirect: only fire when redirect() precedes this call
+      if (redirectAppearsBeforeInSameScope()) {
+        return buildViolation(
+          "revalidate-tag-after-redirect",
+          "revalidateTag() appears after redirect() in the same function scope — redirect() throws RedirectError immediately, so revalidateTag() is dead code that never executes. Call revalidateTag() BEFORE redirect().",
+        );
+      }
+      // revalidate-tag-deprecated-single-arg: fire when called with exactly one argument.
+      // This postcondition applies to all revalidateTag() calls regardless of redirect presence.
+      // Since we intercept all revalidateTag detections here (to suppress the revalidate-after-redirect
+      // FP), we must also handle this postcondition to avoid silently dropping it.
+      // The check: call has exactly 1 argument (the deprecated form) vs 2+ (the current form).
+      if (
+        ts.isCallExpression(node) &&
+        node.arguments.length === 1
+      ) {
+        return buildViolation(
+          "revalidate-tag-deprecated-single-arg",
+          "revalidateTag() called with one argument — the single-arg form is deprecated in Next.js 16. Use revalidateTag(tag, 'max') for stale-while-revalidate semantics or revalidateTag(tag, { expire: 0 }) for immediate expiration.",
+        );
+      }
+      return null; // correct: revalidateTag() with 2+ args, before redirect() or no redirect in scope
     }
 
     return null; // unrecognized function for this handler — should not be reached
