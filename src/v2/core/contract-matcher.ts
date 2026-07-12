@@ -1511,6 +1511,12 @@ export class ContractMatcher {
           "invalid-params",
           "invalid-link-params",
           "search-schema-validation-error",
+          // concern-20260712-lead-02-tanstack-router-useparams-typed:
+          // Route.useParams() is the typed, route-bound variant — TypeScript enforces param
+          // presence at compile time via the file-route type. required-param-missing is always
+          // a false positive for this accessor; the optional generic <T> further confirms the
+          // caller controls the type contract. Evidence: vendure (9 FP), tianji (FP).
+          "required-param-missing",
         ]);
         if (tanStackTypedPostconditions.has(primaryPostcondition.id)) {
           // WAVE-2F: TanStack Router's TypeScript-generated route trees

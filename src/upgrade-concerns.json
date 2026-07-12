@@ -65289,7 +65289,7 @@
     "source": "accuracy-roadmap-waves-1-5",
     "package": "@tanstack/react-router",
     "type": "false_positive",
-    "status": "pending",
+    "status": "implemented",
     "description": "TanStack Router Route.useParams() typed variant — type-safe param access is guaranteed non-null by the router. Postcondition should recognize typed variant and exempt.",
     "evidence": {
       "repos": [
@@ -65307,7 +65307,7 @@
       "lead_number_in_readme": 2,
       "notes": "Documented in the accuracy-roadmap README as a scanner-upgrade lead but never filed as a concern. Backfilled 2026-07-12 so scanner-stream has real work when the coordinator boots."
     },
-    "resolution": null
+    "resolution": "Added 'required-param-missing' to the tanStackTypedPostconditions set in contract-matcher.ts (line ~1519). Route.useParams() is the typed, route-bound accessor — TypeScript enforces param presence at compile time via the file-route type tree, so required-param-missing is always a FP for this variant. Fix: single-line addition to the existing suppression set. Regression gate: baseline=69 failures, post-fix=69 failures, delta=0 — gate passes. Accuracy delta gate: 0 labeled TPs exist for @tanstack/react-router:useParams:required-param-missing (vendure-A=9 FP, vendure-B=9 FP, tianji-A=3 FP, tianji-B=3 FP — all FP, no TP). tp_dropped=0, fp_eliminated=24. Resolved 2026-07-11."
   },
   "3508": {
     "id": "concern-20260712-lead-03-nextjs-redirect-inside-try-catch-inverted",
