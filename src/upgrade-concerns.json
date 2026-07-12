@@ -65779,7 +65779,7 @@
     "source": "accuracy-roadmap-waves-1-5",
     "package": "@prisma/client",
     "type": "false_positive",
-    "status": "pending",
+    "status": "needs-manual",
     "description": "Prisma update with where: { id: models[i].id } from prior findMany — flagged for P2025 (record deleted between findMany and update). In sequential ETL scripts the concurrent-delete risk is unrealistic. Labelers split on real-world risk.",
     "evidence": {
       "repos": [
@@ -65795,7 +65795,7 @@
       "lead_number_in_readme": 20,
       "notes": "Documented in the accuracy-roadmap README as a scanner-upgrade lead but never filed as a concern. Backfilled 2026-07-12 so scanner-stream has real work when the coordinator boots."
     },
-    "resolution": null
+    "resolution": "Needs-manual: The proposed suppression (update-after-findMany-same-ids pattern) requires cross-statement data flow analysis — tracking which variables hold findMany results and whether update.where.id references elements from those results. This is infra-level analysis, not a localized matcher/postcondition change. Additionally, the 402-repo benchmark labels all 3 resi--etl violations as TP (tiebreak-resolved by C, conf=0.6): suppressing them would drop labeled TPs without eliminating any labeled FPs (fp_eliminated=0). The correct user-facing mitigation is a nark-suppression comment on the specific ETL lines. Concern backfilled 2026-07-12; wave 1-5 labeling evidence does not support a scanner-level fix."
   },
   "3526": {
     "id": "concern-20260712-lead-21-prisma-create-false-branch-of-ternary",
