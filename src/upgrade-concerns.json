@@ -65487,7 +65487,7 @@
     "source": "accuracy-roadmap-waves-1-5",
     "package": "bcryptjs",
     "type": "false_positive",
-    "status": "pending",
+    "status": "needs-manual",
     "description": "bcryptjs:hash / jsonwebtoken:sign postconditions become inapplicable when TypeScript types statically exclude the error condition (input is proven non-null / correct type at call site).",
     "evidence": {
       "repos": [
@@ -65506,7 +65506,7 @@
       "lead_number_in_readme": 9,
       "notes": "Documented in the accuracy-roadmap README as a scanner-upgrade lead but never filed as a concern. Backfilled 2026-07-12 so scanner-stream has real work when the coordinator boots."
     },
-    "resolution": null
+    "resolution": "needs-manual: Labeled benchmark analysis shows the described fix would be incorrect or infeasible. Of 27 bcryptjs/jwt disagreements examined in the 402-repo benchmark, the majority of bcryptjs:hash:hash-type-error and bcryptjs:compare:compare-type-error violations have canonical verdict TP (B and C agree TP; A alone votes FP based on typed-input reasoning). A suppression that fires on typed-string arguments would drop labeled TPs — Accuracy Gate would block. The FP pattern that IS consistent across bcryptjs is: (1) explicit null guard before the call (n8n-alt-cli: hashed===null check + typed string — A:FP, B:None, C:FP) and (2) test fixture context (A:FP, B:TP, C:FP in formbricks-apps-web playwright fixture). For jsonwebtoken:sign:sign-invalid-payload, multiple C:FP labels exist when the payload is a literal plain object with typed fields and the secret is a TypeScript non-null assertion (\\!). However, implementing the typed-input check requires using ts.TypeChecker on call-site arguments, which is scanner infrastructure — not a localized matcher/postcondition change. Needs redesign: (a) narrow to explicit-null-guard suppression (detectable via AST, no type checker), or (b) file as a TS type-checker infrastructure request separate from a postcondition change. Do not implement the broad typed-inputs suppression — it would lower recall on genuine TPs."
   },
   "3515": {
     "id": "concern-20260712-lead-10-neon-constructor-vs-query",
