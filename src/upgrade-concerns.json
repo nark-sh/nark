@@ -65681,7 +65681,7 @@
     "source": "accuracy-roadmap-waves-1-5",
     "package": "@prisma/client",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "Prisma seed ordered deleteMany sequences — FK-ordered deletes (children before parents) in seed/ETL scripts get flagged for P2003 risk, but the explicit ordering by design makes constraint violations impossible in single-threaded seed context.",
     "evidence": {
       "repos": [
@@ -65697,7 +65697,7 @@
       "lead_number_in_readme": 16,
       "notes": "Documented in the accuracy-roadmap README as a scanner-upgrade lead but never filed as a concern. Backfilled 2026-07-12 so scanner-stream has real work when the coordinator boots."
     },
-    "resolution": null
+    "resolution": "Rejected: benchmark ground truth says TP, not FP. All 10 resi--etl deleteMany disagreements resolved as TP by tiebreaker C (Opus): A=FP vs B=TP, C=TP — final verdict TP across all 10 instances (lines 25-34). The B/C reasoning is sound: even in an FK-ordered seed sequence, connection failures and orphaned FK refs from partial prior runs can cause P2003 uncaught. Implementing a suppression for seed-file deleteMany would drop 10 labeled TPs and fail the Phase 3.5 accuracy delta gate. The scanner is correct to fire here — the fix belongs in the application code (wrap the ordered delete block in a single try-catch). Scope: concern-3521, rule @prisma/client:deleteMany:deletemany-foreign-key-constraint, resi--etl lead-16."
   },
   "3522": {
     "id": "concern-20260712-lead-17-zod-parse-env-vars-startup",
