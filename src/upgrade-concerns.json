@@ -65655,7 +65655,7 @@
     "source": "accuracy-roadmap-waves-1-5",
     "package": "_scanner",
     "type": "false_positive",
-    "status": "pending",
+    "status": "needs-manual",
     "description": "Thin APIService wrapper delegation — class methods that return axios.get/post/put/delete/patch(...) promise without try-catch are flagged, but the wrapper contract is 'caller handles rejection.' Cannot decide without call-site visibility. Scanner needs wrapper-context detection.",
     "evidence": {
       "repos": [
@@ -65673,7 +65673,7 @@
       "lead_number_in_readme": 15,
       "notes": "Documented in the accuracy-roadmap README as a scanner-upgrade lead but never filed as a concern. Backfilled 2026-07-12 so scanner-stream has real work when the coordinator boots."
     },
-    "resolution": null
+    "resolution": "Attempted bare-return suppression (return axios.METHOD(...) without await => caller handles). Phase 3.5 accuracy gate FAILED: tp_dropped=4 for axios:get:error-4xx-5xx across Maintainerr (line 87), strapi (line 189), plane (line 39). Root cause: labeler disagreement is fundamental. The same structural pattern (bare return of axios promise) produces both agreed-TP (Maintainerr line 87, strapi line 189 — both labelers agree TP) and FP verdicts (plane line 39, nango line 1185 — tiebreaker FP). A general bare-return suppression over-fires on legitimate unhandled-rejection gaps. Requires cross-function call-site analysis to determine if callers actually handle the rejection. That is infrastructure work, not a localized matcher change. Fix reverted. Needs manual triage: (a) accept the 143 FPs as noise, (b) build call-site reachability in a dedicated infra upgrade, or (c) narrow to specific known-safe patterns (e.g. single-expression method body in *service.ts). delta report: work-packages/accuracy-roadmap/scanner-upgrade-log/2026-07-12-axios-get-error-4xx-5xx.md"
   },
   "3521": {
     "id": "concern-20260712-lead-16-prisma-seed-ordered-deletemany",
