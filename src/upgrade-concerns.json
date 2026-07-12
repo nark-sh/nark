@@ -65372,7 +65372,7 @@
     "source": "accuracy-roadmap-waves-1-5",
     "package": "undici",
     "type": "false_positive",
-    "status": "pending",
+    "status": "implemented",
     "description": "Same AST resolution bug as lead #4 — WebSocket.close() and other .close() calls get attributed to undici. Scanner needs stricter package resolution.",
     "evidence": {
       "repos": [
@@ -65389,7 +65389,7 @@
       "lead_number_in_readme": 5,
       "notes": "Documented in the accuracy-roadmap README as a scanner-upgrade lead but never filed as a concern. Backfilled 2026-07-12 so scanner-stream has real work when the coordinator boots."
     },
-    "resolution": null
+    "resolution": "Suppressed dispatcher-close-already-destroyed when .close() is called with arguments (WebSocket.close(code, reason) pattern) or when the member variable name matches WebSocket conventions (ws, websocket, socket, conn, streaming*). Root cause: undici contract class_names includes WebSocket, causing classToPackage to map all WebSocket instances to undici even when the WebSocket is from the native API or ws package, not from an undici Dispatcher. delta: fp_eliminated=14 fp_retained=6 tp_retained=0 tp_dropped=0 (report: work-packages/accuracy-roadmap/scanner-upgrade-log/2026-07-12-undici-close-dispatcher-close-already-destroyed.md)"
   },
   "3511": {
     "id": "concern-20260712-lead-06-refetch-queries-postcondition-contradicts",

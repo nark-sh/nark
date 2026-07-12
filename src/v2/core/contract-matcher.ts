@@ -3846,6 +3846,86 @@ export class ContractMatcher {
         }
       }
 
+      // undici Dispatcher.close(): suppress dispatcher-close-already-destroyed when the
+      // .close() call is on a WebSocket (or similar non-Dispatcher object), not on an
+      // undici Client/Pool/Agent. The undici contract has class_names: [WebSocket, EventSource]
+      // which causes classToPackage to map "WebSocket" → "undici". When a repo imports undici
+      // (e.g. for fetch) AND uses a WebSocket instance, the instance tracker maps the ws
+      // variable to undici. Any ws.close() or this.ws.close() call then fires the Dispatcher
+      // postcondition — a false positive.
+      //
+      // Two discriminating signals:
+      //   1. The close() call has arguments (numeric close code + optional reason string):
+      //      this is the WebSocket close protocol (RFC 6455 §7.1.2). undici Dispatcher.close()
+      //      takes no arguments in normal usage (it returns Promise<void>).
+      //   2. The chain member name before .close is in the set of conventional WebSocket
+      //      variable names: ws, socket, websocket, conn (common in the witsy/hoppscotch
+      //      repos that triggered this concern). Checked case-insensitively.
+      //
+      // Evidence: concern-20260712-lead-05-undici-close-vs-websocket-close (lead #5 in
+      // accuracy-roadmap README). witsy-labels-A/B both agreed FP for:
+      //   this.ws.close(1000, 'Stream ended')    (line 461 — arg check catches this)
+      //   this.streamingSession.close()           (line 154 — was a WebSocket per labels)
+      // hoppscotch: 2 violations matching same pattern.
+      //
+      // The fix does NOT suppress ws.close() on objects that are NOT tracked to undici's
+      // WebSocket class (the importMap path routes those detections correctly).
+      // Reference: .claude/rules/cloud-scan-architecture.md does not apply here.
+      if (
+        detection.packageName === "undici" &&
+        detection.functionName === "close" &&
+        postcondition.id === "dispatcher-close-already-destroyed" &&
+        ts.isCallExpression(detection.node)
+      ) {
+        const callArgs = detection.node.arguments;
+
+        // Signal 1: close() called with arguments → WebSocket.close(code, reason)
+        // undici Dispatcher.close() accepts no positional arguments.
+        if (callArgs.length > 0) {
+          trace.record(
+            MATCHER_IDS.SUPPRESSION_PACKAGE_NOT_IMPORTED,
+            "passed",
+            "undici close() with arguments — WebSocket.close(code, reason), not Dispatcher.close()",
+          );
+          continue;
+        }
+
+        // Signal 2: the chain member name (the variable before .close) matches common
+        // WebSocket variable naming conventions. The chainStr from PropertyChainDetector
+        // is "ws.close", "socket.close", etc. For ThrowingFunctionDetector the metadata
+        // chain is ["ws", "close"]. Either way, the first segment before .close is the var.
+        const chain = detection.metadata?.chain as string[] | undefined;
+        const chainStr = detection.metadata?.chainStr as string | undefined;
+        // Extract the member name that .close() is called on
+        const memberName = chainStr
+          ? chainStr.split(".").slice(-2, -1)[0]?.toLowerCase()   // "ws.close" → "ws"
+          : chain && chain.length >= 2
+            ? chain[chain.length - 2].toLowerCase()               // ["ws", "close"] → "ws"
+            : undefined;
+
+        if (
+          memberName !== undefined &&
+          // Common WebSocket instance variable names in TypeScript codebases
+          (memberName === "ws" ||
+            memberName === "websocket" ||
+            memberName.endsWith("ws") ||
+            memberName.startsWith("ws") ||
+            memberName === "socket" ||
+            memberName === "conn" ||
+            memberName === "connection" ||
+            memberName.includes("socket") ||
+            memberName.includes("websocket") ||
+            memberName.includes("streaming"))
+        ) {
+          trace.record(
+            MATCHER_IDS.SUPPRESSION_PACKAGE_NOT_IMPORTED,
+            "passed",
+            `undici close() on member '${memberName}' — WebSocket/socket variable, not Dispatcher`,
+          );
+          continue;
+        }
+      }
+
       // undici response.json(): suppress response-json-parse-error in React component files
       // and Next.js App Router pages/layouts. These files run in Next.js's error boundary
       // context — uncaught exceptions render the nearest error.tsx boundary, not crash the
