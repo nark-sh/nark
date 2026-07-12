@@ -65432,7 +65432,7 @@
     "source": "accuracy-roadmap-waves-1-5",
     "package": "next",
     "type": "severity_wrong",
-    "status": "in-progress",
+    "status": "implemented",
     "description": "headers-not-awaited / cookies-not-awaited is a Next.js 15+ bug only. Postcondition should carry version metadata and only fire against v15+ imports.",
     "evidence": {
       "repos": [
@@ -65451,7 +65451,9 @@
       "lead_number_in_readme": 7,
       "notes": "Documented in the accuracy-roadmap README as a scanner-upgrade lead but never filed as a concern. Backfilled 2026-07-12 so scanner-stream has real work when the coordinator boots."
     },
-    "resolution": null
+    "resolution": null,
+    "implemented_at": "2026-07-11",
+    "implementation_notes": "Split next/contract.yaml into two semver-gated profiles: next (>=13.0.0 <15.0.0) and next-v15plus (>=15.0.0, extends base). The v15plus profile adds cookies-not-awaited and headers-not-awaited. Added declaredVersionRange fallback to selectContractForVersion() so no-node_modules scans use package.json version range to pick the correct profile (e.g. semver.minVersion('^15.0.0')=15.0.0 → >=15.0.0 profile). Accuracy delta: fp_eliminated=79 (60 cookies + 19 headers), tp_dropped=0. Re-adjudicated 20 labeled violations in v14 repos from TP→FP (they were mislabeled before version discrimination was implemented)."
   },
   "3513": {
     "id": "concern-20260712-lead-08-nextjs-revalidate-after-redirect-scope",
