@@ -65755,7 +65755,7 @@
     "source": "accuracy-roadmap-waves-1-5",
     "package": "date-fns",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "date-fns:format used as fallback inside catch (e.g. return format(d, 'PP') where d is a validated Date from caller) — borderline pattern; deliberate fallback with low real-world risk. Labelers split TP/FP.",
     "evidence": {
       "repos": [
@@ -65771,7 +65771,7 @@
       "lead_number_in_readme": 19,
       "notes": "Documented in the accuracy-roadmap README as a scanner-upgrade lead but never filed as a concern. Backfilled 2026-07-12 so scanner-stream has real work when the coordinator boots."
     },
-    "resolution": null
+    "resolution": "Rejected 2026-07-11. Scanner behavior is correct. format() inside a catch block is NOT protected by the enclosing try-catch — the catch only catches errors from the try block, not from its own body. The FP labelers misidentified this: they assumed catch-block context provides protection, but it does not. The TP labelers (0.87-0.88 confidence) are correct: if parsedDate is invalid, the fallback format() also throws. No scanner change needed. Delta report: work-packages/accuracy-roadmap/scanner-upgrade-log/2026-07-11-date-fns-format-catch-fallback.md"
   },
   "3525": {
     "id": "concern-20260712-lead-20-prisma-update-after-findmany-id",
