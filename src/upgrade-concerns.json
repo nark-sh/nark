@@ -65705,7 +65705,7 @@
     "source": "accuracy-roadmap-waves-1-5",
     "package": "zod",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "zod:parse on env vars at startup — intentional crash on missing/invalid env var is the correct pattern; wrapping in try-catch would hide config bugs. Postcondition should recognize env-var validation context at module/startup scope.",
     "evidence": {
       "repos": [
@@ -65723,7 +65723,7 @@
       "lead_number_in_readme": 17,
       "notes": "Documented in the accuracy-roadmap README as a scanner-upgrade lead but never filed as a concern. Backfilled 2026-07-12 so scanner-stream has real work when the coordinator boots."
     },
-    "resolution": null
+    "resolution": "Rejected: The benchmark ground truth contradicts the FP premise. Both evidence violations (nextjs-saas-starter-kit-lite:7:10, 14:10) were labeled by 3 labelers — A said FP (intentional startup crash), but B and C both said TP (ZodError from missing env var is a real unhandled crash). Tiebreak resolves as TP (2/3). The \"intentional crash on missing env var is correct\" argument is valid design philosophy but does NOT make the violation a scanner FP — nark correctly surfaces it so the developer can make an explicit choice (use safeParse, or call process.exit(1) with a descriptive message). The existing isZodAssertionStyleParse() suppressor already handles top-level variable declarations (const config = schema.parse(...)) and short config-callback functions. Named functions like getSupabaseClientKeys() that return schema.parse() are correctly flagged as needing explicit error handling. Implementing a suppression would drop labeled TPs and fail the accuracy gate. Evidence volume is also below threshold (2 violations, 1 repo)."
   },
   "3523": {
     "id": "concern-20260712-lead-18-fs-extra-cleanup-in-catch-finally",
