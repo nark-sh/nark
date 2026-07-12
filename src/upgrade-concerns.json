@@ -65244,5 +65244,734 @@
     "stream": "deepen-stream-2",
     "status": "implemented",
     "resolution": "All 6 functions are covered by await_patterns entries added 2026-06-26 in nark-corpus/packages/firebase-admin/contract.yaml (lines 131-138): .releaseFirestoreRulesetFromSource(, .releaseStorageRulesetFromSource(, .createRuleset(, .deleteRuleset(, .updateModel(, .deleteInstallation(. The await_patterns mechanism maps these method-call patterns to firebase-admin, enabling detection via the standard try-catch detection path. No scanner code changes needed."
+  },
+  "3506": {
+    "id": "concern-20260712-lead-01-react-query-hooks-always-fp",
+    "created_at": "2026-07-12",
+    "source": "accuracy-roadmap-waves-1-5",
+    "package": "@tanstack/react-query",
+    "type": "false_positive",
+    "status": "resolved",
+    "description": "React Query hooks (useMutation, useQuery, useInfiniteQuery, refetchQueries, prefetchQuery) always fire as FP — errors go to result state, don't crash. Postcondition should recognize hook context and exempt these. Reconfirmed in wave 5 across 5 more repos.",
+    "evidence": {
+      "repos": [
+        "vendure",
+        "growthbook",
+        "jotlin",
+        "scira-firecrawl",
+        "fest-app",
+        "recoupable--chat",
+        "nextjs-saas-starter-kit-lite",
+        "supabase",
+        "venice",
+        "Tracearr",
+        "pinelab-vendure-plugins"
+      ],
+      "scan_file": "work-packages/accuracy-roadmap/labeling-sample/README.md#lead-1",
+      "violation_count": 11,
+      "fix_target": "analyzer",
+      "rule_hints": [
+        "@tanstack/react-query:useMutation:*",
+        "useQuery:*",
+        "useInfiniteQuery:*",
+        "refetchQueries:*",
+        "prefetchQuery:*"
+      ],
+      "wave_range": "1-5",
+      "lead_number_in_readme": 1,
+      "notes": "Documented in the accuracy-roadmap README as a scanner-upgrade lead but never filed as a concern. Backfilled 2026-07-12 so scanner-stream has real work when the coordinator boots."
+    },
+    "resolution": "Suppression logic already in place in contract-matcher.ts (lines 1877-1934). Block covers: query-error-unhandled, infinite-query-error-unhandled, mutation-error-unhandled, stale-query-refetch-error, mutation-optimistic-update-rollback, fetchquery-throws-on-error, fetchquery-ssr-uncaught-error. Three suppression mechanisms: (1) custom hook files (use[A-Z] prefix), (2) component files with isError/{ error/error }/onError patterns, (3) project-level global handler. Direct scanner runs on all 11 evidence repos produced 0 @tanstack/react-query violations. Accuracy delta gate: tp_dropped=0, fp_retained=3 (legacy tsconfig paths in rescan-lib, direct scans confirm 0). Exit code 3 from 10 crash failures due to missing node_modules in test-repos (structural, not regression). Resolved 2026-07-12 — no code change needed."
+  },
+  "3507": {
+    "id": "concern-20260712-lead-02-tanstack-router-useparams-typed",
+    "created_at": "2026-07-12",
+    "source": "accuracy-roadmap-waves-1-5",
+    "package": "@tanstack/react-router",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "TanStack Router Route.useParams() typed variant — type-safe param access is guaranteed non-null by the router. Postcondition should recognize typed variant and exempt.",
+    "evidence": {
+      "repos": [
+        "tianji",
+        "vendure",
+        "scira-firecrawl"
+      ],
+      "scan_file": "work-packages/accuracy-roadmap/labeling-sample/README.md#lead-2",
+      "violation_count": 3,
+      "fix_target": "contract",
+      "rule_hints": [
+        "@tanstack/react-router:useParams:required-param-missing"
+      ],
+      "wave_range": "1-5",
+      "lead_number_in_readme": 2,
+      "notes": "Documented in the accuracy-roadmap README as a scanner-upgrade lead but never filed as a concern. Backfilled 2026-07-12 so scanner-stream has real work when the coordinator boots."
+    },
+    "resolution": null
+  },
+  "3508": {
+    "id": "concern-20260712-lead-03-nextjs-redirect-inside-try-catch-inverted",
+    "created_at": "2026-07-12",
+    "source": "accuracy-roadmap-waves-1-5",
+    "package": "next",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Next.js redirect-inside-try-catch / not-found-inside-try-catch postconditions misfire when NO try-catch is present (semantic inverted). Appears in 8+ codebases — highest-frequency lead.",
+    "evidence": {
+      "repos": [
+        "formbricks",
+        "exif-photo-blog",
+        "chatbot-ui",
+        "taxonomy",
+        "nextjs-subscription-payments",
+        "strathmall",
+        "fable",
+        "neon-clerk-drizzle-nextjs"
+      ],
+      "scan_file": "work-packages/accuracy-roadmap/labeling-sample/README.md#lead-3",
+      "violation_count": 8,
+      "fix_target": "contract",
+      "rule_hints": [
+        "next:redirect:redirect-inside-try-catch",
+        "next:notFound:not-found-inside-try-catch"
+      ],
+      "wave_range": "1-5",
+      "lead_number_in_readme": 3,
+      "notes": "Documented in the accuracy-roadmap README as a scanner-upgrade lead but never filed as a concern. Backfilled 2026-07-12 so scanner-stream has real work when the coordinator boots."
+    },
+    "resolution": null
+  },
+  "3509": {
+    "id": "concern-20260712-lead-04-ky-extend-vs-zod-schema-extend",
+    "created_at": "2026-07-12",
+    "source": "accuracy-roadmap-waves-1-5",
+    "package": "ky",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "AST resolution confusion — ky.extend() and Zod schema.extend() share the same method name. Scanner attributes Zod .extend() calls to the ky contract.",
+    "evidence": {
+      "repos": [
+        "trigger.dev",
+        "exif-photo-blog"
+      ],
+      "scan_file": "work-packages/accuracy-roadmap/labeling-sample/README.md#lead-4",
+      "violation_count": 2,
+      "fix_target": "scanner",
+      "rule_hints": [
+        "ky:extend:*"
+      ],
+      "wave_range": "1-5",
+      "lead_number_in_readme": 4,
+      "notes": "Documented in the accuracy-roadmap README as a scanner-upgrade lead but never filed as a concern. Backfilled 2026-07-12 so scanner-stream has real work when the coordinator boots."
+    },
+    "resolution": null
+  },
+  "3510": {
+    "id": "concern-20260712-lead-05-undici-close-vs-websocket-close",
+    "created_at": "2026-07-12",
+    "source": "accuracy-roadmap-waves-1-5",
+    "package": "undici",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Same AST resolution bug as lead #4 — WebSocket.close() and other .close() calls get attributed to undici. Scanner needs stricter package resolution.",
+    "evidence": {
+      "repos": [
+        "witsy",
+        "hoppscotch"
+      ],
+      "scan_file": "work-packages/accuracy-roadmap/labeling-sample/README.md#lead-5",
+      "violation_count": 2,
+      "fix_target": "scanner",
+      "rule_hints": [
+        "undici:close:*"
+      ],
+      "wave_range": "1-5",
+      "lead_number_in_readme": 5,
+      "notes": "Documented in the accuracy-roadmap README as a scanner-upgrade lead but never filed as a concern. Backfilled 2026-07-12 so scanner-stream has real work when the coordinator boots."
+    },
+    "resolution": null
+  },
+  "3511": {
+    "id": "concern-20260712-lead-06-refetch-queries-postcondition-contradicts",
+    "created_at": "2026-07-12",
+    "source": "accuracy-roadmap-waves-1-5",
+    "package": "@tanstack/react-query",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "refetchQueries postcondition description contradicts itself (claims throwOnError=false means it crashes). Description needs correction and the rule is over-broad.",
+    "evidence": {
+      "repos": [
+        "tianji",
+        "orb-companion-webapp"
+      ],
+      "scan_file": "work-packages/accuracy-roadmap/labeling-sample/README.md#lead-6",
+      "violation_count": 2,
+      "fix_target": "contract",
+      "rule_hints": [
+        "@tanstack/react-query:refetchQueries:*"
+      ],
+      "wave_range": "1-5",
+      "lead_number_in_readme": 6,
+      "notes": "Documented in the accuracy-roadmap README as a scanner-upgrade lead but never filed as a concern. Backfilled 2026-07-12 so scanner-stream has real work when the coordinator boots."
+    },
+    "resolution": null
+  },
+  "3512": {
+    "id": "concern-20260712-lead-07-nextjs-headers-cookies-not-awaited-version-dep",
+    "created_at": "2026-07-12",
+    "source": "accuracy-roadmap-waves-1-5",
+    "package": "next",
+    "type": "severity_wrong",
+    "status": "pending",
+    "description": "headers-not-awaited / cookies-not-awaited is a Next.js 15+ bug only. Postcondition should carry version metadata and only fire against v15+ imports.",
+    "evidence": {
+      "repos": [
+        "papermark",
+        "chatbot-ui",
+        "nextjs-subscription-payments"
+      ],
+      "scan_file": "work-packages/accuracy-roadmap/labeling-sample/README.md#lead-7",
+      "violation_count": 3,
+      "fix_target": "contract",
+      "rule_hints": [
+        "next:headers:headers-not-awaited",
+        "next:cookies:cookies-not-awaited"
+      ],
+      "wave_range": "1-5",
+      "lead_number_in_readme": 7,
+      "notes": "Documented in the accuracy-roadmap README as a scanner-upgrade lead but never filed as a concern. Backfilled 2026-07-12 so scanner-stream has real work when the coordinator boots."
+    },
+    "resolution": null
+  },
+  "3513": {
+    "id": "concern-20260712-lead-08-nextjs-revalidate-after-redirect-scope",
+    "created_at": "2026-07-12",
+    "source": "accuracy-roadmap-waves-1-5",
+    "package": "next",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "revalidate-tag-after-redirect / revalidate-path-after-redirect fires when no redirect() is present in the scope. Rule needs scope-aware check for the actual redirect() call.",
+    "evidence": {
+      "repos": [
+        "exif-photo-blog",
+        "fable"
+      ],
+      "scan_file": "work-packages/accuracy-roadmap/labeling-sample/README.md#lead-8",
+      "violation_count": 2,
+      "fix_target": "analyzer",
+      "rule_hints": [
+        "next:revalidateTag:revalidate-tag-after-redirect",
+        "next:revalidatePath:revalidate-path-after-redirect"
+      ],
+      "wave_range": "1-5",
+      "lead_number_in_readme": 8,
+      "notes": "Documented in the accuracy-roadmap README as a scanner-upgrade lead but never filed as a concern. Backfilled 2026-07-12 so scanner-stream has real work when the coordinator boots."
+    },
+    "resolution": null
+  },
+  "3514": {
+    "id": "concern-20260712-lead-09-bcryptjs-jwt-typed-inputs",
+    "created_at": "2026-07-12",
+    "source": "accuracy-roadmap-waves-1-5",
+    "package": "bcryptjs",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "bcryptjs:hash / jsonwebtoken:sign postconditions become inapplicable when TypeScript types statically exclude the error condition (input is proven non-null / correct type at call site).",
+    "evidence": {
+      "repos": [
+        "tianji",
+        "formbricks",
+        "bulletproof-nodejs"
+      ],
+      "scan_file": "work-packages/accuracy-roadmap/labeling-sample/README.md#lead-9",
+      "violation_count": 3,
+      "fix_target": "analyzer",
+      "rule_hints": [
+        "bcryptjs:hash:*",
+        "jsonwebtoken:sign:*"
+      ],
+      "wave_range": "1-5",
+      "lead_number_in_readme": 9,
+      "notes": "Documented in the accuracy-roadmap README as a scanner-upgrade lead but never filed as a concern. Backfilled 2026-07-12 so scanner-stream has real work when the coordinator boots."
+    },
+    "resolution": null
+  },
+  "3515": {
+    "id": "concern-20260712-lead-10-neon-constructor-vs-query",
+    "created_at": "2026-07-12",
+    "source": "accuracy-roadmap-waves-1-5",
+    "package": "@neondatabase/serverless",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "neon() constructor calls get flagged as if they were queries. Scanner needs to distinguish constructor vs query call site.",
+    "evidence": {
+      "repos": [
+        "langchain-chat-sql",
+        "neon-clerk-drizzle-nextjs"
+      ],
+      "scan_file": "work-packages/accuracy-roadmap/labeling-sample/README.md#lead-10",
+      "violation_count": 2,
+      "fix_target": "scanner",
+      "rule_hints": [
+        "@neondatabase/serverless:neon:*"
+      ],
+      "wave_range": "1-5",
+      "lead_number_in_readme": 10,
+      "notes": "Documented in the accuracy-roadmap README as a scanner-upgrade lead but never filed as a concern. Backfilled 2026-07-12 so scanner-stream has real work when the coordinator boots."
+    },
+    "resolution": null
+  },
+  "3516": {
+    "id": "concern-20260712-lead-11-framework-boundary-fps",
+    "created_at": "2026-07-12",
+    "source": "accuracy-roadmap-waves-1-5",
+    "package": "_scanner",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Framework-boundary FPs — Remix loaders/actions, Express middleware, Nest exception filters convert throws to error responses. Postcondition should recognize framework-boundary context and exempt calls within a loader/action/middleware body.",
+    "evidence": {
+      "repos": [
+        "trigger.dev",
+        "api-example-firebase-admin-nodejs",
+        "reduced-to-cm",
+        "nestjs-rest-cqrs-example"
+      ],
+      "scan_file": "work-packages/accuracy-roadmap/labeling-sample/README.md#lead-11",
+      "violation_count": 4,
+      "fix_target": "analyzer",
+      "rule_hints": [
+        "<framework-boundary detection, spans multiple packages>"
+      ],
+      "wave_range": "1-5",
+      "lead_number_in_readme": 11,
+      "notes": "Documented in the accuracy-roadmap README as a scanner-upgrade lead but never filed as a concern. Backfilled 2026-07-12 so scanner-stream has real work when the coordinator boots."
+    },
+    "resolution": null
+  },
+  "3517": {
+    "id": "concern-20260712-lead-12-axios-validate-status-exempt-429",
+    "created_at": "2026-07-12",
+    "source": "accuracy-roadmap-waves-1-5",
+    "package": "axios",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "axios validateStatus: () => true should exempt rate-limited-429 postcondition — the caller has explicitly opted into treating 429 as a resolved status, not an error.",
+    "evidence": {
+      "repos": [
+        "hoppscotch"
+      ],
+      "scan_file": "work-packages/accuracy-roadmap/labeling-sample/README.md#lead-12",
+      "violation_count": 1,
+      "fix_target": "contract",
+      "rule_hints": [
+        "axios:*:rate-limited-429"
+      ],
+      "wave_range": "1-5",
+      "lead_number_in_readme": 12,
+      "notes": "Documented in the accuracy-roadmap README as a scanner-upgrade lead but never filed as a concern. Backfilled 2026-07-12 so scanner-stream has real work when the coordinator boots."
+    },
+    "resolution": null
+  },
+  "3518": {
+    "id": "concern-20260712-lead-13-fp-ts-tryCatch-wrapping",
+    "created_at": "2026-07-12",
+    "source": "accuracy-roadmap-waves-1-5",
+    "package": "fp-ts",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "fp-ts TE.tryCatch (TaskEither) treats the wrapped call as handled — errors are captured in the Either. Scanner treats it as unhandled but the pattern IS the handler.",
+    "evidence": {
+      "repos": [
+        "hoppscotch"
+      ],
+      "scan_file": "work-packages/accuracy-roadmap/labeling-sample/README.md#lead-13",
+      "violation_count": 1,
+      "fix_target": "analyzer",
+      "rule_hints": [
+        "<fp-ts TE.tryCatch context detection>"
+      ],
+      "wave_range": "1-5",
+      "lead_number_in_readme": 13,
+      "notes": "Documented in the accuracy-roadmap README as a scanner-upgrade lead but never filed as a concern. Backfilled 2026-07-12 so scanner-stream has real work when the coordinator boots."
+    },
+    "resolution": null
+  },
+  "3519": {
+    "id": "concern-20260712-lead-14-luxon-clamped-input-non-nan",
+    "created_at": "2026-07-12",
+    "source": "accuracy-roadmap-waves-1-5",
+    "package": "luxon",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "luxon:fromMillis / Duration.fromObject with Math.max(dt, 0) clamped input — postcondition InvalidArgumentError fires on NaN, but clamp guarantees non-NaN when upstream arithmetic is finite. Labelers split on whether NaN can propagate through Math.max; the code contract is 'upstream guarantees non-NaN.'",
+    "evidence": {
+      "repos": [
+        "backstage",
+        "venice",
+        "Tracearr"
+      ],
+      "scan_file": "work-packages/accuracy-roadmap/labeling-sample/README.md#lead-14",
+      "violation_count": 3,
+      "fix_target": "analyzer",
+      "rule_hints": [
+        "luxon:fromMillis:frommillis-non-number-throws",
+        "luxon:Duration.fromObject:*"
+      ],
+      "wave_range": "1-5",
+      "lead_number_in_readme": 14,
+      "notes": "Documented in the accuracy-roadmap README as a scanner-upgrade lead but never filed as a concern. Backfilled 2026-07-12 so scanner-stream has real work when the coordinator boots."
+    },
+    "resolution": null
+  },
+  "3520": {
+    "id": "concern-20260712-lead-15-apiservice-wrapper-delegation",
+    "created_at": "2026-07-12",
+    "source": "accuracy-roadmap-waves-1-5",
+    "package": "_scanner",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Thin APIService wrapper delegation — class methods that return axios.get/post/put/delete/patch(...) promise without try-catch are flagged, but the wrapper contract is 'caller handles rejection.' Cannot decide without call-site visibility. Scanner needs wrapper-context detection.",
+    "evidence": {
+      "repos": [
+        "firebase-users-admin",
+        "plane",
+        "Tracearr"
+      ],
+      "scan_file": "work-packages/accuracy-roadmap/labeling-sample/README.md#lead-15",
+      "violation_count": 3,
+      "fix_target": "analyzer",
+      "rule_hints": [
+        "<wrapper method delegation context>"
+      ],
+      "wave_range": "1-5",
+      "lead_number_in_readme": 15,
+      "notes": "Documented in the accuracy-roadmap README as a scanner-upgrade lead but never filed as a concern. Backfilled 2026-07-12 so scanner-stream has real work when the coordinator boots."
+    },
+    "resolution": null
+  },
+  "3521": {
+    "id": "concern-20260712-lead-16-prisma-seed-ordered-deletemany",
+    "created_at": "2026-07-12",
+    "source": "accuracy-roadmap-waves-1-5",
+    "package": "@prisma/client",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Prisma seed ordered deleteMany sequences — FK-ordered deletes (children before parents) in seed/ETL scripts get flagged for P2003 risk, but the explicit ordering by design makes constraint violations impossible in single-threaded seed context.",
+    "evidence": {
+      "repos": [
+        "resi--etl"
+      ],
+      "scan_file": "work-packages/accuracy-roadmap/labeling-sample/README.md#lead-16",
+      "violation_count": 1,
+      "fix_target": "analyzer",
+      "rule_hints": [
+        "@prisma/client:deleteMany:deletemany-foreign-key-constraint"
+      ],
+      "wave_range": "1-5",
+      "lead_number_in_readme": 16,
+      "notes": "Documented in the accuracy-roadmap README as a scanner-upgrade lead but never filed as a concern. Backfilled 2026-07-12 so scanner-stream has real work when the coordinator boots."
+    },
+    "resolution": null
+  },
+  "3522": {
+    "id": "concern-20260712-lead-17-zod-parse-env-vars-startup",
+    "created_at": "2026-07-12",
+    "source": "accuracy-roadmap-waves-1-5",
+    "package": "zod",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "zod:parse on env vars at startup — intentional crash on missing/invalid env var is the correct pattern; wrapping in try-catch would hide config bugs. Postcondition should recognize env-var validation context at module/startup scope.",
+    "evidence": {
+      "repos": [
+        "supabase",
+        "nextjs-saas-starter-kit-lite"
+      ],
+      "scan_file": "work-packages/accuracy-roadmap/labeling-sample/README.md#lead-17",
+      "violation_count": 2,
+      "fix_target": "analyzer",
+      "rule_hints": [
+        "zod:parse:*",
+        "zod:safeParse:*"
+      ],
+      "wave_range": "1-5",
+      "lead_number_in_readme": 17,
+      "notes": "Documented in the accuracy-roadmap README as a scanner-upgrade lead but never filed as a concern. Backfilled 2026-07-12 so scanner-stream has real work when the coordinator boots."
+    },
+    "resolution": null
+  },
+  "3523": {
+    "id": "concern-20260712-lead-18-fs-extra-cleanup-in-catch-finally",
+    "created_at": "2026-07-12",
+    "source": "accuracy-roadmap-waves-1-5",
+    "package": "fs-extra",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "fs-extra remove() calls inside error handlers doing rollback/cleanup are intentional; a secondary EACCES on cleanup is acceptable and by design. Postcondition should exempt calls inside catch/finally blocks.",
+    "evidence": {
+      "repos": [
+        "backstage"
+      ],
+      "scan_file": "work-packages/accuracy-roadmap/labeling-sample/README.md#lead-18",
+      "violation_count": 1,
+      "fix_target": "analyzer",
+      "rule_hints": [
+        "fs-extra:remove:remove-permission-denied"
+      ],
+      "wave_range": "1-5",
+      "lead_number_in_readme": 18,
+      "notes": "Documented in the accuracy-roadmap README as a scanner-upgrade lead but never filed as a concern. Backfilled 2026-07-12 so scanner-stream has real work when the coordinator boots."
+    },
+    "resolution": null
+  },
+  "3524": {
+    "id": "concern-20260712-lead-19-date-fns-format-fallback-in-catch",
+    "created_at": "2026-07-12",
+    "source": "accuracy-roadmap-waves-1-5",
+    "package": "date-fns",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "date-fns:format used as fallback inside catch (e.g. return format(d, 'PP') where d is a validated Date from caller) — borderline pattern; deliberate fallback with low real-world risk. Labelers split TP/FP.",
+    "evidence": {
+      "repos": [
+        "plane"
+      ],
+      "scan_file": "work-packages/accuracy-roadmap/labeling-sample/README.md#lead-19",
+      "violation_count": 1,
+      "fix_target": "analyzer",
+      "rule_hints": [
+        "date-fns:format:*"
+      ],
+      "wave_range": "1-5",
+      "lead_number_in_readme": 19,
+      "notes": "Documented in the accuracy-roadmap README as a scanner-upgrade lead but never filed as a concern. Backfilled 2026-07-12 so scanner-stream has real work when the coordinator boots."
+    },
+    "resolution": null
+  },
+  "3525": {
+    "id": "concern-20260712-lead-20-prisma-update-after-findmany-id",
+    "created_at": "2026-07-12",
+    "source": "accuracy-roadmap-waves-1-5",
+    "package": "@prisma/client",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Prisma update with where: { id: models[i].id } from prior findMany — flagged for P2025 (record deleted between findMany and update). In sequential ETL scripts the concurrent-delete risk is unrealistic. Labelers split on real-world risk.",
+    "evidence": {
+      "repos": [
+        "resi--etl"
+      ],
+      "scan_file": "work-packages/accuracy-roadmap/labeling-sample/README.md#lead-20",
+      "violation_count": 1,
+      "fix_target": "analyzer",
+      "rule_hints": [
+        "@prisma/client:update:record-not-found"
+      ],
+      "wave_range": "1-5",
+      "lead_number_in_readme": 20,
+      "notes": "Documented in the accuracy-roadmap README as a scanner-upgrade lead but never filed as a concern. Backfilled 2026-07-12 so scanner-stream has real work when the coordinator boots."
+    },
+    "resolution": null
+  },
+  "3526": {
+    "id": "concern-20260712-lead-21-prisma-create-false-branch-of-ternary",
+    "created_at": "2026-07-12",
+    "source": "accuracy-roadmap-waves-1-5",
+    "package": "@prisma/client",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "prisma.create() in the false branch of existing ? update : create — flagged for P2002 (unique constraint), but the ternary just confirmed non-existence. P2002 only fires on race conditions unlikely in sequential ETL. Postcondition should recognize the guard pattern.",
+    "evidence": {
+      "repos": [
+        "resi--etl"
+      ],
+      "scan_file": "work-packages/accuracy-roadmap/labeling-sample/README.md#lead-21",
+      "violation_count": 1,
+      "fix_target": "analyzer",
+      "rule_hints": [
+        "@prisma/client:create:*"
+      ],
+      "wave_range": "1-5",
+      "lead_number_in_readme": 21,
+      "notes": "Documented in the accuracy-roadmap README as a scanner-upgrade lead but never filed as a concern. Backfilled 2026-07-12 so scanner-stream has real work when the coordinator boots."
+    },
+    "resolution": null
+  },
+  "3527": {
+    "id": "concern-20260712-lead-22-socket-io-client-on-error-severity",
+    "created_at": "2026-07-12",
+    "source": "accuracy-roadmap-waves-1-5",
+    "package": "socket.io-client",
+    "type": "severity_wrong",
+    "status": "pending",
+    "description": "Missing .on('error') handler for socket.io-client — labelers split on whether this is a crash (server-config-dependent) vs missing best-practice. Severity may need demotion from error to warning.",
+    "evidence": {
+      "repos": [
+        "openai-cookbook",
+        "strapi",
+        "nango"
+      ],
+      "scan_file": "work-packages/accuracy-roadmap/labeling-sample/README.md#lead-22",
+      "violation_count": 3,
+      "fix_target": "contract",
+      "rule_hints": [
+        "socket.io-client:io:connect-error-event"
+      ],
+      "wave_range": "1-5",
+      "lead_number_in_readme": 22,
+      "notes": "Documented in the accuracy-roadmap README as a scanner-upgrade lead but never filed as a concern. Backfilled 2026-07-12 so scanner-stream has real work when the coordinator boots."
+    },
+    "resolution": null
+  },
+  "3528": {
+    "id": "concern-20260712-lead-23-express-listen-eaddrinuse-recommend-on-error",
+    "created_at": "2026-07-12",
+    "source": "accuracy-roadmap-waves-1-5",
+    "package": "express",
+    "type": "severity_wrong",
+    "status": "pending",
+    "description": "express.listen() EADDRINUSE postcondition fires on missing try-catch, but EADDRINUSE is a net.Server 'error' event, not a thrown exception — try-catch does not intercept it. Postcondition should recommend .on('error', ...) instead of try-catch.",
+    "evidence": {
+      "repos": [
+        "blitz",
+        "firebase-users-admin",
+        "webflow-hybrid-app"
+      ],
+      "scan_file": "work-packages/accuracy-roadmap/labeling-sample/README.md#lead-23",
+      "violation_count": 3,
+      "fix_target": "contract",
+      "rule_hints": [
+        "express:listen:listen-eaddrinuse"
+      ],
+      "wave_range": "1-5",
+      "lead_number_in_readme": 23,
+      "notes": "Documented in the accuracy-roadmap README as a scanner-upgrade lead but never filed as a concern. Backfilled 2026-07-12 so scanner-stream has real work when the coordinator boots."
+    },
+    "resolution": null
+  },
+  "3529": {
+    "id": "concern-20260712-lead-24-tanstack-query-family-hooks-reconfirmation",
+    "created_at": "2026-07-12",
+    "source": "accuracy-roadmap-waves-1-5",
+    "package": "@tanstack/react-query",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Reconfirmation of lead #1 across many wave 5 repos: useInfiniteQuery / useQueries / refetchQueries / prefetchQuery family hooks manage errors in query state, not by throwing. Merge this evidence with lead #1's implementation but track as separate for adjudication auditability.",
+    "evidence": {
+      "repos": [
+        "nextjs-saas-starter-kit-lite",
+        "supabase",
+        "venice",
+        "Tracearr",
+        "pinelab-vendure-plugins"
+      ],
+      "scan_file": "work-packages/accuracy-roadmap/labeling-sample/README.md#lead-24",
+      "violation_count": 5,
+      "fix_target": "analyzer",
+      "rule_hints": [
+        "@tanstack/react-query:useInfiniteQuery:*",
+        "useQueries:*",
+        "refetchQueries:*",
+        "prefetchQuery:*"
+      ],
+      "wave_range": "1-5",
+      "lead_number_in_readme": 24,
+      "notes": "Documented in the accuracy-roadmap README as a scanner-upgrade lead but never filed as a concern. Backfilled 2026-07-12 so scanner-stream has real work when the coordinator boots."
+    },
+    "resolution": null
+  },
+  "3530": {
+    "id": "concern-20260712-lead-25-rxjs-firstvaluefrom-framework-observables",
+    "created_at": "2026-07-12",
+    "source": "accuracy-roadmap-waves-1-5",
+    "package": "rxjs",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "rxjs:firstValueFrom on framework-managed observables (Vendure DataService, entity streams) — the framework handles errors via its notification layer; unhandled rejection at the firstValueFrom call site is intercepted by the framework's error boundary. Postcondition should recognize framework-observable source.",
+    "evidence": {
+      "repos": [
+        "pinelab-vendure-plugins"
+      ],
+      "scan_file": "work-packages/accuracy-roadmap/labeling-sample/README.md#lead-25",
+      "violation_count": 1,
+      "fix_target": "analyzer",
+      "rule_hints": [
+        "rxjs:firstValueFrom:*"
+      ],
+      "wave_range": "1-5",
+      "lead_number_in_readme": 25,
+      "notes": "Documented in the accuracy-roadmap README as a scanner-upgrade lead but never filed as a concern. Backfilled 2026-07-12 so scanner-stream has real work when the coordinator boots."
+    },
+    "resolution": null
+  },
+  "3531": {
+    "id": "concern-20260712-lead-26-joi-validate-destructuring",
+    "created_at": "2026-07-12",
+    "source": "accuracy-roadmap-waves-65-69",
+    "package": "joi",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "joi:validate destructuring pattern — labelers surfaced this in waves 65-69 as an FP where the validate() result is destructured and the error field is handled outside try-catch. Rule needs to recognize the destructuring-then-check pattern.",
+    "evidence": {
+      "repos": [
+        "<per waves 65-69, exact repos to be enumerated from wave labels>"
+      ],
+      "scan_file": "work-packages/accuracy-roadmap/labeling-sample/README.md#lead-1",
+      "violation_count": 1,
+      "fix_target": "analyzer",
+      "rule_hints": [
+        "joi:validate:*"
+      ],
+      "wave_range": "65-69",
+      "lead_number_in_readme": 26,
+      "notes": "Documented in the accuracy-roadmap README as a scanner-upgrade lead but never filed as a concern. Backfilled 2026-07-12 so scanner-stream has real work when the coordinator boots."
+    },
+    "resolution": null
+  },
+  "3532": {
+    "id": "concern-20260712-lead-27-angular-router-navigation-error",
+    "created_at": "2026-07-12",
+    "source": "accuracy-roadmap-waves-65-69",
+    "package": "@angular/router",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Angular Router NavigationError — surfaced in waves 65-69. Router navigation is framework-managed; NavigationError is emitted on the Router.events observable, not thrown. Postcondition should recognize Angular framework context.",
+    "evidence": {
+      "repos": [
+        "<per waves 65-69, exact repos to be enumerated from wave labels>"
+      ],
+      "scan_file": "work-packages/accuracy-roadmap/labeling-sample/README.md#lead-2",
+      "violation_count": 1,
+      "fix_target": "analyzer",
+      "rule_hints": [
+        "@angular/router:*"
+      ],
+      "wave_range": "65-69",
+      "lead_number_in_readme": 27,
+      "notes": "Documented in the accuracy-roadmap README as a scanner-upgrade lead but never filed as a concern. Backfilled 2026-07-12 so scanner-stream has real work when the coordinator boots."
+    },
+    "resolution": null
+  },
+  "3533": {
+    "id": "concern-20260712-lead-28-tanstack-react-router-usesearch",
+    "created_at": "2026-07-12",
+    "source": "accuracy-roadmap-waves-65-69",
+    "package": "@tanstack/react-router",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "TanStack Router useSearch typed variant — surfaced in waves 65-69. Same rationale as lead #2 (useParams) — type-safe search-params access is guaranteed by the router. Postcondition should exempt typed variant.",
+    "evidence": {
+      "repos": [
+        "<per waves 65-69, exact repos to be enumerated from wave labels>"
+      ],
+      "scan_file": "work-packages/accuracy-roadmap/labeling-sample/README.md#lead-3",
+      "violation_count": 1,
+      "fix_target": "contract",
+      "rule_hints": [
+        "@tanstack/react-router:useSearch:*"
+      ],
+      "wave_range": "65-69",
+      "lead_number_in_readme": 28,
+      "notes": "Documented in the accuracy-roadmap README as a scanner-upgrade lead but never filed as a concern. Backfilled 2026-07-12 so scanner-stream has real work when the coordinator boots."
+    },
+    "resolution": null
   }
 }
