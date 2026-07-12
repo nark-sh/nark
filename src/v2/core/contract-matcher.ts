@@ -3036,8 +3036,34 @@ export class ContractMatcher {
               firstPassedMatcher = MATCHER_IDS.DESTRUCTURED_ERROR_TUPLE;
             }
 
+            // Matcher 5: fp-ts / functional tryCatch wrapper.
+            //
+            // TE.tryCatch(async () => risky(), onError) is the fp-ts idiom for
+            // "run the async callback and capture any rejection in the Left".
+            // The call site has no try-catch but IS protected — the wrapper owns
+            // the error. Narrowly scoped to the `tryCatch` method name only.
+            //
+            // Evidence: concern-20260712-lead-13-fp-ts-tryCatch-wrapping
+            // (hoppscotch — axios.post inside TE.tryCatch throughout frontend).
+            const insideFpTsTryCatch = this.isInsideFunctionalTryCatch(
+              detection.node,
+              sourceFile,
+            );
+            if (!isSentryLifecycleForTrace) {
+              trace.record(
+                MATCHER_IDS.SUPPRESSION_CALLBACK_WRAPPER_SHELL,
+                insideFpTsTryCatch ? "passed" : "failed",
+                insideFpTsTryCatch
+                  ? undefined
+                  : "not inside a functional tryCatch wrapper",
+              );
+            }
+            if (insideFpTsTryCatch && firstPassedMatcher === null) {
+              firstPassedMatcher = MATCHER_IDS.SUPPRESSION_CALLBACK_WRAPPER_SHELL;
+            }
+
             inTryCatch =
-              inTry || catchHandler || onError || destructured;
+              inTry || catchHandler || onError || destructured || insideFpTsTryCatch;
 
             // WAVE-2D: AWS SDK matchers. For @aws-sdk/* packages, also record
             // the per-command-family matcher so the trace surfaces a
@@ -6747,6 +6773,88 @@ export class ContractMatcher {
 
         // Found the enclosing callback but it doesn't match a wrapper shell —
         // stop here so we don't escape to an outer function.
+        return false;
+      }
+
+      // Don't escape across function-declaration / method-declaration boundaries.
+      if (
+        ts.isFunctionDeclaration(cur) ||
+        ts.isMethodDeclaration(cur) ||
+        ts.isConstructorDeclaration(cur)
+      ) {
+        return false;
+      }
+
+      cur = cur.parent;
+    }
+    return false;
+  }
+
+  /**
+   * Returns true when the detection node is inside an arrow/function-expression
+   * passed as the FIRST argument to a `tryCatch(...)` or `*.tryCatch(...)` call
+   * that is imported at the file level — covering fp-ts `TE.tryCatch` and
+   * `E.tryCatch` patterns.
+   *
+   * `TE.tryCatch(async () => risky(), onError)` captures the rejection in the
+   * Left of the TaskEither — errors ARE handled even though there is no
+   * surrounding try-catch at the call site.
+   *
+   * This is a narrower variant of `isInsideCallbackWrapperShell` scoped to
+   * the `tryCatch` method name specifically. It avoids the broad
+   * CALLBACK_WRAPPER_NAMES list (which includes `"flow"`, `"safeAsync"`, etc.)
+   * that would over-suppress if applied globally. The tryCatch name is precise:
+   * both fp-ts and a handful of other functional-error libraries use exactly
+   * this name for "run the callback, put errors in the Left / error channel."
+   *
+   * Evidence: concern-20260712-lead-13-fp-ts-tryCatch-wrapping — hoppscotch
+   * uses TE.tryCatch(async () => axios.post(...), onError) throughout its
+   * codebase. The axios call has no try-catch but IS handled.
+   */
+  private isInsideFunctionalTryCatch(
+    node: ts.Node,
+    sourceFile: ts.SourceFile,
+  ): boolean {
+    const importedNames = this.collectFileImportedIdentifiers(sourceFile);
+
+    // Helper: given a CallExpression callee, return true if it is a `tryCatch`
+    // method that is either:
+    //   (a) a bare `tryCatch` imported at file level, OR
+    //   (b) a property access `NS.tryCatch` where `NS` is imported at file level.
+    const isTryCatchCallee = (callee: ts.Expression): boolean => {
+      if (ts.isIdentifier(callee)) {
+        return callee.text === "tryCatch" && importedNames.has(callee.text);
+      }
+      if (ts.isPropertyAccessExpression(callee)) {
+        if (callee.name.text !== "tryCatch") return false;
+        // Namespace import: `import * as TE from 'fp-ts/TaskEither'`
+        // callee.expression is the TE identifier.
+        if (ts.isIdentifier(callee.expression)) {
+          return importedNames.has(callee.expression.text);
+        }
+        return true; // chained access — allow conservatively
+      }
+      return false;
+    };
+
+    // Walk up from node, looking for an enclosing arrow/function-expression
+    // that is the FIRST argument to a tryCatch(...) call.
+    let cur: ts.Node | undefined = node;
+    while (cur) {
+      if (ts.isSourceFile(cur)) return false;
+
+      if (ts.isArrowFunction(cur) || ts.isFunctionExpression(cur)) {
+        const callback = cur;
+        // Shape: callback is a direct argument to a Call/NewExpression.
+        if (
+          callback.parent &&
+          ts.isCallExpression(callback.parent) &&
+          isTryCatchCallee(callback.parent.expression) &&
+          callback.parent.arguments[0] === callback
+        ) {
+          return true;
+        }
+        // Stop — found the enclosing callback but it's not inside tryCatch.
         return false;
       }
 

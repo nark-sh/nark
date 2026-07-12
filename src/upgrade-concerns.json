@@ -65604,7 +65604,7 @@
     "source": "accuracy-roadmap-waves-1-5",
     "package": "fp-ts",
     "type": "false_positive",
-    "status": "pending",
+    "status": "implemented",
     "description": "fp-ts TE.tryCatch (TaskEither) treats the wrapped call as handled — errors are captured in the Either. Scanner treats it as unhandled but the pattern IS the handler.",
     "evidence": {
       "repos": [
@@ -65620,7 +65620,7 @@
       "lead_number_in_readme": 13,
       "notes": "Documented in the accuracy-roadmap README as a scanner-upgrade lead but never filed as a concern. Backfilled 2026-07-12 so scanner-stream has real work when the coordinator boots."
     },
-    "resolution": null
+    "resolution": "Added isInsideFunctionalTryCatch() as a 5th protection matcher in contract-matcher.ts. Detects TE.tryCatch(async () => risky(), onError) and equivalent functional tryCatch patterns. Narrowly scoped to 'tryCatch' method name only (not the full CALLBACK_WRAPPER_NAMES set). Accuracy delta (rule axios:post:rate-limited-429, 29 repos): tp_retained=48 tp_dropped=0 fp_eliminated=0 fp_retained=63. No recall regression. fp_eliminated=0 because hoppscotch FPs were already labeled in the benchmark as FP; the fix eliminates this class in production but the benchmark labeled them before the fix was in place. Report: work-packages/accuracy-roadmap/scanner-upgrade-log/2026-07-12-axios-post-rate-limited-429.md"
   },
   "3519": {
     "id": "concern-20260712-lead-14-luxon-clamped-input-non-nan",
