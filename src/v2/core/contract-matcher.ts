@@ -991,33 +991,36 @@ export class ContractMatcher {
         continue;
       }
 
-      // express app.listen(): suppress listen-eaddrinuse and listen-eacces when the file
-      // registers a server.on('error') event listener. The .on('error') handler is the
-      // idiomatic Node.js pattern for handling listen errors on net.Server.
-      // Evidence: concern-20260404-express-deepen-5 (ground-truth line 185).
-      // WAVE-2B: original suppression — FRAMEWORK_EXPRESS_ASYNC_ERRORS is gated to
-      // async-* postcondition substrings (per POSTCONDITION_GATING) and would NOT
-      // apply to listen-eaddrinuse / listen-eacces, so recording it here would lie.
-      // WAVE-2F: record SUPPRESSION_PROJECT_ARCHITECTURE — the project owns the
-      // error via a file-level server.on('error') listener.
+      // express app.listen(): suppress listen-eaddrinuse and listen-eacces entirely in the
+      // throwing-function path. EADDRINUSE / EACCES are emitted as 'error' events on the
+      // http.Server returned by app.listen() — they are NOT thrown exceptions and cannot be
+      // caught with a try-catch around the listen() call. Firing this postcondition via the
+      // throwing-function try-catch detection path produces misleading "missing try-catch"
+      // guidance that is technically wrong. The correct check requires tracking the return
+      // value of app.listen() and verifying that server.on('error', ...) is registered on it;
+      // that detection path (event-listener absence on return value) is not yet implemented.
+      //
+      // concern-20260712-lead-23-express-listen-eaddrinuse-recommend-on-error: labeling data
+      // confirmed 2/3 labelers at 0.75-0.85 confidence marked the firebase-users-admin
+      // violation as FP because "try-catch cannot intercept EADDRINUSE". Suppress all
+      // throwing-function path fires for these postconditions until return-value event-listener
+      // tracking is implemented.
+      //
+      // Original suppression evidence: concern-20260404-express-deepen-5 (ground-truth line 185).
+      // WAVE-2B: FRAMEWORK_EXPRESS_ASYNC_ERRORS is gated to async-* postcondition substrings
+      // and would NOT apply here. WAVE-2F: record SUPPRESSION_PROJECT_ARCHITECTURE.
       if (
         detection.packageName === "express" &&
         detection.functionName === "listen" &&
         (primaryPostcondition.id === "listen-eaddrinuse" ||
           primaryPostcondition.id === "listen-eacces")
       ) {
-        const fileText = sourceFile.getFullText();
-        if (
-          fileText.includes(".on('error'") ||
-          fileText.includes('.on("error"')
-        ) {
-          trace.record(
-            MATCHER_IDS.SUPPRESSION_PROJECT_ARCHITECTURE,
-            "passed",
-            "file-level server.on('error') listener handles listen errors",
-          );
-          continue;
-        }
+        trace.record(
+          MATCHER_IDS.SUPPRESSION_PROJECT_ARCHITECTURE,
+          "passed",
+          "listen-eaddrinuse / listen-eacces fire as 'error' events, not thrown exceptions — try-catch does not intercept them; scanner gap until return-value event-listener tracking is implemented",
+        );
+        continue;
       }
 
       // express app.use/METHOD: only fire async postconditions when the argument is

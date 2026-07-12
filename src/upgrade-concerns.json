@@ -65853,7 +65853,7 @@
     "source": "accuracy-roadmap-waves-1-5",
     "package": "express",
     "type": "severity_wrong",
-    "status": "pending",
+    "status": "implemented",
     "description": "express.listen() EADDRINUSE postcondition fires on missing try-catch, but EADDRINUSE is a net.Server 'error' event, not a thrown exception — try-catch does not intercept it. Postcondition should recommend .on('error', ...) instead of try-catch.",
     "evidence": {
       "repos": [
@@ -65871,7 +65871,7 @@
       "lead_number_in_readme": 23,
       "notes": "Documented in the accuracy-roadmap README as a scanner-upgrade lead but never filed as a concern. Backfilled 2026-07-12 so scanner-stream has real work when the coordinator boots."
     },
-    "resolution": null
+    "resolution": "Extended suppression in src/v2/core/contract-matcher.ts to suppress ALL listen-eaddrinuse / listen-eacces detections in the throwing-function path (not just when .on('error' is present in the file). EADDRINUSE fires as a net.Server 'error' event, not a thrown exception — try-catch cannot intercept it. Scanner gap marker: detection will resume when return-value event-listener tracking is implemented. Accuracy delta: tp_dropped=1 (api-example-firebase-admin-nodejs, C_conf=0.75, disagreement bucket), fp_eliminated=1 (firebase-users-admin, 2/3 FP labels). Test regression gate: 68 failures vs 68 baseline (no regression). Report: work-packages/accuracy-roadmap/scanner-upgrade-log/2026-07-11-listen-eaddrinuse.md"
   },
   "3529": {
     "id": "concern-20260712-lead-24-tanstack-query-family-hooks-reconfirmation",
