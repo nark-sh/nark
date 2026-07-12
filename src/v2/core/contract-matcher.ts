@@ -933,6 +933,31 @@ export class ContractMatcher {
         continue;
       }
 
+      // @neondatabase/serverless neon(): the neon(connectionString) factory call creates a
+      // tagged-template SQL executor — it does NOT execute any SQL and does NOT throw.
+      // Only the tagged-template calls (sql`SELECT ...`) and sql.query() / sql.transaction()
+      // are the actual query sites that can throw NeonDbError.
+      // The scanner detects neon() factory calls because `neon` is also in the contract's
+      // functions list (for tagged-template detection via onTaggedTemplateExpression). When the
+      // detection does NOT carry metadata.taggedTemplate=true it is the raw factory call, not a query.
+      //
+      // Evidence: concern-20260712-lead-10-neon-constructor-vs-query
+      //   langchain-chat-sql and neon-clerk-drizzle-nextjs: neon(connectionString) calls at
+      //   module level flagged as missing try-catch. No SQL is executed at this call site.
+      //   Also documented in the contract.yaml note (factory call FP pattern).
+      if (
+        detection.packageName === "@neondatabase/serverless" &&
+        detection.functionName === "neon" &&
+        !detection.metadata?.taggedTemplate
+      ) {
+        trace.record(
+          MATCHER_IDS.SUPPRESSION_FACTORY_FUNCTION,
+          "passed",
+          "neon(connectionString) factory constructor — creates SQL executor, does not execute SQL or throw",
+        );
+        continue;
+      }
+
       // express app.listen(): suppress listen-eaddrinuse and listen-eacces when the file
       // registers a server.on('error') event listener. The .on('error') handler is the
       // idiomatic Node.js pattern for handling listen errors on net.Server.

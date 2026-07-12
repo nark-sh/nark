@@ -65514,7 +65514,7 @@
     "source": "accuracy-roadmap-waves-1-5",
     "package": "@neondatabase/serverless",
     "type": "false_positive",
-    "status": "pending",
+    "status": "implemented",
     "description": "neon() constructor calls get flagged as if they were queries. Scanner needs to distinguish constructor vs query call site.",
     "evidence": {
       "repos": [
@@ -65531,7 +65531,7 @@
       "lead_number_in_readme": 10,
       "notes": "Documented in the accuracy-roadmap README as a scanner-upgrade lead but never filed as a concern. Backfilled 2026-07-12 so scanner-stream has real work when the coordinator boots."
     },
-    "resolution": null
+    "resolution": "Added SUPPRESSION_FACTORY_FUNCTION in contract-matcher.ts for @neondatabase/serverless neon(connectionString) constructor calls (non-taggedTemplate detections). The neon() factory creates a SQL executor but does not execute SQL or throw. Only tagged-template sql`...` calls and sql.query()/sql.transaction() are actual query sites. Also added SHOULD_NOT_FIRE annotation to ground-truth.ts fixture. delta: fp_eliminated=5 fp_retained=1 tp_retained=4 tp_dropped=0 precision: 40% → 80% (report: work-packages/accuracy-roadmap/scanner-upgrade-log/2026-07-12-neondatabase-serverless-neon-neon-db-error.md)"
   },
   "3516": {
     "id": "concern-20260712-lead-11-framework-boundary-fps",
