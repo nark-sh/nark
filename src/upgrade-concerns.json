@@ -65827,7 +65827,7 @@
     "source": "accuracy-roadmap-waves-1-5",
     "package": "socket.io-client",
     "type": "severity_wrong",
-    "status": "pending",
+    "status": "implemented",
     "description": "Missing .on('error') handler for socket.io-client — labelers split on whether this is a crash (server-config-dependent) vs missing best-practice. Severity may need demotion from error to warning.",
     "evidence": {
       "repos": [
@@ -65845,7 +65845,7 @@
       "lead_number_in_readme": 22,
       "notes": "Documented in the accuracy-roadmap README as a scanner-upgrade lead but never filed as a concern. Backfilled 2026-07-12 so scanner-stream has real work when the coordinator boots."
     },
-    "resolution": null
+    "resolution": "Added postcondition_id to all three required_event_listeners entries in socket.io-client/contract.yaml, routing each missing event to its correct postcondition: connect_error->connect-error-event (error), disconnect->disconnect-event (warning), error->parser-error-event (warning). Previously all three collapsing to connect-error-event caused 3x duplicate violations at error severity on every io() callsite — Opus (Layer C) explicitly flagged this as over-fire. No scanner code changes needed. delta: fp_eliminated=2 fp_retained=0 tp_retained=5 tp_dropped=0 (report: work-packages/accuracy-roadmap/scanner-upgrade-log/2026-07-11-socket.io-client-io-connect-error-event.md) sandbox-fallback"
   },
   "3528": {
     "id": "concern-20260712-lead-23-express-listen-eaddrinuse-recommend-on-error",
