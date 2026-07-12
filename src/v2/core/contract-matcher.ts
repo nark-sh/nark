@@ -553,13 +553,21 @@ export class ContractMatcher {
       // by the standard "fire when outside try-catch" flow. Intercept all detections
       // for these functions, handle them via handleNextSpecialPatterns(), and skip the
       // standard matching loop. Covers postconditions added in next contract v1.2.0:
+      //   redirect-inside-try-catch, not-found-inside-try-catch,
+      //   permanent-redirect-inside-try-catch (concern-20260712-lead-03):
+      //     redirect/notFound/permanentRedirect throw control-flow errors — the
+      //     violation is when they ARE inside try-catch (catch swallows the throw),
+      //     not when they are outside try-catch (the correct usage).
       //   forbidden-inside-try-catch, unauthorized-inside-try-catch,
       //   connection-missing-await, connection-inside-after,
       //   draft-mode-missing-await, after-error-swallowed,
       //   update-tag-after-redirect, update-tag-outside-server-action
       if (
         detection.packageName === "next" &&
-        (detection.functionName === "forbidden" ||
+        (detection.functionName === "redirect" ||
+          detection.functionName === "notFound" ||
+          detection.functionName === "permanentRedirect" ||
+          detection.functionName === "forbidden" ||
           detection.functionName === "unauthorized" ||
           detection.functionName === "connection" ||
           detection.functionName === "draftMode" ||
@@ -4900,6 +4908,48 @@ export class ContractMatcher {
     };
 
     // ── Dispatch by function name ─────────────────────────────────────────────
+
+    // concern-20260712-lead-03-nextjs-redirect-inside-try-catch-inverted:
+    // redirect(), notFound(), and permanentRedirect() work by THROWING control-flow
+    // exceptions (NEXT_REDIRECT / NEXT_HTTP_ERROR_FALLBACK). The violation is when they
+    // ARE inside a try-catch (the catch swallows the throw, so the redirect/404 never
+    // executes). The correct usage is to call them OUTSIDE try-catch. Fire ONLY when
+    // isInTryCatch() is true; return null when outside try-catch (correct usage).
+    // Previously these fell through to the standard "fire when outside try-catch" flow,
+    // generating FPs on every correct call site. Fixed 2026-07-11.
+
+    if (fnName === "redirect") {
+      // redirect-inside-try-catch: fire when IS in try-catch
+      if (this.controlFlow.isInTryCatch(node)) {
+        return buildViolation(
+          "redirect-inside-try-catch",
+          "redirect() is inside a try-catch block — the catch intercepts the RedirectError (digest: NEXT_REDIRECT;...) and the redirect never executes. Call redirect() outside the try block or re-throw isRedirectError(e) when caught.",
+        );
+      }
+      return null; // correct usage: redirect() outside try-catch
+    }
+
+    if (fnName === "notFound") {
+      // not-found-inside-try-catch: fire when IS in try-catch
+      if (this.controlFlow.isInTryCatch(node)) {
+        return buildViolation(
+          "not-found-inside-try-catch",
+          "notFound() is inside a try-catch block — the catch intercepts the HTTPAccessFallbackError (digest: NEXT_HTTP_ERROR_FALLBACK;404) and the 404 page never renders. Call notFound() outside the try block or re-throw isHTTPAccessFallbackError(e) when caught.",
+        );
+      }
+      return null; // correct usage: notFound() outside try-catch
+    }
+
+    if (fnName === "permanentRedirect") {
+      // permanent-redirect-inside-try-catch: fire when IS in try-catch
+      if (this.controlFlow.isInTryCatch(node)) {
+        return buildViolation(
+          "permanent-redirect-inside-try-catch",
+          "permanentRedirect() is inside a try-catch block — the catch intercepts the RedirectError (digest: NEXT_REDIRECT;...;308;) and the 308 redirect never executes. Call permanentRedirect() outside the try block or re-throw isRedirectError(e) when caught.",
+        );
+      }
+      return null; // correct usage: permanentRedirect() outside try-catch
+    }
 
     if (fnName === "forbidden") {
       // forbidden-inside-try-catch: fire when IS in try-catch

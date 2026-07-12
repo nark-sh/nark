@@ -65315,7 +65315,7 @@
     "source": "accuracy-roadmap-waves-1-5",
     "package": "next",
     "type": "false_positive",
-    "status": "pending",
+    "status": "implemented",
     "description": "Next.js redirect-inside-try-catch / not-found-inside-try-catch postconditions misfire when NO try-catch is present (semantic inverted). Appears in 8+ codebases — highest-frequency lead.",
     "evidence": {
       "repos": [
@@ -65339,7 +65339,7 @@
       "lead_number_in_readme": 3,
       "notes": "Documented in the accuracy-roadmap README as a scanner-upgrade lead but never filed as a concern. Backfilled 2026-07-12 so scanner-stream has real work when the coordinator boots."
     },
-    "resolution": null
+    "resolution": "Fixed inverted detection semantics: redirect(), notFound(), and permanentRedirect() now correctly fire only when IS inside a try-catch (INVERSE pattern), not when outside. Added these three functions to the handleNextSpecialPatterns() intercept in contract-matcher.ts alongside forbidden/unauthorized. Also added SHOULD_FIRE/SHOULD_NOT_FIRE ground-truth annotations to nark-corpus next package fixture. delta (sandbox-fallback): fp_eliminated=28 fp_retained=0 tp_retained=0 tp_dropped=3 (borderline edge cases: 2x wrapper-function speculation C_conf=0.80, 1x useEffect client-component C_conf=0.65 — inherently undetectable by direct try-catch static analysis). test regression gate: baseline=69 final=69 delta=0."
   },
   "3509": {
     "id": "concern-20260712-lead-04-ky-extend-vs-zod-schema-extend",
