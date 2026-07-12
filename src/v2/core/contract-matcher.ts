@@ -4276,6 +4276,81 @@ export class ContractMatcher {
         }
       }
 
+      // axios: validateStatus option — suppress rate-limited-429 (and all HTTP-error
+      // postconditions) when the caller passes validateStatus in the config argument.
+      // When validateStatus is present (e.g. validateStatus: () => true, or
+      // validateStatus: (s) => s < 600), axios resolves ALL status codes as success —
+      // it never throws AxiosError for any HTTP status. The caller has explicitly opted
+      // into manual status inspection (response.status) instead of exception handling.
+      //
+      // Config argument position by method:
+      //   get/delete/head:  arguments[1]  (url, config)
+      //   post/put/patch:   arguments[2]  (url, data, config)
+      //   request:          arguments[0]  (config)
+      //
+      // Only the inline object literal pattern is detected. Variable references require
+      // data-flow analysis and are out of scope (false negative is acceptable; the FP
+      // burden from validateStatus is what motivated this concern).
+      //
+      // Evidence: concern-20260712-lead-12-axios-validate-status-exempt-429
+      //   hoppscotch: axios.get(url, { validateStatus: () => true }) fires rate-limited-429
+      //   even though the caller explicitly handles all status codes via response.status.
+      if (
+        detection.packageName === "axios" &&
+        ts.isCallExpression(detection.node) &&
+        (postcondition.id.includes("rate-limit") ||
+          postcondition.id.includes("429") ||
+          postcondition.id === "error-4xx-5xx" ||
+          postcondition.id === "patch-error-4xx-5xx" ||
+          postcondition.id === "head-error-4xx-5xx" ||
+          postcondition.id === "postform-error-4xx-5xx" ||
+          postcondition.id === "putform-error-4xx-5xx" ||
+          postcondition.id === "patchform-error-4xx-5xx" ||
+          postcondition.id === "query-error-4xx-5xx")
+      ) {
+        const axiosArgs = detection.node.arguments;
+        // Determine config argument index based on function name
+        const configArgIdx =
+          detection.functionName === "request" ||
+          detection.functionName === "default"
+            ? 0  // axios.request(config), direct axios({...}) call
+            : detection.functionName === "get" ||
+                detection.functionName === "delete" ||
+                detection.functionName === "head"
+              ? 1  // axios.get(url, config)
+              : 2; // axios.post/put/patch(url, data, config)
+        const configArg =
+          configArgIdx < axiosArgs.length
+            ? axiosArgs[configArgIdx]
+            : undefined;
+        // Also check argument index 0 if method is indeterminate (e.g. instance methods)
+        const configArgToCheck =
+          configArg ?? (axiosArgs.length === 1 ? axiosArgs[0] : undefined);
+        if (
+          configArgToCheck &&
+          ts.isObjectLiteralExpression(configArgToCheck) &&
+          configArgToCheck.properties.some(
+            (p): p is ts.PropertyAssignment =>
+              ts.isPropertyAssignment(p) &&
+              ts.isIdentifier(p.name) &&
+              p.name.text === "validateStatus",
+          )
+        ) {
+          trace.record(
+            MATCHER_IDS.SUPPRESSION_OPTION_SUPPRESSES,
+            "passed",
+            "axios validateStatus option present — all HTTP status codes resolved as success, postcondition cannot fire",
+          );
+          this.recordPassedSite(
+            detection,
+            sourceFile,
+            postcondition.id,
+            MATCHER_IDS.SUPPRESSION_OPTION_SUPPRESSES,
+          );
+          continue;
+        }
+      }
+
       // Get location
       const { line, column } = this.getLocation(detection.node, sourceFile);
 

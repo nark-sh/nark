@@ -65566,7 +65566,7 @@
     "source": "accuracy-roadmap-waves-1-5",
     "package": "axios",
     "type": "false_positive",
-    "status": "pending",
+    "status": "implemented",
     "description": "axios validateStatus: () => true should exempt rate-limited-429 postcondition — the caller has explicitly opted into treating 429 as a resolved status, not an error.",
     "evidence": {
       "repos": [
@@ -65582,7 +65582,21 @@
       "lead_number_in_readme": 12,
       "notes": "Documented in the accuracy-roadmap README as a scanner-upgrade lead but never filed as a concern. Backfilled 2026-07-12 so scanner-stream has real work when the coordinator boots."
     },
-    "resolution": null
+    "resolution": {
+      "summary": "Added validateStatus suppression in contract-matcher.ts. When an axios call passes validateStatus in the config argument as an inline object literal, the scanner skips all HTTP-error postconditions (rate-limited-429, error-4xx-5xx, etc.) because axios resolves all status codes as success — it never throws AxiosError when validateStatus is present. Only inline object literals are detected; variable references remain out of scope (acceptable false negative).",
+      "delta": {
+        "tp_retained": 49,
+        "tp_dropped": 0,
+        "fp_eliminated": 0,
+        "fp_retained": 34,
+        "note": "No FPs eliminated in the 30-repo benchmark — the hoppscotch FPs that motivated this concern were labeled as FP in aggregated but not yet captured as benchmark-eligible. Fix correctness verified via ground-truth fixture tests (3 SHOULD_NOT_FIRE cases added)."
+      },
+      "files_changed": [
+        "src/v2/core/contract-matcher.ts",
+        "nark-corpus/packages/axios/fixtures/ground-truth.ts"
+      ],
+      "benchmark_manifest_fix": "Fixed botpress-slack manifest entry in repo-manifest.json: was pointing to packages/sdk-addons/tsconfig.json (wrong), now correctly points to integrations/slack/tsconfig.json."
+    }
   },
   "3518": {
     "id": "concern-20260712-lead-13-fp-ts-tryCatch-wrapping",
