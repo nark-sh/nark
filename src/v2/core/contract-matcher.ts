@@ -533,6 +533,39 @@ export class ContractMatcher {
         effectiveFunctionName = "Duration.fromObject";
       }
 
+      // luxon: fromMillis / fromSeconds — suppress when argument is already a numeric expression.
+      //
+      // The postcondition frommillis-non-number-throws fires only when the argument is NOT a
+      // JavaScript number type (null, undefined, or a string). Since typeof NaN === 'number',
+      // any expression that returns a JavaScript number (including NaN) satisfies the type check
+      // and will NOT trigger the InvalidArgumentError throw. The contract notes this explicitly:
+      //   "NaN is technically a number in JavaScript, so NaN does NOT trigger this throw"
+      //
+      // Common patterns that guarantee a number return and therefore cannot trigger the throw:
+      //   - Math.max(x, 0), Math.min(x, limit), Math.floor(x), Math.ceil(x), Math.round(x), etc.
+      //   - parseInt(str, 10), parseFloat(str)
+      //   - Number(value)
+      // All of these return typeof 'number', even when the result is NaN.
+      //
+      // The suppression also handles variable-assigned clamping (the backstage pattern):
+      //   dt = Math.max(dt, 0);
+      //   Duration.fromMillis(dt)  ← dt is guaranteed numeric, suppress
+      // This is detected by looking for a preceding assignment of the variable from a
+      // numeric-returning function within the same logical block (10-line lookback).
+      //
+      // Evidence: concern-20260712-lead-14 (key-14); backstage (Math.max clamped, 2 violations),
+      // n8n-nodes-base (parseInt / Number coercions, 2 violations). Labelers A+C at 0.85-0.9
+      // confidence marked all 4 as FP.
+      if (
+        detection.packageName === "luxon" &&
+        (detection.functionName === "fromMillis" || detection.functionName === "fromSeconds") &&
+        ts.isCallExpression(detection.node) &&
+        detection.node.arguments.length > 0 &&
+        this.isNumericGuaranteedExpression(detection.node.arguments[0], sourceFile, detection.node)
+      ) {
+        continue;
+      }
+
       // next: NextResponse.redirect() is NOT the redirect() from next/navigation.
       // NextResponse.redirect() returns a Response object — it does NOT throw NEXT_REDIRECT.
       // Only redirect() imported from 'next/navigation' throws. Suppress when the call is
@@ -7220,5 +7253,87 @@ export class ContractMatcher {
     if (expr.arguments.length === 0) return false;
     const arg = expr.arguments[0];
     return ts.isIdentifier(arg) && arg.text === errName;
+  }
+
+  /**
+   * Returns true when `expr` is an expression that is guaranteed to produce a JavaScript
+   * number (including NaN, which is typeof 'number'). Used to suppress luxon fromMillis /
+   * fromSeconds violations when the argument type already satisfies the number check.
+   *
+   * The postcondition frommillis-non-number-throws fires only when typeof arg !== 'number'.
+   * Since NaN is typeof 'number', any expression that always returns a JS number (including NaN)
+   * cannot trigger the InvalidArgumentError throw.
+   *
+   * SCOPE: only explicit numeric-coercion API calls and numeric literals. Binary arithmetic
+   * expressions like `value / 1000` are intentionally EXCLUDED because the upstream variable
+   * may be non-numeric, and the labeling data shows majority TP verdict for those patterns.
+   *
+   * Covered patterns:
+   *   - Call to Number(...), parseInt(...), parseFloat(...)
+   *   - Call to Math.max(x, y), Math.min(x, y), Math.floor(x), Math.ceil(x), Math.round(x),
+   *     Math.abs(x), Math.trunc(x) — all return typeof number
+   *   - A numeric literal: DateTime.fromMillis(0)
+   *   - An identifier that was recently assigned from one of the above (10-line lookback)
+   *     Handles: dt = Math.max(dt, 0); Duration.fromMillis(dt)
+   *
+   * Evidence: concern-20260712-lead-14 (key-14); backstage (Math.max clamped, 2 violations),
+   * n8n-nodes-base (parseInt / Number coercions). Labelers A+C at 0.85-0.9 marked these as FP.
+   * See the inline comment above the call site in matchDetections() for full rationale.
+   */
+  private isNumericGuaranteedExpression(
+    expr: ts.Expression,
+    sourceFile: ts.SourceFile,
+    callNode: ts.Node,
+  ): boolean {
+    // Direct numeric literal: DateTime.fromMillis(1000)
+    if (ts.isNumericLiteral(expr)) {
+      return true;
+    }
+
+    // Call to Number(...), parseInt(...), parseFloat(...)
+    if (ts.isCallExpression(expr) && ts.isIdentifier(expr.expression)) {
+      const globalNumericFns = new Set(["Number", "parseInt", "parseFloat"]);
+      if (globalNumericFns.has(expr.expression.text)) {
+        return true;
+      }
+    }
+
+    // Call to Math.max(...), Math.min(...), Math.floor(...), Math.ceil(...), Math.round(...),
+    // Math.abs(...), Math.trunc(...) — all return typeof number (possibly NaN, but still a number).
+    // Note: Math.random(), Math.PI, etc. are NOT call expressions, so they don't match here.
+    if (
+      ts.isCallExpression(expr) &&
+      ts.isPropertyAccessExpression(expr.expression) &&
+      ts.isIdentifier(expr.expression.expression) &&
+      expr.expression.expression.text === "Math"
+    ) {
+      const mathNumericFns = new Set([
+        "max", "min", "floor", "ceil", "round", "abs", "trunc",
+      ]);
+      if (mathNumericFns.has(expr.expression.name.text)) {
+        return true;
+      }
+    }
+
+    // Identifier that was recently assigned from a numeric-coercion call.
+    // Handles the backstage pattern: dt = Math.max(dt, 0); ...; Duration.fromMillis(dt)
+    // Look within 10 source lines preceding the call site for an assignment of the form:
+    //   <varName> = Math.max(  /  <varName> = parseInt(  / etc.
+    if (ts.isIdentifier(expr)) {
+      const varName = expr.text;
+      const { line: callLine } = sourceFile.getLineAndCharacterOfPosition(callNode.getStart());
+      const fileLines = sourceFile.getFullText().split("\n");
+      const lookbackStart = Math.max(0, callLine - 10);
+      const numericFnPattern = /(?:Math\.(?:max|min|floor|ceil|round|abs|trunc)\s*\(|parseInt\s*\(|parseFloat\s*\(|Number\s*\()/;
+      const assignPattern = new RegExp(`\\b${varName}\\s*=\\s*`);
+      for (let i = callLine - 1; i >= lookbackStart; i--) {
+        const lineText = fileLines[i] ?? "";
+        if (assignPattern.test(lineText) && numericFnPattern.test(lineText)) {
+          return true;
+        }
+      }
+    }
+
+    return false;
   }
 }

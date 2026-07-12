@@ -65628,7 +65628,7 @@
     "source": "accuracy-roadmap-waves-1-5",
     "package": "luxon",
     "type": "false_positive",
-    "status": "pending",
+    "status": "implemented",
     "description": "luxon:fromMillis / Duration.fromObject with Math.max(dt, 0) clamped input — postcondition InvalidArgumentError fires on NaN, but clamp guarantees non-NaN when upstream arithmetic is finite. Labelers split on whether NaN can propagate through Math.max; the code contract is 'upstream guarantees non-NaN.'",
     "evidence": {
       "repos": [
@@ -65647,7 +65647,7 @@
       "lead_number_in_readme": 14,
       "notes": "Documented in the accuracy-roadmap README as a scanner-upgrade lead but never filed as a concern. Backfilled 2026-07-12 so scanner-stream has real work when the coordinator boots."
     },
-    "resolution": null
+    "resolution": "Added isNumericGuaranteedExpression() helper to contract-matcher.ts and a suppression guard in the fromMillis/fromSeconds detection loop. Suppresses when the argument is: (1) a numeric literal, (2) a call to Number/parseInt/parseFloat, (3) a call to Math.max/min/floor/ceil/round/abs/trunc, or (4) an identifier assigned from one of those calls within the preceding 10 source lines (handles the backstage dt=Math.max(dt,0); fromMillis(dt) pattern). Binary arithmetic excluded from suppression (value/1000 stays TP per majority labeler verdict). Accuracy delta: frommillis tp_dropped=0 fp_eliminated=4; fromseconds tp_dropped=0 fp_eliminated=2. Regression gate: 69 failures both before and after (no new failures)."
   },
   "3520": {
     "id": "concern-20260712-lead-15-apiservice-wrapper-delegation",
