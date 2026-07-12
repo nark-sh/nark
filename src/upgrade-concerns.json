@@ -65910,7 +65910,7 @@
     "source": "accuracy-roadmap-waves-1-5",
     "package": "rxjs",
     "type": "false_positive",
-    "status": "pending",
+    "status": "needs-manual",
     "description": "rxjs:firstValueFrom on framework-managed observables (Vendure DataService, entity streams) — the framework handles errors via its notification layer; unhandled rejection at the firstValueFrom call site is intercepted by the framework's error boundary. Postcondition should recognize framework-observable source.",
     "evidence": {
       "repos": [
@@ -65926,7 +65926,7 @@
       "lead_number_in_readme": 25,
       "notes": "Documented in the accuracy-roadmap README as a scanner-upgrade lead but never filed as a concern. Backfilled 2026-07-12 so scanner-stream has real work when the coordinator boots."
     },
-    "resolution": null
+    "resolution": "Skipped in scanner-stream 2026-07-11 session: two parallel workers stalled at the 600s watchdog while analyzing this concern. Symptom suggests the concern requires framework-context reasoning (Angular DataService pattern) that exceeds cheap-fix scope. Requires manual analysis to determine whether a framework-managed observable can be reliably detected via AST alone. See work-packages/accuracy-roadmap/labeling-sample/README.md concern-lead-25 for original evidence."
   },
   "3531": {
     "id": "concern-20260712-lead-26-joi-validate-destructuring",
