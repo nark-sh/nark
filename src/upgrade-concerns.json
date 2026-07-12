@@ -65731,7 +65731,7 @@
     "source": "accuracy-roadmap-waves-1-5",
     "package": "fs-extra",
     "type": "false_positive",
-    "status": "pending",
+    "status": "rejected",
     "description": "fs-extra remove() calls inside error handlers doing rollback/cleanup are intentional; a secondary EACCES on cleanup is acceptable and by design. Postcondition should exempt calls inside catch/finally blocks.",
     "evidence": {
       "repos": [
@@ -65747,7 +65747,7 @@
       "lead_number_in_readme": 18,
       "notes": "Documented in the accuracy-roadmap README as a scanner-upgrade lead but never filed as a concern. Backfilled 2026-07-12 so scanner-stream has real work when the coordinator boots."
     },
-    "resolution": null
+    "resolution": "Rejected after accuracy delta gate. Implemented the catch/finally suppression for fs-extra:remove:remove-permission-denied, but the 402-repo benchmark showed fp_eliminated=0 and tp_dropped=7. The 7 dropped TPs were remove() calls inside finally/catch blocks in backstage (line 87 in finally), strapi (lines 253:13 and 425:13 in finally; line 105:11 in catch), and strapi-upload-server. The benchmark labelers correctly identified these as TRUE POSITIVES: a remove() inside a finally block without its own error handling will throw and mask the primary exception if it fails with EACCES — exactly the pattern the postcondition warns about. The concern's hypothesis (cleanup remove() is always safe to suppress) is contradicted by benchmark ground truth. Current behavior is correct. Reverted fix. delta: fp_eliminated=0 fp_retained=0 tp_retained=38 tp_dropped=7 (report: work-packages/accuracy-roadmap/scanner-upgrade-log/2026-07-12-fs-extra-remove-remove-permission-denied.md)"
   },
   "3524": {
     "id": "concern-20260712-lead-19-date-fns-format-fallback-in-catch",
