@@ -65432,7 +65432,7 @@
     "source": "accuracy-roadmap-waves-1-5",
     "package": "next",
     "type": "severity_wrong",
-    "status": "pending",
+    "status": "in-progress",
     "description": "headers-not-awaited / cookies-not-awaited is a Next.js 15+ bug only. Postcondition should carry version metadata and only fire against v15+ imports.",
     "evidence": {
       "repos": [

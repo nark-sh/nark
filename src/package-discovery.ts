@@ -1080,11 +1080,15 @@ export class PackageDiscovery {
 
     for (const [name, { version, source, usedIn }] of packages) {
       const installedVersion = installedVersions.get(name);
+      // Pass declared version range as fallback for when node_modules is absent
+      // (e.g. public/cloud scans with NARK_ALLOW_MISSING_DEPS=1). semver.minVersion()
+      // on "^15.0.0" → 15.0.0, which correctly selects the >=15 profile.
       const contract = this.contractsByPackageName
         ? selectContractForVersion(
             name,
             installedVersion,
             this.contractsByPackageName,
+            version, // declared range from package.json, used when node_modules absent
           )
         : this.corpusContracts.get(name);
 

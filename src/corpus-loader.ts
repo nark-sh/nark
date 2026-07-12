@@ -601,7 +601,13 @@ export { mergeById as _mergeById, mergeFunctions as _mergeFunctions };
  * with a well-maintained corpus), the most-specific one (first in the sorted
  * array, per loader ordering) is returned.
  *
- * If `installedVersion` is undefined or unparseable, falls back to the first
+ * If `installedVersion` is undefined or unparseable and `declaredVersionRange`
+ * is provided (e.g. "^15.0.0" from package.json), falls back to using the
+ * minimum version of that range for profile selection. This handles the common
+ * case of scanning without node_modules where the declared range is still
+ * a reliable signal (e.g. "^15" → 15.0.0 → picks the >=15 profile).
+ *
+ * If no version information is available at all, falls back to the first
  * profile (most-specific by load order) so callers still get a profile rather
  * than missing one for a known package.
  *
@@ -610,12 +616,25 @@ export { mergeById as _mergeById, mergeFunctions as _mergeFunctions };
 export function selectContractForVersion(
   packageName: string,
   installedVersion: string | undefined,
-  contractsByPackageName: Map<string, PackageContract[]>
+  contractsByPackageName: Map<string, PackageContract[]>,
+  declaredVersionRange?: string
 ): PackageContract | undefined {
   const profiles = contractsByPackageName.get(packageName);
   if (!profiles || profiles.length === 0) return undefined;
 
-  const coercedVersion = installedVersion ? semver.coerce(installedVersion)?.version : undefined;
+  // Prefer installed version (from node_modules); fall back to min version of
+  // declared range (from package.json) when node_modules are absent.
+  let coercedVersion = installedVersion ? semver.coerce(installedVersion)?.version : undefined;
+  const versionIsFromInstalled = !!coercedVersion;
+  if (!coercedVersion && declaredVersionRange) {
+    try {
+      const minVer = semver.minVersion(declaredVersionRange);
+      coercedVersion = minVer?.version;
+    } catch {
+      // unparseable declared range — skip
+    }
+  }
+
   if (!coercedVersion) {
     return profiles[0];
   }
@@ -627,7 +646,18 @@ export function selectContractForVersion(
     }
   }
 
-  return profiles.find((p) => isUniversalSemverRange(p.semver));
+  const universalProfile = profiles.find((p) => isUniversalSemverRange(p.semver));
+  if (universalProfile) return universalProfile;
+
+  // If the version was derived from an imprecise declared range (e.g. "*" or
+  // ">=1.0.0") and nothing matched, fall back to the first profile rather than
+  // returning undefined. The declared range is an approximation; "first profile"
+  // is a better guess than "no profile" for scanning without node_modules.
+  if (!versionIsFromInstalled) {
+    return profiles[0];
+  }
+
+  return undefined;
 }
 
 function semverRangeSatisfies(version: string, range: string): boolean {

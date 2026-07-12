@@ -1008,6 +1008,7 @@ async function main(options: any) {
         pkg.name,
         pkg.installedVersion,
         corpusResult.contractsByPackageName,
+        pkg.version, // declared range from package.json, fallback when node_modules absent
       );
       if (profile) refined.set(pkg.name, profile);
     }
