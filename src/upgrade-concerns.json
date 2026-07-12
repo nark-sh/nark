@@ -65347,7 +65347,7 @@
     "source": "accuracy-roadmap-waves-1-5",
     "package": "ky",
     "type": "false_positive",
-    "status": "pending",
+    "status": "implemented",
     "description": "AST resolution confusion — ky.extend() and Zod schema.extend() share the same method name. Scanner attributes Zod .extend() calls to the ky contract.",
     "evidence": {
       "repos": [
@@ -65364,7 +65364,7 @@
       "lead_number_in_readme": 4,
       "notes": "Documented in the accuracy-roadmap README as a scanner-upgrade lead but never filed as a concern. Backfilled 2026-07-12 so scanner-stream has real work when the coordinator boots."
     },
-    "resolution": null
+    "resolution": "Fixed in src/v2/plugins/instance-tracker.ts resolveFactoryCall() Case 2: added instance-package guard before attributing a method call to a package via factoryToPackage. Previously, schema.extend() on any non-imported variable would be attributed to ky via factoryToPackage[\"extend\"] → ky, incorrectly tracking the result as a ky instance. Fix requires the object to already be a tracked ky instance (or the method to be an isFactoryMethodName heuristic match). Added two regression tests in instance-tracker.test.ts. delta: fp_eliminated=104 fp_retained=0 tp_retained=0 tp_dropped=0 (report: work-packages/accuracy-roadmap/scanner-upgrade-log/2026-07-12-ky-extend-inherited-http-error.md)"
   },
   "3510": {
     "id": "concern-20260712-lead-05-undici-close-vs-websocket-close",

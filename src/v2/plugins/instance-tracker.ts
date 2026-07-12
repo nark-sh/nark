@@ -734,11 +734,34 @@ export class InstanceTrackerPlugin implements DetectorPlugin {
       }
 
       // Check if method is a known factory method AND the object is NOT a direct import.
-      // Only use factoryToPackage when the object isn't from a specific known import —
-      // otherwise the factory method name (e.g., 'connect') would match calls on any object.
+      // Only use factoryToPackage when the object is already a tracked instance of the
+      // same package, OR the method name is a strong factory signal (isFactoryMethodName).
+      //
+      // Without the instancePackage guard, ambiguous factory method names (e.g. `extend`)
+      // that appear in both a contracted package (ky.extend() returns a new KyInstance) and
+      // in unrelated libraries (Zod's schema.extend(), OpenAPI builders, etc.) cause FPs:
+      // `schema.extend({...})` where `schema` is a Zod variable would resolve to `ky` via
+      // factoryToPackage['extend'] → ky, incorrectly tracking `schema` as a ky instance.
+      //
+      // Fix (concern-20260712-lead-04-ky-extend-vs-zod-schema-extend):
+      //   Require that the object (`schema`, `someVar`) is already tracked as an instance
+      //   of the same package before accepting the factory-method attribution. This preserves
+      //   ky.extend() detection for ky instances while suppressing the Zod.extend() FP.
+      //
+      // For non-instance objects with non-isFactoryMethodName methods, fall through to null.
       const fromFactoryMap = this.factoryToPackage.get(methodName);
       if (fromFactoryMap && !importInfo) {
-        return fromFactoryMap;
+        // Only attribute if the object is already a known instance of this package.
+        // This prevents ambiguous factory methods (like `extend`) from firing on unrelated objects.
+        const instancePkg = this.instanceMap.get(objName);
+        if (instancePkg === fromFactoryMap) {
+          return fromFactoryMap;
+        }
+        // If the method is a strong factory signal (e.g. createClient, makeClient),
+        // allow it even for untracked objects — the heuristic is reliable for those names.
+        if (this.isFactoryMethodName(methodName)) {
+          return fromFactoryMap;
+        }
       }
 
       // Check if the object is already a tracked instance
