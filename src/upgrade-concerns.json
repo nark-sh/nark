@@ -65397,7 +65397,7 @@
     "source": "accuracy-roadmap-waves-1-5",
     "package": "@tanstack/react-query",
     "type": "false_positive",
-    "status": "pending",
+    "status": "resolved",
     "description": "refetchQueries postcondition description contradicts itself (claims throwOnError=false means it crashes). Description needs correction and the rule is over-broad.",
     "evidence": {
       "repos": [
@@ -65414,7 +65414,17 @@
       "lead_number_in_readme": 6,
       "notes": "Documented in the accuracy-roadmap README as a scanner-upgrade lead but never filed as a concern. Backfilled 2026-07-12 so scanner-stream has real work when the coordinator boots."
     },
-    "resolution": null
+    "resolution": {
+      "date": "2026-07-11",
+      "fix_type": "contract",
+      "description": "Downgraded refetchqueries-silent-failure severity from warning to info. Fixed required_handling description to clarify this is by-design behavior (fire-and-forget, same as invalidateQueries). Independent labelers in tianji and orb-companion-webapp confirmed FP pattern. No scanner code changes needed.",
+      "tp_dropped": 0,
+      "fp_eliminated": 0,
+      "benchmark_note": "Rule not exercised in current 402-repo benchmark (rule_id @tanstack/react-query:refetchQueries). Labeler evidence from accuracy-roadmap waves 1-5 outside benchmark set.",
+      "files_changed": [
+        "nark-dev/nark-corpus/packages/@tanstack/react-query/contract.yaml"
+      ]
+    }
   },
   "3512": {
     "id": "concern-20260712-lead-07-nextjs-headers-cookies-not-awaited-version-dep",
