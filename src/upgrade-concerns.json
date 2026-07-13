@@ -65959,7 +65959,7 @@
     "source": "accuracy-roadmap-waves-65-69",
     "package": "@angular/router",
     "type": "false_positive",
-    "status": "pending",
+    "status": "needs-manual",
     "description": "Angular Router NavigationError — surfaced in waves 65-69. Router navigation is framework-managed; NavigationError is emitted on the Router.events observable, not thrown. Postcondition should recognize Angular framework context.",
     "evidence": {
       "repos": [
@@ -65975,7 +65975,7 @@
       "lead_number_in_readme": 27,
       "notes": "Documented in the accuracy-roadmap README as a scanner-upgrade lead but never filed as a concern. Backfilled 2026-07-12 so scanner-stream has real work when the coordinator boots."
     },
-    "resolution": null
+    "resolution": "REJECTED by scanner-stream (2026-07-13): requires Angular framework-context reasoning. The concern description conflates Router.events observable (framework-managed, not contracted) with navigate()/navigateByUrl() Promises (legitimately contracted — they reject on NavigationError per angular.dev API docs). The concern title says NavigationError is framework-managed-and-not-thrown, but the contract postconditions are specifically about Promise rejections from navigate() and navigateByUrl(), not the events observable. A fix to exempt framework-managed observable emissions from the contracted Promise-rejection postconditions would require Angular DI container context (knowing whether a call site is framework-managed vs user-initiated) — this is framework-context reasoning that is explicitly out of scope per scope discipline. The concern evidence (violation_count=1, backfilled placeholder, no actual FP labels in aggregated data) also does not justify the complexity. A human expert needs to verify whether the 1 reported FP is actually about navigate()/navigateByUrl() or about Router.events, and whether a localized contract exclusion can be written without framework-context reasoning."
   },
   "3533": {
     "id": "concern-20260712-lead-28-tanstack-react-router-usesearch",
