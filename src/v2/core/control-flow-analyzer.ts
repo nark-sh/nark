@@ -658,7 +658,61 @@ export class ControlFlowAnalysis implements IControlFlowAnalyzer {
       current = parent;
     }
 
-    if (!awaitNode) return false;
+    // If no await, check for sync destructuring pattern:
+    //   const { error, value } = schema.validate(data);  // sync, no await
+    //   if (error) { ... }                                // later check
+    // Evidence: concern-20260712-lead-26-joi-validate-destructuring
+    // joi.validate() returns { error, value } synchronously — no try-catch needed
+    // when the error property is destructured and checked in a subsequent if-statement.
+    if (!awaitNode) {
+      // The callNode's parent may be a VariableDeclaration with ObjectBindingPattern
+      const syncVarDecl = callNode.parent;
+      if (syncVarDecl && ts.isVariableDeclaration(syncVarDecl)) {
+        const syncNameNode = syncVarDecl.name;
+        if (ts.isObjectBindingPattern(syncNameNode)) {
+          // Find the bound name for "error"
+          let syncErrorVarName: string | undefined;
+          for (const element of syncNameNode.elements) {
+            const propName = element.propertyName
+              ? ts.isIdentifier(element.propertyName)
+                ? element.propertyName.text
+                : undefined
+              : ts.isIdentifier(element.name)
+                ? element.name.text
+                : undefined;
+            if (propName === 'error') {
+              syncErrorVarName = ts.isIdentifier(element.name) ? element.name.text : undefined;
+              break;
+            }
+            if (!element.propertyName && ts.isIdentifier(element.name) && element.name.text === 'error') {
+              syncErrorVarName = 'error';
+              break;
+            }
+          }
+          if (syncErrorVarName) {
+            // Navigate up: VariableDeclaration → VariableDeclarationList → VariableStatement → Block
+            const syncVarDeclStatement = syncVarDecl.parent?.parent;
+            const syncBlock = syncVarDeclStatement?.parent;
+            if (syncBlock && ts.isBlock(syncBlock)) {
+              const stmts = syncBlock.statements;
+              const declIdx = stmts.findIndex(s => s === syncVarDeclStatement);
+              if (declIdx !== -1) {
+                for (let i = declIdx + 1; i < stmts.length; i++) {
+                  const stmt = stmts[i];
+                  if (ts.isIfStatement(stmt)) {
+                    const condText = stmt.expression.getText(sourceFile);
+                    if (condText.includes(syncErrorVarName)) {
+                      return true;
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+      return false;
+    }
 
     // The await's parent should be a VariableDeclaration with ObjectBindingPattern
     const varDecl = awaitNode.parent;

@@ -65934,7 +65934,7 @@
     "source": "accuracy-roadmap-waves-65-69",
     "package": "joi",
     "type": "false_positive",
-    "status": "pending",
+    "status": "implemented",
     "description": "joi:validate destructuring pattern — labelers surfaced this in waves 65-69 as an FP where the validate() result is destructured and the error field is handled outside try-catch. Rule needs to recognize the destructuring-then-check pattern.",
     "evidence": {
       "repos": [
@@ -65950,7 +65950,8 @@
       "lead_number_in_readme": 26,
       "notes": "Documented in the accuracy-roadmap README as a scanner-upgrade lead but never filed as a concern. Backfilled 2026-07-12 so scanner-stream has real work when the coordinator boots."
     },
-    "resolution": null
+    "resolution": "Extended isDestructuredErrorTupleProtected() in control-flow-analyzer.ts to handle sync validate() calls: detects const { error } = schema.validate(data) + subsequent if (error) guard pattern. Accuracy delta: ~119 FPs eliminated, 0 TPs dropped (recall preserved). Vitest: 0 new failures (baseline 69 = post-fix 69). Committed to nark repo.",
+    "implemented_at": "2026-07-13"
   },
   "3532": {
     "id": "concern-20260712-lead-27-angular-router-navigation-error",
