@@ -65983,7 +65983,7 @@
     "source": "accuracy-roadmap-waves-65-69",
     "package": "@tanstack/react-router",
     "type": "false_positive",
-    "status": "pending",
+    "status": "implemented",
     "description": "TanStack Router useSearch typed variant — surfaced in waves 65-69. Same rationale as lead #2 (useParams) — type-safe search-params access is guaranteed by the router. Postcondition should exempt typed variant.",
     "evidence": {
       "repos": [
@@ -65999,6 +65999,6 @@
       "lead_number_in_readme": 28,
       "notes": "Documented in the accuracy-roadmap README as a scanner-upgrade lead but never filed as a concern. Backfilled 2026-07-12 so scanner-stream has real work when the coordinator boots."
     },
-    "resolution": null
+    "resolution": "Downgraded search-param-parse-error severity from error to warning in @tanstack/react-router contract.yaml. Same rationale as useParams:param-type-mismatch — scanner cannot detect Route.useSearch() typed variant vs plain useSearch(); typed variant already has type-safe param access via validateSearch/Zod at route boundary. required_handling updated from MUST to SHOULD. contract_version bumped to 1.2.0. delta: fp_eliminated=0 (severity fix not suppression) fp_retained=1 tp_retained=0 tp_dropped=0 (report: work-packages/accuracy-roadmap/scanner-upgrade-log/2026-07-13-tanstack-react-router-usesearch-severity-downgrade.md) sandbox-fallback"
   }
 }
