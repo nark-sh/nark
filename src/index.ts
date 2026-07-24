@@ -2374,6 +2374,22 @@ function findDefaultCorpusPaths(): string[] {
     }
   }
 
+  // Try 2b (pro fallback): the createRequire probe above walks up from nark's
+  // own install location, which misses the pro corpus under strict-pnpm
+  // (no-hoist) layouts and `npx nark` invocations, where the package lives in
+  // the project's own node_modules rather than alongside nark. Probe
+  // process.cwd()/node_modules directly, mirroring the private-tier scan above.
+  if (!proResolved) {
+    for (const pkgName of PRO_PACKAGE_CANDIDATES) {
+      if (proResolved) break;
+      const candidateRoot = path.join(process.cwd(), "node_modules", pkgName);
+      if (fs.existsSync(path.join(candidateRoot, "packages"))) {
+        paths.push(candidateRoot);
+        proResolved = true;
+      }
+    }
+  }
+
   // Try 3: nark-corpus (public free tier) via npm package
   try {
     const corpusModule = _require("nark-corpus");
