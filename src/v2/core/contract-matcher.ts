@@ -1426,10 +1426,31 @@ export class ContractMatcher {
         }
       }
 
+      // GENERAL (package-agnostic): Promise.allSettled([...]) absorbs every
+      // rejection from the promises in its array — a contained call's rejection
+      // becomes a { status: 'rejected' } result and can NEVER propagate. This is
+      // a sound error boundary equivalent to try/catch for the contained
+      // promises, regardless of which package produced them (Ladder Step 1). It
+      // generalizes the previously @vercel/blob-only check below to every
+      // detection. Handles both direct array elements and `.map()/.flatMap()`
+      // callback returns.
+      // Evidence: WP 0007 — Promise.allSettled is in the Step-1 recognizer list;
+      // concern-20260402-vercel-blob-1 was the original single-package instance.
+      if (this.isAbsorbedByPromiseAllSettled(detection.node)) {
+        trace.record(
+          MATCHER_IDS.SUPPRESSION_PROMISE_ABSORBED,
+          "passed",
+          "call is inside Promise.allSettled([...]) — rejections absorbed",
+        );
+        continue;
+      }
+
       // @vercel/blob: Promise.allSettled() absorbs all rejections from the promises in its
       // array — calls inside allSettled([del(url1), del(url2)]) can never propagate errors.
       // This is a valid error boundary equivalent to try-catch for the contained promises.
       // Evidence: concern-20260402-vercel-blob-1 — del() inside Promise.allSettled() is safe.
+      // (Now largely subsumed by the package-agnostic check above; retained for the
+      // server-side-handler suppression that follows it.)
       if (detection.packageName === "@vercel/blob") {
         // Walk up to find if this call is an argument of Promise.allSettled()
         let cur: ts.Node | undefined = detection.node;
@@ -1958,6 +1979,45 @@ export class ContractMatcher {
         continue;
       }
 
+      // @tanstack/react-query: applicability guards — suppress when the
+      // postcondition's OWN precondition is absent at this call site (Ladder
+      // Step 1: an in-function fact, decidable from the hook call's options).
+      //   - combine-loses-error-info: applies only when a useQueries() passes a
+      //     `combine` option that could drop error fields. No combine → inapplicable.
+      // SOUND (not heuristic): reads the hook call's own options.
+      // Evidence: WP 0007 live benchmark (vendure dashboard) — 1 combine FP on a
+      // useQueries with no combine option.
+      //
+      // DEFERRED (WP 0007): a sibling guard for `mutation-optimistic-update-rollback`
+      // (suppress when useMutation has no `onMutate` — no optimistic update, so
+      // nothing to roll back) is CORRECT and sound (contract condition:
+      // "optimistic update is performed") and clears 5 live-benchmark FPs, but the
+      // @tanstack/react-query ground-truth fixture (ground-truth.ts:54) currently
+      // asserts SHOULD_FIRE on a plain useMutation({ mutationFn }) with no onMutate
+      // — i.e. it encodes the FP. Correcting that fixture belongs to the corpus
+      // (contract) stream; adding the scanner guard here without the paired fixture
+      // update trips the test-regression-gate. Land both together in a follow-up.
+      if (detection.packageName === "@tanstack/react-query") {
+        if (
+          primaryPostcondition.id === "combine-loses-error-info" &&
+          this.reactQueryHookOption(detection.node, "useQueries", "combine") ===
+            "absent"
+        ) {
+          trace.record(
+            MATCHER_IDS.SUPPRESSION_NEVER_THROWS,
+            "passed",
+            "useQueries has no combine option — combine-loses-error-info inapplicable",
+          );
+          this.recordPassedSite(
+            detection,
+            sourceFile,
+            primaryPostcondition.id,
+            MATCHER_IDS.FRAMEWORK_REACT_QUERY,
+          );
+          continue;
+        }
+      }
+
       // @tanstack/react-query: error postconditions fire as FPs in three patterns:
       //   1. Custom hook files (useXxx.ts) — wrappers that return {data, error, isError};
       //      error handling is the caller's responsibility.
@@ -1983,6 +2043,7 @@ export class ContractMatcher {
         detection.packageName === "@tanstack/react-query" &&
         (primaryPostcondition.id === "query-error-unhandled" ||
           primaryPostcondition.id === "infinite-query-error-unhandled" ||
+          primaryPostcondition.id === "infinite-query-refetch-all-pages" ||
           primaryPostcondition.id === "mutation-error-unhandled" ||
           primaryPostcondition.id === "stale-query-refetch-error" ||
           primaryPostcondition.id === "mutation-optimistic-update-rollback" ||
@@ -2003,7 +2064,14 @@ export class ContractMatcher {
             MATCHER_IDS.FRAMEWORK_REACT_QUERY,
           );
         };
-        if (/^use[A-Z]/.test(baseName)) {
+        // Match both camelCase (useFacetValueBrowser.ts) AND kebab-case
+        // (use-facet-value-browser.ts) custom-hook file naming. Vendure's
+        // dashboard uses kebab-case hook files, which the camelCase-only regex
+        // missed — leaking stale-query / infinite-query FPs from hook wrappers
+        // whose error handling is the caller's responsibility.
+        // Evidence: WP 0007 live benchmark — use-facet-value-browser.ts,
+        // use-order-history.ts (vendure dashboard).
+        if (/^use[A-Z]/.test(baseName) || /^use-[a-z]/.test(baseName)) {
           recordPassedRq();
           continue; // Hook wrapper file — caller's responsibility
         }
@@ -2017,6 +2085,7 @@ export class ContractMatcher {
         const isComponentFilePattern =
           primaryPostcondition.id === "query-error-unhandled" ||
           primaryPostcondition.id === "infinite-query-error-unhandled" ||
+          primaryPostcondition.id === "infinite-query-refetch-all-pages" ||
           primaryPostcondition.id === "stale-query-refetch-error" ||
           primaryPostcondition.id === "mutation-optimistic-update-rollback";
         if (
@@ -6848,6 +6917,127 @@ export class ContractMatcher {
         return false;
       }
 
+      cur = cur.parent;
+    }
+    return false;
+  }
+
+  /**
+   * React Query applicability helper (WP 0007, Ladder Step 1).
+   *
+   * Finds the enclosing `<hookName>(...)` call for a detection node and reports
+   * whether its FIRST object-literal argument declares option `optionName`:
+   *   - "present"  — the option is declared (postcondition may apply → keep flagged)
+   *   - "absent"   — the hook call was found but the option is not declared
+   *                  (the postcondition's precondition is unmet → safe to suppress)
+   *   - "unknown"  — the hook call / options object could not be located
+   *                  (be conservative: caller should NOT suppress on "unknown")
+   *
+   * Only inspects the immediate options object of the hook call itself — no
+   * cross-function reasoning. This is the same "read the call's own options"
+   * shape as hasOnErrorInOptions, kept deliberately local and decidable.
+   */
+  private reactQueryHookOption(
+    node: ts.Node,
+    hookName: string,
+    optionName: string,
+  ): "present" | "absent" | "unknown" {
+    // Locate the enclosing CallExpression whose callee is `hookName`
+    // (bare identifier `useMutation` or member `rq.useMutation`). Start at the
+    // detection node and walk up a bounded number of ancestors — the detection
+    // node for these postconditions is the hook call site itself or a child of it.
+    const calleeName = (call: ts.CallExpression): string | undefined => {
+      const e = call.expression;
+      if (ts.isIdentifier(e)) return e.text;
+      if (ts.isPropertyAccessExpression(e)) return e.name.text;
+      return undefined;
+    };
+    let cur: ts.Node | undefined = node;
+    let hookCall: ts.CallExpression | undefined;
+    for (let hops = 0; cur && hops < 6; hops++) {
+      if (ts.isCallExpression(cur) && calleeName(cur) === hookName) {
+        hookCall = cur;
+        break;
+      }
+      // Stop at a function boundary — the hook call is never outside its own
+      // component/hook function body relative to the detection node.
+      if (
+        ts.isFunctionDeclaration(cur) ||
+        ts.isMethodDeclaration(cur) ||
+        (ts.isArrowFunction(cur) && !ts.isCallExpression(cur.parent)) ||
+        (ts.isFunctionExpression(cur) && !ts.isCallExpression(cur.parent))
+      ) {
+        break;
+      }
+      cur = cur.parent;
+    }
+    if (!hookCall) return "unknown";
+
+    // Inspect the first object-literal argument for the named option.
+    const optionsArg = hookCall.arguments.find((a) =>
+      ts.isObjectLiteralExpression(a),
+    ) as ts.ObjectLiteralExpression | undefined;
+    if (!optionsArg) return "unknown";
+    for (const prop of optionsArg.properties) {
+      let propName: string | undefined;
+      if (
+        (ts.isPropertyAssignment(prop) ||
+          ts.isMethodDeclaration(prop)) &&
+        ts.isIdentifier(prop.name)
+      ) {
+        propName = prop.name.text;
+      } else if (ts.isShorthandPropertyAssignment(prop)) {
+        propName = prop.name.text;
+      } else if (ts.isSpreadAssignment(prop)) {
+        // A spread (…options) could carry the option — cannot prove absence.
+        return "unknown";
+      }
+      if (propName === optionName) return "present";
+    }
+    return "absent";
+  }
+
+  /**
+   * Returns true when the detection call's promise is absorbed by an enclosing
+   * `Promise.allSettled([...])` — either as a direct array element or as the
+   * value returned from a `.map()/.flatMap()` callback whose result array is
+   * passed to Promise.allSettled. allSettled never rejects: a contained
+   * promise's rejection is captured as a `{status:'rejected'}` result and can
+   * never propagate. This is a SOUND error boundary (Ladder Step 1) — the
+   * package-agnostic generalization of the previously @vercel/blob-only check.
+   *
+   * Conservative: crossing an arrow/function boundary is only allowed when that
+   * function is itself the callback argument of a `.map()/.flatMap()` call
+   * (whose result feeds allSettled). Any other function boundary stops the walk
+   * so a promise created in an unrelated nested async context is not credited.
+   */
+  private isAbsorbedByPromiseAllSettled(node: ts.Node): boolean {
+    let cur: ts.Node | undefined = node;
+    while (cur) {
+      // Reached Promise.allSettled(...) — absorbed.
+      if (
+        ts.isCallExpression(cur) &&
+        ts.isPropertyAccessExpression(cur.expression) &&
+        cur.expression.name.text === "allSettled" &&
+        ts.isIdentifier(cur.expression.expression) &&
+        cur.expression.expression.text === "Promise"
+      ) {
+        return true;
+      }
+      // Crossing a function literal is only OK if it is a .map()/.flatMap()
+      // callback whose result array can feed allSettled further up.
+      if (ts.isArrowFunction(cur) || ts.isFunctionExpression(cur)) {
+        const p = cur.parent;
+        const isMapCallback =
+          p &&
+          ts.isCallExpression(p) &&
+          p.arguments[0] === cur &&
+          ts.isPropertyAccessExpression(p.expression) &&
+          (p.expression.name.text === "map" ||
+            p.expression.name.text === "flatMap");
+        if (!isMapCallback) return false; // unrelated async context — stop
+        // else: keep walking up from the map/flatMap call toward allSettled
+      }
       cur = cur.parent;
     }
     return false;
