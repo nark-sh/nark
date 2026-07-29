@@ -66000,5 +66000,42 @@
       "notes": "Documented in the accuracy-roadmap README as a scanner-upgrade lead but never filed as a concern. Backfilled 2026-07-12 so scanner-stream has real work when the coordinator boots."
     },
     "resolution": "Downgraded search-param-parse-error severity from error to warning in @tanstack/react-router contract.yaml. Same rationale as useParams:param-type-mismatch — scanner cannot detect Route.useSearch() typed variant vs plain useSearch(); typed variant already has type-safe param access via validateSearch/Zod at route boundary. required_handling updated from MUST to SHOULD. contract_version bumped to 1.2.0. delta: fp_eliminated=0 (severity fix not suppression) fp_retained=1 tp_retained=0 tp_dropped=0 (report: work-packages/accuracy-roadmap/scanner-upgrade-log/2026-07-13-tanstack-react-router-usesearch-severity-downgrade.md) sandbox-fallback"
+  },
+  "3534": {
+    "id": "concern-20260729-viem-interprocedural-dispatch",
+    "created_at": "2026-07-29",
+    "source": "precision",
+    "package": "viem",
+    "type": "new_pattern",
+    "status": "pending",
+    "description": "Scanner cannot trace a rejection through a service-class async method that is invoked exclusively via a dynamically-keyed dispatch table (obj[key].apply(...) / obj[key](...)) which is itself wrapped by a generic try { await dispatched() } catch a few frames up, often across a file boundary. Verified end-to-end in RabbyHub/Rabby (1807 stars): src/background/service/customTestnet.ts method (e.g. getBalance(), no local try-catch) -> re-exposed as a property on src/background/controller/wallet.ts's WalletController instance -> invoked via walletController[data.method].apply(null, data.params) in src/background/index.ts's PortMessage.listen() callback (dynamic string-keyed dispatch, no local try-catch) -> caught generically in src/utils/message/index.ts:65-79's Message.onRequest(), which wraps `res = await this.listenCallback(data)` in try/catch and serializes any rejection into a structured error object sent back over the extension message port. nark correctly reports 'no local try-catch' at the call site but has no way to trace the rejection through the dynamic-dispatch -> generic-catch chain, producing a false positive on every one of the 9 flagged call sites in this repo.",
+    "evidence": {
+      "repos": [
+        "RabbyHub/Rabby"
+      ],
+      "violation_count": 9,
+      "fix_target": "scanner",
+      "rule_hints": [
+        "viem:getbalance-rpc-transport-error",
+        "viem:getgasprice-rpc-transport-error",
+        "viem:getcode-rpc-transport-error",
+        "viem:gettransactioncount-rpc-transport-error",
+        "viem:gettransactionreceipt-not-found",
+        "viem:estimategas-execution-error",
+        "viem:readcontract-reverted",
+        "viem:readcontract-zero-data"
+      ],
+      "affected_lines": [
+        "src/background/service/customTestnet.ts:299 (getTransactionReceipt)",
+        "src/background/service/customTestnet.ts:368 (getTransactionCount)",
+        "src/background/service/customTestnet.ts:387 (estimateGas)",
+        "src/background/service/customTestnet.ts:399 (getGasPrice)",
+        "src/background/service/customTestnet.ts:576 (getBalance)",
+        "src/background/service/customTestnet.ts:582,628,633 (readContract x3)",
+        "src/background/service/customTestnet.ts:1070 (getCode, inside parseTx)"
+      ],
+      "notes": "0006 precision-harden pass off-tiered the 8 postconditionIds implicated (see viem contract.yaml + tier-map.json) rather than waiting on this scanner fix, per the precision-over-recall philosophy (a false positive is fatal to a pre-merge PR gate). Suggested detection shape: when a class instance's method is (a) assigned as a property on an exported controller object, and (b) that controller object is indexed with a dynamic (non-literal) key inside a function passed to a .listen(...)/.on(...)/.addEventListener(...)-style registration whose registering module (traced by import, not call depth) contains a try { await <registered-callback>(...) } catch wrapper -- treat calls to that method as handled. Materially different (harder) than the existing suppression:callback-wrapper-shell matcher, which only looks at direct lexical wrapping, not cross-file dynamic dispatch. Priority low-to-medium: narrow static shape (3-4 hops), but the targeted architecture (extension background/UI RPC controllers) recurs across the browser-extension-wallet segment of the crypto-flagship ICP, so a 90% FP rate (9/10) on the highest-star repo scanned this pass is a real credibility risk for that segment. Cheaper mitigation: flag repos with a chrome.runtime/webextension-polyfill dependency + a PortMessage-shaped or runtime.onMessage-shaped dispatcher as a known-FP-risk architecture in docs."
+    },
+    "resolution": null
   }
 }
