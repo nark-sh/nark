@@ -66037,5 +66037,32 @@
       "notes": "0006 precision-harden pass off-tiered the 8 postconditionIds implicated (see viem contract.yaml + tier-map.json) rather than waiting on this scanner fix, per the precision-over-recall philosophy (a false positive is fatal to a pre-merge PR gate). Suggested detection shape: when a class instance's method is (a) assigned as a property on an exported controller object, and (b) that controller object is indexed with a dynamic (non-literal) key inside a function passed to a .listen(...)/.on(...)/.addEventListener(...)-style registration whose registering module (traced by import, not call depth) contains a try { await <registered-callback>(...) } catch wrapper -- treat calls to that method as handled. Materially different (harder) than the existing suppression:callback-wrapper-shell matcher, which only looks at direct lexical wrapping, not cross-file dynamic dispatch. Priority low-to-medium: narrow static shape (3-4 hops), but the targeted architecture (extension background/UI RPC controllers) recurs across the browser-extension-wallet segment of the crypto-flagship ICP, so a 90% FP rate (9/10) on the highest-star repo scanned this pass is a real credibility risk for that segment. Cheaper mitigation: flag repos with a chrome.runtime/webextension-polyfill dependency + a PortMessage-shaped or runtime.onMessage-shaped dispatcher as a known-FP-risk architecture in docs."
     },
     "resolution": null
+  },
+  "concern-20260729-wagmi-callback-wrapper-shell-custom-hook": {
+    "id": "concern-20260729-wagmi-callback-wrapper-shell-custom-hook",
+    "created_at": "2026-07-29",
+    "source": "precision",
+    "package": "wagmi",
+    "type": "false_positive",
+    "status": "pending",
+    "description": "Scanner's callback-wrapper-shell suppression matcher (CALLBACK_WRAPPER_NAMES / CALLBACK_WRAPPER_NAME_REGEX in contract-matcher.ts, ~line 6584) only recognizes a hardcoded list of wrapper names (PromiseCall, PromiseState, safeAsync, tryAwait, tryCatch, withErrorBoundary, mobx flow, and a safe|try|with|wrap- prefixed regex). It does not recognize project-specific custom hook names that provide the functionally identical shape. Verified end-to-end in guildxyz/guild.xyz (3500 stars): src/hooks/useSubmit/useSubmit.ts exports useSubmit(fn, { onSuccess, onError }) which internally wraps the call in a .catch((e) => {...}) (line 47) and routes failures to the caller-supplied onError option (line 167) -- functionally equivalent to react-query's useMutation onError pattern, which IS suppressed for @tanstack/react-query via the hardcoded FRAMEWORK_REACT_QUERY heuristic in contract-matcher.ts. Because useSubmit is a project-specific name, none of the existing matchers recognize it. nark correctly reports 'no local try-catch' at each of the 9 flagged call sites (all wagmi simulateContract/waitForTransactionReceipt usages inside functions passed as useSubmit's first argument, across 4 files: useCollectToken.tsx, useCollectNft.ts, useCreateNft.ts, useMintGuildPin.tsx), but every one of those 9 findings is a false positive once the hook-level onError routing is accounted for.",
+    "evidence": {
+      "repos": [
+        "guildxyz/guild.xyz"
+      ],
+      "violation_count": 9,
+      "fix_target": "scanner",
+      "rule_hints": [
+        "wagmi:simulatecontract-reverted",
+        "wagmi:waitfortxreceipt-reverted"
+      ],
+      "affected_lines": [
+        "src/rewards/Token/hooks/useCollectToken.tsx:91 (simulateContract), :105 (waitForTransactionReceipt)",
+        "src/components/[guild]/collect/hooks/useCollectNft.ts:161,180 (simulateContract), :192 (waitForTransactionReceipt)",
+        "src/components/[guild]/RolePlatforms/components/AddRoleRewardModal/components/AddContractCallPanel/components/CreateNftForm/hooks/useCreateNft.ts:118 (simulateContract), :129 (waitForTransactionReceipt)",
+        "src/components/[guild]/Requirements/components/GuildCheckout/hooks/useMintGuildPin.tsx:120 (simulateContract), :136 (waitForTransactionReceipt)"
+      ]
+    },
+    "notes": "0006 precision-harden pass off-tiered the 2 postconditionIds implicated (simulatecontract-reverted, waitfortxreceipt-reverted -- see wagmi contract.yaml + tier-map.json) rather than waiting on this scanner fix, per the precision-over-recall philosophy (a false positive is fatal to a pre-merge PR gate). Suggested detection shape: generalize the callback-wrapper-shell matcher beyond its hardcoded name list to structurally detect 'function passed as the first argument to a call whose sibling arguments include an object literal with an onError/onSuccess/onFailure key' -- the same generalization named in the wagmi onboarding pass's UPGRADE_CONCERNS (work-packages/wagmi/HANDOFF.md item 1), now with confirmed real-world evidence (100% FP rate, 9/9, on the only real-world sample gathered so far). This would fix not just wagmi's FP source but any package's postconditions used inside a similarly-shaped custom submit/mutation hook, independent of the wrapper's name. Priority: medium-to-high -- custom onSuccess/onError wrapper hooks are a common React pattern well beyond wagmi/web3 code, and this is the dominant (currently only) real-world FP source measured for this contract."
   }
 }
