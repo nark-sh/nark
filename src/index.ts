@@ -296,6 +296,10 @@ program
     "Bypass the 10K-file soft limit (may OOM — pair with NODE_OPTIONS=--max-old-space-size=8192)",
     false,
   )
+  .option(
+    "--emit-probes [path]",
+    "Emit the probe manifest (JSON handoff for nark-runtime) instead of the human report. Writes to <path> if given, else stdout. See ROADMAP.md 'Probe manifest'.",
+  )
   .option("--sarif", "Output results in SARIF 2.1.0 format (stdout)")
   .option(
     "--sarif-output <path>",
@@ -543,6 +547,14 @@ async function main(options: any) {
   // `verbose` cannot silently re-leak the telemetry trace / PII footer
   // behind the broader predicate.
   const verboseFlag = options.verbose === true;
+
+  // `--emit-probes` with no path argument writes the probe manifest to stdout,
+  // so stdout must carry a single clean JSON document. Suppress all incidental
+  // stdout chatter (the scan-output tip, the per-file progress line) for this
+  // mode. Human status still goes to stderr under --verbose. When a path arg is
+  // given the manifest goes to a file and stdout is free, so no suppression.
+  const emitProbesStdout = options.emitProbes === true;
+  if (emitProbesStdout) scanOutputTipPrinted = true;
 
   // Read nark version from package.json
   const narkVersion = (() => {
@@ -1086,7 +1098,7 @@ async function main(options: any) {
     const { runV2Analyzer } = await import("./v2/adapter.js");
 
     // Progress feedback in compact mode (overwritten in-place)
-    const progressCallback = !verbose
+    const progressCallback = !verbose && !emitProbesStdout
       ? (current: number, total: number, fileName: string) => {
           const shortName = path.basename(fileName);
           process.stdout.write(
@@ -1102,7 +1114,7 @@ async function main(options: any) {
     );
 
     // Clear the progress line
-    if (!verbose) process.stdout.write("\r\x1b[K");
+    if (!verbose && !emitProbesStdout) process.stdout.write("\r\x1b[K");
 
     violations = v2Result.violations;
     stats = {
@@ -1258,6 +1270,44 @@ async function main(options: any) {
         return !fp || !_suppressedFps.has(fp);
       });
     }
+  }
+
+  // --emit-probes: serialize the flagged candidate set to the probe-manifest
+  // JSON (the handoff contract consumed by nark-runtime) INSTEAD of the human
+  // report, then exit. Pure serialization of data already computed — no extra
+  // AST work, no new runtime deps. Placed after triage suppression so the
+  // manifest reflects the same violation set the report would show.
+  if (options.emitProbes !== undefined) {
+    const { buildProbeManifest, serializeProbeManifest } = await import(
+      "./output/probe-manifest.js"
+    );
+    const installedVersions = new Map<string, string>();
+    for (const p of packageDiscovery?.packages ?? []) {
+      if (p.installedVersion) installedVersions.set(p.name, p.installedVersion);
+    }
+    const manifest = buildProbeManifest(violations, corpusResult.contracts, {
+      narkVersion: _pkgVersion,
+      projectRoot: path.resolve(options.project),
+      tsconfigPath: path.resolve(tsconfigPath),
+      corpusPaths: existingCorpusPaths,
+      corpusSources: corpusResult.corpusSources,
+      installedVersions,
+    });
+    const serialized = serializeProbeManifest(manifest);
+    // `--emit-probes <path>` writes to a file; bare `--emit-probes` (boolean
+    // true) writes the manifest to stdout for piping into nark-runtime.
+    if (typeof options.emitProbes === "string") {
+      fs.writeFileSync(options.emitProbes, serialized);
+      if (verbose)
+        console.error(
+          chalk.green(
+            `✓ Wrote ${manifest.candidates.length} probe candidate(s) to ${options.emitProbes}`,
+          ),
+        );
+    } else {
+      process.stdout.write(serialized);
+    }
+    process.exit(0);
   }
 
   // qt-187: read corpus version from the installed corpus's package.json

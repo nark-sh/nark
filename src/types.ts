@@ -74,6 +74,17 @@ export interface Postcondition {
    */
   maturity?: "stable" | "beta" | "experimental";
   /**
+   * PR-gate confidence tier per the precision-hardening pass
+   * (bc-precision-harden). Independent of `maturity`:
+   * - "gate": high enough precision to block a merge.
+   * - "report": surface to the developer, never gate.
+   * - "off": known false-positive source; kept for documentation, not fired as a gate.
+   * Carried through to the probe manifest (`nark --emit-probes`) so nark-runtime
+   * and downstream consumers can prioritize confirmation. Absent on profiles that
+   * haven't been precision-hardened yet — consumers treat absence as "unknown".
+   */
+  confidence_tier?: "gate" | "report" | "off";
+  /**
    * Patterns that satisfy this postcondition, suppressing violations.
    * Used when specific catch patterns (e.g., instanceof checks) are sufficient.
    */

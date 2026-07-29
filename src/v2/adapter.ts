@@ -254,6 +254,13 @@ function convertViolation(
   if (v2.fingerprint) {
     (v1 as any).fingerprint = v2.fingerprint;
   }
+  // Pass through the call-expression text (e.g. "client.readContract") so the
+  // probe manifest (`nark --emit-probes`) can hand nark-runtime the exact
+  // callsite expression, not just the bare symbol. Optional — older v2
+  // violations without it fall back to `function` at emit time.
+  if (v2.callExpression) {
+    (v1 as any).callExpression = v2.callExpression;
+  }
   if (v2.suppressionReason) {
     (v1 as any).suppressionReason = v2.suppressionReason;
   }
