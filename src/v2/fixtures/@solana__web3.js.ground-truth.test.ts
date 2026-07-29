@@ -13,6 +13,11 @@
  *   getlatestblockhash-rpc-error
  *   simulatetransaction-rpc-error
  *   requestairdrop-rpc-error
+ *   getsignaturestatus-rpc-error       (added 2026-07-28 deepen pass)
+ *   gettransaction-rpc-error           (added 2026-07-28 deepen pass)
+ *   gettokenaccountbalance-rpc-error   (added 2026-07-28 deepen pass)
+ *   getmultipleaccountsinfo-rpc-error  (added 2026-07-28 deepen pass)
+ *   getprogramaccounts-rpc-error       (added 2026-07-28 deepen pass)
  *
  * Key behaviors under test:
  *   - await connection.sendTransaction(...)      no try/catch          → SHOULD_FIRE
@@ -23,6 +28,11 @@
  *   - await connection.getLatestBlockhash()      no try/catch          → SHOULD_FIRE
  *   - await connection.simulateTransaction(...)  no try/catch          → SHOULD_FIRE
  *   - await connection.requestAirdrop(...)       no try/catch          → SHOULD_FIRE
+ *   - await connection.getSignatureStatus(...)   no try/catch          → SHOULD_FIRE
+ *   - await connection.getTransaction(...)       no try/catch          → SHOULD_FIRE
+ *   - await connection.getTokenAccountBalance(...) no try/catch        → SHOULD_FIRE
+ *   - await connection.getMultipleAccountsInfo(...) no try/catch       → SHOULD_FIRE
+ *   - await connection.getProgramAccounts(...)   no try/catch          → SHOULD_FIRE
  *   - try { ... } finally { } (no catch clause)                       → SHOULD_FIRE
  *   - await this.conn.getBalance(...) (instance field) no try/catch    → SHOULD_FIRE
  *   - any of the above inside try/catch                                → SHOULD_NOT_FIRE

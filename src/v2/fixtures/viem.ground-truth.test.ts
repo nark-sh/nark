@@ -26,6 +26,13 @@
  *   requestaddresses-user-rejected-or-busy (requestAddresses)
  *   switchchain-not-added, switchchain-user-rejected (switchChain)
  *   sendrawtransaction-rpc-rejection (sendRawTransaction)
+ *   gettransactioncount-rpc-transport-error (getTransactionCount)
+ *   estimatefeespergas-eip1559-not-supported (estimateFeesPerGas)
+ *   getblocknumber-rpc-transport-error (getBlockNumber)
+ *   getfeehistory-rpc-transport-error (getFeeHistory)
+ *   getcode-rpc-transport-error (getCode)
+ *   gettransactionconfirmations-transaction-not-found (getTransactionConfirmations)
+ *   addchain-rpc-rejection (addChain)
  *
  * Detection: viem client instance tracking via factory_methods
  * (createPublicClient / createWalletClient / createClient / createTestClient).
