@@ -66064,5 +66064,65 @@
       ]
     },
     "notes": "0006 precision-harden pass off-tiered the 2 postconditionIds implicated (simulatecontract-reverted, waitfortxreceipt-reverted -- see wagmi contract.yaml + tier-map.json) rather than waiting on this scanner fix, per the precision-over-recall philosophy (a false positive is fatal to a pre-merge PR gate). Suggested detection shape: generalize the callback-wrapper-shell matcher beyond its hardcoded name list to structurally detect 'function passed as the first argument to a call whose sibling arguments include an object literal with an onError/onSuccess/onFailure key' -- the same generalization named in the wagmi onboarding pass's UPGRADE_CONCERNS (work-packages/wagmi/HANDOFF.md item 1), now with confirmed real-world evidence (100% FP rate, 9/9, on the only real-world sample gathered so far). This would fix not just wagmi's FP source but any package's postconditions used inside a similarly-shaped custom submit/mutation hook, independent of the wrapper's name. Priority: medium-to-high -- custom onSuccess/onError wrapper hooks are a common React pattern well beyond wagmi/web3 code, and this is the dominant (currently only) real-world FP source measured for this contract."
+  },
+  "concern-20260729-solana-interprocedural-then-catch": {
+    "id": "concern-20260729-solana-interprocedural-then-catch",
+    "created_at": "2026-07-29",
+    "source": "precision",
+    "package": "@solana/web3.js",
+    "type": "new_pattern",
+    "status": "pending",
+    "description": "Scanner's throwing-function-detector.ts checks only the local lexical scope of the flagged call site. Two concrete interprocedural shapes verified end-to-end across the corpus, both invisible to local-scope analysis: (1) a top-level Promise .then(onFulfilled, onRejected) two-argument form -- solana-labs/example-helloworld's src/client/main.ts:34-40 calls main().then(() => process.exit(), err => { console.error(err); process.exit(-1); }); every unguarded RPC call inside establishPayer()/checkProgram()/reportGreetings() (3-4 frames down the call chain from main()) is genuinely caught by the second .then() argument -- functionally identical to a top-level try/catch, a standard Node.js CLI idiom (fail loudly, log, exit non-zero), but the scanner has no concept of .then(onFulfilled, onRejected) as an error-handling equivalent to .catch(). (2) an outer Next.js route-handler try/catch several call-frames up -- solana-foundation/explorer's app/api/domain-info/[domain]/route.ts:23-30 and app/api/ans-domains/[address]/route.ts:23-27 both wrap their entire handler body in try { ... } catch (error) { ... NextResponse.json(..., { status: 500 }) }, but the RPC calls they invoke live in separate library functions (resolveDomain(), fetchAnsDomains()) 1-2 import-boundary hops away with no local try-catch of their own.",
+    "evidence": {
+      "repos": [
+        "solana-labs/example-helloworld",
+        "solana-foundation/explorer"
+      ],
+      "violation_count": 13,
+      "fix_target": "scanner",
+      "rule_hints": [
+        "@solana/web3.js:confirmtransaction-expired-before-confirmation",
+        "@solana/web3.js:getbalance-rpc-error",
+        "@solana/web3.js:getaccountinfo-rpc-error",
+        "@solana/web3.js:requestairdrop-rpc-error",
+        "@solana/web3.js:getmultipleaccountsinfo-rpc-error",
+        "@solana/web3.js:getprogramaccounts-rpc-error"
+      ],
+      "affected_lines": [
+        "solana-labs/example-helloworld src/client/hello_world.ts:113,116,120,121,149,172,219 (establishPayer/checkProgram/reportGreetings, caught by src/client/main.ts:34-40's main().then(onFulfilled, onRejected))",
+        "solana-foundation/explorer src/app/domain-info/utils/resolve-domain.ts:31,40 (caught by app/api/domain-info/[domain]/route.ts:23-30)",
+        "solana-foundation/explorer src/utils/fetch-ans-domains.ts:94,118 (caught by app/api/ans-domains/[address]/route.ts:23-27)"
+      ],
+      "notes": "0006 precision-harden pass (2026-07-29) off-tiered the 6 postconditionIds implicated (see @solana/web3.js contract.yaml + tier-map.json in nark-corpus-pro) rather than waiting on this scanner fix, per the precision-over-recall philosophy. This is a second, independently-derived instance of the SAME abstract category already filed for viem (concern-20260729-viem-interprocedural-dispatch) and named in the stripe/prisma precision passes' PRECISION-NOTES.md -- filed as its own concern because the concrete shape differs materially (a language-level .then(onFulfilled, onRejected) two-argument form, and a plain same-process Next.js route-handler boundary, vs viem's cross-process chrome-extension dynamic-dispatch) and because 0007's fix likely needs to special-case .then(onFulfilled, onRejected) as a first-class .catch()-equivalent regardless of what handles the general N-frames-up try/catch case. Priority: high leverage -- corroborated independently by four packages now (stripe, prisma, viem, @solana/web3.js), suggesting a general interprocedural/caller-frame try-catch-awareness upgrade would move precision across the whole corpus, not just one package."
+    },
+    "resolution": null
+  },
+  "concern-20260729-solana-swr-fetcher-slot": {
+    "id": "concern-20260729-solana-swr-fetcher-slot",
+    "created_at": "2026-07-29",
+    "source": "precision",
+    "package": "@solana/web3.js",
+    "type": "new_pattern",
+    "status": "pending",
+    "description": "Scanner has no concept of 'this function is a known error-managing library's callback slot.' When a function containing an unguarded @solana/web3.js RPC call is passed directly as the fetcher argument to SWR's useSWR()/useSWRImmutable() (swr package), SWR internally wraps the fetcher invocation and surfaces thrown errors via the hook's error return value / onError callback -- this is SWR's documented, intended usage pattern (do not wrap your own fetcher in try/catch; let SWR manage retry/error state). The scanner flags the fetcher function's body as unhandled because there is no local try-catch, without recognizing that the function is only ever invoked through SWR's own error-managing call path. Distinct from the existing swr-hook-error-pattern concern (id 'swr-hook-error-pattern'), which is about callers destructuring only {data} and ignoring useSWR's returned error field -- this concern is about the fetcher argument itself being incorrectly flagged as unhandled, a detection-side gap rather than a caller-discipline gap.",
+    "evidence": {
+      "repos": [
+        "solana-foundation/explorer"
+      ],
+      "violation_count": 4,
+      "fix_target": "scanner",
+      "rule_hints": [
+        "@solana/web3.js:getaccountinfo-rpc-error",
+        "@solana/web3.js:getmultipleaccountsinfo-rpc-error",
+        "@solana/web3.js:getprogramaccounts-rpc-error"
+      ],
+      "affected_lines": [
+        "solana-foundation/explorer src/hooks/use-raw-account-data.ts:36 (getAccountInfo, passed to useSWR/useSWRImmutable)",
+        "solana-foundation/explorer src/hooks/use-accounts-info.ts:13 (getMultipleAccountsInfo, inline arrow function passed as useSWR fetcher: useSWR(swrKey, () => fetchAccountsInfo(pubkeys, clusterUrl)))",
+        "solana-foundation/explorer src/utils/nftoken.ts:24 (getProgramAccounts via getNftsInCollection, invoked through getCollectionNftsFetcher passed to useSWR(swrKey, getCollectionNftsFetcher, { suspense: true }))"
+      ],
+      "notes": "0006 precision-harden pass (2026-07-29) off-tiered getaccountinfo-rpc-error / getmultipleaccountsinfo-rpc-error / getprogramaccounts-rpc-error (partially -- each also carries Cause A evidence, see concern-20260729-solana-interprocedural-then-catch) rather than waiting on this scanner fix. Suggested detection shape: recognize a function argument passed directly to useSWR(key, fetcherArg) / useSWRImmutable(key, fetcherArg) (by import source 'swr') as an error-managed callback slot -- same category as the existing FRAMEWORK_REACT_QUERY heuristic in contract-matcher.ts for @tanstack/react-query's queryFn slot, but for SWR's positional fetcher argument instead of a named option. Lower priority than the interprocedural concern in isolation (4/13 combined FPs this pass), but the same detection gap almost certainly affects every other RPC-heavy package's real-world usage in SWR-based dashboards (viem, wagmi, ethers -- SWR is a very common data-fetching layer for crypto dashboard/indexer frontends, the same ICP segment this contract targets)."
+    },
+    "resolution": null
   }
 }
